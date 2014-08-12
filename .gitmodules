@@ -1,0 +1,3 @@
+[submodule "submodules/vialer-lib"]
+	path = submodules/vialer-lib
+	url = git@github.com:VoIPGRID/vialer-lib.git
