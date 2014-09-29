@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="5"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="20" />
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
@@ -72,6 +72,16 @@
         <activity
             android:name="com.voipgrid.vialer.SettingsActivity"
             android:label="@string/settings"
+            android:screenOrientation="portrait"
+            android:theme="@style/StyledIndicators" />
+        <activity
+            android:name="com.voipgrid.vialer.GoToActivity"
+            android:label="@string/go_to"
+            android:screenOrientation="portrait"
+            android:theme="@style/StyledIndicators" />
+        <activity
+            android:name="com.voipgrid.vialer.WebActivity"
+            android:label="@string/go_to"
             android:screenOrientation="portrait"
             android:theme="@style/StyledIndicators" />
 
