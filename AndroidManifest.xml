@@ -55,6 +55,12 @@
             android:theme="@style/StyledIndicators" >
         </activity>
         <activity
+            android:name="com.voipgrid.vialer.WelcomeActivity"
+            android:label="@string/welcome"
+            android:screenOrientation="portrait"
+            android:theme="@style/StyledIndicators" >
+        </activity>
+        <activity
             android:name="com.voipgrid.vialer.CallingActivity"
             android:excludeFromRecents="false"
             android:screenOrientation="portrait"
