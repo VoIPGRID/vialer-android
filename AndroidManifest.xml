@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.vialer.app"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    package="com.voipgrid.vialer"
+    android:versionCode="3"
+    android:versionName="1.3" >
 
     <uses-sdk
         android:minSdkVersion="5"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="20" />
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
@@ -55,6 +55,12 @@
             android:theme="@style/StyledIndicators" >
         </activity>
         <activity
+            android:name="com.voipgrid.vialer.WelcomeActivity"
+            android:label="@string/welcome"
+            android:screenOrientation="portrait"
+            android:theme="@style/StyledIndicators" >
+        </activity>
+        <activity
             android:name="com.voipgrid.vialer.CallingActivity"
             android:excludeFromRecents="false"
             android:screenOrientation="portrait"
@@ -72,6 +78,11 @@
         <activity
             android:name="com.voipgrid.vialer.SettingsActivity"
             android:label="@string/settings"
+            android:screenOrientation="portrait"
+            android:theme="@style/StyledIndicators" />
+        <activity
+            android:name="com.voipgrid.vialer.WebActivity"
+            android:label="@string/go_to"
             android:screenOrientation="portrait"
             android:theme="@style/StyledIndicators" />
 
