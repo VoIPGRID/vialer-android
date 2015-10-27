@@ -173,9 +173,9 @@ public class DialerActivity extends AppCompatActivity implements
         });
 
         // Getting reference to listview
-        ListView lstContacts = (ListView) findViewById(R.id.list_view);
-        lstContacts.setOnItemClickListener(this);
-        lstContacts.setAdapter(mContactsAdapter);
+        ListView listView = (ListView) findViewById(R.id.list_view);
+        listView.setOnItemClickListener(this);
+        listView.setAdapter(mContactsAdapter);
 
         // Creating an AsyncTask object to retrieve and load listview with contacts
         ListViewContactsLoader listViewContactsLoader = new ListViewContactsLoader(
