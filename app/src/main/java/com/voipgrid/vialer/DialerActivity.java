@@ -151,17 +151,22 @@ public class DialerActivity extends AppCompatActivity implements
             /** Binds the Cursor column defined by the specified index to the specified view */
             public boolean setViewValue(View view, Cursor cursor, int columnIndex){
                 if(view.getId() == R.id.text_view_contact_icon) {
+                    // The ListViewContactsLoader class stores a contact uri for which
+                    // we can retrieve a photo.
                     Uri photoUri = Uri.parse(cursor.getString(columnIndex));
+                    // open a photo inputStream given contact uri.
                     InputStream photoInputStream =
                             ContactsContract.Contacts.openContactPhotoInputStream(
                                     getContentResolver(), photoUri);
                     if (photoInputStream != null) {
+                        // decode it to a bitmap when the stream is opened successfully
                         Bitmap bm = BitmapFactory.decodeStream(photoInputStream);
                         ((CircleImageView) view).setImageBitmap(bm);
                     } else {
+                        // Otherwise set it to transparent for reusability reasons.
                         ((CircleImageView) view).setImageResource(android.R.color.transparent);
                     }
-                    return true; //true because the data was bound to the view
+                    return true; //true because the data was bound to the icon view
                 }
                 return false;
             }
@@ -173,7 +178,8 @@ public class DialerActivity extends AppCompatActivity implements
         lstContacts.setAdapter(mContactsAdapter);
 
         // Creating an AsyncTask object to retrieve and load listview with contacts
-        ListViewContactsLoader listViewContactsLoader = new ListViewContactsLoader(getBaseContext(), mContactsAdapter);
+        ListViewContactsLoader listViewContactsLoader = new ListViewContactsLoader(
+                getBaseContext(), mContactsAdapter);
         // Starting the AsyncTask process to retrieve and load listview with contacts
         listViewContactsLoader.execute();
     }
