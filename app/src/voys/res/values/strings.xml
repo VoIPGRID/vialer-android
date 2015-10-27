@@ -1,0 +1,10 @@
+<resources>
+
+    <string name="app_name">Voys</string>
+    <string name="configure_header_label_text">Voys is configuring</string>
+
+    <string name="url_app_info">http://voys.nl/en/app-info/</string>
+
+    <string name="info_button_title">How does Voys work?</string>
+
+</resources>

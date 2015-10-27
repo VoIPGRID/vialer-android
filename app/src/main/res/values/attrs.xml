@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="DialpadButton">
+        <attr name="digit" format="string" />
+        <attr name="chars" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="TwoStepCallIconView">
+        <attr name="background_color" format="color" />
+        <attr name="foreground_color" format="color" />
+        <attr name="icon_resource" format="integer" />
+    </declare-styleable>
+
+</resources>

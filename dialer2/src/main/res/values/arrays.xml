@@ -1,0 +1,44 @@
+<resources>
+<string-array name="t9lookup">
+<item></item>
+<item></item>
+<item>[abcàáâãäåæçABCÀÁÂÃÄÅÆÇ]</item>
+<item>[defèéêëDEFÈÉÊËÐ]</item>
+<item>[ghiìíîïGHIÌÍÎÏ]</item>
+<item>[jklJKL]</item>
+<item>[mnoñòóôõöøMNOÑÒÓÔÕÖØ]</item>
+<item>[pqrsPQRS]</item>
+<item>[tuvùúûüTUVÙÚÛÜ]</item>
+<item>[wxyzýÿWXYZÝ]</item>
+</string-array>
+
+
+<string-array name="vibrationLengths">
+<item>0ms</item>
+<item>5ms</item>
+<item>10ms</item>
+<item>15ms</item>
+<item>20ms</item>
+<item>25ms</item>
+<item>30ms</item>
+<item>35ms</item>
+<item>40ms</item>
+<item>45ms</item>
+<item>50ms</item>
+</string-array>
+
+<string-array name="vibrationLengthValues">
+<item>0</item>
+<item>5</item>
+<item>10</item>
+<item>15</item>
+<item>20</item>
+<item>25</item>
+<item>30</item>
+<item>35</item>
+<item>40</item>
+<item>45</item>
+<item>50</item>
+</string-array>
+
+</resources>

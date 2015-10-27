@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.voipgrid.vialer" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Contact management -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+
+    <!-- Necessary for Google Analytics -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Necessary for putting sound over speaker -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <uses-feature
+        android:name="android.hardware.sensor.proximity"
+        android:required="false" />
+
+    <permission
+        android:name=".permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name=".permission.C2D_MESSAGE" />
+
+    <application
+        android:name=".VialerApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+
+        <!-- Service that handles (incoming) SIPCall management -->
+        <service android:name=".sip.SipService" />
+
+        <!-- Main activity that presents all main features of the app -->
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Activity responsible for choosing outgoing calls -->
+        <activity
+            android:name=".DialerActivity"
+            android:label="@string/title_activity_dialer"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <!-- Add the option to start a call from Contacts app. -->
+                <data android:mimeType="@string/profile_mimetype" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".CallActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.DIAL" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="tel" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
+                <category android:name="com.voipgrid.vialer" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".VialerGcmListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".VialerInstanceIdListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceId" />
+            </intent-filter>
+        </service>
+        <service android:name=".VialerGcmRegistrationService" />
+
+        <activity
+            android:name=".onboarding.SetupActivity"
+            android:label="@string/title_activity_setup"
+            android:screenOrientation="portrait"
+            android:theme="@style/OnboardingTheme" >
+        </activity>
+        <activity
+            android:name=".WebActivity"
+            android:label="@string/title_activity_web"
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.voipgrid.vialer.MainActivity" />
+        </activity>
+        <activity
+            android:name=".WarningActivity"
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.voipgrid.vialer.MainActivity" />
+        </activity>
+
+        <!--
+             Optionally, register AnalyticsReceiver and AnalyticsService to support background
+             dispatching on non-Google Play devices
+        -->
+        <receiver
+            android:name="com.google.android.gms.analytics.AnalyticsReceiver"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.google.android.gms.analytics.AnalyticsService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- SyncService for sync adapter -->
+        <service
+            android:name=".contacts.SyncService"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+            <meta-data
+                android:name="android.provider.CONTACTS_STRUCTURE"
+                android:resource="@xml/contacts" />
+        </service>
+        <service android:name=".contacts.AuthenticationService" >
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <activity
+            android:name=".contacts.AuthenticatorActivity"
+            android:label="@string/contacts_app_name" />
+        <activity
+            android:name=".AccountActivity"
+            android:label="@string/title_activity_account"
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.voipgrid.vialer.MainActivity" />
+        </activity>
+
+        <activity android:name=".TwoStepCallActivity"
+            android:screenOrientation="portrait" />
+
+    </application>
+
+</manifest>

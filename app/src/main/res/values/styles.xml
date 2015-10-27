@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Base application theme. -->
+    <style name="BaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+    </style>
+
+    <style name="AppTheme" parent="@style/BaseTheme">
+
+    </style>
+
+    <style name="ActionBar" parent="@style/ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:textColorPrimary">@color/actionbar_text_color_primary</item>
+        <item name="android:textColorSecondary">@color/actionbar_text_color_secondary</item>
+    </style>
+
+    <style name="ActionBar_Popup" parent="@style/ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:textColorPrimary">@color/actionbar_popup_text_color_primary</item>
+    </style>
+
+    <style name="TabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/color_accent</item>
+    </style>
+
+    <style name="DialpadButton" parent="@android:style/Widget.TextView">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="layout_columnWeight">1</item>
+        <item name="layout_gravity">fill</item>
+        <item name="android:padding">@dimen/dialpad_button_padding</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+    <style name="DialpadNumberInput" parent="@android:style/Widget.EditText">
+        <item name="android:layout_height">@dimen/dialpad_number_input_height</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:background">@color/dialpad_input_background_color</item>
+        <item name="android:gravity">center</item>
+        <item name="android:cursorVisible">false</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:maxLength">@integer/dialpad_number_input_max_length</item>
+        <item name="android:digits">@string/allowed_dialpad_characters</item>
+    </style>
+
+    <style name="Warning" parent="@android:style/Widget.TextView">
+        <item name="android:padding">@dimen/dialer_warning_background_padding</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">@dimen/warning_text_size</item>
+        <item name="android:textColor">@color/dialer_warning_text</item>
+        <item name="android:background">@color/dialer_warning_background</item>
+        <item name="android:drawableRight">@drawable/ic_info_outline_white_24dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:elevation" tools:ignore="NewApi">@dimen/warning_elevation</item>
+    </style>
+
+    <style name="FloatingActionButton">
+        <item name="android:layout_marginLeft">@dimen/activity_horizontal_margin</item>
+        <item name="android:layout_marginTop">@dimen/activity_vertical_margin</item>
+        <item name="android:layout_marginRight">@dimen/activity_horizontal_margin</item>
+        <item name="android:layout_marginBottom">-16dp</item>
+    </style>
+
+    <!-- Style for Header TextViews -->
+    <style name="WarningTitleTextViewStyle" parent="@android:style/Widget.TextView">
+        <item name="android:textColor">@color/warning_title_textview_color</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <!-- Style for Forgot password description TextView -->
+    <style name="WarningMessageTextViewStyle" parent="@android:style/Widget.TextView">
+        <item name="android:textColor">@color/warning_message_textview_color</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <color name="warning_title_textview_color">@color/color_text</color>
+    <color name="warning_message_textview_color">@color/color_text</color>
+
+    <!-- EditText Style -->
+    <style name="AccountEditTextStyle" parent="android:style/Widget.Material.EditText">
+        <item name="android:textColorHint">@color/account_edittext_hint_color</item>
+        <item name="android:textColor">@color/account_edittext_text_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="AccountTextInputLayoutStyle" parent="android:style/TextAppearance">
+        <item name="android:textSize">@dimen/account_text_input_layout_text_size_</item>
+        <item name="android:textColor">@color/account_text_input_layout_text_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <color name="account_edittext_hint_color">@color/onboarding_color_accent</color>
+    <color name="account_edittext_text_color">@color/onboarding_color_accent</color>
+    <color name="account_text_input_layout_text_color">@color/color_highlight</color>
+
+    <dimen name="account_text_input_layout_text_size_">16dp</dimen>
+
+</resources>

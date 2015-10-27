@@ -1,0 +1,36 @@
+<resources>
+<color name="riddaSelectionBarBackground">#90000000</color>
+<color name="disabled">#ff999999</color>
+<color name="text_main">#ffdddddd</color>
+<color name="text_sub">#ff999999</color>
+<color name="text_link">#ffffffff</color>
+<color name="text_main_read">#ffaaaaaa</color>
+<color name="text_sub_read">#ffaaaaaa</color>
+
+<!-- no label-->
+<color name="label_0">#ff333333</color>
+<!-- red -->
+<color name="label_missed">#ffe60011</color>
+<!-- orange -->
+<color name="label_2">#fff27318</color>
+<!-- yellow -->
+<color name="label_3">#fffdce10</color>
+<!-- light green -->
+<color name="label_4">#ff7bb026</color>
+
+<!--  neon green? -->
+<!-- <color name="label_outgoing">#ff1aa062</color>-->
+<color name="label_outgoing">#ff7fff24</color>
+<!-- green -->
+<color name="label_5">#ff009944</color>
+<!-- sky blue -->
+<!-- <color name="label_incoming">#ff1ab0d6</color>-->
+<!-- <color name="label_incoming">#ff00cdac</color>-->
+<color name="label_incoming">#ff1ab0d6</color>
+<!-- blue -->
+<color name="label_7">#ff1478ff</color>
+<!-- purple -->
+<color name="label_8">#ff9644ce</color>
+<!-- pink -->
+<color name="label_9">#fff2aab2</color>
+</resources>

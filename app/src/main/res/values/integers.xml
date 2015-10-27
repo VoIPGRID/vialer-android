@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="dialpad_row_count">4</integer>
+    <integer name="dialpad_column_count">3</integer>
+
+    <integer name="dialpad_number_input_max_length">20</integer>
+</resources>

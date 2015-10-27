@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+  <FrameLayout
+  	android:id="@+id/DialerView"
+  	android:layout_alignParentTop="true"
+  	android:layout_alignParentBottom="true"
+  	android:layout_alignParentRight="true"
+    android:layout_width="210.0dip"
+    android:layout_height="fill_parent"
+    >
+    	<include layout="@layout/dialpad" />
+    </FrameLayout>
+  
+  <ListView
+      android:id="@+id/ContactListView"
+      android:fadingEdge="none"
+      android:fadingEdgeLength="0.0dip"
+      android:longClickable="true"
+      android:layout_toLeftOf="@id/DialerView"
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent"
+      android:layout_alignParentTop="true"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentLeft="true"
+      android:divider="#00000000" />
+
+  <RelativeLayout
+      android:id="@+id/DialerExpandMenu"
+      android:visibility="gone"
+      android:gravity="center"
+      android:background="@drawable/overlay_footer_background"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true">
+    <ImageButton
+        android:id="@+id/DialerExpandButton"
+        android:layout_centerHorizontal="true"
+        android:onClick="onClick"
+        android:background="@drawable/bg_button"
+        android:padding="0.0dip"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:layout_width="48.0dip"
+        android:layout_height="48.0dip"
+        android:src="@drawable/button_expand" />
+  </RelativeLayout>
+  
+</RelativeLayout>

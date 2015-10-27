@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Licensed under the Apache License, Version 2.0.
+
+Translation by Henri Menke
+-->
+<resources>
+    <string name="hello">Hallo Welt, Telefon!</string>
+    <string name="app_name">Dialer2</string>
+    <string name="unknown">Unbekannt</string>
+    <string name="not_contacted">nicht kontaktiert</string>
+    <string name="contact_has_no_phone_number">Kontakt hat keine Telefonnummer</string>
+    <string name="call_log">Anrufe</string>
+    <string name="contact_list">Kontakte</string>
+    <string name="set_speed_dial">Kurzahl hinzufügen</string>
+    <string name="not_set">Nicht eingestellt</string>
+    <string name="show_dialer">Wähltasten anzeigen</string>
+    <string name="hide_dialer">Wähltasten verbergen</string>
+    <string name="settings">Einstellungen</string>
+    <string name="clear_call_log">Anrufliste leeren</string>
+    <string name="are_you_sure_you_want_to_clear_the_call_log">Sind Sie sicher, dass Sie die Anrufliste leeren wollen</string>
+    <string name="user_interface">Benutzeroberfläche</string>
+    <string name="transparent_dialer">Transparentes Telefon</string>
+    <string name="dialer_is_transparent">Telefon ist transparent</string>
+    <string name="dialer_is_not_transparent">Telefon ist nicht transparent</string>
+    <string name="vibration_length">Vibrationsdauer</string>
+    <string name="length_of_the_key_click_vibration">Dauer der Vibration bei Tastendruck</string>
+    <string name="behavior_settings">Verhalten</string>
+    <string name="sensor_rotation">Sensor Orientierung</string>
+    <string name="use_sensor_based_rotation">Sensor-orientierte Rotation benutzen</string>
+    <string name="do_not_use_sensor_based_rotation">Sensor-orientierte Rotation nicht benutzen</string>
+    <string name="sync_settings">Synchronistationseinstellungen</string>
+    <string name="t9_lookup_settings">T9-Suche Einstellungen</string>
+    <string name="match_start_of_names">Mit Anfang des Namens vergleichen</string>
+    <string name="t9_lookup_only_matches_at_the_start_of_a_name">T9-Suche vergleicht nur den Anfang des Namens</string>
+    <string name="t9_lookup_matches_in_the_middle_of_a_name">T9-Suche vergleicht mit dem ganzen Namen</string>
+    <string name="show_call_counter">Anrufzähler anzeigen</string>
+    <string name="call_counter_visible_in_contact_list_always_0_in_htc_sense_roms">Anrufzähler in der Kontaktliste sichtbar (immer 0 unter HTC Sense roms)</string>
+    <string name="call_counter_hidden_in_contact_list">Anrufzähler in der Kontaktliste versteckt</string>
+    <string name="sort_by_times_contacted">Nach Anzahl der Kontaktierungen sortieren</string>
+    <string name="t9_lookup_sorts_contacts_based_on_times_contacted">T9-Suche sortiert die Kontakte nach Anzahl der Kontaktierungen</string>
+    <string name="t9_lookup_sorts_contacts_in_alphabetical_order">T9-Suche sortiert die Kontakte alphabestisch</string>
+    <string name="favorite_contacts_first">Favoriten zuerst</string>
+    <string name="favorite_contacts_shown_first_in_contact_list">Favoriten werden als Erstes angezeigt</string>
+    <string name="match_phone_numbers">Telefonnummern vergleichen</string>
+    <string name="t9_lookup_matches_phone_numbers_and_names">T9-Suche vergleicht Namen und Telefonnummern</string>
+    <string name="t9_lookup_only_matches_names">T9-Suche vergleicht nur Namen</string>
+</resources>

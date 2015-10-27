@@ -1,0 +1,65 @@
+<PreferenceScreen
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	
+	<PreferenceCategory
+		android:title="@string/behavior_settings">
+		<ListPreference
+			android:key="vibration_length"
+			android:title="@string/vibration_length"
+			android:summary="@string/length_of_the_key_click_vibration"
+			android:entries="@array/vibrationLengths"
+			android:defaultValue="25"
+			android:entryValues="@array/vibrationLengthValues"
+		/>
+		<CheckBoxPreference
+			android:key="sensor_rotation"
+			android:title="@string/sensor_rotation"
+			android:summaryOn="@string/use_sensor_based_rotation"
+			android:summaryOff="@string/do_not_use_sensor_based_rotation"
+			android:defaultValue="true"
+			/>
+				
+		</PreferenceCategory>
+	
+<PreferenceCategory
+		android:title="@string/t9_lookup_settings">
+		<CheckBoxPreference
+			android:key="t9_match_start_of_names_only"
+			android:title="@string/match_start_of_names"
+			android:summaryOn="@string/t9_lookup_only_matches_at_the_start_of_a_name"
+			android:summaryOff="@string/t9_lookup_matches_in_the_middle_of_a_name"
+			android:defaultValue="true"
+			/>
+		<CheckBoxPreference
+			android:key="t9_sort_by_times_contacted"
+			android:title="@string/sort_by_times_contacted"
+			android:summaryOn="@string/t9_lookup_sorts_contacts_based_on_times_contacted"
+			android:summaryOff="@string/t9_lookup_sorts_contacts_in_alphabetical_order"
+			android:defaultValue="true"
+			/>
+		<CheckBoxPreference
+			android:key="t9_match_phone_numbers"
+			android:title="@string/match_phone_numbers"
+			android:summaryOn="@string/t9_lookup_matches_phone_numbers_and_names"
+			android:summaryOff="@string/t9_lookup_only_matches_names"
+			android:defaultValue="false"
+			/>
+</PreferenceCategory>
+
+<PreferenceCategory
+		android:title="@string/user_interface">
+		<CheckBoxPreference
+			android:key="favorite_contacts_first"
+			android:title="@string/favorite_contacts_first"
+			android:summary="@string/favorite_contacts_shown_first_in_contact_list"
+			android:defaultValue="false"
+			/>
+		<CheckBoxPreference
+			android:key="show_call_counter"
+			android:title="@string/show_call_counter"
+			android:summaryOn="@string/call_counter_visible_in_contact_list_always_0_in_htc_sense_roms"
+			android:summaryOff="@string/call_counter_hidden_in_contact_list"
+			android:defaultValue="false"
+			/>		
+</PreferenceCategory>
+</PreferenceScreen>

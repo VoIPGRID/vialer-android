@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sip_host">sip.voipgrid.nl</string>
+    <string name="sip_protocol">sip:</string>
+    <string name="sip_transport">udp</string>
+    <integer name="sip_port">6060</integer>
+</resources>

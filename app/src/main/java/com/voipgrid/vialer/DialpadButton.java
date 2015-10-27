@@ -1,0 +1,145 @@
+package com.voipgrid.vialer;
+
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.media.ToneGenerator;
+import android.util.AttributeSet;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+/**
+ * Custom View widget used in the apps dialpad
+ */
+public class DialpadButton extends LinearLayout {
+
+    private String mDigit;
+    private String mChars;
+    private int mTone;
+
+    /**
+     * Constructor
+     *
+     * @param context
+     * @param attrs
+     */
+    public DialpadButton(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(context, attrs);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param context
+     * @param attrs
+     */
+    public DialpadButton(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context, attrs);
+    }
+
+    /**
+     * Initialize the view widget width TextViews to show a digit and characters.
+     * TextViews are wrapped in several parent views to display them in a GridLayout and add a
+     * decent ripple effect.
+     *
+     * @param context
+     * @param attrs
+     */
+    private void init(Context context, AttributeSet attrs) {
+        /* populate the parameter values supplied in the layout */
+        TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DialpadButton, 0, 0);
+        try {
+            mDigit = a.getString(R.styleable.DialpadButton_digit);
+            mChars = a.getString(R.styleable.DialpadButton_chars);
+        } finally {
+            a.recycle();
+        }
+
+        setDtmfTone(mDigit);
+
+        /* container layout to fix the button is centered in the GridLayout element */
+        LinearLayout container = new LinearLayout(context);
+        container.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        container.setGravity(Gravity.CENTER);
+        addView(container);
+
+        /* square layout to fix a round background on touch events for pre Lollipop devices */
+        LinearLayout linearLayout = new LinearLayout(context);
+        linearLayout.setOrientation(VERTICAL);
+        linearLayout.setBackgroundResource(R.drawable.bg_dial_button);
+        linearLayout.setGravity(Gravity.CENTER);
+        container.addView(linearLayout);
+
+        /* LayoutParams used to center the text within the TextViews*/
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        /* Setup and add the digit TextView */
+        TextView digit = new TextView(context);
+        digit.setText(mDigit);
+        digit.setLayoutParams(params);
+        digit.setGravity(Gravity.CENTER);
+        if(mDigit.equals("*") || mDigit.equals("#")) {
+            digit.setTextColor(getResources().getColor(R.color.dial_button_chars_color));
+            digit.setTextSize(getResources().getDimension(R.dimen.dialpad_button_star_text_size));
+        } else {
+            digit.setTextColor(getResources().getColor(R.color.dial_button_digit_color));
+            digit.setTextSize(getResources().getDimension(R.dimen.dialpad_button_digit_text_size));
+        }
+
+        linearLayout.addView(digit);
+
+        /* Setup and add the chars TextView */
+        TextView chars = new TextView(context);
+        chars.setText(mChars);
+        chars.setLayoutParams(params);
+        chars.setGravity(Gravity.CENTER);
+        chars.setTextColor(getResources().getColor(R.color.dial_button_chars_color));
+        chars.setTextSize(getResources().getDimension(R.dimen.dialpad_button_chars_text_size));
+        chars.setAllCaps(getResources().getBoolean(R.bool.dialpad_button_chars_all_caps));
+        linearLayout.addView(chars);
+
+    }
+
+    /**
+     * Returns the buttons digit value
+     *
+     * @return String value of the buttons digit
+     */
+    public String getDigit() {
+        return mDigit;
+    }
+
+    /**
+     * Returns the buttons characters
+     *
+     * @return String value of the buttons characters
+     */
+    public String getChars() {
+        return mChars;
+    }
+
+    public int getDtmfTone() {
+        return mTone;
+    }
+
+    private void setDtmfTone(String digit) {
+        switch (digit) {
+            case "0" : mTone = ToneGenerator.TONE_DTMF_0; break;
+            case "1" : mTone = ToneGenerator.TONE_DTMF_1; break;
+            case "2" : mTone = ToneGenerator.TONE_DTMF_2; break;
+            case "3" : mTone = ToneGenerator.TONE_DTMF_3; break;
+            case "4" : mTone = ToneGenerator.TONE_DTMF_4; break;
+            case "5" : mTone = ToneGenerator.TONE_DTMF_5; break;
+            case "6" : mTone = ToneGenerator.TONE_DTMF_6; break;
+            case "7" : mTone = ToneGenerator.TONE_DTMF_7; break;
+            case "8" : mTone = ToneGenerator.TONE_DTMF_8; break;
+            case "9" : mTone = ToneGenerator.TONE_DTMF_9; break;
+            case "#" : mTone = ToneGenerator.TONE_DTMF_P; break;
+            case "*" : mTone = ToneGenerator.TONE_DTMF_S; break;
+            default : mTone = -1;
+        }
+    }
+}
