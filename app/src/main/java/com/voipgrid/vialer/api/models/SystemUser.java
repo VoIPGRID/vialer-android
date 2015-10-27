@@ -4,6 +4,9 @@ import android.net.Uri;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by eltjo on 31/07/15.
  */
@@ -32,6 +35,13 @@ public class SystemUser {
 
     @SerializedName("allow_app_account")
     boolean hasSipPermission;
+
+    /**
+     * HashSet with list of Strings describing numbers which are not the main number
+     * for multi entries in contact list. They are stored in a set because that forces
+     * deduplication.
+     */
+    private HashSet<String> secondaryNumbers;
 
     public String getFirstName() {
         return firstName;
@@ -115,5 +125,13 @@ public class SystemUser {
 
     public void setSipPermission(boolean hasSipPermission) {
         this.hasSipPermission = hasSipPermission;
+    }
+
+    public HashSet<String> getSecondaryNumbers() {
+        return this.secondaryNumbers;
+    }
+
+    public void setSecondaryNumbers(HashSet<String> secondaryNumbers) {
+        this.secondaryNumbers = secondaryNumbers;
     }
 }

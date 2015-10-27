@@ -3,18 +3,22 @@ package com.voipgrid.vialer;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -31,12 +35,15 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.t9.ListViewContactsLoader;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * DialerActivity with a numpad view and functionality to perform a T9 contacts search
@@ -64,7 +71,7 @@ public class DialerActivity extends AppCompatActivity implements
 
     private SimpleCursorAdapter mContactsAdapter;
     private Preferences mPreferences;
-    private MatrixCursor mMatrixCursor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,14 +103,17 @@ public class DialerActivity extends AppCompatActivity implements
 
         String number = null;
         if(!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype))) {
+            /**
+             * The app added a "Vialer call <number>" to the native contacts app. clicking this
+             * opens the app with the appname's profile and the data necessary fotr opening the app.
+             */
             Cursor cursor = getContentResolver().query(intent.getData(), new String[] {
                     ContactsContract.CommonDataKinds.StructuredName.PHONETIC_NAME,
                     ContactsContract.Data.DATA2 }, null, null, null);
             cursor.moveToFirst();
-
             number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA2));
             mNumberInputEditText.setNumber(number);
-
+            cursor.close();
         }
 
         mContactsAdapter.getFilter().filter(number);
@@ -124,27 +134,54 @@ public class DialerActivity extends AppCompatActivity implements
     }
 
     private void setupContactsListView() {
-        mContactsAdapter = new SimpleCursorAdapter(getBaseContext(),
+        mContactsAdapter = new SimpleCursorAdapter(
+                getBaseContext(),
                 R.layout.list_item_contact,
                 null,
-                new String[] { "name","photo","details"},
-                new int[] { R.id.text_view_contact_name,R.id.text_view_contact_icon,R.id.text_view_contact_information}, 0);
+                new String[] { "name", "photo", "number"},
+                new int[] {
+                        R.id.text_view_contact_name,
+                        R.id.text_view_contact_icon,
+                        R.id.text_view_contact_information
+                },
+                0
+        );
+
+        mContactsAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder(){
+            /** Binds the Cursor column defined by the specified index to the specified view */
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex){
+                if(view.getId() == R.id.text_view_contact_icon) {
+                    // The ListViewContactsLoader class stores a contact uri for which
+                    // we can retrieve a photo.
+                    Uri photoUri = Uri.parse(cursor.getString(columnIndex));
+                    // open a photo inputStream given contact uri.
+                    InputStream photoInputStream =
+                            ContactsContract.Contacts.openContactPhotoInputStream(
+                                    getContentResolver(), photoUri);
+                    if (photoInputStream != null) {
+                        // decode it to a bitmap when the stream is opened successfully
+                        Bitmap bm = BitmapFactory.decodeStream(photoInputStream);
+                        ((CircleImageView) view).setImageBitmap(bm);
+                    } else {
+                        // Otherwise set it to transparent for reusability reasons.
+                        ((CircleImageView) view).setImageResource(android.R.color.transparent);
+                    }
+                    return true; //true because the data was bound to the icon view
+                }
+                return false;
+            }
+        });
 
         // Getting reference to listview
-        ListView lstContacts = (ListView) findViewById(R.id.list_view);
-
-        lstContacts.setOnItemClickListener(this);
-
-        // Setting the adapter to listview
-        lstContacts.setAdapter(mContactsAdapter);
+        ListView listView = (ListView) findViewById(R.id.list_view);
+        listView.setOnItemClickListener(this);
+        listView.setAdapter(mContactsAdapter);
 
         // Creating an AsyncTask object to retrieve and load listview with contacts
-        ListViewContactsLoader listViewContactsLoader = new ListViewContactsLoader();
-
+        ListViewContactsLoader listViewContactsLoader = new ListViewContactsLoader(
+                getBaseContext(), mContactsAdapter);
         // Starting the AsyncTask process to retrieve and load listview with contacts
         listViewContactsLoader.execute();
-
-        lstContacts.setOnItemClickListener(this);
     }
 
     @Override
@@ -201,41 +238,7 @@ public class DialerActivity extends AppCompatActivity implements
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String name = ((TextView) view.findViewById(R.id.text_view_contact_name)).getText().toString();
         String number = ((TextView) view.findViewById(R.id.text_view_contact_information)).getText().toString();
-
-        List<String> numbers = Arrays.asList(
-                ((MatrixCursor) parent.getItemAtPosition(position))
-                        .getString(4)
-                        .replace("[", "")
-                        .replace("]", "")
-                        .split(","));
-
-        int size = numbers.size();
-        if(size == 1) {
-            onCallNumber(number, name);
-        } else if(size > 1) {
-            //Toast.makeText(DialerActivity.this, Arrays.toString(numbers.toArray()), Toast.LENGTH_SHORT).show();
-            chooseNumber(name, numbers);
-        }
-    }
-
-    public void chooseNumber(final String name, List<String> numbers) {
-        final ArrayAdapter<String> adapter = new ArrayAdapter(
-                this,
-                android.R.layout.select_dialog_item);
-        adapter.addAll(numbers);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.dialer_choose_number);
-
-        builder.setSingleChoiceItems(adapter, -1, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                onCallNumber(PhoneNumberUtils.format(adapter.getItem(which)), name);
-                dialog.dismiss();
-            }
-        });
-
-        builder.show();
+        onCallNumber(number, name);
     }
 
     @Override
@@ -267,139 +270,6 @@ public class DialerActivity extends AppCompatActivity implements
 
     @Override
     public void onInputChanged(String phoneNumber) {
-        new ListViewContactsLoader().execute(phoneNumber);
-    }
-
-
-    /** An AsyncTask class to retrieve and load listview with contacts */
-    private class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor> {
-
-        @Override
-        protected Cursor doInBackground(CharSequence... params) {
-
-            mMatrixCursor = new MatrixCursor(new String[] { "_id","name","photo","details", "numbers"} );
-
-            CharSequence constraint = null;
-            if(params != null && params.length > 0) {
-                constraint = params[0];
-            }
-
-            Uri contactsUri = ContactsContract.Contacts.CONTENT_URI;
-
-            String[] t9Lookup = getResources().getStringArray(R.array.t9lookup);
-            StringBuilder builder = new StringBuilder();
-
-            String constraintString = "";
-            if(constraint != null && constraint.length() > 0) {
-                constraintString = constraint.toString();
-            }
-
-            for (int i = 0, constraintLength = constraintString.length(); i < constraintLength; i++) {
-                char c = constraintString.charAt(i);
-
-                if (c >= '0' && c <= '9') {
-                    builder.append(t9Lookup[c - '0']);
-                } else if (c == '+') {
-                    builder.append(c);
-                } else {
-                    builder.append("[" + Character.toLowerCase(c) + Character.toUpperCase(c) + "]");
-                }
-            }
-
-            String whereStatement = ContactsContract.Contacts.HAS_PHONE_NUMBER + "=?" +
-                    " AND " + "replace(" + ContactsContract.Contacts.DISPLAY_NAME +  ", ' ', '')" + " GLOB " + "?";
-            String whereArguments[] = new String[]{"1", "*" + builder.toString() + "*"};
-            String order = ContactsContract.Contacts.DISPLAY_NAME + " ASC ";
-
-            Cursor contactsCursor = getContentResolver().query(contactsUri, null, whereStatement, whereArguments, order);
-
-            if(contactsCursor.moveToFirst()){
-                do{
-                    long contactId = contactsCursor.getLong(contactsCursor.getColumnIndex("_ID"));
-
-                    Uri dataUri = ContactsContract.Data.CONTENT_URI;
-
-                    // Querying the table ContactsContract.Data to retrieve individual items like
-                    // home phone, mobile phone, work email etc corresponding to each contact
-                    Cursor dataCursor = getContentResolver().query(dataUri, null,
-                            ContactsContract.Data.CONTACT_ID + "=" + contactId,
-                            null, null);
-
-                    String displayName="";
-
-                    String photoPath = null;
-
-                    List<String> numbers = new ArrayList();
-
-                    String number = null;
-
-                    if(dataCursor.moveToFirst()) {
-                        // Getting Display Name
-                        displayName = dataCursor.getString(dataCursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
-                        byte[] photoByte = null;
-
-                        do {
-                            // Getting Photo
-                            if (dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)) {
-                                photoByte = dataCursor.getBlob(dataCursor.getColumnIndex("data15"));
-
-                                if (photoByte != null) {
-                                    Bitmap bitmap = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
-
-                                    // Getting Caching directory
-                                    File cacheDirectory = getBaseContext().getCacheDir();
-
-                                    // Temporary file to store the contact image
-                                    File tmpFile = new File(cacheDirectory.getPath() + "/wpta_" + contactId + ".png");
-
-                                    // The FileOutputStream to the temporary file
-                                    try {
-                                        FileOutputStream fOutStream = new FileOutputStream(tmpFile);
-
-                                        // Writing the bitmap to the temporary file as png file
-                                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOutStream);
-
-                                        // Flush the FileOutputStream
-                                        fOutStream.flush();
-
-                                        //Close the FileOutputStream
-                                        fOutStream.close();
-
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    } finally {
-                                        bitmap.recycle();
-                                    }
-                                    photoPath = tmpFile.getPath();
-                                }
-                            }
-                        } while (dataCursor.moveToNext());
-                    }
-
-                    if(dataCursor.moveToFirst()){
-                        do{
-                            // Getting Phone numbers
-                            if(dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)){
-                                if(dataCursor.getInt(dataCursor.getColumnIndex("data2")) > 0) {
-                                    numbers.add(dataCursor.getString(dataCursor.getColumnIndex("data1")));
-                                } else {
-                                    number = dataCursor.getString(dataCursor.getColumnIndex("data1"));
-                                }
-                            }
-                        }while(dataCursor.moveToNext());
-
-                    }
-                    mMatrixCursor.addRow(new Object[]{Long.toString(contactId), displayName, photoPath, number, Arrays.toString(numbers.toArray())});
-                }while(contactsCursor.moveToNext());
-            }
-            return mMatrixCursor;
-        }
-
-        @Override
-        protected void onPostExecute(Cursor result) {
-            // Setting the cursor containing contacts to listview
-            mContactsAdapter.swapCursor(result);
-            mContactsAdapter.notifyDataSetChanged();
-        }
+        new ListViewContactsLoader(getBaseContext(), mContactsAdapter).execute(phoneNumber);
     }
 }

@@ -1,15 +1,28 @@
 package com.voipgrid.vialer.contacts;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
+import android.util.ArraySet;
+import android.util.Log;
 
 import com.voipgrid.vialer.api.models.SystemUser;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+
 public class ContactsSyncTask extends AsyncTask {
 
+    private static final String TAG = ContactsSyncTask.class.getSimpleName();
     private Context mContext;
     private ContactsSyncListener mListener;
 
@@ -78,8 +91,9 @@ public class ContactsSyncTask extends AsyncTask {
         // gives you the list of contacts who has phone numbers
         Cursor cursor = queryAllContacts();
 
-        SystemUser s = new SystemUser();
+        SystemUser systemUser;
         while (cursor.moveToNext()) {
+            systemUser = new SystemUser();
             String contactId = getColumnFromCursor(ContactsContract.Contacts._ID, cursor);
             String name = getColumnFromCursor(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY, cursor);
 
@@ -87,15 +101,28 @@ public class ContactsSyncTask extends AsyncTask {
             if (phones.getCount() <= 0) {
                 continue;
             }
-            phones.moveToFirst();
-            String phoneNumber = getColumnFromCursor(ContactsContract.CommonDataKinds.Phone.NUMBER, phones);
+            boolean hasFirst = phones.moveToFirst();
+            String phoneNumber = getColumnFromCursor(
+                    ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER,
+                    phones
+            );
+            HashSet<String> secondaryNumbers = new HashSet<>(phones.getCount());
+            String normalizedPhoneNumber;
+            for(boolean ok=hasFirst; ok; ok=phones.moveToNext()) {
+                normalizedPhoneNumber = getColumnFromCursor(
+                        ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER,
+                        phones
+                );
+                secondaryNumbers.add(normalizedPhoneNumber);
+            }
             phones.close();
 
-            s.setFirstName(name);
-            s.setLastName(null);
-            s.setMobileNumber(phoneNumber);
+            systemUser.setFirstName(name);
+            systemUser.setLastName(null);
+            systemUser.setMobileNumber(phoneNumber);
+            systemUser.setSecondaryNumbers(secondaryNumbers);
 
-            ContactsManager.addContact(mContext, s);
+            ContactsManager.addContact(mContext, systemUser);
         }
         cursor.close();
         if (mListener != null) {
