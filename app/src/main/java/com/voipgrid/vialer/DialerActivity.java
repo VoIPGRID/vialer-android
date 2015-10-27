@@ -104,8 +104,8 @@ public class DialerActivity extends AppCompatActivity implements
         String number = null;
         if(!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype))) {
             /**
-             * The app added a "Vialer call <number>" to the native contacts app.
-             *
+             * The app added a "Vialer call <number>" to the native contacts app. clicking this
+             * opens the app with the appname's profile and the data necessary fotr opening the app.
              */
             Cursor cursor = getContentResolver().query(intent.getData(), new String[] {
                     ContactsContract.CommonDataKinds.StructuredName.PHONETIC_NAME,
