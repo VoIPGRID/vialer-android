@@ -36,7 +36,13 @@ public class SystemUser {
     @SerializedName("allow_app_account")
     boolean hasSipPermission;
 
+    /**
+     * HashSet with list of Strings describing numbers which are not the main number
+     * for multi entries in contact list. They are stored in a set because that forces
+     * deduplication.
+     */
     private HashSet<String> secondaryNumbers;
+
     public String getFirstName() {
         return firstName;
     }
