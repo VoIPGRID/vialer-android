@@ -44,7 +44,6 @@ public class SetupActivity extends AppCompatActivity implements
 
     private static final String TAG = SetupActivity.class.getSimpleName();
 
-    private static final String TAG_FORGOT_PASSWORD = "forgot-password-tag";
     private String mPassword;
 
     private Api mApi;
@@ -117,8 +116,9 @@ public class SetupActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        Fragment fragment = getFragmentManager().findFragmentByTag(TAG_FORGOT_PASSWORD);
-        if (fragment instanceof ForgotPasswordFragment) {
+        Fragment forgotPasswordFragment = getFragmentManager()
+                .findFragmentByTag(ForgotPasswordFragment.class.getSimpleName());
+        if (forgotPasswordFragment instanceof ForgotPasswordFragment) {
             // In case of a forgot password fragment we want to move back.
             getFragmentManager().popBackStack();
         } else {
