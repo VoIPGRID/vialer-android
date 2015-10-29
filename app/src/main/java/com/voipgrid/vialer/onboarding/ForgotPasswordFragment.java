@@ -75,7 +75,6 @@ public class ForgotPasswordFragment extends OnboardingFragment implements View.O
 
             @Override
             public void afterTextChanged(Editable s) {
-                Log.e("Editor", s.toString());
                 submitButton.setEnabled(s.length() > 0);
             }
         });
