@@ -3,9 +3,13 @@ package com.voipgrid.vialer.onboarding;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.voipgrid.vialer.R;
@@ -52,8 +56,32 @@ public class ForgotPasswordFragment extends OnboardingFragment implements View.O
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ((EditText) view.findViewById(R.id.forgotPasswordEmailTextDialog)).setText(getArguments().getString(ARG_EMAIL));
-        view.findViewById(R.id.button_send_password_email).setOnClickListener(this);
+
+        final Button submitButton = (Button) view.findViewById(R.id.button_send_password_email);
+        submitButton.setOnClickListener(this);
+
+        String email = getArguments().getString(ARG_EMAIL);
+        final EditText emailEditText = (EditText) view.findViewById(R.id.forgotPasswordEmailTextDialog);
+        emailEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // NOOP
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // NOOP
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                Log.e("Editor", s.toString());
+                submitButton.setEnabled(s.length() > 0);
+            }
+        });
+        emailEditText.setText(email);
+
+
     }
 
     @Override
