@@ -1,3 +1,2 @@
 include ':app'
-include ':dialer2'
 include ':pjsip'
