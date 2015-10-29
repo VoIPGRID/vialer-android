@@ -63,8 +63,6 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                 replyServer(data.getString(RESPONSE_URL), token, messageStartTime, true);
             }
         } else if (request.equals(CALL_REQUEST_TYPE)) {
-
-            String messageStartTime = data.getString(MESSAGE_START_TIME);
             ConnectivityHelper connectivityHelper = new ConnectivityHelper(
                     (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
                     (TelephonyManager) getSystemService(TELEPHONY_SERVICE));
@@ -81,12 +79,17 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                         data.getString(CALLER_ID),
                         data.getString(RESPONSE_URL),
                         data.getString(REQUEST_TOKEN),
-                        messageStartTime
+                        data.getString(MESSAGE_START_TIME)
                 );
             } else {
                 /* Inform the middleware the incoming call is received but the app can not handle
                    the sip call because there is no LTE or Wifi connection available at this point */
-                replyServer(data.getString(RESPONSE_URL), data.getString(REQUEST_TOKEN), messageStartTime, false);
+                replyServer(
+                        data.getString(RESPONSE_URL),
+                        data.getString(REQUEST_TOKEN),
+                        data.getString(MESSAGE_START_TIME),
+                        false
+                );
             }
 
         } else if (request.equals(MESSAGE_REQUEST_TYPE)) {
@@ -129,7 +132,8 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
     /**
      * @param phoneNumber the number that tried call in.
      * @param callerId pretty name of the phonenumber that tied to call in.
-     * @param messageStartTime
+     * @param messageStartTime message roundtrip throughput timestamp handled as String for logging
+     *                         purposes.
      */
     private void startSipService(String phoneNumber, String callerId, String url, String token, String messageStartTime) {
         Intent intent = new Intent(this, SipService.class);
