@@ -56,7 +56,7 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
             String token = prefs.getString(CURRENT_TOKEN, "");
             if (!token.isEmpty()) {
                 /* Use passed URL and token to identify ourselves */
-                replyServer(data.getString(RESPONSE_URL), token);
+                replyServer(data.getString(RESPONSE_URL), token, true);
             }
         } else if (request.equals(CALL_REQUEST_TYPE)) {
             ConnectivityHelper connectivityHelper = new ConnectivityHelper(
@@ -78,8 +78,8 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                 );
             } else {
                 /* Inform the middleware the incoming call is received but the app can not handle
-                   the sip call because there is no LTE or Wifi connection available at this point
-                   TODO: VIALA-241 Respond to middelware when there is not LTE of Wifi connection on incoming call */
+                   the sip call because there is no LTE or Wifi connection available at this point */
+                replyServer(data.getString(RESPONSE_URL), data.getString(REQUEST_TOKEN), false);
             }
 
         } else if (request.equals(MESSAGE_REQUEST_TYPE)) {
@@ -92,7 +92,7 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
      * @param responseUrl the URL of the server
      * @param requestToken unique_key for middleware for recognising SIP connection status updates.
      */
-    private void replyServer(String responseUrl, String requestToken) {
+    private void replyServer(String responseUrl, String requestToken, boolean isAvailable) {
         mConnectivityHelper = new ConnectivityHelper(
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
@@ -105,7 +105,7 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                 new OkClient(new OkHttpClient())
         );
 
-        registrationApi.reply(requestToken, new Callback<Object>() {
+        registrationApi.reply(requestToken, isAvailable, new Callback<Object>() {
             @Override
             public void success(Object object, retrofit.client.Response response) {
                 Log.d(TAG, "response: " + response.getStatus());

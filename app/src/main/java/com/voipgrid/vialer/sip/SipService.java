@@ -262,7 +262,7 @@ public class SipService extends Service implements
                     new OkClient(new OkHttpClient())
             );
 
-            registrationApi.reply(mToken, new Callback<Object>() {
+            registrationApi.reply(mToken, true, new Callback<Object>() {
                 @Override
                 public void success(Object object, retrofit.client.Response response) {
                 /* No need to handle succes callback.

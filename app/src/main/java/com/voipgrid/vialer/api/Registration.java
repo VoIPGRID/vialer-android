@@ -1,8 +1,6 @@
 package com.voipgrid.vialer.api;
 
 
-import android.content.Context;
-
 import retrofit.Callback;
 import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
@@ -17,7 +15,7 @@ public interface Registration {
 
     @FormUrlEncoded
     @POST("/")
-    void reply(@Field("unique_key") String token, Callback<Object> callback);
+    void reply(@Field("unique_key") String token, @Field("available") boolean isAvailable, Callback<Object> callback);
 
     @FormUrlEncoded
     @POST("/api/unregister-gcm-device/")
