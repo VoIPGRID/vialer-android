@@ -15,7 +15,7 @@ public interface Registration {
 
     @FormUrlEncoded
     @POST("/")
-    void reply(@Field("unique_key") String token, @Field("available") boolean isAvailable, Callback<Object> callback);
+    void reply(@Field("unique_key") String token, @Field("available") boolean isAvailable, @Field("message_start_time") String messageStartTime, Callback<Object> callback);
 
     @FormUrlEncoded
     @POST("/api/unregister-gcm-device/")

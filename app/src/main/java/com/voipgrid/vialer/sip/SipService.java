@@ -19,6 +19,7 @@ import android.util.Log;
 import com.squareup.okhttp.OkHttpClient;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerGcmListenerService;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -122,6 +123,8 @@ public class SipService extends Service implements
             mHandler.postDelayed(mRingbackRunnable, 4000);
         }
     };
+    // Message throughput logging timestamp
+    private String mMessageStartTime;
 
     @Nullable
     @Override
@@ -220,6 +223,8 @@ public class SipService extends Service implements
                 mToken = intent.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN);
                 mNumber = intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
                 mCallerId = intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME);
+                mMessageStartTime = intent.getStringExtra(
+                        VialerGcmListenerService.MESSAGE_START_TIME);
                 break;
             case SipConstants.ACTION_VIALER_OUTGOING :
                 SipCall call = new SipCall(mSipAccount, this);
@@ -262,7 +267,7 @@ public class SipService extends Service implements
                     new OkClient(new OkHttpClient())
             );
 
-            registrationApi.reply(mToken, true, new Callback<Object>() {
+            registrationApi.reply(mToken, true, mMessageStartTime, new Callback<Object>() {
                 @Override
                 public void success(Object object, retrofit.client.Response response) {
                 /* No need to handle succes callback.

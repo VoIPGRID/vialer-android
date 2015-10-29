@@ -41,24 +41,30 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
     private final static String PHONE_NUMBER = "phonenumber";
     private final static String CALLER_ID = "caller_id";
     private static final String SUPRESSED = "supressed";
+
+    /**
+     * Extra field for notification throughput logging.
+     */
+    public static final String MESSAGE_START_TIME = "message_start_time";
+
     private ConnectivityHelper mConnectivityHelper;
 
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        Log.d(TAG, String.format("Received GCM message from %s", from));
-        Log.d(TAG, String.format("Data %s", data));
-
         String request = data.getString(MESSAGE_TYPE, "");
         if (request.equals(CHECKIN_REQUEST_TYPE)) {
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             String token = prefs.getString(CURRENT_TOKEN, "");
+            String messageStartTime = data.getString(MESSAGE_START_TIME);
             if (!token.isEmpty()) {
                 /* Use passed URL and token to identify ourselves */
-                replyServer(data.getString(RESPONSE_URL), token, true);
+                replyServer(data.getString(RESPONSE_URL), token, messageStartTime, true);
             }
         } else if (request.equals(CALL_REQUEST_TYPE)) {
+
+            String messageStartTime = data.getString(MESSAGE_START_TIME);
             ConnectivityHelper connectivityHelper = new ConnectivityHelper(
                     (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
                     (TelephonyManager) getSystemService(TELEPHONY_SERVICE));
@@ -74,12 +80,13 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                         number,
                         data.getString(CALLER_ID),
                         data.getString(RESPONSE_URL),
-                        data.getString(REQUEST_TOKEN)
+                        data.getString(REQUEST_TOKEN),
+                        messageStartTime
                 );
             } else {
                 /* Inform the middleware the incoming call is received but the app can not handle
                    the sip call because there is no LTE or Wifi connection available at this point */
-                replyServer(data.getString(RESPONSE_URL), data.getString(REQUEST_TOKEN), false);
+                replyServer(data.getString(RESPONSE_URL), data.getString(REQUEST_TOKEN), messageStartTime, false);
             }
 
         } else if (request.equals(MESSAGE_REQUEST_TYPE)) {
@@ -91,8 +98,9 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
      * Notify the middleware server that we are, in fact, alive.
      * @param responseUrl the URL of the server
      * @param requestToken unique_key for middleware for recognising SIP connection status updates.
+     * @param messageStartTime
      */
-    private void replyServer(String responseUrl, String requestToken, boolean isAvailable) {
+    private void replyServer(String responseUrl, String requestToken, String messageStartTime, boolean isAvailable) {
         mConnectivityHelper = new ConnectivityHelper(
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
@@ -105,7 +113,7 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                 new OkClient(new OkHttpClient())
         );
 
-        registrationApi.reply(requestToken, isAvailable, new Callback<Object>() {
+        registrationApi.reply(requestToken, isAvailable, messageStartTime, new Callback<Object>() {
             @Override
             public void success(Object object, retrofit.client.Response response) {
                 Log.d(TAG, "response: " + response.getStatus());
@@ -119,11 +127,11 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
     }
 
     /**
-     *
      * @param phoneNumber the number that tried call in.
      * @param callerId pretty name of the phonenumber that tied to call in.
+     * @param messageStartTime
      */
-    private void startSipService(String phoneNumber, String callerId, String url, String token) {
+    private void startSipService(String phoneNumber, String callerId, String url, String token, String messageStartTime) {
         Intent intent = new Intent(this, SipService.class);
         intent.setAction(SipConstants.ACTION_VIALER_INCOMING);
 
@@ -134,6 +142,7 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
         intent.putExtra(SipConstants.EXTRA_REQUEST_TOKEN, token);
         intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, phoneNumber);
         intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, callerId);
+        intent.putExtra(VialerGcmListenerService.MESSAGE_START_TIME, messageStartTime);
 
         startService(intent);
     }
