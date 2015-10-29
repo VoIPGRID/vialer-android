@@ -1,23 +1,22 @@
 package com.voipgrid.vialer.onboarding;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.WebActivity;
-import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.util.Storage;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -65,6 +64,14 @@ public class LoginFragment extends OnboardingFragment implements
 
         mPasswordEdittext = (EditText) view.findViewById(R.id.passwordTextDialog);
         mPasswordEdittext.addTextChangedListener(this);
+        mPasswordEdittext.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                // Add an EditorAction when clicking done which override selection of
+                // forgot password and initiates a login.
+                return actionId == EditorInfo.IME_ACTION_DONE && mLoginButton.performClick();
+            }
+        });
 
         mLoginButton = (Button) view.findViewById(R.id.button_login);
         mLoginButton.setOnClickListener(this);
