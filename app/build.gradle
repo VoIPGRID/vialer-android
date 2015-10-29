@@ -48,7 +48,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // Modules
-    compile project(':dialer2')
     compile project(':pjsip')
 
     // Support libs
