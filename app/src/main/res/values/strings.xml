@@ -27,6 +27,7 @@
     <string name="dialer_warning_no_connection">No data connection available</string>
     <string name="version_info">Version: %1$s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
+
     <!-- Login fragment values -->
     <string name="login_header_label_text">Business</string>
     <string name="login_header_label_subtext">calls in the cloud</string>
@@ -37,12 +38,15 @@
     <string name="login_missing_field_title">Warning</string>
     <string name="login_missing_field_message">Please fill in all fields before login!</string>
     <string name="ok">Ok</string>
+
     <!-- Forgot password fragment values -->
     <string name="header_forgot_password_title">Forgot password?</string>
     <string name="forgot_password_button_text">Send</string>
     <string name="forgot_password_description">Please enter your email address and we will send you instructions on setting a new password.</string>
     <string name="forgot_password_missing_field_title">Warning</string>
     <string name="forgot_password_missing_field_message">Please fill in all fields before login!</string>
+    <string name="forgot_password_error_title">Incorrect email address</string>
+    <string name="forgot_password_error_text">Please enter a valid email address.</string>
     <!--
         Configure fragment values.
     -->

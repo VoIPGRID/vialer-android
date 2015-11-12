@@ -242,19 +242,20 @@ public class SetupActivity extends AppCompatActivity implements
     @Override
     public void failure(RetrofitError error) {
         final String errorMessage = error.getMessage();
+        final String failedUrl = error.getUrl();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 enableProgressBar(false);
                 OnboardingFragment fragment = getCurrentFragment();
-
+                if (failedUrl.endsWith("password_reset/")) {
+                    displayAlert(
+                            getString(R.string.forgot_password_error_title),
+                            getString(R.string.forgot_password_error_text)
+                    );
+                }
                 if (fragment != null) {
-                    if (!mConnectivityHelper.hasNetworkConnection()) {
-                        onAlertDialog(getString(R.string.onboarding_no_internet_title),
-                                getString(R.string.onboarding_no_internet_message));
-                    } else {
-                        fragment.onError(errorMessage);
-                    }
+                    fragment.onError(errorMessage);
                 }
             }
         });
