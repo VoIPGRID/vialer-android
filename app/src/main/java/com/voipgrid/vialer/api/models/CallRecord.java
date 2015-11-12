@@ -29,6 +29,9 @@ public class CallRecord {
     @SerializedName("dialed_number")
     private String dialedNumber;
 
+    @SerializedName("src_number")
+    private String caller;
+
     private String direction;
 
     public static String getLimitDate() {
@@ -66,6 +69,14 @@ public class CallRecord {
 
     public void setDialedNumber(String dialedNumber) {
         this.dialedNumber = dialedNumber;
+    }
+
+    public String getCaller() {
+        return caller;
+    }
+
+    public void setCaller(String caller) {
+        this.caller = caller;
     }
 
     public String getDirection() {
