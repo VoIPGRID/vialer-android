@@ -97,9 +97,6 @@ public class CallRecordAdapter extends BaseAdapter {
         CallRecord callRecord = getItem(position);
 
         if(callRecord != null) {
-            // set the dialed number to the view
-            viewHolder.title.setText(callRecord.getDialedNumber());
-
             // default resource for direction.
             int resource = 0;
 
@@ -108,8 +105,10 @@ public class CallRecordAdapter extends BaseAdapter {
 
             // set the drawable resource
             if(direction.equals(CallRecord.DIRECTION_OUTBOUND)) {
+                viewHolder.title.setText(callRecord.getDialedNumber());
                 resource = R.drawable.ic_outgoing;
             } else if(direction.equals(CallRecord.DIRECTION_INBOUND)) {
+                viewHolder.title.setText(callRecord.getCaller());
                 if(callRecord.getDuration() == 0) {
                     resource = R.drawable.ic_incoming_missed;
                 } else {
