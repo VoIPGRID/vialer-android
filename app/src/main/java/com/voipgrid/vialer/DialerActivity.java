@@ -109,9 +109,9 @@ public class DialerActivity extends AppCompatActivity implements
              */
             Cursor cursor = getContentResolver().query(intent.getData(), new String[] {
                     ContactsContract.CommonDataKinds.StructuredName.PHONETIC_NAME,
-                    ContactsContract.Data.DATA2 }, null, null, null);
+                    ContactsContract.Data.DATA3 }, null, null, null);
             cursor.moveToFirst();
-            number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA2));
+            number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA3));
             mNumberInputEditText.setNumber(number);
             cursor.close();
         }

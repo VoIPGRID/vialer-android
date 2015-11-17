@@ -1,64 +1,50 @@
 package com.voipgrid.vialer.contacts;
 
+import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
-import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
 
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.api.models.SystemUser;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.List;
+
 
 public class ContactsManager {
 
-    private static final String TAG = ContactsManager.class.getSimpleName();
-
-    public static void add(Activity context, SystemUser systemUser) {
-        addNewAccount(context, context.getString(R.string.contacts_app_name), context.getString(R.string.authtoken_type_full_access));
-        ContactsManager.addContact(context, systemUser);
-    }
-
-    /** Private convenience method */
-    private static void addNewAccount(Activity activity, String accountType, String authTokenType) {
-        AccountManager.get(activity)
-            .addAccount(accountType, authTokenType, null, null, activity, new AccountManagerCallback<Bundle>() {
-                @Override
-                public void run(AccountManagerFuture<Bundle> future) {
-                    try {
-                        Bundle bnd = future.getResult();
-                        assert (bnd != null);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, null);
-    }
-
-
+    private static final String LOG_TAG = ContactsManager.class.getSimpleName();
 
     /**
-     * Add Data to a Contact entry for "AppName" to enable ann action "<Appname> call <number>".
+     * Check if their is a sync account present. If not create one.
      *
-     * @param context The context used to create a content resolver.
-     * @param contact The Contact data to stored.
+     * @param context The context used to get the AccountManager, Strings and ContentResolver.
      */
-    public static void addContact(Context context, SystemUser contact) {
+    private static void checkSyncAccount(Context context){
+        AccountManager am = AccountManager.get(context);
+        Account[] accounts;
+        accounts = am.getAccountsByType(context.getString(R.string.account_type));
+        if (accounts == null || accounts.length <= 0) {
+            Log.d(LOG_TAG, "Created sync account");
+            Account account = new Account(context.getString(R.string.contacts_app_name), context.getString(R.string.account_type));
+            am.addAccountExplicitly(account, "", null);
+            ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
+        }
+    }
+
+    /**
+     * Function for syncing a contact.
+     *
+     * @param context
+     * @param displayName The display name of the contact.
+     * @param phoneNumbers The phone numbers of the contact.
+     */
+    public static void syncContact(Context context, String displayName, List<String> phoneNumbers) {
         ContentResolver resolver = context.getContentResolver();
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
 
@@ -66,9 +52,12 @@ public class ContactsManager {
                 + ContactsContract.RawContacts.ACCOUNT_TYPE + " = ? AND "
                 + ContactsContract.RawContacts.ACCOUNT_NAME + " = ?";
         String[] whereArg = new String[] {
-                contact.getFirstName(),
+                displayName,
                 context.getString(R.string.account_type),
                 context.getString(R.string.contacts_app_name)};
+
+        // Make sure SyncAccount requirement is met.
+        checkSyncAccount(context);
 
         Cursor sameName = resolver.query(ContactsContract.RawContacts.CONTENT_URI, null, where, whereArg, null);
         if (sameName != null && sameName.getCount() == 0) { // Prevent duplicate entries in RawContactsArray
@@ -82,48 +71,33 @@ public class ContactsManager {
             ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(ContactsContract.Settings.CONTENT_URI, true))
                     .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, context.getString(R.string.contacts_app_name))
                     .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, context.getString(R.string.account_type))
-                    .withValue(ContactsContract.Settings.UNGROUPED_VISIBLE, 1)
+                    .withValue(ContactsContract.Settings.UNGROUPED_VISIBLE, 0)
                     .build());
 
             // Add a name DATA item for the contact
             ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true))
                     .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
                     .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
-                    .withValue(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, contact.getFirstName())
-                    .withValue(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME, contact.getLastName())
+                    .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, displayName)
                     .build());
 
-            // Add a phone number entry for our RawContact type
-            ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true))
-                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                    .withValue(ContactsContract.Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
-                    .withValue(Phone.NUMBER, contact.getMobileNumber())
-                    .build());
+            String contactActionString;
+            String phoneNumber;
+            String appName = context.getString(R.string.app_name);
+            String mimeType = context.getString(R.string.profile_mimetype);
 
-            // Create '<app_name> call <number>' string.
-            String contactActionString = context.getString(
-                    R.string.contact_call_action_name,
-                    context.getString(R.string.app_name),
-                    contact.getMobileNumber());
-
-            // Add a DATA item for our custom sample action
-            ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true))
-                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                    .withValue(ContactsContract.Data.MIMETYPE, context.getString(R.string.profile_mimetype))
-                    .withValue(ContactsContract.Data.DATA1, Integer.valueOf(context.getString(R.string.account_token)))      // Profile token
-                    .withValue(ContactsContract.Data.DATA2, contact.getMobileNumber())   // DATA summary
-                    .withValue(ContactsContract.Data.DATA3, contactActionString)   // DATA desc
-                    .build());
-
-            // Add vialer contact entries with a custom number for easy and fast T9 search.
-            HashSet<String> secondaryNumbers = contact.getSecondaryNumbers();
-            for (String secondaryNumber : secondaryNumbers) {
+            // Add a DATA item for our custom sample action for all numbers.
+            for (int i = 0; i < phoneNumbers.size(); i++){
+                phoneNumber = phoneNumbers.get(i);
+                contactActionString = context.getString(
+                        R.string.contact_call_action_name,
+                        appName,
+                        phoneNumber);
                 ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true))
                         .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                        .withValue(ContactsContract.Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
-                        .withValue(Phone.TYPE, Phone.TYPE_CUSTOM)
-                        .withValue(Phone.LABEL, context.getString(R.string.phone_type))
-                        .withValue(Phone.NUMBER, secondaryNumber)
+                        .withValue(ContactsContract.Data.MIMETYPE, mimeType)
+                        .withValue(ContactsContract.Data.DATA2, contactActionString)   // DATA summary
+                        .withValue(ContactsContract.Data.DATA3, phoneNumber)   // DATA desc
                         .build());
             }
 

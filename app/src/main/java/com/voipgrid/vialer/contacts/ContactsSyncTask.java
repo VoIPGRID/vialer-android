@@ -1,24 +1,13 @@
 package com.voipgrid.vialer.contacts;
 
-import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
-import android.util.ArraySet;
-import android.util.Log;
 
-import com.voipgrid.vialer.api.models.SystemUser;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContactsSyncTask extends AsyncTask {
 
@@ -91,9 +80,8 @@ public class ContactsSyncTask extends AsyncTask {
         // gives you the list of contacts who has phone numbers
         Cursor cursor = queryAllContacts();
 
-        SystemUser systemUser;
         while (cursor.moveToNext()) {
-            systemUser = new SystemUser();
+
             String contactId = getColumnFromCursor(ContactsContract.Contacts._ID, cursor);
             String name = getColumnFromCursor(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY, cursor);
 
@@ -101,28 +89,30 @@ public class ContactsSyncTask extends AsyncTask {
             if (phones.getCount() <= 0) {
                 continue;
             }
+
             boolean hasFirst = phones.moveToFirst();
-            String phoneNumber = getColumnFromCursor(
-                    ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER,
-                    phones
-            );
-            HashSet<String> secondaryNumbers = new HashSet<>(phones.getCount());
+            List<String> phoneNumbers = new ArrayList<String>(phones.getCount());
             String normalizedPhoneNumber;
-            for(boolean ok=hasFirst; ok; ok=phones.moveToNext()) {
+
+            for(boolean ok = hasFirst; ok; ok = phones.moveToNext()) {
                 normalizedPhoneNumber = getColumnFromCursor(
                         ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER,
                         phones
                 );
-                secondaryNumbers.add(normalizedPhoneNumber);
+
+                // We do not want to synchronize null numbers.
+                if (normalizedPhoneNumber == null){
+                    continue;
+                }
+
+                // Avoid duplicate phone numbers.
+                if (!phoneNumbers.contains(normalizedPhoneNumber)){
+                    phoneNumbers.add(normalizedPhoneNumber);
+                }
+
             }
             phones.close();
-
-            systemUser.setFirstName(name);
-            systemUser.setLastName(null);
-            systemUser.setMobileNumber(phoneNumber);
-            systemUser.setSecondaryNumbers(secondaryNumbers);
-
-            ContactsManager.addContact(mContext, systemUser);
+            ContactsManager.syncContact(mContext, name, phoneNumbers);
         }
         cursor.close();
         if (mListener != null) {

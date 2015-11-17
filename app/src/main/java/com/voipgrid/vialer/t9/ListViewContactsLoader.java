@@ -83,12 +83,11 @@ public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor
     protected String getSelectionQueryString() {
         return Data.MIMETYPE + " = ?"                                   // PHONE_TYPE
                 + " AND " + Phone.HAS_PHONE_NUMBER + " = 1"             // HAS_NUMBER
-                + " AND " + Phone.TYPE + " = ?"                         // Custom type
-                + " AND " + Phone.LABEL + " = ?"                        // com.voipgrid.vialer.phone_type
                 + " AND"
                     +" ("
                         + Phone.DISPLAY_NAME_PRIMARY + " GLOB ?"        // T9 name search string
-                        + " OR " + Phone.NORMALIZED_NUMBER + " LIKE ?"  // Normalized number without spaces.
+                        + " OR " + Phone.DATA3 + " LIKE ?"  // DATA3 contains normalized
+                                                            // number without spaces.
                     + ")";
     }
 
@@ -100,9 +99,7 @@ public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor
      */
     protected String[] getSelectionArguments(String searchString, String searchNumber) {
         return new String[] {
-                Phone.CONTENT_ITEM_TYPE,
-                String.valueOf(Phone.TYPE_CUSTOM),
-                mContext.getString(R.string.phone_type),
+                mContext.getString(R.string.profile_mimetype),
                 "*" + searchString + "*",
                 "%" + searchNumber + "%"
         };
@@ -124,7 +121,7 @@ public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor
                     Long.toString(contactId),
                     cursor.getString(cursor.getColumnIndex(Data.DISPLAY_NAME_PRIMARY)),
                     ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId),
-                    cursor.getString(cursor.getColumnIndex(Phone.NORMALIZED_NUMBER))
+                    cursor.getString(cursor.getColumnIndex(Phone.DATA3))
             });
         }
     }
@@ -150,7 +147,7 @@ public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor
                 new String[] {
                         Data.CONTACT_ID,
                         Data.DISPLAY_NAME_PRIMARY,
-                        Phone.NORMALIZED_NUMBER
+                        Phone.DATA3
                 },                                                                // PROJECTION
                 getSelectionQueryString(),                                                      // SELECTION
                 getSelectionArguments(searchStringBuilder.toString(), searchNumber), // WHERE args
