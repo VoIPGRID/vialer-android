@@ -59,7 +59,7 @@ public class ContactsSyncTask extends AsyncTask {
      * @return
      */
     public Cursor queryAllPhoneNumbers(String contactId) {
-        // gives you the list of phone numbers given a contact
+        // Gives the list of phone numbers for a given contact.
         return query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId);
     }
@@ -77,24 +77,25 @@ public class ContactsSyncTask extends AsyncTask {
 
     @Override
     public Object doInBackground(Object[] params) {
-        // gives you the list of contacts who has phone numbers
+        // Gives you the list of contacts who have phone numbers.
         Cursor cursor = queryAllContacts();
 
         while (cursor.moveToNext()) {
-
             String contactId = getColumnFromCursor(ContactsContract.Contacts._ID, cursor);
             String name = getColumnFromCursor(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY, cursor);
 
             Cursor phones = queryAllPhoneNumbers(contactId);
+
             if (phones.getCount() <= 0) {
+                // Close cursor before continue.
+                phones.close();
                 continue;
             }
 
-            boolean hasFirst = phones.moveToFirst();
             List<String> phoneNumbers = new ArrayList<String>(phones.getCount());
             String normalizedPhoneNumber;
 
-            for(boolean ok = hasFirst; ok; ok = phones.moveToNext()) {
+            while (phones.moveToNext()) {
                 normalizedPhoneNumber = getColumnFromCursor(
                         ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER,
                         phones
