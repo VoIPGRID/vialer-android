@@ -1,17 +1,21 @@
 package com.voipgrid.vialer.contacts;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ContactsSyncTask extends AsyncTask {
 
-    private static final String TAG = ContactsSyncTask.class.getSimpleName();
+    private static final String LOG_TAG = ContactsSyncTask.class.getSimpleName();
     private Context mContext;
     private ContactsSyncListener mListener;
 
@@ -77,6 +81,15 @@ public class ContactsSyncTask extends AsyncTask {
 
     @Override
     public Object doInBackground(Object[] params) {
+        // Check contacts permission. Do nothing if we don't have it. Since it's a background
+        // job we can't really ask the user for permission.
+
+        if (!ContactsPermission.hasPermission(mContext)) {
+            // TODO VIALA-349 Delete sync account.
+            Log.d(LOG_TAG, "Missing contact permissions");
+            return null;
+        }
+
         // Gives you the list of contacts who have phone numbers.
         Cursor cursor = queryAllContacts();
 

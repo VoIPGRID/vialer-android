@@ -1,6 +1,7 @@
 package com.voipgrid.vialer;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,6 +12,7 @@ import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -22,6 +24,8 @@ import android.widget.TextView;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.contacts.ContactsPermission;
+import com.voipgrid.vialer.contacts.ContactsSyncTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -39,10 +43,12 @@ public class DialerActivity extends AppCompatActivity implements
         View.OnClickListener,
         KeyPadView.OnKeyPadClickListener,
         AbsListView.OnScrollListener,
-        AdapterView.OnItemClickListener,
-        NumberInputEditText.OnInputChangedListener {
+        AdapterView.OnItemClickListener {
 
     private final static String LOG_TAG = DialerActivity.class.getSimpleName();
+
+    private boolean mHasPermission;
+    private boolean mAskForPermission;
 
     private ConnectivityHelper mConnectivityHelper;
 
@@ -56,7 +62,7 @@ public class DialerActivity extends AppCompatActivity implements
 
     private ViewGroup mKeyPadViewContainer;
 
-    private SimpleCursorAdapter mContactsAdapter;
+    private SimpleCursorAdapter mContactsAdapter = null;
     private Preferences mPreferences;
 
 
@@ -81,9 +87,8 @@ public class DialerActivity extends AppCompatActivity implements
 
         mDialerWarning = (TextView) findViewById(R.id.dialer_warning);
 
+        // This should be called before setupContactParts.
         setupKeypad();
-
-        setupContactsListView();
 
         Intent intent = getIntent();
         String type = intent.getType();
@@ -91,36 +96,69 @@ public class DialerActivity extends AppCompatActivity implements
         // Sadly HTC fails to include the mime-type in the intent in 4.4.2.
         Uri contactUri = intent.getData();
 
-        String number = null;
-        if((!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype))) || contactUri != null) {
-            /**
-             * The app added a "Vialer call <number>" to the native contacts app. clicking this
-             * opens the app with the appname's profile and the data necessary fotr opening the app.
-             */
-            Cursor cursor = getContentResolver().query(contactUri, new String[] {
-                    ContactsContract.CommonDataKinds.StructuredName.PHONETIC_NAME,
-                    ContactsContract.Data.DATA3 }, null, null, null);
-            cursor.moveToFirst();
-            number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA3));
-            mNumberInputEditText.setNumber(number);
-            cursor.close();
-        }
+        mHasPermission = ContactsPermission.hasPermission(this);
+        mAskForPermission = true;
+        // Check for contact permissions before doing contact related work.
+        if (mHasPermission) {
+            // Handling this intent is only needed when we have contact permissions.
+            String number = null;
+            if((!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype))) || contactUri != null) {
+                /**
+                 * The app added a "Vialer call <number>" to the native contacts app. clicking this
+                 * opens the app with the appname's profile and the data necessary fotr opening the app.
+                 */
+                Cursor cursor = getContentResolver().query(contactUri, new String[] {
+                            ContactsContract.CommonDataKinds.StructuredName.PHONETIC_NAME,
+                            ContactsContract.Data.DATA3 }, null, null, null);
+                cursor.moveToFirst();
+                number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA3));
+                mNumberInputEditText.setNumber(number);
+                cursor.close();
+            }
 
-        mContactsAdapter.getFilter().filter(number);
+            // This should be called after setupKeyPad.
+            setupContactParts(number);
+        }
     }
 
+    /**
+     * Setup the keypad and add a empty onInputChanged listener.
+     */
     private void setupKeypad() {
-
         KeyPadView keyPadView = (KeyPadView) findViewById(R.id.key_pad_view);
         keyPadView.setOnKeyPadClickListener(this);
 
         mKeyPadViewContainer = (ViewGroup) findViewById(R.id.key_pad_container);
 
-        ListView listView = (ListView) findViewById(R.id.list_view);
-        listView.setOnScrollListener(this);
-
         mNumberInputEditText = (NumberInputEditText) findViewById(R.id.number_input_edit_text);
-        mNumberInputEditText.setOnInputChangedListener(this);
+
+        mNumberInputEditText.setOnInputChangedListener(new NumberInputEditText.OnInputChangedListener() {
+            @Override
+            public void onInputChanged(String phoneNumber) {
+                // Keep this empty. A implemented version will be set if we have contact permissions
+                // be a empty one is required if we do not have permission.
+            }
+        });
+    }
+
+    /**
+     * Setup the ContactsList, filter the list on the given number and add a onInputChanged
+     * listener for the T9 contact search.
+     * @param number
+     */
+    private void setupContactParts(String number) {
+        // Setup the list view.
+        setupContactsListView();
+        // Filter the contact list on number.
+        mContactsAdapter.getFilter().filter(number);
+
+        // Replace the empty listener set in setupKeypad with the T9 search function.
+        mNumberInputEditText.setOnInputChangedListener(new NumberInputEditText.OnInputChangedListener() {
+            @Override
+            public void onInputChanged(String phoneNumber) {
+                new ListViewContactsLoader(getBaseContext(), mContactsAdapter).execute(phoneNumber);
+            }
+        });
     }
 
     private void setupContactsListView() {
@@ -128,8 +166,8 @@ public class DialerActivity extends AppCompatActivity implements
                 getBaseContext(),
                 R.layout.list_item_contact,
                 null,
-                new String[] { "name", "photo", "number"},
-                new int[] {
+                new String[]{"name", "photo", "number"},
+                new int[]{
                         R.id.text_view_contact_name,
                         R.id.text_view_contact_icon,
                         R.id.text_view_contact_information
@@ -138,7 +176,9 @@ public class DialerActivity extends AppCompatActivity implements
         );
 
         mContactsAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-            /** Binds the Cursor column defined by the specified index to the specified view */
+            /**
+             * Binds the Cursor column defined by the specified index to the specified view
+             */
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
                 if (view.getId() == R.id.text_view_contact_icon) {
                     // The ListViewContactsLoader class stores a contact uri for which
@@ -164,6 +204,7 @@ public class DialerActivity extends AppCompatActivity implements
 
         // Getting reference to listview
         ListView listView = (ListView) findViewById(R.id.list_view);
+        listView.setOnScrollListener(this);
         listView.setOnItemClickListener(this);
         listView.setAdapter(mContactsAdapter);
 
@@ -177,6 +218,25 @@ public class DialerActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Permission changed since last accessing this Activity.
+        if (mHasPermission != ContactsPermission.hasPermission(this)){
+            // Force a recreate of the Activity to reflect the new permission.
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+        }
+
+        // If we don't have permission we need to ask for it.
+        if (!mHasPermission){
+            // We need to avoid a permission loop.
+            if (mAskForPermission) {
+                mAskForPermission = false;
+                ContactsPermission.askForPermission(this);
+            }
+        }
+
+        // Set the warming for lacking connection types.
         mDialerWarning.setVisibility(View.VISIBLE);
         if(!mConnectivityHelper.hasNetworkConnection()) {
             mDialerWarning.setText(R.string.dialer_warning_no_connection);
@@ -189,6 +249,29 @@ public class DialerActivity extends AppCompatActivity implements
             mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_account_message));
         } else {
             mDialerWarning.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == this.getResources().getInteger(R.integer.contact_permission_request_code)) {
+            boolean allPermissionsGranted = true;
+            for (int i = 0; i < permissions.length; i++) {
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    allPermissionsGranted = false;
+                    break;
+                }
+            }
+            if (allPermissionsGranted) {
+                // ContactSync.
+                Log.d(LOG_TAG, "Starting ContactSync after getting contact permissions");
+                new ContactsSyncTask(this, null).execute();
+
+                // Reload Activity to reflect new permission.
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
         }
     }
 
@@ -256,10 +339,5 @@ public class DialerActivity extends AppCompatActivity implements
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 
-    }
-
-    @Override
-    public void onInputChanged(String phoneNumber) {
-        new ListViewContactsLoader(getBaseContext(), mContactsAdapter).execute(phoneNumber);
     }
 }
