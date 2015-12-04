@@ -46,12 +46,15 @@ public class DialHelper {
      * @param contactName
      */
     public void callNumber(String number, String contactName) {
-        if (mPreferences.canUseSip()
-                && mStorage.has(PhoneAccount.class)
-                && mConnectivityHelper.hasFastData()) {
-            callWithSip(number, contactName);
-        } else {
-            callWithApi(number, contactName);
+        // We need internet for both type of calls.
+        if (mConnectivityHelper.hasNetworkConnection()) {
+            if (mPreferences.canUseSip()
+                    && mStorage.has(PhoneAccount.class)
+                    && mConnectivityHelper.hasFastData()) {
+                callWithSip(number, contactName);
+            } else {
+                callWithApi(number, contactName);
+            }
         }
     }
 
