@@ -101,13 +101,16 @@ public class DialerActivity extends AppCompatActivity implements
         Intent intent = getIntent();
         String type = intent.getType();
 
+        // Sadly HTC fails to include the mime-type in the intent in 4.4.2.
+        Uri contactUri = intent.getData();
+
         String number = null;
-        if(!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype))) {
+        if((!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype))) || contactUri != null) {
             /**
              * The app added a "Vialer call <number>" to the native contacts app. clicking this
              * opens the app with the appname's profile and the data necessary fotr opening the app.
              */
-            Cursor cursor = getContentResolver().query(intent.getData(), new String[] {
+            Cursor cursor = getContentResolver().query(contactUri, new String[] {
                     ContactsContract.CommonDataKinds.StructuredName.PHONETIC_NAME,
                     ContactsContract.Data.DATA3 }, null, null, null);
             cursor.moveToFirst();
