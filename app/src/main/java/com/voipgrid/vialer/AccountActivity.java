@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +37,7 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
 import com.voipgrid.vialer.util.Storage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +49,8 @@ import retrofit.client.Response;
 public class AccountActivity extends AppCompatActivity implements
         Switch.OnCheckedChangeListener,
         Callback, AdapterView.OnItemSelectedListener {
+
+    public static final String LOG_TAG = AccountActivity.class.getSimpleName();
 
     private boolean mEditMode = false;
     private Storage mStorage;
@@ -226,6 +230,19 @@ public class AccountActivity extends AppCompatActivity implements
             return;
         }
         mPreferences.setSipEnabled(isChecked);
+
+        if (!isChecked) {
+            // Unregister at middleware.
+            try {
+                // Blocking for now, quickfix for beta testers.
+                Middleware.unregister(this);
+            } catch (IOException exception) {
+                Log.e(LOG_TAG, "Unregister failed", exception);
+            }
+        } else {
+            // Register. Fix this later in SIP vialer version.
+            // TODO: VIALA-364.
+        }
     }
 
 
