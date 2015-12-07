@@ -10,6 +10,7 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Data;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.SimpleCursorAdapter;
 
 import com.voipgrid.vialer.R;
@@ -19,6 +20,8 @@ import com.voipgrid.vialer.R;
  * An AsyncTask class to retrieve a list of contacts data from the Android system.
  */
 public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor> {
+
+    private final static String LOG_TAG = ListViewContactsLoader.class.getSimpleName();
 
     private final Context mContext;
     private SimpleCursorAdapter mContactsAdapter;
@@ -138,7 +141,12 @@ public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor
         String searchNumber = (params.length > 0 ? searchString(params[0]) : "");
         // Then convert that searchNumber to a potential name.
         StringBuilder searchStringBuilder = t9LookupStringBuilder(searchNumber);
-        // Querying the table ContactsContract.Data to retrieve individual items like
+
+        // We want to strip the leading zero because we are searching normalized numbers
+        // (+XX625874469). The leading zero would lead to 0 matches.
+        if (searchNumber.length() > 0 && searchNumber.charAt(0) == '0'){
+            searchNumber = searchNumber.substring(1);
+        }
 
         // Query for all ContactsContract.Data entries with mimetype phone_v2
         // and <app_name> typed data .

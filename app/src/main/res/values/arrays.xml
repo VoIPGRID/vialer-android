@@ -3,13 +3,13 @@
     <string-array name="t9lookup">
         <item></item>
         <item></item>
-        <item>[abcàáâãäåæçABCÀÁÂÃÄÅÆÇ]</item>
-        <item>[defèéêëDEFÈÉÊËÐ]</item>
-        <item>[ghiìíîïGHIÌÍÎÏ]</item>
-        <item>[jklJKL]</item>
-        <item>[mnoñòóôõöøMNOÑÒÓÔÕÖØ]</item>
-        <item>[pqrsPQRS]</item>
-        <item>[tuvùúûüTUVÙÚÛÜ]</item>
-        <item>[wxyzýÿWXYZÝ]</item>
+        <item>*[abcàáâãäåæçABCÀÁÂÃÄÅÆÇ]*</item>
+        <item>*[defèéêëDEFÈÉÊËÐ]*</item>
+        <item>*[ghiìíîïGHIÌÍÎÏ]*</item>
+        <item>*[jklJKL]*</item>
+        <item>*[mnoñòóôõöøMNOÑÒÓÔÕÖØ]*</item>
+        <item>*[pqrsPQRS]*</item>
+        <item>*[tuvùúûüTUVÙÚÛÜ]*</item>
+        <item>*[wxyzýÿWXYZÝ]*</item>
     </string-array>
 </resources>
