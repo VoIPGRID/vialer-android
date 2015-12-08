@@ -98,4 +98,10 @@
 
     <dimen name="account_text_input_layout_text_size_">16dp</dimen>
 
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">?android:attr/listDivider</item>
+    </style>
+
 </resources>

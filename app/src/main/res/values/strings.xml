@@ -113,7 +113,7 @@
     <string name="info_menu_item_title">Info</string>
     <string name="info_button_title">How does Vialer work?</string>
     <string name="account_sip_switch">Call using VoIP</string>
-    <string name="account_availibility_switch_title">Availibility</string>
+    <string name="account_availability_switch_title">Availability</string>
     <string name="not_available">Not available</string>
     <string name="tab_title_recents">recent</string>
     <string name="tab_title_missed">missed</string>
