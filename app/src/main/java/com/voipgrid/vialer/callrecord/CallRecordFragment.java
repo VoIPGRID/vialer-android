@@ -104,10 +104,9 @@ public class CallRecordFragment extends ListFragment implements
 
     private class AsyncCallRecordSaver extends AsyncTask<Void, Void, Void> {
         private List<CallRecord> mRecords;
-        private Storage<CallRecord[]> mStorage;
+
         public AsyncCallRecordSaver(List<CallRecord> records) {
             mRecords = records;
-            mStorage = new Storage<CallRecord[]>(getActivity());
         }
 
         protected Void doInBackground(Void args[]) {
