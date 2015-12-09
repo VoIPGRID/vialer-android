@@ -1,6 +1,6 @@
 package com.voipgrid.vialer;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -17,16 +17,26 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.voipgrid.vialer.api.Registration;
+import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.models.Destination;
+import com.voipgrid.vialer.api.models.FixedDestination;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.api.models.UserDestination;
+import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
 import com.voipgrid.vialer.util.Storage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -36,12 +46,27 @@ import retrofit.client.Response;
 /**
  * NavigationDrawerActivity adds support to add a Toolbar and DrawerLayout to an Activity.
  */
-public abstract class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public abstract class NavigationDrawerActivity
+        extends AppCompatActivity
+        implements Callback, AdapterView.OnItemSelectedListener,
+        NavigationView.OnNavigationItemSelectedListener {
 
     private Toolbar mToolbar;
+    private Spinner mSpinner;
+    private ArrayAdapter<Destination> mSpinnerAdapter;
 
     private DrawerLayout mDrawerLayout;
     private ConnectivityHelper mConnectivityHelper;
+
+    private Storage mStorage;
+    private SystemUser mSystemUser;
+    private Api mApi;
+
+    private String mDestinationId;
+
+    private List<Destination> destinationSpinnerArray = new ArrayList();
+
+    private boolean mFirstTimeOnItemSelected = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +75,23 @@ public abstract class NavigationDrawerActivity extends AppCompatActivity impleme
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
         );
+
+        mStorage = new Storage(this);
+        mSystemUser = (SystemUser) mStorage.get(SystemUser.class);
+
+
+        if (mSystemUser != null){
+            mApi = ServiceGenerator.createService(
+                    mConnectivityHelper,
+                    Api.class,
+                    getString(R.string.api_url),
+                    new OkClient(ServiceGenerator.getOkHttpClient(
+                            this, mSystemUser.getEmail(), mSystemUser.getPassword()))
+            );
+
+            // Preload availability.
+            mApi.getUserDestination(this);
+        }
     }
 
     /**
@@ -82,7 +124,7 @@ public abstract class NavigationDrawerActivity extends AppCompatActivity impleme
 
         ((NavigationView) mDrawerLayout.findViewById(R.id.navigation_view)).setNavigationItemSelectedListener(this);
 
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(
+        ActionBarDrawerToggle drawerToggle = new CustomActionBarDrawerToggle(
                 this,  mDrawerLayout, mToolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close
         );
@@ -108,6 +150,9 @@ public abstract class NavigationDrawerActivity extends AppCompatActivity impleme
         getSupportActionBar().setHomeButtonEnabled(true);
 
         drawerToggle.syncState();
+
+        // Setup the spinner in the drawer.
+        setupSpinner();
     }
 
     private void setVersionInfo(TextView textView) {
@@ -176,5 +221,104 @@ public abstract class NavigationDrawerActivity extends AppCompatActivity impleme
         intent.putExtra(WebActivity.USERNAME, systemUser.getEmail());
         intent.putExtra(WebActivity.PASSWORD, systemUser.getPassword());
         startActivity(intent);
+    }
+
+    @Override
+    public void success(Object object, Response response) {
+        if(object instanceof VoipGridResponse) {
+
+            List<UserDestination> userDestinationObjects = ((VoipGridResponse<UserDestination>) object).getObjects();
+
+            if (userDestinationObjects == null || userDestinationObjects.size() <=0){
+                return;
+            }
+
+            UserDestination userDestination = userDestinationObjects.get(0);
+
+            // Create not available destination.
+            Destination notAvailableDestination = new FixedDestination();
+            notAvailableDestination.setDescription(getString(R.string.not_available));
+
+            // Clear old list and the not available destination.
+            mSpinnerAdapter.clear();
+            mSpinnerAdapter.add(notAvailableDestination);
+
+            // Set current destination.
+            mDestinationId = userDestination.getId();
+
+            Destination activeDestination = userDestination.getActiveDestination();
+
+            List<Destination> destinations = userDestination.getDestinations();
+            int activeIndex = 0;
+
+            // Add all possible destinations to array.
+            for(int i=0, size=destinations.size(); i<size; i++) {
+                Destination destination = destinations.get(i);
+                mSpinnerAdapter.add(destination);
+                if(activeDestination != null && destination.getId().equals(activeDestination.getId())) {
+                    activeIndex = i+1;
+                }
+            }
+            // Update spinner.
+            mSpinnerAdapter.notifyDataSetChanged();
+            mSpinner.setSelection(activeIndex);
+        }
+    }
+
+    @Override
+    public void failure(RetrofitError error) {
+        error.printStackTrace();
+    }
+
+
+    /**
+     * Function to setup the availability spinner.
+     */
+    private void setupSpinner(){
+        mSpinner = (Spinner) findViewById(R.id.menu_availability_spinner);
+        mSpinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
+        mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        mSpinner.setAdapter(mSpinnerAdapter);
+        mSpinner.setOnItemSelectedListener(this);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if(mFirstTimeOnItemSelected) {
+            mFirstTimeOnItemSelected = false;
+        } else {
+            Destination destination = (Destination) parent.getAdapter().getItem(position);
+            SelectedUserDestinationParams params = new SelectedUserDestinationParams();
+            params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
+            params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
+            mApi.setSelectedUserDestination(mDestinationId, params, this);
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    /**
+     * Custom ActionBarDrawerToggle that allows us to update the availability
+     * every time the drawer is opened.
+     */
+    private class CustomActionBarDrawerToggle extends ActionBarDrawerToggle {
+
+        private Callback mActivity;
+
+        public CustomActionBarDrawerToggle(Activity activity, DrawerLayout drawerLayout, Toolbar toolbar, int openDrawerContentDescRes, int closeDrawerContentDescRes) {
+            super(activity, drawerLayout, toolbar, openDrawerContentDescRes, closeDrawerContentDescRes);
+            mActivity = (Callback) activity;
+        }
+
+        @Override
+        public void onDrawerOpened(View drawerView) {
+            super.onDrawerOpened(drawerView);
+            // Force a reload of availability every time the drawer is opened.
+            mApi.getUserDestination(mActivity);
+        }
     }
 }
