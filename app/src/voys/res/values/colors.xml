@@ -17,7 +17,7 @@
 
     <color name="dial_button_digit_color">@color/color_primary</color>
     <color name="dial_button_chars_color">@android:color/secondary_text_light</color>
-    <color name="dial_button_pressed">#CCFFE4B2</color>
+    <color name="dial_button_pressed">#E0FFFF</color>
 
     <color name="dialpad_fab_call_color">#75C25E</color>
     <color name="dialpad_input_background_color">#FFFFFF</color>
