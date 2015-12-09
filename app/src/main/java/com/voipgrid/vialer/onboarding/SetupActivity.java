@@ -265,8 +265,14 @@ public class SetupActivity extends AppCompatActivity implements
             public void run() {
                 enableProgressBar(false);
                 OnboardingFragment fragment = getCurrentFragment();
+
                 if (fragment != null) {
-                    fragment.onError(errorMessage);
+                    if (!mConnectivityHelper.hasNetworkConnection()) {
+                        onAlertDialog(getString(R.string.onboarding_no_internet_title),
+                                getString(R.string.onboarding_no_internet_message));
+                    } else {
+                        fragment.onError(errorMessage);
+                    }
                 }
             }
         });
