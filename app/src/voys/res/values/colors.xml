@@ -39,6 +39,6 @@
     <color name="dialer_warning_text">@color/color_accent</color>
 
     <color name="color_refresh">@color/color_highlight</color>
-    <color name="dialer_button">@color/color_highlight</color>
+    <color name="dialer_button">@color/color_primary</color>
 
 </resources>
