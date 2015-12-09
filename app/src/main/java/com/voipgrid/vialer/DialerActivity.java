@@ -1,16 +1,9 @@
 package com.voipgrid.vialer;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,12 +11,10 @@ import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -37,11 +28,7 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.Storage;
 import com.voipgrid.vialer.t9.ListViewContactsLoader;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -55,7 +42,7 @@ public class DialerActivity extends AppCompatActivity implements
         AdapterView.OnItemClickListener,
         NumberInputEditText.OnInputChangedListener {
 
-    private final static String TAG = DialerActivity.class.getSimpleName();
+    private final static String LOG_TAG = DialerActivity.class.getSimpleName();
 
     private ConnectivityHelper mConnectivityHelper;
 
@@ -150,10 +137,10 @@ public class DialerActivity extends AppCompatActivity implements
                 0
         );
 
-        mContactsAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder(){
+        mContactsAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             /** Binds the Cursor column defined by the specified index to the specified view */
-            public boolean setViewValue(View view, Cursor cursor, int columnIndex){
-                if(view.getId() == R.id.text_view_contact_icon) {
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                if (view.getId() == R.id.text_view_contact_icon) {
                     // The ListViewContactsLoader class stores a contact uri for which
                     // we can retrieve a photo.
                     Uri photoUri = Uri.parse(cursor.getString(columnIndex));
