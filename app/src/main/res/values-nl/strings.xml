@@ -69,6 +69,8 @@
     <string name="start_calling_button">Aan de slag</string>
     <string name="onboarding_login_failed_title">Inloggen mislukt</string>
     <string name="onboarding_login_failed_message">Probeer nogmaals.</string>
+    <string name="onboarding_no_internet_title">Mislukt</string>
+    <string name="onboarding_no_internet_message">Een internet verbinding is noodzakelijk.</string>
     <string name="onboarding_account_configure_failed_title">Configuratie mislukt</string>
     <string name="onboarding_account_configure_invalid_phone_number">Het mobiele telefoonnummer is niet correct.</string>
     <!-- strings empty view call records -->
