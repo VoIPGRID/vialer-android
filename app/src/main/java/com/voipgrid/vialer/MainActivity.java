@@ -22,8 +22,8 @@ import com.google.android.gms.analytics.Tracker;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
+import com.voipgrid.vialer.contacts.ContactsManager;
 import com.voipgrid.vialer.contacts.ContactsPermission;
-import com.voipgrid.vialer.contacts.ContactsSyncTask;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.onboarding.StartupTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -106,7 +106,7 @@ public class MainActivity extends NavigationDrawerActivity implements
             if (allPermissionsGranted) {
                 // ContactSync.
                 Log.d(LOG_TAG, "Starting ContactSync after getting contact permissions");
-                new ContactsSyncTask(this, null).execute();
+                ContactsManager.requestContactSync(this);
             }
         }
     }

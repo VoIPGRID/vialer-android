@@ -1,35 +1,26 @@
 package com.voipgrid.vialer.contacts;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.provider.ContactsContract;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactsSyncTask extends AsyncTask {
+public class ContactsSyncTask {
 
     private static final String LOG_TAG = ContactsSyncTask.class.getSimpleName();
     private Context mContext;
-    private ContactsSyncListener mListener;
 
     /**
      * AsyncTask that adds Data entry in Contacts app with "Call with AppName" action.
      *
      * @param context context used for managing a ContentResolver which queries Contacts.
-     * @param listener Add result listener to act on Contact sync.
      */
-    public ContactsSyncTask(Context context, ContactsSyncListener listener) {
+    public ContactsSyncTask(Context context) {
         mContext = context;
-        if (listener != null) {
-            mListener = listener;
-        }
     }
 
     /**
@@ -79,17 +70,17 @@ public class ContactsSyncTask extends AsyncTask {
         return cursor.getString(cursor.getColumnIndex(columnName));
     }
 
-    @Override
-    public Object doInBackground(Object[] params) {
+    /**
+     * Runs the sync for all contacts.
+     */
+    public void sync() {
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
         // job we can't really ask the user for permission.
-
         if (!ContactsPermission.hasPermission(mContext)) {
             // TODO VIALA-349 Delete sync account.
             Log.d(LOG_TAG, "Missing contact permissions");
-            return null;
+            return;
         }
-
         // Gives you the list of contacts who have phone numbers.
         Cursor cursor = queryAllContacts();
 
@@ -105,7 +96,7 @@ public class ContactsSyncTask extends AsyncTask {
                 continue;
             }
 
-            List<String> phoneNumbers = new ArrayList<String>(phones.getCount());
+            List<String> phoneNumbers = new ArrayList<>(phones.getCount());
             String normalizedPhoneNumber;
 
             while (phones.moveToNext()) {
@@ -126,17 +117,13 @@ public class ContactsSyncTask extends AsyncTask {
 
             }
             phones.close();
+
+            // Found no normalized phone numbers so don't sync the contact.
+            if (phoneNumbers.size() <= 0){
+                continue;
+            }
             ContactsManager.syncContact(mContext, name, phoneNumbers);
         }
         cursor.close();
-        if (mListener != null) {
-            // Return a SyncSuccess callBack if anyone is listening.
-            mListener.onSyncSuccess();
-        }
-        return null;
-    }
-
-    public interface ContactsSyncListener {
-        void onSyncSuccess();
     }
 }

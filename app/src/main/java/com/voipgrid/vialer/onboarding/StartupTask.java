@@ -17,7 +17,7 @@ import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.contacts.ContactsSyncTask;
+import com.voipgrid.vialer.contacts.ContactsManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
 import com.voipgrid.vialer.util.Storage;
@@ -104,15 +104,6 @@ public class StartupTask extends AsyncTask {
 
     @Override
     protected void onPostExecute(Object o) {
-        ContactsSyncTask task = new ContactsSyncTask(mContext, new ContactsSyncTask.ContactsSyncListener() {
-            @Override
-            public void onSyncSuccess() {
-                String message = mContext.getString(R.string.contacts_sync_success_mesage);
-                if(message != null) {
-                    Log.i(TAG, message);
-                }
-            }
-        });
-        task.execute();
+        ContactsManager.requestContactSync(mContext);
     }
 }

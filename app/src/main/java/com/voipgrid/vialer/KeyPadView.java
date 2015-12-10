@@ -17,9 +17,9 @@ import com.voipgrid.vialer.sip.SipConstants;
 /**
  * Created by eltjo on 25/08/15.
  */
-public class KeyPadView extends LinearLayout implements View.OnClickListener {
+public class KeyPadView extends LinearLayout implements View.OnClickListener, View.OnLongClickListener {
 
-    private static final String TAG = KeyPadView.class.getSimpleName();
+    private static final String LOG_TAG = KeyPadView.class.getSimpleName();
 
     private static final int DTMF_TONE_DURATION = 200;
 
@@ -59,6 +59,10 @@ public class KeyPadView extends LinearLayout implements View.OnClickListener {
         for(int i=0, size=view.getChildCount(); i<size; i++) {
             View child = view.getChildAt(i);
             if(child instanceof DialpadButton) {
+                String digit = ((DialpadButton) child).getDigit();
+                if (digit.equals("0")){
+                    child.setOnLongClickListener(this);
+                }
                 child.setOnClickListener(this);
             }
         }
@@ -81,8 +85,22 @@ public class KeyPadView extends LinearLayout implements View.OnClickListener {
         }
     }
 
+    @Override
+    public boolean onLongClick(View view) {
+        if(view instanceof DialpadButton) {
+            DialpadButton button = (DialpadButton) view;
+            String digit = button.getDigit();
+            if (mListener != null) {
+                if (digit.equals("0")) {
+                    mListener.onKeyPadButtonClick(button.getChars(), button.getChars());
+                }
+            }
+        }
+        return true;
+    }
+
     private void broadcast(String key) {
-        Log.d(TAG, "broadcast()");
+        Log.d(LOG_TAG, "broadcast()");
         Intent intent = new Intent(SipConstants.ACTION_BROADCAST_KEY_PAD_INTERACTION);
         intent.putExtra(SipConstants.KEY_PAD_DTMF_TONE, key);
         mBroadcastManager.sendBroadcast(intent);

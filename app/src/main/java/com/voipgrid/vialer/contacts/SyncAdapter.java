@@ -6,10 +6,11 @@ import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.SyncResult;
 import android.os.Bundle;
+import android.util.Log;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
-    private static final String TAG = SyncAdapter.class.getSimpleName();
+    private static final String LOG_TAG = SyncAdapter.class.getSimpleName();
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -17,7 +18,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        // Sync without a success listener.
-        new ContactsSyncTask(getContext(), null).execute();
+        Log.d(LOG_TAG, "STARTED CONTACT SYNC");
+        new ContactsSyncTask(getContext()).sync();
+        Log.d(LOG_TAG, "DONE CONTACT SYNC");
     }
 }

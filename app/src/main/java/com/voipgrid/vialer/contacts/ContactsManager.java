@@ -7,8 +7,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.voipgrid.vialer.R;
@@ -26,16 +26,38 @@ public class ContactsManager {
      *
      * @param context The context used to get the AccountManager, Strings and ContentResolver.
      */
-    private static void checkSyncAccount(Context context){
+    private static Account checkSyncAccount(Context context){
         AccountManager am = AccountManager.get(context);
         Account[] accounts;
         accounts = am.getAccountsByType(context.getString(R.string.account_type));
+        Account account;
         if (accounts == null || accounts.length <= 0) {
             Log.d(LOG_TAG, "Created sync account");
-            Account account = new Account(context.getString(R.string.contacts_app_name), context.getString(R.string.account_type));
+            account = new Account(context.getString(R.string.contacts_app_name), context.getString(R.string.account_type));
             am.addAccountExplicitly(account, "", null);
             ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
+        } else {
+            account = accounts[0];
         }
+        return account;
+    }
+
+    /**
+     * Function to initiate a contact sync. The only function that should be used to initiate
+     * a contact sync.
+     * @param context
+     */
+    public static void requestContactSync(Context context){
+        // Check contacts permission. Do nothing if we don't have it. Since it's a background
+        // job we can't really ask the user for permission.
+        if (!ContactsPermission.hasPermission(context)) {
+            // TODO VIALA-349 Delete sync account.
+            Log.d(LOG_TAG, "Missing contact permissions");
+            return;
+        }
+        Account account = checkSyncAccount(context);
+
+        ContentResolver.requestSync(account, ContactsContract.AUTHORITY, new Bundle());
     }
 
     /**
@@ -53,9 +75,6 @@ public class ContactsManager {
                 displayName,
                 context.getString(R.string.account_type),
                 context.getString(R.string.contacts_app_name)};
-
-        // Make sure SyncAccount requirement is met.
-        checkSyncAccount(context);
 
         // TODO VIALA-340: Duplicate contacts with same name.
         ContentResolver resolver = context.getContentResolver();

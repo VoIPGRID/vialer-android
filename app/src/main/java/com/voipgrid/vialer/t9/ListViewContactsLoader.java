@@ -142,10 +142,15 @@ public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor
         // Then convert that searchNumber to a potential name.
         StringBuilder searchStringBuilder = t9LookupStringBuilder(searchNumber);
 
+        String sortOrder = Data.DISPLAY_NAME_PRIMARY + " ASC";
         // We want to strip the leading zero because we are searching normalized numbers
         // (+XX625874469). The leading zero would lead to 0 matches.
-        if (searchNumber.length() > 0 && searchNumber.charAt(0) == '0'){
-            searchNumber = searchNumber.substring(1);
+        if (searchNumber.length() > 0){
+            // LIMIT 20 because we are t9 searching on the number.
+            sortOrder = sortOrder + " LIMIT 20";
+            if (searchNumber.charAt(0) == '0'){
+                searchNumber = searchNumber.substring(1);
+            }
         }
 
         // Query for all ContactsContract.Data entries with mimetype phone_v2
@@ -159,7 +164,7 @@ public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor
                 },                                                                // PROJECTION
                 getSelectionQueryString(),                                                      // SELECTION
                 getSelectionArguments(searchStringBuilder.toString(), searchNumber), // WHERE args
-                Data.DISPLAY_NAME_PRIMARY + " ASC "                                  // SORT ORDER
+                sortOrder                         // SORT ORDER
         );
         // Dynamically populate a matrix cursor for use in t9 search list presentation
         populateCursorWithCursor(dataCursor);
