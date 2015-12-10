@@ -53,6 +53,7 @@ public class DialerActivity extends AppCompatActivity implements
     private ConnectivityHelper mConnectivityHelper;
 
     private TextView mDialerWarning;
+    private ListView mContactsListView;
 
     private Storage mStorage;
 
@@ -86,6 +87,8 @@ public class DialerActivity extends AppCompatActivity implements
         mPreferences = new Preferences(this);
 
         mDialerWarning = (TextView) findViewById(R.id.dialer_warning);
+        mContactsListView = (ListView) findViewById(R.id.list_view);
+        TextView emptyView = (TextView) findViewById(R.id.message);
 
         // This should be called before setupContactParts.
         setupKeypad();
@@ -115,9 +118,16 @@ public class DialerActivity extends AppCompatActivity implements
                 mNumberInputEditText.setNumber(number);
                 cursor.close();
             }
+            emptyView.setText(getString(R.string.dialer_no_contacts_found_message));
+            mContactsListView.setEmptyView(emptyView);
 
             // This should be called after setupKeyPad.
             setupContactParts(number);
+        } else {
+            // Set the empty view for the contact list to inform the user this functionality will
+            // not work.
+            emptyView.setText(getString(R.string.permission_contact_dialer_list_message));
+            mContactsListView.setEmptyView(emptyView);
         }
     }
 
@@ -203,10 +213,9 @@ public class DialerActivity extends AppCompatActivity implements
         });
 
         // Getting reference to listview
-        ListView listView = (ListView) findViewById(R.id.list_view);
-        listView.setOnScrollListener(this);
-        listView.setOnItemClickListener(this);
-        listView.setAdapter(mContactsAdapter);
+        mContactsListView.setOnScrollListener(this);
+        mContactsListView.setOnItemClickListener(this);
+        mContactsListView.setAdapter(mContactsAdapter);
 
         // Creating an AsyncTask object to retrieve and load listview with contacts
         ListViewContactsLoader listViewContactsLoader = new ListViewContactsLoader(

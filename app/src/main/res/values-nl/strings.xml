@@ -84,6 +84,7 @@
     <string name="dialer_warning_no_connection_message">Deze app heeft een internetverbinding nodig om telefoongesprekken te kunnen starten. Maak verbinding met een mobiele dataverbinding of wifi-netwerk om te bellen via deze app.</string>
     <string name="dialer_warning_a_b_connect_connectivity_message">Internetverbinding is niet snel genoeg om te bellen via VoIP. Bellen in twee stappen is ingeschakeld. Wanneer je iemand belt via de app bellen wij jou eerst op je GSM waarmee we je daarna verbinden met degene die je wilt bellen. Het kan zijn dat je telefonieleverancier voor het opzetten van twee verbindingen dubbele kosten in rekening brengt.</string>
     <string name="dialer_warning_a_b_connect_account_message">Je hebt nog geen VoIP account geconfigureerd voor dit gebruikersaccount. Je kan in de beheeromgeving een VoIP account selecteren welke zal worden gebruikt door de app. Zodra je dit hebt gedaan zal je ook via VoIP kunnen bellen in de app.</string>
+    <string name="dialer_no_contacts_found_message">Geen contacten gevonden</string>
 
     <string name="user_is_partner_error_title">Login mislukt</string>
     <string name="user_is_partner_error_message">Deze gebruiker is niet toegestaan om deze app te gebruiken.</string>
@@ -121,5 +122,5 @@
     <!-- Permission strings -->
     <string name="permission_contact_dialog_title">Contact permissie</string>
     <string name="permission_contact_dialog_message">Permissie is nodig om vanuit de contacten te kunnen bellen</string>
-
+    <string name="permission_contact_dialer_list_message">Kan geen contacten laden, permissie tot contacten is noodzakelijk</string>
 </resources>
