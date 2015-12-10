@@ -24,8 +24,10 @@ import android.widget.TextView;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.contacts.ContactsPermission;
 import com.voipgrid.vialer.contacts.ContactsSyncTask;
+import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -105,24 +107,33 @@ public class DialerActivity extends AppCompatActivity implements
         if (mHasPermission) {
             // Handling this intent is only needed when we have contact permissions.
             String number = null;
-            if((!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype))) || contactUri != null) {
-                /**
-                 * The app added a "Vialer call <number>" to the native contacts app. clicking this
-                 * opens the app with the appname's profile and the data necessary fotr opening the app.
-                 */
-                Cursor cursor = getContentResolver().query(contactUri, new String[] {
-                            ContactsContract.CommonDataKinds.StructuredName.PHONETIC_NAME,
-                            ContactsContract.Data.DATA3 }, null, null, null);
-                cursor.moveToFirst();
-                number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA3));
-                mNumberInputEditText.setNumber(number);
-                cursor.close();
-            }
             emptyView.setText(getString(R.string.dialer_no_contacts_found_message));
             mContactsListView.setEmptyView(emptyView);
 
             // This should be called after setupKeyPad.
             setupContactParts(number);
+
+            /**
+             * The app added a "Vialer call <number>" to the native contacts app. clicking this
+             * opens the app with the appname's profile and the data necessary for opening the app.
+             */
+            if((!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype))) || contactUri != null) {
+                // Redirect user to login.
+                // This can be needed when a user logs out and in the logged out state
+                // presses call with vialer in a contact.
+                if(!mStorage.has(SystemUser.class)) {
+                    startActivity(new Intent(this, SetupActivity.class));
+                    finish();
+                }
+
+                Cursor cursor = getContentResolver().query(contactUri, new String[] {
+                        ContactsContract.CommonDataKinds.StructuredName.PHONETIC_NAME,
+                        ContactsContract.Data.DATA3 }, null, null, null);
+                cursor.moveToFirst();
+                number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA3));
+                mNumberInputEditText.setNumber(number);
+                cursor.close();
+            }
         } else {
             // Set the empty view for the contact list to inform the user this functionality will
             // not work.
@@ -232,8 +243,8 @@ public class DialerActivity extends AppCompatActivity implements
         if (mHasPermission != ContactsPermission.hasPermission(this)){
             // Force a recreate of the Activity to reflect the new permission.
             Intent intent = getIntent();
-            finish();
             startActivity(intent);
+            finish();
         }
 
         // If we don't have permission we need to ask for it.
@@ -278,8 +289,8 @@ public class DialerActivity extends AppCompatActivity implements
 
                 // Reload Activity to reflect new permission.
                 Intent intent = getIntent();
-                finish();
                 startActivity(intent);
+                finish();
             }
         }
     }
