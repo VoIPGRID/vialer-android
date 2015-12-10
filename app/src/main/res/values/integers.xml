@@ -4,4 +4,6 @@
     <integer name="dialpad_column_count">3</integer>
 
     <integer name="dialpad_number_input_max_length">20</integer>
+
+    <integer name="contact_permission_request_code">1</integer>
 </resources>

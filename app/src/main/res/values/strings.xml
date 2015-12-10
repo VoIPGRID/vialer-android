@@ -139,4 +139,8 @@
     <string name="two_step_call_state_connected">Connected</string>
     <string name="two_step_call_state_disconnected">Call ended</string>
 
+    <!-- Permission strings -->
+    <string name="permission_contact_dialog_title">Contact permission</string>
+    <string name="permission_contact_dialog_message">Permission is needed to start calling from contact list</string>
+
 </resources>

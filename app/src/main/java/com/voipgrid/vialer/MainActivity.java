@@ -1,6 +1,7 @@
 package com.voipgrid.vialer;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -20,16 +22,21 @@ import com.google.android.gms.analytics.Tracker;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
+import com.voipgrid.vialer.contacts.ContactsPermission;
+import com.voipgrid.vialer.contacts.ContactsSyncTask;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.onboarding.StartupTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Storage;
 
+
 public class MainActivity extends NavigationDrawerActivity implements
         View.OnClickListener,
         CallRecordFragment.OnFragmentInteractionListener {
 
-    private final static String TAG = MainActivity.class.getSimpleName();
+    private final static String LOG_TAG = MainActivity.class.getSimpleName();
+
+    private boolean mAskForPermission = true;
 
     private ViewPager mViewPager;
 
@@ -71,7 +78,37 @@ public class MainActivity extends NavigationDrawerActivity implements
 
         /* set tabs */
         setupTabs();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!ContactsPermission.hasPermission(this)){
+            // We need to avoid a permission loop.
+            if (mAskForPermission) {
+                mAskForPermission = false;
+                ContactsPermission.askForPermission(this);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == this.getResources().getInteger(R.integer.contact_permission_request_code)) {
+            boolean allPermissionsGranted = true;
+            for (int i = 0; i < permissions.length; i++) {
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    allPermissionsGranted = false;
+                    break;
+                }
+            }
+            if (allPermissionsGranted) {
+                // ContactSync.
+                Log.d(LOG_TAG, "Starting ContactSync after getting contact permissions");
+                new ContactsSyncTask(this, null).execute();
+            }
+        }
     }
 
     /**
@@ -114,8 +151,6 @@ public class MainActivity extends NavigationDrawerActivity implements
 
             }
         });
-
-
     }
 
     private String getScreenName(String text) {
@@ -189,5 +224,4 @@ public class MainActivity extends NavigationDrawerActivity implements
             return 2;
         }
     }
-
 }
