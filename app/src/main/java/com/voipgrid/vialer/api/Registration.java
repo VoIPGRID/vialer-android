@@ -15,11 +15,13 @@ public interface Registration {
 
     @FormUrlEncoded
     @POST("/")
-    void reply(@Field("unique_key") String token, @Field("available") boolean isAvailable, @Field("message_start_time") String messageStartTime, Callback<Object> callback);
+    void reply(@Field("unique_key") String token, @Field("available") boolean isAvailable,
+               @Field("message_start_time") String messageStartTime, Callback<Object> callback);
 
     @FormUrlEncoded
     @POST("/api/unregister-gcm-device/")
-    void unregister(@Field("token") String token, @Field("sip_user_id") String sipId, Callback<Object> callback);
+    void unregister(@Field("token") String token, @Field("sip_user_id") String sipId,
+                    Callback<Object> callback);
 
     @FormUrlEncoded
     @POST("/api/unregister-gcm-device/")

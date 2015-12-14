@@ -9,7 +9,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,8 +45,6 @@ import retrofit.client.Response;
 public class CallRecordFragment extends ListFragment implements
         Callback<VoipGridResponse<CallRecord>>,
         SwipeRefreshLayout.OnRefreshListener {
-
-    private static final String TAG = CallRecordFragment.class.getSimpleName();
 
     private static final String ARG_FILTER = "filter";
 
@@ -89,7 +86,6 @@ public class CallRecordFragment extends ListFragment implements
 
         protected List<CallRecord> doInBackground(Void args[]) {
             CallRecord[] records = mStorage.get(CallRecord[].class);
-            Log.d(TAG, "Loaded callrecords from cache");
             if (records != null) {
                 return Arrays.asList(records);
             } else {
@@ -113,7 +109,6 @@ public class CallRecordFragment extends ListFragment implements
             CallRecord[] records = new CallRecord[mRecords.size()];
             mRecords.toArray(records);
             mStorage.save(records);
-            Log.d(TAG, "Saved callrecords to cache");
             return null;
         }
     }
@@ -262,7 +257,8 @@ public class CallRecordFragment extends ListFragment implements
             mAdapter.setCallRecords(filtered);
             setEmptyView(null, false);
         } else if(mAdapter.getCount() == 0) {
-            /* List is empty, but adapter view may not be. Since this method is only called in success cases, ignore this case.   */
+            /* List is empty, but adapter view may not be. Since this method is only called in
+            success cases, ignore this case.   */
             String emptyText;
             if (mFilter != null && mFilter.equals(FILTER_MISSED_RECORDS)){
                 emptyText = getString(R.string.empty_view_missed_message);
@@ -326,13 +322,16 @@ public class CallRecordFragment extends ListFragment implements
     public void failure(RetrofitError error) {
         String message = getString(R.string.empty_view_default_message);
         Response response = error.getResponse();
-        if(response != null && (response.getStatus() == 401 || response.getStatus() == 403)) { //UNAUTHORIZED
+
+        // Check if authorized.
+        if(response != null && (response.getStatus() == 401 || response.getStatus() == 403)) {
             message = getString(R.string.empty_view_unauthorized_message);
         }
         if (mAdapter.getCount() == 0) {
             setEmptyView(new EmptyView(getActivity(), message), true);
         } else {
-            /* adapter has cached values and we're not about to overwrite them. However, we do want to notify the user. */
+            /* adapter has cached values and we're not about to overwrite them. However,
+            we do want to notify the user. */
             Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();
         }
         mSwipeRefreshLayout.setRefreshing(false);

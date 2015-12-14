@@ -9,11 +9,11 @@ import android.preference.PreferenceManager;
  */
 public class Preferences {
 
-    public static final String PREF_HAS_SIP_PERMISSION = "PREF_HAS_SIP_PERMISSION";
     public static final String PREF_HAS_SIP_ENABLED = "PREF_HAS_SIP_ENABLED";
+    public static final String PREF_HAS_SIP_PERMISSION = "PREF_HAS_SIP_PERMISSION";
 
-    public static final boolean DEFAULT_VALUE_HAS_SIP_PERMISSION = false;
     public static final boolean DEFAULT_VALUE_HAS_SIP_ENABLED = true;
+    public static final boolean DEFAULT_VALUE_HAS_SIP_PERMISSION = false;
 
     private SharedPreferences mPreferences;
 

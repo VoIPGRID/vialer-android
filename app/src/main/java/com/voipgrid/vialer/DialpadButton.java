@@ -14,8 +14,8 @@ import android.widget.TextView;
  */
 public class DialpadButton extends LinearLayout {
 
-    private String mDigit;
     private String mChars;
+    private String mDigit;
     private int mTone;
 
     /**
@@ -50,7 +50,8 @@ public class DialpadButton extends LinearLayout {
      */
     private void init(Context context, AttributeSet attrs) {
         /* populate the parameter values supplied in the layout */
-        TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DialpadButton, 0, 0);
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs, R.styleable.DialpadButton, 0, 0);
         try {
             mDigit = a.getString(R.styleable.DialpadButton_digit);
             mChars = a.getString(R.styleable.DialpadButton_chars);
@@ -62,7 +63,8 @@ public class DialpadButton extends LinearLayout {
 
         /* container layout to fix the button is centered in the GridLayout element */
         LinearLayout container = new LinearLayout(context);
-        container.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        container.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
         container.setGravity(Gravity.CENTER);
         addView(container);
 
@@ -74,7 +76,8 @@ public class DialpadButton extends LinearLayout {
         container.addView(linearLayout);
 
         /* LayoutParams used to center the text within the TextViews*/
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         /* Setup and add the digit TextView */
         TextView digit = new TextView(context);

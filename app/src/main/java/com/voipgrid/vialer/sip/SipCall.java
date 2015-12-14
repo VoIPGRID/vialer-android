@@ -56,7 +56,7 @@ class SipCall extends org.pjsip.pjsua2.Call {
     @Override
     public void onCallState(OnCallStateParam onCallStateParam) {
         try {
-            CallInfo info = getInfo();       /* Check to see if we can get CallInfo with this callback */
+            CallInfo info = getInfo();  // Check to see if we can get CallInfo with this callback
 
             pjsip_inv_state callState = info.getState();
             Log.d(TAG, String.format("onCallState(%s)", callState));
@@ -110,7 +110,8 @@ class SipCall extends org.pjsip.pjsua2.Call {
             boolean mediaAvailable = false;
             for(int i=0; i < media.size(); ++i) {
                 CallMediaInfo cmi = media.get(i);
-                boolean usableStatus = (cmi.getStatus() == pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE ||
+                boolean usableStatus = (cmi.getStatus() ==
+                        pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE ||
                         cmi.getStatus() == pjsua_call_media_status.PJSUA_CALL_MEDIA_REMOTE_HOLD);
                 if (cmi.getType() == pjmedia_type.PJMEDIA_TYPE_AUDIO && usableStatus) {
                     Media m = getMedia(i);

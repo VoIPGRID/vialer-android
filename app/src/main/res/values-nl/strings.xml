@@ -2,12 +2,8 @@
 <resources>
 
     <string name="app_name">Vialer</string>
-    <string name="hello_world">Hallo wereld!</string>
-    <string name="action_settings">Account</string>
     <string name="navigation_drawer_open">Open menu</string>
     <string name="navigation_drawer_close">Sluit menu</string>
-    <string name="tab_recents">Recente gesprekken</string>
-    <string name="tab_contacts">Contacten</string>
     <string name="feature_not_implemented">Feature is nog niet geïmplementeerd</string>
     <string name="title_activity_dialer">Kiezer</string>
     <string name="allowed_dialpad_characters">0123456789*#+</string>

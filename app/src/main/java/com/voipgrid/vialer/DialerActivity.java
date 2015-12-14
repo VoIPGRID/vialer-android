@@ -12,7 +12,6 @@ import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -47,27 +46,19 @@ public class DialerActivity extends AppCompatActivity implements
         AbsListView.OnScrollListener,
         AdapterView.OnItemClickListener {
 
-    private final static String LOG_TAG = DialerActivity.class.getSimpleName();
+    private ListView mContactsListView;
+    private NumberInputEditText mNumberInputEditText;
+    private SimpleCursorAdapter mContactsAdapter = null;
+    private TextView mDialerWarning;
+    private ViewGroup mKeyPadViewContainer;
+
+    private AnalyticsHelper mAnalyticsHelper;
+    private ConnectivityHelper mConnectivityHelper;
+    private Preferences mPreferences;
+    private Storage mStorage;
 
     private boolean mHasPermission;
     private boolean mAskForPermission;
-
-    private ConnectivityHelper mConnectivityHelper;
-
-    private TextView mDialerWarning;
-    private ListView mContactsListView;
-
-    private Storage mStorage;
-
-    private AnalyticsHelper mAnalyticsHelper;
-
-    private NumberInputEditText mNumberInputEditText;
-
-    private ViewGroup mKeyPadViewContainer;
-
-    private SimpleCursorAdapter mContactsAdapter = null;
-    private Preferences mPreferences;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +108,8 @@ public class DialerActivity extends AppCompatActivity implements
              * The app added a "Vialer call <number>" to the native contacts app. clicking this
              * opens the app with the appname's profile and the data necessary for opening the app.
              */
-            if((!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype))) || contactUri != null) {
+            if((!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype)))
+                    || contactUri != null) {
                 // Redirect user to login.
                 // This can be needed when a user logs out and in the logged out state
                 // presses call with vialer in a contact.
@@ -185,7 +177,8 @@ public class DialerActivity extends AppCompatActivity implements
             mNumberInputEditText.setOnInputChangedListener(new NumberInputEditText.OnInputChangedListener() {
                 @Override
                 public void onInputChanged(String phoneNumber) {
-                    new ListViewContactsLoader(getBaseContext(), mContactsAdapter).execute(phoneNumber);
+                    new ListViewContactsLoader(getBaseContext(), mContactsAdapter)
+                            .execute(phoneNumber);
                 }
             });
         }
@@ -282,8 +275,10 @@ public class DialerActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == this.getResources().getInteger(R.integer.contact_permission_request_code)) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        if (requestCode ==
+                this.getResources().getInteger(R.integer.contact_permission_request_code)) {
             boolean allPermissionsGranted = true;
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
@@ -293,7 +288,6 @@ public class DialerActivity extends AppCompatActivity implements
             }
             if (allPermissionsGranted) {
                 // ContactSync.
-                Log.d(LOG_TAG, "Starting ContactSync after getting contact permissions");
                 ContactsManager.requestContactSync(this);
                 // Reload Activity to reflect new permission.
                 Intent intent = getIntent();
@@ -337,8 +331,10 @@ public class DialerActivity extends AppCompatActivity implements
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String name = ((TextView) view.findViewById(R.id.text_view_contact_name)).getText().toString();
-        String number = ((TextView) view.findViewById(R.id.text_view_contact_information)).getText().toString();
+        String name = ((TextView) view.findViewById(
+                R.id.text_view_contact_name)).getText().toString();
+        String number = ((TextView) view.findViewById(
+                R.id.text_view_contact_information)).getText().toString();
         onCallNumber(number, name);
     }
 
@@ -365,7 +361,8 @@ public class DialerActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                         int totalItemCount) {
 
     }
 }

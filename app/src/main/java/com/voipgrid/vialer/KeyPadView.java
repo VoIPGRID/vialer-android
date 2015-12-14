@@ -6,7 +6,6 @@ import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,17 +16,14 @@ import com.voipgrid.vialer.sip.SipConstants;
 /**
  * Created by eltjo on 25/08/15.
  */
-public class KeyPadView extends LinearLayout implements View.OnClickListener, View.OnLongClickListener {
-
-    private static final String LOG_TAG = KeyPadView.class.getSimpleName();
+public class KeyPadView extends LinearLayout
+        implements View.OnClickListener, View.OnLongClickListener {
 
     private static final int DTMF_TONE_DURATION = 200;
 
-    private OnKeyPadClickListener mListener;
-
-    private ToneGenerator mToneGenerator;
-
     private LocalBroadcastManager mBroadcastManager;
+    private OnKeyPadClickListener mListener;
+    private ToneGenerator mToneGenerator;
 
     public KeyPadView(Context context) {
         super(context);
@@ -45,14 +41,16 @@ public class KeyPadView extends LinearLayout implements View.OnClickListener, Vi
     }
 
     private void init() {
-        AudioManager audioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+        AudioManager audioManager = (AudioManager) getContext()
+                .getSystemService(Context.AUDIO_SERVICE);
         mToneGenerator = new ToneGenerator(
                 AudioManager.STREAM_MUSIC,
                 audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
 
         mBroadcastManager = LocalBroadcastManager.getInstance(getContext());
 
-        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) getContext()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_key_pad, this);
         ViewGroup view = (ViewGroup) findViewById(R.id.grid_layout);
 
@@ -100,7 +98,6 @@ public class KeyPadView extends LinearLayout implements View.OnClickListener, Vi
     }
 
     private void broadcast(String key) {
-        Log.d(LOG_TAG, "broadcast()");
         Intent intent = new Intent(SipConstants.ACTION_BROADCAST_KEY_PAD_INTERACTION);
         intent.putExtra(SipConstants.KEY_PAD_DTMF_TONE, key);
         mBroadcastManager.sendBroadcast(intent);

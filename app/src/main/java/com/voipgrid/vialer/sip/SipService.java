@@ -56,7 +56,8 @@ import retrofit.client.OkClient;
  * Goals of this class:
  * - initiate calls
  * - handle call actions (on speaker, mute, show dialpad, put on hold).
- * - Handle call status (CONNECTED, DISCONNECTED, MEDIA_AVAILABLE, MEDIA_UNAVAILABLE, RINGING_IN, RINGING_OUT).
+ * - Handle call status (CONNECTED, DISCONNECTED, MEDIA_AVAILABLE, MEDIA_UNAVAILABLE, RINGING_IN,
+ *   RINGING_OUT).
  */
 public class SipService extends Service implements
         AccountStatus,
@@ -246,12 +247,14 @@ public class SipService extends Service implements
     }
 
     private void setupCallInteractionReceiver() {
-        IntentFilter intentFilter = new IntentFilter(SipConstants.ACTION_BROADCAST_CALL_INTERACTION);
+        IntentFilter intentFilter = new IntentFilter(
+                SipConstants.ACTION_BROADCAST_CALL_INTERACTION);
         mBroadcastManager.registerReceiver(mCallInteractionReceiver, intentFilter);
     }
 
     private void setupKeyPadInteractionReceiver() {
-        IntentFilter intentFilter = new IntentFilter(SipConstants.ACTION_BROADCAST_KEY_PAD_INTERACTION);
+        IntentFilter intentFilter = new IntentFilter(
+                SipConstants.ACTION_BROADCAST_KEY_PAD_INTERACTION);
         mBroadcastManager.registerReceiver(mKeyPadInteractionReceiver, intentFilter);
     }
 

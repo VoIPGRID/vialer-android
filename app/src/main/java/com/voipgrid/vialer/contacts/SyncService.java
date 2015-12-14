@@ -6,7 +6,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 /**
- * Created by karsten on 28/08/15.
+ * Service for syncing contacts.
  */
 public class SyncService extends Service {
 

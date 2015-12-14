@@ -13,7 +13,6 @@ public class Storage<T> {
 
     private SharedPreferences mPreferences;
 
-
     public Storage(Context context) {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }

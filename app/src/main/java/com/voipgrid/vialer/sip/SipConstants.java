@@ -16,17 +16,20 @@ public interface SipConstants {
     String ACTION_VIALER_INCOMING = "com.voipgrid.vialer.VIALER_INCOMING";
 
     /**
-     * ACTION parameter for explicit Intents to communicate Service information with a view through Broadcasts.
+     * ACTION parameter for explicit Intents to communicate Service information with a view through
+     * Broadcasts.
      */
     String ACTION_BROADCAST_CALL_STATUS = "com.voipgrid.vialer.VIALER_CALL_STATUS";
 
     /**
-     * CallStatus interface messages for communication with activity when Media for a call becomes available.
+     * CallStatus interface messages for communication with activity when Media for a call becomes
+     * available.
      */
     String CALL_MEDIA_AVAILABLE_MESSAGE   = "MEDIA_AVAILABLE";
 
     /**
-     * CallStatus interface messages for communication with activity when Media for a call becomes unavailable.
+     * CallStatus interface messages for communication with activity when Media for a call becomes
+     * unavailable.
      */
     String CALL_MEDIA_UNAVAILABLE_MESSAGE = "MEDIA_UNAVAILABLE";
 
@@ -61,22 +64,26 @@ public interface SipConstants {
     String CALL_STATUS_ACTION = "service_status";
 
     /**
-     * CallInteraction broadcast type for communicating a "hang-up" to the SIP service through Broadcasts.
+     * CallInteraction broadcast type for communicating a "hang-up" to the SIP service through
+     * Broadcasts.
      */
     String CALL_HANG_UP_ACTION = "HANG_UP";
 
     /**
-     * CallInteraction broadcast type for communicating a "Mute microphone" to the SIP service through Broadcasts.
+     * CallInteraction broadcast type for communicating a "Mute microphone" to the SIP service
+     * through Broadcasts.
      */
     String CALL_UPDATE_MICROPHONE_VOLUME_ACTION = "MUTE_MICROPHONE";
 
     /**
-     * CallInteraction broadcast type for communicating a "Put on hold" to the SIP service through Broadcasts.
+     * CallInteraction broadcast type for communicating a "Put on hold" to the SIP service through
+     * Broadcasts.
      */
     String CALL_PUT_ON_HOLD_ACTION = "PUT_ON_HOLD";
 
     /**
-     * CallInteraction broadcast type for communicating a "Transfer" to the SIP service through Broadcasts.
+     * CallInteraction broadcast type for communicating a "Transfer" to the SIP service through
+     * Broadcasts.
      */
     String CALL_XFER_ACTION = "XFER";
 
@@ -91,27 +98,32 @@ public interface SipConstants {
     String CALL_STATUS_KEY = "call_status";
 
     /**
-     * CallInteraction broadcast type for communicating a "pick-up" to the SIP service through Broadcasts.
+     * CallInteraction broadcast type for communicating a "pick-up" to the SIP service through
+     * Broadcasts.
      */
     String CALL_PICK_UP_ACTION = "PICK_UP";
 
     /**
-     * CallInteraction broadcast type for communicating a "decline" to the SIP service through Broadcasts.
+     * CallInteraction broadcast type for communicating a "decline" to the SIP service through
+     * Broadcasts.
      */
     String CALL_DECLINE_ACTION = "DECLINE";
 
     /**
-     * CallInteraction broadcast type for communicating a "UNHOLD" to the SIP service through Broadcasts.
+     * CallInteraction broadcast type for communicating a "UNHOLD" to the SIP service through
+     * Broadcasts.
      */
     String CALL_UNHOLD_ACTION = "UNHOLD_CALL";
 
     /**
-     * CallInteraction broadcast type for communicating amn optional "RINGBACK" to the SIP service through Broadcasts.
+     * CallInteraction broadcast type for communicating amn optional "RINGBACK" to the SIP service
+     * through Broadcasts.
      */
     String CALL_START_RINGBACK_MESSAGE = "START_RINGBACK";
 
     /**
-     * CallInteraction broadcast type for communicating amn optional "RINGBACK" to the SIP service through Broadcasts.
+     * CallInteraction broadcast type for communicating amn optional "RINGBACK" to the SIP service
+     * through Broadcasts.
      */
     String CALL_STOP_RINGBACK_MESSAGE = "STOP_RINGBACK";
 

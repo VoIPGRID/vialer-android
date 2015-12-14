@@ -13,9 +13,11 @@ public class CallingCode {
         if (mobileCC == null) {
             String systemCC = null;
 
-            final TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            final TelephonyManager manager = (TelephonyManager) context.getSystemService(
+                    Context.TELEPHONY_SERVICE);
             final String countryIso = manager.getSimCountryIso().toUpperCase();
-            final String[] countryCodes = context.getResources().getStringArray(R.array.country_codes);
+            final String[] countryCodes = context.getResources().getStringArray(
+                    R.array.country_codes);
 
             for (int i = 0; i < countryCodes.length; i++) {
                 String[] cc = countryCodes[i].split(",");

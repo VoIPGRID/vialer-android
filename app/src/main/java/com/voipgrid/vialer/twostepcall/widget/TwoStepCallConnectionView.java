@@ -13,6 +13,7 @@ import com.voipgrid.vialer.R;
 public class TwoStepCallConnectionView extends RelativeLayout {
 
     private TextView mMessage;
+
     private TwoStepCallProgressView mProgress;
 
     public TwoStepCallConnectionView(Context context, AttributeSet attrs) {

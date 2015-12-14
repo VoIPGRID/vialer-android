@@ -35,7 +35,6 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
 import com.voipgrid.vialer.util.Storage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit.Callback;
@@ -51,21 +50,18 @@ public abstract class NavigationDrawerActivity
         implements Callback, AdapterView.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
 
-    private Toolbar mToolbar;
-    private Spinner mSpinner;
     private ArrayAdapter<Destination> mSpinnerAdapter;
-
     private DrawerLayout mDrawerLayout;
-    private ConnectivityHelper mConnectivityHelper;
+    private Spinner mSpinner;
+    private Toolbar mToolbar;
 
+    private Api mApi;
+    private ConnectivityHelper mConnectivityHelper;
     private Storage mStorage;
     private SystemUser mSystemUser;
-    private Api mApi;
+
 
     private String mDestinationId;
-
-    private List<Destination> destinationSpinnerArray = new ArrayList();
-
     private boolean mFirstTimeOnItemSelected = true;
 
     @Override
@@ -104,7 +100,8 @@ public abstract class NavigationDrawerActivity
     protected void setActionBar(@IdRes int resId) {
         mToolbar = (Toolbar) findViewById(resId);
         if(mToolbar == null) {
-            throw new RuntimeException("NavigationDrawerActivity must have a valid resource ID to a Toolbar");
+            throw new RuntimeException(
+                    "NavigationDrawerActivity must have a valid resource ID to a Toolbar");
         }
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle(getTitle());
@@ -119,10 +116,12 @@ public abstract class NavigationDrawerActivity
     protected void setNavigationDrawer(@IdRes int resId) {
         mDrawerLayout = (DrawerLayout) findViewById(resId);
         if(mDrawerLayout == null) {
-            throw new RuntimeException("NavigationDrawerActivity must have a valid resource ID to a DrawerLayout");
+            throw new RuntimeException(
+                    "NavigationDrawerActivity must have a valid resource ID to a DrawerLayout");
         }
 
-        ((NavigationView) mDrawerLayout.findViewById(R.id.navigation_view)).setNavigationItemSelectedListener(this);
+        ((NavigationView) mDrawerLayout.findViewById(R.id.navigation_view))
+                .setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle drawerToggle = new CustomActionBarDrawerToggle(
                 this,  mDrawerLayout, mToolbar,
@@ -185,11 +184,16 @@ public abstract class NavigationDrawerActivity
     public boolean onNavigationItemSelected(MenuItem menuItem) {
         int itemId = menuItem.getItemId();
         switch (itemId) {
-            case R.id.navigation_item_statistics : startWebActivity(getString(R.string.statistics_menu_item_title), getString(R.string.web_statistics)); break;
-            case R.id.navigation_item_dial_plan : startWebActivity(getString(R.string.dial_plan_menu_item_title), getString(R.string.web_dial_plan)); break;
-            case R.id.navigation_item_info : startWebActivity(getString(R.string.info_menu_item_title), getString(R.string.url_app_info)); break;
-            case R.id.navigation_item_settings : startActivity(new Intent(this, AccountActivity.class)); break;
-            case R.id.navigation_item_logout : logout(); break;
+            case R.id.navigation_item_statistics :
+                startWebActivity(getString(R.string.statistics_menu_item_title), getString(R.string.web_statistics)); break;
+            case R.id.navigation_item_dial_plan :
+                startWebActivity(getString(R.string.dial_plan_menu_item_title), getString(R.string.web_dial_plan)); break;
+            case R.id.navigation_item_info :
+                startWebActivity(getString(R.string.info_menu_item_title), getString(R.string.url_app_info)); break;
+            case R.id.navigation_item_settings :
+                startActivity(new Intent(this, AccountActivity.class)); break;
+            case R.id.navigation_item_logout :
+                logout(); break;
         }
         return false;
     }
@@ -201,7 +205,11 @@ public abstract class NavigationDrawerActivity
         /* Delete our account information */
         new Storage(this).clear();
         /* Mark ourselves as unregistered */
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Middleware.Constants.REGISTRATION_STATUS, Middleware.Constants.STATUS_UNREGISTERED).commit();
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putInt(Middleware.Constants.REGISTRATION_STATUS,
+                        Middleware.Constants.STATUS_UNREGISTERED)
+                .commit();
         /* Start a new session */
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -227,7 +235,8 @@ public abstract class NavigationDrawerActivity
     public void success(Object object, Response response) {
         if(object instanceof VoipGridResponse) {
 
-            List<UserDestination> userDestinationObjects = ((VoipGridResponse<UserDestination>) object).getObjects();
+            List<UserDestination> userDestinationObjects =
+                    ((VoipGridResponse<UserDestination>) object).getObjects();
 
             if (userDestinationObjects == null || userDestinationObjects.size() <=0){
                 return;
@@ -255,7 +264,8 @@ public abstract class NavigationDrawerActivity
             for(int i=0, size=destinations.size(); i<size; i++) {
                 Destination destination = destinations.get(i);
                 mSpinnerAdapter.add(destination);
-                if(activeDestination != null && destination.getId().equals(activeDestination.getId())) {
+                if(activeDestination != null &&
+                        destination.getId().equals(activeDestination.getId())) {
                     activeIndex = i+1;
                 }
             }
@@ -290,8 +300,10 @@ public abstract class NavigationDrawerActivity
         } else {
             Destination destination = (Destination) parent.getAdapter().getItem(position);
             SelectedUserDestinationParams params = new SelectedUserDestinationParams();
-            params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
-            params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
+            params.fixedDestination = destination instanceof FixedDestination ?
+                    destination.getId() : null;
+            params.phoneAccount = destination instanceof PhoneAccount ?
+                    destination.getId() : null;
             mApi.setSelectedUserDestination(mDestinationId, params, this);
         }
     }
@@ -309,8 +321,11 @@ public abstract class NavigationDrawerActivity
 
         private Callback mActivity;
 
-        public CustomActionBarDrawerToggle(Activity activity, DrawerLayout drawerLayout, Toolbar toolbar, int openDrawerContentDescRes, int closeDrawerContentDescRes) {
-            super(activity, drawerLayout, toolbar, openDrawerContentDescRes, closeDrawerContentDescRes);
+        public CustomActionBarDrawerToggle(Activity activity, DrawerLayout drawerLayout,
+                                           Toolbar toolbar, int openDrawerContentDescRes,
+                                           int closeDrawerContentDescRes) {
+            super(activity, drawerLayout, toolbar, openDrawerContentDescRes,
+                    closeDrawerContentDescRes);
             mActivity = (Callback) activity;
         }
 

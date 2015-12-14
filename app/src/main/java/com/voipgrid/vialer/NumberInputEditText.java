@@ -19,9 +19,7 @@ public class NumberInputEditText extends RelativeLayout implements
         TextWatcher {
 
     private EditText mEditText;
-
     private ImageButton mRemoveButton;
-
     private OnInputChangedListener mListener;
 
     public NumberInputEditText(Context context) {
@@ -40,7 +38,8 @@ public class NumberInputEditText extends RelativeLayout implements
     }
 
     private void init() {
-        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) getContext()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_number_input, this);
 
         /* find the number input field and add a TextChangedListener to handle text changes */

@@ -19,7 +19,8 @@ public class ConnectivityHelper {
      * @param connectivityManager
      * @param telephonyManager
      */
-    public ConnectivityHelper(ConnectivityManager connectivityManager, TelephonyManager telephonyManager) {
+    public ConnectivityHelper(ConnectivityManager connectivityManager,
+                              TelephonyManager telephonyManager) {
         mConnectivityManager = connectivityManager;
         mTelephonyManager = telephonyManager;
     }
@@ -49,8 +50,10 @@ public class ConnectivityHelper {
     }
 
     public static ConnectivityHelper get(Context context) {
-        ConnectivityManager c = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        TelephonyManager    t = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        ConnectivityManager c = (ConnectivityManager) context.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        TelephonyManager t = (TelephonyManager) context.getSystemService(
+                Context.TELEPHONY_SERVICE);
         return new ConnectivityHelper(c,t);
     }
 }

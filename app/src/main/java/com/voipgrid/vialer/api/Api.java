@@ -47,7 +47,6 @@ public interface Api {
     @GET("/api/phoneaccount/basic/phoneaccount/{account}/")
     PhoneAccount phoneAccount(@Path("account") String accountId);
 
-    //@PUT("/api/permission/systemuser/profile/")
     @PUT("/api/permission/mobile_number/")
     void mobileNumber(@Body MobileNumber mobileNumber, Callback<MobileNumber> callback);
 
@@ -55,11 +54,15 @@ public interface Api {
     void resetPassword(@Body PasswordResetParams params, Callback<Response> callback);
 
     @GET("/api/cdr/record/")
-    void getRecentCalls(@Query("limit") int limit, @Query("offset") int offset, @Query("call_date__gt") String date, Callback<VoipGridResponse<CallRecord>> callback);
+    void getRecentCalls(@Query("limit") int limit, @Query("offset") int offset,
+                        @Query("call_date__gt") String date,
+                        Callback<VoipGridResponse<CallRecord>> callback);
 
     @GET("/api/userdestination")
     void getUserDestination(Callback<VoipGridResponse<UserDestination>> callback);
 
     @PUT("/api/selecteduserdestination/{id}/")
-    void setSelectedUserDestination(@Path("id") String id, @Body SelectedUserDestinationParams params, Callback<Response> callback);
+    void setSelectedUserDestination(@Path("id") String id,
+                                    @Body SelectedUserDestinationParams params,
+                                    Callback<Response> callback);
 }

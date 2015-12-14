@@ -6,7 +6,6 @@ import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.squareup.okhttp.OkHttpClient;
 import com.voipgrid.vialer.Preferences;
@@ -30,7 +29,6 @@ import retrofit.client.OkClient;
  */
 public class StartupTask extends AsyncTask {
 
-    private static final String TAG = StartupTask.class.getSimpleName();
     private final ConnectivityHelper mConnectivityHelper;
     private Preferences mPreferences;
 
@@ -97,7 +95,6 @@ public class StartupTask extends AsyncTask {
             }
         } catch (RetrofitError e) {
             // Setup can fail. No need to handle error. Next startup the app will try again.
-            Log.i(TAG, "Error: " + e.getMessage() + " on " + e.getUrl());
         }
         return null;
     }

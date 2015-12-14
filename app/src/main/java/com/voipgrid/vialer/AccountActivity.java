@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,17 +31,17 @@ public class AccountActivity extends AppCompatActivity implements
         Switch.OnCheckedChangeListener,
         Callback {
 
-    public static final String LOG_TAG = AccountActivity.class.getSimpleName();
-
-    private boolean mEditMode = false;
-    private Storage mStorage;
-    private SystemUser mSystemUser;
-    private PhoneAccount mPhoneAccount;
-    private Api mApi;
-    private ConnectivityHelper mConnectivityHelper;
     private CompoundButton mSwitch;
     private EditText mSipIdEditText;
+
+    private Api mApi;
+    private ConnectivityHelper mConnectivityHelper;
+    private PhoneAccount mPhoneAccount;
     private Preferences mPreferences;
+    private Storage mStorage;
+    private SystemUser mSystemUser;
+
+    private boolean mEditMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +139,8 @@ public class AccountActivity extends AppCompatActivity implements
     private void save() {
         findViewById(R.id.container).setFocusableInTouchMode(true);
 
-        String number = ((EditText) findViewById(R.id.account_mobile_number_edit_text)).getText().toString();
+        String number = ((EditText) findViewById(
+                R.id.account_mobile_number_edit_text)).getText().toString();
 
         mApi.mobileNumber(new MobileNumber(number), this);
 
@@ -183,7 +183,7 @@ public class AccountActivity extends AppCompatActivity implements
                 // Blocking for now, quickfix for beta testers.
                 Middleware.unregister(this);
             } catch (IOException exception) {
-                Log.e(LOG_TAG, "Unregister failed", exception);
+
             }
         } else {
             // Register. Fix this later in SIP vialer version.

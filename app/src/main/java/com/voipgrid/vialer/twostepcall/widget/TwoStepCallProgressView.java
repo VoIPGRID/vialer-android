@@ -113,7 +113,8 @@ public class TwoStepCallProgressView extends View {
                 Bitmap bitmap = mState == STATE_SUCCESS ? mBitmapSuccess : mBitmapFailed;
                 int height = bitmap.getHeight();
                 int width = bitmap.getWidth();
-                canvas.drawBitmap(bitmap, mPosition - width / 2, (mRadius + mStep * i) - mRadius - height / 2, null);
+                canvas.drawBitmap(bitmap, mPosition - width / 2,
+                        (mRadius + mStep * i) - mRadius - height / 2, null);
             } else {
                 canvas.drawCircle(mPosition,
                         (mRadius + mStep * i) - mRadius,

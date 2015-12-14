@@ -18,16 +18,12 @@ import com.voipgrid.vialer.TwoStepCallActivity;
  */
 public class DialHelper {
 
-    private final static String TAG = DialHelper.class.getSimpleName();
-    private final Preferences mPreferences;
-
     private Context mContext;
 
-    private Storage mStorage;
-
-    private ConnectivityHelper mConnectivityHelper;
-
     private AnalyticsHelper mAnalyticsHelper;
+    private ConnectivityHelper mConnectivityHelper;
+    private final Preferences mPreferences;
+    private Storage mStorage;
 
     public DialHelper(Context context, Storage storage,
             ConnectivityHelper connectivityHelper, AnalyticsHelper analyticsHelper ) {

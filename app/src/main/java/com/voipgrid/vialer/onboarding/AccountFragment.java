@@ -43,7 +43,8 @@ public class AccountFragment extends OnboardingFragment implements
      * @param outgoingNumberString Parameter 2.
      * @return A new instance of fragment AccountFragment.
      */
-    public static AccountFragment newInstance(String mobileNumberString, String outgoingNumberString) {
+    public static AccountFragment newInstance(String mobileNumberString,
+                                              String outgoingNumberString) {
         AccountFragment fragment = new AccountFragment();
         Bundle args = new Bundle();
         args.putString(ARG_MOBILE, mobileNumberString);
@@ -75,7 +76,8 @@ public class AccountFragment extends OnboardingFragment implements
 
             mOutgoingEdittext = (EditText) view.findViewById(R.id.outgoingNumberTextDialog);
             String outGoingNumber = arguments.getString(ARG_OUTGOING);
-            /* NB: sometimes the outgoing number is supressed (anonymous), so we capture that here */
+            /* NB: sometimes the outgoing number is supressed (anonymous),
+            so we capture that here */
             if (outGoingNumber.equals(SUPRESSED)) {
                 outGoingNumber = getString(R.string.supressed_number);
             }

@@ -9,7 +9,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.util.Log;
 
 import com.voipgrid.vialer.R;
 
@@ -17,9 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * Class for contact related operations.
+ */
 public class ContactsManager {
-
-    private static final String LOG_TAG = ContactsManager.class.getSimpleName();
 
     /**
      * Check if their is a sync account present. If not create one.
@@ -32,8 +32,8 @@ public class ContactsManager {
         accounts = am.getAccountsByType(context.getString(R.string.account_type));
         Account account;
         if (accounts == null || accounts.length <= 0) {
-            Log.d(LOG_TAG, "Created sync account");
-            account = new Account(context.getString(R.string.contacts_app_name), context.getString(R.string.account_type));
+            account = new Account(context.getString(R.string.contacts_app_name),
+                    context.getString(R.string.account_type));
             am.addAccountExplicitly(account, "", null);
             ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
         } else {
@@ -45,6 +45,7 @@ public class ContactsManager {
     /**
      * Function to initiate a contact sync. The only function that should be used to initiate
      * a contact sync.
+     *
      * @param context
      */
     public static void requestContactSync(Context context){
@@ -52,7 +53,6 @@ public class ContactsManager {
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(context)) {
             // TODO VIALA-349 Delete sync account.
-            Log.d(LOG_TAG, "Missing contact permissions");
             return;
         }
         Account account = checkSyncAccount(context);
@@ -78,7 +78,8 @@ public class ContactsManager {
 
         // TODO VIALA-340: Duplicate contacts with same name.
         ContentResolver resolver = context.getContentResolver();
-        Cursor sameName = resolver.query(ContactsContract.RawContacts.CONTENT_URI, null, where, whereArg, null);
+        Cursor sameName = resolver.query(ContactsContract.RawContacts.CONTENT_URI, null, where,
+                whereArg, null);
 
         if (sameName != null) {
             // Prevent duplicate entries in RawContactsArray.
@@ -88,7 +89,8 @@ public class ContactsManager {
                 addAppContact(context, displayName, phoneNumbers);
             } else {
                 sameName.moveToFirst();
-                String contactId = sameName.getString(sameName.getColumnIndex(ContactsContract.Contacts._ID));
+                String contactId = sameName.getString(sameName.getColumnIndex(
+                        ContactsContract.Contacts._ID));
                 sameName.close();
                 // Does exist, take first contact and update it.
                 // TODO VIALA-340: Duplicate contacts with same name.
@@ -107,23 +109,32 @@ public class ContactsManager {
     private static void addAppContact(Context context, String displayName, List<String> phoneNumbers) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         // Insert RawContact to which is root for DATA entries
-        ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(ContactsContract.RawContacts.CONTENT_URI, true))
-                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, context.getString(R.string.contacts_app_name))
-                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, context.getString(R.string.account_type))
+        ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(
+                ContactsContract.RawContacts.CONTENT_URI, true))
+                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME,
+                        context.getString(R.string.contacts_app_name))
+                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE,
+                        context.getString(R.string.account_type))
                 .build());
 
         // Add Setting to manage and edit contact data
-        ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(ContactsContract.Settings.CONTENT_URI, true))
-                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, context.getString(R.string.contacts_app_name))
-                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, context.getString(R.string.account_type))
+        ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(
+                ContactsContract.Settings.CONTENT_URI, true))
+                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME,
+                        context.getString(R.string.contacts_app_name))
+                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE,
+                        context.getString(R.string.account_type))
                 .withValue(ContactsContract.Settings.UNGROUPED_VISIBLE, 0)
                 .build());
 
         // Add a name DATA item for the contact
-        ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true))
+        ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(
+                ContactsContract.Data.CONTENT_URI, true))
                 .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, displayName)
+                .withValue(ContactsContract.Data.MIMETYPE,
+                        ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
+                        displayName)
                 .build());
 
         addAppContactActionInsertsToOps(context, ops, phoneNumbers);
@@ -164,10 +175,12 @@ public class ContactsManager {
         };
 
         // Get current app contact rows with mimetype.
-        Cursor current = resolver.query(ContactsContract.Data.CONTENT_URI, projection, selection, selectionArgs, null);
+        Cursor current = resolver.query(ContactsContract.Data.CONTENT_URI, projection, selection,
+                selectionArgs, null);
         while(current.moveToNext()){
             // Add all DATA3 (Normalized phone numbers) entries to currentPhoneNumbers.
-            currentPhoneNumbers.add(current.getString(current.getColumnIndex(ContactsContract.Data.DATA3)));
+            currentPhoneNumbers.add(current.getString(current.getColumnIndex(
+                    ContactsContract.Data.DATA3)));
         }
         current.close();
 
@@ -206,7 +219,9 @@ public class ContactsManager {
      * @param ops ArrayList with current operations (including a new contact).
      * @param phoneNumbers List of phone numbers to add.
      */
-    private static void addAppContactActionInsertsToOps(Context context, ArrayList<ContentProviderOperation> ops, List<String> phoneNumbers){
+    private static void addAppContactActionInsertsToOps(Context context,
+                                                        ArrayList<ContentProviderOperation> ops,
+                                                        List<String> phoneNumbers){
         addAppContactActionInsertsToOps(context, ops, null, phoneNumbers);
     }
 
@@ -218,7 +233,10 @@ public class ContactsManager {
      * @param contactId Long with app contact id or null for freshly created contact in ops.
      * @param phoneNumbers List with phone numbers to add.
      */
-    private static void addAppContactActionInsertsToOps(Context context, ArrayList<ContentProviderOperation> ops, Long contactId,  List<String> phoneNumbers) {
+    private static void addAppContactActionInsertsToOps(Context context,
+                                                        ArrayList<ContentProviderOperation> ops,
+                                                        Long contactId,
+                                                        List<String> phoneNumbers) {
         // Initialization.
         String contactActionString;
         String phoneNumber;
@@ -233,7 +251,8 @@ public class ContactsManager {
                     appName,
                     phoneNumber);
             // Create builder.
-            ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true));
+            ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
+                    addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true));
 
             if (contactId == null) {
                 // No contact id so add it with a back reference to the app contact that will be
@@ -244,7 +263,8 @@ public class ContactsManager {
                 builder.withValue(ContactsContract.Data.RAW_CONTACT_ID, contactId);
             }
 
-            ContentProviderOperation op = builder.withValue(ContactsContract.Data.MIMETYPE, mimeType)
+            ContentProviderOperation op = builder.withValue(ContactsContract.Data.MIMETYPE,
+                    mimeType)
                     .withValue(ContactsContract.Data.DATA2, contactActionString)   // DATA summary
                     .withValue(ContactsContract.Data.DATA3, phoneNumber)   // DATA desc
                     .build();
@@ -261,7 +281,10 @@ public class ContactsManager {
      * @param contactId String with the app contact id.
      * @param currentPhoneNumbers List of phone numbers to delete.
      */
-    private static void addAppContactActionDeletesToOps(Context context, ArrayList<ContentProviderOperation> ops, String contactId, List<String> currentPhoneNumbers) {
+    private static void addAppContactActionDeletesToOps(Context context,
+                                                        ArrayList<ContentProviderOperation> ops,
+                                                        String contactId,
+                                                        List<String> currentPhoneNumbers) {
         String mimetype = context.getString(R.string.profile_mimetype);
         String selection = ContactsContract.Data.RAW_CONTACT_ID + " = ? AND "
                 + ContactsContract.Data.MIMETYPE + " = ? AND "
@@ -275,7 +298,8 @@ public class ContactsManager {
                     mimetype,
                     currentPhoneNumbers.get(i),
             };
-            ops.add(ContentProviderOperation.newDelete(addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true))
+            ops.add(ContentProviderOperation.newDelete(addCallerIsSyncAdapterParameter(
+                    ContactsContract.Data.CONTENT_URI, true))
                     .withSelection(selection, selectionArgs)
                     .build());
         }
