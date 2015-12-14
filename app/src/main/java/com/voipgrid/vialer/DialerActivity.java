@@ -25,8 +25,8 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.contacts.ContactsManager;
 import com.voipgrid.vialer.contacts.ContactsPermission;
-import com.voipgrid.vialer.contacts.ContactsSyncTask;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
@@ -111,7 +111,7 @@ public class DialerActivity extends AppCompatActivity implements
             mContactsListView.setEmptyView(emptyView);
 
             // This should be called after setupKeyPad.
-            setupContactParts(number);
+            setupContactParts();
 
             /**
              * The app added a "Vialer call <number>" to the native contacts app. clicking this
@@ -165,21 +165,30 @@ public class DialerActivity extends AppCompatActivity implements
     /**
      * Setup the ContactsList, filter the list on the given number and add a onInputChanged
      * listener for the T9 contact search.
-     * @param number
      */
-    private void setupContactParts(String number) {
+    private void setupContactParts() {
         // Setup the list view.
         setupContactsListView();
-        // Filter the contact list on number.
-        mContactsAdapter.getFilter().filter(number);
 
-        // Replace the empty listener set in setupKeypad with the T9 search function.
-        mNumberInputEditText.setOnInputChangedListener(new NumberInputEditText.OnInputChangedListener() {
-            @Override
-            public void onInputChanged(String phoneNumber) {
-                new ListViewContactsLoader(getBaseContext(), mContactsAdapter).execute(phoneNumber);
-            }
-        });
+        Cursor cursor = this.getContentResolver()
+                .query(
+                    ContactsContract.Contacts.CONTENT_URI,
+                    null,
+                    ContactsContract.Data.HAS_PHONE_NUMBER + " = 1",
+                    null,
+                    null
+                );
+
+        // Due to performance we only support <= 750 contacts for T9 search.
+        if (cursor == null || cursor.getCount() <= 750){
+            // Replace the empty listener set in setupKeypad with the T9 search function.
+            mNumberInputEditText.setOnInputChangedListener(new NumberInputEditText.OnInputChangedListener() {
+                @Override
+                public void onInputChanged(String phoneNumber) {
+                    new ListViewContactsLoader(getBaseContext(), mContactsAdapter).execute(phoneNumber);
+                }
+            });
+        }
     }
 
     private void setupContactsListView() {
@@ -285,8 +294,7 @@ public class DialerActivity extends AppCompatActivity implements
             if (allPermissionsGranted) {
                 // ContactSync.
                 Log.d(LOG_TAG, "Starting ContactSync after getting contact permissions");
-                new ContactsSyncTask(this, null).execute();
-
+                ContactsManager.requestContactSync(this);
                 // Reload Activity to reflect new permission.
                 Intent intent = getIntent();
                 startActivity(intent);

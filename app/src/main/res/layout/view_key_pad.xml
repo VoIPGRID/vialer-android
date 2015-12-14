@@ -74,6 +74,7 @@
     <com.voipgrid.vialer.DialpadButton
         android:id="@+id/button_0"
         app:digit="0"
+        app:chars="+"
         style="@style/DialpadButton"/>
 
     <com.voipgrid.vialer.DialpadButton

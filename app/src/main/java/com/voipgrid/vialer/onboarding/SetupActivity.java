@@ -11,7 +11,6 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -25,7 +24,6 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.contacts.ContactsSyncTask;
 import com.voipgrid.vialer.models.PasswordResetParams;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Storage;
@@ -158,22 +156,6 @@ public class SetupActivity extends AppCompatActivity implements
         systemUser.setMobileNumber(mobileNumber);
         systemUser.setOutgoingCli(outgoingNumber);
         mStorage.save(systemUser);
-
-        ContactsSyncTask task = new ContactsSyncTask(this, new ContactsSyncTask.ContactsSyncListener() {
-            @Override
-            public void onSyncSuccess() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String message = getString(R.string.contacts_sync_success_mesage);
-                        if(message != null) {
-                            Log.i(TAG, message);
-                        }
-                    }
-                });
-            }
-        });
-        task.execute();
 
         String phoneAccountId = systemUser.getPhoneAccountId();
         if(phoneAccountId != null) {
