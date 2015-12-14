@@ -319,7 +319,7 @@ public class CallRecordFragment extends ListFragment implements
     public void failure(RetrofitError error) {
         String message = getString(R.string.empty_view_default_message);
         Response response = error.getResponse();
-        if(response != null && response.getStatus() == 401) { //UNAUTHORIZED
+        if(response != null && (response.getStatus() == 401 || response.getStatus() == 403)) { //UNAUTHORIZED
             message = getString(R.string.empty_view_unauthorized_message);
         }
         if (mAdapter.getCount() == 0) {
