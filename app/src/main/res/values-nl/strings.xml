@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">Vialer</string>
     <string name="navigation_drawer_open">Open menu</string>
     <string name="navigation_drawer_close">Sluit menu</string>
@@ -30,6 +29,10 @@
     <string name="dialer_warning_no_connection">Geen dataverbinding beschikbaar</string>
     <string name="version_info">Versie: %1$s</string>
     <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
+
+    <!-- Sidebar fragment values -->
+    <string name="cannot_logout_error_title">Geen internetverbinding beschikbaar</string>
+    <string name="cannot_logout_error_text">Een internetverbinding is nodig om uit te loggen.</string>
 
     <!-- Login fragment values -->
     <string name="login_header_label_text">Zakelijke</string>
