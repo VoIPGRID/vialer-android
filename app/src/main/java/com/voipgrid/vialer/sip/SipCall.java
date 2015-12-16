@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.sip;
 
 import android.net.Uri;
-import android.util.Log;
 
 import org.pjsip.pjsua2.AudioMedia;
 import org.pjsip.pjsua2.CallInfo;
@@ -59,7 +58,6 @@ class SipCall extends org.pjsip.pjsua2.Call {
             CallInfo info = getInfo();  // Check to see if we can get CallInfo with this callback
 
             pjsip_inv_state callState = info.getState();
-            Log.d(TAG, String.format("onCallState(%s)", callState));
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                 // This means we're handling an incoming call.
                 if (!hasMedia()) { // Based on if we have media.
