@@ -71,6 +71,7 @@
     <string name="onboarding_account_configure_invalid_phone_number">The mobile number is invalid.</string>
     <!-- strings empty view call records -->
     <string name="empty_view_default_message">No recent calls available (yet).</string>
+    <string name="empty_view_missed_message">No missed calls.</string>
     <string name="empty_view_unauthorized_message">You are not allowed to see call records.</string>
 
     <!-- analytics -->

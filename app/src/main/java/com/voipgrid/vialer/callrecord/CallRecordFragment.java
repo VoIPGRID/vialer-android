@@ -263,8 +263,15 @@ public class CallRecordFragment extends ListFragment implements
             setEmptyView(null, false);
         } else if(mAdapter.getCount() == 0) {
             /* List is empty, but adapter view may not be. Since this method is only called in success cases, ignore this case.   */
+            String emptyText;
+            if (mFilter != null && mFilter.equals(FILTER_MISSED_RECORDS)){
+                emptyText = getString(R.string.empty_view_missed_message);
+            } else {
+                emptyText = getString(R.string.empty_view_default_message);
+            }
+
             setEmptyView(
-                    new EmptyView(getActivity(), getString(R.string.empty_view_default_message)),
+                    new EmptyView(getActivity(), emptyText),
                     true
             );
         }
