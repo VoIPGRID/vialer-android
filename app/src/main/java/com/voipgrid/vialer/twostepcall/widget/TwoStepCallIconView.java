@@ -65,8 +65,10 @@ public class TwoStepCallIconView extends View {
         Paint border = new Paint();
         border.setAntiAlias(true);
         border.setColor(mBackgroundColor);
-        border.setShadowLayer(mShadowRadius, 0.0f, 0.0f, getResources().getColor(R.color.two_step_call_step_shadow));
-        canvas.drawCircle(borderRadius + mShadowRadius, borderRadius + mShadowRadius, borderRadius, border);
+        border.setShadowLayer(mShadowRadius, 0.0f, 0.0f,
+                getResources().getColor(R.color.two_step_call_step_shadow));
+        canvas.drawCircle(borderRadius + mShadowRadius, borderRadius + mShadowRadius,
+                borderRadius, border);
 
         Paint paint = new Paint();
         paint.setAntiAlias(true);
@@ -74,7 +76,8 @@ public class TwoStepCallIconView extends View {
         if(!mEnabled) {
             paint.setAlpha(NOT_ENABLED_ALPHA);
         }
-        canvas.drawCircle(borderRadius + mShadowRadius, borderRadius + mShadowRadius, radius, paint);
+        canvas.drawCircle(borderRadius + mShadowRadius, borderRadius + mShadowRadius,
+                radius, paint);
 
         if(mBitmap != null) {
             float width = mBitmap.getWidth();

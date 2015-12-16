@@ -9,11 +9,11 @@ import android.preference.PreferenceManager;
  */
 public class Preferences {
 
-    public static final String PREF_HAS_SIP_PERMISSION = "PREF_HAS_SIP_PERMISSION";
     public static final String PREF_HAS_SIP_ENABLED = "PREF_HAS_SIP_ENABLED";
+    public static final String PREF_HAS_SIP_PERMISSION = "PREF_HAS_SIP_PERMISSION";
 
-    public static final boolean DEFAULT_VALUE_HAS_SIP_PERMISSION = false;
     public static final boolean DEFAULT_VALUE_HAS_SIP_ENABLED = true;
+    public static final boolean DEFAULT_VALUE_HAS_SIP_PERMISSION = false;
 
     private SharedPreferences mPreferences;
 
@@ -26,7 +26,10 @@ public class Preferences {
     }
 
     public boolean hasSipPermission() {
-        return  mPreferences.getBoolean(PREF_HAS_SIP_PERMISSION, DEFAULT_VALUE_HAS_SIP_PERMISSION);
+        // DUE TO VIALA-391
+        // TODO: UNDO IN VIALA-392
+        // return  mPreferences.getBoolean(PREF_HAS_SIP_PERMISSION, DEFAULT_VALUE_HAS_SIP_PERMISSION);
+        return false;
     }
 
     public void setSipEnabled(boolean sipEnabled) {
@@ -34,7 +37,10 @@ public class Preferences {
     }
 
     public boolean hasSipEnabled() {
-        return  mPreferences.getBoolean(PREF_HAS_SIP_ENABLED, DEFAULT_VALUE_HAS_SIP_ENABLED);
+        // DUE TO VIALA-391
+        // TODO: UNDO IN VIALA-392
+        //  return  mPreferences.getBoolean(PREF_HAS_SIP_ENABLED, DEFAULT_VALUE_HAS_SIP_ENABLED);
+        return false;
     }
 
     public boolean canUseSip() {

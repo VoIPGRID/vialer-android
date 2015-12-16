@@ -26,19 +26,14 @@ public class TwoStepCallActivity extends Activity {
 
     public static final String NUMBER_TO_CALL = "number-to-call";
 
-    private TwoStepCallView mTwoStepCallView;
-
-    private AnalyticsHelper mAnalyticsHelper;
-
+    private TextView mDialerWarningTextView;
     private TextView mStatusTextView;
 
+    private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
-
-    private TextView mDialerWarningTextView;
-
     private Preferences mPreferences;
-
     private Storage mStorage;
+    private TwoStepCallView mTwoStepCallView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,10 +96,12 @@ public class TwoStepCallActivity extends Activity {
             mDialerWarningTextView.setTag(getString(R.string.dialer_warning_no_connection_message));
         } else if(!mConnectivityHelper.hasFastData() && mPreferences.canUseSip()) {
             mDialerWarningTextView.setText(R.string.dialer_warning_a_b_connect);
-            mDialerWarningTextView.setTag(getString(R.string.dialer_warning_a_b_connect_connectivity_message));
+            mDialerWarningTextView
+                    .setTag(getString(R.string.dialer_warning_a_b_connect_connectivity_message));
         } else if(!mStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
             mDialerWarningTextView.setText(R.string.dialer_warning_a_b_connect);
-            mDialerWarningTextView.setTag(getString(R.string.dialer_warning_a_b_connect_account_message));
+            mDialerWarningTextView
+                    .setTag(getString(R.string.dialer_warning_a_b_connect_account_message));
         } else {
             mDialerWarningTextView.setVisibility(View.GONE);
         }

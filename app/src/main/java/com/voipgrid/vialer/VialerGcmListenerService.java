@@ -6,7 +6,6 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
 import com.squareup.okhttp.OkHttpClient;
@@ -28,7 +27,6 @@ import retrofit.client.OkClient;
  * incoming calls.
  */
 public class VialerGcmListenerService extends GcmListenerService implements Middleware.Constants {
-    private final static String TAG = VialerGcmListenerService.class.getSimpleName();
     /* Message format constants. */
     private final static String MESSAGE_TYPE = "type";
 
@@ -48,7 +46,6 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
     public static final String MESSAGE_START_TIME = "message_start_time";
 
     private ConnectivityHelper mConnectivityHelper;
-
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
@@ -83,7 +80,8 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                 );
             } else {
                 /* Inform the middleware the incoming call is received but the app can not handle
-                   the sip call because there is no LTE or Wifi connection available at this point */
+                   the sip call because there is no LTE or Wifi connection available at this
+                   point */
                 replyServer(
                         data.getString(RESPONSE_URL),
                         data.getString(REQUEST_TOKEN),
@@ -103,7 +101,8 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
      * @param requestToken unique_key for middleware for recognising SIP connection status updates.
      * @param messageStartTime
      */
-    private void replyServer(String responseUrl, String requestToken, String messageStartTime, boolean isAvailable) {
+    private void replyServer(String responseUrl, String requestToken, String messageStartTime,
+                             boolean isAvailable) {
         mConnectivityHelper = new ConnectivityHelper(
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
@@ -119,12 +118,12 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
         registrationApi.reply(requestToken, isAvailable, messageStartTime, new Callback<Object>() {
             @Override
             public void success(Object object, retrofit.client.Response response) {
-                Log.d(TAG, "response: " + response.getStatus());
+
             }
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d(TAG, "error: " + error.getMessage());
+
             }
         });
     }
@@ -135,7 +134,8 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
      * @param messageStartTime message roundtrip throughput timestamp handled as String for logging
      *                         purposes.
      */
-    private void startSipService(String phoneNumber, String callerId, String url, String token, String messageStartTime) {
+    private void startSipService(String phoneNumber, String callerId, String url, String token,
+                                 String messageStartTime) {
         Intent intent = new Intent(this, SipService.class);
         intent.setAction(SipConstants.ACTION_VIALER_INCOMING);
 

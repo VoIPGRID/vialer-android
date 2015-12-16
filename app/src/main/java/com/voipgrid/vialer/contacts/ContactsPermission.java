@@ -12,6 +12,9 @@ import android.support.v7.app.AlertDialog;
 import com.voipgrid.vialer.R;
 
 
+/**
+ * Class for Android 6.0+ related contact permissions.
+ */
 public class ContactsPermission {
 
     public static final String mPermissionToCheck = Manifest.permission.READ_CONTACTS;
@@ -24,7 +27,8 @@ public class ContactsPermission {
      * @return Whether or not we have permission.
      */
     public static boolean hasPermission(Context context) {
-        if (ContextCompat.checkSelfPermission(context, mPermissionToCheck) == PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(context, mPermissionToCheck) ==
+                PackageManager.PERMISSION_GRANTED){
             return true;
         }
         return false;
@@ -36,8 +40,10 @@ public class ContactsPermission {
      */
     public static void askForPermission(final Activity activity) {
         // Request code for the callback verifying in the Activity.
-        final int requestCode = activity.getResources().getInteger(R.integer.contact_permission_request_code);
-        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, ContactsPermission.mPermissionToCheck)) {
+        final int requestCode = activity.getResources().getInteger(
+                R.integer.contact_permission_request_code);
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                ContactsPermission.mPermissionToCheck)) {
             // Function to show a dialog that explains the permissions.
             AlertDialog.Builder builder = new AlertDialog.Builder(activity);
             builder.setTitle(activity.getString(R.string.permission_contact_dialog_title));

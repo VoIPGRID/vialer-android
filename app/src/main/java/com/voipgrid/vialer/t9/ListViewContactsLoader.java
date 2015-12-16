@@ -10,7 +10,6 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Data;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.widget.SimpleCursorAdapter;
 
 import com.voipgrid.vialer.R;
@@ -21,12 +20,10 @@ import com.voipgrid.vialer.R;
  */
 public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor> {
 
-    private final static String LOG_TAG = ListViewContactsLoader.class.getSimpleName();
-
-    private final Context mContext;
     private SimpleCursorAdapter mContactsAdapter;
-    private MatrixCursor mMatrixCursor;
     private ContentResolver mContentResolver;
+    private final Context mContext;
+    private MatrixCursor mMatrixCursor;
 
     public ListViewContactsLoader(Context context, SimpleCursorAdapter contactsAdapter) {
         mContext = context;
@@ -161,12 +158,12 @@ public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor
                         Data.CONTACT_ID,
                         Data.DISPLAY_NAME_PRIMARY,
                         Phone.DATA3
-                },                                                                // PROJECTION
-                getSelectionQueryString(),                                                      // SELECTION
+                },                                                                   // PROJECTION
+                getSelectionQueryString(),                                           // SELECTION
                 getSelectionArguments(searchStringBuilder.toString(), searchNumber), // WHERE args
-                sortOrder                         // SORT ORDER
+                sortOrder                                                            // SORT ORDER
         );
-        // Dynamically populate a matrix cursor for use in t9 search list presentation
+        // Dynamically populate a matrix cursor for use in t9 search list presentation.
         populateCursorWithCursor(dataCursor);
         assert dataCursor != null; // properly clean up the search process.
         dataCursor.close();
@@ -180,7 +177,7 @@ public class ListViewContactsLoader extends AsyncTask<CharSequence, Void, Cursor
      */
     @Override
     protected void onPostExecute(Cursor result) {
-        // Setting the cursor containing contacts to listview
+        // Setting the cursor containing contacts to listview.
         mContactsAdapter.swapCursor(result);
         mContactsAdapter.notifyDataSetChanged();
     }

@@ -32,9 +32,10 @@ public class WebActivity extends AppCompatActivity implements retrofit.Callback<
     public static final String TITLE = "key-title";
     public static final String USERNAME = "key-username";
     public static final String PASSWORD = "key-password";
-    private WebView mWebView;
 
     private ProgressBar mProgressBar;
+    private WebView mWebView;
+
     private ConnectivityHelper mConnectivityHelper;
 
     @Override
@@ -104,7 +105,8 @@ public class WebActivity extends AppCompatActivity implements retrofit.Callback<
      */
     private void autoLoginToken() {
         mProgressBar.setVisibility(View.VISIBLE);
-        Api api = ServiceGenerator.createService(mConnectivityHelper, Api.class, getString(R.string.api_url),
+        Api api = ServiceGenerator.createService(mConnectivityHelper, Api.class,
+                getString(R.string.api_url),
                 new OkClient(ServiceGenerator.getOkHttpClient(
                         this,
                         getIntent().getStringExtra(USERNAME),

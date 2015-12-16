@@ -33,6 +33,10 @@ import retrofit.RetrofitError;
 import retrofit.client.OkClient;
 import retrofit.client.Response;
 
+
+/**
+ * Activity that handles the onboarding.
+ */
 public class SetupActivity extends AppCompatActivity implements
         OnboardingFragment.FragmentInteractionListener,
         LoginFragment.FragmentInteractionListener,
@@ -40,17 +44,12 @@ public class SetupActivity extends AppCompatActivity implements
         ForgotPasswordFragment.FragmentInteractionListener,
         Callback {
 
-    private static final String TAG = SetupActivity.class.getSimpleName();
-
     private String mPassword;
 
     private Api mApi;
-
-    private Storage mStorage;
-
     private ConnectivityHelper mConnectivityHelper;
-
     private Preferences mPreferences;
+    private Storage mStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,7 +161,8 @@ public class SetupActivity extends AppCompatActivity implements
             mApi.phoneAccount(phoneAccountId, this);
         } else {
             enableProgressBar(false);
-            // TODO add UI to let the user know the sip features are not available without a sip account VIALA-157
+            // TODO add UI to let the user know the sip features are not available without
+            // a sip account VIALA-157
             onNextStep(WelcomeFragment.newInstance(
                             ((SystemUser) mStorage.get(SystemUser.class)).getFullName())
             );
@@ -304,7 +304,8 @@ public class SetupActivity extends AppCompatActivity implements
     public void manageKeyboard() {
         View focus = getCurrentFocus();
         if (focus != null) {
-            InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager keyboard = (InputMethodManager) getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
             keyboard.hideSoftInputFromWindow(focus.getWindowToken(), 0);
         }
     }

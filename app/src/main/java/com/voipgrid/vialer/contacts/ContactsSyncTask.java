@@ -4,14 +4,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Class acting as a layer between the syncadapter and the contactsmanager.
+ */
 public class ContactsSyncTask {
 
-    private static final String LOG_TAG = ContactsSyncTask.class.getSimpleName();
     private Context mContext;
 
     /**
@@ -78,7 +80,6 @@ public class ContactsSyncTask {
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(mContext)) {
             // TODO VIALA-349 Delete sync account.
-            Log.d(LOG_TAG, "Missing contact permissions");
             return;
         }
         // Gives you the list of contacts who have phone numbers.
@@ -86,7 +87,8 @@ public class ContactsSyncTask {
 
         while (cursor.moveToNext()) {
             String contactId = getColumnFromCursor(ContactsContract.Contacts._ID, cursor);
-            String name = getColumnFromCursor(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY, cursor);
+            String name = getColumnFromCursor(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
+                    cursor);
 
             Cursor phones = queryAllPhoneNumbers(contactId);
 

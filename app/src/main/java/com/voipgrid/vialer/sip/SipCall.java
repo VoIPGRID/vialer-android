@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.sip;
 
 import android.net.Uri;
-import android.util.Log;
 
 import org.pjsip.pjsua2.AudioMedia;
 import org.pjsip.pjsua2.CallInfo;
@@ -56,10 +55,9 @@ class SipCall extends org.pjsip.pjsua2.Call {
     @Override
     public void onCallState(OnCallStateParam onCallStateParam) {
         try {
-            CallInfo info = getInfo();       /* Check to see if we can get CallInfo with this callback */
+            CallInfo info = getInfo();  // Check to see if we can get CallInfo with this callback
 
             pjsip_inv_state callState = info.getState();
-            Log.d(TAG, String.format("onCallState(%s)", callState));
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                 // This means we're handling an incoming call.
                 if (!hasMedia()) { // Based on if we have media.
@@ -110,7 +108,8 @@ class SipCall extends org.pjsip.pjsua2.Call {
             boolean mediaAvailable = false;
             for(int i=0; i < media.size(); ++i) {
                 CallMediaInfo cmi = media.get(i);
-                boolean usableStatus = (cmi.getStatus() == pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE ||
+                boolean usableStatus = (cmi.getStatus() ==
+                        pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE ||
                         cmi.getStatus() == pjsua_call_media_status.PJSUA_CALL_MEDIA_REMOTE_HOLD);
                 if (cmi.getType() == pjmedia_type.PJMEDIA_TYPE_AUDIO && usableStatus) {
                     Media m = getMedia(i);

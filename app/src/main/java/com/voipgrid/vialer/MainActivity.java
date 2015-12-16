@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -34,17 +33,13 @@ public class MainActivity extends NavigationDrawerActivity implements
         View.OnClickListener,
         CallRecordFragment.OnFragmentInteractionListener {
 
-    private final static String LOG_TAG = MainActivity.class.getSimpleName();
-
-    private boolean mAskForPermission = true;
-
     private ViewPager mViewPager;
 
+    private ConnectivityHelper mConnectivityHelper;
+    private Preferences mPreferences;
     private Storage mStorage;
 
-    private ConnectivityHelper mConnectivityHelper;
-
-    private Preferences mPreferences;
+    private boolean mAskForPermission = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,8 +89,10 @@ public class MainActivity extends NavigationDrawerActivity implements
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == this.getResources().getInteger(R.integer.contact_permission_request_code)) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        if (requestCode ==
+                this.getResources().getInteger(R.integer.contact_permission_request_code)) {
             boolean allPermissionsGranted = true;
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
@@ -105,7 +102,6 @@ public class MainActivity extends NavigationDrawerActivity implements
             }
             if (allPermissionsGranted) {
                 // ContactSync.
-                Log.d(LOG_TAG, "Starting ContactSync after getting contact permissions");
                 ContactsManager.requestContactSync(this);
             }
         }
@@ -187,7 +183,9 @@ public class MainActivity extends NavigationDrawerActivity implements
         Intent intent = new Intent(this, DialerActivity.class);
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
             ActivityOptionsCompat options = ActivityOptionsCompat.
-                    makeSceneTransitionAnimation(this, findViewById(R.id.floating_action_button), "floating_action_button_transition_name");
+                    makeSceneTransitionAnimation(
+                            this, findViewById(R.id.floating_action_button),
+                            "floating_action_button_transition_name");
             startActivity(intent, options.toBundle());
         } else {
             startActivity(intent);

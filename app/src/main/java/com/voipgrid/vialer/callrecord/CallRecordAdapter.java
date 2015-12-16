@@ -83,7 +83,8 @@ public class CallRecordAdapter extends BaseAdapter {
             // well set up the ViewHolder
             viewHolder = new ViewHolder();
             viewHolder.title = (TextView) convertView.findViewById(R.id.text_view_contact_name);
-            viewHolder.information = (TextView) convertView.findViewById(R.id.text_view_contact_information);
+            viewHolder.information = (TextView) convertView.findViewById(
+                    R.id.text_view_contact_information);
 
             // store the holder with the view.
             convertView.setTag(viewHolder);
@@ -129,7 +130,9 @@ public class CallRecordAdapter extends BaseAdapter {
             }
 
             // set the call record date information to the view
-            viewHolder.information.setText(DateUtils.getRelativeDateTimeString(mContext, date.getTime(), DateUtils.SECOND_IN_MILLIS, DateUtils.YEAR_IN_MILLIS, DateUtils.FORMAT_ABBREV_TIME));
+            viewHolder.information.setText(DateUtils.getRelativeDateTimeString(
+                    mContext, date.getTime(), DateUtils.SECOND_IN_MILLIS,
+                    DateUtils.YEAR_IN_MILLIS, DateUtils.FORMAT_ABBREV_TIME));
         }
 
         return convertView;

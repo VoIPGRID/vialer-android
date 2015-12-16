@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,7 +60,8 @@ public class ForgotPasswordFragment extends OnboardingFragment implements View.O
         submitButton.setOnClickListener(this);
 
         String email = getArguments().getString(ARG_EMAIL);
-        final EditText emailEditText = (EditText) view.findViewById(R.id.forgotPasswordEmailTextDialog);
+        final EditText emailEditText = (EditText) view.findViewById(
+                R.id.forgotPasswordEmailTextDialog);
         emailEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

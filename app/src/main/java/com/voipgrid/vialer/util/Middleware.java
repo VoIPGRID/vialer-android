@@ -2,10 +2,8 @@ package com.voipgrid.vialer.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.squareup.okhttp.OkHttpClient;
 import com.voipgrid.vialer.R;
@@ -25,7 +23,6 @@ import retrofit.client.OkClient;
  * Handle (un)registration from the middleware in a centralised place.
  */
 public class Middleware {
-    public final static String TAG = Middleware.class.getSimpleName();
 
     public interface Constants {
         String REGISTRATION_STATUS = "VIALER_REGISTRATION_STATUS";
@@ -53,7 +50,8 @@ public class Middleware {
             String sipUserId = ((PhoneAccount) storage.get(PhoneAccount.class)).getAccountId();
             String fullName = ((SystemUser) storage.get(SystemUser.class)).getFullName();
             String appName = context.getPackageName();
-            api.register(fullName, token, sipUserId, Build.VERSION.CODENAME, Build.VERSION.RELEASE, appName);
+            api.register(fullName, token, sipUserId, Build.VERSION.CODENAME,
+                    Build.VERSION.RELEASE, appName);
             editor.putString(Constants.CURRENT_TOKEN, token);
             editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_REGISTERED);
         } catch (RetrofitError|NullPointerException error) {
@@ -75,7 +73,8 @@ public class Middleware {
                     new OkClient(new OkHttpClient())
             );
             String token     = preferences.getString(Constants.CURRENT_TOKEN, "");
-            String sipUserId = (new Storage<PhoneAccount>(context).get(PhoneAccount.class)).getAccountId();
+            String sipUserId = (new Storage<PhoneAccount>(context).get(PhoneAccount.class))
+                    .getAccountId();
             api.unregister(token, sipUserId);
             editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_UNREGISTERED);
         } catch (RetrofitError|NullPointerException error) {

@@ -20,7 +20,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,9 +34,8 @@ import com.voipgrid.vialer.sip.SipConstants;
 /**
  * CallActivity for incoming or outgoing call
  */
-public class CallActivity extends AppCompatActivity implements View.OnClickListener, SensorEventListener, SipConstants {
-
-    public static final String TAG = CallActivity.class.getSimpleName();
+public class CallActivity extends AppCompatActivity
+        implements View.OnClickListener, SensorEventListener, SipConstants {
 
     public static final String TYPE_OUTGOING_CALL = "type-outgoing-call";
     public static final String TYPE_INCOMING_CALL = "type-incoming-call";
@@ -52,8 +50,8 @@ public class CallActivity extends AppCompatActivity implements View.OnClickListe
     private SensorManager mSensorManager;
     private Sensor mProximitySensor;
 
-    private TextView mStateView;
     private TextView mCallDurationView;
+    private TextView mStateView;
 
     // Keep track of the start time of a call, so we can keep track of its duration.
     long mCallStartTime = 0;
@@ -65,7 +63,8 @@ public class CallActivity extends AppCompatActivity implements View.OnClickListe
         public void run() {
             long seconds = (System.currentTimeMillis() - mCallStartTime) / 1000;
             mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
-            mCallHandler.postDelayed(mCallDurationRunnable, 1000); // Keep timer running for as long as possible.
+            // Keep timer running for as long as possible.
+            mCallHandler.postDelayed(mCallDurationRunnable, 1000);
         }
     };
 
@@ -92,7 +91,6 @@ public class CallActivity extends AppCompatActivity implements View.OnClickListe
     private BroadcastReceiver mCallStatusReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, String.format("onReceive(%s)", intent.getStringExtra(CALL_STATUS_KEY)));
             onCallStatusUpdate(intent.getStringExtra(CALL_STATUS_KEY));
         }
     };
@@ -366,25 +364,31 @@ public class CallActivity extends AppCompatActivity implements View.OnClickListe
 
         // Toggle speaker item
         if(mAudioManager.isSpeakerphoneOn()) {
-            speakerItem.setIcon(speakerItem.isEnabled() ? R.drawable.ic_volume_off_enabled : R.drawable.ic_volume_off_disabled);
+            speakerItem.setIcon(speakerItem.isEnabled() ?
+                    R.drawable.ic_volume_off_enabled : R.drawable.ic_volume_off_disabled);
         } else {
-            speakerItem.setIcon(speakerItem.isEnabled() ? R.drawable.ic_volume_on_enabled : R.drawable.ic_volume_on_disabled);
+            speakerItem.setIcon(speakerItem.isEnabled() ?
+                    R.drawable.ic_volume_on_enabled : R.drawable.ic_volume_on_disabled);
         }
 
         // Toggle microphone item
         if(mMute) {
-            microphoneItem.setIcon(microphoneItem.isEnabled() ? R.drawable.ic_mic_on_enabled : R.drawable.ic_mic_on_disabled);
+            microphoneItem.setIcon(microphoneItem.isEnabled() ?
+                    R.drawable.ic_mic_on_enabled : R.drawable.ic_mic_on_disabled);
         } else {
-            microphoneItem.setIcon(microphoneItem.isEnabled() ? R.drawable.ic_mic_off_enabled: R.drawable.ic_mic_off_disabled);
+            microphoneItem.setIcon(microphoneItem.isEnabled() ?
+                    R.drawable.ic_mic_off_enabled: R.drawable.ic_mic_off_disabled);
         }
 
         // Set dialpad item
         MenuItem dialpadItem = menu.findItem(R.id.dialpad);
-        dialpadItem.setIcon(dialpadItem.isEnabled() ? R.drawable.ic_dialer_enabled : R.drawable.ic_dialer_disabled);
+        dialpadItem.setIcon(dialpadItem.isEnabled() ?
+                R.drawable.ic_dialer_enabled : R.drawable.ic_dialer_disabled);
 
         // Set onhold item
         MenuItem onhold = menu.findItem(R.id.onhold);
-        onhold.setIcon(onhold.isEnabled() ? R.drawable.ic_pause_enabled : R.drawable.ic_pause_disabled);
+        onhold.setIcon(onhold.isEnabled() ?
+                R.drawable.ic_pause_enabled : R.drawable.ic_pause_disabled);
 
         return super.onPrepareOptionsMenu(menu);
     }
@@ -475,14 +479,14 @@ public class CallActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.button_hangup:
                 Bundle hangupExtras = new Bundle();
                 hangupExtras.putString(CALL_STATUS_ACTION, CALL_HANG_UP_ACTION);
-                broadcast(hangupExtras); // Broadcast to service to decline or end call.
+                broadcast(hangupExtras);  // Broadcast to service to decline or end call.
                 mStateView.setText(R.string.call_hangup);
-                finish();                // Close this activity. (that's a little eager now isn't it?)
+                finish();  // Close this activity. (that's a little eager now isn't it?)
                 break;
             case R.id.button_reject:
                 Bundle rejectExtras = new Bundle();
                 rejectExtras.putString(CALL_STATUS_ACTION, CALL_DECLINE_ACTION);
-                broadcast(rejectExtras); // Broadcast to service to decline or end call.
+                broadcast(rejectExtras);  // Broadcast to service to decline or end call.
 
                 mAnalyticsHelper.send(
                         getString(R.string.analytics_dimension),
@@ -511,7 +515,6 @@ public class CallActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void toggleScreen(boolean on) {
-        Log.d(TAG, String.format("toggleScreen(%s)", on ? "on" : "off"));
         WindowManager.LayoutParams params = getWindow().getAttributes();
         View view = findViewById(R.id.screen_off);
         if (on) {
@@ -546,7 +549,6 @@ public class CallActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        Log.d(TAG, String.format("onSensorEventChanged(%s)", event.sensor.getClass().getSimpleName()));
         if (event.values[0] == event.sensor.getMaximumRange()) {
             toggleScreen(true);
         } else if (event.values[0] > 5.0f) {

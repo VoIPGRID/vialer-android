@@ -10,8 +10,8 @@ import android.widget.TextView;
  */
 public class WarningActivity extends AppCompatActivity {
 
-    public static final String TITLE = "key-title";
     public static final String MESSAGE = "key-message";
+    public static final String TITLE = "key-title";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

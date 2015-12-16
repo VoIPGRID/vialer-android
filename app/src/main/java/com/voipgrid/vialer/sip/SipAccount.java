@@ -16,12 +16,14 @@ class SipAccount extends org.pjsip.pjsua2.Account {
 
     /**
      *
-     * @param accountConfig configuration to automagically communicate and setup some sort of SIP session.
+     * @param accountConfig configuration to automagically communicate and setup some sort of
+     *                      SIP session.
      * @param accountStatus callback object which is used to notify outside world of past events.
      * @param callStatus callback object which is used to notify outside world of past events.
      * @throws Exception issue with creating an account.
      */
-    public SipAccount(AccountConfig accountConfig, AccountStatus accountStatus, CallStatus callStatus) throws Exception {
+    public SipAccount(AccountConfig accountConfig, AccountStatus accountStatus,
+                      CallStatus callStatus) throws Exception {
         super();
         mAccountStatus = accountStatus;
         mCallStatus = callStatus;

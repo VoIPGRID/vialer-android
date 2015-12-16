@@ -14,7 +14,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.squareup.okhttp.OkHttpClient;
 import com.voipgrid.vialer.CallActivity;
@@ -56,7 +55,8 @@ import retrofit.client.OkClient;
  * Goals of this class:
  * - initiate calls
  * - handle call actions (on speaker, mute, show dialpad, put on hold).
- * - Handle call status (CONNECTED, DISCONNECTED, MEDIA_AVAILABLE, MEDIA_UNAVAILABLE, RINGING_IN, RINGING_OUT).
+ * - Handle call status (CONNECTED, DISCONNECTED, MEDIA_AVAILABLE, MEDIA_UNAVAILABLE, RINGING_IN,
+ *   RINGING_OUT).
  */
 public class SipService extends Service implements
         AccountStatus,
@@ -184,8 +184,6 @@ public class SipService extends Service implements
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy()");
-
         mBroadcastManager.unregisterReceiver(mCallInteractionReceiver);
         mBroadcastManager.unregisterReceiver(mKeyPadInteractionReceiver);
 
@@ -216,7 +214,6 @@ public class SipService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         mCallType = intent.getAction();
         Uri number = intent.getData();
-        Log.d(TAG, String.format("onStartCommand(%s)", mCallType));
         switch (mCallType) {
             case SipConstants.ACTION_VIALER_INCOMING :
                 mUrl = intent.getStringExtra(SipConstants.EXTRA_RESPONSE_URL);
@@ -246,19 +243,20 @@ public class SipService extends Service implements
     }
 
     private void setupCallInteractionReceiver() {
-        IntentFilter intentFilter = new IntentFilter(SipConstants.ACTION_BROADCAST_CALL_INTERACTION);
+        IntentFilter intentFilter = new IntentFilter(
+                SipConstants.ACTION_BROADCAST_CALL_INTERACTION);
         mBroadcastManager.registerReceiver(mCallInteractionReceiver, intentFilter);
     }
 
     private void setupKeyPadInteractionReceiver() {
-        IntentFilter intentFilter = new IntentFilter(SipConstants.ACTION_BROADCAST_KEY_PAD_INTERACTION);
+        IntentFilter intentFilter = new IntentFilter(
+                SipConstants.ACTION_BROADCAST_KEY_PAD_INTERACTION);
         mBroadcastManager.registerReceiver(mKeyPadInteractionReceiver, intentFilter);
     }
 
     /** AccountStatus **/
     @Override
     public void onAccountRegistered(Account account, OnRegStateParam param) {
-        Log.d(TAG, "onAccountRegistered()");
         if(mCallType.equals(SipConstants.ACTION_VIALER_INCOMING)) {
             Registration registrationApi = ServiceGenerator.createService(
                     mConnectivityHelper,
@@ -272,12 +270,10 @@ public class SipService extends Service implements
                 public void success(Object object, retrofit.client.Response response) {
                 /* No need to handle succes callback.
                    Call is automatically routed to onIncomingCall */
-                    Log.i(TAG, "Succesfully sent reply to the middleware");
                 }
 
                 @Override
                 public void failure(RetrofitError error) {
-                    Log.d(TAG, "onAccountRegistered() reply failure", error);
                     broadcast(SipConstants.SIP_SERVICE_ACCOUNT_REGISTRATION_FAILED);
                     stopSelf();
                 }
@@ -290,14 +286,13 @@ public class SipService extends Service implements
     /** AccountStatus **/
     @Override
     public void onAccountUnregistered(Account account, OnRegStateParam param) {
-        Log.d(TAG, "onAccountUnregistered()");
 
     }
 
     /** AccountStatus **/
     @Override
     public void onAccountInvalidState(Account account, Throwable fault) {
-        Log.d(TAG, "onAccountInvalidState()", fault);
+
     }
 
     /**
@@ -311,7 +306,6 @@ public class SipService extends Service implements
         try {
             System.loadLibrary("pjsua2");
         } catch (UnsatisfiedLinkError error) { /* Can not load PJSIP library */
-            Log.i(TAG, "Cannot load pjsua2 library");
             /* Notify app */
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_LOAD_PJSIP);
             /* Stop the service since the app can not use SIP */
@@ -328,7 +322,6 @@ public class SipService extends Service implements
             endpoint.transportCreate(transportType, transportConfig);
             endpoint.libStart();
         } catch (Exception exception) {
-            Log.i(TAG, "Cannot start pjsua2 library");
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
             stopSelf();
         }
@@ -362,7 +355,6 @@ public class SipService extends Service implements
 
     @Override
     public void onCallIncoming(Call call) {
-        Log.d(TAG, "onCallIncoming()");
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(
                 mHasActiveCall ?
@@ -380,7 +372,6 @@ public class SipService extends Service implements
 
     @Override
     public void onCallOutgoing(Call call, Uri number) {
-        Log.d(TAG, "onCallOutgoing()");
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_RINGING);
         try {
@@ -395,13 +386,11 @@ public class SipService extends Service implements
 
     @Override
     public void onCallConnected(Call call) {
-        Log.d(TAG, "onCallConnected()");
         broadcast(SipConstants.CALL_CONNECTED_MESSAGE);
     }
 
     @Override
     public void onCallDisconnected(final Call call) {
-        Log.d(TAG, "onCallDisconnected()");
         /* Cleanup the call */
         if(call != null) {
             // Deleting the call leads to inexplicable failures.
@@ -413,14 +402,12 @@ public class SipService extends Service implements
 
     @Override
     public void onCallInvalidState(Call call, Throwable fault) {
-        Log.e(TAG, "Call in invalid state", fault);
         broadcast(SipConstants.CALL_INVALID_STATE);
         stopSelf();
     }
 
     @Override
     public void onCallMediaAvailable(Call call, AudioMedia media) {
-        Log.d(TAG, "onCallMediaAvailable()");
         try {
             AudDevManager audDevManager = mEndpoint.audDevManager();
             media.startTransmit(audDevManager.getPlaybackDevMedia());
@@ -435,23 +422,20 @@ public class SipService extends Service implements
 
     @Override
     public void onCallMediaUnavailable(Call call) {
-        Log.d(TAG, "onCallMediaUnavailable()");
+
     }
 
     @Override
     public void onCallStartRingback() {
-        Log.d(TAG, "onCallStartRingback()");
         mHandler.postDelayed(mRingbackRunnable, 2000);
     }
 
     @Override
     public void onCallStopRingback() {
-        Log.d(TAG, "onCallStopRingback()");
         mHandler.removeCallbacks(mRingbackRunnable);
     }
 
     private void callVisibleForUser(Call call, String type, Uri number) {
-        Log.d(TAG, "callVisibleForUser()");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setDataAndType(number, type);
@@ -464,7 +448,6 @@ public class SipService extends Service implements
     }
 
     private void callVisibleForUser(Call call, String type, String number, String callerId) {
-        Log.d(TAG, "callVisibleForUser()");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setDataAndType(SipUri.build(this, number), type);
@@ -475,7 +458,6 @@ public class SipService extends Service implements
 
     private void handleCallInteraction(Call call, Intent intent) {
         String type = intent.getStringExtra(SipConstants.CALL_STATUS_ACTION);
-        Log.d(TAG, String.format("handleCallInteraction(%s)", type));
         switch (type) {
             case SipConstants.CALL_UPDATE_MICROPHONE_VOLUME_ACTION :
                 updateMicrophoneVolume(call,
@@ -490,7 +472,6 @@ public class SipService extends Service implements
     }
 
     private void handleKeyPadInteraction(Call call, Intent intent) {
-        Log.d(TAG, "handleKeyPadInteraction()");
         try {
             call.dialDtmf(intent.getStringExtra(SipConstants.KEY_PAD_DTMF_TONE));
         } catch (Exception e) {
@@ -500,7 +481,6 @@ public class SipService extends Service implements
 
     @Override
     public void hangUp(Call call) {
-        Log.d(TAG, "hangUp()");
         try {
             CallOpParam callOpParam = new CallOpParam(true);
             callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_DECLINE);
@@ -513,13 +493,11 @@ public class SipService extends Service implements
 
     @Override
     public void decline(Call call) {
-        Log.d(TAG, "decline()");
         hangUp(call);
     }
 
     @Override
     public void answer(Call call) {
-        Log.d(TAG, "answer()");
         CallOpParam callOpParam = new CallOpParam(true);
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_ACCEPTED);
         try {
@@ -552,14 +530,11 @@ public class SipService extends Service implements
 
     @Override
     public void putOnHold(Call call) {
-        Log.d(TAG, "putOnHold()");
         try {
             CallOpParam callOpParam = new CallOpParam(true);
             if(!mHasHold) {
-                Log.d(TAG, "call is active");
                 call.setHold(callOpParam);
             } else {
-                Log.d(TAG, "call is not active");
                 CallSetting callSetting = callOpParam.getOpt();
                 callSetting.setFlag(pjsua_call_flag.PJSUA_CALL_UNHOLD.swigValue());
                 call.reinvite(callOpParam);
