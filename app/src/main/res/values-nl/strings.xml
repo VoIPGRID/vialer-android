@@ -75,6 +75,7 @@
     <string name="onboarding_account_configure_invalid_phone_number">Het mobiele telefoonnummer is niet correct.</string>
     <!-- strings empty view call records -->
     <string name="empty_view_default_message">Je hebt (nog) geen recente telefoongesprekken.</string>
+    <string name="empty_view_missed_message">Je hebt geen gemiste telefoongesprekken.</string>
     <string name="empty_view_unauthorized_message">Je bent niet gemachtigd om recente telefoongesprekken in te zien.</string>
     <!---->
     <string name="contacts_sync_success_mesage">Contacten synchronisatie succesvol</string>
@@ -106,21 +107,25 @@
     <string name="dial_plan_menu_item_title">Belplan</string>
     <string name="accessibility_menu_item_title">Bereikbaarheid</string>
 
-    <string name="two_step_call_description_platform">Outgoing number</string>
-    <string name="two_step_call_description_step_a">Calling your phone</string>
-    <string name="two_step_call_description_step_b">Connecting you with</string>
-    <string name="two_step_call_message_step_a_failed">Could not reach your phone</string>
-    <string name="two_step_call_message_step_b_failed">Could not reach other party</string>
+    <string name="two_step_call_description_platform">Uitgaand nummer</string>
+    <string name="two_step_call_description_step_a">U wordt gebeld</string>
+    <string name="two_step_call_description_step_b">Verbinden met</string>
 
-    <string name="two_step_call_state_dialing_a">Calling your phone</string>
-    <string name="two_step_call_state_dialing_b">Connection to other party</string>
-    <string name="two_step_call_state_failed_a">Could not reach your phone</string>
-    <string name="two_step_call_state_failed_b">Could not reach other party</string>
-    <string name="two_step_call_state_connected">Connected</string>
-    <string name="two_step_call_state_disconnected">Call ended</string>
+    <string name="two_step_call_state_dialing_a">U wordt gebeld</string>
+    <string name="two_step_call_state_dialing_b">Verbonden met andere partij</string>
+    <string name="two_step_call_state_failed_a">Konden uw telefoon niet bereiken</string>
+    <string name="two_step_call_state_failed_b">Konden andere partij niet bereiken</string>
+    <string name="two_step_call_state_connected">Verbonden</string>
+    <string name="two_step_call_state_disconnected">Gesprek beëindigd</string>
 
     <!-- Permission strings -->
     <string name="permission_contact_dialog_title">Contact permissie</string>
     <string name="permission_contact_dialog_message">Permissie is nodig om vanuit de contacten te kunnen bellen</string>
     <string name="permission_contact_dialer_list_message">Kan geen contacten laden, permissie tot contacten is noodzakelijk</string>
+    <string name="account_mobile_number_edit_text_hint">Mobiel nummer</string>
+    <string name="account_outgoing_number_edit_text_hint">Uitgaand nummer</string>
+    <string name="account_sip_id_edit_text_hint">SIP Account</string>
+    <string name="account_sip_password_edit_text_hint">Wachtwoord</string>
+    <string name="two_step_call_message_step_a_failed">Konden uw telefoon niet bereiken</string>
+    <string name="two_step_call_message_step_b_failed">Konden andere partij niet bereiken</string>
 </resources>
