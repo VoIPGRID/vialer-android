@@ -50,6 +50,7 @@ public class DialerActivity extends AppCompatActivity implements
     private NumberInputEditText mNumberInputEditText;
     private SimpleCursorAdapter mContactsAdapter = null;
     private TextView mDialerWarning;
+    private TextView mEmptyView;
     private ViewGroup mKeyPadViewContainer;
 
     private AnalyticsHelper mAnalyticsHelper;
@@ -81,7 +82,7 @@ public class DialerActivity extends AppCompatActivity implements
 
         mDialerWarning = (TextView) findViewById(R.id.dialer_warning);
         mContactsListView = (ListView) findViewById(R.id.list_view);
-        TextView emptyView = (TextView) findViewById(R.id.message);
+        mEmptyView = (TextView) findViewById(R.id.message);
 
         // This should be called before setupContactParts.
         setupKeypad();
@@ -98,8 +99,8 @@ public class DialerActivity extends AppCompatActivity implements
         if (mHasPermission) {
             // Handling this intent is only needed when we have contact permissions.
             String number = null;
-            emptyView.setText(getString(R.string.dialer_no_contacts_found_message));
-            mContactsListView.setEmptyView(emptyView);
+            mEmptyView.setText(getString(R.string.dialer_no_contacts_found_message));
+            mContactsListView.setEmptyView(mEmptyView);
 
             // This should be called after setupKeyPad.
             setupContactParts();
@@ -129,8 +130,8 @@ public class DialerActivity extends AppCompatActivity implements
         } else {
             // Set the empty view for the contact list to inform the user this functionality will
             // not work.
-            emptyView.setText(getString(R.string.permission_contact_dialer_list_message));
-            mContactsListView.setEmptyView(emptyView);
+            mEmptyView.setText(getString(R.string.permission_contact_dialer_list_message));
+            mContactsListView.setEmptyView(mEmptyView);
         }
     }
 
@@ -159,9 +160,6 @@ public class DialerActivity extends AppCompatActivity implements
      * listener for the T9 contact search.
      */
     private void setupContactParts() {
-        // Setup the list view.
-        setupContactsListView();
-
         Cursor cursor = this.getContentResolver()
                 .query(
                     ContactsContract.Contacts.CONTENT_URI,
@@ -173,6 +171,8 @@ public class DialerActivity extends AppCompatActivity implements
 
         // Due to performance we only support <= 750 contacts for T9 search.
         if (cursor == null || cursor.getCount() <= 750){
+            // Setup the list view.
+            setupContactsListView();
             // Replace the empty listener set in setupKeypad with the T9 search function.
             mNumberInputEditText.setOnInputChangedListener(new NumberInputEditText.OnInputChangedListener() {
                 @Override
@@ -181,6 +181,9 @@ public class DialerActivity extends AppCompatActivity implements
                             .execute(phoneNumber);
                 }
             });
+        } else {
+            mEmptyView.setText(getString(R.string.dialer_too_many_contacts));
+            mContactsListView.setEmptyView(mEmptyView);
         }
     }
 
