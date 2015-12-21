@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="analytics_id">UA-401436-29</string>
+
+    <string name="analytics_screenname_missed">Missed</string>
+    <string name="analytics_screenname_recents">Recents</string>
+
+</resources>
