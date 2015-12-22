@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- colors -->
+    <color name="empty_view_tint_color">#D2D2D2</color>
+    <color name="empty_view_text_color">@color/empty_view_tint_color</color>
+
+    <!-- dimens -->
+    <dimen name="empty_view_title_size">28sp</dimen>
+    <dimen name="empty_view_message_size">18sp</dimen>
+    <dimen name="empty_view_message_width">220dp</dimen>
+
+    <dimen name="empty_view_logo_width">42dp</dimen>
+    <dimen name="empty_view_logo_height">42dp</dimen>
+    <dimen name="empty_view_logo_padding">10dp</dimen>
+
+    <!-- Theme -->
+    <style name="EmptyViewStyle" parent="@style/AppTheme">
+        <item name="android:textAppearance">@style/EmptyViewTextStyle</item>
+    </style>
+
+    <!-- TextView Style -->
+    <style name="EmptyViewTextStyle" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/empty_view_text_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <!-- TextView Title Style-->
+    <style name="EmptyViewTitleTextStyle" parent="@style/EmptyViewTextStyle">
+        <item name="android:textSize">@dimen/empty_view_title_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_marginLeft">@dimen/empty_view_logo_padding</item>
+    </style>
+
+    <!-- TextView Title Message-->
+    <style name="EmptyViewMessageTextStyle" parent="@style/EmptyViewTextStyle">
+        <item name="android:textSize">@dimen/empty_view_message_size</item>
+    </style>
+
+
+</resources>

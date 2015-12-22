@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingRight="@dimen/list_item_contact_padding_right"
+    android:paddingLeft="@dimen/list_item_contact_padding_left"
+    android:paddingTop="@dimen/list_item_contact_padding_top"
+    android:paddingBottom="@dimen/list_item_contact_padding_bottom">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/text_view_contact_icon"
+        android:layout_width="@dimen/contact_icon_width"
+        android:layout_height="@dimen/contact_icon_height"
+        android:background="@drawable/bg_contact_item_icon" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:paddingLeft="@dimen/list_item_contact_padding_top">
+
+    <TextView
+        android:id="@+id/text_view_contact_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/contact_name_text_size"
+        android:fontFamily="sans-serif"
+        android:textColor="@color/contact_name_text_color"/>
+
+    <TextView
+        android:id="@+id/text_view_contact_information"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/contact_information_text_size"
+        android:fontFamily="sans-serif"
+        android:textColor="@color/contact_information_text_color"/>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Vialer</string>
+    <string name="navigation_drawer_open">Open menu</string>
+    <string name="navigation_drawer_close">Sluit menu</string>
+    <string name="feature_not_implemented">Feature is nog niet geïmplementeerd</string>
+    <string name="title_activity_dialer">Kiezer</string>
+    <string name="allowed_dialpad_characters">0123456789*#+</string>
+    <string name="title_activity_call">Telefoongesprek</string>
+    <string name="title_state_calling">Bellen</string>
+    <string name="title_unknown_caller">Onbekend</string>
+    <string name="title_number_label">Mobiel</string>
+    <string name="title_activity_setup">Instellen</string>
+    <string name="title_pick_phone_number">Kies een telefoonnnummer</string>
+    <string name="statistics_menu_item_title">Statistieken</string>
+    <string name="settings_menu_item_title">Instellingen</string>
+    <string name="logout_menu_item_title">Uitloggen</string>
+    <string name="title_activity_web">Web</string>
+    <string name="auto_login_error">@string/login_error</string>
+    <string name="login_error">Inloggen niet gelukt: %s</string>
+    <string name="call_incoming">Inkomend gesprek</string>
+    <string name="call_outgoing">Uitgaand gesprek</string>
+    <string name="call_ended">Gesprek beeëindigd</string>
+    <string name="call_on_hold">In de wacht</string>
+    <string name="call_hangup">Ophangen</string>
+    <string name="call_connected">Verbonden</string>
+    <string name="call_failed">Gesprek mislukt</string>
+    <string name="dialer_warning_a_b_connect">Twee staps modus ingeschakeld</string>
+    <string name="dialer_warning_no_connection">Geen dataverbinding beschikbaar</string>
+    <string name="version_info">Versie: %1$s</string>
+    <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
+
+    <!-- Login fragment values -->
+    <string name="login_header_label_text">Zakelijke</string>
+    <string name="login_header_label_subtext">telefonie in de cloud</string>
+    <string name="email_edittext_hint">E-mailadres</string>
+    <string name="password_edittext_hint">Wachtwoord</string>
+    <string name="forgot_password_button_title">Wachtwoord vergeten?</string>
+    <string name="login_button_title">Inloggen</string>
+    <string name="login_missing_field_title">Let op</string>
+    <string name="login_missing_field_message">Vul alstublieft alle velden in</string>
+    <string name="ok">Ok</string>
+    <!-- Forgot password fragment values -->
+    <string name="header_forgot_password_title">Wachtwoord vergeten</string>
+    <string name="forgot_password_button_text">Verzenden</string>
+    <string name="forgot_password_description">Voer uw e-mailadres in en wij sturen je instructies om je wachtwoord te herstellen.</string>
+    <string name="forgot_password_missing_field_title">Let op</string>
+    <string name="forgot_password_missing_field_message">Vul alstublieft alle velden in</string>
+    <!--
+        Configure fragment values.
+    -->
+    <string name="configure_button_title">Instellen</string>
+    <string name="configure_header_label_text">Vialer stelt</string>
+    <string name="configure_header_label_subtext">je account in</string>
+    <string name="phonenumber_edittext_hint">Mobiel nummer</string>
+    <string name="outgoingnumber_edittext_hint">Uitgaand nummer</string>
+    <string name="configure_missing_field_title">Let op</string>
+    <string name="configure_missing_field_message">Vul alstublieft alle velden in</string>
+    <!--
+        Welcome fragment values
+     -->
+    <string name="welcome_text">Welkom</string>
+    <string name="placeholder_name">Naamloze gebruiker</string>
+    <string name="start_calling_button">Aan de slag</string>
+    <string name="onboarding_login_failed_title">Inloggen mislukt</string>
+    <string name="onboarding_login_failed_message">Probeer nogmaals.</string>
+    <string name="onboarding_no_internet_title">Mislukt</string>
+    <string name="onboarding_no_internet_message">Een internet verbinding is noodzakelijk.</string>
+    <string name="onboarding_account_configure_failed_title">Configuratie mislukt</string>
+    <string name="onboarding_account_configure_invalid_phone_number">Het mobiele telefoonnummer is niet correct.</string>
+    <!-- strings empty view call records -->
+    <string name="empty_view_default_message">Je hebt (nog) geen recente telefoongesprekken.</string>
+    <string name="empty_view_missed_message">Je hebt geen gemiste telefoongesprekken.</string>
+    <string name="empty_view_unauthorized_message">Je bent niet gemachtigd om recente telefoongesprekken in te zien.</string>
+    <!---->
+    <string name="contacts_sync_success_mesage">Contacten synchronisatie succesvol</string>
+
+    <string name="contact_call_action_name">%1$s bel %2$s</string>
+
+    <string name="dialer_warning_no_connection_message">Deze app heeft een internetverbinding nodig om telefoongesprekken te kunnen starten. Maak verbinding met een mobiele dataverbinding of wifi-netwerk om te bellen via deze app.</string>
+    <string name="dialer_warning_a_b_connect_connectivity_message">Internetverbinding is niet snel genoeg om te bellen via VoIP. Bellen in twee stappen is ingeschakeld. Wanneer je iemand belt via de app bellen wij jou eerst op je GSM waarmee we je daarna verbinden met degene die je wilt bellen. Het kan zijn dat je telefonieleverancier voor het opzetten van twee verbindingen dubbele kosten in rekening brengt.</string>
+    <string name="dialer_warning_a_b_connect_account_message">Je hebt nog geen VoIP account geconfigureerd voor dit gebruikersaccount. Je kan in de beheeromgeving een VoIP account selecteren welke zal worden gebruikt door de app. Zodra je dit hebt gedaan zal je ook via VoIP kunnen bellen in de app.</string>
+    <string name="dialer_no_contacts_found_message">Geen contacten gevonden</string>
+    <string name="dialer_too_many_contacts">Momenteel ondersteunen we tot 750 contacten. In de toekomst zullen we meer contacten ondersteunen.</string>
+
+    <string name="user_is_partner_error_title">Login mislukt</string>
+    <string name="user_is_partner_error_message">Deze gebruiker is niet toegestaan om deze app te gebruiken.</string>
+
+    <string name="url_app_info">http://vialerapp.com/nl/app-info/</string>
+
+    <string name="info_menu_item_title">Info</string>
+    <string name="info_button_title">Hoe werkt bellen met Vialer</string>
+    <string name="account_sip_switch">Bellen via VoIP</string>
+    <string name="account_availability_switch_title">Bereikbaarheid</string>
+    <string name="not_available">Niet bereikbaar</string>
+    <string name="tab_title_recents">recent</string>
+    <string name="tab_title_missed">gemist</string>
+
+    <string name="navigation_name_placeholder_text">Geen uitgaand nummer geconfigureerd</string>
+    <string name="supressed_number">Anoniem</string>
+    <string name="dialer_choose_number">Kies nummer</string>
+
+    <string name="dial_plan_menu_item_title">Belplan</string>
+    <string name="accessibility_menu_item_title">Bereikbaarheid</string>
+
+    <string name="two_step_call_description_platform">Uitgaand nummer</string>
+    <string name="two_step_call_description_step_a">U wordt gebeld</string>
+    <string name="two_step_call_description_step_b">Verbinden met</string>
+
+    <string name="two_step_call_state_dialing_a">U wordt gebeld</string>
+    <string name="two_step_call_state_dialing_b">Verbonden met andere partij</string>
+    <string name="two_step_call_state_failed_a">Konden uw telefoon niet bereiken</string>
+    <string name="two_step_call_state_failed_b">Konden andere partij niet bereiken</string>
+    <string name="two_step_call_state_connected">Verbonden</string>
+    <string name="two_step_call_state_disconnected">Gesprek beëindigd</string>
+
+    <!-- Permission strings -->
+    <string name="permission_contact_dialog_title">Contact permissie</string>
+    <string name="permission_contact_dialog_message">Permissie is nodig om vanuit de contacten te kunnen bellen</string>
+    <string name="permission_contact_dialer_list_message">Kan geen contacten laden, permissie tot contacten is noodzakelijk</string>
+    <string name="account_mobile_number_edit_text_hint">Mobiel nummer</string>
+    <string name="account_outgoing_number_edit_text_hint">Uitgaand nummer</string>
+    <string name="account_sip_id_edit_text_hint">SIP Account</string>
+    <string name="account_sip_password_edit_text_hint">Wachtwoord</string>
+    <string name="two_step_call_message_step_a_failed">Konden uw telefoon niet bereiken</string>
+    <string name="two_step_call_message_step_b_failed">Konden andere partij niet bereiken</string>
+</resources>

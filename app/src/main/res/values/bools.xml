@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="dialpad_button_chars_all_caps">true</bool>
+</resources>

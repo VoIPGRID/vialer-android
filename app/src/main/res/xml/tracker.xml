@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <string name="ga_trackingId">UA-60726618-4</string>
+
+    <!-- Enable automatic Activity measurement -->
+    <bool name="ga_autoActivityTracking">true</bool>
+
+    <!-- The screen names that will appear in reports -->
+    <screenName name="com.voipgrid.vialer.MainActivity">
+        Main
+    </screenName>
+    <screenName name="com.voipgrid.vialer.onboarding.SetupActivity">
+        Onboarding
+    </screenName>
+    <screenName name="com.voipgrid.vialer.AccountActivity">
+        Settings
+    </screenName>
+    <screenName name="com.voipgrid.vialer.CallActivity">
+        Call
+    </screenName>
+    <screenName name="com.voipgrid.vialer.ClickToDialActivity">
+        ClickToDial
+    </screenName>
+    <screenName name="com.voipgrid.vialer.DialerActivity">
+        Dialer
+    </screenName>
+    <screenName name="com.voipgrid.vialer.WebActivity">
+        Web
+    </screenName>
+
+</resources>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single"
+        android:id="@+id/group1">
+        <item
+            android:id="@+id/navigation_item_statistics"
+            android:icon="@drawable/ic_menu_stats"
+            android:title="@string/statistics_menu_item_title"/>
+        <item
+            android:id="@+id/navigation_item_dial_plan"
+            android:icon="@drawable/ic_menu_dialplan"
+            android:title="@string/dial_plan_menu_item_title"/>
+
+        <item
+            android:id="@+id/navigation_item_settings"
+            android:icon="@drawable/ic_menu_settings"
+            android:title="@string/settings_menu_item_title"/>
+        <item
+            android:id="@+id/navigation_item_info"
+            android:icon="@drawable/ic_menu_info"
+            android:title="@string/info_menu_item_title"/>
+    </group>
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/group2">
+        <item
+            android:icon="@drawable/ic_menu_logout"
+            android:id="@+id/navigation_item_logout"
+            android:title="@string/logout_menu_item_title"/>
+    </group>
+</menu>
