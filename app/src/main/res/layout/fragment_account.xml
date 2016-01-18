@@ -36,7 +36,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/phonenumber_edittext_hint"
-            android:inputType="phone" />
+            android:inputType="phone"
+            android:drawableRight="@drawable/ic_info_outline_white_24dp"/>
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout

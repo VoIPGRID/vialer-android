@@ -59,6 +59,8 @@
     <string name="configure_header_label_subtext">je account in</string>
     <string name="phonenumber_edittext_hint">Mobiel nummer</string>
     <string name="outgoingnumber_edittext_hint">Uitgaand nummer</string>
+    <string name="phonenumber_info_text_title">Mobiele telefoonnummer</string>
+    <string name="phonenumber_info_text">Om Twee stap bellen mogelijk te maken, hebben we je mobiele nummer nodig.</string>
     <string name="configure_missing_field_title">Let op</string>
     <string name="configure_missing_field_message">Vul alstublieft alle velden in</string>
     <!--

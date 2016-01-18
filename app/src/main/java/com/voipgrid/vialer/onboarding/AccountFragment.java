@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -73,6 +74,22 @@ public class AccountFragment extends OnboardingFragment implements
             mMobileEdittext = (EditText) view.findViewById(R.id.mobileNumberTextDialog);
             mMobileEdittext.setText(arguments.getString(ARG_MOBILE));
             mMobileEdittext.addTextChangedListener(this);
+            mMobileEdittext.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    final int DRAWABLE_RIGHT = 2;
+
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        if (event.getRawX() >= (mMobileEdittext.getRight() - mMobileEdittext.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                            mListener.onAlertDialog(getString(R.string.phonenumber_info_text_title),
+                                    getString(R.string.phonenumber_info_text));
+
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
 
             mOutgoingEdittext = (EditText) view.findViewById(R.id.outgoingNumberTextDialog);
             String outGoingNumber = arguments.getString(ARG_OUTGOING);
