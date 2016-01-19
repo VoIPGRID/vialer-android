@@ -55,6 +55,8 @@
     <string name="configure_header_label_subtext">your account</string>
     <string name="phonenumber_edittext_hint">Mobile number</string>
     <string name="outgoingnumber_edittext_hint">Outgoing number</string>
+    <string name="phonenumber_info_text_title">Mobile phone number</string>
+    <string name="phonenumber_info_text">To make two step calling possible, we need to have your mobile phone number.</string>
     <string name="configure_missing_field_title">Warning</string>
     <string name="configure_missing_field_message">Please fill in all fields before login!</string>
     <!--
