@@ -28,6 +28,10 @@
     <string name="version_info">Version: %1$s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
 
+    <!-- Sidebar fragment values -->
+    <string name="cannot_logout_error_title">No available internet connection</string>
+    <string name="cannot_logout_error_text">An internet connection is needed to log you off.</string>
+
     <!-- Login fragment values -->
     <string name="login_header_label_text">Business</string>
     <string name="login_header_label_subtext">calls in the cloud</string>

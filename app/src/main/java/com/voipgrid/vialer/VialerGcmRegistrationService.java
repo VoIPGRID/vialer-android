@@ -38,7 +38,6 @@ public class VialerGcmRegistrationService extends IntentService implements Middl
             /* Send to server and save our registration status */
             Middleware.register(this, token);
         } catch (IOException exception) {
-
         }
     }
 }
