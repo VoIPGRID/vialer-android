@@ -31,8 +31,21 @@ import retrofit.converter.GsonConverter;
  */
 public class ServiceGenerator {
 
-    // No need to instantiate this class.
+    private static ServiceGenerator instance = null;
+    private static boolean taken = false;
+
     private ServiceGenerator() {
+    }
+
+    public static ServiceGenerator getInstance() throws PreviousRequestNotFinishedException {
+        if (taken) {
+            throw new PreviousRequestNotFinishedException("Not ready for new request yet");
+        }
+        if (instance == null) {
+            instance = new ServiceGenerator();
+        }
+        taken = true;
+        return instance;
     }
 
     public static OkHttpClient getOkHttpClient(Context context, final String username,
@@ -58,7 +71,7 @@ public class ServiceGenerator {
         });
 
         httpClient.setCache(getCache(context));
-        
+
         return httpClient;
     }
 
@@ -93,5 +106,9 @@ public class ServiceGenerator {
 
     public static Cache getCache(Context context) {
         return new Cache(context.getCacheDir(), 1024 * 1024 * 10);
+    }
+
+    public void release() {
+        this.taken = false;
     }
 }

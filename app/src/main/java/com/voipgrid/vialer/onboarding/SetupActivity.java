@@ -21,6 +21,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerGcmRegistrationService;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -49,6 +50,7 @@ public class SetupActivity extends AppCompatActivity implements
     private Api mApi;
     private ConnectivityHelper mConnectivityHelper;
     private Preferences mPreferences;
+    private ServiceGenerator mServiceGen;
     private Storage mStorage;
 
     @Override
@@ -129,11 +131,17 @@ public class SetupActivity extends AppCompatActivity implements
         mPassword = password;
         enableProgressBar(true);
 
-        mApi = ServiceGenerator.createService(
+        try {
+            mServiceGen = ServiceGenerator.getInstance();
+        } catch(PreviousRequestNotFinishedException e) {
+            e.printStackTrace();
+            return;
+        }
+        mApi = mServiceGen.createService(
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
-                new OkClient(ServiceGenerator.getOkHttpClient(this, username, password))
+                new OkClient(mServiceGen.getOkHttpClient(this, username, password))
         );
         mApi.systemUser(this);
     }
@@ -237,6 +245,7 @@ public class SetupActivity extends AppCompatActivity implements
                 onNextStep(LoginFragment.newInstance());
             }
         }
+        mServiceGen.release();
     }
 
     @Override
@@ -259,6 +268,7 @@ public class SetupActivity extends AppCompatActivity implements
                 }
             }
         });
+        mServiceGen.release();
     }
 
     private String[] tags = {
