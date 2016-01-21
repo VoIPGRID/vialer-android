@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -21,9 +22,11 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerGcmRegistrationService;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.contacts.ContactsSyncTask;
 import com.voipgrid.vialer.models.PasswordResetParams;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Storage;
@@ -33,10 +36,6 @@ import retrofit.RetrofitError;
 import retrofit.client.OkClient;
 import retrofit.client.Response;
 
-
-/**
- * Activity that handles the onboarding.
- */
 public class SetupActivity extends AppCompatActivity implements
         OnboardingFragment.FragmentInteractionListener,
         LoginFragment.FragmentInteractionListener,
@@ -44,12 +43,19 @@ public class SetupActivity extends AppCompatActivity implements
         ForgotPasswordFragment.FragmentInteractionListener,
         Callback {
 
+    private static final String TAG = SetupActivity.class.getSimpleName();
+
     private String mPassword;
 
     private Api mApi;
-    private ConnectivityHelper mConnectivityHelper;
-    private Preferences mPreferences;
+
     private Storage mStorage;
+
+    private ConnectivityHelper mConnectivityHelper;
+
+    private Preferences mPreferences;
+
+    private ServiceGenerator mServiceGen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,11 +135,16 @@ public class SetupActivity extends AppCompatActivity implements
         mPassword = password;
         enableProgressBar(true);
 
-        mApi = ServiceGenerator.createService(
+        try {
+            mServiceGen = ServiceGenerator.getInstance();
+        } catch(PreviousRequestNotFinishedException e) {
+            return;
+        }
+        mApi = mServiceGen.createService(
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
-                new OkClient(ServiceGenerator.getOkHttpClient(this, username, password))
+                new OkClient(mServiceGen.getOkHttpClient(this, username, password))
         );
         mApi.systemUser(this);
     }
@@ -156,13 +167,28 @@ public class SetupActivity extends AppCompatActivity implements
         systemUser.setOutgoingCli(outgoingNumber);
         mStorage.save(systemUser);
 
+        ContactsSyncTask task = new ContactsSyncTask(this, new ContactsSyncTask.ContactsSyncListener() {
+            @Override
+            public void onSyncSuccess() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String message = getString(R.string.contacts_sync_success_mesage);
+                        if(message != null) {
+                            Log.i(TAG, message);
+                        }
+                    }
+                });
+            }
+        });
+        task.execute();
+
         String phoneAccountId = systemUser.getPhoneAccountId();
         if(phoneAccountId != null) {
             mApi.phoneAccount(phoneAccountId, this);
         } else {
             enableProgressBar(false);
-            // TODO add UI to let the user know the sip features are not available without
-            // a sip account VIALA-157
+            // TODO add UI to let the user know the sip features are not available without a sip account VIALA-157
             onNextStep(WelcomeFragment.newInstance(
                             ((SystemUser) mStorage.get(SystemUser.class)).getFullName())
             );
@@ -237,28 +263,23 @@ public class SetupActivity extends AppCompatActivity implements
                 onNextStep(LoginFragment.newInstance());
             }
         }
+        mServiceGen.release();
     }
 
     @Override
     public void failure(RetrofitError error) {
         final String errorMessage = error.getMessage();
-        final String failedUrl = error.getUrl();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 enableProgressBar(false);
                 OnboardingFragment fragment = getCurrentFragment();
-                if (failedUrl.endsWith("password_reset/")) {
-                    displayAlert(
-                            getString(R.string.forgot_password_error_title),
-                            getString(R.string.forgot_password_error_text)
-                    );
-                }
                 if (fragment != null) {
                     fragment.onError(errorMessage);
                 }
             }
         });
+        mServiceGen.release();
     }
 
     private String[] tags = {
@@ -305,8 +326,7 @@ public class SetupActivity extends AppCompatActivity implements
     public void manageKeyboard() {
         View focus = getCurrentFocus();
         if (focus != null) {
-            InputMethodManager keyboard = (InputMethodManager) getSystemService(
-                    Context.INPUT_METHOD_SERVICE);
+            InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             keyboard.hideSoftInputFromWindow(focus.getWindowToken(), 0);
         }
     }
