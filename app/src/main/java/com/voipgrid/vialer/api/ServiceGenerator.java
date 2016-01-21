@@ -31,24 +31,12 @@ import retrofit.converter.GsonConverter;
  */
 public class ServiceGenerator {
 
-    private static ServiceGenerator instance = null;
-    private static boolean taken = false;
-
+    // No need to instantiate this class.
     private ServiceGenerator() {
     }
 
-    public static ServiceGenerator getInstance() throws PreviousRequestNotFinishedException {
-        if (taken) {
-            throw new PreviousRequestNotFinishedException("Not ready for new request yet");
-        }
-        if (instance == null) {
-            instance = new ServiceGenerator();
-        }
-        taken = true;
-        return instance;
-    }
-
-    public static OkHttpClient getOkHttpClient(Context context, final String username, final String password) {
+    public static OkHttpClient getOkHttpClient(Context context, final String username,
+                                               final String password) {
         OkHttpClient httpClient = new OkHttpClient();
         httpClient.setAuthenticator(new Authenticator() {
 
@@ -67,14 +55,15 @@ public class ServiceGenerator {
             public Request authenticateProxy(Proxy proxy, Response response) throws IOException {
                 return null;
             }
-
         });
 
         httpClient.setCache(getCache(context));
+        
         return httpClient;
     }
 
-    public static <S> S createService(final ConnectivityHelper connectivityHelper, Class<S> serviceClass, String baseUrl, Client client) {
+    public static <S> S createService(final ConnectivityHelper connectivityHelper,
+                                      Class<S> serviceClass, String baseUrl, Client client) {
         RestAdapter.Builder builder = new RestAdapter.Builder()
                 .setEndpoint(baseUrl)
                 .setClient(client)
@@ -86,7 +75,8 @@ public class ServiceGenerator {
                             request.addHeader("Cache-Control", "public, max-age=" + maxAge);
                         } else {
                             int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
-                            request.addHeader("Cache-Control", "public, only-if-cached, max-stale=" + maxStale);
+                            request.addHeader("Cache-Control",
+                                              "public, only-if-cached, max-stale=" + maxStale);
                         }
                     }
                 });
@@ -103,9 +93,5 @@ public class ServiceGenerator {
 
     public static Cache getCache(Context context) {
         return new Cache(context.getCacheDir(), 1024 * 1024 * 10);
-    }
-
-    public void release() {
-        this.taken = false;
     }
 }
