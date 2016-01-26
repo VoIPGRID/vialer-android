@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.EditText;
 import android.widget.Switch;
 
 import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -34,8 +36,8 @@ public class AccountActivity extends AppCompatActivity implements
     private CompoundButton mSwitch;
     private EditText mSipIdEditText;
 
-    private Api mApi;
-    private ConnectivityHelper mConnectivityHelper;
+    private ServiceGenerator mServiceGen;
+
     private PhoneAccount mPhoneAccount;
     private Preferences mPreferences;
     private Storage mStorage;
@@ -52,20 +54,7 @@ public class AccountActivity extends AppCompatActivity implements
         mSystemUser = (SystemUser) mStorage.get(SystemUser.class);
         mPhoneAccount = (PhoneAccount) mStorage.get(PhoneAccount.class);
 
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
-
         mPreferences = new Preferences(this);
-
-        mApi = ServiceGenerator.createService(
-                mConnectivityHelper,
-                Api.class,
-                getString(R.string.api_url),
-                new OkClient(ServiceGenerator.getOkHttpClient(
-                        this, mSystemUser.getEmail(), mSystemUser.getPassword()))
-        );
 
         /* set the Toolbar to use as ActionBar */
         setSupportActionBar((Toolbar) findViewById(R.id.action_bar));
@@ -142,7 +131,24 @@ public class AccountActivity extends AppCompatActivity implements
         String number = ((EditText) findViewById(
                 R.id.account_mobile_number_edit_text)).getText().toString();
 
-        mApi.mobileNumber(new MobileNumber(number), this);
+        ConnectivityHelper connectivityHelper = new ConnectivityHelper(
+                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
+                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
+        );
+
+        try {
+            mServiceGen = ServiceGenerator.getInstance();
+        } catch(PreviousRequestNotFinishedException e) {
+            return;
+        }
+        Api api = mServiceGen.createService(
+                connectivityHelper,
+                Api.class,
+                getString(R.string.api_url),
+                new OkClient(mServiceGen.getOkHttpClient(
+                        this, mSystemUser.getEmail(), mSystemUser.getPassword()))
+        );
+        api.mobileNumber(new MobileNumber(number), this);
 
         mSystemUser.setMobileNumber(number);
 
@@ -158,11 +164,12 @@ public class AccountActivity extends AppCompatActivity implements
             // Success callback for updating mobile number.
             // Update the systemuser.
             mStorage.save(mSystemUser);
+            mServiceGen.release();
     }
 
     @Override
     public void failure(RetrofitError error) {
-        error.printStackTrace();
+        mServiceGen.release();
     }
 
     @Override
