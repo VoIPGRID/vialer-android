@@ -23,6 +23,7 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.contacts.ContactsManager;
 import com.voipgrid.vialer.contacts.ContactsPermission;
+import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.onboarding.StartupTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;

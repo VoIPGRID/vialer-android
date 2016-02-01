@@ -1,4 +1,4 @@
-package com.voipgrid.vialer;
+package com.voipgrid.vialer.dialer;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,6 +9,8 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -20,6 +22,9 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
+import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.WarningActivity;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -27,11 +32,11 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.contacts.ContactsManager;
 import com.voipgrid.vialer.contacts.ContactsPermission;
 import com.voipgrid.vialer.onboarding.SetupActivity;
+import com.voipgrid.vialer.t9.ContactCursorLoader;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.Storage;
-import com.voipgrid.vialer.t9.ListViewContactsLoader;
 
 import java.io.InputStream;
 
@@ -44,7 +49,8 @@ public class DialerActivity extends AppCompatActivity implements
         View.OnClickListener,
         KeyPadView.OnKeyPadClickListener,
         AbsListView.OnScrollListener,
-        AdapterView.OnItemClickListener {
+        AdapterView.OnItemClickListener,
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     private ListView mContactsListView;
     private NumberInputEditText mNumberInputEditText;
@@ -58,6 +64,7 @@ public class DialerActivity extends AppCompatActivity implements
     private Preferences mPreferences;
     private Storage mStorage;
 
+    private String t9Query;
     private boolean mHasPermission;
     private boolean mAskForPermission;
 
@@ -83,6 +90,7 @@ public class DialerActivity extends AppCompatActivity implements
         mDialerWarning = (TextView) findViewById(R.id.dialer_warning);
         mContactsListView = (ListView) findViewById(R.id.list_view);
         mEmptyView = (TextView) findViewById(R.id.message);
+        mEmptyView.setText("");
 
         // This should be called before setupContactParts.
         setupKeypad();
@@ -96,11 +104,7 @@ public class DialerActivity extends AppCompatActivity implements
         mHasPermission = ContactsPermission.hasPermission(this);
         mAskForPermission = true;
         // Check for contact permissions before doing contact related work.
-        if (mHasPermission) {
-            // Handling this intent is only needed when we have contact permissions.
-            String number = null;
-            mEmptyView.setText(getString(R.string.dialer_no_contacts_found_message));
-            mContactsListView.setEmptyView(mEmptyView);
+        if (mHasPermission) { // Handling this intent is only needed when we have contact permissions.
 
             // This should be called after setupKeyPad.
             setupContactParts();
@@ -123,7 +127,7 @@ public class DialerActivity extends AppCompatActivity implements
                         ContactsContract.CommonDataKinds.StructuredName.PHONETIC_NAME,
                         ContactsContract.Data.DATA3 }, null, null, null);
                 cursor.moveToFirst();
-                number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA3));
+                String number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA3));
                 mNumberInputEditText.setNumber(number);
                 cursor.close();
             }
@@ -160,33 +164,36 @@ public class DialerActivity extends AppCompatActivity implements
      * listener for the T9 contact search.
      */
     private void setupContactParts() {
-        Cursor cursor = this.getContentResolver()
-                .query(
-                    ContactsContract.Contacts.CONTENT_URI,
-                    null,
-                    ContactsContract.Data.HAS_PHONE_NUMBER + " = 1",
-                    null,
-                    null
-                );
-
-        // Due to performance we only support <= 750 contacts for T9 search.
-        if (cursor == null || cursor.getCount() <= 750){
-            // Setup the list view.
-            setupContactsListView();
-            // Replace the empty listener set in setupKeypad with the T9 search function.
-            mNumberInputEditText.setOnInputChangedListener(new NumberInputEditText.OnInputChangedListener() {
-                @Override
-                public void onInputChanged(String phoneNumber) {
-                    new ListViewContactsLoader(getBaseContext(), mContactsAdapter)
-                            .execute(phoneNumber);
+        // Setup the list view.
+        setupContactsListView();
+        // Replace the empty listener set in setupKeypad with the T9 search function.
+        mNumberInputEditText.setOnInputChangedListener(new NumberInputEditText.OnInputChangedListener() {
+            @Override
+            public void onInputChanged(String phoneNumber) {
+                t9Query = phoneNumber;
+                // Input field is cleared so clear contact list.
+                if (phoneNumber.length() == 0) {
+                    clearContactList();
+                } else {
+                    // Load contacts matching t9Query.
+                    getSupportLoaderManager().restartLoader(1, null, DialerActivity.this).forceLoad();
                 }
-            });
-        } else {
-            mEmptyView.setText(getString(R.string.dialer_too_many_contacts));
-            mContactsListView.setEmptyView(mEmptyView);
-        }
+            }
+        });
     }
 
+    /**
+     * Function to clear the contact list in the dialer.
+     */
+    private void clearContactList() {
+        mContactsAdapter.swapCursor(null);
+        mContactsAdapter.notifyDataSetChanged();
+        mEmptyView.setText("");
+    }
+
+    /**
+     * Function to setup the listview and cursor adapter.
+     */
     private void setupContactsListView() {
         mContactsAdapter = new SimpleCursorAdapter(
                 getBaseContext(),
@@ -203,19 +210,19 @@ public class DialerActivity extends AppCompatActivity implements
 
         mContactsAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             /**
-             * Binds the Cursor column defined by the specified index to the specified view
+             * Binds the Cursor column defined by the specified index to the specified view.
              */
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
                 if (view.getId() == R.id.text_view_contact_icon) {
-                    // The ListViewContactsLoader class stores a contact uri for which
+                    // The class stores a contact uri for which
                     // we can retrieve a photo.
                     Uri photoUri = Uri.parse(cursor.getString(columnIndex));
-                    // open a photo inputStream given contact uri.
+                    // Open a photo inputStream given contact uri.
                     InputStream photoInputStream =
                             ContactsContract.Contacts.openContactPhotoInputStream(
                                     getContentResolver(), photoUri);
                     if (photoInputStream != null) {
-                        // decode it to a bitmap when the stream is opened successfully
+                        // Decode it to a bitmap when the stream is opened successfully.
                         Bitmap bm = BitmapFactory.decodeStream(photoInputStream);
                         ((CircleImageView) view).setImageBitmap(bm);
                     } else {
@@ -228,16 +235,11 @@ public class DialerActivity extends AppCompatActivity implements
             }
         });
 
-        // Getting reference to listview
+        // Getting reference to listview.
         mContactsListView.setOnScrollListener(this);
         mContactsListView.setOnItemClickListener(this);
         mContactsListView.setAdapter(mContactsAdapter);
-
-        // Creating an AsyncTask object to retrieve and load listview with contacts
-        ListViewContactsLoader listViewContactsLoader = new ListViewContactsLoader(
-                getBaseContext(), mContactsAdapter);
-        // Starting the AsyncTask process to retrieve and load listview with contacts
-        listViewContactsLoader.execute();
+        mContactsListView.setEmptyView(mEmptyView);
     }
 
     @Override
@@ -367,5 +369,29 @@ public class DialerActivity extends AppCompatActivity implements
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
                          int totalItemCount) {
 
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // Create loader and set t9Query to load for.
+        ContactCursorLoader loader = new ContactCursorLoader(this);
+        loader.setT9Query(t9Query);
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        // Set new data on adapter and notify data changed.
+        mContactsAdapter.swapCursor(data);
+        mContactsAdapter.notifyDataSetChanged();
+        // Set empty to no contacts found when result is empty.
+        if (data != null && data.getCount() == 0) {
+            mEmptyView.setText(getString(R.string.dialer_no_contacts_found_message));
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        clearContactList();
     }
 }

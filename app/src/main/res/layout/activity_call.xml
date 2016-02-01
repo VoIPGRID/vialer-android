@@ -130,7 +130,7 @@
                     android:orientation="vertical"
                     >
 
-                    <com.voipgrid.vialer.NumberInputEditText
+                    <com.voipgrid.vialer.dialer.NumberInputEditText
                         android:id="@+id/number_input_edit_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -142,7 +142,7 @@
                         android:background="@color/key_pad_divider_color"
                         />
 
-                    <com.voipgrid.vialer.KeyPadView
+                    <com.voipgrid.vialer.dialer.KeyPadView
                         android:id="@+id/key_pad_view"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

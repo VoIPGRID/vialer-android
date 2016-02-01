@@ -5,12 +5,17 @@ import android.accounts.AccountManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.util.Log;
 
+import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.t9.T9DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +25,9 @@ import java.util.List;
  * Class for contact related operations.
  */
 public class ContactsManager {
+
+    private static final String LOG_TAG = ContactsManager.class.getName();
+    private static final boolean DEBUG = false;
 
     /**
      * Check if their is a sync account present. If not create one.
@@ -61,40 +69,72 @@ public class ContactsManager {
     }
 
     /**
+     *
+     * @param context
+     * @param syncContact
+     * @param t9Database
+     */
+    public static void syncContact(Context context, SyncContact syncContact, T9DatabaseHelper t9Database) {
+        syncContact(context, syncContact, t9Database, false);
+    }
+
+    /**
      * Function for syncing a contact.
      *
-     * @param context Context for Strings and ContentResolver.
-     * @param displayName The display name of the contact.
-     * @param phoneNumbers The phone numbers of the contact.
+     * @param context
+     * @param syncContact Object that contains contact info.
+     * @param t9Database Database for the t9 queries.
+     * @param fullT9Sync Whether a full t9 contact sync should occur.
      */
-    public static void syncContact(Context context, String displayName, List<String> phoneNumbers) {
-        String where = ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY + " = ? AND "
+    public static void syncContact(Context context, SyncContact syncContact, T9DatabaseHelper t9Database, boolean fullT9Sync) {
+
+        if (DEBUG) {
+            Log.d(LOG_TAG, "Syncing contact with id " + Long.toString(syncContact.getContactId()) + " and name " + syncContact.getDisplayName());
+        }
+
+        String where = ContactsContract.RawContacts.CONTACT_ID + " = ? AND "
                 + ContactsContract.RawContacts.ACCOUNT_TYPE + " = ? AND "
                 + ContactsContract.RawContacts.ACCOUNT_NAME + " = ?";
         String[] whereArg = new String[] {
-                displayName,
+                Long.toString(syncContact.getContactId()),
                 context.getString(R.string.account_type),
                 context.getString(R.string.contacts_app_name)};
 
         // TODO VIALA-340: Duplicate contacts with same name.
         ContentResolver resolver = context.getContentResolver();
-        Cursor sameName = resolver.query(ContactsContract.RawContacts.CONTENT_URI, null, where,
+        Cursor sameContact = resolver.query(ContactsContract.RawContacts.CONTENT_URI, null, where,
                 whereArg, null);
 
-        if (sameName != null) {
+        if (sameContact != null) {
             // Prevent duplicate entries in RawContactsArray.
-            if (sameName.getCount() == 0) {
-                sameName.close();
+            if (sameContact.getCount() == 0) {
+                sameContact.close();
                 // Not an existing record so create app contact.
-                addAppContact(context, displayName, phoneNumbers);
+                addAppContact(context, syncContact.getDisplayName(), syncContact.getNormalizedPhoneNumbers());
+                t9Database.insertT9Contact(syncContact);
             } else {
-                sameName.moveToFirst();
-                String contactId = sameName.getString(sameName.getColumnIndex(
-                        ContactsContract.Contacts._ID));
-                sameName.close();
+                sameContact.moveToFirst();
+                String vialerContactId = sameContact.getString(sameContact.getColumnIndex(
+                        ContactsContract.RawContacts._ID));
+                sameContact.close();
                 // Does exist, take first contact and update it.
                 // TODO VIALA-340: Duplicate contacts with same name.
-                updateAppContact(context, contactId, phoneNumbers);
+                boolean updatedContact = updateAppContact(context, vialerContactId, syncContact.getNormalizedPhoneNumbers());
+
+                SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
+
+                // We can change this piece of code every time we want a full sync by alternating
+                // the interpretation value of full_sync_toggle.
+                if (!preferenceManager.contains("full_sync_toggle")) {
+                    fullT9Sync = true;
+                    preferenceManager.edit().putBoolean("full_sync_toggle", false);
+                }
+
+                // On first run of the new t9 sync contacts will not be changed thus no t9 records
+                // will be synced. We need to make sure all contacts get synced to the t9 db.
+                if (updatedContact || fullT9Sync) {
+                    t9Database.updateT9Contact(syncContact);
+                }
             }
         }
     }
@@ -152,10 +192,10 @@ public class ContactsManager {
      * Function for updating a app contact related to a existing contact.
      *
      * @param context Context for Strings and ContentResolver.
-     * @param contactId Id of the app contact that needs to be updated.
+     * @param vailerContactId Id of the app contact that needs to be updated.
      * @param phoneNumbers New phone numbers of the related contact.
      */
-    private static void updateAppContact(Context context, String contactId, List<String> phoneNumbers) {
+    private static boolean updateAppContact(Context context, String vailerContactId, List<String> phoneNumbers) {
         // Initialization.
         String[] projection;
         String selection;
@@ -170,7 +210,7 @@ public class ContactsManager {
         selection = ContactsContract.Data.RAW_CONTACT_ID + " = ? AND "
                 + ContactsContract.Data.MIMETYPE + " = ?";
         selectionArgs = new String[] {
-                contactId,
+                vailerContactId,
                 mimetype,
         };
 
@@ -195,21 +235,24 @@ public class ContactsManager {
 
         // These numbers need to be added to the app contact.
         if (phoneNumbers.size() > 0) {
-            addAppContactActionInsertsToOps(context, ops, Long.parseLong(contactId), phoneNumbers);
+            addAppContactActionInsertsToOps(context, ops, Long.parseLong(vailerContactId), phoneNumbers);
         }
         // These numbers need to be deleted from the app contact.
         if (currentPhoneNumbers.size() > 0){
-            addAppContactActionDeletesToOps(context, ops, contactId, currentPhoneNumbers);
+            addAppContactActionDeletesToOps(context, ops, vailerContactId, currentPhoneNumbers);
         }
 
         // If we have operations execute them.
         if (ops.size() > 0){
             try {
                 resolver.applyBatch(ContactsContract.AUTHORITY, ops);
+                return true;
             } catch (Exception e) {
                 e.printStackTrace();
+                return false;
             }
         }
+        return false;
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.voipgrid.vialer;
+package com.voipgrid.vialer.dialer;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.sip.SipConstants;
 
 /**

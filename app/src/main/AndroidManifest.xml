@@ -56,7 +56,7 @@
 
         <!-- Activity responsible for choosing outgoing calls -->
         <activity
-            android:name=".DialerActivity"
+            android:name=".dialer.DialerActivity"
             android:label="@string/title_activity_dialer"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -174,9 +174,6 @@
                 android:resource="@xml/authenticator" />
         </service>
 
-        <activity
-            android:name=".contacts.AuthenticatorActivity"
-            android:label="@string/contacts_app_name" />
         <activity
             android:name=".AccountActivity"
             android:label="@string/title_activity_account"

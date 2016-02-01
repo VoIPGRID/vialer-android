@@ -1,4 +1,4 @@
-package com.voipgrid.vialer;
+package com.voipgrid.vialer.dialer;
 
 import android.content.Context;
 import android.text.Editable;
@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+
+import com.voipgrid.vialer.R;
 
 /**
  * Created by eltjo on 26/08/15.
