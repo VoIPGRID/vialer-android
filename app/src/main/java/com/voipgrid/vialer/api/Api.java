@@ -32,7 +32,7 @@ public interface Api {
     @POST("/api/mobileapp/")
     TwoStepCallStatus twoStepCall(@Body ClickToDialParams params);
 
-    @GET("/api/mobileapp/{call_id}")
+    @GET("/api/mobileapp/{call_id}/")
     TwoStepCallStatus twoStepCall(@Path("call_id") String callId);
 
     @GET("/api/permission/systemuser/profile/")
@@ -58,7 +58,7 @@ public interface Api {
                         @Query("call_date__gt") String date,
                         Callback<VoipGridResponse<CallRecord>> callback);
 
-    @GET("/api/userdestination")
+    @GET("/api/userdestination/")
     void getUserDestination(Callback<VoipGridResponse<UserDestination>> callback);
 
     @PUT("/api/selecteduserdestination/{id}/")
