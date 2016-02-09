@@ -15,6 +15,7 @@ import com.voipgrid.vialer.models.PasswordResetParams;
 import retrofit.Callback;
 import retrofit.client.Response;
 import retrofit.http.Body;
+import retrofit.http.DELETE;
 import retrofit.http.GET;
 import retrofit.http.POST;
 import retrofit.http.PUT;
@@ -34,6 +35,9 @@ public interface Api {
 
     @GET("/api/mobileapp/{call_id}/")
     TwoStepCallStatus twoStepCall(@Path("call_id") String callId);
+
+    @DELETE("/api/mobileapp/{call_id}/")
+    void twoStepCallCancel(@Path("call_id") String callId, Callback<Object> callback);
 
     @GET("/api/permission/systemuser/profile/")
     void systemUser(Callback<SystemUser> callback);

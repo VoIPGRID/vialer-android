@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.voipgrid.vialer.TwoStepCallActivity">
+    tools:context=".twostepcall.TwoStepCallActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -34,20 +35,41 @@
         android:onClick="onClick"
         style="@style/Warning"
         />
-
-    <ScrollView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <com.voipgrid.vialer.twostepcall.widget.TwoStepCallView
-            android:id="@+id/two_step_call_view"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            android:paddingBottom="@dimen/activity_vertical_margin"/>
+            android:layout_height="match_parent">
 
-    </ScrollView>
+            <com.voipgrid.vialer.twostepcall.TwoStepCallView
+                android:id="@+id/two_step_call_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin"/>
+
+        </ScrollView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal|bottom"
+            >
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/two_step_button_hangup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_call"
+                android:onClick="onClick"
+                app:backgroundTint="@color/call_fab_hangup_color"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                app:elevation="@dimen/fab_elevation"
+                app:borderWidth="@dimen/fab_border_width"
+                />
+        </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

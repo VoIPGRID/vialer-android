@@ -187,7 +187,7 @@
                 android:value="com.voipgrid.vialer.MainActivity" />
         </activity>
         <activity
-            android:name=".TwoStepCallActivity"
+            android:name=".twostepcall.TwoStepCallActivity"
             android:screenOrientation="portrait" />
     </application>
 

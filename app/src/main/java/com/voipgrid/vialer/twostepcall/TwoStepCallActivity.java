@@ -1,13 +1,16 @@
-package com.voipgrid.vialer;
+package com.voipgrid.vialer.twostepcall;
 
 import android.app.Activity;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.TextView;
 
+import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
@@ -16,23 +19,30 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 import com.voipgrid.vialer.models.ClickToDialParams;
-import com.voipgrid.vialer.twostepcall.widget.TwoStepCallView;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Storage;
 
+import retrofit.Callback;
+import retrofit.RetrofitError;
 import retrofit.client.OkClient;
+import retrofit.client.Response;
 
-public class TwoStepCallActivity extends Activity {
+public class TwoStepCallActivity extends Activity implements View.OnClickListener, Callback<Object> {
 
     public static final String NUMBER_TO_CALL = "number-to-call";
+    private boolean cancelCall = false;
 
     private TextView mDialerWarningTextView;
     private TextView mStatusTextView;
 
+
     private AnalyticsHelper mAnalyticsHelper;
+    private Api mApi;
     private ConnectivityHelper mConnectivityHelper;
     private Preferences mPreferences;
     private Storage mStorage;
+    private SystemUser mSystemUser;
+    private TwoStepCallTask mTwoStepCallTask;
     private TwoStepCallView mTwoStepCallView;
 
     @Override
@@ -56,25 +66,31 @@ public class TwoStepCallActivity extends Activity {
 
         mDialerWarningTextView = (TextView) findViewById(R.id.dialer_warning);
 
-        SystemUser systemUser = (SystemUser) new Storage(this).get(SystemUser.class);
+        mSystemUser = (SystemUser) new Storage(this).get(SystemUser.class);
 
-        Api api = ServiceGenerator.createService(
+        mApi = ServiceGenerator.createService(
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
                 new OkClient(ServiceGenerator.getOkHttpClient(
                         this,
-                        systemUser.getEmail(),
-                        systemUser.getPassword())
+                        mSystemUser.getEmail(),
+                        mSystemUser.getPassword())
                 )
         );
 
         String numberToCall = getIntent().getStringExtra(NUMBER_TO_CALL);
 
-        new TwoStepCallTask(api, systemUser.getMobileNumber(), numberToCall).execute();
+        mTwoStepCallTask = new TwoStepCallTask(mApi, mSystemUser.getMobileNumber(), numberToCall);
+        mTwoStepCallTask.execute();
+
+        mStatusTextView = ((TextView) findViewById(R.id.status_text_view));
 
         mTwoStepCallView = (TwoStepCallView) findViewById(R.id.two_step_call_view);
-        mTwoStepCallView.setOutgoingNumber(systemUser.getOutgoingCli());
+        mTwoStepCallView.setOutgoingNumber(mSystemUser.getOutgoingCli());
+        mTwoStepCallView.setNumberA(mSystemUser.getMobileNumber());
+        mTwoStepCallView.setNumberB(numberToCall);
+        updateStateView(TwoStepCallUtils.STATE_INITIAL);
 
         mAnalyticsHelper.send(
                 getString(R.string.analytics_dimension),
@@ -84,7 +100,6 @@ public class TwoStepCallActivity extends Activity {
         );
 
         ((TextView) findViewById(R.id.name_text_view)).setText(numberToCall);
-        mStatusTextView = ((TextView) findViewById(R.id.status_text_view));
     }
 
     @Override
@@ -107,6 +122,68 @@ public class TwoStepCallActivity extends Activity {
         }
     }
 
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.two_step_button_hangup:
+                // Already cancelling a call.
+                if (cancelCall) {
+                    break;
+                }
+
+                String callId = mTwoStepCallTask.getCallId();
+
+                if (callId != null) {  // callId exists so cancel right away
+                    mApi.twoStepCallCancel(callId, this);
+                    cancelCall = true;
+                } else {  // set cancelCall so the two way task will cancel it once it's created
+                    cancelCall = true;
+                }
+
+                // Update view to reflect cancelling process.
+                updateStateView(TwoStepCallUtils.STATE_CANCELLING);
+                break;
+        }
+    }
+
+    @Override
+    public void success(Object o, Response response) {
+        // Response code of successful cancel request.
+        if (response.getStatus() == 204) {
+            // Cancel the status update task.
+            mTwoStepCallTask.cancel(false);
+            // Update view.
+            updateStateView(TwoStepCallUtils.STATE_CANCELLED);
+            findViewById(R.id.two_step_button_hangup).setVisibility(View.GONE);
+
+            // Redirect user back to previous activity after 5 seconds.
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    finish();
+                }
+            }, 5000);
+        }
+    }
+
+    @Override
+    public void failure(RetrofitError error) {
+        // No longer cancelling a call.
+        cancelCall = false;
+        // Failed to cancel call, enable button again.
+        findViewById(R.id.two_step_button_hangup).setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Function to update the root view to given state.
+     * @param state Present in TwoStepCallUtils.
+     */
+    private void updateStateView(String state) {
+        mTwoStepCallView.setState(state);
+        mStatusTextView.setText(TwoStepCallUtils.getStateText(this, state));
+    }
+
+
     public class TwoStepCallTask extends AsyncTask<Void, String, Boolean> {
 
         private Api mApi;
@@ -121,10 +198,20 @@ public class TwoStepCallActivity extends Activity {
             mNumberB = numberB;
         }
 
+        public String getCallId() {
+            return mCallId;
+        }
+
         @Override
         protected Boolean doInBackground(Void... params) {
             TwoStepCallStatus status = mApi.twoStepCall(new ClickToDialParams(mNumberA, mNumberB));
             mCallId = status.getCallId();
+            // If cancel has been pressed before the call was made cancel it here.
+            if (cancelCall) {
+                mApi.twoStepCallCancel(mCallId, TwoStepCallActivity.this);
+            }
+            // We continue with the task because if the cancel fails there is no way to inform
+            // the user with the status of the uncancelled call.
             mNumberA = status.getaNumber();
             mNumberB = status.getbNumber();
             String message = status.getStatus();
@@ -139,11 +226,9 @@ public class TwoStepCallActivity extends Activity {
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            if(values.length > 0) {
-                mTwoStepCallView.setState(values[0]);
-                mTwoStepCallView.setNumberA(mNumberA);
-                mTwoStepCallView.setNumberB(mNumberB);
-                mStatusTextView.setText(getStateText(values[0]));
+            if(values.length > 0 && !cancelCall) {
+                // We do not want to update the view if we are in the process of cancelling a call.
+                updateStateView(values[0]);
             }
         }
 
@@ -151,7 +236,7 @@ public class TwoStepCallActivity extends Activity {
             if(values.length > 0) {
                 String message = values[0];
                 if (message != null) {
-                    values[0] = getViewState(message);
+                    values[0] = TwoStepCallUtils.getViewState(message);
                 }
                 publishProgress(values);
 
@@ -169,51 +254,6 @@ public class TwoStepCallActivity extends Activity {
                 }
             }
             return true;
-        }
-
-        private String getViewState(String message) {
-            if(message != null) {
-                switch (message) {
-                    case TwoStepCallStatus.STATE_CALLING_A:
-                        return TwoStepCallView.STATE_CALLING_A;
-                    case TwoStepCallStatus.STATE_CALLING_B:
-                        return TwoStepCallView.STATE_CALLING_B;
-                    case TwoStepCallStatus.STATE_FAILED_A:
-                        return TwoStepCallView.STATE_FAILED_A;
-                    case TwoStepCallStatus.STATE_FAILED_B:
-                        return TwoStepCallView.STATE_FAILED_B;
-                    case TwoStepCallStatus.STATE_CONNECTED:
-                        return TwoStepCallView.STATE_CONNECTED;
-                    case TwoStepCallStatus.STATE_DISCONNECTED:
-                        return TwoStepCallView.STATE_DISCONNECTED;
-                }
-            }
-            return TwoStepCallView.STATE_INITIAL;
-        }
-
-        private String getStateText(String message) {
-            if(message != null) {
-                int resource = 0;
-                switch (message) {
-                    case TwoStepCallView.STATE_CALLING_A:
-                        resource = R.string.two_step_call_state_dialing_a; break;
-                    case TwoStepCallView.STATE_CALLING_B:
-                        resource =  R.string.two_step_call_state_dialing_b; break;
-                    case TwoStepCallView.STATE_FAILED_A:
-                        resource =  R.string.two_step_call_state_failed_a; break;
-                    case TwoStepCallView.STATE_FAILED_B:
-                        resource =  R.string.two_step_call_state_failed_b; break;
-                    case TwoStepCallView.STATE_CONNECTED:
-                        resource =  R.string.two_step_call_state_connected; break;
-                    case TwoStepCallView.STATE_DISCONNECTED:
-                        resource =  R.string.two_step_call_state_disconnected; break;
-                }
-
-                if(resource > 0) {
-                    return getResources().getString(resource);
-                }
-            }
-            return null;
         }
     }
 }

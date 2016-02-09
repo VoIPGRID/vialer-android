@@ -141,6 +141,8 @@
     <string name="two_step_call_state_failed_b">Could not reach other party</string>
     <string name="two_step_call_state_connected">Connected</string>
     <string name="two_step_call_state_disconnected">Call ended</string>
+    <string name="two_step_call_state_cancelling">Cancelling call</string>
+    <string name="two_step_call_state_cancelled">Call cancelled</string>
 
     <!-- Permission strings -->
     <string name="permission_contact_dialog_title">Contact permission</string>

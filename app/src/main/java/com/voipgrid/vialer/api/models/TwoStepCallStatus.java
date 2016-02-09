@@ -9,7 +9,6 @@ public class TwoStepCallStatus {
 
     public static final String STATE_CONNECTED = "connected";
     public static final String STATE_DISCONNECTED = "disconnected";
-    public static final String STATE_BLACKLISTED = "blacklisted";
     public static final String STATE_FAILED_A = "failed_a";
     public static final String STATE_FAILED_B = "failed_b";
     public static final String STATE_CALLING_A = "dialing_a";
