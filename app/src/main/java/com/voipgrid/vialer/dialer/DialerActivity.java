@@ -16,6 +16,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -53,7 +54,7 @@ public class DialerActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     private ListView mContactsListView;
-    private NumberInputEditText mNumberInputEditText;
+    private NumberInputView mNumberInputView;
     private SimpleCursorAdapter mContactsAdapter = null;
     private TextView mDialerWarning;
     private TextView mEmptyView;
@@ -128,7 +129,7 @@ public class DialerActivity extends AppCompatActivity implements
                         ContactsContract.Data.DATA3 }, null, null, null);
                 cursor.moveToFirst();
                 String number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA3));
-                mNumberInputEditText.setNumber(number);
+                mNumberInputView.setNumber(number);
                 cursor.close();
             }
         } else {
@@ -137,6 +138,10 @@ public class DialerActivity extends AppCompatActivity implements
             mEmptyView.setText(getString(R.string.permission_contact_dialer_list_message));
             mContactsListView.setEmptyView(mEmptyView);
         }
+
+        // Make sure there is no keyboard popping up when pasting in the dialer input field.
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     }
 
     /**
@@ -148,9 +153,9 @@ public class DialerActivity extends AppCompatActivity implements
 
         mKeyPadViewContainer = (ViewGroup) findViewById(R.id.key_pad_container);
 
-        mNumberInputEditText = (NumberInputEditText) findViewById(R.id.number_input_edit_text);
+        mNumberInputView = (NumberInputView) findViewById(R.id.number_input_edit_text);
 
-        mNumberInputEditText.setOnInputChangedListener(new NumberInputEditText.OnInputChangedListener() {
+        mNumberInputView.setOnInputChangedListener(new NumberInputView.OnInputChangedListener() {
             @Override
             public void onInputChanged(String phoneNumber) {
                 // Keep this empty. A implemented version will be set if we have contact permissions
@@ -167,7 +172,7 @@ public class DialerActivity extends AppCompatActivity implements
         // Setup the list view.
         setupContactsListView();
         // Replace the empty listener set in setupKeypad with the T9 search function.
-        mNumberInputEditText.setOnInputChangedListener(new NumberInputEditText.OnInputChangedListener() {
+        mNumberInputView.setOnInputChangedListener(new NumberInputView.OnInputChangedListener() {
             @Override
             public void onInputChanged(String phoneNumber) {
                 t9Query = phoneNumber;
@@ -317,7 +322,7 @@ public class DialerActivity extends AppCompatActivity implements
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_call :
-                String phoneNumber = mNumberInputEditText.getNumber();
+                String phoneNumber = mNumberInputView.getNumber();
                 if(phoneNumber!= null && !phoneNumber.isEmpty()) {
                     onCallNumber(PhoneNumberUtils.format(phoneNumber), null);
                 }
@@ -345,7 +350,7 @@ public class DialerActivity extends AppCompatActivity implements
 
     @Override
     public void onKeyPadButtonClick(String digit, String chars) {
-        mNumberInputEditText.add(digit);
+        mNumberInputView.add(digit);
     }
 
     private void toggleKeyPadView() {

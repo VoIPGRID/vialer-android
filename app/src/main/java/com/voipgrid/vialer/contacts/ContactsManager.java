@@ -155,6 +155,8 @@ public class ContactsManager {
                         context.getString(R.string.contacts_app_name))
                 .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE,
                         context.getString(R.string.account_type))
+                .withValue(ContactsContract.RawContacts.AGGREGATION_MODE,
+                        ContactsContract.RawContacts.AGGREGATION_MODE_DEFAULT)
                 .build());
 
         // Add Setting to manage and edit contact data
