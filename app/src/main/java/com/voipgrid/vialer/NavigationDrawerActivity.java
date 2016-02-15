@@ -215,6 +215,7 @@ public abstract class NavigationDrawerActivity
                 e.printStackTrace();
             }
             /* Delete our account information */
+            // TODO This may lead to bugs! Investigate better way in VIALA-408.
             new Storage(this).clear();
             /* Mark ourselves as unregistered */
             PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Middleware.Constants.REGISTRATION_STATUS, Middleware.Constants.STATUS_UNREGISTERED).commit();
