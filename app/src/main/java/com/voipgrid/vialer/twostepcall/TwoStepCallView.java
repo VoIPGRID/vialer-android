@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.twostepcall.widget;
+package com.voipgrid.vialer.twostepcall;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
@@ -8,22 +8,17 @@ import android.widget.LinearLayout;
 import com.voipgrid.vialer.R;
 
 /**
- * Created by eltjo on 15/10/15.
+ * Class that contains a view with information about a two step call.
  */
 public class TwoStepCallView extends LinearLayout {
-
-    public static final String STATE_INITIAL = "initial";
-    public static final String STATE_CALLING_A = "calling-a";
-    public static final String STATE_CALLING_B = "calling-b";
-    public static final String STATE_FAILED_A = "failed-a";
-    public static final String STATE_FAILED_B = "failed-b";
-    public static final String STATE_CONNECTED = "connected";
-    public static final String STATE_DISCONNECTED = "disconnected";
-
+    private TwoStepCallConnectionView mConnectionCallA, mConnectionCallB;
     private TwoStepCallStepView mStepPlatform, mStepCallA, mStepCallB;
 
-    private TwoStepCallConnectionView mConnectionCallA, mConnectionCallB;
-
+    /**
+     * Constructor.
+     * @param context
+     * @param attrs
+     */
     public TwoStepCallView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
@@ -53,14 +48,14 @@ public class TwoStepCallView extends LinearLayout {
                 getResources().getString(R.string.two_step_call_description_step_b));
 
         setOrientation(VERTICAL);
-        setState(STATE_INITIAL);
+        setState(TwoStepCallUtils.STATE_INITIAL);
     }
 
-    private TwoStepCallStepView addStep(Context context, int color, int icon, String desciption) {
+    private TwoStepCallStepView addStep(Context context, int color, int icon, String description) {
         TwoStepCallStepView step = new TwoStepCallStepView(context);
         step.setColor(color);
         step.setIcon(icon);
-        step.setDescription(desciption);
+        step.setDescription(description);
         addView(step);
         return step;
     }
@@ -71,48 +66,71 @@ public class TwoStepCallView extends LinearLayout {
         return connection;
     }
 
+    /**
+     * Set outgoing number.
+     * @param number Outgoing CLI.
+     */
     public void setOutgoingNumber(String number) {
         mStepPlatform.setNumber(number);
     }
 
+    /**
+     * Set the a number.
+     * @param number The users own number.
+     */
     public void setNumberA(String number) {
         mStepCallA.setNumber(number);
     }
 
+    /**
+     * Set the b number.
+     * @param number The number being called.
+     */
     public void setNumberB(String number) {
         mStepCallB.setNumber(number);
     }
 
+    /**
+     * Set the state and act accordingly to the new state.
+     * @param state Found in TwoStepCallUtils.
+     */
     public void setState(String state) {
         if(state != null) {
             switch (state) {
-                case STATE_INITIAL:
+                case TwoStepCallUtils.STATE_INITIAL:
                     initialize();
                     break;
-                case STATE_CALLING_A:
+                case TwoStepCallUtils.STATE_CALLING_A:
                     callingA();
                     break;
-                case STATE_CALLING_B:
+                case TwoStepCallUtils.STATE_CALLING_B:
                     callingB();
                     break;
-                case STATE_FAILED_A:
+                case TwoStepCallUtils.STATE_FAILED_A:
                     failedA();
                     break;
-                case STATE_FAILED_B:
+                case TwoStepCallUtils.STATE_FAILED_B:
                     failedB();
                     break;
-                case STATE_CONNECTED:
+                case TwoStepCallUtils.STATE_CONNECTED:
                     connected();
                     break;
-                case STATE_DISCONNECTED:
+                case TwoStepCallUtils.STATE_DISCONNECTED:
                     disconnected();
+                    break;
+                case TwoStepCallUtils.STATE_CANCELLING:
+                    cancelling();
+                    break;
+                case TwoStepCallUtils.STATE_CANCELLED:
+                    cancelled();
                     break;
             }
         }
     }
 
-
-
+    /**
+     * Setup all UI elements.
+     */
     private void initialize() {
         mStepPlatform.setEnabled(true);
         mConnectionCallA.setEnabled(false);
@@ -123,12 +141,18 @@ public class TwoStepCallView extends LinearLayout {
         mStepCallB.setEnabled(false);
     }
 
+    /**
+     * Start calling a number animations.
+     */
     private void callingA() {
         mConnectionCallA.setEnabled(true);
         mConnectionCallA.startProgress();
         mStepCallA.setEnabled(true);
     }
 
+    /**
+     * Start calling b number animations.
+     */
     private void callingB() {
         mConnectionCallA.stopProgress();
         mConnectionCallA.setState(TwoStepCallProgressView.STATE_SUCCESS);
@@ -137,25 +161,58 @@ public class TwoStepCallView extends LinearLayout {
         mStepCallB.setEnabled(true);
     }
 
+    /**
+     * Update view to reflect failed a number call.
+     */
     private void failedA() {
         mConnectionCallA.stopProgress();
         mConnectionCallA.setState(TwoStepCallProgressView.STATE_FAILED);
         mConnectionCallA.setMessage(getResources().getString(R.string.two_step_call_message_step_a_failed));
     }
 
+    /**
+     * Update view to reflect failed b number call.
+     */
     private void failedB() {
         mConnectionCallB.stopProgress();
         mConnectionCallB.setState(TwoStepCallProgressView.STATE_FAILED);
         mConnectionCallB.setMessage(getResources().getString(R.string.two_step_call_message_step_b_failed));
     }
 
+    /**
+     * Update the view to show in progress two way call.
+     */
     private void connected() {
         mConnectionCallB.stopProgress();
         mConnectionCallB.setState(TwoStepCallProgressView.STATE_SUCCESS);
     }
 
+    /**
+     * Update the view to show a ended two way call.
+     */
     private void disconnected() {
         mConnectionCallA.stopProgress();
         mConnectionCallB.stopProgress();
+    }
+
+    /**
+     * Update the view to show a two way call being cancelled.
+     */
+    private void cancelling() {
+        mConnectionCallA.stopProgress();
+        mConnectionCallB.stopProgress();
+    }
+
+    /**
+     * Update the view to show that a two way call is cancelled.
+     */
+    private void cancelled() {
+        mConnectionCallA.setEnabled(true);
+        mConnectionCallA.stopProgress();
+        mConnectionCallA.setState(TwoStepCallProgressView.STATE_FAILED);
+
+        mConnectionCallB.setEnabled(true);
+        mConnectionCallB.stopProgress();
+        mConnectionCallB.setState(TwoStepCallProgressView.STATE_FAILED);
     }
 }
