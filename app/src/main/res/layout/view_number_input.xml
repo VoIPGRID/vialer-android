@@ -4,10 +4,11 @@
     android:layout_height="wrap_content"
     >
 
-    <EditText
+    <com.voipgrid.vialer.dialer.DialerEditText
         android:id="@+id/edit_text"
         style="@style/DialpadNumberInput"
-        android:focusable="false"
+        android:inputType="none"
+        android:textIsSelectable="true"
         />
 
     <ImageButton
