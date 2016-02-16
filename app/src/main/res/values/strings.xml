@@ -149,4 +149,7 @@
     <string name="permission_contact_dialog_message">Permission is needed to start calling from contact list</string>
     <string name="permission_contact_dialer_list_message">Unable to show contacts, permission is required</string>
 
+    <string name="invalid_mobile_number_title">Invalid number</string>
+    <string name="invalid_mobile_number_message">Your mobile number should start with your country code e.g. +31.</string>
+
 </resources>

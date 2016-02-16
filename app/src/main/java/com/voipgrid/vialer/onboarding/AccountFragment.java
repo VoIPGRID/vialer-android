@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -136,7 +137,17 @@ public class AccountFragment extends OnboardingFragment implements
 
     @Override
     public void onClick(View view) {
-        mListener.onUpdateMobileNumber(this, String.valueOf(mMobileEdittext.getText()));
+        String mobileNumber = PhoneNumberUtils.formatMobileNumber(
+                String.valueOf(mMobileEdittext.getText()));
+
+        if (PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
+            mListener.onUpdateMobileNumber(this, mobileNumber);
+        } else {
+            mListener.onAlertDialog(
+                    getString(R.string.invalid_mobile_number_title),
+                    getString(R.string.invalid_mobile_number_message)
+            );
+        }
     }
 
     @Override
@@ -161,7 +172,8 @@ public class AccountFragment extends OnboardingFragment implements
     public void onNextStep() {
         mListener.onConfigure(
                 this,
-                String.valueOf(mMobileEdittext.getText()),
+                PhoneNumberUtils.formatMobileNumber(
+                        String.valueOf(mMobileEdittext.getText())),
                 String.valueOf(mOutgoingEdittext.getText())
         );
     }
