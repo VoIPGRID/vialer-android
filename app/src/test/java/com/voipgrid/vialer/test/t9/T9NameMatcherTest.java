@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.test;
+package com.voipgrid.vialer.test.t9;
 
 import com.voipgrid.vialer.t9.T9NameMatcher;
 
