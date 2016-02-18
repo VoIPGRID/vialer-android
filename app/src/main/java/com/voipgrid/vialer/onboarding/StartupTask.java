@@ -16,7 +16,6 @@ import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.contacts.ContactsManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
 import com.voipgrid.vialer.util.Storage;
@@ -97,10 +96,5 @@ public class StartupTask extends AsyncTask {
             // Setup can fail. No need to handle error. Next startup the app will try again.
         }
         return null;
-    }
-
-    @Override
-    protected void onPostExecute(Object o) {
-        ContactsManager.requestContactSync(mContext);
     }
 }

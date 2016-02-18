@@ -173,6 +173,7 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+        <service android:name=".contacts.UpdateChangedContactsService" />
 
         <activity
             android:name=".AccountActivity"
