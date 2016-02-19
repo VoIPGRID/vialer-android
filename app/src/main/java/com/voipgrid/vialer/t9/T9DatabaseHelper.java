@@ -200,6 +200,11 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
         ArrayList<Long> matches = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
 
+        if (db == null) {
+            // Database not ready yet.
+            return matches;
+        }
+
         // Match as 'starts with'.
         String prefixQuery = T9Query + "%";
 
