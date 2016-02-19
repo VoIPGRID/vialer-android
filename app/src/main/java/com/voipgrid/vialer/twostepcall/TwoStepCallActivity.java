@@ -157,12 +157,7 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
             findViewById(R.id.two_step_button_hangup).setVisibility(View.GONE);
 
             // Redirect user back to previous activity after 5 seconds.
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    finish();
-                }
-            }, 5000);
+            finishWithDelay();
         }
     }
 
@@ -181,6 +176,18 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
     private void updateStateView(String state) {
         mTwoStepCallView.setState(state);
         mStatusTextView.setText(TwoStepCallUtils.getStateText(this, state));
+    }
+
+    /**
+     * Finish the current activity with a delay.
+     */
+    private void finishWithDelay() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                finish();
+            }
+        }, 5000);
     }
 
 
@@ -221,6 +228,8 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
+            // Called after doInBackGround and NOT called when the task is cancelled.
+            finishWithDelay();
         }
 
         @Override
