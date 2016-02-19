@@ -2,6 +2,8 @@ package com.voipgrid.vialer.callrecord;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +13,14 @@ import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.models.CallRecord;
+import com.voipgrid.vialer.util.IconHelper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Adapter to display the call records
@@ -80,6 +85,11 @@ public class CallRecordAdapter extends BaseAdapter {
             LayoutInflater inflater = ((Activity)mContext).getLayoutInflater();
             convertView = inflater.inflate(R.layout.list_item_call_record, parent, false);
 
+            Bitmap bitmapImage = IconHelper.getCallerIconBitmap("", Color.BLUE);
+
+            View photoView = convertView.findViewById(R.id.text_view_contact_icon);
+
+            ((CircleImageView) photoView).setImageBitmap(bitmapImage);
             // well set up the ViewHolder
             viewHolder = new ViewHolder();
             viewHolder.title = (TextView) convertView.findViewById(R.id.text_view_contact_name);

@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -36,6 +38,7 @@ import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.t9.ContactCursorLoader;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
+import com.voipgrid.vialer.util.IconHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.Storage;
 
@@ -221,18 +224,19 @@ public class DialerActivity extends AppCompatActivity implements
                 if (view.getId() == R.id.text_view_contact_icon) {
                     // The class stores a contact uri for which
                     // we can retrieve a photo.
-                    Uri photoUri = Uri.parse(cursor.getString(columnIndex));
+                    Uri contactUri = Uri.parse(cursor.getString(columnIndex));
                     // Open a photo inputStream given contact uri.
                     InputStream photoInputStream =
                             ContactsContract.Contacts.openContactPhotoInputStream(
-                                    getContentResolver(), photoUri);
+                                    getContentResolver(), contactUri);
                     if (photoInputStream != null) {
                         // Decode it to a bitmap when the stream is opened successfully.
                         Bitmap bm = BitmapFactory.decodeStream(photoInputStream);
                         ((CircleImageView) view).setImageBitmap(bm);
                     } else {
-                        // Otherwise set it to transparent for reusability reasons.
-                        ((CircleImageView) view).setImageResource(android.R.color.transparent);
+                        String firstLetter = cursor.getString(1).substring(0, 1);
+                        Bitmap bitmapImage = IconHelper.getCallerIconBitmap(firstLetter, Color.BLUE);
+                        ((CircleImageView) view).setImageBitmap(bitmapImage);
                     }
                     return true; //true because the data was bound to the icon view
                 }
