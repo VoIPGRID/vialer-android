@@ -20,7 +20,9 @@ import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.Middleware;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.Storage;
 
 import java.io.IOException;
@@ -115,8 +117,17 @@ public class AccountActivity extends AppCompatActivity implements
                 mEditMode = true;
             }
             if (id == R.id.action_done) {
-                mEditMode = false;
-                save();
+
+                if (isValidNumber()) {
+                    mEditMode = false;
+                    save();
+                } else {
+                    DialogHelper.displayAlert(
+                            this,
+                            getString(R.string.invalid_mobile_number_title),
+                            getString(R.string.invalid_mobile_number_message)
+                    );
+                }
             }
             invalidateOptionsMenu();
             invalidateEditText();
@@ -125,11 +136,22 @@ public class AccountActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * isValidNumber returns true if the number currently entered is a valid phone number.
+     */
+    private boolean isValidNumber() {
+        String mobileNumber = ((EditText) findViewById(
+                R.id.account_mobile_number_edit_text)).getText().toString();
+
+        return PhoneNumberUtils.isValidMobileNumber(PhoneNumberUtils.formatMobileNumber(mobileNumber));
+    }
+
     private void save() {
         findViewById(R.id.container).setFocusableInTouchMode(true);
 
         String number = ((EditText) findViewById(
                 R.id.account_mobile_number_edit_text)).getText().toString();
+        number = PhoneNumberUtils.formatMobileNumber(number);
 
         ConnectivityHelper connectivityHelper = new ConnectivityHelper(
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
@@ -161,15 +183,20 @@ public class AccountActivity extends AppCompatActivity implements
 
     @Override
     public void success(Object object, Response response) {
-            // Success callback for updating mobile number.
-            // Update the systemuser.
-            mStorage.save(mSystemUser);
-            mServiceGen.release();
+        // Success callback for updating mobile number.
+        // Update the systemuser.
+        mStorage.save(mSystemUser);
+        mServiceGen.release();
     }
 
     @Override
     public void failure(RetrofitError error) {
         mServiceGen.release();
+        DialogHelper.displayAlert(
+                this,
+                getString(R.string.onboarding_account_configure_failed_title),
+                getString(R.string.onboarding_account_configure_invalid_phone_number)
+        );
     }
 
     @Override
