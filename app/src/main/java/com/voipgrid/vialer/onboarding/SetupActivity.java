@@ -65,6 +65,13 @@ public class SetupActivity extends AppCompatActivity implements
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
         );
 
+        try {
+            mServiceGen = ServiceGenerator.getInstance();
+        } catch(PreviousRequestNotFinishedException e) {
+            e.printStackTrace();
+            return;
+        }
+
         mPreferences = new Preferences(this);
 
         if (findViewById(R.id.fragment_container) != null) {
@@ -131,12 +138,6 @@ public class SetupActivity extends AppCompatActivity implements
         mPassword = password;
         enableProgressBar(true);
 
-        try {
-            mServiceGen = ServiceGenerator.getInstance();
-        } catch(PreviousRequestNotFinishedException e) {
-            e.printStackTrace();
-            return;
-        }
         mApi = mServiceGen.createService(
                 mConnectivityHelper,
                 Api.class,
@@ -300,7 +301,7 @@ public class SetupActivity extends AppCompatActivity implements
 
     @Override
     public void onForgotPassword(Fragment fragment, String email) {
-        Api api = ServiceGenerator.createService(
+        Api api = mServiceGen.createService(
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
