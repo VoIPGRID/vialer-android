@@ -5,6 +5,9 @@ import android.content.Context;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class for util functions needed for the two step process.
  */
@@ -18,6 +21,17 @@ public class TwoStepCallUtils {
     public static final String STATE_DISCONNECTED = "disconnected";
     public static final String STATE_CANCELLING = "cancelling";
     public static final String STATE_CANCELLED = "cancelled";
+    public static final String STATE_FAILED = "failed";
+    public static final String STATE_INVALID_NUMBER = "invalid-number";
+
+    public static List<String> getFailedStates() {
+        List<String> failedStates = new ArrayList<>();
+        failedStates.add(STATE_FAILED_A);
+        failedStates.add(STATE_FAILED_B);
+        failedStates.add(STATE_FAILED);
+        failedStates.add(STATE_INVALID_NUMBER);
+        return failedStates;
+    }
 
     /**
      * Function to get the state based on the state returned in API.
@@ -70,6 +84,10 @@ public class TwoStepCallUtils {
                     resource = R.string.two_step_call_state_cancelling; break;
                 case TwoStepCallUtils.STATE_CANCELLED:
                     resource = R.string.two_step_call_state_cancelled; break;
+                case TwoStepCallUtils.STATE_FAILED:
+                    resource = R.string.two_step_call_state_setup_failed; break;
+                case TwoStepCallUtils.STATE_INVALID_NUMBER:
+                    resource = R.string.two_step_call_state_invalid_number; break;
             }
 
             if(resource > 0) {

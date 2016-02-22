@@ -125,6 +125,8 @@
     <string name="two_step_call_state_disconnected">Gesprek beëindigd</string>
     <string name="two_step_call_state_cancelling">Gesprek wordt afgebroken</string>
     <string name="two_step_call_state_cancelled">Gesprek afgebroken</string>
+    <string name="two_step_call_state_setup_failed">Opzetten van gesprek mislukt</string>
+    <string name="two_step_call_state_invalid_number">Telefoonnummer incorrect</string>
 
     <!-- Permission strings -->
     <string name="permission_contact_dialog_title">Contact permissie</string>
