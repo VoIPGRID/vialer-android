@@ -26,10 +26,7 @@ public class Preferences {
     }
 
     public boolean hasSipPermission() {
-        // DUE TO VIALA-391
-        // TODO: UNDO IN VIALA-392
-        // return  mPreferences.getBoolean(PREF_HAS_SIP_PERMISSION, DEFAULT_VALUE_HAS_SIP_PERMISSION);
-        return false;
+         return  mPreferences.getBoolean(PREF_HAS_SIP_PERMISSION, DEFAULT_VALUE_HAS_SIP_PERMISSION);
     }
 
     public void setSipEnabled(boolean sipEnabled) {
@@ -37,10 +34,8 @@ public class Preferences {
     }
 
     public boolean hasSipEnabled() {
-        // DUE TO VIALA-391
-        // TODO: UNDO IN VIALA-392
-        //  return  mPreferences.getBoolean(PREF_HAS_SIP_ENABLED, DEFAULT_VALUE_HAS_SIP_ENABLED);
-        return false;
+        return  mPreferences.getBoolean(PREF_HAS_SIP_ENABLED, DEFAULT_VALUE_HAS_SIP_ENABLED);
+
     }
 
     public boolean canUseSip() {
