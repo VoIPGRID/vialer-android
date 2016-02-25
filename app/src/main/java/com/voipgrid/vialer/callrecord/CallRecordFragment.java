@@ -228,6 +228,7 @@ public class CallRecordFragment extends ListFragment implements
         mHaveNetworkRecords = false;
         SystemUser systemUser = (SystemUser) mStorage.get(SystemUser.class);
         Api api = ServiceGenerator.createService(
+                getContext(),
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),

@@ -109,6 +109,7 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
         );
 
         Registration registrationApi = ServiceGenerator.createService(
+                this,
                 mConnectivityHelper,
                 Registration.class,
                 responseUrl,

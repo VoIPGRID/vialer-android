@@ -68,7 +68,8 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
 
         mSystemUser = (SystemUser) new Storage(this).get(SystemUser.class);
 
-        mApi = ServiceGenerator.createService(
+        Api api = ServiceGenerator.createService(
+                this,
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),

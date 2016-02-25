@@ -84,6 +84,7 @@ public abstract class NavigationDrawerActivity
 
         if (mSystemUser != null){
             mApi = ServiceGenerator.createService(
+                    this,
                     mConnectivityHelper,
                     Api.class,
                     getString(R.string.api_url),

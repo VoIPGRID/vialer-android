@@ -1,6 +1,8 @@
 package com.voipgrid.vialer.api;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,6 +12,7 @@ import com.squareup.okhttp.Credentials;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
 import java.io.IOException;
@@ -75,7 +78,7 @@ public class ServiceGenerator {
         return httpClient;
     }
 
-    public static <S> S createService(final ConnectivityHelper connectivityHelper,
+    public static <S> S createService(final Context context, final ConnectivityHelper connectivityHelper,
                                       Class<S> serviceClass, String baseUrl, Client client) {
         RestAdapter.Builder builder = new RestAdapter.Builder()
                 .setEndpoint(baseUrl)
@@ -83,13 +86,22 @@ public class ServiceGenerator {
                 .setRequestInterceptor(new RequestInterceptor() {
                     @Override
                     public void intercept(RequestFacade request) {
+                        String header = context.getString(R.string.app_name);
+                        String version = "?";
+                        try {
+                            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+                            version = packageInfo.versionName;
+                        } catch (PackageManager.NameNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        request.addHeader("User-Agent", header + " - " + version);
                         if (connectivityHelper.hasNetworkConnection()) {
                             int maxAge = 60; // read from cache for 1 minute
                             request.addHeader("Cache-Control", "public, max-age=" + maxAge);
                         } else {
                             int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
                             request.addHeader("Cache-Control",
-                                              "public, only-if-cached, max-stale=" + maxStale);
+                                    "public, only-if-cached, max-stale=" + maxStale);
                         }
                     }
                 });
