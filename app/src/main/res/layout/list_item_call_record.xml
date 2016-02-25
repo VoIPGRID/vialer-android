@@ -8,7 +8,7 @@
     android:paddingTop="@dimen/list_item_contact_padding_top"
     android:paddingBottom="@dimen/list_item_contact_padding_bottom">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/text_view_contact_icon"
         android:layout_width="@dimen/contact_icon_width"
         android:layout_height="@dimen/contact_icon_height"
