@@ -48,4 +48,46 @@ public class T9NameMatcherTest {
         assertFalse(T9NameMatcher.T9QueryMatchesName(query, name));
     }
 
+    @Test
+    public void highlightMatchedPartTest() {
+        String name = "Henk van den Berg";
+        String query;
+        String expectedResult;
+
+        // hen.
+        query = "436";
+        expectedResult = "<b>Hen</b>k van den Berg";
+        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+
+        // henk.
+        query = "4365";
+        expectedResult = "<b>Henk</b> van den Berg";
+        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+
+        // van.
+        query = "826";
+        expectedResult = "Henk <b>van</b> den Berg";
+        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+
+        // vande.
+        query = "82633";
+        expectedResult = "Henk <b>van de</b>n Berg";
+        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+
+        // den.
+        query = "336";
+        expectedResult = "Henk van <b>den</b> Berg";
+        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+
+        // denb.
+        query = "3362";
+        expectedResult = "Henk van <b>den B</b>erg";
+        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+
+        // berg.
+        query = "2374";
+        expectedResult = "Henk van den <b>Berg</b>";
+        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+    }
+
 }

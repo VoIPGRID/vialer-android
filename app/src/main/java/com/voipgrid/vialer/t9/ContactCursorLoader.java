@@ -50,19 +50,22 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
             long contactId = cursor.getInt(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
             String displayName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY));
             String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            number = number.replaceAll("[ ]", "");
 
             boolean addResult = false;
 
             if (t9query.length() != 0) {
                 // Only allowed T9 chars for name matching.
-                if (t9query.substring(0, 1).matches("[2-9]")){
+                if (t9query.substring(0, 1).matches("[2-9]")) {
                     if (T9NameMatcher.T9QueryMatchesName(t9query, displayName)) {
                         addResult = true;
+                        displayName = T9NameMatcher.highlightMatchedPart(t9query, displayName);
                     }
                 }
 
                 if (number != null && number.startsWith(t9query)) {
                     addResult = true;
+                    number = "<b>" + number.substring(0, t9query.length()) + "</b>" + number.substring(t9query.length());
                 }
             } else {
                 // No query so add all 20 results.

@@ -14,6 +14,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -239,6 +240,9 @@ public class DialerActivity extends AppCompatActivity implements
                         ((CircleImageView) view).setImageBitmap(bitmapImage);
                     }
                     return true; //true because the data was bound to the icon view
+                } else if (view instanceof TextView) {
+                    ((TextView) view).setText(Html.fromHtml(cursor.getString(columnIndex)));
+                    return true;
                 }
                 return false;
             }
