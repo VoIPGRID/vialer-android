@@ -164,6 +164,7 @@ public class AccountActivity extends AppCompatActivity implements
             return;
         }
         Api api = mServiceGen.createService(
+                this,
                 connectivityHelper,
                 Api.class,
                 getString(R.string.api_url),

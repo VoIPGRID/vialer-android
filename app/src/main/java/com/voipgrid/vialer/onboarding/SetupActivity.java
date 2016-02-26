@@ -139,6 +139,7 @@ public class SetupActivity extends AppCompatActivity implements
         enableProgressBar(true);
 
         mApi = mServiceGen.createService(
+                this,
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
@@ -302,6 +303,7 @@ public class SetupActivity extends AppCompatActivity implements
     @Override
     public void onForgotPassword(Fragment fragment, String email) {
         Api api = mServiceGen.createService(
+                this,
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),

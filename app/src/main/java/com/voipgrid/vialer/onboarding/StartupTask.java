@@ -57,6 +57,7 @@ public class StartupTask extends AsyncTask {
         String password = systemUser.getPassword();
 
         mApi = ServiceGenerator.createService(
+                mContext,
                 mConnectivityHelper,
                 Api.class,
                 context.getString(R.string.api_url),
@@ -64,6 +65,7 @@ public class StartupTask extends AsyncTask {
         );
 
         mRegistrationApi = ServiceGenerator.createService(
+                mContext,
                 mConnectivityHelper,
                 Registration.class,
                 context.getString(R.string.registration_url),
