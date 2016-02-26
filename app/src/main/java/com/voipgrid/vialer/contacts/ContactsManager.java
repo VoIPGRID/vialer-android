@@ -1,19 +1,13 @@
 package com.voipgrid.vialer.contacts;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.util.Log;
 
-import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
 
@@ -30,51 +24,13 @@ public class ContactsManager {
     private static final boolean DEBUG = false;
 
     /**
-     * Check if their is a sync account present. If not create one.
-     *
-     * @param context The context used to get the AccountManager, Strings and ContentResolver.
-     */
-    private static Account checkSyncAccount(Context context){
-        AccountManager am = AccountManager.get(context);
-        Account[] accounts;
-        accounts = am.getAccountsByType(context.getString(R.string.account_type));
-        Account account;
-        if (accounts == null || accounts.length <= 0) {
-            account = new Account(context.getString(R.string.contacts_app_name),
-                    context.getString(R.string.account_type));
-            am.addAccountExplicitly(account, "", null);
-            ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
-        } else {
-            account = accounts[0];
-        }
-        return account;
-    }
-
-    /**
-     * Function to initiate a contact sync. The only function that should be used to initiate
-     * a contact sync.
-     *
-     * @param context
-     */
-    public static void requestContactSync(Context context){
-        // Check contacts permission. Do nothing if we don't have it. Since it's a background
-        // job we can't really ask the user for permission.
-        if (!ContactsPermission.hasPermission(context)) {
-            // TODO VIALA-349 Delete sync account.
-            return;
-        }
-        Account account = checkSyncAccount(context);
-
-        ContentResolver.requestSync(account, ContactsContract.AUTHORITY, new Bundle());
-    }
-
-    /**
      *
      * @param context
      * @param syncContact
      * @param t9Database
      */
-    public static void syncContact(Context context, SyncContact syncContact, T9DatabaseHelper t9Database) {
+    public static void syncContact(Context context, SyncContact syncContact,
+                                   T9DatabaseHelper t9Database) {
         syncContact(context, syncContact, t9Database, false);
     }
 
@@ -86,10 +42,14 @@ public class ContactsManager {
      * @param t9Database Database for the t9 queries.
      * @param fullT9Sync Whether a full t9 contact sync should occur.
      */
-    public static void syncContact(Context context, SyncContact syncContact, T9DatabaseHelper t9Database, boolean fullT9Sync) {
+    public static void syncContact(Context context, SyncContact syncContact,
+                                   T9DatabaseHelper t9Database, boolean fullT9Sync) {
 
         if (DEBUG) {
-            Log.d(LOG_TAG, "Syncing contact with id " + Long.toString(syncContact.getContactId()) + " and name " + syncContact.getDisplayName());
+            Log.d(LOG_TAG, "Syncing contact with id " +
+                    Long.toString(syncContact.getContactId()) +
+                    " and name " +
+                    syncContact.getDisplayName());
         }
 
         String where = ContactsContract.RawContacts.CONTACT_ID + " = ? AND "
@@ -119,15 +79,14 @@ public class ContactsManager {
                 sameContact.close();
                 // Does exist, take first contact and update it.
                 // TODO VIALA-340: Duplicate contacts with same name.
-                boolean updatedContact = updateAppContact(context, vialerContactId, syncContact.getNormalizedPhoneNumbers());
+                boolean updatedContact = updateAppContact(
+                        context,
+                        vialerContactId,
+                        syncContact.getNormalizedPhoneNumbers()
+                );
 
-                SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(context);
-
-                // We can change this piece of code every time we want a full sync by alternating
-                // the interpretation value of full_sync_toggle.
-                if (!preferenceManager.contains("full_sync_toggle")) {
+                if (SyncUtils.requiresFullContactSync(context)) {
                     fullT9Sync = true;
-                    preferenceManager.edit().putBoolean("full_sync_toggle", false);
                 }
 
                 // On first run of the new t9 sync contacts will not be changed thus no t9 records
@@ -148,7 +107,7 @@ public class ContactsManager {
      */
     private static void addAppContact(Context context, String displayName, List<String> phoneNumbers) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        // Insert RawContact to which is root for DATA entries
+        // Insert RawContact to which is root for DATA entries.
         ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(
                 ContactsContract.RawContacts.CONTENT_URI, true))
                 .withValue(ContactsContract.RawContacts.ACCOUNT_NAME,
@@ -159,7 +118,7 @@ public class ContactsManager {
                         ContactsContract.RawContacts.AGGREGATION_MODE_DEFAULT)
                 .build());
 
-        // Add Setting to manage and edit contact data
+        // Add Setting to manage and edit contact data.
         ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(
                 ContactsContract.Settings.CONTENT_URI, true))
                 .withValue(ContactsContract.RawContacts.ACCOUNT_NAME,
@@ -169,7 +128,7 @@ public class ContactsManager {
                 .withValue(ContactsContract.Settings.UNGROUPED_VISIBLE, 0)
                 .build());
 
-        // Add a name DATA item for the contact
+        // Add a name DATA item for the contact.
         ops.add(ContentProviderOperation.newInsert(addCallerIsSyncAdapterParameter(
                 ContactsContract.Data.CONTENT_URI, true))
                 .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
@@ -194,10 +153,11 @@ public class ContactsManager {
      * Function for updating a app contact related to a existing contact.
      *
      * @param context Context for Strings and ContentResolver.
-     * @param vailerContactId Id of the app contact that needs to be updated.
+     * @param vialerContactId Id of the app contact that needs to be updated.
      * @param phoneNumbers New phone numbers of the related contact.
      */
-    private static boolean updateAppContact(Context context, String vailerContactId, List<String> phoneNumbers) {
+    private static boolean updateAppContact(Context context, String vialerContactId,
+                                            List<String> phoneNumbers) {
         // Initialization.
         String[] projection;
         String selection;
@@ -212,7 +172,7 @@ public class ContactsManager {
         selection = ContactsContract.Data.RAW_CONTACT_ID + " = ? AND "
                 + ContactsContract.Data.MIMETYPE + " = ?";
         selectionArgs = new String[] {
-                vailerContactId,
+                vialerContactId,
                 mimetype,
         };
 
@@ -237,11 +197,11 @@ public class ContactsManager {
 
         // These numbers need to be added to the app contact.
         if (phoneNumbers.size() > 0) {
-            addAppContactActionInsertsToOps(context, ops, Long.parseLong(vailerContactId), phoneNumbers);
+            addAppContactActionInsertsToOps(context, ops, Long.parseLong(vialerContactId), phoneNumbers);
         }
         // These numbers need to be deleted from the app contact.
         if (currentPhoneNumbers.size() > 0){
-            addAppContactActionDeletesToOps(context, ops, vailerContactId, currentPhoneNumbers);
+            addAppContactActionDeletesToOps(context, ops, vialerContactId, currentPhoneNumbers);
         }
 
         // If we have operations execute them.

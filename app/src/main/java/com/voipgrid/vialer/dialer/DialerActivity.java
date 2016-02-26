@@ -33,8 +33,8 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.contacts.ContactsManager;
 import com.voipgrid.vialer.contacts.ContactsPermission;
+import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.t9.ContactCursorLoader;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -306,7 +306,7 @@ public class DialerActivity extends AppCompatActivity implements
             }
             if (allPermissionsGranted) {
                 // ContactSync.
-                ContactsManager.requestContactSync(this);
+                SyncUtils.requestContactSync(this);
                 // Reload Activity to reflect new permission.
                 Intent intent = getIntent();
                 startActivity(intent);

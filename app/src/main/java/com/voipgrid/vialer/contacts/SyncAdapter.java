@@ -30,12 +30,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.d(LOG_TAG, "Start syncing contacts");
             long start = System.currentTimeMillis();
 
-            new ContactsSyncTask(getContext()).sync();
+            new ContactsSyncTask(getContext()).fullSync();
 
             long end = System.currentTimeMillis();
             Log.d(LOG_TAG, "Done syncing contacts, it took " + Double.toString((end - start) / 1000) + " seconds");
         } else {
-            new ContactsSyncTask(getContext()).sync();
+            new ContactsSyncTask(getContext()).fullSync();
         }
     }
 }
