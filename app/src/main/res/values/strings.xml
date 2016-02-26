@@ -28,6 +28,10 @@
     <string name="version_info">Version: %1$s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
 
+    <!-- Dialog options -->
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+
     <!-- Sidebar fragment values -->
     <string name="cannot_logout_error_title">No available internet connection</string>
     <string name="cannot_logout_error_text">An internet connection is needed to log you off.</string>
@@ -41,7 +45,6 @@
     <string name="login_button_title">login</string>
     <string name="login_missing_field_title">Warning</string>
     <string name="login_missing_field_message">Please fill in all fields before login!</string>
-    <string name="ok">Ok</string>
 
     <!-- Forgot password fragment values -->
     <string name="header_forgot_password_title">Forgot password?</string>
@@ -49,8 +52,8 @@
     <string name="forgot_password_description">Please enter your email address and we will send you instructions on setting a new password.</string>
     <string name="forgot_password_missing_field_title">Warning</string>
     <string name="forgot_password_missing_field_message">Please fill in all fields before login!</string>
-    <string name="forgot_password_error_title">Incorrect email address</string>
-    <string name="forgot_password_error_text">Please enter a valid email address.</string>
+    <string name="forgot_password_alert_title">Password reset</string>
+    <string name="forgot_password_alert_message">If your user is %1s we will send you an email with instructions to reset your password.</string>
     <!--
         Configure fragment values.
     -->
