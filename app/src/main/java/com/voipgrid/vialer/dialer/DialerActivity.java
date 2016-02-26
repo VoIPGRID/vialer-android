@@ -235,7 +235,7 @@ public class DialerActivity extends AppCompatActivity implements
                         Bitmap bm = BitmapFactory.decodeStream(photoInputStream);
                         ((CircleImageView) view).setImageBitmap(bm);
                     } else {
-                        String firstLetter = cursor.getString(1).substring(0, 1);
+                        String firstLetter = cursor.getString(1).replaceAll("\\<.*?>","").substring(0, 1);
                         Bitmap bitmapImage = IconHelper.getCallerIconBitmap(firstLetter, Color.BLUE);
                         ((CircleImageView) view).setImageBitmap(bitmapImage);
                     }
