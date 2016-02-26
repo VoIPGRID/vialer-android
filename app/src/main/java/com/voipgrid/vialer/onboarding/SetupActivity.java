@@ -27,7 +27,7 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.models.PasswordResetParams;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -51,14 +51,14 @@ public class SetupActivity extends AppCompatActivity implements
     private ConnectivityHelper mConnectivityHelper;
     private Preferences mPreferences;
     private ServiceGenerator mServiceGen;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup);
 
-        mStorage = new Storage(this);
+        mJsonStorage = new JsonStorage(this);
 
         mConnectivityHelper = new ConnectivityHelper(
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
@@ -161,10 +161,10 @@ public class SetupActivity extends AppCompatActivity implements
         enableProgressBar(true);
 
         /*  save mobile and outgoing number */
-        SystemUser systemUser = (SystemUser) mStorage.get(SystemUser.class);
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         systemUser.setMobileNumber(mobileNumber);
         systemUser.setOutgoingCli(outgoingNumber);
-        mStorage.save(systemUser);
+        mJsonStorage.save(systemUser);
 
         String phoneAccountId = systemUser.getPhoneAccountId();
         if(phoneAccountId != null) {
@@ -174,7 +174,7 @@ public class SetupActivity extends AppCompatActivity implements
             // TODO add UI to let the user know the sip features are not available without
             // a sip account VIALA-157
             onNextStep(WelcomeFragment.newInstance(
-                            ((SystemUser) mStorage.get(SystemUser.class)).getFullName())
+                            ((SystemUser) mJsonStorage.get(SystemUser.class)).getFullName())
             );
         }
     }
@@ -218,19 +218,19 @@ public class SetupActivity extends AppCompatActivity implements
             } else {
                 mPreferences.setSipPermission(systemUser.hasSipPermission());
                 systemUser.setPassword(mPassword);
-                mStorage.save(systemUser);
+                mJsonStorage.save(systemUser);
                 onNextStep(AccountFragment.newInstance(
                         systemUser.getMobileNumber(),
                         systemUser.getOutgoingCli()
                 ));
             }
         } else if(object instanceof PhoneAccount) {
-            mStorage.save(object);
+            mJsonStorage.save(object);
             if(mPreferences.hasSipPermission()) {
                 startService(new Intent(this, VialerGcmRegistrationService.class));
             }
             onNextStep(WelcomeFragment.newInstance(
-                    ((SystemUser) mStorage.get(SystemUser.class)).getFullName())
+                    ((SystemUser) mJsonStorage.get(SystemUser.class)).getFullName())
             );
         } else {
             FragmentManager fragmentManager = getFragmentManager();

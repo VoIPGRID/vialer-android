@@ -36,7 +36,7 @@ import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.onboarding.LogoutTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -63,7 +63,7 @@ public abstract class NavigationDrawerActivity
 
     private Api mApi;
     private ConnectivityHelper mConnectivityHelper;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
 
 
@@ -78,8 +78,8 @@ public abstract class NavigationDrawerActivity
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
         );
 
-        mStorage = new Storage(this);
-        mSystemUser = (SystemUser) mStorage.get(SystemUser.class);
+        mJsonStorage = new JsonStorage(this);
+        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
 
 
         if (mSystemUser != null){
@@ -137,7 +137,7 @@ public abstract class NavigationDrawerActivity
 
         mDrawerLayout.setDrawerListener(drawerToggle);
 
-        SystemUser systemUser = (SystemUser) new Storage(this).get(SystemUser.class);
+        SystemUser systemUser = (SystemUser) new JsonStorage(this).get(SystemUser.class);
         if(systemUser != null) {
             String phoneNumber = systemUser.getOutgoingCli();
             if (!TextUtils.isEmpty(phoneNumber)) {
@@ -217,7 +217,7 @@ public abstract class NavigationDrawerActivity
             }
             /* Delete our account information */
             // TODO This may lead to bugs! Investigate better way in VIALA-408.
-            new Storage(this).clear();
+            new JsonStorage(this).clear();
             /* Mark ourselves as unregistered */
             PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Middleware.Constants.REGISTRATION_STATUS, Middleware.Constants.STATUS_UNREGISTERED).commit();
             /* Start a new session */
@@ -246,7 +246,7 @@ public abstract class NavigationDrawerActivity
      * @param page
      */
     private void startWebActivity(String title, String page) {
-        SystemUser systemUser = new Storage<SystemUser>(this).get(SystemUser.class);
+        SystemUser systemUser = new JsonStorage<SystemUser>(this).get(SystemUser.class);
         Intent intent = new Intent(this, WebActivity.class);
         intent.putExtra(WebActivity.PAGE, page);
         intent.putExtra(WebActivity.TITLE, title);

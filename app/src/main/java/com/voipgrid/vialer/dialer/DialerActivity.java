@@ -41,7 +41,7 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.IconHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import java.io.InputStream;
 
@@ -67,7 +67,7 @@ public class DialerActivity extends AppCompatActivity implements
     private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private Preferences mPreferences;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
 
     private String t9Query;
     private boolean mHasPermission;
@@ -83,7 +83,7 @@ public class DialerActivity extends AppCompatActivity implements
                 ((AnalyticsApplication) getApplication()).getDefaultTracker()
         );
 
-        mStorage = new Storage(this);
+        mJsonStorage = new JsonStorage(this);
 
         mConnectivityHelper = new ConnectivityHelper(
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
@@ -123,7 +123,7 @@ public class DialerActivity extends AppCompatActivity implements
                 // Redirect user to login.
                 // This can be needed when a user logs out and in the logged out state
                 // presses call with vialer in a contact.
-                if(!mStorage.has(SystemUser.class)) {
+                if(!mJsonStorage.has(SystemUser.class)) {
                     startActivity(new Intent(this, SetupActivity.class));
                     finish();
                 }
@@ -284,7 +284,7 @@ public class DialerActivity extends AppCompatActivity implements
         } else if(!mConnectivityHelper.hasFastData() && mPreferences.canUseSip()) {
             mDialerWarning.setText(R.string.dialer_warning_a_b_connect);
             mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_connectivity_message));
-        } else if(!mStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
+        } else if(!mJsonStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
             mDialerWarning.setText(R.string.dialer_warning_a_b_connect);
             mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_account_message));
         } else {
@@ -322,7 +322,7 @@ public class DialerActivity extends AppCompatActivity implements
      * @param contactName contact name to display
      */
     public void onCallNumber(String number, String contactName) {
-        new DialHelper(this, mStorage, mConnectivityHelper, mAnalyticsHelper)
+        new DialHelper(this, mJsonStorage, mConnectivityHelper, mAnalyticsHelper)
                 .callNumber(PhoneNumberUtils.format(number), contactName);
     }
 

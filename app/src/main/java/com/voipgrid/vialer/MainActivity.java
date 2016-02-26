@@ -28,7 +28,7 @@ import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.onboarding.StartupTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 
 public class MainActivity extends NavigationDrawerActivity implements
@@ -39,7 +39,7 @@ public class MainActivity extends NavigationDrawerActivity implements
 
     private ConnectivityHelper mConnectivityHelper;
     private Preferences mPreferences;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
 
     private boolean mAskForPermission = true;
 
@@ -47,7 +47,7 @@ public class MainActivity extends NavigationDrawerActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mStorage = new Storage(this);
+        mJsonStorage = new JsonStorage(this);
 
         mConnectivityHelper = new ConnectivityHelper(
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
@@ -57,7 +57,7 @@ public class MainActivity extends NavigationDrawerActivity implements
         mPreferences = new Preferences(this);
 
         /* check if the app has a SystemUser */
-        if(!mStorage.has(SystemUser.class)) {
+        if(!mJsonStorage.has(SystemUser.class)) {
             //start onboarding flow
             startActivity(new Intent(this, SetupActivity.class));
             finish();

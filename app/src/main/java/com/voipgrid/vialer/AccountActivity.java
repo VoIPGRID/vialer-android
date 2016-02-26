@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +22,7 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.Middleware;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import java.io.IOException;
 import retrofit.Callback;
@@ -42,7 +41,7 @@ public class AccountActivity extends AppCompatActivity implements
 
     private PhoneAccount mPhoneAccount;
     private Preferences mPreferences;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
 
     private boolean mEditMode = false;
@@ -52,9 +51,9 @@ public class AccountActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account);
 
-        mStorage = new Storage(this);
-        mSystemUser = (SystemUser) mStorage.get(SystemUser.class);
-        mPhoneAccount = (PhoneAccount) mStorage.get(PhoneAccount.class);
+        mJsonStorage = new JsonStorage(this);
+        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        mPhoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
 
         mPreferences = new Preferences(this);
 
@@ -186,7 +185,7 @@ public class AccountActivity extends AppCompatActivity implements
     public void success(Object object, Response response) {
         // Success callback for updating mobile number.
         // Update the systemuser.
-        mStorage.save(mSystemUser);
+        mJsonStorage.save(mSystemUser);
         mServiceGen.release();
     }
 

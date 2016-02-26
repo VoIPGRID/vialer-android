@@ -20,7 +20,7 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 import com.voipgrid.vialer.models.ClickToDialParams;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -39,7 +39,7 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
     private Api mApi;
     private ConnectivityHelper mConnectivityHelper;
     private Preferences mPreferences;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
     private TwoStepCallTask mTwoStepCallTask;
     private TwoStepCallView mTwoStepCallView;
@@ -54,7 +54,7 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
                 ((AnalyticsApplication) getApplication()).getDefaultTracker()
         );
 
-        mStorage = new Storage(this);
+        mJsonStorage = new JsonStorage(this);
 
         mPreferences = new Preferences(this);
 
@@ -65,7 +65,7 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
 
         mDialerWarningTextView = (TextView) findViewById(R.id.dialer_warning);
 
-        mSystemUser = (SystemUser) new Storage(this).get(SystemUser.class);
+        mSystemUser = (SystemUser) new JsonStorage(this).get(SystemUser.class);
 
         mApi = ServiceGenerator.createService(
                 this,
@@ -113,7 +113,7 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
             mDialerWarningTextView.setText(R.string.dialer_warning_a_b_connect);
             mDialerWarningTextView
                     .setTag(getString(R.string.dialer_warning_a_b_connect_connectivity_message));
-        } else if(!mStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
+        } else if(!mJsonStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
             mDialerWarningTextView.setText(R.string.dialer_warning_a_b_connect);
             mDialerWarningTextView
                     .setTag(getString(R.string.dialer_warning_a_b_connect_account_message));

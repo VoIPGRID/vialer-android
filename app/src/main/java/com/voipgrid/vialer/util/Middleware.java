@@ -3,9 +3,10 @@ package com.voipgrid.vialer.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.storage.StorageManager;
 import android.preference.PreferenceManager;
 
-import com.squareup.okhttp.OkHttpClient;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
@@ -35,21 +36,34 @@ public class Middleware {
     }
 
     public static void register(Context context, String token) throws IOException {
+        Preferences sipPreferences = new Preferences(context);
+
+        if (!sipPreferences.canUseSip()) {
+            return;
+        }
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
+
         editor.putLong(Constants.LAST_REGISTRATION, System.currentTimeMillis());
 
         try {
+            JsonStorage jsonStorage = new JsonStorage(context);
+            SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
+
             Registration api = ServiceGenerator.createService(
                     context,
                     ConnectivityHelper.get(context),
                     Registration.class,
-                    context.getString(R.string.registration_url),
-                    new OkClient(new OkHttpClient())
+                    getBaseApiUrl(context),
+                    new OkClient(ServiceGenerator.getOkHttpClient(
+                            context,
+                            systemUser.getEmail(),
+                            systemUser.getPassword()
+                    ))
             );
-            Storage storage = new Storage(context);
-            String sipUserId = ((PhoneAccount) storage.get(PhoneAccount.class)).getAccountId();
-            String fullName = ((SystemUser) storage.get(SystemUser.class)).getFullName();
+            String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
+            String fullName = ((SystemUser) jsonStorage.get(SystemUser.class)).getFullName();
             String appName = context.getPackageName();
             api.register(fullName, token, sipUserId, Build.VERSION.CODENAME,
                     Build.VERSION.RELEASE, appName);
@@ -59,31 +73,47 @@ public class Middleware {
             editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_FAILED);
             throw new IOException(error);
         } finally {
-            editor.commit();
+            editor.apply();
         }
     }
 
     public static void unregister(Context context) throws IOException {
-        SharedPreferences preferences   = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
         try {
+            JsonStorage jsonStorage = new JsonStorage(context);
+            SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
+
             Registration api = ServiceGenerator.createService(
                     context,
                     ConnectivityHelper.get(context),
                     Registration.class,
-                    context.getString(R.string.registration_url),
-                    new OkClient(new OkHttpClient())
+                    getBaseApiUrl(context),
+                    new OkClient(ServiceGenerator.getOkHttpClient(
+                            context,
+                            systemUser.getEmail(),
+                            systemUser.getPassword()
+                    ))
             );
-            String token     = preferences.getString(Constants.CURRENT_TOKEN, "");
-            String sipUserId = (new Storage<PhoneAccount>(context).get(PhoneAccount.class))
-                    .getAccountId();
-            api.unregister(token, sipUserId);
+            String token = preferences.getString(Constants.CURRENT_TOKEN, "");
+            String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
+            String appName = context.getPackageName();
+            api.unregister(token, sipUserId, appName);
             editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_UNREGISTERED);
         } catch (RetrofitError|NullPointerException error) {
             throw new IOException(error);
         } finally {
-            editor.commit();
+            editor.apply();
         }
-
     }
+
+    /**
+     * Function to get the URL needed for api calls.
+     * @param mContext
+     * @return
+     */
+    public static String getBaseApiUrl(Context mContext) {
+        return mContext.getString(R.string.registration_url);
+    }
+
 }

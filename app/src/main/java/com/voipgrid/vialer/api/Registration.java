@@ -2,6 +2,7 @@ package com.voipgrid.vialer.api;
 
 
 import retrofit.Callback;
+import retrofit.http.DELETE;
 import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.POST;
@@ -19,16 +20,17 @@ public interface Registration {
                @Field("message_start_time") String messageStartTime, Callback<Object> callback);
 
     @FormUrlEncoded
-    @POST("/api/unregister-gcm-device/")
+    @DELETE("/api/gcm-device/")
     void unregister(@Field("token") String token, @Field("sip_user_id") String sipId,
                     Callback<Object> callback);
 
     @FormUrlEncoded
-    @POST("/api/unregister-gcm-device/")
-    Object unregister(@Field("token") String token, @Field("sip_user_id") String sipId);
+    @DELETE("/api/gcm-device/")
+    Object unregister(@Field("token") String token, @Field("sip_user_id") String sipId,
+                      @Field("app") String app);
 
     @FormUrlEncoded
-    @POST("/api/register-gcm-device/")
+    @POST("/api/gcm-device/")
     Object register(@Field("name") String name, @Field("token") String token,
                     @Field("sip_user_id") String sipUserId, @Field("os_version") String osVersion,
                     @Field("client_version") String clientVersion, @Field("app") String app);

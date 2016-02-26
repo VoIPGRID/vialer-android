@@ -18,7 +18,9 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
+
+import java.io.IOException;
 
 import retrofit.RetrofitError;
 import retrofit.client.OkClient;
@@ -35,9 +37,7 @@ public class StartupTask extends AsyncTask {
 
     private Api mApi;
 
-    private Registration mRegistrationApi;
-
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
 
     public StartupTask(Context context) {
         mContext = context;
@@ -49,10 +49,10 @@ public class StartupTask extends AsyncTask {
 
         mPreferences = new Preferences(context);
 
-        mStorage = new Storage(context);
+        mJsonStorage = new JsonStorage(context);
 
         /* get username and password */
-        SystemUser systemUser = (SystemUser) mStorage.get(SystemUser.class);
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         String username = systemUser.getEmail();
         String password = systemUser.getPassword();
 
@@ -63,14 +63,6 @@ public class StartupTask extends AsyncTask {
                 context.getString(R.string.api_url),
                 new OkClient(ServiceGenerator.getOkHttpClient(mContext, username, password))
         );
-
-        mRegistrationApi = ServiceGenerator.createService(
-                mContext,
-                mConnectivityHelper,
-                Registration.class,
-                context.getString(R.string.registration_url),
-                new OkClient(new OkHttpClient())
-        );
     }
 
     @Override
@@ -79,23 +71,20 @@ public class StartupTask extends AsyncTask {
             SystemUser systemUser = mApi.systemUser();
             mPreferences.setSipPermission(systemUser.hasSipPermission());
             String phoneAccountId = systemUser.getPhoneAccountId();
-            PhoneAccount phoneAccount = ((PhoneAccount) new Storage(mContext).get(PhoneAccount.class));
+            PhoneAccount phoneAccount = ((PhoneAccount) new JsonStorage(mContext).get(PhoneAccount.class));
             if (phoneAccountId != null) {
                 phoneAccount = mApi.phoneAccount(phoneAccountId);
-                mStorage.save(phoneAccount);
+                mJsonStorage.save(phoneAccount);
                 if(mPreferences.hasSipPermission()) {
                     mContext.startService(new Intent(mContext, VialerGcmRegistrationService.class));
                 }
             } else if (phoneAccount != null && mPreferences.hasSipPermission()) {
-                String gcmToken = PreferenceManager.getDefaultSharedPreferences(mContext)
-                        .getString(Middleware.Constants.CURRENT_TOKEN, "");
-                mRegistrationApi.unregister(
-                        gcmToken,
-                        phoneAccount.getAccountId()
-                );
+                Middleware.unregister(mContext);
             }
         } catch (RetrofitError e) {
             // Setup can fail. No need to handle error. Next startup the app will try again.
+        } catch (IOException i) {
+            // Registration failed.
         }
         return null;
     }

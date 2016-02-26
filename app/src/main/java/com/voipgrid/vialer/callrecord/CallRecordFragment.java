@@ -28,7 +28,7 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +61,7 @@ public class CallRecordFragment extends ListFragment implements
 
     private ConnectivityHelper mConnectivityHelper;
 
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
 
     private AnalyticsHelper mAnalyticsHelper;
 
@@ -79,13 +79,13 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     private class AsyncCallRecordLoader extends AsyncTask<Void, Void, List<CallRecord>> {
-        private Storage<CallRecord[]> mStorage;
+        private JsonStorage<CallRecord[]> mJsonStorage;
         public AsyncCallRecordLoader() {
-            mStorage = new Storage<>(getActivity());
+            mJsonStorage = new JsonStorage<>(getActivity());
         }
 
         protected List<CallRecord> doInBackground(Void args[]) {
-            CallRecord[] records = mStorage.get(CallRecord[].class);
+            CallRecord[] records = mJsonStorage.get(CallRecord[].class);
             if (records != null) {
                 return Arrays.asList(records);
             } else {
@@ -108,7 +108,7 @@ public class CallRecordFragment extends ListFragment implements
         protected Void doInBackground(Void args[]) {
             CallRecord[] records = new CallRecord[mRecords.size()];
             mRecords.toArray(records);
-            mStorage.save(records);
+            mJsonStorage.save(records);
             return null;
         }
     }
@@ -131,7 +131,7 @@ public class CallRecordFragment extends ListFragment implements
                 (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE),
                 (TelephonyManager) getActivity().getSystemService(Context.TELEPHONY_SERVICE));
 
-        mStorage = new Storage(getActivity());
+        mJsonStorage = new JsonStorage(getActivity());
 
         mFilter = getArguments().getString(ARG_FILTER);
         
@@ -178,7 +178,7 @@ public class CallRecordFragment extends ListFragment implements
         } else if(!mConnectivityHelper.hasFastData() && mPreferences.canUseSip()) {
             mDialerWarning.setText(R.string.dialer_warning_a_b_connect);
             mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_connectivity_message));
-        } else if(!mStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
+        } else if(!mJsonStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
             mDialerWarning.setText(R.string.dialer_warning_a_b_connect);
             mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_account_message));
         } else {
@@ -220,7 +220,7 @@ public class CallRecordFragment extends ListFragment implements
             }
 
 
-            new DialHelper(getActivity(),mStorage,mConnectivityHelper, mAnalyticsHelper).
+            new DialHelper(getActivity(), mJsonStorage, mConnectivityHelper, mAnalyticsHelper).
                     callNumber(number, "");
         }
     }
@@ -235,7 +235,7 @@ public class CallRecordFragment extends ListFragment implements
 
     private void loadCallRecordsFromApi() {
         mHaveNetworkRecords = false;
-        SystemUser systemUser = (SystemUser) mStorage.get(SystemUser.class);
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         Api api = ServiceGenerator.createService(
                 getContext(),
                 mConnectivityHelper,

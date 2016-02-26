@@ -23,12 +23,12 @@ public class DialHelper {
     private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private final Preferences mPreferences;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
 
-    public DialHelper(Context context, Storage storage,
+    public DialHelper(Context context, JsonStorage jsonStorage,
             ConnectivityHelper connectivityHelper, AnalyticsHelper analyticsHelper ) {
         mContext = context;
-        mStorage = storage;
+        mJsonStorage = jsonStorage;
         mConnectivityHelper = connectivityHelper;
         mAnalyticsHelper = analyticsHelper;
         mPreferences = new Preferences(context);
@@ -45,7 +45,7 @@ public class DialHelper {
         // We need internet for both type of calls.
         if (mConnectivityHelper.hasNetworkConnection()) {
             if (mPreferences.canUseSip()
-                    && mStorage.has(PhoneAccount.class)
+                    && mJsonStorage.has(PhoneAccount.class)
                     && mConnectivityHelper.hasFastData()) {
                 callWithSip(number, contactName);
             } else {

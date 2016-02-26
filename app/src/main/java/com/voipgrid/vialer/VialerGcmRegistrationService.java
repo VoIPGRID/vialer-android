@@ -2,6 +2,8 @@ package com.voipgrid.vialer;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.google.android.gms.iid.InstanceID;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -35,8 +37,14 @@ public class VialerGcmRegistrationService extends IntentService implements Middl
                     getString(R.string.gcm_registration_id),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null
             );
-            /* Send to server and save our registration status */
-            Middleware.register(this, token);
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            String currentToken = preferences.getString(CURRENT_TOKEN, "");
+
+            // If token changed update the registration.
+            if (!token.equals(currentToken)) {
+                Middleware.register(this, token);
+            }
         } catch (IOException exception) {
         }
     }

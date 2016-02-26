@@ -9,11 +9,11 @@ import com.google.gson.Gson;
 /**
  * Created by eltjo on 03/08/15.
  */
-public class Storage<T> {
+public class JsonStorage<T> {
 
     private SharedPreferences mPreferences;
 
-    public Storage(Context context) {
+    public JsonStorage(Context context) {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 

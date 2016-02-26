@@ -23,7 +23,7 @@ import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import org.pjsip.pjsua2.Account;
 import org.pjsip.pjsua2.AccountConfig;
@@ -153,7 +153,7 @@ public class SipService extends Service implements
         /* Try to load PJSIP library */
         loadPjsip();
 
-        PhoneAccount phoneAccount = new Storage<PhoneAccount>(this).get(PhoneAccount.class);
+        PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
         if(phoneAccount != null) {
 
             mEndpoint = createEndpoint(
