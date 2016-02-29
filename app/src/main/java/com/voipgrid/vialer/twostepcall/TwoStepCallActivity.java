@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.twostepcall;
 
 import android.app.Activity;
-import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -68,7 +67,7 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
 
         mSystemUser = (SystemUser) new Storage(this).get(SystemUser.class);
 
-        Api api = ServiceGenerator.createService(
+        mApi = ServiceGenerator.createService(
                 this,
                 mConnectivityHelper,
                 Api.class,
