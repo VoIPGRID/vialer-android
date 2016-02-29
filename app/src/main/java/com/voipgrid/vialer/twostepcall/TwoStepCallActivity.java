@@ -200,7 +200,7 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
             public void run() {
                 finish();
             }
-        }, 5000);
+        }, 3000);
     }
 
 
