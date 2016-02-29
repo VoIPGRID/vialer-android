@@ -30,6 +30,10 @@
     <string name="version_info">Versie: %1$s</string>
     <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
 
+    <!-- Dialog options -->
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+
     <!-- Sidebar fragment values -->
     <string name="cannot_logout_error_title">Geen internetverbinding beschikbaar</string>
     <string name="cannot_logout_error_text">Een internetverbinding is nodig om uit te loggen.</string>
@@ -43,7 +47,6 @@
     <string name="login_button_title">Inloggen</string>
     <string name="login_missing_field_title">Let op</string>
     <string name="login_missing_field_message">Vul alstublieft alle velden in</string>
-    <string name="ok">Ok</string>
 
     <!-- Forgot password fragment values -->
     <string name="header_forgot_password_title">Wachtwoord vergeten</string>
@@ -51,8 +54,8 @@
     <string name="forgot_password_description">Voer uw e-mailadres in en wij sturen je instructies om je wachtwoord te herstellen.</string>
     <string name="forgot_password_missing_field_title">Let op</string>
     <string name="forgot_password_missing_field_message">Vul alstublieft alle velden in</string>
-    <string name="forgot_password_error_title">Incorrect emailaddress</string>
-    <string name="forgot_password_error_text">Vul alstublieft een correct e-mailadres in.</string>
+    <string name="forgot_password_alert_title">Wachtwoord herstellen</string>
+    <string name="forgot_password_alert_message">Als uw gebruikersnaam %1s is zullen we u een e-mail sturen met instructies om uw wachtwoord te herstellen.</string>
 
     <!--
         Configure fragment values.

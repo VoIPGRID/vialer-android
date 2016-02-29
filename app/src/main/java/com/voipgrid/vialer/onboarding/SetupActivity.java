@@ -253,18 +253,11 @@ public class SetupActivity extends AppCompatActivity implements
     @Override
     public void failure(RetrofitError error) {
         final String errorMessage = error.getMessage();
-        final String failedUrl = error.getUrl();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 enableProgressBar(false);
                 OnboardingFragment fragment = getCurrentFragment();
-                if (failedUrl.endsWith("password_reset/")) {
-                    displayAlert(
-                            getString(R.string.forgot_password_error_title),
-                            getString(R.string.forgot_password_error_text)
-                    );
-                }
                 if (fragment != null) {
                     fragment.onError(errorMessage);
                 }
@@ -301,7 +294,27 @@ public class SetupActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onForgotPassword(Fragment fragment, String email) {
+    public void onForgotPassword(Fragment fragment, final String email) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setTitle(getString(R.string.forgot_password_alert_title));
+        alertDialogBuilder
+                .setMessage(getString(R.string.forgot_password_alert_message, email))
+                .setCancelable(false)
+                .setPositiveButton(this.getString(R.string.ok), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        resetPassword(email);
+                    }
+                })
+                .setNegativeButton(this.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }
+
+    private void resetPassword(String email) {
         Api api = mServiceGen.createService(
                 this,
                 mConnectivityHelper,
