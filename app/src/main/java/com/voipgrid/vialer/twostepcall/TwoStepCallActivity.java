@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.twostepcall;
 
 import android.app.Activity;
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -34,7 +35,6 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
 
     private TextView mDialerWarningTextView;
     private TextView mStatusTextView;
-
 
     private AnalyticsHelper mAnalyticsHelper;
     private Api mApi;
@@ -155,19 +155,29 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
             mTwoStepCallTask.cancel(false);
             // Update view.
             updateStateView(TwoStepCallUtils.STATE_CANCELLED);
-            findViewById(R.id.two_step_button_hangup).setVisibility(View.GONE);
+            cancelButtonVisible(false);
 
             // Redirect user back to previous activity after 5 seconds.
             finishWithDelay();
         }
     }
 
+
     @Override
     public void failure(RetrofitError error) {
         // No longer cancelling a call.
         cancelCall = false;
         // Failed to cancel call, enable button again.
-        findViewById(R.id.two_step_button_hangup).setVisibility(View.VISIBLE);
+        cancelButtonVisible(true);
+    }
+
+    /**
+     * Function to set the cancel buttons visibility.
+     * @param visible
+     */
+    private void cancelButtonVisible(boolean visible) {
+        int visibility = visible ? View.VISIBLE : View.GONE;
+        findViewById(R.id.two_step_button_hangup).setVisibility(visibility);
     }
 
     /**
@@ -177,6 +187,9 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
     private void updateStateView(String state) {
         mTwoStepCallView.setState(state);
         mStatusTextView.setText(TwoStepCallUtils.getStateText(this, state));
+        if (TwoStepCallUtils.getFailedStates().contains(state)) {
+            cancelButtonVisible(false);
+        }
     }
 
     /**
@@ -193,11 +206,9 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
 
 
     public class TwoStepCallTask extends AsyncTask<Void, String, Boolean> {
-
         private Api mApi;
 
         private String mCallId;
-
         private String mNumberA, mNumberB;
 
         public TwoStepCallTask(Api api, String numberA, String numberB) {
@@ -212,7 +223,18 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            TwoStepCallStatus status = mApi.twoStepCall(new ClickToDialParams(mNumberA, mNumberB));
+            TwoStepCallStatus status;
+            try {
+                status = mApi.twoStepCall(new ClickToDialParams(mNumberA, mNumberB));
+            } catch (RetrofitError error) {
+                int statusCode = error.getResponse().getStatus();
+                if (statusCode == 400) {
+                    publishProgress(TwoStepCallUtils.STATE_INVALID_NUMBER);
+                } else {
+                    publishProgress(TwoStepCallUtils.STATE_FAILED);
+                }
+                return false;
+            }
             mCallId = status.getCallId();
             // If cancel has been pressed before the call was made cancel it here.
             if (cancelCall) {

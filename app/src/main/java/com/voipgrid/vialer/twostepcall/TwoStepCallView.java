@@ -124,6 +124,12 @@ public class TwoStepCallView extends LinearLayout {
                 case TwoStepCallUtils.STATE_CANCELLED:
                     cancelled();
                     break;
+                case TwoStepCallUtils.STATE_FAILED:
+                    failed();
+                    break;
+                case TwoStepCallUtils.STATE_INVALID_NUMBER:
+                    invalidNumber();
+                    break;
             }
         }
     }
@@ -214,5 +220,19 @@ public class TwoStepCallView extends LinearLayout {
         mConnectionCallB.setEnabled(true);
         mConnectionCallB.stopProgress();
         mConnectionCallB.setState(TwoStepCallProgressView.STATE_FAILED);
+    }
+
+    /**
+     * Update the view to show a failed attempt on the api call.
+     */
+    private void failed() {
+        cancelled();
+    }
+
+    /**
+     * Update the view to show a failed attempt because of a invalid number.
+     */
+    private void invalidNumber() {
+        cancelled();
     }
 }

@@ -143,6 +143,8 @@
     <string name="two_step_call_state_disconnected">Call ended</string>
     <string name="two_step_call_state_cancelling">Cancelling call</string>
     <string name="two_step_call_state_cancelled">Call cancelled</string>
+    <string name="two_step_call_state_setup_failed">Failed to setup call</string>
+    <string name="two_step_call_state_invalid_number">Phone number incorrect</string>
 
     <!-- Permission strings -->
     <string name="permission_contact_dialog_title">Contact permission</string>
