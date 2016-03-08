@@ -22,7 +22,7 @@
     <screenName name="com.voipgrid.vialer.ClickToDialActivity">
         ClickToDial
     </screenName>
-    <screenName name="com.voipgrid.vialer.DialerActivity">
+    <screenName name="com.voipgrid.vialer.dialer.DialerActivity">
         Dialer
     </screenName>
     <screenName name="com.voipgrid.vialer.WebActivity">

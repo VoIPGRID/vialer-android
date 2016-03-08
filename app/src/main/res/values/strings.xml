@@ -27,6 +27,15 @@
     <string name="dialer_warning_no_connection">No data connection available</string>
     <string name="version_info">Version: %1$s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
+
+    <!-- Dialog options -->
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Sidebar fragment values -->
+    <string name="cannot_logout_error_title">No available internet connection</string>
+    <string name="cannot_logout_error_text">An internet connection is needed to log you off.</string>
+
     <!-- Login fragment values -->
     <string name="login_header_label_text">Business</string>
     <string name="login_header_label_subtext">calls in the cloud</string>
@@ -36,13 +45,15 @@
     <string name="login_button_title">login</string>
     <string name="login_missing_field_title">Warning</string>
     <string name="login_missing_field_message">Please fill in all fields before login!</string>
-    <string name="ok">Ok</string>
+
     <!-- Forgot password fragment values -->
     <string name="header_forgot_password_title">Forgot password?</string>
     <string name="forgot_password_button_text">Send</string>
     <string name="forgot_password_description">Please enter your email address and we will send you instructions on setting a new password.</string>
     <string name="forgot_password_missing_field_title">Warning</string>
     <string name="forgot_password_missing_field_message">Please fill in all fields before login!</string>
+    <string name="forgot_password_alert_title">Password reset</string>
+    <string name="forgot_password_alert_message">If your user is %1s we will send you an email with instructions to reset your password.</string>
     <!--
         Configure fragment values.
     -->
@@ -51,6 +62,8 @@
     <string name="configure_header_label_subtext">your account</string>
     <string name="phonenumber_edittext_hint">Mobile number</string>
     <string name="outgoingnumber_edittext_hint">Outgoing number</string>
+    <string name="phonenumber_info_text_title">Mobile phone number</string>
+    <string name="phonenumber_info_text">To make two step calling possible, we need to have your mobile phone number.</string>
     <string name="configure_missing_field_title">Warning</string>
     <string name="configure_missing_field_message">Please fill in all fields before login!</string>
     <!--
@@ -131,10 +144,17 @@
     <string name="two_step_call_state_failed_b">Could not reach other party</string>
     <string name="two_step_call_state_connected">Connected</string>
     <string name="two_step_call_state_disconnected">Call ended</string>
+    <string name="two_step_call_state_cancelling">Cancelling call</string>
+    <string name="two_step_call_state_cancelled">Call cancelled</string>
+    <string name="two_step_call_state_setup_failed">Failed to setup call</string>
+    <string name="two_step_call_state_invalid_number">Phone number incorrect</string>
 
     <!-- Permission strings -->
     <string name="permission_contact_dialog_title">Contact permission</string>
     <string name="permission_contact_dialog_message">Permission is needed to start calling from contact list</string>
     <string name="permission_contact_dialer_list_message">Unable to show contacts, permission is required</string>
+
+    <string name="invalid_mobile_number_title">Invalid number</string>
+    <string name="invalid_mobile_number_message">Your mobile number should start with your country code e.g. +31.</string>
 
 </resources>

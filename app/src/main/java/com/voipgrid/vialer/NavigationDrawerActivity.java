@@ -1,6 +1,8 @@
 package com.voipgrid.vialer;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -31,11 +33,15 @@ import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
+import com.voipgrid.vialer.onboarding.LogoutTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
 import com.voipgrid.vialer.util.Storage;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -78,6 +84,7 @@ public abstract class NavigationDrawerActivity
 
         if (mSystemUser != null){
             mApi = ServiceGenerator.createService(
+                    this,
                     mConnectivityHelper,
                     Api.class,
                     getString(R.string.api_url),
@@ -202,18 +209,35 @@ public abstract class NavigationDrawerActivity
      * Perform logout; Remove the stored SystemUser and PhoneAccount and show the login view
      */
     private void logout() {
-        /* Delete our account information */
-        new Storage(this).clear();
-        /* Mark ourselves as unregistered */
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .edit()
-                .putInt(Middleware.Constants.REGISTRATION_STATUS,
-                        Middleware.Constants.STATUS_UNREGISTERED)
-                .commit();
-        /* Start a new session */
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+        if(mConnectivityHelper.hasNetworkConnection()){
+            try {
+                new LogoutTask(this).execute().get(1000, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                e.printStackTrace();
+            }
+            /* Delete our account information */
+            // TODO This may lead to bugs! Investigate better way in VIALA-408.
+            new Storage(this).clear();
+            /* Mark ourselves as unregistered */
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Middleware.Constants.REGISTRATION_STATUS, Middleware.Constants.STATUS_UNREGISTERED).commit();
+            /* Start a new session */
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        } else {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle(getText(R.string.cannot_logout_error_title));
+            alertDialogBuilder
+                    .setMessage(getText(R.string.cannot_logout_error_text))
+                    .setCancelable(false)
+                    .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }
     }
 
     /**

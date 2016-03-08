@@ -1,4 +1,4 @@
-package com.voipgrid.vialer;
+package com.voipgrid.vialer.dialer;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -8,6 +8,8 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.voipgrid.vialer.R;
 
 /**
  * Custom View widget used in the apps dialpad

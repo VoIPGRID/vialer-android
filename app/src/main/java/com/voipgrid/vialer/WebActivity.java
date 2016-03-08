@@ -105,7 +105,9 @@ public class WebActivity extends AppCompatActivity implements retrofit.Callback<
      */
     private void autoLoginToken() {
         mProgressBar.setVisibility(View.VISIBLE);
-        Api api = ServiceGenerator.createService(mConnectivityHelper, Api.class,
+        Api api = ServiceGenerator.createService(
+                this,
+                mConnectivityHelper, Api.class,
                 getString(R.string.api_url),
                 new OkClient(ServiceGenerator.getOkHttpClient(
                         this,

@@ -56,7 +56,7 @@
 
         <!-- Activity responsible for choosing outgoing calls -->
         <activity
-            android:name=".DialerActivity"
+            android:name=".dialer.DialerActivity"
             android:label="@string/title_activity_dialer"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -173,10 +173,8 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+        <service android:name=".contacts.UpdateChangedContactsService" />
 
-        <activity
-            android:name=".contacts.AuthenticatorActivity"
-            android:label="@string/contacts_app_name" />
         <activity
             android:name=".AccountActivity"
             android:label="@string/title_activity_account"
@@ -187,7 +185,7 @@
                 android:value="com.voipgrid.vialer.MainActivity" />
         </activity>
         <activity
-            android:name=".TwoStepCallActivity"
+            android:name=".twostepcall.TwoStepCallActivity"
             android:screenOrientation="portrait" />
     </application>
 

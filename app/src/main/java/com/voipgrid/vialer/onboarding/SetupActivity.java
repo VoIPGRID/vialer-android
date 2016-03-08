@@ -21,6 +21,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerGcmRegistrationService;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -49,6 +50,7 @@ public class SetupActivity extends AppCompatActivity implements
     private Api mApi;
     private ConnectivityHelper mConnectivityHelper;
     private Preferences mPreferences;
+    private ServiceGenerator mServiceGen;
     private Storage mStorage;
 
     @Override
@@ -62,6 +64,13 @@ public class SetupActivity extends AppCompatActivity implements
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
         );
+
+        try {
+            mServiceGen = ServiceGenerator.getInstance();
+        } catch(PreviousRequestNotFinishedException e) {
+            e.printStackTrace();
+            return;
+        }
 
         mPreferences = new Preferences(this);
 
@@ -129,11 +138,12 @@ public class SetupActivity extends AppCompatActivity implements
         mPassword = password;
         enableProgressBar(true);
 
-        mApi = ServiceGenerator.createService(
+        mApi = mServiceGen.createService(
+                this,
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
-                new OkClient(ServiceGenerator.getOkHttpClient(this, username, password))
+                new OkClient(mServiceGen.getOkHttpClient(this, username, password))
         );
         mApi.systemUser(this);
     }
@@ -237,6 +247,7 @@ public class SetupActivity extends AppCompatActivity implements
                 onNextStep(LoginFragment.newInstance());
             }
         }
+        mServiceGen.release();
     }
 
     @Override
@@ -247,17 +258,12 @@ public class SetupActivity extends AppCompatActivity implements
             public void run() {
                 enableProgressBar(false);
                 OnboardingFragment fragment = getCurrentFragment();
-
                 if (fragment != null) {
-                    if (!mConnectivityHelper.hasNetworkConnection()) {
-                        onAlertDialog(getString(R.string.onboarding_no_internet_title),
-                                getString(R.string.onboarding_no_internet_message));
-                    } else {
-                        fragment.onError(errorMessage);
-                    }
+                    fragment.onError(errorMessage);
                 }
             }
         });
+        mServiceGen.release();
     }
 
     private String[] tags = {
@@ -288,8 +294,29 @@ public class SetupActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onForgotPassword(Fragment fragment, String email) {
-        Api api = ServiceGenerator.createService(
+    public void onForgotPassword(Fragment fragment, final String email) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setTitle(getString(R.string.forgot_password_alert_title));
+        alertDialogBuilder
+                .setMessage(getString(R.string.forgot_password_alert_message, email))
+                .setCancelable(false)
+                .setPositiveButton(this.getString(R.string.ok), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        resetPassword(email);
+                    }
+                })
+                .setNegativeButton(this.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }
+
+    private void resetPassword(String email) {
+        Api api = mServiceGen.createService(
+                this,
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),

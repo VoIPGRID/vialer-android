@@ -10,7 +10,7 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
-import com.voipgrid.vialer.TwoStepCallActivity;
+import com.voipgrid.vialer.twostepcall.TwoStepCallActivity;
 
 /**
  * Helper class to use to setup a outgoing call. Based on connectivity choose between SIP or

@@ -2,7 +2,7 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     >
 
-    <com.voipgrid.vialer.twostepcall.widget.TwoStepCallProgressView
+    <com.voipgrid.vialer.twostepcall.TwoStepCallProgressView
         android:id="@+id/progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>

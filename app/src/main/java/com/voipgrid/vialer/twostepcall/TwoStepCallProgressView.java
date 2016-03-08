@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.twostepcall.widget;
+package com.voipgrid.vialer.twostepcall;
 
 import android.content.Context;
 import android.graphics.Bitmap;

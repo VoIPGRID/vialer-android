@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,12 +14,15 @@ import android.widget.EditText;
 import android.widget.Switch;
 
 import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.Middleware;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.Storage;
 
 import java.io.IOException;
@@ -34,8 +38,8 @@ public class AccountActivity extends AppCompatActivity implements
     private CompoundButton mSwitch;
     private EditText mSipIdEditText;
 
-    private Api mApi;
-    private ConnectivityHelper mConnectivityHelper;
+    private ServiceGenerator mServiceGen;
+
     private PhoneAccount mPhoneAccount;
     private Preferences mPreferences;
     private Storage mStorage;
@@ -52,20 +56,7 @@ public class AccountActivity extends AppCompatActivity implements
         mSystemUser = (SystemUser) mStorage.get(SystemUser.class);
         mPhoneAccount = (PhoneAccount) mStorage.get(PhoneAccount.class);
 
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
-
         mPreferences = new Preferences(this);
-
-        mApi = ServiceGenerator.createService(
-                mConnectivityHelper,
-                Api.class,
-                getString(R.string.api_url),
-                new OkClient(ServiceGenerator.getOkHttpClient(
-                        this, mSystemUser.getEmail(), mSystemUser.getPassword()))
-        );
 
         /* set the Toolbar to use as ActionBar */
         setSupportActionBar((Toolbar) findViewById(R.id.action_bar));
@@ -126,8 +117,17 @@ public class AccountActivity extends AppCompatActivity implements
                 mEditMode = true;
             }
             if (id == R.id.action_done) {
-                mEditMode = false;
-                save();
+
+                if (isValidNumber()) {
+                    mEditMode = false;
+                    save();
+                } else {
+                    DialogHelper.displayAlert(
+                            this,
+                            getString(R.string.invalid_mobile_number_title),
+                            getString(R.string.invalid_mobile_number_message)
+                    );
+                }
             }
             invalidateOptionsMenu();
             invalidateEditText();
@@ -136,13 +136,42 @@ public class AccountActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * isValidNumber returns true if the number currently entered is a valid phone number.
+     */
+    private boolean isValidNumber() {
+        String mobileNumber = ((EditText) findViewById(
+                R.id.account_mobile_number_edit_text)).getText().toString();
+
+        return PhoneNumberUtils.isValidMobileNumber(PhoneNumberUtils.formatMobileNumber(mobileNumber));
+    }
+
     private void save() {
         findViewById(R.id.container).setFocusableInTouchMode(true);
 
         String number = ((EditText) findViewById(
                 R.id.account_mobile_number_edit_text)).getText().toString();
+        number = PhoneNumberUtils.formatMobileNumber(number);
 
-        mApi.mobileNumber(new MobileNumber(number), this);
+        ConnectivityHelper connectivityHelper = new ConnectivityHelper(
+                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
+                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
+        );
+
+        try {
+            mServiceGen = ServiceGenerator.getInstance();
+        } catch(PreviousRequestNotFinishedException e) {
+            return;
+        }
+        Api api = mServiceGen.createService(
+                this,
+                connectivityHelper,
+                Api.class,
+                getString(R.string.api_url),
+                new OkClient(mServiceGen.getOkHttpClient(
+                        this, mSystemUser.getEmail(), mSystemUser.getPassword()))
+        );
+        api.mobileNumber(new MobileNumber(number), this);
 
         mSystemUser.setMobileNumber(number);
 
@@ -155,14 +184,20 @@ public class AccountActivity extends AppCompatActivity implements
 
     @Override
     public void success(Object object, Response response) {
-            // Success callback for updating mobile number.
-            // Update the systemuser.
-            mStorage.save(mSystemUser);
+        // Success callback for updating mobile number.
+        // Update the systemuser.
+        mStorage.save(mSystemUser);
+        mServiceGen.release();
     }
 
     @Override
     public void failure(RetrofitError error) {
-        error.printStackTrace();
+        mServiceGen.release();
+        DialogHelper.displayAlert(
+                this,
+                getString(R.string.onboarding_account_configure_failed_title),
+                getString(R.string.onboarding_account_configure_invalid_phone_number)
+        );
     }
 
     @Override

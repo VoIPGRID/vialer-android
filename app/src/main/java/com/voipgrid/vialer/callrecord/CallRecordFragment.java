@@ -211,8 +211,17 @@ public class CallRecordFragment extends ListFragment implements
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
 
+            CallRecord record = mAdapter.getItem(position);
+            String number;
+            if (record.getDirection().equals(CallRecord.DIRECTION_INBOUND)) {
+                number = record.getCaller();
+            } else {
+                number = record.getDialedNumber();
+            }
+
+
             new DialHelper(getActivity(),mStorage,mConnectivityHelper, mAnalyticsHelper).
-                    callNumber(mAdapter.getItem(position).getDialedNumber(), "");
+                    callNumber(number, "");
         }
     }
 
@@ -228,6 +237,7 @@ public class CallRecordFragment extends ListFragment implements
         mHaveNetworkRecords = false;
         SystemUser systemUser = (SystemUser) mStorage.get(SystemUser.class);
         Api api = ServiceGenerator.createService(
+                getContext(),
                 mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),

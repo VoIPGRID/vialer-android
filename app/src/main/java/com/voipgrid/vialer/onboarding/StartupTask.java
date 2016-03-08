@@ -16,7 +16,6 @@ import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.contacts.ContactsManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
 import com.voipgrid.vialer.util.Storage;
@@ -58,6 +57,7 @@ public class StartupTask extends AsyncTask {
         String password = systemUser.getPassword();
 
         mApi = ServiceGenerator.createService(
+                mContext,
                 mConnectivityHelper,
                 Api.class,
                 context.getString(R.string.api_url),
@@ -65,6 +65,7 @@ public class StartupTask extends AsyncTask {
         );
 
         mRegistrationApi = ServiceGenerator.createService(
+                mContext,
                 mConnectivityHelper,
                 Registration.class,
                 context.getString(R.string.registration_url),
@@ -97,10 +98,5 @@ public class StartupTask extends AsyncTask {
             // Setup can fail. No need to handle error. Next startup the app will try again.
         }
         return null;
-    }
-
-    @Override
-    protected void onPostExecute(Object o) {
-        ContactsManager.requestContactSync(mContext);
     }
 }

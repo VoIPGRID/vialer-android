@@ -259,6 +259,7 @@ public class SipService extends Service implements
     public void onAccountRegistered(Account account, OnRegStateParam param) {
         if(mCallType.equals(SipConstants.ACTION_VIALER_INCOMING)) {
             Registration registrationApi = ServiceGenerator.createService(
+                    this,
                     mConnectivityHelper,
                     Registration.class,
                     mUrl,

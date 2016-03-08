@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">Vialer</string>
     <string name="navigation_drawer_open">Open menu</string>
     <string name="navigation_drawer_close">Sluit menu</string>
@@ -31,6 +30,14 @@
     <string name="version_info">Versie: %1$s</string>
     <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
 
+    <!-- Dialog options -->
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Sidebar fragment values -->
+    <string name="cannot_logout_error_title">Geen internetverbinding beschikbaar</string>
+    <string name="cannot_logout_error_text">Een internetverbinding is nodig om uit te loggen.</string>
+
     <!-- Login fragment values -->
     <string name="login_header_label_text">Zakelijke</string>
     <string name="login_header_label_subtext">telefonie in de cloud</string>
@@ -40,13 +47,16 @@
     <string name="login_button_title">Inloggen</string>
     <string name="login_missing_field_title">Let op</string>
     <string name="login_missing_field_message">Vul alstublieft alle velden in</string>
-    <string name="ok">Ok</string>
+
     <!-- Forgot password fragment values -->
     <string name="header_forgot_password_title">Wachtwoord vergeten</string>
     <string name="forgot_password_button_text">Verzenden</string>
     <string name="forgot_password_description">Voer uw e-mailadres in en wij sturen je instructies om je wachtwoord te herstellen.</string>
     <string name="forgot_password_missing_field_title">Let op</string>
     <string name="forgot_password_missing_field_message">Vul alstublieft alle velden in</string>
+    <string name="forgot_password_alert_title">Wachtwoord herstellen</string>
+    <string name="forgot_password_alert_message">Als uw gebruikersnaam %1s is zullen we u een e-mail sturen met instructies om uw wachtwoord te herstellen.</string>
+
     <!--
         Configure fragment values.
     -->
@@ -55,6 +65,8 @@
     <string name="configure_header_label_subtext">je account in</string>
     <string name="phonenumber_edittext_hint">Mobiel nummer</string>
     <string name="outgoingnumber_edittext_hint">Uitgaand nummer</string>
+    <string name="phonenumber_info_text_title">Mobiele telefoonnummer</string>
+    <string name="phonenumber_info_text">Om Twee stap bellen mogelijk te maken, hebben we je mobiele nummer nodig.</string>
     <string name="configure_missing_field_title">Let op</string>
     <string name="configure_missing_field_message">Vul alstublieft alle velden in</string>
     <!--
@@ -114,6 +126,10 @@
     <string name="two_step_call_state_failed_b">Konden andere partij niet bereiken</string>
     <string name="two_step_call_state_connected">Verbonden</string>
     <string name="two_step_call_state_disconnected">Gesprek beëindigd</string>
+    <string name="two_step_call_state_cancelling">Gesprek wordt afgebroken</string>
+    <string name="two_step_call_state_cancelled">Gesprek afgebroken</string>
+    <string name="two_step_call_state_setup_failed">Opzetten van gesprek mislukt</string>
+    <string name="two_step_call_state_invalid_number">Telefoonnummer incorrect</string>
 
     <!-- Permission strings -->
     <string name="permission_contact_dialog_title">Contact permissie</string>
@@ -125,4 +141,8 @@
     <string name="account_sip_password_edit_text_hint">Wachtwoord</string>
     <string name="two_step_call_message_step_a_failed">Konden uw telefoon niet bereiken</string>
     <string name="two_step_call_message_step_b_failed">Konden andere partij niet bereiken</string>
+
+
+    <string name="invalid_mobile_number_title">Ongeldig nummer</string>
+    <string name="invalid_mobile_number_message">Het mobiele nummer moet beginnen met een landcode bijv. +31.</string>
 </resources>

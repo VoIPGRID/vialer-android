@@ -1,9 +1,13 @@
 package com.voipgrid.vialer.contacts;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract;
+
+import com.voipgrid.vialer.t9.T9DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +79,7 @@ public class ContactsSyncTask {
     /**
      * Runs the sync for all contacts.
      */
-    public void sync() {
+    public void fullSync() {
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(mContext)) {
@@ -84,13 +88,36 @@ public class ContactsSyncTask {
         }
         // Gives you the list of contacts who have phone numbers.
         Cursor cursor = queryAllContacts();
+        SyncUtils.setFullSyncInProgress(mContext, true);
+        sync(cursor);
+        SyncUtils.setFullSyncInProgress(mContext, false);
+        SyncUtils.setRequiresFullContactSync(mContext, false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            mContext.startService(new Intent(mContext, UpdateChangedContactsService.class));
+        }
+    }
+
+    /**
+     * Sync syncs the contacts in the given cursor for T9 and call with app button.
+     * @param cursor The cursor of contacts to sync.
+     */
+    public void sync(Cursor cursor) {
+        // Check contacts permission. Do nothing if we don't have it. Since it's a background
+        // job we can't really ask the user for permission.
+        if (!ContactsPermission.hasPermission(mContext)) {
+            // TODO VIALA-349 Delete sync account.
+            return;
+        }
+
+        T9DatabaseHelper t9Database = new T9DatabaseHelper(mContext);
 
         while (cursor.moveToNext()) {
-            String contactId = getColumnFromCursor(ContactsContract.Contacts._ID, cursor);
+            long contactId = cursor.getLong(cursor.getColumnIndex(ContactsContract.Contacts._ID));
             String name = getColumnFromCursor(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
                     cursor);
 
-            Cursor phones = queryAllPhoneNumbers(contactId);
+            Cursor phones = queryAllPhoneNumbers(Long.toString(contactId));
 
             if (phones.getCount() <= 0) {
                 // Close cursor before continue.
@@ -98,8 +125,10 @@ public class ContactsSyncTask {
                 continue;
             }
 
-            List<String> phoneNumbers = new ArrayList<>(phones.getCount());
+            List<String> normalizedPhoneNumbers = new ArrayList<>();
             String normalizedPhoneNumber;
+            List<String> phoneNumbers = new ArrayList<>();
+            String phoneNumber;
 
             while (phones.moveToNext()) {
                 normalizedPhoneNumber = getColumnFromCursor(
@@ -113,19 +142,45 @@ public class ContactsSyncTask {
                 }
 
                 // Avoid duplicate phone numbers.
-                if (!phoneNumbers.contains(normalizedPhoneNumber)){
-                    phoneNumbers.add(normalizedPhoneNumber);
+                if (!normalizedPhoneNumbers.contains(normalizedPhoneNumber)){
+                    normalizedPhoneNumbers.add(normalizedPhoneNumber);
+                }
+
+                phoneNumber = getColumnFromCursor(
+                        ContactsContract.CommonDataKinds.Phone.NUMBER,
+                        phones
+                );
+
+                // We do not want to synchronize null numbers.
+                if (phoneNumber == null || phoneNumber.length() < 1) {
+                    continue;
+                }
+
+                // Avoid duplicate phone numbers.
+                if (!phoneNumbers.contains(phoneNumber)){
+                    phoneNumbers.add(phoneNumber.replace(" ", ""));
                 }
 
             }
             phones.close();
 
             // Found no normalized phone numbers so don't sync the contact.
-            if (phoneNumbers.size() <= 0){
+            if (normalizedPhoneNumbers.size() <= 0){
                 continue;
             }
-            ContactsManager.syncContact(mContext, name, phoneNumbers);
+            SyncContact syncContact = new SyncContact(
+                    contactId,
+                    name,
+                    normalizedPhoneNumbers,
+                    phoneNumbers
+            );
+
+            ContactsManager.syncContact(mContext, syncContact, t9Database);
         }
         cursor.close();
+
+        // Remove dead weight from t9 db.
+        t9Database.afterSyncCleanup();
+        SyncUtils.setLastSyncNow(mContext);
     }
 }

@@ -41,6 +41,7 @@ public class Middleware {
 
         try {
             Registration api = ServiceGenerator.createService(
+                    context,
                     ConnectivityHelper.get(context),
                     Registration.class,
                     context.getString(R.string.registration_url),
@@ -67,6 +68,7 @@ public class Middleware {
         SharedPreferences.Editor editor = preferences.edit();
         try {
             Registration api = ServiceGenerator.createService(
+                    context,
                     ConnectivityHelper.get(context),
                     Registration.class,
                     context.getString(R.string.registration_url),

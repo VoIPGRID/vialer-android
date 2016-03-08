@@ -6,12 +6,14 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -73,6 +75,22 @@ public class AccountFragment extends OnboardingFragment implements
             mMobileEdittext = (EditText) view.findViewById(R.id.mobileNumberTextDialog);
             mMobileEdittext.setText(arguments.getString(ARG_MOBILE));
             mMobileEdittext.addTextChangedListener(this);
+            mMobileEdittext.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    final int DRAWABLE_RIGHT = 2;
+
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        if (event.getRawX() >= (mMobileEdittext.getRight() - mMobileEdittext.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                            mListener.onAlertDialog(getString(R.string.phonenumber_info_text_title),
+                                    getString(R.string.phonenumber_info_text));
+
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
 
             mOutgoingEdittext = (EditText) view.findViewById(R.id.outgoingNumberTextDialog);
             String outGoingNumber = arguments.getString(ARG_OUTGOING);
@@ -119,7 +137,17 @@ public class AccountFragment extends OnboardingFragment implements
 
     @Override
     public void onClick(View view) {
-        mListener.onUpdateMobileNumber(this, String.valueOf(mMobileEdittext.getText()));
+        String mobileNumber = PhoneNumberUtils.formatMobileNumber(
+                String.valueOf(mMobileEdittext.getText()));
+
+        if (PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
+            mListener.onUpdateMobileNumber(this, mobileNumber);
+        } else {
+            mListener.onAlertDialog(
+                    getString(R.string.invalid_mobile_number_title),
+                    getString(R.string.invalid_mobile_number_message)
+            );
+        }
     }
 
     @Override
@@ -144,7 +172,8 @@ public class AccountFragment extends OnboardingFragment implements
     public void onNextStep() {
         mListener.onConfigure(
                 this,
-                String.valueOf(mMobileEdittext.getText()),
+                PhoneNumberUtils.formatMobileNumber(
+                        String.valueOf(mMobileEdittext.getText())),
                 String.valueOf(mOutgoingEdittext.getText())
         );
     }

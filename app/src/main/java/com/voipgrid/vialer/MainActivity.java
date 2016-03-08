@@ -21,8 +21,10 @@ import com.google.android.gms.analytics.Tracker;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
-import com.voipgrid.vialer.contacts.ContactsManager;
 import com.voipgrid.vialer.contacts.ContactsPermission;
+import com.voipgrid.vialer.contacts.SyncUtils;
+import com.voipgrid.vialer.contacts.UpdateChangedContactsService;
+import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.onboarding.StartupTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -64,6 +66,17 @@ public class MainActivity extends NavigationDrawerActivity implements
             new StartupTask(this).execute();
         }
 
+        if (SyncUtils.requiresFullContactSync(this)) {
+            SyncUtils.requestContactSync(this);
+        } else {
+            // Live contact updates are not supported below api level 18.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                startService(new Intent(this, UpdateChangedContactsService.class));
+            }
+        }
+
+        SyncUtils.setPeriodicSync(this);
+
         setContentView(R.layout.activity_main);
 
         /* set the Toolbar to use as ActionBar */
@@ -102,7 +115,7 @@ public class MainActivity extends NavigationDrawerActivity implements
             }
             if (allPermissionsGranted) {
                 // ContactSync.
-                ContactsManager.requestContactSync(this);
+                SyncUtils.requestContactSync(this);
             }
         }
     }

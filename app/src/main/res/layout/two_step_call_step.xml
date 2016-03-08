@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
-    <com.voipgrid.vialer.twostepcall.widget.TwoStepCallIconView
+    <com.voipgrid.vialer.twostepcall.TwoStepCallIconView
         android:id="@+id/icon"
         app:icon_resource="@drawable/ic_twostepcall_platform"
         android:layout_width="wrap_content"
