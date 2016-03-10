@@ -31,6 +31,7 @@
     <!-- Dialog options -->
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
+    <string name="permission_settings">App permissions</string>
 
     <!-- WebActivity -->
     <string name="webactivity_open_page_failed">Failed to open web page.</string>
@@ -153,6 +154,9 @@
     <string name="two_step_call_state_invalid_number">Phone number incorrect</string>
 
     <!-- Permission strings -->
+    <string name="permission_microphone_dialog_title">Microphone permission</string>
+    <string name="permission_microphone_dialog_message">Permission is needed to call</string>
+    <string name="permission_microphone_missing_message">Cannot start a call, permission to use the microphone is required</string>
     <string name="permission_contact_dialog_title">Contact permission</string>
     <string name="permission_contact_dialog_message">Permission is needed to start calling from contact list</string>
     <string name="permission_contact_dialer_list_message">Unable to show contacts, permission is required</string>

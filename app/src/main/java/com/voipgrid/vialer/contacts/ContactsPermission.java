@@ -17,6 +17,10 @@ import com.voipgrid.vialer.R;
  */
 public class ContactsPermission {
 
+    public static final int GRANTED = 0;
+    public static final int DENIED = 1;
+    public static final int BLOCKED = 2;
+
     public static final String mPermissionToCheck = Manifest.permission.READ_CONTACTS;
     public static final String[] mPermissions = new String[] {Manifest.permission.READ_CONTACTS,
             Manifest.permission.WRITE_CONTACTS, Manifest.permission.GET_ACCOUNTS};
@@ -27,11 +31,17 @@ public class ContactsPermission {
      * @return Whether or not we have permission.
      */
     public static boolean hasPermission(Context context) {
-        if (ContextCompat.checkSelfPermission(context, mPermissionToCheck) ==
-                PackageManager.PERMISSION_GRANTED){
-            return true;
+        return getPermissionStatus((Activity) context, mPermissionToCheck) == GRANTED;
+    }
+
+    private static int getPermissionStatus(Activity activity, String androidPermissionName) {
+        if(ContextCompat.checkSelfPermission(activity, androidPermissionName) != PackageManager.PERMISSION_GRANTED) {
+            if(!ActivityCompat.shouldShowRequestPermissionRationale(activity, androidPermissionName)){
+                return BLOCKED;
+            }
+            return DENIED;
         }
-        return false;
+        return GRANTED;
     }
 
     /**

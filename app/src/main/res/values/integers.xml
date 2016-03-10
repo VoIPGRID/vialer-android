@@ -6,4 +6,5 @@
     <integer name="dialpad_number_input_max_length">20</integer>
 
     <integer name="contact_permission_request_code">1</integer>
+    <integer name="microphone_permission_request_code">2</integer>
 </resources>
