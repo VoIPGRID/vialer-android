@@ -34,10 +34,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A fragment representing a list of call records.
@@ -132,9 +131,7 @@ public class CallRecordFragment extends ListFragment implements
                 (TelephonyManager) getActivity().getSystemService(Context.TELEPHONY_SERVICE));
 
         mJsonStorage = new JsonStorage(getActivity());
-
         mFilter = getArguments().getString(ARG_FILTER);
-        
         mPreferences = new Preferences(getContext());
     }
 
@@ -238,17 +235,13 @@ public class CallRecordFragment extends ListFragment implements
         SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         Api api = ServiceGenerator.createService(
                 getContext(),
-                mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
-                new OkClient(ServiceGenerator.getOkHttpClient(
-                        getContext(),
-                        systemUser.getEmail(),
-                        systemUser.getPassword()
-                ))
-        );
+                systemUser.getEmail(),
+                systemUser.getPassword());
 
-        api.getRecentCalls(50, 0, CallRecord.getLimitDate(), this);
+        Call<VoipGridResponse<CallRecord>> call = api.getRecentCalls(50, 0, CallRecord.getLimitDate());
+        call.enqueue(this);
     }
 
     /* Load from local cache first */
@@ -285,24 +278,6 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     /**
-     * Callback on succesfull request. When call records are available add them to the adapter
-     * otherwise display the empty view with an error message.
-     * @param voipGridResponse
-     * @param response
-     */
-    @Override
-    public void success(VoipGridResponse<CallRecord> voipGridResponse, Response response) {
-        mHaveNetworkRecords = true;
-        List<CallRecord> records = voipGridResponse.getObjects();
-        displayCallRecords(records);
-        /* save the records to cache, if there are any */
-        if (filter(records).size() > 0) {
-            new AsyncCallRecordSaver(records).execute();
-        }
-    }
-
-
-    /**
      * Apply filter on call records or return the call record list when the filter is null
      * @param callRecords
      * @return
@@ -324,17 +299,32 @@ public class CallRecordFragment extends ListFragment implements
         return callRecords;
     }
 
-    /**
-     * Request failed. Display the empty view with an error message.
-     * @param error
-     */
     @Override
-    public void failure(RetrofitError error) {
+    public void onResponse(Call<VoipGridResponse<CallRecord>> call,
+                           Response<VoipGridResponse<CallRecord>> response) {
+        if (response.isSuccess() && response.body() != null) {
+            mHaveNetworkRecords = true;
+            List<CallRecord> records = response.body().getObjects();
+            displayCallRecords(records);
+        /* save the records to cache, if there are any */
+            if (filter(records).size() > 0) {
+                new AsyncCallRecordSaver(records).execute();
+            }
+        } else {
+            failedFeedback(response);
+        }
+    }
+
+    @Override
+    public void onFailure(Call call, Throwable t) {
+        failedFeedback(null);
+    }
+
+    private void failedFeedback(Response response) {
         String message = getString(R.string.empty_view_default_message);
-        Response response = error.getResponse();
 
         // Check if authorized.
-        if(response != null && (response.getStatus() == 401 || response.getStatus() == 403)) {
+        if(response != null && (response.code() == 401 || response.code() == 403)) {
             message = getString(R.string.empty_view_unauthorized_message);
         }
         if (mAdapter.getCount() == 0) {

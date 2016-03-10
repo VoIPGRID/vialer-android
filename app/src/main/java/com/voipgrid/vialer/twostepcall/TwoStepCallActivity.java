@@ -22,10 +22,11 @@ import com.voipgrid.vialer.models.ClickToDialParams;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
-import retrofit.client.Response;
+import java.io.IOException;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TwoStepCallActivity extends Activity implements View.OnClickListener, Callback<Object> {
 
@@ -69,14 +70,10 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
 
         mApi = ServiceGenerator.createService(
                 this,
-                mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
-                new OkClient(ServiceGenerator.getOkHttpClient(
-                        this,
-                        mSystemUser.getEmail(),
-                        mSystemUser.getPassword())
-                )
+                mSystemUser.getEmail(),
+                mSystemUser.getPassword()
         );
 
         String numberToCall = getIntent().getStringExtra(NUMBER_TO_CALL);
@@ -134,7 +131,8 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
                 String callId = mTwoStepCallTask.getCallId();
 
                 if (callId != null) {  // callId exists so cancel right away
-                    mApi.twoStepCallCancel(callId, this);
+                    Call<Object> call = mApi.twoStepCallCancel(callId);
+                    call.enqueue(this);
                     cancelCall = true;
                 } else {  // set cancelCall so the two way task will cancel it once it's created
                     cancelCall = true;
@@ -144,30 +142,6 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
                 updateStateView(TwoStepCallUtils.STATE_CANCELLING);
                 break;
         }
-    }
-
-    @Override
-    public void success(Object o, Response response) {
-        // Response code of successful cancel request.
-        if (response.getStatus() == 204) {
-            // Cancel the status update task.
-            mTwoStepCallTask.cancel(false);
-            // Update view.
-            updateStateView(TwoStepCallUtils.STATE_CANCELLED);
-            cancelButtonVisible(false);
-
-            // Redirect user back to previous activity after 5 seconds.
-            finishWithDelay();
-        }
-    }
-
-
-    @Override
-    public void failure(RetrofitError error) {
-        // No longer cancelling a call.
-        cancelCall = false;
-        // Failed to cancel call, enable button again.
-        cancelButtonVisible(true);
     }
 
     /**
@@ -203,6 +177,38 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
         }, 3000);
     }
 
+    @Override
+    public void onResponse(Call<Object> call, Response<Object> response) {
+        // Response code of successful cancel request.
+        if (response.isSuccess()) {
+            // Cancel the status update task.
+            mTwoStepCallTask.cancel(false);
+            // Update view.
+            updateStateView(TwoStepCallUtils.STATE_CANCELLED);
+            cancelButtonVisible(false);
+
+            // Redirect user back to previous activity after 5 seconds.
+            finishWithDelay();
+        } else {
+            failedFeedback();
+        }
+    }
+
+    @Override
+    public void onFailure(Call<Object> call, Throwable t) {
+        failedFeedback();
+    }
+
+    /**
+     * Update view to reflect failed cancel.
+     */
+    private void failedFeedback() {
+        // No longer cancelling a call.
+        cancelCall = false;
+        // Failed to cancel call, enable button again.
+        cancelButtonVisible(true);
+    }
+
 
     public class TwoStepCallTask extends AsyncTask<Void, String, Boolean> {
         private Api mApi;
@@ -223,21 +229,24 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
         @Override
         protected Boolean doInBackground(Void... params) {
             TwoStepCallStatus status;
+            Call<TwoStepCallStatus> call = mApi.twoStepCall(new ClickToDialParams(mNumberA, mNumberB));
             try {
-                status = mApi.twoStepCall(new ClickToDialParams(mNumberA, mNumberB));
-            } catch (RetrofitError error) {
-                int statusCode = error.getResponse().getStatus();
-                if (statusCode == 400) {
-                    publishProgress(TwoStepCallUtils.STATE_INVALID_NUMBER);
+                Response<TwoStepCallStatus> response = call.execute();
+                if (response.isSuccess() && response.body() != null) {
+                    status = response.body();
                 } else {
-                    publishProgress(TwoStepCallUtils.STATE_FAILED);
+                    publishProgress(TwoStepCallUtils.STATE_INVALID_NUMBER);
+                    return false;
                 }
+            } catch (IOException e) {
+                publishProgress(TwoStepCallUtils.STATE_FAILED);
                 return false;
             }
             mCallId = status.getCallId();
             // If cancel has been pressed before the call was made cancel it here.
             if (cancelCall) {
-                mApi.twoStepCallCancel(mCallId, TwoStepCallActivity.this);
+                Call<Object> cancelCall = mApi.twoStepCallCancel(mCallId);
+                cancelCall.enqueue(TwoStepCallActivity.this);
             }
             // We continue with the task because if the cancel fails there is no way to inform
             // the user with the status of the uncancelled call.
@@ -277,8 +286,17 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
                         message.equals(TwoStepCallStatus.STATE_CONNECTED)) {
                     try {
                         Thread.sleep(1000);
-                        TwoStepCallStatus status = mApi.twoStepCall(mCallId);
-                        handleMessage(status.getStatus());
+                        Call<TwoStepCallStatus> call = mApi.twoStepCall(mCallId);
+
+                        try {
+                            Response<TwoStepCallStatus> response = call.execute();
+                            if (response.isSuccess() && response.body() != null) {
+                                TwoStepCallStatus status = response.body();
+                                handleMessage(status.getStatus());
+                            }
+                        } catch (IOException e) {
+
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

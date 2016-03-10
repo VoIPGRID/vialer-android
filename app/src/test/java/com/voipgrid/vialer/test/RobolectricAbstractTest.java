@@ -10,6 +10,6 @@ import org.robolectric.annotation.Config;
  * Abstract test class for tests that require Robolectric.
  */
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk = 21)
 public abstract class RobolectricAbstractTest {
 }

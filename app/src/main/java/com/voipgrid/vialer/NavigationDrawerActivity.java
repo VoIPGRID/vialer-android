@@ -43,10 +43,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * NavigationDrawerActivity adds support to add a Toolbar and DrawerLayout to an Activity.
@@ -85,15 +84,15 @@ public abstract class NavigationDrawerActivity
         if (mSystemUser != null){
             mApi = ServiceGenerator.createService(
                     this,
-                    mConnectivityHelper,
                     Api.class,
                     getString(R.string.api_url),
-                    new OkClient(ServiceGenerator.getOkHttpClient(
-                            this, mSystemUser.getEmail(), mSystemUser.getPassword()))
-            );
+                    mSystemUser.getEmail(),
+                    mSystemUser.getPassword());
+
 
             // Preload availability.
-            mApi.getUserDestination(this);
+            Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
+            call.enqueue(this);
         }
     }
 
@@ -137,7 +136,7 @@ public abstract class NavigationDrawerActivity
 
         mDrawerLayout.setDrawerListener(drawerToggle);
 
-        SystemUser systemUser = (SystemUser) new JsonStorage(this).get(SystemUser.class);
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         if(systemUser != null) {
             String phoneNumber = systemUser.getOutgoingCli();
             if (!TextUtils.isEmpty(phoneNumber)) {
@@ -217,7 +216,7 @@ public abstract class NavigationDrawerActivity
             }
             /* Delete our account information */
             // TODO This may lead to bugs! Investigate better way in VIALA-408.
-            new JsonStorage(this).clear();
+            mJsonStorage.clear();
             /* Mark ourselves as unregistered */
             PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Middleware.Constants.REGISTRATION_STATUS, Middleware.Constants.STATUS_UNREGISTERED).commit();
             /* Start a new session */
@@ -246,7 +245,7 @@ public abstract class NavigationDrawerActivity
      * @param page
      */
     private void startWebActivity(String title, String page) {
-        SystemUser systemUser = new JsonStorage<SystemUser>(this).get(SystemUser.class);
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         Intent intent = new Intent(this, WebActivity.class);
         intent.putExtra(WebActivity.PAGE, page);
         intent.putExtra(WebActivity.TITLE, title);
@@ -255,12 +254,17 @@ public abstract class NavigationDrawerActivity
         startActivity(intent);
     }
 
-    @Override
-    public void success(Object object, Response response) {
-        if(object instanceof VoipGridResponse) {
 
+    @Override
+    public void onFailure(Call call, Throwable t) {
+
+    }
+
+    @Override
+    public void onResponse(Call call, Response response) {
+        if(response.body() instanceof VoipGridResponse) {
             List<UserDestination> userDestinationObjects =
-                    ((VoipGridResponse<UserDestination>) object).getObjects();
+                    ((VoipGridResponse<UserDestination>) response.body()).getObjects();
 
             if (userDestinationObjects == null || userDestinationObjects.size() <=0){
                 return;
@@ -299,12 +303,6 @@ public abstract class NavigationDrawerActivity
         }
     }
 
-    @Override
-    public void failure(RetrofitError error) {
-        error.printStackTrace();
-    }
-
-
     /**
      * Function to setup the availability spinner.
      */
@@ -328,7 +326,9 @@ public abstract class NavigationDrawerActivity
                     destination.getId() : null;
             params.phoneAccount = destination instanceof PhoneAccount ?
                     destination.getId() : null;
-            mApi.setSelectedUserDestination(mDestinationId, params, this);
+            Call<Object> call = mApi.setSelectedUserDestination(mDestinationId, params);
+            call.enqueue(this);
+
         }
     }
 
@@ -357,7 +357,8 @@ public abstract class NavigationDrawerActivity
         public void onDrawerOpened(View drawerView) {
             super.onDrawerOpened(drawerView);
             // Force a reload of availability every time the drawer is opened.
-            mApi.getUserDestination(mActivity);
+            Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
+            call.enqueue(mActivity);
         }
     }
 }

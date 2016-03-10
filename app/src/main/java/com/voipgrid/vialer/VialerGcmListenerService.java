@@ -8,7 +8,6 @@ import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
 import com.google.android.gms.gcm.GcmListenerService;
-import com.squareup.okhttp.OkHttpClient;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.sip.SipConstants;
@@ -17,10 +16,10 @@ import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
-
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Listen to messages from GCM. The backend server sends us GCM notifications when we have
@@ -44,8 +43,6 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
      * Extra field for notification throughput logging.
      */
     public static final String MESSAGE_START_TIME = "message_start_time";
-
-    private ConnectivityHelper mConnectivityHelper;
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
@@ -103,27 +100,21 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
      */
     private void replyServer(String responseUrl, String requestToken, String messageStartTime,
                              boolean isAvailable) {
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
-
         Registration registrationApi = ServiceGenerator.createService(
                 this,
-                mConnectivityHelper,
                 Registration.class,
-                responseUrl,
-                new OkClient(new OkHttpClient())
+                responseUrl
         );
 
-        registrationApi.reply(requestToken, isAvailable, messageStartTime, new Callback<Object>() {
+        Call<ResponseBody> call = registrationApi.reply(requestToken, isAvailable, messageStartTime);
+        call.enqueue(new Callback<ResponseBody>() {
             @Override
-            public void success(Object object, retrofit.client.Response response) {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 
             }
 
             @Override
-            public void failure(RetrofitError error) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
 
             }
         });

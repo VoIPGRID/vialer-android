@@ -1,10 +1,8 @@
 package com.voipgrid.vialer;
 
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,17 +16,13 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialogHelper;
-import com.voipgrid.vialer.util.Middleware;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.JsonStorage;
 
-import java.io.IOException;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AccountActivity extends AppCompatActivity implements
         Switch.OnCheckedChangeListener,
@@ -152,11 +146,6 @@ public class AccountActivity extends AppCompatActivity implements
                 R.id.account_mobile_number_edit_text)).getText().toString();
         number = PhoneNumberUtils.formatMobileNumber(number);
 
-        ConnectivityHelper connectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
-
         try {
             mServiceGen = ServiceGenerator.getInstance();
         } catch(PreviousRequestNotFinishedException e) {
@@ -164,13 +153,13 @@ public class AccountActivity extends AppCompatActivity implements
         }
         Api api = mServiceGen.createService(
                 this,
-                connectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
-                new OkClient(mServiceGen.getOkHttpClient(
-                        this, mSystemUser.getEmail(), mSystemUser.getPassword()))
+                mSystemUser.getEmail(),
+                mSystemUser.getPassword()
         );
-        api.mobileNumber(new MobileNumber(number), this);
+        Call<MobileNumber> call = api.mobileNumber(new MobileNumber(number));
+        call.enqueue(this);
 
         mSystemUser.setMobileNumber(number);
 
@@ -179,24 +168,6 @@ public class AccountActivity extends AppCompatActivity implements
 
     private void invalidateEditText() {
         findViewById(R.id.account_mobile_number_edit_text).setEnabled(mEditMode);
-    }
-
-    @Override
-    public void success(Object object, Response response) {
-        // Success callback for updating mobile number.
-        // Update the systemuser.
-        mJsonStorage.save(mSystemUser);
-        mServiceGen.release();
-    }
-
-    @Override
-    public void failure(RetrofitError error) {
-        mServiceGen.release();
-        DialogHelper.displayAlert(
-                this,
-                getString(R.string.onboarding_account_configure_failed_title),
-                getString(R.string.onboarding_account_configure_invalid_phone_number)
-        );
     }
 
     @Override
@@ -213,15 +184,43 @@ public class AccountActivity extends AppCompatActivity implements
 
         if (!isChecked) {
             // Unregister at middleware.
-            try {
-                // Blocking for now, quickfix for beta testers.
-                Middleware.unregister(this);
-            } catch (IOException exception) {
 
-            }
+            // Blocking for now, quickfix for beta testers.
+            // TODO VIALA 366 temporary disabled.
+//            Middleware.unregister(this);
+
         } else {
             // Register. Fix this later in SIP vialer version.
             // TODO: VIALA-364.
         }
+    }
+
+    @Override
+    public void onResponse(Call call, Response response) {
+        mServiceGen.release();
+        if (response.isSuccess()) {
+            // Success callback for updating mobile number.
+            // Update the systemuser.
+            mJsonStorage.save(mSystemUser);
+        } else {
+            failedFeedback();
+        }
+    }
+
+    @Override
+    public void onFailure(Call call, Throwable t) {
+        mServiceGen.release();
+        failedFeedback();
+    }
+
+    /**
+     * Function to inform the user of a failed requests.
+     */
+    private void failedFeedback() {
+        DialogHelper.displayAlert(
+                this,
+                getString(R.string.onboarding_account_configure_failed_title),
+                getString(R.string.onboarding_account_configure_invalid_phone_number)
+        );
     }
 }
