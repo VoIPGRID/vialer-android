@@ -7,14 +7,11 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.TelephonyManager;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import com.squareup.okhttp.OkHttpClient;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
@@ -26,14 +23,11 @@ import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.models.PasswordResetParams;
-import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
-import retrofit.client.Response;
-
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Activity that handles the onboarding.
@@ -48,22 +42,16 @@ public class SetupActivity extends AppCompatActivity implements
     private String mPassword;
 
     private Api mApi;
-    private ConnectivityHelper mConnectivityHelper;
     private Preferences mPreferences;
     private ServiceGenerator mServiceGen;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup);
 
-        mStorage = new Storage(this);
-
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
+        mJsonStorage = new JsonStorage(this);
 
         try {
             mServiceGen = ServiceGenerator.getInstance();
@@ -140,12 +128,13 @@ public class SetupActivity extends AppCompatActivity implements
 
         mApi = mServiceGen.createService(
                 this,
-                mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
-                new OkClient(mServiceGen.getOkHttpClient(this, username, password))
+                username,
+                password
         );
-        mApi.systemUser(this);
+        Call<SystemUser> call = mApi.systemUser();
+        call.enqueue(this);
     }
 
     @Override
@@ -153,7 +142,8 @@ public class SetupActivity extends AppCompatActivity implements
         enableProgressBar(true);
 
         /* post mobileNumber to VoipGrip platform */
-        mApi.mobileNumber(new MobileNumber(mobileNumber), this);
+        Call<MobileNumber> call = mApi.mobileNumber(new MobileNumber(mobileNumber));
+        call.enqueue(this);
     }
 
     @Override
@@ -161,20 +151,21 @@ public class SetupActivity extends AppCompatActivity implements
         enableProgressBar(true);
 
         /*  save mobile and outgoing number */
-        SystemUser systemUser = (SystemUser) mStorage.get(SystemUser.class);
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         systemUser.setMobileNumber(mobileNumber);
         systemUser.setOutgoingCli(outgoingNumber);
-        mStorage.save(systemUser);
+        mJsonStorage.save(systemUser);
 
         String phoneAccountId = systemUser.getPhoneAccountId();
         if(phoneAccountId != null) {
-            mApi.phoneAccount(phoneAccountId, this);
+            Call<PhoneAccount> call = mApi.phoneAccount(phoneAccountId);
+            call.enqueue(this);
         } else {
             enableProgressBar(false);
             // TODO add UI to let the user know the sip features are not available without
             // a sip account VIALA-157
             onNextStep(WelcomeFragment.newInstance(
-                            ((SystemUser) mStorage.get(SystemUser.class)).getFullName())
+                            ((SystemUser) mJsonStorage.get(SystemUser.class)).getFullName())
             );
         }
     }
@@ -200,70 +191,6 @@ public class SetupActivity extends AppCompatActivity implements
         if(view != null) {
             view.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
         }
-    }
-
-    @Override
-    public void success(Object object, Response response) {
-        enableProgressBar(false);
-        if(object instanceof SystemUser) {
-            SystemUser systemUser = ((SystemUser) object);
-            if(systemUser.getPartner() != null) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        onAlertDialog(getString(R.string.user_is_partner_error_title),
-                                getString(R.string.user_is_partner_error_message));
-                    }
-                });
-            } else {
-                mPreferences.setSipPermission(systemUser.hasSipPermission());
-                systemUser.setPassword(mPassword);
-                mStorage.save(systemUser);
-                onNextStep(AccountFragment.newInstance(
-                        systemUser.getMobileNumber(),
-                        systemUser.getOutgoingCli()
-                ));
-            }
-        } else if(object instanceof PhoneAccount) {
-            mStorage.save(object);
-            if(mPreferences.hasSipPermission()) {
-                startService(new Intent(this, VialerGcmRegistrationService.class));
-            }
-            onNextStep(WelcomeFragment.newInstance(
-                    ((SystemUser) mStorage.get(SystemUser.class)).getFullName())
-            );
-        } else {
-            FragmentManager fragmentManager = getFragmentManager();
-            // First see if a AccountFragment exists
-            AccountFragment fragment = (AccountFragment) fragmentManager
-                    .findFragmentByTag(AccountFragment.class.getSimpleName());
-            if(fragment != null) {
-                fragment.onNextStep();
-            }
-
-            ForgotPasswordFragment forgotFragment = (ForgotPasswordFragment) fragmentManager
-                    .findFragmentByTag(ForgotPasswordFragment.class.getSimpleName());
-            if (forgotFragment != null) {
-                onNextStep(LoginFragment.newInstance());
-            }
-        }
-        mServiceGen.release();
-    }
-
-    @Override
-    public void failure(RetrofitError error) {
-        final String errorMessage = error.getMessage();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                enableProgressBar(false);
-                OnboardingFragment fragment = getCurrentFragment();
-                if (fragment != null) {
-                    fragment.onError(errorMessage);
-                }
-            }
-        });
-        mServiceGen.release();
     }
 
     private String[] tags = {
@@ -317,12 +244,11 @@ public class SetupActivity extends AppCompatActivity implements
     private void resetPassword(String email) {
         Api api = mServiceGen.createService(
                 this,
-                mConnectivityHelper,
                 Api.class,
-                getString(R.string.api_url),
-                new OkClient(new OkHttpClient())
+                getString(R.string.api_url)
         );
-        api.resetPassword(new PasswordResetParams(email), this);
+        Call<Object> call = api.resetPassword(new PasswordResetParams(email));
+        call.enqueue(this);
     }
 
     /**
@@ -335,5 +261,77 @@ public class SetupActivity extends AppCompatActivity implements
                     Context.INPUT_METHOD_SERVICE);
             keyboard.hideSoftInputFromWindow(focus.getWindowToken(), 0);
         }
+    }
+
+    @Override
+    public void onResponse(Call call, Response response) {
+        if (response.isSuccess()) {
+            enableProgressBar(false);
+            if (response.body() instanceof SystemUser) {
+                SystemUser systemUser = ((SystemUser) response.body());
+                if (systemUser.getPartner() != null) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            onAlertDialog(getString(R.string.user_is_partner_error_title),
+                                    getString(R.string.user_is_partner_error_message));
+                        }
+                    });
+                } else {
+                    mPreferences.setSipPermission(systemUser.hasSipPermission());
+                    systemUser.setPassword(mPassword);
+                    mJsonStorage.save(systemUser);
+                    onNextStep(AccountFragment.newInstance(
+                            systemUser.getMobileNumber(),
+                            systemUser.getOutgoingCli()
+                    ));
+                }
+            } else if (response.body() instanceof PhoneAccount) {
+                mJsonStorage.save(response.body());
+                if (mPreferences.hasSipPermission()) {
+                    startService(new Intent(this, VialerGcmRegistrationService.class));
+                }
+                onNextStep(WelcomeFragment.newInstance(
+                                ((SystemUser) mJsonStorage.get(SystemUser.class)).getFullName())
+                );
+            } else {
+                FragmentManager fragmentManager = getFragmentManager();
+                // First see if a AccountFragment exists
+                AccountFragment fragment = (AccountFragment) fragmentManager
+                        .findFragmentByTag(AccountFragment.class.getSimpleName());
+                if (fragment != null) {
+                    fragment.onNextStep();
+                }
+
+                ForgotPasswordFragment forgotFragment = (ForgotPasswordFragment) fragmentManager
+                        .findFragmentByTag(ForgotPasswordFragment.class.getSimpleName());
+                if (forgotFragment != null) {
+                    onNextStep(LoginFragment.newInstance());
+                }
+            }
+            mServiceGen.release();
+        } else {
+            failedFeedback(response.errorBody().toString());
+        }
+    }
+
+    @Override
+    public void onFailure(Call call, Throwable t) {
+        failedFeedback("Failed");
+    }
+
+    private void failedFeedback(String message) {
+        final String mMessage = message;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                enableProgressBar(false);
+                OnboardingFragment fragment = getCurrentFragment();
+                if (fragment != null) {
+                    fragment.onError(mMessage);
+                }
+            }
+        });
+        mServiceGen.release();
     }
 }

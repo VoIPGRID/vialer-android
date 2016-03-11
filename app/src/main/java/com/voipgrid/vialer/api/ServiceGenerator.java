@@ -4,24 +4,20 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.squareup.okhttp.Authenticator;
-import com.squareup.okhttp.Cache;
-import com.squareup.okhttp.Credentials;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
 import java.io.IOException;
-import java.net.Proxy;
 
-import retrofit.RequestInterceptor;
-import retrofit.RestAdapter;
-import retrofit.client.Client;
-import retrofit.converter.GsonConverter;
+import okhttp3.Cache;
+import okhttp3.Credentials;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 
 /**
  * Project: Vialer
@@ -33,6 +29,10 @@ import retrofit.converter.GsonConverter;
  * Copyright (c) 2015 Peperzaken BV. All rights reserved.
  */
 public class ServiceGenerator {
+
+
+    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+    private static Retrofit.Builder builder = new Retrofit.Builder();
 
     private static ServiceGenerator instance = null;
     private static boolean taken = false;
@@ -51,69 +51,94 @@ public class ServiceGenerator {
         return instance;
     }
 
-    public static OkHttpClient getOkHttpClient(Context context, final String username,
-                                               final String password) {
-        OkHttpClient httpClient = new OkHttpClient();
-        httpClient.setAuthenticator(new Authenticator() {
+    /**
+     * Function to get the user agent string to use in the http requests.
+     * @param context
+     * @return
+     */
+    private static String getUserAgentHeader(Context context) {
+        String appName = context.getString(R.string.app_name);
+        String version = "?";
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            version = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return appName + " - " + version;
+    }
 
+    /**
+     * Function to create the HttpClient to be used by retrofit for API calls.
+     * @param context
+     * @param username
+     * @param password
+     * @return
+     */
+    private static OkHttpClient getHttpClient(final Context context, final String username, final String password) {
+        httpClient.addInterceptor(new Interceptor() {
             @Override
-            public Request authenticate(Proxy proxy, Response response) throws IOException {
-                String credential = Credentials.basic(username, password);
+            public Response intercept(Chain chain) throws IOException {
+                Request original = chain.request();
+                Request.Builder requestBuilder = original.newBuilder();
 
-                if (credential.equals(response.request().header("Authorization"))) {
-                    return null; // If we already failed with these credentials, don't retry.
+                if (username != null && password != null) {
+                    requestBuilder.header("Authorization", Credentials.basic(username, password));
                 }
 
-                return response.request().newBuilder().header("Authorization", credential).build();
-            }
+                requestBuilder.header("User-Agent", getUserAgentHeader(context));
 
-            @Override
-            public Request authenticateProxy(Proxy proxy, Response response) throws IOException {
-                return null;
+                if (ConnectivityHelper.get(context).hasNetworkConnection()) {
+                    int maxAge = 60; // read from cache for 1 minute
+                    requestBuilder.header("Cache-Control", "public, max-age=" + maxAge);
+                } else {
+                    int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
+                    requestBuilder.header("Cache-Control",
+                            "public, only-if-cached, max-stale=" + maxStale);
+                }
+
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
             }
         });
 
-        httpClient.setCache(getCache(context));
+        httpClient.cache(getCache(context));
 
-        return httpClient;
+        return httpClient.build();
     }
 
-    public static <S> S createService(final Context context, final ConnectivityHelper connectivityHelper,
-                                      Class<S> serviceClass, String baseUrl, Client client) {
-        RestAdapter.Builder builder = new RestAdapter.Builder()
-                .setEndpoint(baseUrl)
-                .setClient(client)
-                .setRequestInterceptor(new RequestInterceptor() {
-                    @Override
-                    public void intercept(RequestFacade request) {
-                        String header = context.getString(R.string.app_name);
-                        String version = "?";
-                        try {
-                            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-                            version = packageInfo.versionName;
-                        } catch (PackageManager.NameNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                        request.addHeader("User-Agent", header + " - " + version);
-                        if (connectivityHelper.hasNetworkConnection()) {
-                            int maxAge = 60; // read from cache for 1 minute
-                            request.addHeader("Cache-Control", "public, max-age=" + maxAge);
-                        } else {
-                            int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
-                            request.addHeader("Cache-Control",
-                                    "public, only-if-cached, max-stale=" + maxStale);
-                        }
-                    }
-                });
+    /**
+     * Create a service for given api class and URL.
+     * @param context
+     * @param serviceClass
+     * @param baseUrl
+     * @param <S>
+     * @return
+     */
+    public static <S> S createService(final Context context, Class<S> serviceClass, String baseUrl) {
+        return createService(context, serviceClass, baseUrl,  null, null);
+    }
 
-        Gson gson = new GsonBuilder()
-                .serializeNulls()
-                .create();
-        builder.setConverter(new GsonConverter(gson));
+    /**
+     * Create a service for given api class and URL.
+     * @param context
+     * @param serviceClass
+     * @param baseUrl
+     * @param username
+     * @param password
+     * @param <S>
+     * @return
+     */
+    public static <S> S createService(final Context context, Class<S> serviceClass, String baseUrl, String username, String password) {
 
-        RestAdapter adapter = builder.build();
+        builder.baseUrl(baseUrl)
+                .client(getHttpClient(context, username, password))
+                .addConverterFactory(GsonConverterFactory.create());
 
-        return adapter.create(serviceClass);
+        Retrofit retrofit = builder.build();
+
+
+        return retrofit.create(serviceClass);
     }
 
     public static Cache getCache(Context context) {

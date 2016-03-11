@@ -34,6 +34,9 @@
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
 
+    <!-- WebActivity -->
+    <string name="webactivity_open_page_failed">Het openen van de webpagina is mislukt.</string>
+
     <!-- Sidebar fragment values -->
     <string name="cannot_logout_error_title">Geen internetverbinding beschikbaar</string>
     <string name="cannot_logout_error_text">Een internetverbinding is nodig om uit te loggen.</string>

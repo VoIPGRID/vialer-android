@@ -32,6 +32,9 @@
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
 
+    <!-- WebActivity -->
+    <string name="webactivity_open_page_failed">Failed to open web page.</string>
+
     <!-- Sidebar fragment values -->
     <string name="cannot_logout_error_title">No available internet connection</string>
     <string name="cannot_logout_error_text">An internet connection is needed to log you off.</string>

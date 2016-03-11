@@ -2,100 +2,90 @@ package com.voipgrid.vialer.onboarding;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.telephony.TelephonyManager;
 
-import com.squareup.okhttp.OkHttpClient;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerGcmRegistrationService;
 import com.voipgrid.vialer.api.Api;
-import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.Middleware;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
+import java.io.IOException;
+
+import retrofit2.Call;
+import retrofit2.Response;
+
 
 /**
  * Created by eltjo on 04/08/15.
  */
 public class StartupTask extends AsyncTask {
 
-    private final ConnectivityHelper mConnectivityHelper;
     private Preferences mPreferences;
 
     private Context mContext;
 
     private Api mApi;
 
-    private Registration mRegistrationApi;
-
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
 
     public StartupTask(Context context) {
         mContext = context;
 
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE),
-                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE)
-        );
-
         mPreferences = new Preferences(context);
 
-        mStorage = new Storage(context);
+        mJsonStorage = new JsonStorage(context);
 
         /* get username and password */
-        SystemUser systemUser = (SystemUser) mStorage.get(SystemUser.class);
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         String username = systemUser.getEmail();
         String password = systemUser.getPassword();
 
         mApi = ServiceGenerator.createService(
                 mContext,
-                mConnectivityHelper,
                 Api.class,
                 context.getString(R.string.api_url),
-                new OkClient(ServiceGenerator.getOkHttpClient(mContext, username, password))
-        );
-
-        mRegistrationApi = ServiceGenerator.createService(
-                mContext,
-                mConnectivityHelper,
-                Registration.class,
-                context.getString(R.string.registration_url),
-                new OkClient(new OkHttpClient())
+                username,
+                password
         );
     }
 
     @Override
     protected Object doInBackground(Object[] params) {
+        Call<SystemUser> call = mApi.systemUser();
         try {
-            SystemUser systemUser = mApi.systemUser();
-            mPreferences.setSipPermission(systemUser.hasSipPermission());
-            String phoneAccountId = systemUser.getPhoneAccountId();
-            PhoneAccount phoneAccount = ((PhoneAccount) new Storage(mContext).get(PhoneAccount.class));
-            if (phoneAccountId != null) {
-                phoneAccount = mApi.phoneAccount(phoneAccountId);
-                mStorage.save(phoneAccount);
-                if(mPreferences.hasSipPermission()) {
-                    mContext.startService(new Intent(mContext, VialerGcmRegistrationService.class));
+            // Get the systemuser.
+            Response<SystemUser> response = call.execute();
+            if (response.isSuccess() && response.body() != null) {
+                SystemUser systemUser = response.body();
+                // Set the permissions based on systemuser.
+                mPreferences.setSipPermission(systemUser.hasSipPermission());
+                String phoneAccountId = systemUser.getPhoneAccountId();
+                PhoneAccount phoneAccount = ((PhoneAccount) new JsonStorage(mContext).get(PhoneAccount.class));
+                // Get phoneaccount from API if one is provided in the systemuser API.
+                if (phoneAccountId != null) {
+                    Call<PhoneAccount> phoneAccountCall = mApi.phoneAccount(phoneAccountId);
+                    Response<PhoneAccount> phoneAccountResponse = phoneAccountCall.execute();
+                    if (phoneAccountResponse.isSuccess() && phoneAccountResponse.body() != null) {
+                        phoneAccount = phoneAccountResponse.body();
+                        // Save the (app)phoneaccount.
+                        mJsonStorage.save(phoneAccount);
+                        if(mPreferences.hasSipPermission()) {
+                            // Start service for incoming calls on push wakeup.
+                            mContext.startService(new Intent(mContext, VialerGcmRegistrationService.class));
+                        }
+                    }
+                } else if (phoneAccount != null && mPreferences.hasSipPermission()) {
+                    // No phone account so unregister at middleware.
+//                    Middleware.unregister(mContext);
                 }
-            } else if (phoneAccount != null && mPreferences.hasSipPermission()) {
-                String gcmToken = PreferenceManager.getDefaultSharedPreferences(mContext)
-                        .getString(Middleware.Constants.CURRENT_TOKEN, "");
-                mRegistrationApi.unregister(
-                        gcmToken,
-                        phoneAccount.getAccountId()
-                );
             }
-        } catch (RetrofitError e) {
-            // Setup can fail. No need to handle error. Next startup the app will try again.
+        } catch (IOException e) {
+
         }
         return null;
     }

@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
 
-import com.squareup.okhttp.OkHttpClient;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
@@ -14,8 +14,8 @@ import com.voipgrid.vialer.api.models.SystemUser;
 
 import java.io.IOException;
 
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
 
 /**
  * Created by bwiegmans on 06/10/15.
@@ -34,56 +34,83 @@ public class Middleware {
         int STATUS_FAILED = -1;
     }
 
-    public static void register(Context context, String token) throws IOException {
+    public static void register(Context context, String token) {
+        Preferences sipPreferences = new Preferences(context);
+
+        if (!sipPreferences.canUseSip()) {
+            return;
+        }
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
+
         editor.putLong(Constants.LAST_REGISTRATION, System.currentTimeMillis());
 
+        JsonStorage jsonStorage = new JsonStorage(context);
+        SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
+
+        Registration api = ServiceGenerator.createService(
+                context,
+                Registration.class,
+                getBaseApiUrl(context),
+                systemUser.getEmail(),
+                systemUser.getPassword()
+        );
+        String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
+        String fullName = ((SystemUser) jsonStorage.get(SystemUser.class)).getFullName();
+        String appName = context.getPackageName();
+        Call<ResponseBody> call = api.register(fullName, token, sipUserId, Build.VERSION.CODENAME,
+                Build.VERSION.RELEASE, appName);
+        editor.putString(Constants.CURRENT_TOKEN, token);
         try {
-            Registration api = ServiceGenerator.createService(
-                    context,
-                    ConnectivityHelper.get(context),
-                    Registration.class,
-                    context.getString(R.string.registration_url),
-                    new OkClient(new OkHttpClient())
-            );
-            Storage storage = new Storage(context);
-            String sipUserId = ((PhoneAccount) storage.get(PhoneAccount.class)).getAccountId();
-            String fullName = ((SystemUser) storage.get(SystemUser.class)).getFullName();
-            String appName = context.getPackageName();
-            api.register(fullName, token, sipUserId, Build.VERSION.CODENAME,
-                    Build.VERSION.RELEASE, appName);
-            editor.putString(Constants.CURRENT_TOKEN, token);
-            editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_REGISTERED);
-        } catch (RetrofitError|NullPointerException error) {
+            if (call.execute().isSuccess()) {
+                editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_REGISTERED);
+            } else {
+                editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_FAILED);
+            }
+        } catch (IOException e) {
             editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_FAILED);
-            throw new IOException(error);
+            e.printStackTrace();
         } finally {
-            editor.commit();
+            editor.apply();
         }
     }
 
-    public static void unregister(Context context) throws IOException {
-        SharedPreferences preferences   = PreferenceManager.getDefaultSharedPreferences(context);
+    public static void unregister(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
-        try {
-            Registration api = ServiceGenerator.createService(
-                    context,
-                    ConnectivityHelper.get(context),
-                    Registration.class,
-                    context.getString(R.string.registration_url),
-                    new OkClient(new OkHttpClient())
-            );
-            String token     = preferences.getString(Constants.CURRENT_TOKEN, "");
-            String sipUserId = (new Storage<PhoneAccount>(context).get(PhoneAccount.class))
-                    .getAccountId();
-            api.unregister(token, sipUserId);
-            editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_UNREGISTERED);
-        } catch (RetrofitError|NullPointerException error) {
-            throw new IOException(error);
-        } finally {
-            editor.commit();
-        }
 
+        JsonStorage jsonStorage = new JsonStorage(context);
+        SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
+
+        Registration api = ServiceGenerator.createService(
+                context,
+                Registration.class,
+                getBaseApiUrl(context),
+                systemUser.getEmail(),
+                systemUser.getPassword());
+        String token = preferences.getString(Constants.CURRENT_TOKEN, "");
+        String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
+        String appName = context.getPackageName();
+        Call<ResponseBody> call = api.unregister(token, sipUserId, appName);
+        try {
+            if (call.execute().isSuccess()) {
+                editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_UNREGISTERED);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            editor.apply();
+        }
     }
+
+    /**
+     * Function to get the URL needed for api calls.
+     * @param mContext
+     * @return
+     */
+    public static String getBaseApiUrl(Context mContext) {
+        return mContext.getString(R.string.registration_url);
+    }
+
 }

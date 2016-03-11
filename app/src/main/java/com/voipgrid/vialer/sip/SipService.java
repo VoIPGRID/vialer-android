@@ -7,23 +7,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.telephony.TelephonyManager;
 
-import com.squareup.okhttp.OkHttpClient;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerGcmListenerService;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import org.pjsip.pjsua2.Account;
 import org.pjsip.pjsua2.AccountConfig;
@@ -44,9 +40,9 @@ import org.pjsip.pjsua2.pjsip_status_code;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
 import org.pjsip.pjsua2.pjsua_call_flag;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
+import okhttp3.ResponseBody;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -70,8 +66,6 @@ public class SipService extends Service implements
     private Endpoint mEndpoint;
 
     private SipAccount mSipAccount;
-
-    private ConnectivityHelper mConnectivityHelper;
 
     private String mToken;
 
@@ -145,15 +139,10 @@ public class SipService extends Service implements
 
         mBroadcastManager = LocalBroadcastManager.getInstance(this);
 
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
-
         /* Try to load PJSIP library */
         loadPjsip();
 
-        PhoneAccount phoneAccount = new Storage<PhoneAccount>(this).get(PhoneAccount.class);
+        PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
         if(phoneAccount != null) {
 
             mEndpoint = createEndpoint(
@@ -260,21 +249,19 @@ public class SipService extends Service implements
         if(mCallType.equals(SipConstants.ACTION_VIALER_INCOMING)) {
             Registration registrationApi = ServiceGenerator.createService(
                     this,
-                    mConnectivityHelper,
                     Registration.class,
-                    mUrl,
-                    new OkClient(new OkHttpClient())
+                    mUrl
             );
 
-            registrationApi.reply(mToken, true, mMessageStartTime, new Callback<Object>() {
+            retrofit2.Call<ResponseBody> call = registrationApi.reply(mToken, true, mMessageStartTime);
+            call.enqueue(new Callback<ResponseBody>() {
                 @Override
-                public void success(Object object, retrofit.client.Response response) {
-                /* No need to handle succes callback.
-                   Call is automatically routed to onIncomingCall */
+                public void onResponse(retrofit2.Call<ResponseBody> call, Response<ResponseBody> response) {
+
                 }
 
                 @Override
-                public void failure(RetrofitError error) {
+                public void onFailure(retrofit2.Call<ResponseBody> call, Throwable t) {
                     broadcast(SipConstants.SIP_SERVICE_ACCOUNT_REGISTRATION_FAILED);
                     stopSelf();
                 }

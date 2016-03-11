@@ -28,16 +28,15 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A fragment representing a list of call records.
@@ -61,7 +60,7 @@ public class CallRecordFragment extends ListFragment implements
 
     private ConnectivityHelper mConnectivityHelper;
 
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
 
     private AnalyticsHelper mAnalyticsHelper;
 
@@ -79,13 +78,13 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     private class AsyncCallRecordLoader extends AsyncTask<Void, Void, List<CallRecord>> {
-        private Storage<CallRecord[]> mStorage;
+        private JsonStorage<CallRecord[]> mJsonStorage;
         public AsyncCallRecordLoader() {
-            mStorage = new Storage<>(getActivity());
+            mJsonStorage = new JsonStorage<>(getActivity());
         }
 
         protected List<CallRecord> doInBackground(Void args[]) {
-            CallRecord[] records = mStorage.get(CallRecord[].class);
+            CallRecord[] records = mJsonStorage.get(CallRecord[].class);
             if (records != null) {
                 return Arrays.asList(records);
             } else {
@@ -108,7 +107,7 @@ public class CallRecordFragment extends ListFragment implements
         protected Void doInBackground(Void args[]) {
             CallRecord[] records = new CallRecord[mRecords.size()];
             mRecords.toArray(records);
-            mStorage.save(records);
+            mJsonStorage.save(records);
             return null;
         }
     }
@@ -131,10 +130,8 @@ public class CallRecordFragment extends ListFragment implements
                 (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE),
                 (TelephonyManager) getActivity().getSystemService(Context.TELEPHONY_SERVICE));
 
-        mStorage = new Storage(getActivity());
-
+        mJsonStorage = new JsonStorage(getActivity());
         mFilter = getArguments().getString(ARG_FILTER);
-        
         mPreferences = new Preferences(getContext());
     }
 
@@ -178,7 +175,7 @@ public class CallRecordFragment extends ListFragment implements
         } else if(!mConnectivityHelper.hasFastData() && mPreferences.canUseSip()) {
             mDialerWarning.setText(R.string.dialer_warning_a_b_connect);
             mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_connectivity_message));
-        } else if(!mStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
+        } else if(!mJsonStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
             mDialerWarning.setText(R.string.dialer_warning_a_b_connect);
             mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_account_message));
         } else {
@@ -220,7 +217,7 @@ public class CallRecordFragment extends ListFragment implements
             }
 
 
-            new DialHelper(getActivity(),mStorage,mConnectivityHelper, mAnalyticsHelper).
+            new DialHelper(getActivity(), mJsonStorage, mConnectivityHelper, mAnalyticsHelper).
                     callNumber(number, "");
         }
     }
@@ -235,20 +232,16 @@ public class CallRecordFragment extends ListFragment implements
 
     private void loadCallRecordsFromApi() {
         mHaveNetworkRecords = false;
-        SystemUser systemUser = (SystemUser) mStorage.get(SystemUser.class);
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         Api api = ServiceGenerator.createService(
                 getContext(),
-                mConnectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
-                new OkClient(ServiceGenerator.getOkHttpClient(
-                        getContext(),
-                        systemUser.getEmail(),
-                        systemUser.getPassword()
-                ))
-        );
+                systemUser.getEmail(),
+                systemUser.getPassword());
 
-        api.getRecentCalls(50, 0, CallRecord.getLimitDate(), this);
+        Call<VoipGridResponse<CallRecord>> call = api.getRecentCalls(50, 0, CallRecord.getLimitDate());
+        call.enqueue(this);
     }
 
     /* Load from local cache first */
@@ -285,24 +278,6 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     /**
-     * Callback on succesfull request. When call records are available add them to the adapter
-     * otherwise display the empty view with an error message.
-     * @param voipGridResponse
-     * @param response
-     */
-    @Override
-    public void success(VoipGridResponse<CallRecord> voipGridResponse, Response response) {
-        mHaveNetworkRecords = true;
-        List<CallRecord> records = voipGridResponse.getObjects();
-        displayCallRecords(records);
-        /* save the records to cache, if there are any */
-        if (filter(records).size() > 0) {
-            new AsyncCallRecordSaver(records).execute();
-        }
-    }
-
-
-    /**
      * Apply filter on call records or return the call record list when the filter is null
      * @param callRecords
      * @return
@@ -324,17 +299,32 @@ public class CallRecordFragment extends ListFragment implements
         return callRecords;
     }
 
-    /**
-     * Request failed. Display the empty view with an error message.
-     * @param error
-     */
     @Override
-    public void failure(RetrofitError error) {
+    public void onResponse(Call<VoipGridResponse<CallRecord>> call,
+                           Response<VoipGridResponse<CallRecord>> response) {
+        if (response.isSuccess() && response.body() != null) {
+            mHaveNetworkRecords = true;
+            List<CallRecord> records = response.body().getObjects();
+            displayCallRecords(records);
+        /* save the records to cache, if there are any */
+            if (filter(records).size() > 0) {
+                new AsyncCallRecordSaver(records).execute();
+            }
+        } else {
+            failedFeedback(response);
+        }
+    }
+
+    @Override
+    public void onFailure(Call call, Throwable t) {
+        failedFeedback(null);
+    }
+
+    private void failedFeedback(Response response) {
         String message = getString(R.string.empty_view_default_message);
-        Response response = error.getResponse();
 
         // Check if authorized.
-        if(response != null && (response.getStatus() == 401 || response.getStatus() == 403)) {
+        if(response != null && (response.code() == 401 || response.code() == 403)) {
             message = getString(R.string.empty_view_unauthorized_message);
         }
         if (mAdapter.getCount() == 0) {

@@ -8,31 +8,26 @@ import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertTrue;
 
 /**
  * Test AccountActivity behaviour.
  */
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
-public class AccountActivityTest {
+public class AccountActivityTest extends RobolectricAbstractTest {
 
     /**
      * Setup dependencies for tests.
      */
     @Before
     public void setUp() {
-        Storage storage = new Storage(RuntimeEnvironment.application);
+        JsonStorage jsonStorage = new JsonStorage(RuntimeEnvironment.application);
         SystemUser systemUser = new SystemUser();
         PhoneAccount phoneAccount = new PhoneAccount();
 
@@ -41,8 +36,8 @@ public class AccountActivityTest {
 
         phoneAccount.setAccountId("123456789");
 
-        storage.save(systemUser);
-        storage.save(phoneAccount);
+        jsonStorage.save(systemUser);
+        jsonStorage.save(phoneAccount);
     }
 
     /**

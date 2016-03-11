@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="api_url">https://api.voipgrid.nl</string>
-    <string name="registration_url">https://vialerpush.voipgrid.nl</string>
-    <string name="vialer_registration_url">https://vialerpush.voipgrid.nl/api/register-gcm-device/</string>
+    <string name="api_url">https://api.voipgrid.nl/</string>
+    <string name="registration_url">https://vialerpush.voipgrid.nl/</string>
     <string name="gcm_registration_id">439121107319</string>
 
     <string name="web_url">https://partner.voipgrid.nl</string>
