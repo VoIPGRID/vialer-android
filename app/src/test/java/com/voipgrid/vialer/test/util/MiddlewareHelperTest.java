@@ -9,17 +9,13 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.test.RobolectricPowerMockAbstractTest;
 import com.voipgrid.vialer.util.JsonStorage;
-import com.voipgrid.vialer.util.Middleware;
+import com.voipgrid.vialer.util.MiddlewareHelper;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RuntimeEnvironment;
-
-import java.net.URL;
 
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -30,13 +26,10 @@ import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.*;
 
 /**
- * Tests for the Middleware class.
+ * Tests for the MiddlewareHelper class.
  */
-@PrepareForTest(Middleware.class)
-public class MiddlewareTest extends RobolectricPowerMockAbstractTest {
-
-    @Rule
-    public PowerMockRule rule = new PowerMockRule();
+@PrepareForTest(MiddlewareHelper.class)
+public class MiddlewareHelperTest extends RobolectricPowerMockAbstractTest {
 
     /**
      * Setup dependencies for tests.
@@ -88,15 +81,15 @@ public class MiddlewareTest extends RobolectricPowerMockAbstractTest {
                 "dNtk2BAokeMCg2ZXKqpc8FXKmhX94kIxQ";
 
         // Mock the method that returns the api base URL to return the fake server URL.
-        spy(Middleware.class);
-        stub(PowerMockito.method(Middleware.class, "getBaseApiUrl", Context.class))
+        spy(MiddlewareHelper.class);
+        stub(PowerMockito.method(MiddlewareHelper.class, "getBaseApiUrl", Context.class))
                 .toReturn(fakeServerUrl.toString());
 
         // Make sure the mocked method returns the right value.
-        assertTrue(Middleware.getBaseApiUrl(context).equals(fakeServerUrl.toString()));
+        assertTrue(MiddlewareHelper.getBaseApiUrl(context).equals(fakeServerUrl.toString()));
 
         // Register call.
-        Middleware.register(context, fakePushToken);
+        MiddlewareHelper.register(context, fakePushToken);
 
         // Check the if the request that was made meets requirements in the middleware
         // api docs.
@@ -114,9 +107,9 @@ public class MiddlewareTest extends RobolectricPowerMockAbstractTest {
 
         // Check registration status.
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        int status = preferences.getInt(Middleware.Constants.REGISTRATION_STATUS, 10);
+        int status = preferences.getInt(MiddlewareHelper.Constants.REGISTRATION_STATUS, 10);
 
-        assertEquals(Middleware.Constants.STATUS_REGISTERED, status);
+        assertEquals(MiddlewareHelper.Constants.STATUS_REGISTERED, status);
 
         // Shutdown the fake web server.
         server.shutdown();
@@ -142,27 +135,34 @@ public class MiddlewareTest extends RobolectricPowerMockAbstractTest {
         Context context = RuntimeEnvironment.application;
 
         // Mock the method that returns the api base URL to return the fake server URL.
-        spy(Middleware.class);
-        stub(PowerMockito.method(Middleware.class, "getBaseApiUrl", Context.class))
+        spy(MiddlewareHelper.class);
+        stub(PowerMockito.method(MiddlewareHelper.class, "getBaseApiUrl", Context.class))
                 .toReturn(fakeServerUrl.toString());
 
         // Make sure the mocked method returns the right value.
-        assertTrue(Middleware.getBaseApiUrl(context).equals(fakeServerUrl.toString()));
+        assertTrue(MiddlewareHelper.getBaseApiUrl(context).equals(fakeServerUrl.toString()));
 
         // Unregister call.
-        Middleware.unregister(context);
+        MiddlewareHelper.unregister(context);
 
         // Check the if the request that was made meets requirements in the middleware
         // api docs.
         RecordedRequest request = server.takeRequest();
 
-        // TODO After Robolectic issue is fixed: Check request that was made.
+        assertNotNull(request.getHeader("Authorization"));
+
+        String body = request.getBody().readUtf8();
+
+        // Make sure required values are present.
+        assertTrue(body.contains("sip_user_id"));
+        assertTrue(body.contains("token"));
+        assertTrue(body.contains("app"));
 
         // Check registration status.
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        int status = preferences.getInt(Middleware.Constants.REGISTRATION_STATUS, 10);
+        int status = preferences.getInt(MiddlewareHelper.Constants.REGISTRATION_STATUS, 10);
 
-        assertTrue(status == Middleware.Constants.STATUS_UNREGISTERED);
+        assertTrue(status == MiddlewareHelper.Constants.STATUS_UNREGISTERED);
 
         // Shutdown the fake web server.
         server.shutdown();

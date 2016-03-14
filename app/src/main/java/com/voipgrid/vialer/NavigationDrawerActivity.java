@@ -35,7 +35,7 @@ import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.onboarding.LogoutTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Middleware;
+import com.voipgrid.vialer.util.MiddlewareHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
 import java.util.List;
@@ -218,7 +218,7 @@ public abstract class NavigationDrawerActivity
             // TODO This may lead to bugs! Investigate better way in VIALA-408.
             mJsonStorage.clear();
             /* Mark ourselves as unregistered */
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Middleware.Constants.REGISTRATION_STATUS, Middleware.Constants.STATUS_UNREGISTERED).commit();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(MiddlewareHelper.Constants.REGISTRATION_STATUS, MiddlewareHelper.Constants.STATUS_UNREGISTERED).commit();
             /* Start a new session */
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

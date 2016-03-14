@@ -60,7 +60,8 @@ public class ServiceGenerator {
         String appName = context.getString(R.string.app_name);
         String version = "?";
         try {
-            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            PackageInfo packageInfo = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0);
             version = packageInfo.versionName;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -75,7 +76,8 @@ public class ServiceGenerator {
      * @param password
      * @return
      */
-    private static OkHttpClient getHttpClient(final Context context, final String username, final String password) {
+    private static OkHttpClient getHttpClient(final Context context, final String username,
+                                              final String password) {
         httpClient.addInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
@@ -107,6 +109,12 @@ public class ServiceGenerator {
         return httpClient.build();
     }
 
+    public static <S> S createPortalService(final Context context, Class<S> serviceClass,
+                                            String username, String password) {
+        return createService(context, serviceClass, getVgApiUrl(context),
+                username, password);
+    }
+
     /**
      * Create a service for given api class and URL.
      * @param context
@@ -116,7 +124,7 @@ public class ServiceGenerator {
      * @return
      */
     public static <S> S createService(final Context context, Class<S> serviceClass, String baseUrl) {
-        return createService(context, serviceClass, baseUrl,  null, null);
+        return createService(context, serviceClass, baseUrl, null, null);
     }
 
     /**
@@ -129,7 +137,8 @@ public class ServiceGenerator {
      * @param <S>
      * @return
      */
-    public static <S> S createService(final Context context, Class<S> serviceClass, String baseUrl, String username, String password) {
+    public static <S> S createService(final Context context, Class<S> serviceClass, String baseUrl,
+                                      String username, String password) {
 
         builder.baseUrl(baseUrl)
                 .client(getHttpClient(context, username, password))
@@ -137,12 +146,15 @@ public class ServiceGenerator {
 
         Retrofit retrofit = builder.build();
 
-
         return retrofit.create(serviceClass);
     }
 
     public static Cache getCache(Context context) {
         return new Cache(context.getCacheDir(), 1024 * 1024 * 10);
+    }
+
+    public static String getVgApiUrl(Context context) {
+        return context.getString(R.string.api_url);
     }
 
     public void release() {

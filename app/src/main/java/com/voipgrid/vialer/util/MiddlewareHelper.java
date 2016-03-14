@@ -2,6 +2,7 @@ package com.voipgrid.vialer.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.preference.PreferenceManager;
 
@@ -22,7 +23,7 @@ import retrofit2.Call;
  *
  * Handle (un)registration from the middleware in a centralised place.
  */
-public class Middleware {
+public class MiddlewareHelper {
 
     public interface Constants {
         String REGISTRATION_STATUS = "VIALER_REGISTRATION_STATUS";
@@ -32,7 +33,42 @@ public class Middleware {
         int STATUS_UNREGISTERED = 0;
         int STATUS_REGISTERED = 1;
         int STATUS_FAILED = -1;
+        int STATUS_UPDATE_NEEDED = 2;
     }
+
+    /**
+     * Function to set the current registration status with the middleware.
+     * @param context
+     * @param status
+     */
+    public static void setRegistrationStatus(Context context, int status) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putInt(Constants.REGISTRATION_STATUS, status).apply();
+    }
+
+    /**
+     * Function to check if the app is currently registered at the middleware.
+     * @param context
+     * @return
+     */
+    public static boolean isRegistered(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int currentRegistration = prefs.getInt(Constants.REGISTRATION_STATUS,
+                Constants.STATUS_UNREGISTERED);
+        return currentRegistration == Constants.STATUS_REGISTERED;
+    }
+
+    public static boolean needsUpdate(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int currentRegistration = prefs.getInt(Constants.REGISTRATION_STATUS,
+                Constants.STATUS_UNREGISTERED);
+        return currentRegistration == Constants.STATUS_UPDATE_NEEDED;
+    }
+
+    public static boolean needsRegistration(Context context) {
+        return !isRegistered(context) || needsUpdate(context);
+    }
+
 
     public static void register(Context context, String token) {
         Preferences sipPreferences = new Preferences(context);
@@ -64,12 +100,16 @@ public class Middleware {
         editor.putString(Constants.CURRENT_TOKEN, token);
         try {
             if (call.execute().isSuccess()) {
-                editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_REGISTERED);
+                setRegistrationStatus(context, Constants.STATUS_REGISTERED);
             } else {
-                editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_FAILED);
+                setRegistrationStatus(context, Constants.STATUS_FAILED);
+                // Disable sip because failed at middleware.
+                new Preferences(context).setSipEnabled(false);
             }
         } catch (IOException e) {
-            editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_FAILED);
+            setRegistrationStatus(context, Constants.STATUS_FAILED);
+            // Disable sip because failed at middleware.
+            new Preferences(context).setSipEnabled(false);
             e.printStackTrace();
         } finally {
             editor.apply();
@@ -95,7 +135,7 @@ public class Middleware {
         Call<ResponseBody> call = api.unregister(token, sipUserId, appName);
         try {
             if (call.execute().isSuccess()) {
-                editor.putInt(Constants.REGISTRATION_STATUS, Constants.STATUS_UNREGISTERED);
+                setRegistrationStatus(context, Constants.STATUS_UNREGISTERED);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,4 +153,13 @@ public class Middleware {
         return mContext.getString(R.string.registration_url);
     }
 
+    public static void executeUnregisterTask(final Context context) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                unregister(context);
+                return null;
+            }
+        }.execute();
+    }
 }

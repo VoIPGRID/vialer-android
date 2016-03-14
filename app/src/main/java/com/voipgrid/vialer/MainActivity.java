@@ -26,7 +26,7 @@ import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.contacts.UpdateChangedContactsService;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.onboarding.SetupActivity;
-import com.voipgrid.vialer.onboarding.StartupTask;
+import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -63,7 +63,7 @@ public class MainActivity extends NavigationDrawerActivity implements
             finish();
         } else if(mConnectivityHelper.hasNetworkConnection()) {
             //update SystemUser and PhoneAccount on background thread
-            new StartupTask(this).execute();
+            new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
         }
 
         if (SyncUtils.requiresFullContactSync(this)) {

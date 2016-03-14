@@ -1,5 +1,6 @@
 package com.voipgrid.vialer;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -16,7 +17,9 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.DialogHelper;
+import com.voipgrid.vialer.util.MiddlewareHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -184,14 +187,35 @@ public class AccountActivity extends AppCompatActivity implements
 
         if (!isChecked) {
             // Unregister at middleware.
-
-            // Blocking for now, quickfix for beta testers.
-            // TODO VIALA 366 temporary disabled.
-//            Middleware.unregister(this);
-
+            MiddlewareHelper.executeUnregisterTask(this);
         } else {
-            // Register. Fix this later in SIP vialer version.
-            // TODO: VIALA-364.
+
+            final PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(this);
+
+            new AsyncTask<Void, Void, PhoneAccount>() {
+
+                @Override
+                protected PhoneAccount doInBackground(Void... params) {
+                    return phoneAccountHelper.getLinkedPhoneAccount();
+                }
+
+                @Override
+                protected void onPostExecute(PhoneAccount phoneAccount) {
+                    super.onPostExecute(phoneAccount);
+
+                    if (phoneAccount != null) {
+                        phoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
+                    } else {
+                        // Make sure sip is disabled in preference and the switch is returned
+                        // to disabled. Setting disabled in the settings first makes sure
+                        // the onCheckChanged does not execute the code that normally is executed
+                        // on a change in the check of the switch.
+                        mPreferences.setSipEnabled(false);
+                        mSwitch.setChecked(false);
+                        // TODO user feedback in VIALA-443.
+                    }
+                }
+            }.execute();
         }
     }
 
