@@ -31,6 +31,9 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.sip.SipConstants;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * CallActivity for incoming or outgoing call
  */
@@ -481,7 +484,12 @@ public class CallActivity extends AppCompatActivity
                 hangupExtras.putString(CALL_STATUS_ACTION, CALL_HANG_UP_ACTION);
                 broadcast(hangupExtras);  // Broadcast to service to decline or end call.
                 mStateView.setText(R.string.call_hangup);
-                finish();  // Close this activity. (that's a little eager now isn't it?)
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();  // Close this activity after 2 seconds.
+                    }
+                }, 3000);
                 break;
             case R.id.button_reject:
                 Bundle rejectExtras = new Bundle();
