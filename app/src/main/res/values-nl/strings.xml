@@ -33,6 +33,7 @@
     <!-- Dialog options -->
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
+    <string name="permission_settings">App permissions</string>
 
     <!-- WebActivity -->
     <string name="webactivity_open_page_failed">Het openen van de webpagina is mislukt.</string>
@@ -135,6 +136,9 @@
     <string name="two_step_call_state_invalid_number">Telefoonnummer incorrect</string>
 
     <!-- Permission strings -->
+    <string name="permission_microphone_dialog_title">Microfoon permissie</string>
+    <string name="permission_microphone_dialog_message">Permissie is nodig om te kunnen bellen.</string>
+    <string name="permission_microphone_missing_message">Kan geen gesprek opstarten, permissie tot de microfoon is noodzakelijk</string>
     <string name="permission_contact_dialog_title">Contact permissie</string>
     <string name="permission_contact_dialog_message">Permissie is nodig om vanuit de contacten te kunnen bellen</string>
     <string name="permission_contact_dialer_list_message">Kan geen contacten laden, permissie tot contacten is noodzakelijk</string>

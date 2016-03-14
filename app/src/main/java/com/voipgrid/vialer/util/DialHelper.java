@@ -1,8 +1,10 @@
 package com.voipgrid.vialer.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
+import com.voipgrid.vialer.MicrophonePermission;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
@@ -47,6 +49,11 @@ public class DialHelper {
             if (mPreferences.canUseSip()
                     && mJsonStorage.has(PhoneAccount.class)
                     && mConnectivityHelper.hasFastData()) {
+                // Check if we have permission to use the microphone. If not, request it.
+                if (!MicrophonePermission.hasPermission(mContext)){
+                    MicrophonePermission.askForPermission((Activity) mContext);
+                    return;
+                }
                 callWithSip(number, contactName);
             } else {
                 callWithApi(number, contactName);
