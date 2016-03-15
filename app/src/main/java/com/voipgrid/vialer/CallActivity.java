@@ -505,32 +505,36 @@ public class CallActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Function to set the screen to ON (visible) or OFF (dimmed and disabled).
+     * @param on Wether or not the screen needs to be on or off.
+     */
     private void toggleScreen(boolean on) {
         WindowManager.LayoutParams params = getWindow().getAttributes();
         View view = findViewById(R.id.screen_off);
         if (on) {
-            // reset screen brightness
+            // Reset screen brightness.
             params.screenBrightness = -1;
 
-            // hide screen off view visible
+            // Set the OFF version of the screen to gone.
             view.setVisibility(View.GONE);
 
-            // remove onclick listener to handle all clicks
+            // Remove the listener for the OFF screen state.
             view.setOnClickListener(null);
 
-            // show statusbar and navigation
+            // Show statusbar and navigation.
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         } else {
-            // set screen brightness to 0
+            // Set screen brightness to 0.
             params.screenBrightness = 0;
 
-            // make screen off view visible
+            // Set the OFF version of the screen to visible.
             view.setVisibility(View.VISIBLE);
 
-            // set onclick listener to handle all clicks
+            // Set the listener for the OFF screen stat.
             view.setOnClickListener(this);
 
-            // hide statusbar and navigation
+            // Hide statusbar and navigation.
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN
             );
@@ -540,9 +544,9 @@ public class CallActivity extends AppCompatActivity
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.values[0] == event.sensor.getMaximumRange()) {
-            toggleScreen(true);
-        } else if (event.values[0] > 5.0f) {
+        float distance = event.values[0];
+        // Leave the screen on if the measured distance is the max distance.
+        if (distance >= event.sensor.getMaximumRange() || distance >= 10.0f) {
             toggleScreen(true);
         } else {
             toggleScreen(false);
