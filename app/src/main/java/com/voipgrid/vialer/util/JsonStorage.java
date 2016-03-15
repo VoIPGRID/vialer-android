@@ -7,7 +7,7 @@ import android.preference.PreferenceManager;
 import com.google.gson.Gson;
 
 /**
- * Created by eltjo on 03/08/15.
+ * Class that handles the storage of json objects.
  */
 public class JsonStorage<T> {
 
@@ -29,10 +29,20 @@ public class JsonStorage<T> {
                 mPreferences.getString(clss.getName(), null), clss);
     }
 
+    public void remove(Class<T> clss) {
+        if (has(clss)){
+            mPreferences.edit().remove(clss.getName()).apply();
+        }
+    }
+
     public boolean has(Class<T> clss) {
         return mPreferences.contains(clss.getName());
     }
 
+    /**
+     * Dangerous function! This clears all stored settings instead of only the things that
+     * are put in with this class.
+     */
     public void clear() {
         mPreferences.edit().clear().apply();
     }

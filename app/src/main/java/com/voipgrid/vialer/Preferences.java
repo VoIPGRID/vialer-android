@@ -4,8 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.util.JsonStorage;
+
 /**
- * Created by eltjo on 15/09/15.
+ * Class used for storing preferences related to SIP.
  */
 public class Preferences {
 
@@ -15,30 +18,61 @@ public class Preferences {
     public static final boolean DEFAULT_VALUE_HAS_SIP_ENABLED = true;
     public static final boolean DEFAULT_VALUE_HAS_SIP_PERMISSION = false;
 
+    private Context mContext;
     private SharedPreferences mPreferences;
 
     public Preferences(Context context) {
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        mContext = context;
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
     }
 
+    /**
+     * Function to check if a phone account is present.
+     * @return
+     */
+    public boolean hasPhoneAccount() {
+        return new JsonStorage(mContext).has(PhoneAccount.class);
+    }
+
+    /**
+     * Function to set the sip permission.
+     * @param sipPermission
+     */
     public void setSipPermission(boolean sipPermission) {
         mPreferences.edit().putBoolean(PREF_HAS_SIP_PERMISSION, sipPermission).apply();
     }
 
+    /**
+     * Function to check for the sip permission.
+     * @return
+     */
     public boolean hasSipPermission() {
          return  mPreferences.getBoolean(PREF_HAS_SIP_PERMISSION, DEFAULT_VALUE_HAS_SIP_PERMISSION);
     }
 
+    /**
+     * Function to set the enabled state of sip.
+     * @param sipEnabled
+     */
     public void setSipEnabled(boolean sipEnabled) {
         mPreferences.edit().putBoolean(PREF_HAS_SIP_ENABLED, sipEnabled).apply();
     }
 
+    /**
+     * Function to check if sip is enabled.
+     * @return
+     */
     public boolean hasSipEnabled() {
         return  mPreferences.getBoolean(PREF_HAS_SIP_ENABLED, DEFAULT_VALUE_HAS_SIP_ENABLED);
 
     }
 
+    /**
+     * Function that checks if all requirements are met for using sip. (Sip enabled, permission
+     * and phone account).
+     * @return
+     */
     public boolean canUseSip() {
-        return hasSipPermission() && hasSipEnabled();
+        return hasSipPermission() && hasSipEnabled() && hasPhoneAccount();
     }
 }

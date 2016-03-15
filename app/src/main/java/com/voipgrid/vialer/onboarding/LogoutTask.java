@@ -3,7 +3,7 @@ package com.voipgrid.vialer.onboarding;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.voipgrid.vialer.util.Middleware;
+import com.voipgrid.vialer.util.MiddlewareHelper;
 
 
 /**
@@ -20,7 +20,7 @@ public class LogoutTask extends AsyncTask{
 
     @Override
     protected Object doInBackground(Object[] params) {
-//        Middleware.unregister(mContext);
+        MiddlewareHelper.unregister(mContext);
         return null;
     }
 }

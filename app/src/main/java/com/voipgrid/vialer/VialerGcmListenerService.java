@@ -14,7 +14,7 @@ import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Middleware;
+import com.voipgrid.vialer.util.MiddlewareHelper;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -25,7 +25,7 @@ import retrofit2.Response;
  * Listen to messages from GCM. The backend server sends us GCM notifications when we have
  * incoming calls.
  */
-public class VialerGcmListenerService extends GcmListenerService implements Middleware.Constants {
+public class VialerGcmListenerService extends GcmListenerService implements MiddlewareHelper.Constants {
     /* Message format constants. */
     private final static String MESSAGE_TYPE = "type";
 

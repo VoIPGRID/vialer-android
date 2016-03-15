@@ -69,4 +69,16 @@ public class PhoneAccount implements Destination {
     public String toString() {
         return getNumber() + " / " + getDescription();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PhoneAccount that = (PhoneAccount) o;
+
+        if (!getAccountId().equals(that.getAccountId())) return false;
+        if (!getPassword().equals(that.getPassword())) return false;
+        return getNumber().equals(that.getNumber());
+    }
 }
