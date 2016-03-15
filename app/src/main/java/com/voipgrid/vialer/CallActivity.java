@@ -266,13 +266,7 @@ public class CallActivity extends AppCompatActivity
                 playRingtone(false);
                 vibrate(false);
 
-                /* wait for 1000ms before closing the view */
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        finish();
-                    }
-                }, 1000);
+                finishWithDelay();
 
                 break;
             case CALL_PUT_ON_HOLD_ACTION:
@@ -299,13 +293,7 @@ public class CallActivity extends AppCompatActivity
                 break;
             case SERVICE_STOPPED :
 
-                /* wait for 1000ms before closing the view */
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        finish();
-                    }
-                }, 1000);
+                finishWithDelay();
 
                 break;
         }
@@ -484,12 +472,7 @@ public class CallActivity extends AppCompatActivity
                 hangupExtras.putString(CALL_STATUS_ACTION, CALL_HANG_UP_ACTION);
                 broadcast(hangupExtras);  // Broadcast to service to decline or end call.
                 mStateView.setText(R.string.call_hangup);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        finish();  // Close this activity after 2 seconds.
-                    }
-                }, 3000);
+                finishWithDelay();
                 break;
             case R.id.button_reject:
                 Bundle rejectExtras = new Bundle();
@@ -503,7 +486,7 @@ public class CallActivity extends AppCompatActivity
                         getString(R.string.analytics_event_label_declined)
                 );
 
-                finish();                // Close this activity.
+                finishWithDelay();              // Close this activity.
                 break;
             case R.id.button_pickup:
                 Bundle pickupExtras = new Bundle();
@@ -589,6 +572,15 @@ public class CallActivity extends AppCompatActivity
                 mVibrator.cancel();
             }
         }
+    }
+
+    private void finishWithDelay() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                finish();  // Close this activity after 2 seconds.
+            }
+        }, 3000);
     }
 
 }

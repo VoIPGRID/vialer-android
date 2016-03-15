@@ -467,11 +467,15 @@ public class SipService extends Service implements
         }
     }
 
-    @Override
-    public void hangUp(Call call) {
+    /**
+     * Function for doing a SIP hangup with the given status code.
+     * @param call
+     * @param statusCode
+     */
+    private void hangUpWithStatusCode(Call call, pjsip_status_code statusCode) {
         try {
             CallOpParam callOpParam = new CallOpParam(true);
-            callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_DECLINE);
+            callOpParam.setStatusCode(statusCode);
             call.hangup(callOpParam);
         } catch (Exception e) {
             e.printStackTrace();
@@ -480,8 +484,13 @@ public class SipService extends Service implements
     }
 
     @Override
+    public void hangUp(Call call) {
+        hangUpWithStatusCode(call, pjsip_status_code.PJSIP_SC_DECLINE);
+    }
+
+    @Override
     public void decline(Call call) {
-        hangUp(call);
+        hangUpWithStatusCode(call, pjsip_status_code.PJSIP_SC_BUSY_HERE);
     }
 
     @Override
