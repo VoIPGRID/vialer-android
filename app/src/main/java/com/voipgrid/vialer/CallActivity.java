@@ -31,9 +31,6 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.sip.SipConstants;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
  * CallActivity for incoming or outgoing call
  */

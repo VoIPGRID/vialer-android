@@ -31,6 +31,8 @@ import org.pjsip.pjsua2.CallMediaInfo;
 import org.pjsip.pjsua2.CallMediaInfoVector;
 import org.pjsip.pjsua2.CallOpParam;
 import org.pjsip.pjsua2.CallSetting;
+import org.pjsip.pjsua2.CodecInfo;
+import org.pjsip.pjsua2.CodecInfoVector;
 import org.pjsip.pjsua2.Endpoint;
 import org.pjsip.pjsua2.EpConfig;
 import org.pjsip.pjsua2.OnRegStateParam;
@@ -39,6 +41,9 @@ import org.pjsip.pjsua2.pjmedia_type;
 import org.pjsip.pjsua2.pjsip_status_code;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
 import org.pjsip.pjsua2.pjsua_call_flag;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.ResponseBody;
 import retrofit2.Callback;
@@ -86,6 +91,20 @@ public class SipService extends Service implements
     private Handler mHandler;
 
     private ToneGenerator mToneGenerator;
+
+    private static Map<String, Short> sCodecPrioMapping;
+
+    static {
+        sCodecPrioMapping = new HashMap<>();
+        sCodecPrioMapping.put("PCMA/8000/1", (short) 210);
+        sCodecPrioMapping.put("G722/16000/1", (short) 209);
+        sCodecPrioMapping.put("iLBC/8000/1", (short) 208);
+        sCodecPrioMapping.put("PCMU/8000/1", (short) 0);
+        sCodecPrioMapping.put("speex/8000/1", (short) 0);
+        sCodecPrioMapping.put("speex/16000/1", (short) 0);
+        sCodecPrioMapping.put("speex/32000/1", (short) 0);
+        sCodecPrioMapping.put("GSM/8000/1", (short) 0);
+    }
 
     private BroadcastReceiver mCallInteractionReceiver = new BroadcastReceiver() {
         @Override
@@ -143,12 +162,14 @@ public class SipService extends Service implements
         loadPjsip();
 
         PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
-        if(phoneAccount != null) {
+        if (phoneAccount != null) {
 
             mEndpoint = createEndpoint(
                     pjsip_transport_type_e.PJSIP_TRANSPORT_UDP,
                     createTransportConfig(getResources().getInteger(R.integer.sip_port))
             );
+
+            setCodecPrio();
 
             AuthCredInfo credInfo = new AuthCredInfo(
                     "digest", "*",
@@ -169,6 +190,27 @@ public class SipService extends Service implements
             stopSelf();
         }
 
+    }
+
+    private void setCodecPrio() {
+        try {
+            CodecInfoVector codecList = mEndpoint.codecEnum();
+            String codecId;
+            CodecInfo info;
+            Short prio;
+
+            for (int i = 1; i < codecList.size(); i++) {
+                info = codecList.get(i);
+                codecId = info.getCodecId();
+                prio = sCodecPrioMapping.get(codecId);
+                if (prio != null) {
+                    mEndpoint.codecSetPriority(codecId, prio);
+                }
+            }
+
+        } catch (Exception e) {
+
+        }
     }
 
     @Override
