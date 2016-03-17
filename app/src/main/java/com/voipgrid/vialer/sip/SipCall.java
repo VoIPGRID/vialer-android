@@ -79,6 +79,8 @@ class SipCall extends org.pjsip.pjsua2.Call {
                     }
                 }
             } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) {
+                // Call has been setup, stop ringback.
+                mCallStatus.onCallStopRingback();
                 mCallStatus.onCallConnected(this);
             } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED) {
                 mCallStatus.onCallDisconnected(this);
