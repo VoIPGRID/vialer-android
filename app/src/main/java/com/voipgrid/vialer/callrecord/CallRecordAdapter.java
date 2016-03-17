@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.models.CallRecord;
+import com.voipgrid.vialer.contacts.ContactsPermission;
 import com.voipgrid.vialer.util.IconHelper;
 
 import java.text.ParseException;
@@ -149,7 +150,9 @@ public class CallRecordAdapter extends BaseAdapter {
             }
 
             // Get possible name or null.
-            name = getContactNameForNumber(number);
+            if (ContactsPermission.hasPermission(mContext)) {
+                name = getContactNameForNumber(number);
+            }
         }
 
         if(convertView == null) {
