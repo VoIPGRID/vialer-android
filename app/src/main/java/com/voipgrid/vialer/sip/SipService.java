@@ -573,10 +573,12 @@ public class SipService extends Service implements
             CallOpParam callOpParam = new CallOpParam(true);
             if(!mHasHold) {
                 call.setHold(callOpParam);
+                broadcast(SipConstants.CALL_PUT_ON_HOLD_ACTION);
             } else {
                 CallSetting callSetting = callOpParam.getOpt();
                 callSetting.setFlag(pjsua_call_flag.PJSUA_CALL_UNHOLD.swigValue());
                 call.reinvite(callOpParam);
+                broadcast(SipConstants.CALL_UNHOLD_ACTION);
             }
             mHasHold = !mHasHold;
         } catch (Exception e) {

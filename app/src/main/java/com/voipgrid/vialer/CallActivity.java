@@ -42,8 +42,6 @@ public class CallActivity extends AppCompatActivity
     public static final String TYPE_CONNECTED_CALL = "type-connected-call";
     public static final String CONTACT_NAME = "contact-name";
     public static final String PHONE_NUMBER = "phone-number";
-    public static final String RESPONSE_URL = "response-url";
-    public static final String REQUEST_TOKEN = "request-token";
     private static final long[] VIBRATOR_PATTERN = {1000L, 1000L};
     // Manager for "on speaker" action.
     private AudioManager mAudioManager;
@@ -172,11 +170,7 @@ public class CallActivity extends AppCompatActivity
 
             toggleCallStateButtonVisibility(type);
 
-            String url = null;
-            String token = null;
             if(mIsIncomingCall) {
-                url = intent.getStringExtra(RESPONSE_URL);
-                token = intent.getStringExtra(REQUEST_TOKEN);
 
                 switch (mAudioManager.getRingerMode()) {
                     case AudioManager.RINGER_MODE_NORMAL : playRingtone(true); break;
@@ -267,7 +261,6 @@ public class CallActivity extends AppCompatActivity
 
                 break;
             case CALL_PUT_ON_HOLD_ACTION:
-
                 // Remove a running timer which shows call duration
                 mCallHandler.removeCallbacks(mCallDurationRunnable);
                 mCallDurationView.setVisibility(View.INVISIBLE);
