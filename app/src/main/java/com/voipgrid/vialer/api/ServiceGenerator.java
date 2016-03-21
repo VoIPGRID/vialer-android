@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
+import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
@@ -142,7 +143,8 @@ public class ServiceGenerator {
 
         builder.baseUrl(baseUrl)
                 .client(getHttpClient(context, username, password))
-                .addConverterFactory(GsonConverterFactory.create());
+                .addConverterFactory(
+                        GsonConverterFactory.create(new GsonBuilder().serializeNulls().create()));
 
         Retrofit retrofit = builder.build();
 
