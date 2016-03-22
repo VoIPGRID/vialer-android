@@ -21,6 +21,7 @@ public class MicrophonePermission {
     public static final int GRANTED = 0;
     public static final int DENIED = 1;
     public static final int BLOCKED = 2;
+    public static boolean firstRequest = true;
     private static final int REQUEST_PERMISSION_SETTING = 125;
 
     public static final String mPermissionToCheck = Manifest.permission.RECORD_AUDIO;
@@ -43,6 +44,23 @@ public class MicrophonePermission {
             return DENIED;
         }
         return GRANTED;
+    }
+
+    private static void showPermissionDeniedDialog(final Activity activity){
+        final int requestCode = activity.getResources().getInteger(
+                R.integer.microphone_permission_request_code);
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(activity.getString(R.string.permission_microphone_dialog_title));
+        builder.setMessage(activity.getString(R.string.permission_microphone_dialog_message));
+        builder.setPositiveButton(activity.getString(R.string.ok),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                        ActivityCompat.requestPermissions(activity, mPermissions, requestCode);
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private static void showPermissionBlockedDialog(final Activity activity){
@@ -80,28 +98,23 @@ public class MicrophonePermission {
         // Request code for the callback verifying in the Activity.
         final int requestCode = activity.getResources().getInteger(
                 R.integer.microphone_permission_request_code);
+
         if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
                 MicrophonePermission.mPermissionToCheck)) {
-            // Function to show a dialog that explains the permissions.
-            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            builder.setTitle(activity.getString(R.string.permission_microphone_dialog_title));
-            builder.setMessage(activity.getString(R.string.permission_microphone_dialog_message));
-            builder.setPositiveButton(activity.getString(R.string.ok),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                            ActivityCompat.requestPermissions(activity, mPermissions, requestCode);
-                        }
-                    });
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        } else {
+
             if (permissionStatus == DENIED) {
-                ActivityCompat.requestPermissions(activity, mPermissions, requestCode);
+                // Permission has previously been denied.
+               showPermissionDeniedDialog(activity);
             }
-            else if(permissionStatus == BLOCKED) {
-                showPermissionBlockedDialog(activity);
-            }
+
+        } else if(permissionStatus == BLOCKED && firstRequest) {
+            // Permission has not yet been requested. Request it immediately.
+            ActivityCompat.requestPermissions(activity, mPermissions, requestCode);
+            firstRequest = false;
+        }
+        else if (permissionStatus == BLOCKED && !firstRequest){
+            // Permission denied with 'do-not-ask-again' flag set.
+            showPermissionBlockedDialog(activity);
         }
     }
 }
