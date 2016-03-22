@@ -9,10 +9,6 @@ import android.provider.ContactsContract;
 
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 /**
  * Class acting as a layer between the syncadapter and the contactsmanager.
  */
@@ -66,17 +62,6 @@ public class ContactsSyncTask {
     }
 
     /**
-     * Get a specific column data field given a column name from a cursor.
-     *
-     * @param columnName
-     * @param cursor
-     * @return
-     */
-    public String getColumnFromCursor(String columnName, Cursor cursor) {
-        return cursor.getString(cursor.getColumnIndex(columnName));
-    }
-
-    /**
      * Runs the sync for all contacts.
      */
     public void fullSync() {
@@ -99,8 +84,64 @@ public class ContactsSyncTask {
     }
 
     /**
+     * Create a SyncContact object from the given contact cursor.
+     * @param contactCursor Cursor containing contacts.
+     * @return Populated SyncContact object.
+     */
+    private SyncContact createSyncContactFromCursor(Cursor contactCursor) {
+        long contactId =
+                contactCursor.getLong(
+                        contactCursor.getColumnIndex(
+                                ContactsContract.Contacts._ID));
+        String lookupKey =
+                contactCursor.getString(
+                        contactCursor.getColumnIndex(
+                                ContactsContract.Contacts.LOOKUP_KEY));
+        String displayName =
+                contactCursor.getString(
+                        contactCursor.getColumnIndex(
+                                ContactsContract.Contacts.DISPLAY_NAME_PRIMARY));
+        String thumbnailUri =
+                contactCursor.getString(
+                        contactCursor.getColumnIndex(
+                                ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
+
+        return new SyncContact(contactId, lookupKey, displayName, thumbnailUri);
+    }
+
+    /**
+     * Create a SyncContactNumber object from the give number cursor.
+     * @param numberCursor Cursor containing phone numbers.
+     * @return Populated SyncContact object or null.
+     */
+    private SyncContactNumber createSyncContactNumberFromCursor(Cursor numberCursor) {
+        long dataId =
+                numberCursor.getLong(
+                        numberCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID));
+        String number =
+                numberCursor.getString(
+                        numberCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+        int type =
+                numberCursor.getInt(
+                        numberCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
+        String label =
+                numberCursor.getString(
+                        numberCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LABEL));
+
+        // Strip whitespace.
+        number = number.replace(" ", "");
+
+        // We do not want to sync numbers that are null or have no content.
+        if (number == null || number.length() < 1){
+            return null;
+        }
+
+        return new SyncContactNumber(dataId, number, type, label);
+    }
+
+    /**
      * Sync syncs the contacts in the given cursor for T9 and call with app button.
-     * @param cursor The cursor of contacts to sync.
+     * @param cursor The cursor of contact(s) to sync.
      */
     public void sync(Cursor cursor) {
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
@@ -112,69 +153,38 @@ public class ContactsSyncTask {
 
         T9DatabaseHelper t9Database = new T9DatabaseHelper(mContext);
 
+        SyncContact syncContact;
+        SyncContactNumber syncContactNumber;
+
+        // Loop all contacts to sync.
         while (cursor.moveToNext()) {
-            long contactId = cursor.getLong(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-            String name = getColumnFromCursor(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
-                    cursor);
 
-            Cursor phones = queryAllPhoneNumbers(Long.toString(contactId));
+            syncContact = createSyncContactFromCursor(cursor);
 
-            if (phones.getCount() <= 0) {
+            // Get all numbers for contact.
+            Cursor numbers = queryAllPhoneNumbers(Long.toString(syncContact.getContactId()));
+
+            if (numbers == null) {
+                continue;
+            }
+
+            // Check if we have found phone numbers.
+            if (numbers.getCount() <= 0) {
                 // Close cursor before continue.
-                phones.close();
+                numbers.close();
                 continue;
             }
 
-            List<String> normalizedPhoneNumbers = new ArrayList<>();
-            String normalizedPhoneNumber;
-            List<String> phoneNumbers = new ArrayList<>();
-            String phoneNumber;
-
-            while (phones.moveToNext()) {
-                normalizedPhoneNumber = getColumnFromCursor(
-                        ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER,
-                        phones
-                );
-
-                // We do not want to synchronize null numbers.
-                if (normalizedPhoneNumber == null){
-                    continue;
+            // Loop all number belonging to a contact.
+            while (numbers.moveToNext()) {
+                syncContactNumber = createSyncContactNumberFromCursor(numbers);
+                if (syncContactNumber != null) {
+                    syncContact.addNumber(syncContactNumber);
                 }
-
-                // Avoid duplicate phone numbers.
-                if (!normalizedPhoneNumbers.contains(normalizedPhoneNumber)){
-                    normalizedPhoneNumbers.add(normalizedPhoneNumber);
-                }
-
-                phoneNumber = getColumnFromCursor(
-                        ContactsContract.CommonDataKinds.Phone.NUMBER,
-                        phones
-                );
-
-                // We do not want to synchronize null numbers.
-                if (phoneNumber == null || phoneNumber.length() < 1) {
-                    continue;
-                }
-
-                // Avoid duplicate phone numbers.
-                if (!phoneNumbers.contains(phoneNumber)){
-                    phoneNumbers.add(phoneNumber.replace(" ", ""));
-                }
-
             }
-            phones.close();
+            numbers.close();
 
-            // Found no normalized phone numbers so don't sync the contact.
-            if (normalizedPhoneNumbers.size() <= 0){
-                continue;
-            }
-            SyncContact syncContact = new SyncContact(
-                    contactId,
-                    name,
-                    normalizedPhoneNumbers,
-                    phoneNumbers
-            );
-
+            // Sync the contact.
             ContactsManager.syncContact(mContext, syncContact, t9Database);
         }
         cursor.close();

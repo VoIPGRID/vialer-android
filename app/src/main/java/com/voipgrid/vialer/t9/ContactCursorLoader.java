@@ -9,6 +9,8 @@ import android.provider.ContactsContract;
 import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
+import java.util.List;
+
 /**
  * AsyncTaskLoader for loading t9 matches.
  */
@@ -40,47 +42,59 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
      * can be manipulated dynamically.
      * @param cursor Matrix cursor obtained from
      */
-    void populateMaxtrixCursor(Cursor cursor, String t9query) {
+    void populateMaxtrixCursor(List<T9Match> matches) {
         // Create a mutable cursor to manipulate for search.
         if (mMatrixCursor == null) {
             mMatrixCursor = new MatrixCursor(new String[] {"_id", "name", "photo", "number"});
         }
 
-        while (cursor.moveToNext()) {
-            long contactId = cursor.getInt(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
-            String displayName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY));
-            String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-            number = number.replaceAll("[ ]", "");
+        T9Match match;
+        boolean addResult;
+        String displayName;
+        String number;
 
-            boolean addResult = false;
+        for (int i = 0; i < matches.size(); i++) {
+            match = matches.get(i);
+            displayName = match.getDisplayName();
+            number = match.getNumber();
+            addResult = false;
 
-            if (t9query.length() != 0) {
+            if (mT9Query.length() != 0) {
                 // Only allowed T9 chars for name matching.
-                if (t9query.substring(0, 1).matches("[2-9]")) {
-                    if (T9NameMatcher.T9QueryMatchesName(t9query, displayName)) {
+                if (mT9Query.substring(0, 1).matches("[2-9]")) {
+                    if (T9NameMatcher.T9QueryMatchesName(mT9Query, displayName)) {
                         addResult = true;
-                        displayName = T9NameMatcher.highlightMatchedPart(t9query, displayName);
+                        displayName = T9NameMatcher.highlightMatchedPart(mT9Query, displayName);
                     }
                 }
 
-                if (number != null && number.startsWith(t9query)) {
-                    addResult = true;
-                    number = "<b>" + number.substring(0, t9query.length()) + "</b>" + number.substring(t9query.length());
+                if (number != null) {
+                    if (number.startsWith("+")) {
+                        if(("0" + number.substring(3)).startsWith(mT9Query)) {
+                            addResult = true;
+                            number = "<b>" + number.substring(0, mT9Query.length() + 2) + "</b>" + number.substring(mT9Query.length() + 2);
+                        }
+                    }
+
+                    if (number.startsWith(mT9Query)) {
+                        addResult = true;
+                        number = "<b>" + number.substring(0, mT9Query.length()) + "</b>" + number.substring(mT9Query.length());
+                    }
                 }
             } else {
                 // No query so add all 20 results.
                 addResult = true;
             }
 
+
             if (addResult) {
                 mMatrixCursor.addRow(new Object[]{
-                        Long.toString(contactId),
+                        Long.toString(match.getContactId()),
                         displayName,
-                        ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId),
+                        match.getThumbnailUri(),
                         number,
                 });
             }
-
         }
     }
 
@@ -125,33 +139,12 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
 
         // Setup database handler.
         T9DatabaseHelper t9Database = new T9DatabaseHelper(mContext);
-        Object[] contactIdMatches = t9Database.getT9ContactIdMatches(mT9Query).toArray();
 
-        String selection = ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " IN " + "(" + TextUtils.join(", ", contactIdMatches) + ")";
-
-        Uri URI = ContactsContract.CommonDataKinds.Phone.CONTENT_URI.buildUpon()
-                .appendQueryParameter(ContactsContract.DIRECTORY_PARAM_KEY,
-                        String.valueOf(ContactsContract.Directory.DEFAULT))
-                .build();
-
-        // Query contact info based on found contact id matches.
-        Cursor dataCursor = mContext.getContentResolver().query(
-                URI,
-                new String[]{
-                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY,
-                        ContactsContract.CommonDataKinds.Phone.NUMBER,
-                },
-                selection,
-                null,
-                sortOrder
-        );
+        List<T9Match> matches = t9Database.getT9Matches(mT9Query);
 
         // Populate a new cursor that is UI friendly.
-        populateMaxtrixCursor(dataCursor, mT9Query);
+        populateMaxtrixCursor(matches);
 
-        assert dataCursor != null; // properly clean up the search process.
-        dataCursor.close();
         return mMatrixCursor;
     }
 

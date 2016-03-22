@@ -107,4 +107,30 @@ public class T9QueryTest {
         assertEquals(generatedNameQueries, expectedResult);
 
     }
+
+    /**
+     * Test if the correct queries are generated for a phone number.
+     */
+    @Test
+    public void generateT9NumberQueriesTest() {
+        ArrayList<String> expectedResult = new ArrayList<>();
+        ArrayList<String> generatedNumberQueries;
+
+        // Case 1: Number without country code.
+        generatedNumberQueries = T9Query.generateT9NumberQueries("0508009000");
+
+        expectedResult.add("0508009000");
+
+        assertEquals(expectedResult, generatedNumberQueries);
+
+        // Case 2: Number with +XX country code.
+        expectedResult.clear();
+
+        generatedNumberQueries = T9Query.generateT9NumberQueries("+31508009000");
+
+        expectedResult.add("+31508009000");
+        expectedResult.add("0508009000");
+
+        assertEquals(generatedNumberQueries, expectedResult);
+    }
 }

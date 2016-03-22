@@ -70,7 +70,8 @@ public class ContactsManager {
             if (sameContact.getCount() == 0) {
                 sameContact.close();
                 // Not an existing record so create app contact.
-                addAppContact(context, syncContact.getDisplayName(), syncContact.getNormalizedPhoneNumbers());
+                addAppContact(context, syncContact.getDisplayName(),
+                        syncContact.getNumbersAsStringList());
                 t9Database.insertT9Contact(syncContact);
             } else {
                 sameContact.moveToFirst();
@@ -82,7 +83,7 @@ public class ContactsManager {
                 boolean updatedContact = updateAppContact(
                         context,
                         vialerContactId,
-                        syncContact.getNormalizedPhoneNumbers()
+                        syncContact.getNumbersAsStringList()
                 );
 
                 if (SyncUtils.requiresFullContactSync(context)) {

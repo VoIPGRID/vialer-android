@@ -2,6 +2,7 @@ package com.voipgrid.vialer.dialer;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,6 +44,10 @@ import com.voipgrid.vialer.util.IconHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.Storage;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -201,6 +206,36 @@ public class DialerActivity extends AppCompatActivity implements
     }
 
     /**
+     * Function to get the bitmap from the uri.
+     * @param thumbnailUriString String uri of the file
+     * @return Bitmap of the uri.
+     */
+    private Bitmap loadContactThumbnail(String thumbnailUriString) {
+        Uri thumbUri = Uri.parse(thumbnailUriString);
+        AssetFileDescriptor afd = null;
+        try {
+            afd = getContentResolver().openAssetFileDescriptor(thumbUri, "r");
+            FileDescriptor fileDescriptor = afd.getFileDescriptor();
+            if (fileDescriptor != null) {
+                // Decodes the bitmap
+                return BitmapFactory.decodeFileDescriptor(
+                        fileDescriptor, null, null);
+            }
+        } catch (FileNotFoundException e) {
+
+        } finally {
+            if (afd != null) {
+                try {
+                    afd.close();
+                } catch (IOException e) {
+
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Function to setup the listview and cursor adapter.
      */
     private void setupContactsListView() {
@@ -225,21 +260,22 @@ public class DialerActivity extends AppCompatActivity implements
                 if (view.getId() == R.id.text_view_contact_icon) {
                     // The class stores a contact uri for which
                     // we can retrieve a photo.
-                    Uri contactUri = Uri.parse(cursor.getString(columnIndex));
-                    // Open a photo inputStream given contact uri.
-                    InputStream photoInputStream =
-                            ContactsContract.Contacts.openContactPhotoInputStream(
-                                    getContentResolver(), contactUri);
-                    if (photoInputStream != null) {
-                        // Decode it to a bitmap when the stream is opened successfully.
-                        Bitmap bm = BitmapFactory.decodeStream(photoInputStream);
-                        ((CircleImageView) view).setImageBitmap(bm);
-                    } else {
+                    boolean hasThumbnail = false;
+                    String thumbnailUriString = cursor.getString(columnIndex);
+                    if (thumbnailUriString != null) {
+                        Bitmap thumbNail = loadContactThumbnail(thumbnailUriString);
+                        if (thumbNail != null) {
+                            hasThumbnail = true;
+                            ((CircleImageView) view).setImageBitmap(thumbNail);
+                        }
+                    }
+
+                    if (!hasThumbnail) {
                         String firstLetter = cursor.getString(1).replaceAll("\\<.*?>","").substring(0, 1);
                         Bitmap bitmapImage = IconHelper.getCallerIconBitmap(firstLetter, Color.BLUE);
                         ((CircleImageView) view).setImageBitmap(bitmapImage);
                     }
-                    return true; //true because the data was bound to the icon view
+                    return true;
                 } else if (view instanceof TextView) {
                     ((TextView) view).setText(Html.fromHtml(cursor.getString(columnIndex)));
                     return true;
