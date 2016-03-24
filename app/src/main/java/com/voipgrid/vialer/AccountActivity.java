@@ -175,8 +175,13 @@ public class AccountActivity extends AppCompatActivity implements
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        /* First, view updates */
+        if (!mPreferences.hasPhoneAccount()){
+            
+            WebActivityHelper webHelper = new WebActivityHelper(this);
+            webHelper.startWebActivity(getString(R.string.user_change_title), getString(R.string.web_user_change));
+        }
 
+        /* First, view updates */
         mSipIdEditText.setVisibility(isChecked ? View.VISIBLE : View.GONE);
 
         if (mPreferences.hasSipEnabled() == isChecked) {

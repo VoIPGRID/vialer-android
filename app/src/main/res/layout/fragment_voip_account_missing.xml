@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:gravity="center"
+    tools:context="com.voipgrid.vialer.onboarding.SetUpVoipAccountFragment">
+
+    <TextView
+        android:id="@+id/title_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/voip_account_missing_text"
+        android:fontFamily="sans-serif-light"
+        android:ems="10"
+        style="@style/DescriptionTextViewStyle"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:id="@+id/cancel_set_voip_account_button"
+        android:layout_below="@+id/set_voip_account_button"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/set_voip_account_button_text"
+        android:id="@+id/set_voip_account_button"
+        android:layout_below="@+id/title_label"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>

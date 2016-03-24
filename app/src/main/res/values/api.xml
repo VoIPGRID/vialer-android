@@ -6,6 +6,7 @@
     <string name="gcm_registration_id">439121107319</string>
 
     <string name="web_url">https://partner.voipgrid.nl</string>
+    <string name="web_user_change">/user/change/</string>
     <string name="web_accessibility">/dashboard/</string>
     <string name="web_dial_plan">/dialplan/</string>
     <string name="web_statistics">/stats/dashboard/</string>

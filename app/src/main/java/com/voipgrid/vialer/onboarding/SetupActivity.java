@@ -16,6 +16,7 @@ import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerGcmRegistrationService;
+import com.voipgrid.vialer.WebActivityHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
@@ -37,6 +38,7 @@ public class SetupActivity extends AppCompatActivity implements
         LoginFragment.FragmentInteractionListener,
         AccountFragment.FragmentInteractionListener,
         ForgotPasswordFragment.FragmentInteractionListener,
+        SetUpVoipAccountFragment.FragmentInteractionListener,
         Callback {
 
     private String mPassword;
@@ -157,7 +159,7 @@ public class SetupActivity extends AppCompatActivity implements
         mJsonStorage.save(systemUser);
 
         String phoneAccountId = systemUser.getPhoneAccountId();
-        if(phoneAccountId != null) {
+        if (phoneAccountId != null) {
             Call<PhoneAccount> call = mApi.phoneAccount(phoneAccountId);
             call.enqueue(this);
         } else {
@@ -168,6 +170,12 @@ public class SetupActivity extends AppCompatActivity implements
                             ((SystemUser) mJsonStorage.get(SystemUser.class)).getFullName())
             );
         }
+    }
+
+    @Override
+    public void onSetVoipAccount(Fragment fragment) {
+        WebActivityHelper webHelper = new WebActivityHelper(this);
+        webHelper.startWebActivity(getString(R.string.user_change_title), getString(R.string.web_user_change));
     }
 
     @Override
