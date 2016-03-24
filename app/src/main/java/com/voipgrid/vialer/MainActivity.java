@@ -70,7 +70,8 @@ public class MainActivity extends NavigationDrawerActivity implements
             SyncUtils.requestContactSync(this);
         } else {
             // Live contact updates are not supported below api level 18.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
+                    && ContactsPermission.hasPermission(this)) {
                 startService(new Intent(this, UpdateChangedContactsService.class));
             }
         }
