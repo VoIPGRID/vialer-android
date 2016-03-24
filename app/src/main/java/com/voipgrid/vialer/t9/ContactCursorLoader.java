@@ -1,13 +1,9 @@
 package com.voipgrid.vialer.t9;
 
-import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.net.Uri;
-import android.provider.ContactsContract;
 import android.support.v4.content.AsyncTaskLoader;
-import android.text.TextUtils;
 
 import java.util.List;
 
@@ -21,8 +17,6 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
     MatrixCursor mMatrixCursor;
 
     private Cursor mCursor;
-
-    private final String sortOrder = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY + " ASC";
 
     public ContactCursorLoader(Context context) {
         super(context);
@@ -38,11 +32,10 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
     }
 
     /**
-     * Covert a cursor obtained from a ContentResolver query to a MatrixCursor that
-     * can be manipulated dynamically.
-     * @param cursor Matrix cursor obtained from
+     * Populate a MatrixCursor that is UI friendly with the matches found for the t9 query.
+     * @param matches List of T9Match objects to be inserted into the MatrixCursor.
      */
-    void populateMaxtrixCursor(List<T9Match> matches) {
+    void populateMatrixCursor(List<T9Match> matches) {
         // Create a mutable cursor to manipulate for search.
         if (mMatrixCursor == null) {
             mMatrixCursor = new MatrixCursor(new String[] {"_id", "name", "photo", "number"});
@@ -85,7 +78,6 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
                 // No query so add all 20 results.
                 addResult = true;
             }
-
 
             if (addResult) {
                 mMatrixCursor.addRow(new Object[]{
@@ -143,7 +135,7 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
         List<T9Match> matches = t9Database.getT9Matches(mT9Query);
 
         // Populate a new cursor that is UI friendly.
-        populateMaxtrixCursor(matches);
+        populateMatrixCursor(matches);
 
         return mMatrixCursor;
     }

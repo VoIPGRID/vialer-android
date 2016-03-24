@@ -6,13 +6,16 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
+import android.util.Log;
 
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
 
 /**
- * Class acting as a layer between the syncadapter and the contactsmanager.
+ * Class that handles the syncing of the contacts to the t9 database.
  */
 public class ContactsSyncTask {
+    private static final String LOG_TAG = ContactsSyncTask.class.getName();
+    private static final boolean DEBUG = false;
 
     private Context mContext;
 
@@ -158,6 +161,17 @@ public class ContactsSyncTask {
 
         // Loop all contacts to sync.
         while (cursor.moveToNext()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                long lastUpdated =
+                        cursor.getLong(cursor.getColumnIndex(
+                                ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP));
+                // Skip the contact if it has not changed since the last sync AND a full sync
+                // is not required.
+                if (lastUpdated <= Long.parseLong(SyncUtils.getLastSync(mContext))
+                        && !SyncUtils.requiresFullContactSync(mContext)) {
+                    continue;
+                }
+            }
 
             syncContact = createSyncContactFromCursor(cursor);
 
@@ -184,8 +198,15 @@ public class ContactsSyncTask {
             }
             numbers.close();
 
+            if (DEBUG) {
+                Log.d(LOG_TAG, "Syncing contact: " +
+                        syncContact.getContactId() +
+                        " - " +
+                        syncContact.getDisplayName());
+            }
+
             // Sync the contact.
-            ContactsManager.syncContact(mContext, syncContact, t9Database);
+            t9Database.updateT9Contact(syncContact);
         }
         cursor.close();
 
