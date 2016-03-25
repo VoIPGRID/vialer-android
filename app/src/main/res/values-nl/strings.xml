@@ -75,8 +75,8 @@
     <!-- Missing voip account fragment values -->
     <string name="set_voip_account_button_text">Koppel VoIP account</string>
     <string name="user_change_title">Gebruiker aanpassen</string>
-    <string name="voip_account_missing_text">"Om gebruik te kunnen maken van bellen via VoIP, moet er een VoIP-account gekoppeld zijn aan je gebruiker.\n\nOp dit moment is er geen VoIP-account gekoppeld aan deze gebruiker.</string>
-    
+    <string name="voip_account_missing_text">Om gebruik te kunnen maken van bellen via VoIP, moet er een VoIP-account gekoppeld zijn aan je gebruiker.\n\nOp dit moment is er geen VoIP-account gekoppeld aan deze gebruiker.</string>
+
     <!-- Welcome fragment values -->
     <string name="welcome_text">Welkom</string>
     <string name="placeholder_name">Naamloze gebruiker</string>
@@ -147,7 +147,7 @@
     <string name="permission_contact_dialer_list_message">Kan geen contacten laden, permissie tot contacten is noodzakelijk</string>
     <string name="account_mobile_number_edit_text_hint">Mobiel nummer</string>
     <string name="account_outgoing_number_edit_text_hint">Uitgaand nummer</string>
-    <string name="account_sip_id_edit_text_hint">SIP Account</string>
+    <string name="account_sip_id_edit_text_hint">VoIP Account</string>
     <string name="account_sip_password_edit_text_hint">Wachtwoord</string>
     <string name="two_step_call_message_step_a_failed">Konden uw telefoon niet bereiken</string>
     <string name="two_step_call_message_step_b_failed">Konden andere partij niet bereiken</string>

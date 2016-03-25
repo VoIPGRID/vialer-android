@@ -7,7 +7,7 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.util.JsonStorage;
 
 /**
- * Created by stefan on 22-3-16.
+ * Used to start a webactivity from anywhere in the application.
  */
 public class WebActivityHelper {
 
@@ -18,7 +18,7 @@ public class WebActivityHelper {
     }
 
     /**
-     * Start a new WebActivity to display the page
+     * Start a new WebActivity to display the page.
      * @param title
      * @param page
      */

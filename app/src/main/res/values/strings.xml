@@ -58,7 +58,7 @@
     <string name="forgot_password_missing_field_message">Please fill in all fields before login!</string>
     <string name="forgot_password_alert_title">Password reset</string>
     <string name="forgot_password_alert_message">If your user is %1s we will send you an email with instructions to reset your password.</string>
-    
+
     <!-- Configure fragment values. -->
     <string name="configure_button_title">Configure</string>
     <string name="configure_header_label_text">Vialer is configuring</string>
@@ -73,7 +73,7 @@
     <!-- Missing voip account fragment values -->
     <string name="set_voip_account_button_text">Set VoIP account</string>
     <string name="user_change_title">Change user</string>
-    <string name="voip_account_missing_text">"To setup a phone call via the VoIP function, a VoIP account has to be set in your user profile.\n\nAt this moment there is no VoIP account linked to your account.</string>
+    <string name="voip_account_missing_text">To setup a phone call via the VoIP function, a VoIP account has to be set in your user profile.\n\nAt this moment there is no VoIP account linked to your account.</string>
 
     <!-- Welcome fragment values -->
     <string name="welcome_text">Welcome</string>
@@ -85,7 +85,7 @@
     <string name="onboarding_no_internet_message">An internet connection is required.</string>
     <string name="onboarding_account_configure_failed_title">Configuration failed</string>
     <string name="onboarding_account_configure_invalid_phone_number">The mobile number is invalid.</string>
-    
+
     <!-- strings empty view call records -->
     <string name="empty_view_default_message">No recent calls available (yet).</string>
     <string name="empty_view_missed_message">No missed calls.</string>
@@ -115,7 +115,7 @@
     <string name="user_is_partner_error_title">Login failed</string>
     <string name="user_is_partner_error_message">This user is not allowed to use the app.</string>
     <string name="title_activity_account">@string/settings_menu_item_title</string>
-    <string name="account_sip_id_edit_text_hint">SIP account</string>
+    <string name="account_sip_id_edit_text_hint">VoIP account</string>
     <string name="account_sip_password_edit_text_hint">Password</string>
     <string name="account_mobile_number_edit_text_hint">Mobile number</string>
     <string name="account_outgoing_number_edit_text_hint">Outgoing number</string>

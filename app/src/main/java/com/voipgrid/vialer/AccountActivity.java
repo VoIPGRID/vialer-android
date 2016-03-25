@@ -1,7 +1,9 @@
 package com.voipgrid.vialer;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -12,11 +14,11 @@ import android.widget.EditText;
 import android.widget.Switch;
 
 import com.voipgrid.vialer.api.Api;
-import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.MiddlewareHelper;
@@ -33,8 +35,6 @@ public class AccountActivity extends AppCompatActivity implements
 
     private CompoundButton mSwitch;
     private EditText mSipIdEditText;
-
-    private ServiceGenerator mServiceGen;
 
     private PhoneAccount mPhoneAccount;
     private Preferences mPreferences;
@@ -62,11 +62,11 @@ public class AccountActivity extends AppCompatActivity implements
 
         /* enabled home button for the Toolbar */
         getSupportActionBar().setHomeButtonEnabled(true);
-        
-        mSwitch = (CompoundButton) findViewById(R.id.account_sip_switch);
-        mSwitch.setOnCheckedChangeListener(this);
 
         mSipIdEditText = ((EditText) findViewById(R.id.account_sip_id_edit_text));
+        mSwitch = (CompoundButton) findViewById(R.id.account_sip_switch);
+
+        mSwitch.setOnCheckedChangeListener(this);
 
         populate();
     }
@@ -149,12 +149,7 @@ public class AccountActivity extends AppCompatActivity implements
                 R.id.account_mobile_number_edit_text)).getText().toString();
         number = PhoneNumberUtils.formatMobileNumber(number);
 
-        try {
-            mServiceGen = ServiceGenerator.getInstance();
-        } catch(PreviousRequestNotFinishedException e) {
-            return;
-        }
-        Api api = mServiceGen.createService(
+        Api api = ServiceGenerator.createService(
                 this,
                 Api.class,
                 getString(R.string.api_url),
@@ -175,12 +170,6 @@ public class AccountActivity extends AppCompatActivity implements
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (!mPreferences.hasPhoneAccount()){
-            
-            WebActivityHelper webHelper = new WebActivityHelper(this);
-            webHelper.startWebActivity(getString(R.string.user_change_title), getString(R.string.web_user_change));
-        }
-
         /* First, view updates */
         mSipIdEditText.setVisibility(isChecked ? View.VISIBLE : View.GONE);
 
@@ -215,18 +204,28 @@ public class AccountActivity extends AppCompatActivity implements
                         // to disabled. Setting disabled in the settings first makes sure
                         // the onCheckChanged does not execute the code that normally is executed
                         // on a change in the check of the switch.
-                        mPreferences.setSipEnabled(false);
-                        mSwitch.setChecked(false);
-                        // TODO user feedback in VIALA-443.
+                        setVoipAccount();
                     }
                 }
             }.execute();
         }
     }
 
+    /**
+     * Loads setupactivity with the SetUpVoipAccountFragment.
+     */
+    private void setVoipAccount(){
+        Intent intent = new Intent(this, SetupActivity.class);
+        Bundle b = new Bundle();
+        b.putInt("fragment", R.id.fragment_voip_account_missing);
+        b.putString("activity", AccountActivity.class.getSimpleName());
+        intent.putExtras(b);
+
+        startActivity(intent);
+    }
+
     @Override
     public void onResponse(Call call, Response response) {
-        mServiceGen.release();
         if (response.isSuccess()) {
             // Success callback for updating mobile number.
             // Update the systemuser.
@@ -237,9 +236,32 @@ public class AccountActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // When coming back from the SetUpVoipAccountFragment's created webactivity
+        // we cannot immediately check if a voipaccount has been set. Processing the
+        // fragment and the checks for a permitted sip permission can take 1 up to 3 seconds.
+        // For this reason we re-check if the mSwitch has the correct value after a timer.
+        enableProgressBar(true);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSwitch.setChecked(mPreferences.hasSipEnabled());
+                enableProgressBar(false);
+            }
+        }, 3000);
+    }
+
+    @Override
     public void onFailure(Call call, Throwable t) {
-        mServiceGen.release();
         failedFeedback();
+    }
+
+    private void enableProgressBar(boolean enabled) {
+        View view = findViewById(R.id.progressBar);
+        if(view != null) {
+            view.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
+        }
     }
 
     /**

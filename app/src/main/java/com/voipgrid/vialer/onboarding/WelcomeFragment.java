@@ -77,8 +77,7 @@ public class WelcomeFragment extends OnboardingFragment implements View.OnClickL
 
     @Override
     public void onClick(View view) {
-        boolean hasVoipAccount = false;
-        if (!hasVoipAccount) {
+        if (!mPreferences.hasPhoneAccount()) {
             mListener.onNextStep(SetUpVoipAccountFragment.newInstance());
         }
         else {

@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:gravity="center"
-    tools:context="com.voipgrid.vialer.onboarding.SetUpVoipAccountFragment">
+    tools:context="com.voipgrid.vialer.onboarding.SetUpVoipAccountFragment"
+    android:id="@+id/fragment_voip_account_missing">
 
     <TextView
         android:id="@+id/title_label"
