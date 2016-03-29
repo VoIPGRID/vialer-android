@@ -1,52 +1,83 @@
 package com.voipgrid.vialer.contacts;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Class for storing all information needed for the contact to be synced.
  */
 public class SyncContact {
-    private long contactId;
-    private String displayName;
-    private List<String> normalizedPhoneNumbers;
-    private List<String> phoneNumbers;
+    private long mContactId;
+    private String mLookupKey;
+    private String mDisplayName;
+    private String mThumbnailUri;
 
-    public SyncContact(long contactId, String displayName, List<String> normalizedPhoneNumbers, List<String> phoneNumbers) {
+    private List<SyncContactNumber> mNumbers;
+
+
+    public SyncContact(long contactId, String lookupKey, String displayName, String thumbnailUri) {
         setContactId(contactId);
+        setLookupKey(lookupKey);
         setDisplayName(displayName);
-        setNormalizedPhoneNumbers(normalizedPhoneNumbers);
-        setPhoneNumbers(phoneNumbers);
+        setThumbnailUri(thumbnailUri);
+        mNumbers = new ArrayList<>();
     }
 
     public long getContactId() {
-        return contactId;
+        return mContactId;
     }
 
     private void setContactId(long contactId) {
-        this.contactId = contactId;
+        this.mContactId = contactId;
+    }
+
+    public String getLookupKey() {
+        return mLookupKey;
+    }
+
+    private void setLookupKey(String lookupKey) {
+        // Some lookup keys are to large and can cause memory allocation problems.
+        if (lookupKey.length() < 1000) {
+            this.mLookupKey = lookupKey;
+        } else {
+            this.mLookupKey = null;
+        }
     }
 
     public String getDisplayName() {
-        return displayName;
+        return mDisplayName;
     }
 
     private void setDisplayName(String displayName) {
-        this.displayName = displayName;
+        this.mDisplayName = displayName;
     }
 
-    public List<String> getNormalizedPhoneNumbers() {
-        return normalizedPhoneNumbers;
+    public String getThumbnailUri() {
+        return this.mThumbnailUri;
     }
 
-    private void setNormalizedPhoneNumbers(List<String> normalizedPhoneNumbers) {
-        this.normalizedPhoneNumbers = normalizedPhoneNumbers;
+    private void setThumbnailUri(String thumbnailUri) {
+        this.mThumbnailUri = thumbnailUri;
     }
 
-    public List<String> getPhoneNumbers() {
-        return phoneNumbers;
+    public void addNumber(SyncContactNumber syncContactNumber) {
+        // We do not want duplicates.
+        if (!mNumbers.contains(syncContactNumber)) {
+            mNumbers.add(syncContactNumber);
+        }
     }
 
-    private void setPhoneNumbers(List<String> phoneNumbers) {
-        this.phoneNumbers = phoneNumbers;
+    public List<SyncContactNumber> getNumbers() {
+        return mNumbers;
+    }
+
+    public List<String> getNumbersAsStringList() {
+        List<String> stringList = new ArrayList<>();
+        SyncContactNumber number;
+        for (int i = 0; i < mNumbers.size(); i++) {
+            number = mNumbers.get(i);
+            stringList.add(number.getNumber());
+        }
+        return stringList;
     }
 }

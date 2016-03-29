@@ -94,6 +94,9 @@ public class UpdateChangedContactsService extends Service {
 
             // No results to sync.
             if (updatedContacts == null || updatedContacts.getCount() <= 0){
+                if (updatedContacts != null) {
+                    updatedContacts.close();
+                }
                 return;
             }
 
