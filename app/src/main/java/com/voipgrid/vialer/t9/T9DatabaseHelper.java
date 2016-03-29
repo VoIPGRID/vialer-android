@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 
 import com.voipgrid.vialer.contacts.SyncContact;
+import com.voipgrid.vialer.contacts.SyncContactNumber;
+import com.voipgrid.vialer.contacts.SyncUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,13 +18,16 @@ import java.util.List;
  * Helper class for accessing the t9 contact database.
  */
 public class T9DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "t9.db";
 
     private static final int MAX_RESULTS = 20;
 
+    private Context mContext;
+
     public T9DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        mContext = context;
     }
 
     /**
@@ -30,15 +35,29 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
      */
     public interface Tables {
         String T9_CONTACT = "t9_contact";
+        String T9_QUERY = "t9_query";
     }
 
     /**
      * Interface for the columns required in the t9_contact table.
      */
     public interface T9ContactColumns extends BaseColumns {
+        String DATA_ID = "data_id";
+        String CONTACT_ID = "contact_id";
+        String LOOKUP_KEY = "lookup_key";
+        String DISPLAY_NAME = "display_name";
+        String THUMBNAIL_URI = "thumbnail_uri";
+        String NUMBER = "number";
+        String TYPE = "type";
+        String LABEL = "label";
+    }
+
+    /**
+     * Interface for the columns required in the t9_query table.
+     */
+    public interface T9QueryColumns extends BaseColumns {
         String T9_QUERY = "t9_query";
         String CONTACT_ID = "contact_id";
-        String LAST_UPDATED = "last_updated";
     }
 
     @Override
@@ -51,6 +70,9 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
         // Data is re-creatable so it is safe to drop the db on an upgrade.
         dropTables(db);
         onCreate(db);
+        // Make sure a full contact sync is done.
+        SyncUtils.setRequiresFullContactSync(mContext, true);
+        SyncUtils.requestContactSync(mContext);
     }
 
     @Override
@@ -63,20 +85,36 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
      * @param db
      */
     private void setupTables(SQLiteDatabase db) {
-        // Create t9 contact table.
         db.execSQL("CREATE TABLE " + Tables.T9_CONTACT + " (" +
-                T9ContactColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                T9ContactColumns.T9_QUERY + " TEXT COLLATE NOCASE, " +
-                T9ContactColumns.CONTACT_ID + " INTEGER," +
-                T9ContactColumns.LAST_UPDATED + " LONG " +
+                T9ContactColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                T9ContactColumns.DATA_ID + " INTEGER, " +
+                T9ContactColumns.CONTACT_ID + " INTEGER, " +
+                T9ContactColumns.LOOKUP_KEY + " TEXT," +
+                T9ContactColumns.DISPLAY_NAME + " TEXT, " +
+                T9ContactColumns.THUMBNAIL_URI + " TEXT, " +
+                T9ContactColumns.NUMBER + " TEXT, " +
+                T9ContactColumns.TYPE + " INTEGER, " +
+                T9ContactColumns.LABEL + " TEXT" +
                 ");");
 
-        // Set indexes.
-        db.execSQL("CREATE INDEX IF NOT EXISTS t9_query_index ON " +
-                Tables.T9_CONTACT + " (" + T9ContactColumns.T9_QUERY + ");");
+        db.execSQL("CREATE TABLE " + Tables.T9_QUERY + " (" +
+                T9QueryColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                T9QueryColumns.T9_QUERY + " TEXT COLLATE NOCASE, " +
+                T9QueryColumns.CONTACT_ID + " INTEGER" +
+                ");");
 
-        db.execSQL("CREATE INDEX IF NOT EXISTS t9_contact_id_index ON " +
-                Tables.T9_CONTACT + " (" + T9ContactColumns.CONTACT_ID + ");");
+
+        db.execSQL("CREATE INDEX IF NOT EXISTS contact_contact_id_index ON " +
+                Tables.T9_CONTACT + " (" + T9ContactColumns.CONTACT_ID  + ");");
+
+        db.execSQL("CREATE INDEX IF NOT EXISTS contact_sort_index ON " +
+                Tables.T9_CONTACT + " (" + T9ContactColumns.DISPLAY_NAME + ");");
+
+        db.execSQL("CREATE INDEX IF NOT EXISTS t9_query_index ON " +
+                Tables.T9_QUERY + " (" + T9QueryColumns.T9_QUERY + ");");
+
+        db.execSQL("CREATE INDEX IF NOT EXISTS t9_query_contact_id_index ON " +
+                Tables.T9_QUERY + " (" + T9QueryColumns.CONTACT_ID + ");");
     }
 
     /**
@@ -85,6 +123,7 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
      */
     private void dropTables(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + Tables.T9_CONTACT);
+        db.execSQL("DROP TABLE IF EXISTS " + Tables.T9_QUERY);
     }
 
     /**
@@ -102,8 +141,11 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
      */
     private void analyzeDB(SQLiteDatabase db) {
         db.execSQL("ANALYZE " + Tables.T9_CONTACT);
+        db.execSQL("ANALYZE " + Tables.T9_QUERY);
+        db.execSQL("ANALYZE contact_contact_id_index");
+        db.execSQL("ANALYZE contact_sort_index");
         db.execSQL("ANALYZE t9_query_index");
-        db.execSQL("ANALYZE t9_contact_id_index");
+        db.execSQL("ANALYZE t9_query_contact_id_index");
     }
 
     /**
@@ -112,8 +154,8 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
      */
     public void insertT9Contact(SyncContact syncContact) {
         SQLiteDatabase db = getReadableDatabase();
-        insertDisplayNameQuery(db, syncContact.getContactId(), syncContact.getDisplayName());
-        insertPhoneNumberQueries(db, syncContact.getContactId(), syncContact.getPhoneNumbers());
+        insertPhoneNumberQueries(db, syncContact);
+        insertDisplayNameQueries(db, syncContact);
         db.close();
     }
 
@@ -124,40 +166,101 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
      */
     public void updateT9Contact(SyncContact syncContact) {
         SQLiteDatabase db = getReadableDatabase();
-        removeContactEntries(db, syncContact.getContactId());
+        removeContactEntries(db, syncContact);
         db.close();
         insertT9Contact(syncContact);
     }
 
     /**
-     * Function to remove contact entries for a contact.
+     * Function that tries to remove all entries for the given contact.
      * @param db
-     * @param contactId Id of the contact to remove.
+     * @param syncContact Contact to remove.
      */
-    private void removeContactEntries(SQLiteDatabase db, long contactId) {
-        db.delete(Tables.T9_CONTACT, T9ContactColumns.CONTACT_ID + "=" +
-                        contactId, null);
+    private void removeContactEntries(SQLiteDatabase db, SyncContact syncContact) {
+        // Multiple deletes to try and delete the contact even though the contact_id has changed.
+        // This introduces a bug where contacts with the exact same name but different contacts
+        // get deleted as well.
+        int contactDeleteResult = db.delete(Tables.T9_CONTACT, T9ContactColumns.CONTACT_ID + "=" +
+                        syncContact.getContactId(), null);
+        int queryDeleteResults = db.delete(Tables.T9_QUERY, T9ContactColumns.CONTACT_ID + "=" +
+                syncContact.getContactId(), null);
+
+        // Nothing deleted yet, try delete by name.
+        if (contactDeleteResult == 0 && queryDeleteResults == 0) {
+            db.delete(Tables.T9_QUERY,
+                    T9QueryColumns.CONTACT_ID + " IN " +
+                            "(SELECT " + T9ContactColumns.CONTACT_ID + " FROM " + Tables.T9_CONTACT +
+                            " WHERE " + T9ContactColumns.DISPLAY_NAME + " = ?)",
+                    new String[] {syncContact.getDisplayName()});
+            db.delete(Tables.T9_CONTACT,
+                    T9ContactColumns.DISPLAY_NAME + " = ?",
+                    new String[] {syncContact.getDisplayName()});
+        }
     }
 
     /**
-     * Function that inserts the t9 queries for the phone numbers.
+     * Function for inserting T9 queries for phone numbers.
      * @param db
-     * @param contactId Id of the contact to insert for.
-     * @param phoneNumbers List of phone numbers to insert queries for.
+     * @param syncContact Contact with phone numbers.
      */
-    private void insertPhoneNumberQueries(SQLiteDatabase db, long contactId, List<String> phoneNumbers) {
-        try {
-            final String numberSqlInsert = "INSERT INTO " + Tables.T9_CONTACT + " (" +
-                    T9ContactColumns.CONTACT_ID + ", " +
-                    T9ContactColumns.T9_QUERY  + ") " +
-                    " VALUES (?, ?)";
-            final SQLiteStatement numberInsert = db.compileStatement(numberSqlInsert);
+    private void insertPhoneNumberQueries(SQLiteDatabase db, SyncContact syncContact) {
+        List<SyncContactNumber> numbers = syncContact.getNumbers();
 
-            for (int i = 0; i < phoneNumbers.size(); i++) {
-                numberInsert.bindLong(1, contactId);
-                numberInsert.bindString(2, phoneNumbers.get(i));
-                numberInsert.executeInsert();
-                numberInsert.clearBindings();
+        try {
+            final String contactSqlInsert = "INSERT INTO " + Tables.T9_CONTACT + " (" +
+                    T9ContactColumns.DATA_ID + ", " +        // 1
+                    T9ContactColumns.CONTACT_ID + ", " +     // 2
+                    T9ContactColumns.LOOKUP_KEY + ", " +     // 3
+                    T9ContactColumns.DISPLAY_NAME + ", " +   // 4
+                    T9ContactColumns.THUMBNAIL_URI + ", " +  // 5
+                    T9ContactColumns.NUMBER + "," +          // 6
+                    T9ContactColumns.TYPE + ", " +           // 7
+                    T9ContactColumns.LABEL  + ") " +         // 8
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            final SQLiteStatement contactInsert = db.compileStatement(contactSqlInsert);
+
+            final String querySqlInsert = "INSERT INTO " + Tables.T9_QUERY + " (" +
+                    T9QueryColumns.CONTACT_ID + ", " +  // 1
+                    T9QueryColumns.T9_QUERY  + ") " +   // 2
+                    " VALUES (?, ?)";
+            final SQLiteStatement queryInsert = db.compileStatement(querySqlInsert);
+
+            SyncContactNumber number;
+            ArrayList<String> numberQueries;
+            String query;
+
+            for (int i = 0; i < numbers.size(); i++) {
+                number = numbers.get(i);
+
+                // Insert contact record for number.
+                contactInsert.bindLong(1, number.getDataId());
+                contactInsert.bindLong(2, syncContact.getContactId());
+                if (syncContact.getLookupKey() != null) {
+                    contactInsert.bindString(3, syncContact.getLookupKey());
+                }
+                contactInsert.bindString(4, syncContact.getDisplayName());
+                if (syncContact.getThumbnailUri() != null) {
+                    contactInsert.bindString(5, syncContact.getThumbnailUri());
+                }
+                contactInsert.bindString(6, number.getNumber());
+                contactInsert.bindLong(7, number.getType());
+                if (number.getLabel() != null) {
+                    contactInsert.bindString(8, number.getLabel());
+                }
+                contactInsert.executeInsert();
+                contactInsert.clearBindings();
+
+                // Insert queries for phone numbers.
+                numberQueries = T9Query.generateT9NumberQueries(number.getNumber());
+
+                for (int j = 0; j < numberQueries.size(); j++) {
+                    query = numberQueries.get(j);
+                    queryInsert.bindLong(1, syncContact.getContactId());
+                    queryInsert.bindString(2, query);
+
+                    queryInsert.executeInsert();
+                    queryInsert.clearBindings();
+                }
             }
         } finally {
 
@@ -165,24 +268,26 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Function to insert t9 queries for the display name of a contact.
+     * Function for inserting T9 queries for the contacts name.
      * @param db
-     * @param contactId Id of the contact to insert for.
-     * @param displayName The display name to insert t9 queries for.
+     * @param syncContact The contact with a name.
      */
-    private void insertDisplayNameQuery(SQLiteDatabase db, long contactId, String displayName) {
+    private void insertDisplayNameQueries(SQLiteDatabase db, SyncContact syncContact) {
         try {
-            final String sqlInsert = "INSERT INTO " + Tables.T9_CONTACT + " (" +
-                    T9ContactColumns.CONTACT_ID + ", " +
-                    T9ContactColumns.T9_QUERY  + ") " +
+            final String sqlInsert = "INSERT INTO " + Tables.T9_QUERY + " (" +
+                    T9QueryColumns.CONTACT_ID + ", " +
+                    T9QueryColumns.T9_QUERY  + ") " +
                     " VALUES (?, ?)";
             final SQLiteStatement insert = db.compileStatement(sqlInsert);
 
             // Computes a list of prefixes of a given contact name.
-            ArrayList<String> T9NameQueries = T9Query.generateT9NameQueries(displayName);
-            for (String T9NameQuery : T9NameQueries) {
-                insert.bindLong(1, contactId);
-                insert.bindString(2, T9NameQuery);
+            ArrayList<String> T9NameQueries =
+                    T9Query.generateT9NameQueries(syncContact.getDisplayName());
+            String query;
+            for (int i = 0; i < T9NameQueries.size(); i++) {
+                query = T9NameQueries.get(i);
+                insert.bindLong(1, syncContact.getContactId());
+                insert.bindString(2, query);
                 insert.executeInsert();
                 insert.clearBindings();
             }
@@ -196,43 +301,67 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
      * @param T9Query
      * @return
      */
-    public ArrayList<Long> getT9ContactIdMatches(String T9Query) {
-        ArrayList<Long> matches = new ArrayList<>();
+    public List<T9Match> getT9Matches(String T9Query) {
+        List<T9Match> matchList = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
 
         if (db == null) {
             // Database not ready yet.
-            return matches;
+            return matchList;
         }
 
         // Match as 'starts with'.
         String prefixQuery = T9Query + "%";
 
-        // Query to select contact id's that have a query that starts with prefixQuery.
-        Cursor cursor = db.rawQuery("SELECT " + T9ContactColumns.CONTACT_ID +
-            " FROM " +  Tables.T9_CONTACT +
-            " WHERE " + Tables.T9_CONTACT + "." + T9ContactColumns.T9_QUERY +
-            " LIKE '" + prefixQuery + "'", null);
+        final Cursor cursor = db.rawQuery(
+                "SELECT " +
+                T9ContactColumns.CONTACT_ID + ", " +     // 0
+                T9ContactColumns.LOOKUP_KEY + ", " +     // 1
+                T9ContactColumns.DISPLAY_NAME + ", " +   // 2
+                T9ContactColumns.THUMBNAIL_URI + ", " +  // 3
+                T9ContactColumns.NUMBER + ", " +         // 4
+                T9ContactColumns.TYPE + ", " +           // 5
+                T9ContactColumns.LABEL +                 // 6
+                " FROM " + Tables.T9_CONTACT + " WHERE " +
+                        T9ContactColumns.CONTACT_ID + " IN " +
+                        " (SELECT " + T9QueryColumns.CONTACT_ID +
+                        " FROM " + Tables.T9_QUERY +
+                        " WHERE " + Tables.T9_QUERY + "." + T9QueryColumns.T9_QUERY +
+                        " LIKE '" + prefixQuery + "')" +
+                " ORDER BY " + T9ContactColumns.DISPLAY_NAME + " ASC",
+                null);
 
         if (cursor == null) {
-            return matches;
+            return matchList;
         }
 
+        T9Match match;
+
         // Loop results and add them to matches.
-        while ((cursor.moveToNext()) && (matches.size() < MAX_RESULTS)) {
-            long contactId = cursor.getLong(0);  // we only select 1 column so get the first one
+        while ((cursor.moveToNext()) && (matchList.size() < MAX_RESULTS)) {
+            match = new T9Match(
+                    cursor.getLong(0),    // contactId
+                    cursor.getString(1),  // lookupKey
+                    cursor.getString(2),  // displayName
+                    cursor.getString(3),  // thumbnailUri
+                    cursor.getString(4),  // number
+                    cursor.getInt(5),     // type
+                    cursor.getString(6),  // label
+                    T9Query
+            );
+
             // We do not want duplicates.
-            if (matches.contains(contactId)) {
+            if (matchList.contains(match)) {
                 continue;
             }
-            matches.add(contactId);
+            matchList.add(match);
         }
 
         // Close resources.
         cursor.close();
         db.close();
 
-        return matches;
+        return matchList;
     }
 
 }

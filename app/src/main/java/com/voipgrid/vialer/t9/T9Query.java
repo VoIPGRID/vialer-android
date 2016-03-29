@@ -10,6 +10,23 @@ import java.util.HashMap;
 public class T9Query {
 
     /**
+     * Generate T9 Queries for the given number.
+     * @param number Number to create queries for.
+     * @return List of all queries.
+     */
+    public static ArrayList<String> generateT9NumberQueries(String number) {
+        ArrayList<String> numberQueries = new ArrayList<>();
+        numberQueries.add(number);
+
+        // Best effort to convert +XX12345678 numbers to 0612345678
+        if (number.startsWith("+")) {
+            numberQueries.add("0" + number.substring(3));
+        }
+
+        return numberQueries;
+    }
+
+    /**
      * Generate a T9 Query from a name like 'Henk' -> '4365'
      * @param displayName The name to convert to a T9 Query
      * @return The generated T9 Query.
