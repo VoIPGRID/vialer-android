@@ -117,30 +117,32 @@ public class MiddlewareHelper {
     }
 
     public static void unregister(Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = preferences.edit();
+        if (new Preferences(context).hasPhoneAccount()){
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor = preferences.edit();
 
-        JsonStorage jsonStorage = new JsonStorage(context);
-        SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
+            JsonStorage jsonStorage = new JsonStorage(context);
+            SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
 
-        Registration api = ServiceGenerator.createService(
-                context,
-                Registration.class,
-                getBaseApiUrl(context),
-                systemUser.getEmail(),
-                systemUser.getPassword());
-        String token = preferences.getString(Constants.CURRENT_TOKEN, "");
-        String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
-        String appName = context.getPackageName();
-        Call<ResponseBody> call = api.unregister(token, sipUserId, appName);
-        try {
-            if (call.execute().isSuccess()) {
-                setRegistrationStatus(context, Constants.STATUS_UNREGISTERED);
+            Registration api = ServiceGenerator.createService(
+                    context,
+                    Registration.class,
+                    getBaseApiUrl(context),
+                    systemUser.getEmail(),
+                    systemUser.getPassword());
+            String token = preferences.getString(Constants.CURRENT_TOKEN, "");
+            String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
+            String appName = context.getPackageName();
+            Call<ResponseBody> call = api.unregister(token, sipUserId, appName);
+            try {
+                if (call.execute().isSuccess()) {
+                    setRegistrationStatus(context, Constants.STATUS_UNREGISTERED);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                editor.apply();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            editor.apply();
         }
     }
 
