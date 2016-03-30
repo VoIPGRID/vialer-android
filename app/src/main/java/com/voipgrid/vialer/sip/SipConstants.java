@@ -147,4 +147,7 @@ public interface SipConstants {
     String KEY_PAD_DTMF_TONE = "KEY_PAD_DTMF_TONE";
 
     String ACTION_BROADCAST_KEY_PAD_INTERACTION = "com.voipgrid.vialer.VIALER_KEY_PAD_INTERACTION";
+
+    // Volume for the ringing tone on a scale of 0 - 100.
+    int RINGING_VOLUME = 75;
 }

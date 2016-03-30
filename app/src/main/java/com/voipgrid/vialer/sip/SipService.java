@@ -151,10 +151,9 @@ public class SipService extends Service implements
 
         mHandler = new Handler();
 
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mToneGenerator = new ToneGenerator(
-                AudioManager.STREAM_MUSIC,
-                audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
+                AudioManager.STREAM_VOICE_CALL,
+                SipConstants.RINGING_VOLUME);
 
         mBroadcastManager = LocalBroadcastManager.getInstance(this);
 
@@ -463,6 +462,7 @@ public class SipService extends Service implements
     @Override
     public void onCallStopRingback() {
         mHandler.removeCallbacks(mRingbackRunnable);
+        mToneGenerator.release();
     }
 
     private void callVisibleForUser(Call call, String type, Uri number) {
