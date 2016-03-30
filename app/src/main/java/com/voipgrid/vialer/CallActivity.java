@@ -11,7 +11,6 @@ import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
-import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -63,23 +62,6 @@ public class CallActivity extends AppCompatActivity
             mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
             // Keep timer running for as long as possible.
             mCallHandler.postDelayed(mCallDurationRunnable, 1000);
-        }
-    };
-
-    /**
-     * SIP does not present Media by default.
-     * Use Android's ToneGenerator to play a dial tone at certain required times.
-     * @see #onCallStatusUpdate for usage of delayed "mCallRingbackRunnable" callback.
-     */
-    ToneGenerator mToneGenerator;
-    Runnable mCallRingbackRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (!mIsIncomingCall) { // Only when we are not an incomingCall (hence outgoing).
-                // Play a ringback tone to update a user that setup is ongoing.
-                mToneGenerator.startTone(ToneGenerator.TONE_SUP_DIAL, 1000);
-                mCallHandler.postDelayed(mCallRingbackRunnable, 4000);
-            }
         }
     };
 
@@ -135,8 +117,6 @@ public class CallActivity extends AppCompatActivity
 
         mSensorManager   = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-
-        mToneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
         mRingtone = RingtoneManager.getRingtone(this, Settings.System.DEFAULT_RINGTONE_URI);
 
@@ -218,13 +198,6 @@ public class CallActivity extends AppCompatActivity
      */
     private void onCallStatusUpdate(String newStatus) {
         switch (newStatus) {
-            case CALL_START_RINGBACK_MESSAGE:
-                mCallHandler.postDelayed(mCallRingbackRunnable, 2000);
-                break;
-            case CALL_STOP_RINGBACK_MESSAGE:
-                // We should probably stop Ringback: remove the delayed Runnable callback.
-                mCallHandler.removeCallbacks(mCallRingbackRunnable);
-                break;
             case CALL_MEDIA_AVAILABLE_MESSAGE:
                 onCallStatusUpdate(CALL_STOP_RINGBACK_MESSAGE);
                 break;
