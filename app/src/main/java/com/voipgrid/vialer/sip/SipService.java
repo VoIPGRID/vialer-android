@@ -360,7 +360,7 @@ public class SipService extends Service implements
         try {
             endpoint.libCreate();
         } catch (Exception e) {
-            Log.e("ERROR", "Unable to create the PJSIP library");
+            Log.e(TAG, "Unable to create the PJSIP library");
             e.printStackTrace();
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
             stopSelf();
@@ -467,10 +467,13 @@ public class SipService extends Service implements
 
     @Override
     public void onCallDisconnected(final Call call) {
-        /* Cleanup the call */
-        if(call != null) {
-            // Deleting the call leads to inexplicable failures.
+        try {
+            // Try to unregister the sip account with the sipproxy
+            mSipAccount.setRegistration(false);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        // Cleanup the call
         setCurrentCall(null);
         broadcast(SipConstants.CALL_DISCONNECTED_MESSAGE);
         stopSelf();
@@ -601,7 +604,7 @@ public class SipService extends Service implements
         try {
             CallMediaInfoVector callMediaInfoVector = call.getInfo().getMedia();
             long size=callMediaInfoVector.size();
-            for(int i=0; i<size; i++) {
+            for(int i = 0; i < size; i++) {
                 CallMediaInfo callMediaInfo = callMediaInfoVector.get(i);
                 if(callMediaInfo.getType() == pjmedia_type.PJMEDIA_TYPE_AUDIO) {
                     AudioMedia audioMedia = AudioMedia.typecastFromMedia(call.getMedia(i));
