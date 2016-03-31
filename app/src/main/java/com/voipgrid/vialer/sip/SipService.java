@@ -12,7 +12,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
+import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerGcmListenerService;
@@ -35,12 +37,15 @@ import org.pjsip.pjsua2.CodecInfo;
 import org.pjsip.pjsua2.CodecInfoVector;
 import org.pjsip.pjsua2.Endpoint;
 import org.pjsip.pjsua2.EpConfig;
+import org.pjsip.pjsua2.LogConfig;
 import org.pjsip.pjsua2.OnRegStateParam;
 import org.pjsip.pjsua2.TransportConfig;
+import org.pjsip.pjsua2.UaConfig;
 import org.pjsip.pjsua2.pjmedia_type;
 import org.pjsip.pjsua2.pjsip_status_code;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
 import org.pjsip.pjsua2.pjsua_call_flag;
+import org.pjsip.pjsua2.pj_log_decoration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +53,8 @@ import java.util.Map;
 import okhttp3.ResponseBody;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static com.voipgrid.vialer.api.ServiceGenerator.getUserAgentHeader;
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -91,6 +98,8 @@ public class SipService extends Service implements
     private Handler mHandler;
 
     private ToneGenerator mToneGenerator;
+
+    private SIPLogWriter mSIPLogWriter;
 
     private static Map<String, Short> sCodecPrioMapping;
 
@@ -157,32 +166,35 @@ public class SipService extends Service implements
 
         mBroadcastManager = LocalBroadcastManager.getInstance(this);
 
-        /* Try to load PJSIP library */
-        loadPjsip();
-
         PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
         if (phoneAccount != null) {
+            /* Try to load PJSIP library */
+            loadPjsip();
 
             mEndpoint = createEndpoint(
                     pjsip_transport_type_e.PJSIP_TRANSPORT_UDP,
                     createTransportConfig(getResources().getInteger(R.integer.sip_port))
             );
 
-            setCodecPrio();
+            if (mEndpoint != null) {
+                setCodecPrio();
 
-            AuthCredInfo credInfo = new AuthCredInfo(
-                    "digest", "*",
-                    phoneAccount.getAccountId(), 0, phoneAccount.getPassword());
+                AuthCredInfo credInfo = new AuthCredInfo(
+                        "digest", "*",
+                        phoneAccount.getAccountId(), 0, phoneAccount.getPassword());
 
-            AccountConfig accountConfig = createAccountConfig(
-                    SipUri.build(this, phoneAccount.getAccountId()),
-                    SipUri.buildRegistrar(this),
-                    credInfo
-            );
-            mSipAccount = createSipAccount(accountConfig,  this, this);
+                AccountConfig accountConfig = createAccountConfig(
+                        SipUri.build(this, phoneAccount.getAccountId()),
+                        SipUri.buildRegistrar(this),
+                        credInfo
+                );
+                mSipAccount = createSipAccount(accountConfig, this, this);
 
-            setupCallInteractionReceiver();
-            setupKeyPadInteractionReceiver();
+                setupCallInteractionReceiver();
+                setupKeyPadInteractionReceiver();
+            } else {
+                Log.e(TAG, "There is no PJSIP endpoint!");
+            }
         } else {
             /* User has no Sip Account so service has no function at all. We stop the service */
             broadcast(SipConstants.SIP_SERVICE_HAS_NO_ACCOUNT);
@@ -206,7 +218,6 @@ public class SipService extends Service implements
                     mEndpoint.codecSetPriority(codecId, prio);
                 }
             }
-
         } catch (Exception e) {
 
         }
@@ -310,8 +321,6 @@ public class SipService extends Service implements
         }
     }
 
-
-
     /** AccountStatus **/
     @Override
     public void onAccountUnregistered(Account account, OnRegStateParam param) {
@@ -335,6 +344,7 @@ public class SipService extends Service implements
         try {
             System.loadLibrary("pjsua2");
         } catch (UnsatisfiedLinkError error) { /* Can not load PJSIP library */
+            Log.e(TAG, error.getMessage());
             /* Notify app */
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_LOAD_PJSIP);
             /* Stop the service since the app can not use SIP */
@@ -345,14 +355,51 @@ public class SipService extends Service implements
     private Endpoint createEndpoint(pjsip_transport_type_e transportType,
                                     TransportConfig transportConfig) {
         Endpoint endpoint = new Endpoint();
+        EpConfig endpointConfig = new EpConfig();
+
         try {
             endpoint.libCreate();
-            endpoint.libInit(new EpConfig());
+        } catch (Exception e) {
+            Log.e("ERROR", "Unable to create the PJSIP library");
+            e.printStackTrace();
+            broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
+            stopSelf();
+            return null;
+        }
+
+        if (BuildConfig.DEBUG) {
+            endpointConfig.getLogConfig().setLevel(SipConstants.SIP_LOG_LEVEL);
+            endpointConfig.getLogConfig().setConsoleLevel(SipConstants.SIP_CONSOLE_LOG_LEVEL);
+            LogConfig logConfig = endpointConfig.getLogConfig();
+            mSIPLogWriter = new SIPLogWriter();
+            logConfig.setWriter(mSIPLogWriter);
+            logConfig.setDecor(logConfig.getDecor() &
+                            ~(pj_log_decoration.PJ_LOG_HAS_CR.swigValue() |
+                                    pj_log_decoration.PJ_LOG_HAS_NEWLINE.swigValue())
+            );
+        }
+
+        UaConfig uaConfig = endpointConfig.getUaConfig();
+        uaConfig.setUserAgent(getUserAgentHeader(this));
+
+        try {
+            endpoint.libInit(endpointConfig);
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to init the PJSIP library");
+            e.printStackTrace();
+            broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
+            stopSelf();
+            return null;
+        }
+
+        try {
             endpoint.transportCreate(transportType, transportConfig);
             endpoint.libStart();
         } catch (Exception exception) {
+            Log.e(TAG, "Unable to start the PJSIP library");
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
             stopSelf();
+            return null;
         }
         return endpoint;
     }
