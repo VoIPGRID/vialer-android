@@ -1,14 +1,14 @@
 package com.voipgrid.vialer;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
 import com.google.android.gms.gcm.GcmListenerService;
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.sip.SipConstants;
@@ -31,7 +31,6 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
     /* Message format constants. */
     private final static String MESSAGE_TYPE = "type";
 
-    private final static String CHECKIN_REQUEST_TYPE = "checkin";
     private final static String CALL_REQUEST_TYPE = "call";
     private final static String MESSAGE_REQUEST_TYPE = "message";
 
@@ -49,16 +48,11 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
     @Override
     public void onMessageReceived(String from, Bundle data) {
         String request = data.getString(MESSAGE_TYPE, "");
-        if (request.equals(CHECKIN_REQUEST_TYPE)) {
+        if (request.equals(CALL_REQUEST_TYPE)) {
 
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-            String token = prefs.getString(CURRENT_TOKEN, "");
-            String messageStartTime = data.getString(MESSAGE_START_TIME);
-            if (!token.isEmpty()) {
-                /* Use passed URL and token to identify ourselves */
-                replyServer(data.getString(RESPONSE_URL), token, messageStartTime, true);
-            }
-        } else if (request.equals(CALL_REQUEST_TYPE)) {
+            AnalyticsHelper analyticsHelper = new AnalyticsHelper(
+                    ((AnalyticsApplication) getApplication()).getDefaultTracker());
+
             ConnectivityHelper connectivityHelper = new ConnectivityHelper(
                     (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
                     (TelephonyManager) getSystemService(TELEPHONY_SERVICE));
@@ -81,6 +75,12 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                 /* Inform the middleware the incoming call is received but the app can not handle
                    the sip call because there is no LTE or Wifi connection available at this
                    point */
+                analyticsHelper.sendEvent(
+                        getString(R.string.analytics_event_category_middleware),
+                        getString(R.string.analytics_event_action_acceptance),
+                        getString(R.string.analytics_event_label_middleware_rejected),
+                        connectivityHelper.getConnectionType()
+                );
                 replyServer(
                         data.getString(RESPONSE_URL),
                         data.getString(REQUEST_TOKEN),

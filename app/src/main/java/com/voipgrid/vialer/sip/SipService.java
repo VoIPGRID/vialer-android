@@ -18,6 +18,8 @@ import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerGcmListenerService;
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -181,7 +183,6 @@ public class SipService extends Service implements
                 transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_TCP;
                 tcp = ";transport=tcp";
             }
-
             mEndpoint = createEndpoint(
                     transportType,
                     createTransportConfig(getResources().getInteger(R.integer.sip_port))
@@ -317,10 +318,32 @@ public class SipService extends Service implements
     @Override
     public void onAccountRegistered(Account account, OnRegStateParam param) {
         if(mCallType.equals(SipConstants.ACTION_VIALER_INCOMING)) {
+
+            AnalyticsHelper analyticsHelper = new AnalyticsHelper(
+                    ((AnalyticsApplication) getApplication()).getDefaultTracker()
+            );
+
             Registration registrationApi = ServiceGenerator.createService(
                     this,
                     Registration.class,
                     mUrl
+            );
+
+            // Accepted event.
+            analyticsHelper.sendEvent(
+                    getString(R.string.analytics_event_category_middleware),
+                    getString(R.string.analytics_event_action_acceptance),
+                    getString(R.string.analytics_event_label_middleware_accepted)
+            );
+
+            long startTime = (long) (Double.parseDouble(mMessageStartTime) * 1000);  // To ms.
+            long startUpTime = System.currentTimeMillis() - startTime;
+
+            // Response timing.
+            analyticsHelper.sendTiming(
+                    getString(R.string.analytics_event_category_middleware),
+                    getString(R.string.analytics_event_name_call_response),
+                    startUpTime
             );
 
             retrofit2.Call<ResponseBody> call = registrationApi.reply(mToken, true, mMessageStartTime);

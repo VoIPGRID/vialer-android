@@ -445,8 +445,7 @@ public class CallActivity extends AppCompatActivity
                 rejectExtras.putString(CALL_STATUS_ACTION, CALL_DECLINE_ACTION);
                 broadcast(rejectExtras);  // Broadcast to service to decline or end call.
 
-                mAnalyticsHelper.send(
-                        getString(R.string.analytics_dimension),
+                mAnalyticsHelper.sendEvent(
                         getString(R.string.analytics_event_category_call),
                         getString(R.string.analytics_event_action_inbound),
                         getString(R.string.analytics_event_label_declined)
@@ -459,8 +458,7 @@ public class CallActivity extends AppCompatActivity
                 pickupExtras.putString(CALL_STATUS_ACTION, CALL_PICK_UP_ACTION);
                 broadcast(pickupExtras); // Broadcast to service to accept call.
 
-                mAnalyticsHelper.send(
-                        getString(R.string.analytics_dimension),
+                mAnalyticsHelper.sendEvent(
                         getString(R.string.analytics_event_category_call),
                         getString(R.string.analytics_event_action_inbound),
                         getString(R.string.analytics_event_label_accepted)
