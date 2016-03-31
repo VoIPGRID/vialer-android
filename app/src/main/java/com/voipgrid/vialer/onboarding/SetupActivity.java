@@ -7,7 +7,6 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -73,7 +72,7 @@ public class SetupActivity extends AppCompatActivity implements
             }
             // Add the fragment to the 'fragment_container' FrameLayout
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.add(R.id.fragment_container, firstFragment).commit();
+            transaction.add(R.id.fragment_container, firstFragment).commitAllowingStateLoss();
         }
 
 
@@ -91,7 +90,7 @@ public class SetupActivity extends AppCompatActivity implements
         } else {
             tag = "fragment";
         }
-        transaction.replace(R.id.fragment_container, newFragment, tag).commit();
+        transaction.replace(R.id.fragment_container, newFragment, tag).commitAllowingStateLoss();
 
         //Hide the keyboard when switching fragments
         manageKeyboard();
@@ -201,35 +200,14 @@ public class SetupActivity extends AppCompatActivity implements
     @Override
     public void onFinish(Fragment fragment) {
         if (mActivityToReturnToName.equals(AccountActivity.class.getSimpleName())){
-            savePhoneAccountAndRegister(mPreferences);
+            PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(this);
+            phoneAccountHelper.savePhoneAccountAndRegister(
+                    (PhoneAccount) mJsonStorage.get(PhoneAccount.class));
             startActivity(new Intent(this, AccountActivity.class));
         } else {
             startActivity(new Intent(this, MainActivity.class));
         }
         finish();
-    }
-
-    public void savePhoneAccountAndRegister(final Preferences mPreferences) {
-        final PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(this);
-
-        new AsyncTask<Void, Void, PhoneAccount>() {
-
-            @Override
-            protected PhoneAccount doInBackground(Void... params) {
-                return phoneAccountHelper.getLinkedPhoneAccount();
-            }
-
-            @Override
-            protected void onPostExecute(PhoneAccount phoneAccount) {
-                super.onPostExecute(phoneAccount);
-                if (phoneAccount != null) {
-                    phoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
-                    mPreferences.setSipEnabled(true);
-                } else {
-                    mPreferences.setSipEnabled(false);
-                }
-            }
-        }.execute();
     }
 
     @Override

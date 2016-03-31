@@ -30,6 +30,11 @@
     <string name="version_info">Versie: %1$s</string>
     <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
 
+    <!-- UpdateHelper -->
+    <string name="title_activity_update">Updaten</string>
+    <string name="update_spinner_title">Initialiseren</string>
+    <string name="update_spinner_message">Bezig met initialiseren, even geduld</string>
+
     <!-- Dialog options -->
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>

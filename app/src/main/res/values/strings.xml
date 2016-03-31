@@ -28,6 +28,11 @@
     <string name="version_info">Version: %1$s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
 
+    <!-- UpdateHelper -->
+    <string name="title_activity_update">Updating</string>
+    <string name="update_spinner_title">Initializing</string>
+    <string name="update_spinner_message">Please wait a moment</string>
+
     <!-- Dialog options -->
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>

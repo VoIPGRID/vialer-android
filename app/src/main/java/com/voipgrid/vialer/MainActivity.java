@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.telephony.TelephonyManager;
 import android.view.View;
 
 import com.google.android.gms.analytics.HitBuilders;
@@ -26,6 +27,8 @@ import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.UpdateActivity;
+import com.voipgrid.vialer.util.UpdateHelper;
 
 
 public class MainActivity extends NavigationDrawerActivity implements
@@ -45,39 +48,49 @@ public class MainActivity extends NavigationDrawerActivity implements
 
         mJsonStorage = new JsonStorage(this);
 
-        mConnectivityHelper = ConnectivityHelper.get(this);
+        mConnectivityHelper = new ConnectivityHelper(
+                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
+                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
+        );
 
         /* check if the app has a SystemUser */
-        if(!mJsonStorage.has(SystemUser.class)) {
+        if (!mJsonStorage.has(SystemUser.class)) {
             //start onboarding flow
             startActivity(new Intent(this, SetupActivity.class));
             finish();
-        } else if(mConnectivityHelper.hasNetworkConnection()) {
+        } else if (mConnectivityHelper.hasNetworkConnection()) {
             //update SystemUser and PhoneAccount on background thread
             new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
         }
-
-        if (SyncUtils.requiresFullContactSync(this)) {
-            SyncUtils.requestContactSync(this);
+        // Start UpdateActivity if app has updated.
+        if (UpdateHelper.requiresUpdate(this)) {
+            this.startActivity(new Intent(this, UpdateActivity.class));
+            finish();
+            return;
         } else {
-            // Live contact updates are not supported below api level 18.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
-                    && ContactsPermission.hasPermission(this)) {
-                startService(new Intent(this, UpdateChangedContactsService.class));
+            if (SyncUtils.requiresFullContactSync(this)) {
+                SyncUtils.requestContactSync(this);
+            } else {
+                // Live contact updates are not supported below api level 18.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
+                        && ContactsPermission.hasPermission(this)) {
+                    startService(new Intent(this, UpdateChangedContactsService.class));
+                }
             }
+
+            SyncUtils.setPeriodicSync(this);
+
+            setContentView(R.layout.activity_main);
+
+            /* set the Toolbar to use as ActionBar */
+            setActionBar(R.id.action_bar);
+
+            setNavigationDrawer(R.id.drawer_layout);
+
+            /* set tabs */
+            setupTabs();
         }
 
-        SyncUtils.setPeriodicSync(this);
-
-        setContentView(R.layout.activity_main);
-
-        /* set the Toolbar to use as ActionBar */
-        setActionBar(R.id.action_bar);
-
-        setNavigationDrawer(R.id.drawer_layout);
-
-        /* set tabs */
-        setupTabs();
     }
 
     @Override
