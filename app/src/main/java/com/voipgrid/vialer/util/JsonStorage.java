@@ -5,6 +5,12 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
+import com.voipgrid.vialer.api.models.CallRecord;
+import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.api.models.SystemUser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that handles the storage of json objects.
@@ -40,10 +46,30 @@ public class JsonStorage<T> {
     }
 
     /**
-     * Dangerous function! This clears all stored settings instead of only the things that
-     * are put in with this class.
+     * Function that generates a list of class names for clearing the SharedPreferences.
+     * @return
+     */
+    private List<String> getClassesToClear() {
+        List<String> classesToClear = new ArrayList<>();
+        classesToClear.add(SystemUser.class.getName());
+        classesToClear.add(PhoneAccount.class.getName());
+        classesToClear.add(CallRecord[].class.getName());
+        classesToClear.add(CallRecord.class.getName());
+        return classesToClear;
+    }
+
+    /**
+     * Clear only the json objects from the SharedPreferences.
      */
     public void clear() {
-        mPreferences.edit().clear().apply();
+        SharedPreferences.Editor editor =  mPreferences.edit();
+
+        List<String> classesToClear = getClassesToClear();
+
+        for (int i = 0; i < classesToClear.size(); i++) {
+            editor.remove(classesToClear.get(i));
+        }
+
+        editor.apply();
     }
 }
