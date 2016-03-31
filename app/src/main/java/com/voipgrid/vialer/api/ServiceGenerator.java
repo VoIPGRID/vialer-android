@@ -3,12 +3,14 @@ package com.voipgrid.vialer.api;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
 import java.io.IOException;
+import static java.lang.String.format;
 
 import okhttp3.Cache;
 import okhttp3.Credentials;
@@ -30,7 +32,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Copyright (c) 2015 Peperzaken BV. All rights reserved.
  */
 public class ServiceGenerator {
-
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
     private static Retrofit.Builder builder = new Retrofit.Builder();
@@ -57,7 +58,7 @@ public class ServiceGenerator {
      * @param context
      * @return
      */
-    private static String getUserAgentHeader(Context context) {
+    public static String getUserAgentHeader(Context context) {
         String appName = context.getString(R.string.app_name);
         String version = "?";
         try {
@@ -67,7 +68,7 @@ public class ServiceGenerator {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-        return appName + " - " + version;
+        return format("%s/%s (Android; %s, %s %s)", appName, version, Build.VERSION.RELEASE, Build.MANUFACTURER, Build.PRODUCT);
     }
 
     /**
