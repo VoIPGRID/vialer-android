@@ -80,7 +80,7 @@ public class DialerActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dialer);
 
-        /* set the AnalyticsHelper */
+        // Set the AnalyticsHelper
         mAnalyticsHelper = new AnalyticsHelper(
                 ((AnalyticsApplication) getApplication()).getDefaultTracker()
         );
@@ -357,6 +357,7 @@ public class DialerActivity extends AppCompatActivity implements
     public void onCallNumber(String number, String contactName) {
         new DialHelper(this, mJsonStorage, mConnectivityHelper, mAnalyticsHelper)
                 .callNumber(PhoneNumberUtils.format(number), contactName);
+        mNumberInputView.clear();
     }
 
     @Override
