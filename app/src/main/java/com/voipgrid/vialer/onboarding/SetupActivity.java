@@ -7,23 +7,27 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.voipgrid.vialer.AccountActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerGcmRegistrationService;
+import com.voipgrid.vialer.WebActivityHelper;
 import com.voipgrid.vialer.api.Api;
-import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
+import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.models.PasswordResetParams;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.PhoneAccountHelper;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,14 +41,16 @@ public class SetupActivity extends AppCompatActivity implements
         LoginFragment.FragmentInteractionListener,
         AccountFragment.FragmentInteractionListener,
         ForgotPasswordFragment.FragmentInteractionListener,
+        SetUpVoipAccountFragment.FragmentInteractionListener,
         Callback {
 
     private String mPassword;
+    private String mActivityToReturnToName = "";
 
     private Api mApi;
+    private JsonStorage mJsonStorage;
     private Preferences mPreferences;
     private ServiceGenerator mServiceGen;
-    private JsonStorage mJsonStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,22 +58,25 @@ public class SetupActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_setup);
 
         mJsonStorage = new JsonStorage(this);
-
-        try {
-            mServiceGen = ServiceGenerator.getInstance();
-        } catch(PreviousRequestNotFinishedException e) {
-            e.printStackTrace();
-            return;
-        }
-
         mPreferences = new Preferences(this);
 
+        Fragment firstFragment = null;
+        Bundle b = getIntent().getExtras();
+        if (b != null) {
+            int fragmentId = b.getInt("fragment");
+            mActivityToReturnToName = b.getString("activity");
+            firstFragment = ((SetUpVoipAccountFragment) getFragmentManager().findFragmentById(fragmentId)).newInstance();
+        }
         if (findViewById(R.id.fragment_container) != null) {
-            LogoFragment firstFragment = LogoFragment.newInstance();
+            if (firstFragment == null) {
+                firstFragment = LogoFragment.newInstance();
+            }
             // Add the fragment to the 'fragment_container' FrameLayout
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.add(R.id.fragment_container, firstFragment).commit();
         }
+
+
     }
 
     /**
@@ -75,6 +84,7 @@ public class SetupActivity extends AppCompatActivity implements
      * @param newFragment next step in the setup process to present to the user.
      */
     void swapFragment(Fragment newFragment, String tag) {
+
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         if (tag != null) {
             transaction.addToBackStack(null);
@@ -126,6 +136,13 @@ public class SetupActivity extends AppCompatActivity implements
         mPassword = password;
         enableProgressBar(true);
 
+        try {
+            mServiceGen = ServiceGenerator.getInstance();
+        } catch(PreviousRequestNotFinishedException e) {
+            e.printStackTrace();
+            return;
+        }
+
         mApi = mServiceGen.createService(
                 this,
                 Api.class,
@@ -157,7 +174,7 @@ public class SetupActivity extends AppCompatActivity implements
         mJsonStorage.save(systemUser);
 
         String phoneAccountId = systemUser.getPhoneAccountId();
-        if(phoneAccountId != null) {
+        if (phoneAccountId != null) {
             Call<PhoneAccount> call = mApi.phoneAccount(phoneAccountId);
             call.enqueue(this);
         } else {
@@ -171,14 +188,48 @@ public class SetupActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onSetVoipAccount(Fragment fragment) {
+        WebActivityHelper webHelper = new WebActivityHelper(this);
+        webHelper.startWebActivity(getString(R.string.user_change_title), getString(R.string.web_user_change));
+    }
+
+    @Override
     public void onNextStep(Fragment nextFragment) {
         swapFragment(nextFragment, nextFragment.getClass().getSimpleName());
     }
 
     @Override
     public void onFinish(Fragment fragment) {
-        startActivity(new Intent(this, MainActivity.class));
+        if (mActivityToReturnToName.equals(AccountActivity.class.getSimpleName())){
+            savePhoneAccountAndRegister(mPreferences);
+            startActivity(new Intent(this, AccountActivity.class));
+        } else {
+            startActivity(new Intent(this, MainActivity.class));
+        }
         finish();
+    }
+
+    public void savePhoneAccountAndRegister(final Preferences mPreferences) {
+        final PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(this);
+
+        new AsyncTask<Void, Void, PhoneAccount>() {
+
+            @Override
+            protected PhoneAccount doInBackground(Void... params) {
+                return phoneAccountHelper.getLinkedPhoneAccount();
+            }
+
+            @Override
+            protected void onPostExecute(PhoneAccount phoneAccount) {
+                super.onPostExecute(phoneAccount);
+                if (phoneAccount != null) {
+                    phoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
+                    mPreferences.setSipEnabled(true);
+                } else {
+                    mPreferences.setSipEnabled(false);
+                }
+            }
+        }.execute();
     }
 
     @Override
@@ -242,7 +293,7 @@ public class SetupActivity extends AppCompatActivity implements
         }
 
     private void resetPassword(String email) {
-        Api api = mServiceGen.createService(
+        Api api = ServiceGenerator.createService(
                 this,
                 Api.class,
                 getString(R.string.api_url)
@@ -265,6 +316,9 @@ public class SetupActivity extends AppCompatActivity implements
 
     @Override
     public void onResponse(Call call, Response response) {
+        if (mServiceGen != null){
+            mServiceGen.release();
+        }
         if (response.isSuccess()) {
             enableProgressBar(false);
             if (response.body() instanceof SystemUser) {
@@ -309,7 +363,6 @@ public class SetupActivity extends AppCompatActivity implements
                     onNextStep(LoginFragment.newInstance());
                 }
             }
-            mServiceGen.release();
         } else {
             failedFeedback(response.errorBody().toString());
         }
@@ -317,6 +370,9 @@ public class SetupActivity extends AppCompatActivity implements
 
     @Override
     public void onFailure(Call call, Throwable t) {
+        if (mServiceGen != null){
+            mServiceGen.release();
+        }
         failedFeedback("Failed");
     }
 
@@ -332,6 +388,5 @@ public class SetupActivity extends AppCompatActivity implements
                 }
             }
         });
-        mServiceGen.release();
     }
 }
