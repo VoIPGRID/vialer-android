@@ -38,6 +38,7 @@ import org.pjsip.pjsua2.CodecInfoVector;
 import org.pjsip.pjsua2.Endpoint;
 import org.pjsip.pjsua2.EpConfig;
 import org.pjsip.pjsua2.LogConfig;
+import org.pjsip.pjsua2.MediaConfig;
 import org.pjsip.pjsua2.OnRegStateParam;
 import org.pjsip.pjsua2.TransportConfig;
 import org.pjsip.pjsua2.UaConfig;
@@ -356,6 +357,12 @@ public class SipService extends Service implements
                                     TransportConfig transportConfig) {
         Endpoint endpoint = new Endpoint();
         EpConfig endpointConfig = new EpConfig();
+
+        // Set echo cancellation options for endpoint.
+        MediaConfig mediaConfig = endpointConfig.getMedConfig();
+        mediaConfig.setEcOptions(SipConstants.WEBRTC_ECHO_CANCELLATION);
+        mediaConfig.setEcTailLen(SipConstants.ECHO_CANCELLATION_TAIL_LENGTH);
+        endpointConfig.setMedConfig(mediaConfig);
 
         try {
             endpoint.libCreate();
