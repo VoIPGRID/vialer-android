@@ -44,13 +44,13 @@ public class NumberInputView extends RelativeLayout implements
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_number_input, this);
 
-        /* find the number input field and add a TextChangedListener to handle text changes */
+        // Find the number input field and add a TextChangedListener to handle text changes.
         mEditText = (EditText) findViewById(R.id.edit_text);
         mEditText.addTextChangedListener(this);
         mEditText.setOnClickListener(this);
         mEditText.setOnLongClickListener(this);
 
-        /* find the remove button and add an OnClickListener */
+        // Find the remove button and add an OnClickListener.
         mRemoveButton = (ImageButton) findViewById(R.id.remove_button);
         mRemoveButton.setOnClickListener(this);
         mRemoveButton.setOnLongClickListener(this);
@@ -101,9 +101,7 @@ public class NumberInputView extends RelativeLayout implements
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        /* set visibility for the delete Button based on number of characters */
-        mRemoveButton.setVisibility(count == 0 ? View.INVISIBLE : View.VISIBLE);
+        mRemoveButton.setVisibility(s.length() == 0 ? View.INVISIBLE : View.VISIBLE);
 
         mListener.onInputChanged(s.toString());
     }
@@ -114,14 +112,21 @@ public class NumberInputView extends RelativeLayout implements
     }
 
     /**
-     * Remove last character from number input field
+     * Remove character from input field
      */
     public void remove() {
-        mEditText.setCursorVisible(false);
-        String text = mEditText.getText().toString();
-        int length = text.length();
-        if(length > 0) {
-            mEditText.setText(text.substring(0, length - 1));
+        // Check if there is actually text in the input field.
+        if (mEditText.length() > 0) {
+            mRemoveButton.animate();
+            Integer startCursorPosition = mEditText.getSelectionStart();
+            Integer endCursorPosition = mEditText.getSelectionEnd();
+
+            // Check if there is an selection to remove. Otherwise remove one character.
+            if ((endCursorPosition - startCursorPosition) > 0) {
+                removeTextFromInput(startCursorPosition, endCursorPosition);
+            } else {
+                removeTextFromInput(startCursorPosition - 1, endCursorPosition);
+            }
         }
     }
 
@@ -130,7 +135,26 @@ public class NumberInputView extends RelativeLayout implements
      * @param text
      */
     public void add(CharSequence text) {
-        mEditText.getText().append(text);
+        Editable inputText = mEditText.getText();
+        Integer startCursorPosition = mEditText.getSelectionStart();
+        Integer endCursorPosition = mEditText.getSelectionEnd();
+
+        removeTextFromInput(startCursorPosition, endCursorPosition);
+
+        inputText.insert(startCursorPosition, text);
+    }
+
+    private void removeTextFromInput(Integer startCursorPosition, Integer endCursorPosition) {
+        // If there is a selection active delete the selected text.
+        if ((endCursorPosition - startCursorPosition) > 0) {
+            mEditText.getText().delete(startCursorPosition, endCursorPosition);
+        }
+
+        if (startCursorPosition == mEditText.length()) {
+            mEditText.setCursorVisible(false);
+        } else {
+            mEditText.setCursorVisible(true);
+        }
     }
 
     /**

@@ -64,4 +64,6 @@
 
     <dimen name="key_pad_width">300dp</dimen>
 
+    <dimen name="remove_button_height">50dp</dimen>
+    <dimen name="remove_button_width">50dp</dimen>
 </resources>
