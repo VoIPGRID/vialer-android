@@ -220,7 +220,7 @@ public class SipService extends Service implements
                 }
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 
