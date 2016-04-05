@@ -78,9 +78,12 @@ public class WelcomeFragment extends OnboardingFragment implements View.OnClickL
     @Override
     public void onClick(View view) {
         if (!mPreferences.hasPhoneAccount()) {
+            mPreferences.setSipEnabled(false);
             mListener.onNextStep(SetUpVoipAccountFragment.newInstance());
-        }
-        else {
+        } else {
+            if (mPreferences.hasSipPermission()) {
+                mPreferences.setSipEnabled(true);
+            }
             mListener.onFinish(this);
         }
     }
