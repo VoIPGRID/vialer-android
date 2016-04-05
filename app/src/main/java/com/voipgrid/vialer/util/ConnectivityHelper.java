@@ -44,9 +44,20 @@ public class ConnectivityHelper {
         if (info == null) {
             return false;
         }
+
+        // We need to check 2 methods for the type because they both can give a different
+        // value for the same information we are checking.
+        // Get network type from ConnectivityManager.
+        int networkTypeConnection = info.getSubtype();
+        // Get network type from TelephonyManager.
+        int networkTypeTelephony = mTelephonyManager.getNetworkType();
+
+        // TODO VIALA 325 Roaming settings.
         return info.isConnected() && !info.isRoaming() &&
                 (info.getType() == ConnectivityManager.TYPE_WIFI ||
-                        mTelephonyManager.getNetworkType() == TelephonyManager.NETWORK_TYPE_LTE);
+                        networkTypeConnection == TelephonyManager.NETWORK_TYPE_LTE ||
+                        networkTypeTelephony == TelephonyManager.NETWORK_TYPE_LTE
+                );
     }
 
     public static ConnectivityHelper get(Context context) {
