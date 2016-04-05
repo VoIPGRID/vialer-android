@@ -418,18 +418,6 @@ public class CallActivity extends AppCompatActivity
         broadcast(extras);
     }
 
-    /**
-     * Update the microphone (SIPCall Rx) volume level based on the selected state.
-     *
-     * @param newMuted boolean determining the new volume level of a SIPCall.
-     */
-    private void toggleMute(boolean newMuted) {
-        long newVolume = (newMuted ?               // get new volume based on selection value
-                getResources().getInteger(R.integer.mute_microphone_volume_value) :   // muted
-                getResources().getInteger(R.integer.unmute_microphone_volume_value)); // unmuted
-        updateMicrophoneVolume(newVolume);
-    }
-
     @Override
     public void onClick(View view) {
         switch (view.getId()) {

@@ -3,6 +3,7 @@ package com.voipgrid.vialer;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
@@ -15,6 +16,7 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.MiddlewareHelper;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -132,7 +134,11 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
         intent.setAction(SipConstants.ACTION_VIALER_INCOMING);
 
         // set a phoneNumberUri as DATA for the intent to SipServiceOld.
-        intent.setData(SipUri.build(this, phoneNumber));
+        Uri sipAddressUri = SipUri.sipAddressUri(
+                this,
+                PhoneNumberUtils.format(phoneNumber)
+        );
+        intent.setData(sipAddressUri);
 
         intent.putExtra(SipConstants.EXTRA_RESPONSE_URL, url);
         intent.putExtra(SipConstants.EXTRA_REQUEST_TOKEN, token);
