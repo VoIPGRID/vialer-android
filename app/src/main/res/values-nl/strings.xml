@@ -152,7 +152,9 @@
     <string name="two_step_call_message_step_a_failed">Konden uw telefoon niet bereiken</string>
     <string name="two_step_call_message_step_b_failed">Konden andere partij niet bereiken</string>
 
-
     <string name="invalid_mobile_number_title">Ongeldig nummer</string>
     <string name="invalid_mobile_number_message">Het mobiele nummer moet beginnen met een landcode bijv. +31.</string>
+
+    <string name="notification_contact_sync_done_title">Contact synchronisatie</string>
+    <string name="notification_contact_sync_done_content">De contact synchronisatie is klaar! Het is nu mogelijk om te zoeken in je contacten.</string>
 </resources>

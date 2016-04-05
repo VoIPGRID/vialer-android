@@ -168,4 +168,6 @@
     <string name="invalid_mobile_number_title">Invalid number</string>
     <string name="invalid_mobile_number_message">Your mobile number should start with your country code e.g. +31.</string>
 
+    <string name="notification_contact_sync_done_title">Contact synchronisation</string>
+    <string name="notification_contact_sync_done_content">The contact synchronisation is done! You are now able to search in your contacts.</string>
 </resources>

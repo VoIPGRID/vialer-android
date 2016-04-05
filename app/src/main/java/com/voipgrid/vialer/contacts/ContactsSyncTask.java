@@ -1,13 +1,20 @@
 package com.voipgrid.vialer.contacts;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
+import com.voipgrid.vialer.MainActivity;
+import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
 
 /**
@@ -16,6 +23,7 @@ import com.voipgrid.vialer.t9.T9DatabaseHelper;
 public class ContactsSyncTask {
     private static final String LOG_TAG = ContactsSyncTask.class.getName();
     private static final boolean DEBUG = false;
+    private static final int mNotificationId = 1;
 
     private Context mContext;
 
@@ -74,6 +82,9 @@ public class ContactsSyncTask {
             // TODO VIALA-349 Delete sync account.
             return;
         }
+
+        boolean requireFullContactSync = SyncUtils.requiresFullContactSync(mContext);
+
         // Gives you the list of contacts who have phone numbers.
         Cursor cursor = queryAllContacts();
         SyncUtils.setFullSyncInProgress(mContext, true);
@@ -84,6 +95,40 @@ public class ContactsSyncTask {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             mContext.startService(new Intent(mContext, UpdateChangedContactsService.class));
         }
+
+        // When there was a full contact sync required inform the user.
+        if (requireFullContactSync) {
+            fullSyncDoneNotification();
+        }
+    }
+
+    /**
+     * When the full contact ync is done this function will show the notification to
+     * the user.
+     */
+    private void fullSyncDoneNotification() {
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_logo)
+                .setContentTitle(mContext.getString(R.string.app_name) + " - " + mContext.getString(R.string.notification_contact_sync_done_title))
+                .setContentText(mContext.getString(R.string.notification_contact_sync_done_content))
+                .setAutoCancel(true)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(mContext.getString(R.string.notification_contact_sync_done_content)));
+
+        // Create stack for the app to use when clicking the notification.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(new Intent(mContext, MainActivity.class));
+
+        mBuilder.setContentIntent(stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT));
+
+        // For SDK version greater than 21 we will set the vibration.
+        if (Build.VERSION.SDK_INT >= 21) {
+            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
+        }
+
+        NotificationManager mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(mNotificationId, mBuilder.build());
     }
 
     /**
