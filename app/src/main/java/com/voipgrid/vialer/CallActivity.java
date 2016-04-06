@@ -115,6 +115,9 @@ public class CallActivity extends AppCompatActivity
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mAudioManager.setSpeakerphoneOn(false); // Set default speaker usage to NO/Off.
 
+        // Make sure the hardware volume buttons control the volume of the call.
+        setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+
         mSensorManager   = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 
