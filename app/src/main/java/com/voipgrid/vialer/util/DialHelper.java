@@ -3,6 +3,7 @@ package com.voipgrid.vialer.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 
 import com.voipgrid.vialer.MicrophonePermission;
 import com.voipgrid.vialer.Preferences;
@@ -71,7 +72,11 @@ public class DialHelper {
         intent.setAction(SipConstants.ACTION_VIALER_OUTGOING);
 
         // set a phoneNumberUri as DATA for the intent to SipServiceOld.
-        intent.setData(SipUri.build(mContext, number));
+        Uri sipAddressUri = SipUri.sipAddressUri(
+                mContext,
+                PhoneNumberUtils.format(number)
+        );
+        intent.setData(sipAddressUri);
 
         intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, number);
         intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, contactName);

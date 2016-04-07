@@ -22,6 +22,7 @@ import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import org.pjsip.pjsua2.Account;
 import org.pjsip.pjsua2.AccountConfig;
@@ -42,11 +43,11 @@ import org.pjsip.pjsua2.MediaConfig;
 import org.pjsip.pjsua2.OnRegStateParam;
 import org.pjsip.pjsua2.TransportConfig;
 import org.pjsip.pjsua2.UaConfig;
+import org.pjsip.pjsua2.pj_log_decoration;
 import org.pjsip.pjsua2.pjmedia_type;
 import org.pjsip.pjsua2.pjsip_status_code;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
 import org.pjsip.pjsua2.pjsua_call_flag;
-import org.pjsip.pjsua2.pj_log_decoration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -172,8 +173,17 @@ public class SipService extends Service implements
             /* Try to load PJSIP library */
             loadPjsip();
 
+            pjsip_transport_type_e transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_UDP;
+            String sipTransport = this.getString(R.string.sip_transport_type);
+            String tcp = "";
+
+            if (sipTransport.equals("tcp")) {
+                transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_TCP;
+                tcp = ";transport=tcp";
+            }
+
             mEndpoint = createEndpoint(
-                    pjsip_transport_type_e.PJSIP_TRANSPORT_UDP,
+                    transportType,
                     createTransportConfig(getResources().getInteger(R.integer.sip_port))
             );
 
@@ -181,12 +191,19 @@ public class SipService extends Service implements
                 setCodecPrio();
 
                 AuthCredInfo credInfo = new AuthCredInfo(
-                        "digest", "*",
-                        phoneAccount.getAccountId(), 0, phoneAccount.getPassword());
+                        this.getString(R.string.sip_auth_scheme),
+                        this.getString(R.string.sip_auth_realm),
+                        phoneAccount.getAccountId(),
+                        0,
+                        phoneAccount.getPassword()
+                );
+
+                String sipAccountRegId = SipUri.sipAddress(this, phoneAccount.getAccountId()) + tcp;
+                String sipRegistratUri = SipUri.prependSIPUri(this, this.getString(R.string.sip_host)) + tcp;
 
                 AccountConfig accountConfig = createAccountConfig(
-                        SipUri.build(this, phoneAccount.getAccountId()),
-                        SipUri.buildRegistrar(this),
+                        sipAccountRegId,
+                        sipRegistratUri,
                         credInfo
                 );
                 mSipAccount = createSipAccount(accountConfig, this, this);
@@ -413,6 +430,7 @@ public class SipService extends Service implements
 
     private TransportConfig createTransportConfig(long port) {
         TransportConfig config = new TransportConfig();
+
         config.setPort(port);
         return config;
     }
@@ -428,11 +446,12 @@ public class SipService extends Service implements
         return sipAccount;
     }
 
-    private AccountConfig createAccountConfig(Uri idUri, Uri registrarUri, AuthCredInfo credInfo) {
+    private AccountConfig createAccountConfig(String idUri, String registrarUri, AuthCredInfo credInfo) {
         AccountConfig config = new AccountConfig();
-        config.setIdUri(idUri.toString());
-        config.getRegConfig().setRegistrarUri(registrarUri.toString());
+        config.setIdUri(idUri);
+        config.getRegConfig().setRegistrarUri(registrarUri);
         config.getSipConfig().getAuthCreds().add(credInfo);
+        config.getSipConfig().getProxies().add(registrarUri);
         return config;
     }
 
@@ -537,7 +556,11 @@ public class SipService extends Service implements
     private void callVisibleForUser(Call call, String type, String number, String callerId) {
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setDataAndType(SipUri.build(this, number), type);
+        Uri sipAddressUri = SipUri.sipAddressUri(
+                this,
+                PhoneNumberUtils.format(number)
+        );
+        intent.setDataAndType(sipAddressUri, type);
         intent.putExtra(CallActivity.CONTACT_NAME, callerId);
         intent.putExtra(CallActivity.PHONE_NUMBER, number);
         startActivity(intent);

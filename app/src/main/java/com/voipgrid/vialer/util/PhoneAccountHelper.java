@@ -73,7 +73,7 @@ public class PhoneAccountHelper {
                 }
             }
         } catch (IOException e) {
-            return phoneAccount;
+            e.printStackTrace();
         }
         return phoneAccount;
     }
