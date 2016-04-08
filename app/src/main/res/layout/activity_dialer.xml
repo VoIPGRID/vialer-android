@@ -86,13 +86,14 @@
             android:transitionName="floating_action_button_transition_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
+            android:layout_gravity="center_horizontal|bottom"
             android:src="@drawable/ic_call"
             android:onClick="onClick"
             app:backgroundTint="@color/dialpad_fab_call_color"
             app:elevation="@dimen/fab_elevation"
             app:borderWidth="@dimen/fab_border_width"
-            style="@style/FloatingActionButton"/>
+            style="@style/FloatingActionButton"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"/>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/button_dialpad"
