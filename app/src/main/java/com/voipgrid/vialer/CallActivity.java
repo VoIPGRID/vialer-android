@@ -34,7 +34,8 @@ import com.voipgrid.vialer.sip.SipConstants;
  * CallActivity for incoming or outgoing call
  */
 public class CallActivity extends AppCompatActivity
-        implements View.OnClickListener, SensorEventListener, SipConstants {
+        implements View.OnClickListener, SensorEventListener, SipConstants,
+        AudioManager.OnAudioFocusChangeListener {
 
     public static final String TYPE_OUTGOING_CALL = "type-outgoing-call";
     public static final String TYPE_INCOMING_CALL = "type-incoming-call";
@@ -88,6 +89,8 @@ public class CallActivity extends AppCompatActivity
 
     private Vibrator mVibrator;
 
+    private int mPreviousVolume = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,6 +117,9 @@ public class CallActivity extends AppCompatActivity
         // Manager that handles the 'put on speaker' feature
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mAudioManager.setSpeakerphoneOn(false); // Set default speaker usage to NO/Off.
+
+        // Make sure what ever audio source is playing by other apps is paused.
+        mAudioManager.requestAudioFocus(this, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
 
         // Make sure the hardware volume buttons control the volume of the call.
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
@@ -279,12 +285,18 @@ public class CallActivity extends AppCompatActivity
 
     public void onStop() {
         super.onStop();
-
         // unRegister the SipService BroadcastReceiver when the activity pauses
         mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
         if (mProximitySensor != null) {
             mSensorManager.unregisterListener(this);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Abandon focus so other apps can continue playing.
+        mAudioManager.abandonAudioFocus(this);
     }
 
     @Override
@@ -536,9 +548,35 @@ public class CallActivity extends AppCompatActivity
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                finish();  // Close this activity after 2 seconds.
+                finish();  // Close this activity after 3 seconds.
             }
         }, 3000);
     }
 
+    @Override
+    public void onAudioFocusChange(int focusChange) {
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                // Check if we have a previous volume on audio gain.
+                if (mPreviousVolume != -1) {
+                    mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, mPreviousVolume, 0);
+                    mPreviousVolume = -1;
+                }
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS:
+                // TODO VIALA-463: Handle the complete loss of audio. Eg: incoming GSM call.
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                // TODO VIALA-463: Handle temoprary loss of audio. Eg: incoming GSM call.
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                // Steam voice call max volume = 5. Set it to 1 while ducking.
+                mPreviousVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+                mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, 1, 0);
+                break;
+        }
+    }
 }

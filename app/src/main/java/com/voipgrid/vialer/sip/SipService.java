@@ -538,7 +538,6 @@ public class SipService extends Service implements
     @Override
     public void onCallStopRingback() {
         mHandler.removeCallbacks(mRingbackRunnable);
-        mToneGenerator.release();
     }
 
     private void callVisibleForUser(Call call, String type, Uri number) {
