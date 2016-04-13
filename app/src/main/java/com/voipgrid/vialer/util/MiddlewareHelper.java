@@ -8,6 +8,8 @@ import android.preference.PreferenceManager;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -72,6 +74,9 @@ public class MiddlewareHelper {
 
     public static void register(Context context, String token) {
         Preferences sipPreferences = new Preferences(context);
+        ((AnalyticsApplication) context.getApplicationContext()).getDefaultTracker();
+        AnalyticsHelper analyticsHelper = new AnalyticsHelper(
+                ((AnalyticsApplication) context.getApplicationContext()).getDefaultTracker());
 
         if (!sipPreferences.canUseSip()) {
             return;
@@ -105,6 +110,10 @@ public class MiddlewareHelper {
                 setRegistrationStatus(context, Constants.STATUS_FAILED);
                 // Disable sip because failed at middleware.
                 new Preferences(context).setSipEnabled(false);
+
+                analyticsHelper.sendException(
+                        context.getString(
+                                R.string.analytics_event_description_registration_failed));
             }
         } catch (IOException e) {
             setRegistrationStatus(context, Constants.STATUS_FAILED);

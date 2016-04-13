@@ -83,8 +83,7 @@ public class DialHelper {
 
         mContext.startService(intent);
 
-        mAnalyticsHelper.send(
-                mContext.getString(R.string.analytics_dimension),
+        mAnalyticsHelper.sendEvent(
                 mContext.getString(R.string.analytics_event_category_call),
                 mContext.getString(R.string.analytics_event_action_outbound),
                 mContext.getString(R.string.analytics_event_label_sip)

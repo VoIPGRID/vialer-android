@@ -6,4 +6,29 @@
     <string name="analytics_screenname_missed">Missed</string>
     <string name="analytics_screenname_recents">Recents</string>
 
+    <string name="analytics_dimension">@string/app_name</string>
+
+    <!-- Middleware events -->
+    <string name="analytics_event_category_middleware">middleware</string>
+
+    <string name="analytics_event_action_acceptance">acceptance</string>
+    <string name="analytics_event_label_middleware_accepted">accepted</string>
+    <string name="analytics_event_label_middleware_rejected">rejected</string>
+
+    <string name="analytics_event_description_registration_failed">Failed middleware registration</string>
+
+    <string name="analytics_event_name_call_response">response time</string>
+
+    <!-- Call events -->
+    <string name="analytics_event_category_call">call</string>
+
+    <string name="analytics_event_action_inbound">Inbound</string>
+    <string name="analytics_event_action_outbound">Outbound</string>
+
+    <string name="analytics_event_label_accepted">Accepted</string>
+    <string name="analytics_event_label_declined">Declined</string>
+
+    <string name="analytics_event_label_connect_a_b">ConnectAB</string>
+    <string name="analytics_event_label_sip">SIP</string>
+
 </resources>

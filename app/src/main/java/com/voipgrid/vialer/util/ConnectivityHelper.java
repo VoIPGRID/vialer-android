@@ -5,17 +5,30 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Helper class to check connectivity of the device
+ * Helper class to check connectivity of the device.
  */
 public class ConnectivityHelper {
+    private static final long TYPE_NO_CONNECTION = -1;
+    private static final long TYPE_SLOW = 0;
+    private static final long TYPE_WIFI = 1;
+    private static final long TYPE_LTE = 2;
 
     private final ConnectivityManager mConnectivityManager;
     private final TelephonyManager mTelephonyManager;
 
+    private static final List<Long> sFastDataTypes = new ArrayList<>();
+
+    static {
+        sFastDataTypes.add(TYPE_WIFI);
+        sFastDataTypes.add(TYPE_LTE);
+    }
+
     /**
-     * Constuctor supply connectivity and telephoney manager
-     *
+     * Constructor.
      * @param connectivityManager
      * @param telephonyManager
      */
@@ -26,7 +39,7 @@ public class ConnectivityHelper {
     }
 
     /**
-     * Check the device current connectivity state based on the active network
+     * Check the device current connectivity state based on the active network.
      * @return
      */
     public boolean hasNetworkConnection() {
@@ -35,14 +48,13 @@ public class ConnectivityHelper {
     }
 
     /**
-     * Check if the device is connected via wifi or LTE connection
-     * @return
+     * Get the current connection type.
+     * @return Long representation of the connection type.
      */
-    public boolean hasFastData() {
-        /* NB this is a very rough approximation to a 'fast data connection' */
+    public long getConnectionType() {
         NetworkInfo info = mConnectivityManager.getActiveNetworkInfo();
-        if (info == null) {
-            return false;
+        if (info == null || !info.isConnected()) {
+            return TYPE_NO_CONNECTION;
         }
 
         // We need to check 2 methods for the type because they both can give a different
@@ -52,12 +64,22 @@ public class ConnectivityHelper {
         // Get network type from TelephonyManager.
         int networkTypeTelephony = mTelephonyManager.getNetworkType();
 
-        // TODO VIALA 325 Roaming settings.
-        return info.isConnected() && !info.isRoaming() &&
-                (info.getType() == ConnectivityManager.TYPE_WIFI ||
-                        networkTypeConnection == TelephonyManager.NETWORK_TYPE_LTE ||
-                        networkTypeTelephony == TelephonyManager.NETWORK_TYPE_LTE
-                );
+        if (info.getType() == ConnectivityManager.TYPE_WIFI) {
+            return TYPE_WIFI;
+        } else if (networkTypeConnection == TelephonyManager.NETWORK_TYPE_LTE ||
+                networkTypeTelephony == TelephonyManager.NETWORK_TYPE_LTE) {
+            return TYPE_LTE;
+        } else {
+            return TYPE_SLOW;
+        }
+    }
+
+    /**
+     * Check if the device is connected via wifi or LTE connection.
+     * @return
+     */
+    public boolean hasFastData() {
+        return sFastDataTypes.contains(getConnectionType());
     }
 
     public static ConnectivityHelper get(Context context) {
@@ -65,6 +87,6 @@ public class ConnectivityHelper {
                 Context.CONNECTIVITY_SERVICE);
         TelephonyManager t = (TelephonyManager) context.getSystemService(
                 Context.TELEPHONY_SERVICE);
-        return new ConnectivityHelper(c,t);
+        return new ConnectivityHelper(c, t);
     }
 }

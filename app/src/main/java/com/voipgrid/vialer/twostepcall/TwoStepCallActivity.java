@@ -89,8 +89,7 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
         mTwoStepCallView.setNumberB(numberToCall);
         updateStateView(TwoStepCallUtils.STATE_INITIAL);
 
-        mAnalyticsHelper.send(
-                getString(R.string.analytics_dimension),
+        mAnalyticsHelper.sendEvent(
                 getString(R.string.analytics_event_category_call),
                 getString(R.string.analytics_event_action_outbound),
                 getString(R.string.analytics_event_label_connect_a_b)
