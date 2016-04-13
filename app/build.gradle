@@ -10,6 +10,7 @@ android {
         targetSdkVersion 23
         versionCode 33
         versionName "2.2 beta"
+        multiDexEnabled true
         ndk {
             moduleName "pjsua2"
         }
@@ -46,6 +47,7 @@ repositories {
 }
 
 dependencies {
+    compile 'com.android.support:multidex:1.0.0'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     // Modules.
     compile project(':pjsip')
