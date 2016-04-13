@@ -1,6 +1,8 @@
 package com.voipgrid.vialer.analytics;
 
 import android.app.Application;
+import android.content.Context;
+import android.support.multidex.MultiDex;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
@@ -13,6 +15,12 @@ import com.voipgrid.vialer.R;
 public class AnalyticsApplication extends Application {
 
     private Tracker mTracker;
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
 
     /**
      * Gets the default {@link Tracker} for this {@link Application}.
