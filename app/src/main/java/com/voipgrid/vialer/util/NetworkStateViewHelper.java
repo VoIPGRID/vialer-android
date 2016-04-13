@@ -1,7 +1,10 @@
 package com.voipgrid.vialer.util;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.view.View;
 import android.widget.TextView;
 
@@ -14,7 +17,7 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
  * Class that handles the network state view and allows the updating of the view
  * according to the current connection.
  */
-public class NetworkStateViewHelper implements View.OnClickListener {
+public class NetworkStateViewHelper extends BroadcastReceiver implements View.OnClickListener {
     private Context mContext;
     private ConnectivityHelper mConnectivityHelper;
     private JsonStorage mJsonStorage;
@@ -33,6 +36,25 @@ public class NetworkStateViewHelper implements View.OnClickListener {
         mJsonStorage = new JsonStorage(mContext);
         mPreferences = new Preferences(mContext);
         mNetworkStateView.setOnClickListener(this);
+    }
+
+    /**
+     * Function to start listening for connectivity changes.
+     */
+    public void startListening() {
+        mContext.registerReceiver(this, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    /**
+     * Function to stop listening for connectivity changes.
+     */
+    public void stopListening() {
+        mContext.unregisterReceiver(this);
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {;
+        updateNetworkStateView();
     }
 
     /**

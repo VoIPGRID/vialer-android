@@ -156,6 +156,7 @@ public class CallRecordFragment extends ListFragment implements
         super.onResume();
 
         mNetworkStateViewHelper.updateNetworkStateView();
+        mNetworkStateViewHelper.startListening();
     }
 
     @Override
@@ -167,6 +168,12 @@ public class CallRecordFragment extends ListFragment implements
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mNetworkStateViewHelper.stopListening();
     }
 
     @Override
