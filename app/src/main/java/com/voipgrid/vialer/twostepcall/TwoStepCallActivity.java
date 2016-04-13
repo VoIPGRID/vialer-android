@@ -1,25 +1,20 @@
 package com.voipgrid.vialer.twostepcall;
 
 import android.app.Activity;
-import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.TextView;
 
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
-import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 import com.voipgrid.vialer.models.ClickToDialParams;
-import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
 import java.io.IOException;
@@ -29,18 +24,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class TwoStepCallActivity extends Activity implements View.OnClickListener, Callback<Object> {
-
     public static final String NUMBER_TO_CALL = "number-to-call";
     private boolean cancelCall = false;
 
-    private TextView mDialerWarningTextView;
     private TextView mStatusTextView;
 
     private AnalyticsHelper mAnalyticsHelper;
     private Api mApi;
-    private ConnectivityHelper mConnectivityHelper;
-    private Preferences mPreferences;
-    private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
     private TwoStepCallTask mTwoStepCallTask;
     private TwoStepCallView mTwoStepCallView;
@@ -54,17 +44,6 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
         mAnalyticsHelper = new AnalyticsHelper(
                 ((AnalyticsApplication) getApplication()).getDefaultTracker()
         );
-
-        mJsonStorage = new JsonStorage(this);
-
-        mPreferences = new Preferences(this);
-
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
-
-        mDialerWarningTextView = (TextView) findViewById(R.id.dialer_warning);
 
         mSystemUser = (SystemUser) new JsonStorage(this).get(SystemUser.class);
 
@@ -96,26 +75,6 @@ public class TwoStepCallActivity extends Activity implements View.OnClickListene
         );
 
         ((TextView) findViewById(R.id.name_text_view)).setText(numberToCall);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mDialerWarningTextView.setVisibility(View.VISIBLE);
-        if(!mConnectivityHelper.hasNetworkConnection()) {
-            mDialerWarningTextView.setText(R.string.dialer_warning_no_connection);
-            mDialerWarningTextView.setTag(getString(R.string.dialer_warning_no_connection_message));
-        } else if(!mConnectivityHelper.hasFastData() && mPreferences.canUseSip()) {
-            mDialerWarningTextView.setText(R.string.dialer_warning_a_b_connect);
-            mDialerWarningTextView
-                    .setTag(getString(R.string.dialer_warning_a_b_connect_connectivity_message));
-        } else if(!mJsonStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
-            mDialerWarningTextView.setText(R.string.dialer_warning_a_b_connect);
-            mDialerWarningTextView
-                    .setTag(getString(R.string.dialer_warning_a_b_connect_account_message));
-        } else {
-            mDialerWarningTextView.setVisibility(View.GONE);
-        }
     }
 
     @Override

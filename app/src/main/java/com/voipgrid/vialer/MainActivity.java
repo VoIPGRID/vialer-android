@@ -2,7 +2,6 @@ package com.voipgrid.vialer;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -12,9 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.telephony.TelephonyManager;
 import android.view.View;
-import android.widget.TextView;
 
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -38,7 +35,6 @@ public class MainActivity extends NavigationDrawerActivity implements
     private ViewPager mViewPager;
 
     private ConnectivityHelper mConnectivityHelper;
-    private Preferences mPreferences;
     private JsonStorage mJsonStorage;
 
     private boolean mAskForPermission = true;
@@ -49,12 +45,7 @@ public class MainActivity extends NavigationDrawerActivity implements
 
         mJsonStorage = new JsonStorage(this);
 
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
-
-        mPreferences = new Preferences(this);
+        mConnectivityHelper = ConnectivityHelper.get(this);
 
         /* check if the app has a SystemUser */
         if(!mJsonStorage.has(SystemUser.class)) {
@@ -181,12 +172,6 @@ public class MainActivity extends NavigationDrawerActivity implements
     public void onClick(View view) {
         switch(view.getId()) {
             case R.id.floating_action_button : openDialer(); break;
-            case R.id.dialer_warning :
-                Intent intent = new Intent(this, WarningActivity.class);
-                intent.putExtra(WarningActivity.TITLE, ((TextView) view).getText());
-                intent.putExtra(WarningActivity.MESSAGE, (String) view.getTag());
-                startActivity(intent);
-                break;
         }
     }
 
