@@ -1,14 +1,11 @@
 package com.voipgrid.vialer.callrecord;
 
 import android.app.Activity;
-import android.content.Context;
-import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,19 +13,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.voipgrid.vialer.EmptyView;
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.CallRecord;
-import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.NetworkStateViewHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,27 +42,19 @@ public class CallRecordFragment extends ListFragment implements
         SwipeRefreshLayout.OnRefreshListener {
 
     private static final String ARG_FILTER = "filter";
-
     public static final String FILTER_MISSED_RECORDS = "missed-records";
 
     private OnFragmentInteractionListener mListener;
-
     private CallRecordAdapter mAdapter;
-
     private List<CallRecord> mCallRecords = new ArrayList<>();
-
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private TextView mDialerWarning;
-
-    private ConnectivityHelper mConnectivityHelper;
-
-    private JsonStorage mJsonStorage;
 
     private AnalyticsHelper mAnalyticsHelper;
+    private ConnectivityHelper mConnectivityHelper;
+    private JsonStorage mJsonStorage;
+    private NetworkStateViewHelper mNetworkStateViewHelper;
 
     private String mFilter;
-    private Preferences mPreferences;
-
     private boolean mHaveNetworkRecords;
 
     public static CallRecordFragment newInstance(String filter) {
@@ -126,13 +114,10 @@ public class CallRecordFragment extends ListFragment implements
                 ((AnalyticsApplication) getActivity().getApplication()).getDefaultTracker()
         );
 
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE),
-                (TelephonyManager) getActivity().getSystemService(Context.TELEPHONY_SERVICE));
+        mConnectivityHelper = ConnectivityHelper.get(getActivity());
 
         mJsonStorage = new JsonStorage(getActivity());
         mFilter = getArguments().getString(ARG_FILTER);
-        mPreferences = new Preferences(getContext());
     }
 
     @Override
@@ -144,7 +129,9 @@ public class CallRecordFragment extends ListFragment implements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mDialerWarning = (TextView) view.findViewById(R.id.dialer_warning);
+
+        mNetworkStateViewHelper = new NetworkStateViewHelper(
+                getActivity(), (TextView) view.findViewById(R.id.dialer_warning));
 
         mAdapter = new CallRecordAdapter(view.getContext(), mCallRecords);
 
@@ -167,20 +154,8 @@ public class CallRecordFragment extends ListFragment implements
     @Override
     public void onResume() {
         super.onResume();
-        /* check network state and show a warning if needed */
-        mDialerWarning.setVisibility(View.VISIBLE);
-        if(!mConnectivityHelper.hasNetworkConnection()) {
-            mDialerWarning.setText(R.string.dialer_warning_no_connection);
-            mDialerWarning.setTag(getString(R.string.dialer_warning_no_connection_message));
-        } else if(!mConnectivityHelper.hasFastData() && mPreferences.canUseSip()) {
-            mDialerWarning.setText(R.string.dialer_warning_a_b_connect);
-            mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_connectivity_message));
-        } else if(!mJsonStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
-            mDialerWarning.setText(R.string.dialer_warning_a_b_connect);
-            mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_account_message));
-        } else {
-            mDialerWarning.setVisibility(View.GONE);
-        }
+
+        mNetworkStateViewHelper.updateNetworkStateView();
     }
 
     @Override

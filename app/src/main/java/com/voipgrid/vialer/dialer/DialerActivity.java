@@ -7,14 +7,12 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
@@ -26,12 +24,9 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.WarningActivity;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.contacts.ContactsPermission;
 import com.voipgrid.vialer.contacts.SyncUtils;
@@ -40,6 +35,7 @@ import com.voipgrid.vialer.t9.ContactCursorLoader;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.IconHelper;
+import com.voipgrid.vialer.util.NetworkStateViewHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -62,14 +58,13 @@ public class DialerActivity extends AppCompatActivity implements
     private ListView mContactsListView;
     private NumberInputView mNumberInputView;
     private SimpleCursorAdapter mContactsAdapter = null;
-    private TextView mDialerWarning;
     private TextView mEmptyView;
     private ViewGroup mKeyPadViewContainer;
 
     private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
-    private Preferences mPreferences;
     private JsonStorage mJsonStorage;
+    private NetworkStateViewHelper mNetworkStateViewHelper;
 
     private String t9Query;
     private boolean mHasPermission;
@@ -87,14 +82,10 @@ public class DialerActivity extends AppCompatActivity implements
 
         mJsonStorage = new JsonStorage(this);
 
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
+        mConnectivityHelper = ConnectivityHelper.get(this);
 
-        mPreferences = new Preferences(this);
-
-        mDialerWarning = (TextView) findViewById(R.id.dialer_warning);
+        mNetworkStateViewHelper = new NetworkStateViewHelper(
+                this, (TextView) findViewById(R.id.dialer_warning));
         mContactsListView = (ListView) findViewById(R.id.list_view);
         mEmptyView = (TextView) findViewById(R.id.message);
         mEmptyView.setText("");
@@ -309,20 +300,7 @@ public class DialerActivity extends AppCompatActivity implements
             }
         }
 
-        // Set the warming for lacking connection types.
-        mDialerWarning.setVisibility(View.VISIBLE);
-        if(!mConnectivityHelper.hasNetworkConnection()) {
-            mDialerWarning.setText(R.string.dialer_warning_no_connection);
-            mDialerWarning.setTag(getString(R.string.dialer_warning_no_connection_message));
-        } else if(!mConnectivityHelper.hasFastData() && mPreferences.canUseSip()) {
-            mDialerWarning.setText(R.string.dialer_warning_a_b_connect);
-            mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_connectivity_message));
-        } else if(!mJsonStorage.has(PhoneAccount.class) && mPreferences.canUseSip()) {
-            mDialerWarning.setText(R.string.dialer_warning_a_b_connect);
-            mDialerWarning.setTag(getString(R.string.dialer_warning_a_b_connect_account_message));
-        } else {
-            mDialerWarning.setVisibility(View.GONE);
-        }
+        mNetworkStateViewHelper.updateNetworkStateView();
     }
 
     @Override
@@ -371,12 +349,6 @@ public class DialerActivity extends AppCompatActivity implements
                 break;
             case R.id.button_dialpad :
                 toggleKeyPadView();
-                break;
-            case R.id.dialer_warning :
-                Intent intent = new Intent(this, WarningActivity.class);
-                intent.putExtra(WarningActivity.TITLE, ((TextView) view).getText());
-                intent.putExtra(WarningActivity.MESSAGE, (String) view.getTag());
-                startActivity(intent);
                 break;
         }
     }
