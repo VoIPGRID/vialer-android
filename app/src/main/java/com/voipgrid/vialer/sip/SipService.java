@@ -350,7 +350,11 @@ public class SipService extends Service implements
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(retrofit2.Call<ResponseBody> call, Response<ResponseBody> response) {
-
+                    if (!response.isSuccess()) {
+                        // Too late or middleware failure so stop the service.
+                        broadcast(SipConstants.SIP_SERVICE_ACCOUNT_REGISTRATION_FAILED);
+                        stopSelf();
+                    }
                 }
 
                 @Override
