@@ -17,10 +17,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -31,7 +28,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.sip.SipConstants;
 
 /**
- * CallActivity for incoming or outgoing call
+ * CallActivity for incoming or outgoing call.
  */
 public class CallActivity extends AppCompatActivity
         implements View.OnClickListener, SensorEventListener, SipConstants,
@@ -47,14 +44,23 @@ public class CallActivity extends AppCompatActivity
     private AudioManager mAudioManager;
     private SensorManager mSensorManager;
     private Sensor mProximitySensor;
-
     private TextView mCallDurationView;
     private TextView mStateView;
+    private boolean mIsIncomingCall;
+    private boolean mConnected = false;
+    private boolean mMute = false;
+    private boolean mOnHold = false;
+    private boolean mKeyPadVisible = false;
+    private boolean mOnSpeaker = false;
+    private ViewGroup mKeyPadViewContainer;
+    private AnalyticsHelper mAnalyticsHelper;
+    private Ringtone mRingtone;
+    private Vibrator mVibrator;
 
     // Keep track of the start time of a call, so we can keep track of its duration.
     long mCallStartTime = 0;
 
-    // runs without a timer by reposting this handler at the end of the runnable
+    // Runs without a timer by re-posting this handler at the end of the runnable.
     Handler mCallHandler = new Handler();
     Runnable mCallDurationRunnable = new Runnable() {
         @Override
@@ -66,28 +72,17 @@ public class CallActivity extends AppCompatActivity
         }
     };
 
-    // Broadcast manager to notify all call status listeners and listen for call interactions
+    // Broadcast manager to notify all call status listeners and listen for call interactions.
     private LocalBroadcastManager mBroadcastManager;
+
     // Broadcast receiver for presenting changes in call state to user.
     private BroadcastReceiver mCallStatusReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             onCallStatusUpdate(intent.getStringExtra(CALL_STATUS_KEY));
+            onCallStatesUpdateButtons(intent.getStringExtra(CALL_STATUS_KEY));
         }
     };
-
-    private boolean mIsIncomingCall;
-
-    private boolean mConnected;
-
-    private boolean mMute = false;
-
-    private ViewGroup mKeyPadViewContainer;
-    private AnalyticsHelper mAnalyticsHelper;
-
-    private Ringtone mRingtone;
-
-    private Vibrator mVibrator;
 
     private int mPreviousVolume = -1;
 
@@ -102,17 +97,12 @@ public class CallActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_call);
 
-        /* set the AnalyticsHelper */
+        // Set the AnalyticsHelper.
         mAnalyticsHelper = new AnalyticsHelper(
                 ((AnalyticsApplication) getApplication()).getDefaultTracker()
         );
 
         mKeyPadViewContainer = (ViewGroup) findViewById(R.id.key_pad_container);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
 
         // Manager that handles the 'put on speaker' feature
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -139,6 +129,8 @@ public class CallActivity extends AppCompatActivity
 
         mConnected = false;
 
+        onCallStatesUpdateButtons(SERVICE_STOPPED);
+
         Intent intent = getIntent();
 
         /**
@@ -149,7 +141,7 @@ public class CallActivity extends AppCompatActivity
         if (type.equals(TYPE_INCOMING_CALL) ||
                 type.equals(TYPE_OUTGOING_CALL)) {
 
-            // Update the textview with a number URI
+            // Update the textView with a number URI.
             String phoneNumber = intent.getStringExtra(PHONE_NUMBER);
             String contactName = intent.getStringExtra(CONTACT_NAME);
             displayCallInfo(phoneNumber, contactName);
@@ -160,17 +152,21 @@ public class CallActivity extends AppCompatActivity
             toggleCallStateButtonVisibility(type);
 
             if(mIsIncomingCall) {
-
                 switch (mAudioManager.getRingerMode()) {
-                    case AudioManager.RINGER_MODE_NORMAL : playRingtone(true); break;
-                    case AudioManager.RINGER_MODE_VIBRATE : vibrate(true); break;
-                    case AudioManager.RINGER_MODE_SILENT :
+                    case AudioManager.RINGER_MODE_NORMAL:
+                        playRingtone(true);
+                        break;
+
+                    case AudioManager.RINGER_MODE_VIBRATE:
+                        vibrate(true);
+                        break;
+
+                    case AudioManager.RINGER_MODE_SILENT:
                         playRingtone(false);
                         vibrate(false);
                         break;
                 }
             }
-
         }
     }
 
@@ -184,12 +180,12 @@ public class CallActivity extends AppCompatActivity
     }
 
     /**
-     * Based on typeshow/hide and position the buttons to answer/hangup a call.
+     * Based on type show/hide and position the buttons to answer/hangup a call.
      * @param type a string containing a call type (INCOMING or OUTGOING)
      */
     private void toggleCallStateButtonVisibility(String type) {
         if (type.equals(TYPE_OUTGOING_CALL) || type.equals(TYPE_CONNECTED_CALL)) {
-            // Hide answer, decline = hangup
+            // Hide answer, decline = hangup.
             findViewById(R.id.ringing).setVisibility(View.GONE);
             findViewById(R.id.connected).setVisibility(View.VISIBLE);
         } else if (type.equals(TYPE_INCOMING_CALL)) {
@@ -210,74 +206,71 @@ public class CallActivity extends AppCompatActivity
             case CALL_MEDIA_AVAILABLE_MESSAGE:
                 onCallStatusUpdate(CALL_STOP_RINGBACK_MESSAGE);
                 break;
-            case CALL_MEDIA_UNAVAILABLE_MESSAGE:
-                /* NOTYETIMPLEMENTED */
-                break;
+
             case CALL_CONNECTED_MESSAGE:
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
                 mStateView.setText(R.string.call_connected);
-
                 mCallStartTime = System.currentTimeMillis();
                 mCallHandler.postDelayed(mCallDurationRunnable, 0);
-
                 mConnected = true;
 
                 playRingtone(false);
                 vibrate(false);
-
                 break;
+
             case CALL_DISCONNECTED_MESSAGE:
-                // We got a DISCONNECT. Probably save to stop Ringback since it's over
+                // We got a DISCONNECT. Probably save to stop ring back since it's over.
                 onCallStatusUpdate(CALL_STOP_RINGBACK_MESSAGE);
 
                 mAudioManager.setSpeakerphoneOn(false);
                 mStateView.setText(R.string.call_ended);
 
-                // Stop duration timer
+                // Stop duration timer.
                 mCallHandler.removeCallbacks(mCallDurationRunnable);
 
                 playRingtone(false);
                 vibrate(false);
-
                 finishWithDelay();
-
                 break;
+
             case CALL_PUT_ON_HOLD_ACTION:
-                // Remove a running timer which shows call duration
+                // Remove a running timer which shows call duration.
                 mCallHandler.removeCallbacks(mCallDurationRunnable);
                 mCallDurationView.setVisibility(View.INVISIBLE);
-
                 mStateView.setText(R.string.call_on_hold);
                 break;
-            case CALL_UNHOLD_ACTION:
 
-                // Start the running timer which shows call duration
+            case CALL_UNHOLD_ACTION:
+                // Start the running timer which shows call duration.
                 mCallHandler.postDelayed(mCallDurationRunnable, 0);
                 mCallDurationView.setVisibility(View.VISIBLE);
-
                 mStateView.setText(R.string.call_connected);
                 break;
+
             case CALL_RINGING_OUT_MESSAGE:
                 mStateView.setText(R.string.call_outgoing);
+                findViewById(R.id.speaker).setEnabled(false);
+                findViewById(R.id.microphone).setEnabled(false);
                 break;
+
             case CALL_RINGING_IN_MESSAGE:
                 mStateView.setText(R.string.call_incoming);
                 break;
+
             case SERVICE_STOPPED :
-
                 finishWithDelay();
-
                 break;
         }
-        invalidateOptionsMenu();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        /* Register for updates */
+
+        // Register for updates.
         IntentFilter intentFilter = new IntentFilter(ACTION_BROADCAST_CALL_STATUS);
         mBroadcastManager.registerReceiver(mCallStatusReceiver, intentFilter);
+
         if (mProximitySensor != null) {
             mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_UI);
         }
@@ -287,6 +280,7 @@ public class CallActivity extends AppCompatActivity
         super.onStop();
         // unRegister the SipService BroadcastReceiver when the activity pauses
         mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
+
         if (mProximitySensor != null) {
             mSensorManager.unregisterListener(this);
         }
@@ -303,6 +297,7 @@ public class CallActivity extends AppCompatActivity
     public void onBackPressed() {
         View hangupButton = findViewById(R.id.button_hangup);
         View declineButton = findViewById(R.id.button_reject);
+
         if(hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
             onClick(hangupButton);
         } else if(declineButton != null && declineButton.getVisibility() == View.VISIBLE) {
@@ -312,95 +307,133 @@ public class CallActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_call, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem speakerItem = menu.findItem(R.id.speaker);
-        MenuItem microphoneItem = menu.findItem(R.id.microphone);
-        if(mIsIncomingCall && !mConnected) {
-            speakerItem.setEnabled(false);
-            microphoneItem.setEnabled(false);
-        } else {
-            speakerItem.setEnabled(true);
-            microphoneItem.setEnabled(true);
-        }
-
-        // Toggle speaker item
-        if(mAudioManager.isSpeakerphoneOn()) {
-            speakerItem.setIcon(speakerItem.isEnabled() ?
-                    R.drawable.ic_volume_off_enabled : R.drawable.ic_volume_off_disabled);
-        } else {
-            speakerItem.setIcon(speakerItem.isEnabled() ?
-                    R.drawable.ic_volume_on_enabled : R.drawable.ic_volume_on_disabled);
-        }
-
-        // Toggle microphone item
-        if(mMute) {
-            microphoneItem.setIcon(microphoneItem.isEnabled() ?
-                    R.drawable.ic_mic_on_enabled : R.drawable.ic_mic_on_disabled);
-        } else {
-            microphoneItem.setIcon(microphoneItem.isEnabled() ?
-                    R.drawable.ic_mic_off_enabled: R.drawable.ic_mic_off_disabled);
-        }
-
-        // Set dialpad item
-        MenuItem dialpadItem = menu.findItem(R.id.dialpad);
-        dialpadItem.setIcon(dialpadItem.isEnabled() ?
-                R.drawable.ic_dialer_enabled : R.drawable.ic_dialer_disabled);
-
-        // Set onhold item
-        MenuItem onhold = menu.findItem(R.id.onhold);
-        onhold.setIcon(onhold.isEnabled() ?
-                R.drawable.ic_pause_enabled : R.drawable.ic_pause_disabled);
-
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.speaker : toggleSpeaker(); break;
-            case R.id.microphone : toggleMicrophone(); break;
-            case R.id.dialpad : toggleDialpad(); break;
-            case R.id.onhold: onPutHold(); break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
+    // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
+        mOnSpeaker = !mOnSpeaker;
         mAudioManager.setSpeakerphoneOn(!mAudioManager.isSpeakerphoneOn());
-        invalidateOptionsMenu();
     }
 
-    private void toggleMicrophone() {
+    // Mute or un-mute a call when the user presses the button.
+    private void toggleMute() {
         mMute = !mMute;
         long newVolume = (mMute ?               // get new volume based on selection value
                     getResources().getInteger(R.integer.mute_microphone_volume_value) :   // muted
-                    getResources().getInteger(R.integer.unmute_microphone_volume_value)); // unmuted
+                    getResources().getInteger(R.integer.unmute_microphone_volume_value)); // un-muted
         updateMicrophoneVolume(newVolume);
-        invalidateOptionsMenu();
     }
 
-    private void toggleDialpad() {
+    // Show or hide the dialPad when the user presses the button.
+    private void toggleDialPad() {
+        mKeyPadVisible = !mKeyPadVisible;
         boolean visible = mKeyPadViewContainer.getVisibility() == View.VISIBLE;
         mKeyPadViewContainer.setVisibility(visible ? View.GONE : View.VISIBLE);
     }
 
-    private void onPutHold() {
+    // Toggle the hold the call when the user presses the button.
+    private void toggleOnHold() {
+        mOnHold = !mOnHold;
         Bundle onHoldExtras = new Bundle();
         onHoldExtras.putString(CALL_STATUS_ACTION, CALL_PUT_ON_HOLD_ACTION);
         broadcast(onHoldExtras);
-        // put on hold (UI) -> https://jira.peperzaken.nl/browse/VIALA-104
+    }
+
+    /**
+     * Update the state of a single call button.
+     *
+     * @param viewId Integer The id of the button to change.
+     * @param buttonEnabled Boolean Whether the button needs to be enabled or disabled.
+     */
+    private void updateCallButton(Integer viewId, boolean buttonEnabled) {
+        View speakerButton;
+        View microphoneButton;
+        View keypadButton;
+        View onHoldButton;
+
+        switch (viewId) {
+            case R.id.button_speaker:
+                speakerButton = findViewById(viewId);
+                speakerButton.setActivated(mOnSpeaker);
+                speakerButton.setAlpha(
+                        buttonEnabled ? mOnSpeaker ? 1.0f : 0.5f : 1.0f
+                );
+                break;
+
+            case R.id.button_microphone:
+                microphoneButton = findViewById(viewId);
+                microphoneButton.setActivated(mMute);
+                microphoneButton.setAlpha(
+                        buttonEnabled ? mMute ? 1.0f : 0.5f : 1.0f
+                );
+                break;
+
+            case R.id.button_keypad:
+                keypadButton = findViewById(viewId);
+                keypadButton.setActivated(mKeyPadVisible);
+                keypadButton.setAlpha(
+                        buttonEnabled ? mKeyPadVisible ? 1.0f : 0.5f : 1.0f
+                );
+                break;
+
+            case R.id.button_onhold:
+                onHoldButton = findViewById(viewId);
+                onHoldButton.setActivated(mOnHold);
+                onHoldButton.setAlpha(
+                        buttonEnabled ? mOnHold ? 1.0f : 0.5f : 1.0f
+                );
+                break;
+        }
+    }
+
+    private void onCallStatesUpdateButtons(String callState) {
+        Integer speakerButtonId = R.id.button_speaker;
+        Integer microphoneButtonId = R.id.button_microphone;
+        Integer keypadButtonId = R.id.button_keypad;
+        Integer onHoldButtonId = R.id.button_onhold;
+
+        View declineButton = findViewById(R.id.button_reject);
+        View acceptButton = findViewById(R.id.button_pickup);
+
+        switch (callState) {
+            case CALL_CONNECTED_MESSAGE:
+                updateCallButton(speakerButtonId, true);
+                updateCallButton(microphoneButtonId, true);
+                updateCallButton(keypadButtonId, true);
+                updateCallButton(onHoldButtonId, true);
+                break;
+
+            case CALL_DISCONNECTED_MESSAGE:
+                if (mIsIncomingCall) {
+                    if (declineButton != null && declineButton.getVisibility() == View.VISIBLE) {
+                        declineButton.setEnabled(false);
+                        declineButton.setClickable(false);
+                        declineButton.setAlpha(0.5f);
+                    }
+
+                    if (acceptButton != null && acceptButton.getVisibility() == View.VISIBLE) {
+                        acceptButton.setEnabled(false);
+                        acceptButton.setClickable(false);
+                        acceptButton.setAlpha(0.5f);
+                    }
+                } else {
+                    View hangupButton = findViewById(R.id.button_hangup);
+                    if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
+                        hangupButton.setEnabled(false);
+                        hangupButton.setClickable(false);
+                        hangupButton.setAlpha(0.5f);
+                    }
+                }
+                updateCallButton(speakerButtonId, false);
+                updateCallButton(microphoneButtonId, false);
+                updateCallButton(keypadButtonId, false);
+                updateCallButton(onHoldButtonId, false);
+                break;
+
+            case SERVICE_STOPPED:
+                updateCallButton(microphoneButtonId, false);
+                updateCallButton(keypadButtonId, false);
+                updateCallButton(onHoldButtonId, false);
+                break;
+        }
     }
 
     /**
@@ -432,7 +465,34 @@ public class CallActivity extends AppCompatActivity
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
+        Integer viewId = view.getId();
+        switch (viewId) {
+            case R.id.button_speaker:
+                toggleSpeaker();
+                updateCallButton(viewId, true);
+                break;
+
+            case R.id.button_microphone:
+                if (mConnected) {
+                    toggleMute();
+                    updateCallButton(viewId, true);
+                }
+                break;
+
+            case R.id.button_keypad:
+                if (mConnected) {
+                    toggleDialPad();
+                    updateCallButton(viewId, true);
+                }
+                break;
+
+            case R.id.button_onhold:
+                if (mConnected) {
+                    toggleOnHold();
+                    updateCallButton(viewId, true);
+                }
+                break;
+
             case R.id.button_hangup:
                 Bundle hangupExtras = new Bundle();
                 hangupExtras.putString(CALL_STATUS_ACTION, CALL_HANG_UP_ACTION);
@@ -440,6 +500,7 @@ public class CallActivity extends AppCompatActivity
                 mStateView.setText(R.string.call_hangup);
                 finishWithDelay();
                 break;
+
             case R.id.button_reject:
                 Bundle rejectExtras = new Bundle();
                 rejectExtras.putString(CALL_STATUS_ACTION, CALL_DECLINE_ACTION);
@@ -453,6 +514,7 @@ public class CallActivity extends AppCompatActivity
 
                 finishWithDelay();              // Close this activity.
                 break;
+
             case R.id.button_pickup:
                 Bundle pickupExtras = new Bundle();
                 pickupExtras.putString(CALL_STATUS_ACTION, CALL_PICK_UP_ACTION);
@@ -463,15 +525,15 @@ public class CallActivity extends AppCompatActivity
                         getString(R.string.analytics_event_action_inbound),
                         getString(R.string.analytics_event_label_accepted)
                 );
-
                 break;
+
             case R.id.screen_off : break; // Screen is off so ignore click events
         }
     }
 
     /**
      * Function to set the screen to ON (visible) or OFF (dimmed and disabled).
-     * @param on Wether or not the screen needs to be on or off.
+     * @param on Whether or not the screen needs to be on or off.
      */
     private void toggleScreen(boolean on) {
         WindowManager.LayoutParams params = getWindow().getAttributes();
@@ -486,7 +548,7 @@ public class CallActivity extends AppCompatActivity
             // Remove the listener for the OFF screen state.
             view.setOnClickListener(null);
 
-            // Show statusbar and navigation.
+            // Show status bar and navigation.
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         } else {
             // Set screen brightness to 0.
@@ -498,7 +560,7 @@ public class CallActivity extends AppCompatActivity
             // Set the listener for the OFF screen stat.
             view.setOnClickListener(this);
 
-            // Hide statusbar and navigation.
+            // Hide status bar and navigation.
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN
             );
@@ -550,7 +612,6 @@ public class CallActivity extends AppCompatActivity
             }
         }, 3000);
     }
-
     @Override
     public void onAudioFocusChange(int focusChange) {
         switch (focusChange) {

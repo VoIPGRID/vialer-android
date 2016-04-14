@@ -53,17 +53,68 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/color_primary">
+            android:background="@color/color_primary"
+            android:gravity="center_horizontal">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/button_speaker"
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/abc_action_bar_default_height_material"
-                android:layout_centerInParent="true"
-                android:minHeight="?attr/actionBarSize" />
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/ic_volume_on_enabled"
+                android:onClick="onClick"
+                app:backgroundTint="@color/call_buttons"
+                app:elevation="0dp"
+                app:borderWidth="0dp"
+                />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/button_microphone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/button_speaker"
+                android:layout_toEndOf="@+id/button_speaker"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/ic_mic_off_enabled"
+                android:onClick="onClick"
+                app:backgroundTint="@color/call_buttons"
+                app:elevation="0dp"
+                app:borderWidth="0dp"
+                />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/button_keypad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/button_microphone"
+                android:layout_toEndOf="@+id/button_microphone"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/ic_dialer_enabled"
+                android:onClick="onClick"
+                app:backgroundTint="@color/call_buttons"
+                app:elevation="0dp"
+                app:borderWidth="0dp"
+                />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/button_onhold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/button_keypad"
+                android:layout_toEndOf="@id/button_keypad"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/ic_pause_enabled"
+                android:onClick="onClick"
+                app:backgroundTint="@color/call_buttons"
+                app:elevation="0dp"
+                app:borderWidth="0dp"
+                />
 
         </RelativeLayout>
-
 
         <FrameLayout
             android:layout_width="match_parent"
