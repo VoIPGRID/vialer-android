@@ -8,9 +8,9 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -76,34 +76,26 @@ public class SipService extends Service implements
         CallInteraction {
 
     private final static String TAG = SipService.class.getSimpleName(); // TAG used for debug Logs
+    private final IBinder mBinder = new SipServiceBinder();
 
+    private Handler mHandler;
     private LocalBroadcastManager mBroadcastManager;
+    private ToneGenerator mToneGenerator;
 
     private Endpoint mEndpoint;
-
     private SipAccount mSipAccount;
-
     private String mToken;
-
     private String mUrl;
-
     private String mNumber;
-
     private String mCallerId;
 
     private boolean mHasActiveCall = false;
-
     private String mCallType;
-
     private Call mCall;
-
     private boolean mHasHold = false;
-
-    private Handler mHandler;
-
-    private ToneGenerator mToneGenerator;
-
     private SIPLogWriter mSIPLogWriter;
+    // Message throughput logging timestamp.
+    private String mMessageStartTime;
 
     private static Map<String, Short> sCodecPrioMapping;
 
@@ -136,6 +128,13 @@ public class SipService extends Service implements
         }
     };
 
+    public class SipServiceBinder extends Binder {
+        public SipService getService() {
+            // Return this instance of SipService so clients can call public methods.
+            return SipService.this;
+        }
+    }
+
     /**
      * SIP does not present Media by default.
      * Use Android's ToneGenerator to play a dial tone at certain required times.
@@ -149,13 +148,10 @@ public class SipService extends Service implements
             mHandler.postDelayed(mRingbackRunnable, 4000);
         }
     };
-    // Message throughput logging timestamp
-    private String mMessageStartTime;
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
     @Override
@@ -703,7 +699,7 @@ public class SipService extends Service implements
         mHasActiveCall = (call != null);
     }
 
-    private Call getCurrentCall() {
+    public Call getCurrentCall() {
         return mCall;
     }
 }
