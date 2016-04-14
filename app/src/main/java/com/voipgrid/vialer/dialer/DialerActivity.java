@@ -301,6 +301,13 @@ public class DialerActivity extends AppCompatActivity implements
         }
 
         mNetworkStateViewHelper.updateNetworkStateView();
+        mNetworkStateViewHelper.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mNetworkStateViewHelper.stopListening();
     }
 
     @Override
