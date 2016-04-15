@@ -3,6 +3,7 @@ package com.voipgrid.vialer.t9;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.provider.ContactsContract;
 import android.support.v4.content.AsyncTaskLoader;
 
 import java.util.List;
@@ -38,18 +39,28 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
     void populateMatrixCursor(List<T9Match> matches) {
         // Create a mutable cursor to manipulate for search.
         if (mMatrixCursor == null) {
-            mMatrixCursor = new MatrixCursor(new String[] {"_id", "name", "photo", "number"});
+            mMatrixCursor = new MatrixCursor(new String[] {"_id", "name", "photo", "number", "type"});
         }
 
         T9Match match;
         boolean addResult;
         String displayName;
         String number;
+        int type;
+        String label;
 
         for (int i = 0; i < matches.size(); i++) {
             match = matches.get(i);
             displayName = match.getDisplayName();
             number = match.getNumber();
+            type = match.getType();
+
+            if (type == ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM){
+                label = match.getLabel();
+            }
+            else {
+                label = ContactsContract.CommonDataKinds.Phone.getTypeLabel(mContext.getResources(), type, "").toString();
+            }
             addResult = false;
 
             if (mT9Query.length() != 0) {
@@ -85,6 +96,7 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
                         displayName,
                         match.getThumbnailUri(),
                         number,
+                        label,
                 });
             }
         }

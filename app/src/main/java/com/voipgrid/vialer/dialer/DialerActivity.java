@@ -231,11 +231,12 @@ public class DialerActivity extends AppCompatActivity implements
                 getBaseContext(),
                 R.layout.list_item_contact,
                 null,
-                new String[]{"name", "photo", "number"},
+                new String[]{"name", "photo", "number", "type"},
                 new int[]{
                         R.id.text_view_contact_name,
                         R.id.text_view_contact_icon,
-                        R.id.text_view_contact_information
+                        R.id.text_view_contact_information,
+                        R.id.text_view_contact_type
                 },
                 0
         );
