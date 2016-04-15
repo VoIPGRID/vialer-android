@@ -266,7 +266,7 @@ public abstract class NavigationDrawerActivity
             List<UserDestination> userDestinationObjects =
                     ((VoipGridResponse<UserDestination>) response.body()).getObjects();
 
-            if (userDestinationObjects == null || userDestinationObjects.size() <=0){
+            if (userDestinationObjects == null || userDestinationObjects.size() <=0 || mSpinnerAdapter == null){
                 return;
             }
 
@@ -357,8 +357,10 @@ public abstract class NavigationDrawerActivity
         public void onDrawerOpened(View drawerView) {
             super.onDrawerOpened(drawerView);
             // Force a reload of availability every time the drawer is opened.
-            Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
-            call.enqueue(mActivity);
+            if (mSpinner != null) {
+                Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
+                call.enqueue(mActivity);
+            }
         }
     }
 }

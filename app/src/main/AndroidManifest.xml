@@ -109,6 +109,12 @@
         <service android:name=".VialerGcmRegistrationService" />
 
         <activity
+            android:name=".util.UpdateActivity"
+            android:label="@string/title_activity_update"
+            android:screenOrientation="portrait"
+            android:theme="@style/OnboardingTheme" >
+        </activity>
+        <activity
             android:name=".onboarding.SetupActivity"
             android:label="@string/title_activity_setup"
             android:screenOrientation="portrait"
