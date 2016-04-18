@@ -18,6 +18,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.contacts.ContactsPermission;
 import com.voipgrid.vialer.util.IconHelper;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -172,14 +173,17 @@ public class CallRecordAdapter extends BaseAdapter {
         viewHolder = new ViewHolder();
         viewHolder.title = (TextView) convertView.findViewById(R.id.text_view_contact_name);
         viewHolder.information = (TextView) convertView.findViewById(
-                R.id.text_view_contact_information);
+                R.id.text_view_contact_information
+        );
 
         // Store the holder with the view.
         convertView.setTag(viewHolder);
 
         if(callRecord != null) {
             // Set name or number as text.
-            if (name != null) {
+            if(number != null && PhoneNumberUtils.isAnonymousNumber(callRecord.getCaller())) {
+                viewHolder.title.setText(convertView.getContext().getString(R.string.supressed_number));
+            } else if (name != null) {
                 viewHolder.title.setText(name);
             } else {
                 viewHolder.title.setText(number);

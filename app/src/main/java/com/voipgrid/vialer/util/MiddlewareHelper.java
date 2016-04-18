@@ -71,7 +71,6 @@ public class MiddlewareHelper {
         return !isRegistered(context) || needsUpdate(context);
     }
 
-
     public static void register(Context context, String token) {
         Preferences sipPreferences = new Preferences(context);
         ((AnalyticsApplication) context.getApplicationContext()).getDefaultTracker();
@@ -113,7 +112,9 @@ public class MiddlewareHelper {
 
                 analyticsHelper.sendException(
                         context.getString(
-                                R.string.analytics_event_description_registration_failed));
+                                R.string.analytics_event_description_registration_failed
+                        )
+                );
             }
         } catch (IOException e) {
             setRegistrationStatus(context, Constants.STATUS_FAILED);
@@ -146,6 +147,8 @@ public class MiddlewareHelper {
             try {
                 if (call.execute().isSuccess()) {
                     setRegistrationStatus(context, Constants.STATUS_UNREGISTERED);
+                } else {
+                    setRegistrationStatus(context, Constants.STATUS_FAILED);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
