@@ -37,6 +37,7 @@ public class AccountActivity extends AppCompatActivity implements
     private EditText mSipIdEditText;
 
     private PhoneAccount mPhoneAccount;
+    private PhoneAccountHelper mPhoneAccountHelper;
     private Preferences mPreferences;
     private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
@@ -49,9 +50,7 @@ public class AccountActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_account);
 
         mJsonStorage = new JsonStorage(this);
-        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        mPhoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
-
+        mPhoneAccountHelper = new PhoneAccountHelper(this);
         mPreferences = new Preferences(this);
 
         /* set the Toolbar to use as ActionBar */
@@ -67,6 +66,11 @@ public class AccountActivity extends AppCompatActivity implements
         mSwitch = (CompoundButton) findViewById(R.id.account_sip_switch);
 
         mSwitch.setOnCheckedChangeListener(this);
+    }
+
+    private void updateAndPopulate() {
+        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        mPhoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
 
         populate();
     }
@@ -184,13 +188,11 @@ public class AccountActivity extends AppCompatActivity implements
             MiddlewareHelper.executeUnregisterTask(this);
         } else {
 
-            final PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(this);
-
             new AsyncTask<Void, Void, PhoneAccount>() {
 
                 @Override
                 protected PhoneAccount doInBackground(Void... params) {
-                    return phoneAccountHelper.getLinkedPhoneAccount();
+                    return mPhoneAccountHelper.getLinkedPhoneAccount();
                 }
 
                 @Override
@@ -198,7 +200,8 @@ public class AccountActivity extends AppCompatActivity implements
                     super.onPostExecute(phoneAccount);
 
                     if (phoneAccount != null) {
-                        phoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
+                        mPhoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
+                        updateAndPopulate();
                     } else {
                         // Make sure sip is disabled in preference and the switch is returned
                         // to disabled. Setting disabled in the settings first makes sure
@@ -238,6 +241,12 @@ public class AccountActivity extends AppCompatActivity implements
     @Override
     public void onResume() {
         super.onResume();
+        // Update and populate the fields.
+        updateAndPopulate();
+
+        // Update phone account and systemuser.
+        updateSystemUserAndPhoneAccount();
+
         // When coming back from the SetUpVoipAccountFragment's created webactivity
         // we cannot immediately check if a voipaccount has been set. Processing the
         // fragment and the checks for a permitted sip permission can take 1 up to 3 seconds.
@@ -255,6 +264,26 @@ public class AccountActivity extends AppCompatActivity implements
     @Override
     public void onFailure(Call call, Throwable t) {
         failedFeedback();
+    }
+
+    /**
+     * Function to update the systemuser and phone account. Update views after update.
+     */
+    private void updateSystemUserAndPhoneAccount() {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                mPhoneAccountHelper.updatePhoneAccount();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                updateAndPopulate();
+            }
+        }.execute();
     }
 
     private void enableProgressBar(boolean enabled) {

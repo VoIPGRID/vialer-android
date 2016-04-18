@@ -136,18 +136,7 @@ public abstract class NavigationDrawerActivity
 
         mDrawerLayout.setDrawerListener(drawerToggle);
 
-        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        if(systemUser != null) {
-            String phoneNumber = systemUser.getOutgoingCli();
-            if (!TextUtils.isEmpty(phoneNumber)) {
-                ((TextView) mDrawerLayout.findViewById(R.id.text_view_name)).setText(phoneNumber);
-            }
-
-            String email = systemUser.getEmail();
-            if (!TextUtils.isEmpty(email)) {
-                ((TextView) mDrawerLayout.findViewById(R.id.text_view_email)).setText(email);
-            }
-        }
+        setSystemUserInfo();
 
         setVersionInfo((TextView) mDrawerLayout.findViewById(R.id.text_view_version));
 
@@ -158,6 +147,20 @@ public abstract class NavigationDrawerActivity
 
         // Setup the spinner in the drawer.
         setupSpinner();
+    }
+
+    protected void setSystemUserInfo() {
+        if(mSystemUser != null) {
+            String phoneNumber = mSystemUser.getOutgoingCli();
+            if (!TextUtils.isEmpty(phoneNumber)) {
+                ((TextView) mDrawerLayout.findViewById(R.id.text_view_name)).setText(phoneNumber);
+            }
+
+            String email = mSystemUser.getEmail();
+            if (!TextUtils.isEmpty(email)) {
+                ((TextView) mDrawerLayout.findViewById(R.id.text_view_email)).setText(email);
+            }
+        }
     }
 
     private void setVersionInfo(TextView textView) {
@@ -356,10 +359,13 @@ public abstract class NavigationDrawerActivity
         @Override
         public void onDrawerOpened(View drawerView) {
             super.onDrawerOpened(drawerView);
-            // Force a reload of availability every time the drawer is opened.
             if (mSpinner != null) {
+                // Force a reload of availability every time the drawer is opened.
                 Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
                 call.enqueue(mActivity);
+                // Make sure the systemuser info shown is up-to-date.
+                mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+                setSystemUserInfo();
             }
         }
     }

@@ -25,8 +25,8 @@ import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.models.PasswordResetParams;
-import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import retrofit2.Call;
 import retrofit2.Callback;

@@ -31,10 +31,9 @@ public class PhoneAccountHelper {
         mContext = context;
 
         mPreferences = new Preferences(context);
-
         mJsonStorage = new JsonStorage(context);
 
-        /* get username and password */
+        // Get credentials for api.
         SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         String username = systemUser.getEmail();
         String password = systemUser.getPassword();
@@ -48,32 +47,59 @@ public class PhoneAccountHelper {
     }
 
     /**
-     * Function to get the phone linked to the user.
+     * Function to get the current systemuser from the api.
+     * @return
+     */
+    public SystemUser getAndUpdateSystemUser() {
+        Call<SystemUser> call = mApi.systemUser();
+        SystemUser systemUser = null;
+        try {
+            Response<SystemUser> response = call.execute();
+            if (response.isSuccess() && response.body() != null) {
+                systemUser = response.body();
+                updateSystemUser(systemUser);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return systemUser;
+    }
+
+    /**
+     * Function to update the systemuser information.
+     */
+    private void updateSystemUser(SystemUser systemUser) {
+        SystemUser currentSystemuser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        currentSystemuser.setOutgoingCli(systemUser.getOutgoingCli());
+        currentSystemuser.setMobileNumber(systemUser.getMobileNumber());
+        mJsonStorage.save(currentSystemuser);
+    }
+
+
+    /**
+     * Function to get the phone linked to the user. This also updates the systemuser.
      * @return PhoneAccount object or null.
      */
     public PhoneAccount getLinkedPhoneAccount() {
-        Call<SystemUser> call = mApi.systemUser();
+        SystemUser systemUser = getAndUpdateSystemUser();
         PhoneAccount phoneAccount = null;
-        try {
-            // Get the systemuser.
-            Response<SystemUser> response = call.execute();
-            if (response.isSuccess() && response.body() != null) {
-                SystemUser systemUser = response.body();
-                // Set the permissions based on systemuser.
-                mPreferences.setSipPermission(systemUser.hasSipPermission());
-                String phoneAccountId = systemUser.getPhoneAccountId();
 
-                // Get phone account from API if one is provided in the systemuser API.
-                if (phoneAccountId != null) {
-                    Call<PhoneAccount> phoneAccountCall = mApi.phoneAccount(phoneAccountId);
+        if (systemUser != null) {
+            mPreferences.setSipPermission(systemUser.hasSipPermission());
+            String phoneAccountId = systemUser.getPhoneAccountId();
+
+            // Get phone account from API if one is provided in the systemuser API.
+            if (phoneAccountId != null) {
+                Call<PhoneAccount> phoneAccountCall = mApi.phoneAccount(phoneAccountId);
+                try {
                     Response<PhoneAccount> phoneAccountResponse = phoneAccountCall.execute();
                     if (phoneAccountResponse.isSuccess() && phoneAccountResponse.body() != null) {
                         phoneAccount = phoneAccountResponse.body();
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return phoneAccount;
     }
