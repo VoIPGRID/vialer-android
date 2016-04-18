@@ -48,10 +48,7 @@ public class MainActivity extends NavigationDrawerActivity implements
 
         mJsonStorage = new JsonStorage(this);
 
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
+        mConnectivityHelper = ConnectivityHelper.get(this);
 
         /* check if the app has a SystemUser */
         if (!mJsonStorage.has(SystemUser.class)) {
