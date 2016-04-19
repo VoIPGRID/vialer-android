@@ -4,6 +4,7 @@
     android:layout_width="@dimen/key_pad_width"
     android:layout_height="wrap_content"
     android:id="@+id/grid_layout"
+    android:gravity="center_horizontal"
     app:columnCount="@integer/dialpad_column_count"
     app:rowCount="@integer/dialpad_row_count">
 
@@ -18,7 +19,9 @@
         android:onClick="onClick"
         app:digit="2"
         app:chars="abc"
-        style="@style/DialpadButton"/>
+        style="@style/DialpadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
         android:id="@+id/button_3"
