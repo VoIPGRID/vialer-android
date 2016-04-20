@@ -96,6 +96,7 @@ public class SipService extends Service implements
     private String mCallType;
     private Call mCall;
     private boolean mHasHold = false;
+    private boolean mHasRespondedToMiddleware = false;
     private SIPLogWriter mSIPLogWriter;
     private boolean mUserHangupCall = false;
     private boolean mCallIsConnected = false;
@@ -319,7 +320,11 @@ public class SipService extends Service implements
     /** AccountStatus **/
     @Override
     public void onAccountRegistered(Account account, OnRegStateParam param) {
-        if(mCallType.equals(SipConstants.ACTION_VIALER_INCOMING)) {
+        // Check if it an incoming call and we did not respond to the middleware already.
+        if (mCallType.equals(SipConstants.ACTION_VIALER_INCOMING) && !mHasRespondedToMiddleware) {
+            // Set responded as soon as possible to avoid duplicate requests due to multiple
+            // onAccountRegistered calls in a row.
+            mHasRespondedToMiddleware = true;
 
             AnalyticsHelper analyticsHelper = new AnalyticsHelper(
                     ((AnalyticsApplication) getApplication()).getDefaultTracker()
