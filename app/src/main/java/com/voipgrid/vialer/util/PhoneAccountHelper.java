@@ -105,6 +105,11 @@ public class PhoneAccountHelper {
     }
 
     public void savePhoneAccountAndRegister(PhoneAccount phoneAccount) {
+        // Check if we have something to save and register.
+        if (phoneAccount == null) {
+            return;
+        }
+
         // Get the phone account currently saved in the local storage.
         PhoneAccount existingPhoneAccount = ((PhoneAccount) mJsonStorage.get(PhoneAccount.class));
         // Save the linked phone account in the local storage.
