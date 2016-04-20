@@ -1,9 +1,11 @@
 package com.voipgrid.vialer;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -13,6 +15,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
@@ -26,6 +29,7 @@ import android.widget.TextView;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.sip.SipConstants;
+import com.voipgrid.vialer.sip.SipService;
 
 /**
  * CallActivity for incoming or outgoing call.
@@ -59,6 +63,8 @@ public class CallActivity extends AppCompatActivity
 
     // Keep track of the start time of a call, so we can keep track of its duration.
     long mCallStartTime = 0;
+    private SipService mSipService;
+    private boolean mServiceBound = false;
 
     // Runs without a timer by re-posting this handler at the end of the runnable.
     Handler mCallHandler = new Handler();
@@ -81,6 +87,23 @@ public class CallActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             onCallStatusUpdate(intent.getStringExtra(CALL_STATUS_KEY));
             onCallStatesUpdateButtons(intent.getStringExtra(CALL_STATUS_KEY));
+        }
+    };
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance.
+            SipService.SipServiceBinder binder = (SipService.SipServiceBinder) service;
+            mSipService = binder.getService();
+            mServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mServiceBound = false;
         }
     };
 
@@ -276,13 +299,37 @@ public class CallActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Bind the SipService to the activity.
+        bindService(new Intent(this, SipService.class), mConnection, Context.BIND_AUTO_CREATE);
+
+        // Make sure service is bound before updating status.
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!mServiceBound) {
+                    finishWithDelay();
+                } else if(mSipService.getCurrentCall() == null) {
+                    onCallStatusUpdate(CALL_DISCONNECTED_MESSAGE);
+                }
+            }
+        }, 500);
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
-        // unRegister the SipService BroadcastReceiver when the activity pauses
+        // Unregister the SipService BroadcastReceiver when the activity pauses.
         mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
 
         if (mProximitySensor != null) {
             mSensorManager.unregisterListener(this);
+        }
+        if (mServiceBound) {
+            unbindService(mConnection);
+            mServiceBound = false;
         }
     }
 
@@ -332,9 +379,9 @@ public class CallActivity extends AppCompatActivity
     // Toggle the hold the call when the user presses the button.
     private void toggleOnHold() {
         mOnHold = !mOnHold;
-        Bundle onHoldExtras = new Bundle();
-        onHoldExtras.putString(CALL_STATUS_ACTION, CALL_PUT_ON_HOLD_ACTION);
-        broadcast(onHoldExtras);
+        if (mServiceBound) {
+            mSipService.putOnHold(mSipService.getCurrentCall());
+        }
     }
 
     /**
@@ -437,18 +484,6 @@ public class CallActivity extends AppCompatActivity
     }
 
     /**
-     * Send a broadcast with Action ACTION_BROADCAST_CALL_STATUS and a STATUS String extra to a set
-     * of receivers.
-     *
-     * @param extras add data Bundle to CAll interaction broadcast intent.'
-     */
-    private void broadcast(Bundle extras) {
-        Intent intent =  new Intent(ACTION_BROADCAST_CALL_INTERACTION);
-        intent.putExtras(extras);
-        mBroadcastManager.sendBroadcast(intent);
-    }
-
-    /**
      * Method for setting new  microphone volume value (SIP Rx level):
      * - level 0 means mute:
      * - level 1 means no volume change, so we won't use this.
@@ -457,10 +492,9 @@ public class CallActivity extends AppCompatActivity
      * @param newVolume new volume level for the Rx level of the current media of active call.
      */
     void updateMicrophoneVolume(long newVolume) {
-        Bundle extras = new Bundle();
-        extras.putString(CALL_STATUS_ACTION, CALL_UPDATE_MICROPHONE_VOLUME_ACTION);
-        extras.putLong(MICROPHONE_VOLUME_KEY, newVolume);
-        broadcast(extras);
+        if (mServiceBound) {
+            mSipService.updateMicrophoneVolume(mSipService.getCurrentCall(), newVolume);
+        }
     }
 
     @Override
@@ -494,37 +528,35 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case R.id.button_hangup:
-                Bundle hangupExtras = new Bundle();
-                hangupExtras.putString(CALL_STATUS_ACTION, CALL_HANG_UP_ACTION);
-                broadcast(hangupExtras);  // Broadcast to service to decline or end call.
-                mStateView.setText(R.string.call_hangup);
-                finishWithDelay();
+                if (mServiceBound) {
+                    mSipService.hangUp(mSipService.getCurrentCall());
+                    mStateView.setText(R.string.call_hangup);
+                    finishWithDelay();
+                }
                 break;
 
             case R.id.button_reject:
-                Bundle rejectExtras = new Bundle();
-                rejectExtras.putString(CALL_STATUS_ACTION, CALL_DECLINE_ACTION);
-                broadcast(rejectExtras);  // Broadcast to service to decline or end call.
+                if (mServiceBound) {
+                    mSipService.decline(mSipService.getCurrentCall());
+                    mAnalyticsHelper.sendEvent(
+                            getString(R.string.analytics_event_category_call),
+                            getString(R.string.analytics_event_action_inbound),
+                            getString(R.string.analytics_event_label_declined)
+                    );
 
-                mAnalyticsHelper.sendEvent(
-                        getString(R.string.analytics_event_category_call),
-                        getString(R.string.analytics_event_action_inbound),
-                        getString(R.string.analytics_event_label_declined)
-                );
-
-                finishWithDelay();              // Close this activity.
+                    finishWithDelay();
+                }
                 break;
 
             case R.id.button_pickup:
-                Bundle pickupExtras = new Bundle();
-                pickupExtras.putString(CALL_STATUS_ACTION, CALL_PICK_UP_ACTION);
-                broadcast(pickupExtras); // Broadcast to service to accept call.
-
-                mAnalyticsHelper.sendEvent(
-                        getString(R.string.analytics_event_category_call),
-                        getString(R.string.analytics_event_action_inbound),
-                        getString(R.string.analytics_event_label_accepted)
-                );
+                if (mServiceBound) {
+                    mSipService.answer(mSipService.getCurrentCall());
+                    mAnalyticsHelper.sendEvent(
+                            getString(R.string.analytics_event_category_call),
+                            getString(R.string.analytics_event_action_inbound),
+                            getString(R.string.analytics_event_label_accepted)
+                    );
+                }
                 break;
 
             case R.id.screen_off : break; // Screen is off so ignore click events
