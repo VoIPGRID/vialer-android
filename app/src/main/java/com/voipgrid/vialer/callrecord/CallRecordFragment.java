@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.callrecord;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -25,6 +26,7 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NetworkStateViewHelper;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,7 +124,8 @@ public class CallRecordFragment extends ListFragment implements
 
     @Override
     public View onCreateView(
-            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
+    ) {
         return inflater.inflate(R.layout.fragment_call_records, null);
     }
 
@@ -160,13 +163,18 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof Activity) {
+            Activity activity = (Activity) context;
+            try {
+                mListener = (OnFragmentInteractionListener) activity;
+            } catch (ClassCastException e) {
+                throw new ClassCastException(
+                        activity.toString() + " must implement OnFragmentInteractionListener"
+                );
+            }
         }
     }
 
@@ -186,10 +194,9 @@ public class CallRecordFragment extends ListFragment implements
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        if (null != mListener) {
+        if (mListener != null) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-
             CallRecord record = mAdapter.getItem(position);
             String number;
             if (record.getDirection().equals(CallRecord.DIRECTION_INBOUND)) {
@@ -198,9 +205,14 @@ public class CallRecordFragment extends ListFragment implements
                 number = record.getDialedNumber();
             }
 
-
-            new DialHelper(getActivity(), mJsonStorage, mConnectivityHelper, mAnalyticsHelper).
-                    callNumber(number, "");
+            if (!PhoneNumberUtils.isAnonymousNumber(number)) {
+                new DialHelper(
+                        getActivity(),
+                        mJsonStorage,
+                        mConnectivityHelper,
+                        mAnalyticsHelper
+                ).callNumber(number, "");
+            }
         }
     }
 
@@ -222,7 +234,9 @@ public class CallRecordFragment extends ListFragment implements
                 systemUser.getEmail(),
                 systemUser.getPassword());
 
-        Call<VoipGridResponse<CallRecord>> call = api.getRecentCalls(50, 0, CallRecord.getLimitDate());
+        Call<VoipGridResponse<CallRecord>> call = api.getRecentCalls(
+                50, 0, CallRecord.getLimitDate()
+        );
         call.enqueue(this);
     }
 
@@ -232,20 +246,25 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     private void displayCachedRecords(List<CallRecord> records) {
-        if (mHaveNetworkRecords) return; /* cached results arrived later than the network results */
+        // Cached results arrived later than the network results.
+        if (mHaveNetworkRecords) {
+            return;
+        }
         displayCallRecords(records);
     }
 
     private void displayCallRecords(List<CallRecord> records) {
         List<CallRecord> filtered = filter(records);
+
         if(filtered != null && filtered.size() > 0) {
             mAdapter.setCallRecords(filtered);
             setEmptyView(null, false);
         } else if(mAdapter.getCount() == 0) {
-            /* List is empty, but adapter view may not be. Since this method is only called in
-            success cases, ignore this case.   */
+            // List is empty, but adapter view may not be. Since this method is only called in
+            // success cases, ignore this case.
             String emptyText;
-            if (mFilter != null && mFilter.equals(FILTER_MISSED_RECORDS)){
+
+            if (mFilter != null && mFilter.equals(FILTER_MISSED_RECORDS)) {
                 emptyText = getString(R.string.empty_view_missed_message);
             } else {
                 emptyText = getString(R.string.empty_view_default_message);
@@ -261,16 +280,18 @@ public class CallRecordFragment extends ListFragment implements
 
     /**
      * Apply filter on call records or return the call record list when the filter is null
-     * @param callRecords
-     * @return
+     * @param callRecords List of CallRecord instances
+     * @return List of CallRecord instances.
      */
     private List<CallRecord> filter(List<CallRecord> callRecords) {
-        if(mFilter != null && callRecords != null && callRecords.size() > 0) {
+        if (mFilter != null && callRecords != null && callRecords.size() > 0) {
             List<CallRecord> filtered = new ArrayList<>();
-            if(mFilter.equals(FILTER_MISSED_RECORDS)) {
-                for(int i=0, size = callRecords.size(); i < size; i++) {
+
+            if (mFilter.equals(FILTER_MISSED_RECORDS)) {
+                for (int i=0, size = callRecords.size(); i < size; i++) {
                     CallRecord callRecord = callRecords.get(i);
-                    if(callRecord.getDirection().equals(CallRecord.DIRECTION_INBOUND) &&
+
+                    if (callRecord.getDirection().equals(CallRecord.DIRECTION_INBOUND) &&
                             callRecord.getDuration() == 0) {
                         filtered.add(callRecord);
                     }
@@ -288,7 +309,7 @@ public class CallRecordFragment extends ListFragment implements
             mHaveNetworkRecords = true;
             List<CallRecord> records = response.body().getObjects();
             displayCallRecords(records);
-        /* save the records to cache, if there are any */
+            // Save the records to cache, if there are any.
             if (filter(records).size() > 0) {
                 new AsyncCallRecordSaver(records).execute();
             }

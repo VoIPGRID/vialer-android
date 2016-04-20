@@ -36,7 +36,6 @@ public class PhoneNumberUtils {
      * @return boolean If the number is valid.
      */
     public static boolean isValidMobileNumber(String mobileNumber) {
-
         if (!mobileNumber.startsWith("+")) {
             return false;
         }
@@ -46,6 +45,10 @@ public class PhoneNumberUtils {
         }
 
         return true;
+    }
+
+    public static boolean isAnonymousNumber(String number) {
+        return number.endsWith("x");
     }
 
 }

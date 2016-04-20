@@ -28,7 +28,7 @@ import retrofit2.Response;
  * incoming calls.
  */
 public class VialerGcmListenerService extends GcmListenerService implements MiddlewareHelper.Constants {
-    /* Message format constants. */
+    // Message format constants.
     private final static String MESSAGE_TYPE = "type";
 
     private final static String CALL_REQUEST_TYPE = "call";
@@ -38,11 +38,9 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
     private final static String REQUEST_TOKEN = "unique_key";
     private final static String PHONE_NUMBER = "phonenumber";
     private final static String CALLER_ID = "caller_id";
-    private static final String SUPRESSED = "supressed";
+    private static final String SUPPRESSED = "supressed";
 
-    /**
-     * Extra field for notification throughput logging.
-     */
+    // Extra field for notification throughput logging.
     public static final String MESSAGE_START_TIME = "message_start_time";
 
     @Override
@@ -59,11 +57,11 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
             if(connectivityHelper.hasNetworkConnection() && connectivityHelper.hasFastData()) {
 
                 String number = data.getString(PHONE_NUMBER);
-                if(number.equalsIgnoreCase(SUPRESSED)) {
+                if(number != null && number.equalsIgnoreCase(SUPPRESSED)) {
                     number = getString(R.string.supressed_number);
                 }
 
-                /* First start the SIP service with an incoming call */
+                // First start the SIP service with an incoming call.
                 startSipService(
                         number,
                         data.getString(CALLER_ID),
@@ -72,9 +70,9 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                         data.getString(MESSAGE_START_TIME)
                 );
             } else {
-                /* Inform the middleware the incoming call is received but the app can not handle
-                   the sip call because there is no LTE or Wifi connection available at this
-                   point */
+                // Inform the middleware the incoming call is received but the app can not handle
+                // the sip call because there is no LTE or Wifi connection available at this
+                // point.
                 analyticsHelper.sendEvent(
                         getString(R.string.analytics_event_category_middleware),
                         getString(R.string.analytics_event_action_acceptance),
@@ -133,7 +131,7 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
         Intent intent = new Intent(this, SipService.class);
         intent.setAction(SipConstants.ACTION_VIALER_INCOMING);
 
-        // set a phoneNumberUri as DATA for the intent to SipServiceOld.
+        // Set a phoneNumberUri as DATA for the intent to SipServiceOld.
         Uri sipAddressUri = SipUri.sipAddressUri(
                 this,
                 PhoneNumberUtils.format(phoneNumber)
