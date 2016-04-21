@@ -27,6 +27,7 @@ import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
+import com.voipgrid.vialer.util.PhonePermission;
 import com.voipgrid.vialer.util.UpdateActivity;
 import com.voipgrid.vialer.util.UpdateHelper;
 
@@ -93,6 +94,12 @@ public class MainActivity extends NavigationDrawerActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Ask for phone permissions.
+        if (!PhonePermission.hasPermission(this)){
+            PhonePermission.askForPermission(this);
+            return;
+        }
 
         if (!ContactsPermission.hasPermission(this)){
             // We need to avoid a permission loop.
