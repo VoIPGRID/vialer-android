@@ -126,11 +126,18 @@ public class MiddlewareHelper {
         }
     }
 
+    /**
+     * Function to synchronously unregister at the middleware if a phone account and
+     * token are present.
+     * @param context
+     */
     public static void unregister(Context context) {
-        if (new Preferences(context).hasPhoneAccount()){
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor editor = preferences.edit();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        String token = preferences.getString(Constants.CURRENT_TOKEN, "");
 
+        // Check if we have a phone account and a push token.
+        if (new Preferences(context).hasPhoneAccount() && !token.equals("")) {
             JsonStorage jsonStorage = new JsonStorage(context);
             SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
 
@@ -140,7 +147,6 @@ public class MiddlewareHelper {
                     getBaseApiUrl(context),
                     systemUser.getEmail(),
                     systemUser.getPassword());
-            String token = preferences.getString(Constants.CURRENT_TOKEN, "");
             String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
             String appName = context.getPackageName();
             Call<ResponseBody> call = api.unregister(token, sipUserId, appName);
@@ -155,6 +161,8 @@ public class MiddlewareHelper {
             } finally {
                 editor.apply();
             }
+        } else {
+            setRegistrationStatus(context, Constants.STATUS_FAILED);
         }
     }
 
