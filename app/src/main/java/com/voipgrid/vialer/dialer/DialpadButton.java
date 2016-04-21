@@ -51,7 +51,7 @@ public class DialpadButton extends LinearLayout {
      * @param attrs
      */
     private void init(Context context, AttributeSet attrs) {
-        /* populate the parameter values supplied in the layout */
+        // Populate the parameter values supplied in the layout.
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.DialpadButton, 0, 0);
         try {
@@ -63,25 +63,25 @@ public class DialpadButton extends LinearLayout {
 
         setDtmfTone(mDigit);
 
-        /* container layout to fix the button is centered in the GridLayout element */
+        // Container layout to fix the button is centered in the GridLayout element.
         LinearLayout container = new LinearLayout(context);
         container.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
         container.setGravity(Gravity.CENTER);
         addView(container);
 
-        /* square layout to fix a round background on touch events for pre Lollipop devices */
+        // Square layout to fix a round background on touch events for pre Lollipop devices.
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(VERTICAL);
         linearLayout.setBackgroundResource(R.drawable.bg_dial_button);
         linearLayout.setGravity(Gravity.CENTER);
         container.addView(linearLayout);
 
-        /* LayoutParams used to center the text within the TextViews*/
+        // LayoutParams used to center the text within the TextViews.
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-        /* Setup and add the digit TextView */
+        // Setup and add the digit TextView.
         TextView digit = new TextView(context);
         digit.setText(mDigit);
         digit.setLayoutParams(params);
@@ -96,7 +96,7 @@ public class DialpadButton extends LinearLayout {
 
         linearLayout.addView(digit);
 
-        /* Setup and add the chars TextView */
+        // Setup and add the chars TextView.
         TextView chars = new TextView(context);
         chars.setText(mChars);
         chars.setLayoutParams(params);

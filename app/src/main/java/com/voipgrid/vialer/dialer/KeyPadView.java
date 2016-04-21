@@ -15,7 +15,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.sip.SipConstants;
 
 /**
- * Created by eltjo on 25/08/15.
+ * Custom KeyPadClass to extend the LinearLayout to show dial pad buttons.
  */
 public class KeyPadView extends LinearLayout
         implements View.OnClickListener, View.OnLongClickListener {
@@ -42,24 +42,29 @@ public class KeyPadView extends LinearLayout
     }
 
     private void init() {
-        AudioManager audioManager = (AudioManager) getContext()
-                .getSystemService(Context.AUDIO_SERVICE);
-        mToneGenerator = new ToneGenerator(
-                AudioManager.STREAM_MUSIC,
-                audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
+        if (!isInEditMode()) {
+            AudioManager audioManager = (AudioManager) getContext().getSystemService(
+                    Context.AUDIO_SERVICE
+            );
+            mToneGenerator = new ToneGenerator(
+                    AudioManager.STREAM_MUSIC,
+                    audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+            );
+        }
 
         mBroadcastManager = LocalBroadcastManager.getInstance(getContext());
 
-        LayoutInflater inflater = (LayoutInflater) getContext()
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE
+        );
         inflater.inflate(R.layout.view_key_pad, this);
         ViewGroup view = (ViewGroup) findViewById(R.id.grid_layout);
 
-        for(int i=0, size=view.getChildCount(); i<size; i++) {
+        for(int i = 0, size = view.getChildCount(); i < size; i++) {
             View child = view.getChildAt(i);
             if(child instanceof DialpadButton) {
                 String digit = ((DialpadButton) child).getDigit();
-                if (digit.equals("0")){
+                if (digit.equals("0")) {
                     child.setOnLongClickListener(this);
                 }
                 child.setOnClickListener(this);
