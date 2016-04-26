@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -94,6 +95,9 @@ public class SipService extends Service implements
     private Call mCall;
     private boolean mHasHold = false;
     private SIPLogWriter mSIPLogWriter;
+    private boolean mUserHangupCall = false;
+    private boolean mCallIsConnected = false;
+
     // Message throughput logging timestamp.
     private String mMessageStartTime;
 
@@ -512,19 +516,27 @@ public class SipService extends Service implements
     @Override
     public void onCallConnected(Call call) {
         broadcast(SipConstants.CALL_CONNECTED_MESSAGE);
+        mCallIsConnected = true;
     }
 
     @Override
     public void onCallDisconnected(final Call call) {
         try {
-            // Try to unregister the sip account with the sipproxy
+            // Try to unregister the sip account with the sip proxy.
             mSipAccount.setRegistration(false);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // Play end of call beep only when the remote party hangs up and the call was connected.
+        if (!mUserHangupCall && mCallIsConnected) {
+            mToneGenerator.startTone(ToneGenerator.TONE_CDMA_NETWORK_BUSY, 1500);
+        }
+
         // Cleanup the call
         setCurrentCall(null);
         broadcast(SipConstants.CALL_DISCONNECTED_MESSAGE);
+
         stopSelf();
     }
 
@@ -595,11 +607,21 @@ public class SipService extends Service implements
                 updateMicrophoneVolume(call,
                         intent.getLongExtra(SipConstants.MICROPHONE_VOLUME_KEY, 1));
                 break;
-            case SipConstants.CALL_PUT_ON_HOLD_ACTION : putOnHold(call); break;
-            case SipConstants.CALL_HANG_UP_ACTION : hangUp(call); break;
-            case SipConstants.CALL_PICK_UP_ACTION : answer(call); break;
-            case SipConstants.CALL_DECLINE_ACTION : decline(call); break;
-            case SipConstants.CALL_XFER_ACTION : xFer(call); break;
+            case SipConstants.CALL_PUT_ON_HOLD_ACTION :
+                putOnHold(call);
+                break;
+            case SipConstants.CALL_HANG_UP_ACTION :
+                hangUp(call, false);
+                break;
+            case SipConstants.CALL_PICK_UP_ACTION :
+                answer(call);
+                break;
+            case SipConstants.CALL_DECLINE_ACTION :
+                decline(call);
+                break;
+            case SipConstants.CALL_XFER_ACTION :
+                xFer(call);
+                break;
         }
     }
 
@@ -628,7 +650,8 @@ public class SipService extends Service implements
     }
 
     @Override
-    public void hangUp(Call call) {
+    public void hangUp(Call call, boolean userHangup) {
+        mUserHangupCall = userHangup;
         hangUpWithStatusCode(call, pjsip_status_code.PJSIP_SC_DECLINE);
     }
 
@@ -644,6 +667,7 @@ public class SipService extends Service implements
         try {
             if(call != null) {
                 call.answer(callOpParam);
+                mCallIsConnected = true;
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -533,7 +533,7 @@ public class CallActivity extends AppCompatActivity
 
             case R.id.button_hangup:
                 if (mServiceBound) {
-                    mSipService.hangUp(mSipService.getCurrentCall());
+                    mSipService.hangUp(mSipService.getCurrentCall(), true);
                     mStateView.setText(R.string.call_hangup);
                     finishWithDelay();
                 }
