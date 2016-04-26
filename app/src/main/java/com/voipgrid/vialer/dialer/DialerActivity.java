@@ -14,7 +14,6 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
@@ -37,6 +36,7 @@ import com.voipgrid.vialer.t9.ContactCursorLoader;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.IconHelper;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.NetworkStateViewHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -50,7 +50,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 /**
  * DialerActivity with a numpad view and functionality to perform a T9 contacts search
  */
-public class DialerActivity extends AppCompatActivity implements
+public class DialerActivity extends LoginRequiredActivity implements
         View.OnClickListener,
         KeyPadView.OnKeyPadClickListener,
         AbsListView.OnScrollListener,

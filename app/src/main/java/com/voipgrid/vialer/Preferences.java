@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.util.JsonStorage;
 
 /**
@@ -24,6 +25,15 @@ public class Preferences {
     public Preferences(Context context) {
         mContext = context;
         mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+    }
+
+    /**
+     * Function to check if a user is logged in.
+     * @return If a system user is present thus logged in.
+     */
+    public boolean isLoggedIn() {
+        JsonStorage storage = new JsonStorage(mContext);
+        return storage.has(SystemUser.class);
     }
 
     /**

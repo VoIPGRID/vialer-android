@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +18,7 @@ import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.onboarding.SetupActivity;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.MiddlewareHelper;
@@ -29,7 +29,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AccountActivity extends AppCompatActivity implements
+public class AccountActivity extends LoginRequiredActivity implements
         Switch.OnCheckedChangeListener,
         Callback {
 
