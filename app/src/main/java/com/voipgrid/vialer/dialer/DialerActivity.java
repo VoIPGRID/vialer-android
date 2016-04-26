@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.dialer;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -9,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -54,9 +56,11 @@ public class DialerActivity extends AppCompatActivity implements
         AbsListView.OnScrollListener,
         AdapterView.OnItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
+    private static final String LAST_DIALED = "last_dialed";
 
     private ListView mContactsListView;
     private NumberInputView mNumberInputView;
+    private SharedPreferences mSharedPreferences;
     private SimpleCursorAdapter mContactsAdapter = null;
     private TextView mEmptyView;
     private ViewGroup mKeyPadViewContainer;
@@ -79,6 +83,8 @@ public class DialerActivity extends AppCompatActivity implements
         mAnalyticsHelper = new AnalyticsHelper(
                 ((AnalyticsApplication) getApplication()).getDefaultTracker()
         );
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         mJsonStorage = new JsonStorage(this);
 
@@ -343,6 +349,7 @@ public class DialerActivity extends AppCompatActivity implements
     public void onCallNumber(String number, String contactName) {
         new DialHelper(this, mJsonStorage, mConnectivityHelper, mAnalyticsHelper)
                 .callNumber(PhoneNumberUtils.format(number), contactName);
+        mSharedPreferences.edit().putString(LAST_DIALED, number).apply();
         mNumberInputView.clear();
     }
 
@@ -351,8 +358,12 @@ public class DialerActivity extends AppCompatActivity implements
         switch (view.getId()) {
             case R.id.button_call :
                 String phoneNumber = mNumberInputView.getNumber();
-                if(phoneNumber!= null && !phoneNumber.isEmpty()) {
+                if (phoneNumber != null && !phoneNumber.isEmpty()) {
                     onCallNumber(PhoneNumberUtils.format(phoneNumber), null);
+                } else {
+                    // Set last dialed number on call button clicked when number is empty.
+                    String last_dialed = mSharedPreferences.getString(LAST_DIALED, "");
+                    mNumberInputView.setNumber(last_dialed);
                 }
                 break;
             case R.id.button_dialpad :
@@ -386,7 +397,7 @@ public class DialerActivity extends AppCompatActivity implements
 
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if(scrollState == SCROLL_STATE_TOUCH_SCROLL &&
+        if (scrollState == SCROLL_STATE_TOUCH_SCROLL &&
                 mKeyPadViewContainer.getVisibility() == View.VISIBLE) {
             toggleKeyPadView();
         }

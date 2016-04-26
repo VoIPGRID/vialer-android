@@ -123,6 +123,11 @@ public class NumberInputView extends RelativeLayout implements
             Integer startCursorPosition = mEditText.getSelectionStart();
             Integer endCursorPosition = mEditText.getSelectionEnd();
 
+            // Can not remove on index 0.
+            if (startCursorPosition == 0 && endCursorPosition == 0) {
+                return;
+            }
+
             // Check if there is an selection to remove. Otherwise remove one character.
             if ((endCursorPosition - startCursorPosition) > 0) {
                 removeTextFromInput(startCursorPosition, endCursorPosition);
@@ -169,6 +174,7 @@ public class NumberInputView extends RelativeLayout implements
 
     public void setNumber(String number) {
         mEditText.setText(number);
+        mEditText.setSelection(number.length());
     }
 
     /**
