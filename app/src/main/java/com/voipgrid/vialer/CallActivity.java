@@ -562,6 +562,9 @@ public class CallActivity extends AppCompatActivity
                     );
                 }
                 break;
+        }
+    }
+
     private void playRingtone(boolean play) {
         if(mRingtone != null) {
             if(play && !mRingtone.isPlaying()) {
