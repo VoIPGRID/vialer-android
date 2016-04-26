@@ -2,6 +2,7 @@ package com.voipgrid.vialer;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -23,9 +24,9 @@ import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.contacts.UpdateChangedContactsService;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.onboarding.SetupActivity;
-import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.UpdateActivity;
 import com.voipgrid.vialer.util.UpdateHelper;
 

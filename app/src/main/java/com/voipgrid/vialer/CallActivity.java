@@ -6,10 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -21,6 +17,7 @@ import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -30,12 +27,15 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.util.ProximitySensorHelper;
+import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
+
 
 /**
  * CallActivity for incoming or outgoing call.
  */
 public class CallActivity extends AppCompatActivity
-        implements View.OnClickListener, SensorEventListener, SipConstants,
+        implements View.OnClickListener, SipConstants, ProximitySensorInterface,
         AudioManager.OnAudioFocusChangeListener {
 
     public static final String TYPE_OUTGOING_CALL = "type-outgoing-call";
@@ -46,11 +46,12 @@ public class CallActivity extends AppCompatActivity
     private static final long[] VIBRATOR_PATTERN = {1000L, 1000L};
     // Manager for "on speaker" action.
     private AudioManager mAudioManager;
-    private SensorManager mSensorManager;
-    private Sensor mProximitySensor;
+    private ProximitySensorHelper mProximityHelper;
     private TextView mCallDurationView;
     private TextView mStateView;
     private boolean mIsIncomingCall;
+    private boolean mIncomingCallIsRinging = false;
+
     private boolean mConnected = false;
     private boolean mMute = false;
     private boolean mOnHold = false;
@@ -137,8 +138,7 @@ public class CallActivity extends AppCompatActivity
         // Make sure the hardware volume buttons control the volume of the call.
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 
-        mSensorManager   = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        mProximityHelper = new ProximitySensorHelper(this, this, findViewById(R.id.screen_off));
 
         mRingtone = RingtoneManager.getRingtone(this, Settings.System.DEFAULT_RINGTONE_URI);
 
@@ -175,6 +175,7 @@ public class CallActivity extends AppCompatActivity
             toggleCallStateButtonVisibility(type);
 
             if(mIsIncomingCall) {
+                mIncomingCallIsRinging = true;
                 switch (mAudioManager.getRingerMode()) {
                     case AudioManager.RINGER_MODE_NORMAL:
                         playRingtone(true);
@@ -236,9 +237,12 @@ public class CallActivity extends AppCompatActivity
                 mCallStartTime = System.currentTimeMillis();
                 mCallHandler.postDelayed(mCallDurationRunnable, 0);
                 mConnected = true;
+                mIncomingCallIsRinging = false;
 
                 playRingtone(false);
                 vibrate(false);
+
+                mProximityHelper.updateWakeLock();
                 break;
 
             case CALL_DISCONNECTED_MESSAGE:
@@ -250,6 +254,8 @@ public class CallActivity extends AppCompatActivity
 
                 // Stop duration timer.
                 mCallHandler.removeCallbacks(mCallDurationRunnable);
+                mConnected = false;
+                mIncomingCallIsRinging = false;
 
                 playRingtone(false);
                 vibrate(false);
@@ -281,6 +287,8 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case SERVICE_STOPPED :
+                mConnected = false;
+                mIncomingCallIsRinging = false;
                 finishWithDelay();
                 break;
         }
@@ -293,10 +301,7 @@ public class CallActivity extends AppCompatActivity
         // Register for updates.
         IntentFilter intentFilter = new IntentFilter(ACTION_BROADCAST_CALL_STATUS);
         mBroadcastManager.registerReceiver(mCallStatusReceiver, intentFilter);
-
-        if (mProximitySensor != null) {
-            mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_UI);
-        }
+        mProximityHelper.startSensor();
     }
 
     @Override
@@ -324,9 +329,7 @@ public class CallActivity extends AppCompatActivity
         // Unregister the SipService BroadcastReceiver when the activity pauses.
         mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
 
-        if (mProximitySensor != null) {
-            mSensorManager.unregisterListener(this);
-        }
+        mProximityHelper.stopSensor();
         if (mServiceBound) {
             unbindService(mConnection);
             mServiceBound = false;
@@ -374,6 +377,7 @@ public class CallActivity extends AppCompatActivity
         mKeyPadVisible = !mKeyPadVisible;
         boolean visible = mKeyPadViewContainer.getVisibility() == View.VISIBLE;
         mKeyPadViewContainer.setVisibility(visible ? View.GONE : View.VISIBLE);
+        mProximityHelper.updateWakeLock();
     }
 
     // Toggle the hold the call when the user presses the button.
@@ -558,64 +562,6 @@ public class CallActivity extends AppCompatActivity
                     );
                 }
                 break;
-
-            case R.id.screen_off : break; // Screen is off so ignore click events
-        }
-    }
-
-    /**
-     * Function to set the screen to ON (visible) or OFF (dimmed and disabled).
-     * @param on Whether or not the screen needs to be on or off.
-     */
-    private void toggleScreen(boolean on) {
-        WindowManager.LayoutParams params = getWindow().getAttributes();
-        View view = findViewById(R.id.screen_off);
-        if (on) {
-            // Reset screen brightness.
-            params.screenBrightness = -1;
-
-            // Set the OFF version of the screen to gone.
-            view.setVisibility(View.GONE);
-
-            // Remove the listener for the OFF screen state.
-            view.setOnClickListener(null);
-
-            // Show status bar and navigation.
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-        } else {
-            // Set screen brightness to 0.
-            params.screenBrightness = 0;
-
-            // Set the OFF version of the screen to visible.
-            view.setVisibility(View.VISIBLE);
-
-            // Set the listener for the OFF screen stat.
-            view.setOnClickListener(this);
-
-            // Hide status bar and navigation.
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN
-            );
-        }
-        getWindow().setAttributes(params);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        float distance = event.values[0];
-        // Leave the screen on if the measured distance is the max distance.
-        if (distance >= event.sensor.getMaximumRange() || distance >= 10.0f) {
-            toggleScreen(true);
-        } else {
-            toggleScreen(false);
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
     private void playRingtone(boolean play) {
         if(mRingtone != null) {
             if(play && !mRingtone.isPlaying()) {
@@ -660,7 +606,7 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                // TODO VIALA-463: Handle temoprary loss of audio. Eg: incoming GSM call.
+                // TODO VIALA-463: Handle temporary loss of audio. Eg: incoming GSM call.
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
@@ -669,5 +615,10 @@ public class CallActivity extends AppCompatActivity
                 mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, 1, 0);
                 break;
         }
+    }
+
+    @Override
+    public boolean activateProximitySensor() {
+        return (mConnected && !mIncomingCallIsRinging) && !mKeyPadVisible;
     }
 }
