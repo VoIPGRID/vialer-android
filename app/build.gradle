@@ -8,7 +8,7 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 30
+        versionCode 34
         versionName "2.1"
         multiDexEnabled true
         ndk {
