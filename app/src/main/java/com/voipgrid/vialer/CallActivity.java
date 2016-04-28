@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
@@ -113,6 +114,11 @@ public class CallActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if we have permission to use the microphone. If not, request it.
+        if (!MicrophonePermission.hasPermission(this)) {
+            MicrophonePermission.askForPermission(this);
+        }
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
@@ -553,13 +559,19 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case R.id.button_pickup:
-                if (mServiceBound) {
-                    mSipService.answer(mSipService.getCurrentCall());
-                    mAnalyticsHelper.sendEvent(
-                            getString(R.string.analytics_event_category_call),
-                            getString(R.string.analytics_event_action_inbound),
-                            getString(R.string.analytics_event_label_accepted)
-                    );
+                if (MicrophonePermission.hasPermission(this)) {
+                    if (mServiceBound) {
+                        mSipService.answer(mSipService.getCurrentCall());
+                        mAnalyticsHelper.sendEvent(
+                                getString(R.string.analytics_event_category_call),
+                                getString(R.string.analytics_event_action_inbound),
+                                getString(R.string.analytics_event_label_accepted)
+                        );
+                    }
+                } else {
+                    Toast.makeText(CallActivity.this,
+                            getString(R.string.permission_microphone_missing_message),
+                            Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
