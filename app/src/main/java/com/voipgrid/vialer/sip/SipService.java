@@ -24,8 +24,10 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.util.GsmCallListener;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
+import com.voipgrid.vialer.util.PhonePermission;
 
 import org.pjsip.pjsua2.Account;
 import org.pjsip.pjsua2.AccountConfig;
@@ -83,6 +85,7 @@ public class SipService extends Service implements
     private LocalBroadcastManager mBroadcastManager;
     private ToneGenerator mToneGenerator;
 
+    private GsmCallListener mGsmCallListener;
     private Endpoint mEndpoint;
     private SipAccount mSipAccount;
     private String mToken;
@@ -517,6 +520,11 @@ public class SipService extends Service implements
     public void onCallConnected(Call call) {
         broadcast(SipConstants.CALL_CONNECTED_MESSAGE);
         mCallIsConnected = true;
+
+        if (PhonePermission.hasPermission(getApplicationContext())) {
+            mGsmCallListener = new GsmCallListener(call, this);
+            registerReceiver(mGsmCallListener, new IntentFilter("android.intent.action.PHONE_STATE"));
+        }
     }
 
     @Override
@@ -535,6 +543,9 @@ public class SipService extends Service implements
 
         // Cleanup the call
         setCurrentCall(null);
+        if (PhonePermission.hasPermission(getApplicationContext())) {
+            unregisterReceiver(mGsmCallListener);
+        }
         broadcast(SipConstants.CALL_DISCONNECTED_MESSAGE);
 
         stopSelf();
