@@ -82,8 +82,8 @@ class SipCall extends org.pjsip.pjsua2.Call {
                 mCallStatus.onCallStopRingback();
                 mCallStatus.onCallConnected(this);
             } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED) {
-                mCallStatus.onCallDisconnected(this);
                 mCallStatus.onCallStopRingback();
+                mCallStatus.onCallDisconnected(this);
                 this.delete();
             }
 
