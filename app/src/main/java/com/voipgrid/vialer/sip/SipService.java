@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -543,7 +542,7 @@ public class SipService extends Service implements
 
         // Cleanup the call
         setCurrentCall(null);
-        if (PhonePermission.hasPermission(getApplicationContext())) {
+        if (PhonePermission.hasPermission(getApplicationContext()) && mCallIsConnected) {
             unregisterReceiver(mGsmCallListener);
         }
         broadcast(SipConstants.CALL_DISCONNECTED_MESSAGE);
