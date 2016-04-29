@@ -103,7 +103,7 @@ public class NumberInputView extends RelativeLayout implements
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         mRemoveButton.setVisibility(s.length() == 0 ? View.INVISIBLE : View.VISIBLE);
 
-        if (s.length() > 0) {
+        if (s.length() >= 0) {
             mListener.onInputChanged(s.toString());
         }
     }
