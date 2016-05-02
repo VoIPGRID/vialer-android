@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -19,25 +19,36 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="center"
-        android:paddingLeft="@dimen/list_item_contact_padding_top">
+        android:paddingLeft="@dimen/list_item_contact_padding_top"
+        android:layout_toRightOf="@id/text_view_contact_icon">
 
-    <TextView
-        android:id="@+id/text_view_contact_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/contact_name_text_size"
-        android:fontFamily="sans-serif"
-        android:textColor="@color/contact_name_text_color"/>
+        <TextView
+            android:id="@+id/text_view_contact_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/contact_name_text_size"
+            android:fontFamily="sans-serif"
+            android:textColor="@color/contact_name_text_color"/>
 
-    <TextView
-        android:id="@+id/text_view_contact_information"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/contact_information_text_size"
-        android:fontFamily="sans-serif"
-        android:drawablePadding="@dimen/direction_icon_padding"
-        android:textColor="@color/contact_information_text_color"/>
-
+        <TextView
+            android:id="@+id/text_view_contact_information"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/contact_information_text_size"
+            android:fontFamily="sans-serif"
+            android:drawablePadding="@dimen/direction_icon_padding"
+            android:textColor="@color/contact_information_text_color"/>
     </LinearLayout>
 
-</LinearLayout>
+    <ImageButton
+        android:id="@+id/call_record_call_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerInParent="true"
+        android:padding="@dimen/list_item_call_button_padding"
+        android:src="@drawable/ic_phone"
+        android:tint="@color/tint_color_backspace"
+        android:background="?selectableItemBackgroundBorderless"/>
+</RelativeLayout>
