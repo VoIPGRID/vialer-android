@@ -2,7 +2,6 @@ package com.voipgrid.vialer;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +13,7 @@ import android.widget.Toast;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.AutoLoginToken;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -26,7 +26,7 @@ import retrofit2.Response;
 /**
  * Activity to display the web pages within the app.
  */
-public class WebActivity extends AppCompatActivity implements Callback<AutoLoginToken> {
+public class WebActivity extends LoginRequiredActivity implements Callback<AutoLoginToken> {
 
     public static final String PAGE = "key-page";
     public static final String TITLE = "key-title";

@@ -13,7 +13,6 @@ import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -35,6 +34,7 @@ import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.onboarding.LogoutTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.MiddlewareHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -51,7 +51,7 @@ import retrofit2.Response;
  * NavigationDrawerActivity adds support to add a Toolbar and DrawerLayout to an Activity.
  */
 public abstract class NavigationDrawerActivity
-        extends AppCompatActivity
+        extends LoginRequiredActivity
         implements Callback, AdapterView.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
 

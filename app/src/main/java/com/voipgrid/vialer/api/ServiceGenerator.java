@@ -1,15 +1,20 @@
 package com.voipgrid.vialer.api;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import java.io.IOException;
+
 import static java.lang.String.format;
 
 import okhttp3.Cache;
@@ -102,7 +107,25 @@ public class ServiceGenerator {
                 }
 
                 Request request = requestBuilder.build();
-                return chain.proceed(request);
+
+                Response response = chain.proceed(request);
+
+                // Check if we get a 401 and are not in the onboarding.
+                if (response.code() == 401 &&
+                        !context.getClass().getSimpleName().equals(
+                                SetupActivity.class.getSimpleName())) {
+                    // Clear logged in values.
+                    new JsonStorage(context).clear();
+                    if (context instanceof Activity) {
+                        // Start onboarding.
+                        Intent intent = new Intent(context, SetupActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        context.startActivity(intent);
+                        ((Activity) context).finish();
+                    }
+                }
+
+                return response;
             }
         });
 

@@ -1,6 +1,5 @@
 package com.voipgrid.vialer.twostepcall;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,6 +15,7 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 import com.voipgrid.vialer.models.ClickToDialParams;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TwoStepCallActivity extends Activity implements View.OnClickListener, Callback<Object> {
+public class TwoStepCallActivity extends LoginRequiredActivity implements View.OnClickListener, Callback<Object> {
     public static final String NUMBER_TO_CALL = "number-to-call";
     private boolean cancelCall = false;
 

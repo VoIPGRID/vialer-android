@@ -70,6 +70,12 @@ public class JsonStorage<T> {
             editor.remove(classesToClear.get(i));
         }
 
+        // Make sure the registration is invalidated as well.
+        editor.putInt(
+                MiddlewareHelper.Constants.REGISTRATION_STATUS,
+                MiddlewareHelper.Constants.STATUS_UPDATE_NEEDED
+        );
+
         editor.apply();
     }
 }
