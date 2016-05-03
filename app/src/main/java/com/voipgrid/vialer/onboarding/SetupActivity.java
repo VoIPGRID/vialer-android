@@ -70,19 +70,16 @@ public class SetupActivity extends AppCompatActivity implements
             if (firstFragment == null) {
                 firstFragment = LogoFragment.newInstance();
             }
-            // Add the fragment to the 'fragment_container' FrameLayout
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.add(R.id.fragment_container, firstFragment).commitAllowingStateLoss();
+            swapFragment(firstFragment, firstFragment.getClass().getSimpleName());
         }
-
-
     }
 
     /**
      * Swap the current fragment for a new one with the next step of the configure process.
+     *
      * @param newFragment next step in the setup process to present to the user.
      */
-    void swapFragment(Fragment newFragment, String tag) {
+    private void swapFragment(Fragment newFragment, String tag) {
 
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         if (tag != null) {
