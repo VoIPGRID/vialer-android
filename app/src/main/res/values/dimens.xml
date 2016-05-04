@@ -42,6 +42,8 @@
     <dimen name="list_item_contact_padding_top">@dimen/activity_vertical_item_padding</dimen>
     <dimen name="list_item_contact_padding_bottom">@dimen/activity_vertical_item_padding</dimen>
 
+    <dimen name="list_item_call_button_padding">6dp</dimen>
+
     <dimen name="contact_icon_width">40dp</dimen>
     <dimen name="contact_icon_height">@dimen/contact_icon_width</dimen>
 

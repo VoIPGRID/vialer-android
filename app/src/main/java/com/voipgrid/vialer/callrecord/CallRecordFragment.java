@@ -23,10 +23,8 @@ import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NetworkStateViewHelper;
-import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -136,7 +134,7 @@ public class CallRecordFragment extends ListFragment implements
         mNetworkStateViewHelper = new NetworkStateViewHelper(
                 getActivity(), (TextView) view.findViewById(R.id.dialer_warning));
 
-        mAdapter = new CallRecordAdapter(view.getContext(), mCallRecords);
+        mAdapter = new CallRecordAdapter(getActivity(), mCallRecords);
 
         /* setup swipe refresh layout */
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
@@ -193,27 +191,6 @@ public class CallRecordFragment extends ListFragment implements
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-
-        if (mListener != null) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-            CallRecord record = mAdapter.getItem(position);
-            String number;
-            if (record.getDirection().equals(CallRecord.DIRECTION_INBOUND)) {
-                number = record.getCaller();
-            } else {
-                number = record.getDialedNumber();
-            }
-
-            if (!PhoneNumberUtils.isAnonymousNumber(number)) {
-                new DialHelper(
-                        getActivity(),
-                        mJsonStorage,
-                        mConnectivityHelper,
-                        mAnalyticsHelper
-                ).callNumber(number, "");
-            }
-        }
     }
 
     /**
