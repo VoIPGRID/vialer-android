@@ -44,6 +44,8 @@
     <!-- Sidebar fragment values -->
     <string name="cannot_logout_error_title">No available internet connection</string>
     <string name="cannot_logout_error_text">An internet connection is needed to log you off.</string>
+    <string name="set_userdestination_api_fail">Editing of availability has failed. Please try again later.</string>
+
 
     <!-- Login fragment values -->
     <string name="login_header_label_text">Business</string>

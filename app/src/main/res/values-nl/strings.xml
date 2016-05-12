@@ -46,6 +46,7 @@
     <!-- Sidebar fragment values -->
     <string name="cannot_logout_error_title">Geen internetverbinding beschikbaar</string>
     <string name="cannot_logout_error_text">Een internetverbinding is nodig om uit te loggen.</string>
+    <string name="set_userdestination_api_fail">Aanpassen van bereikbaarheid mislukt. Probeer later opnieuw.</string>
 
     <!-- Login fragment values -->
     <string name="login_header_label_text">Zakelijke</string>

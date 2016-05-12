@@ -22,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
@@ -260,11 +261,14 @@ public abstract class NavigationDrawerActivity
 
     @Override
     public void onFailure(Call call, Throwable t) {
-
+        Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG);
     }
 
     @Override
     public void onResponse(Call call, Response response) {
+        if(!response.isSuccess()){
+            Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG);
+        }
         if(response.body() instanceof VoipGridResponse) {
             List<UserDestination> userDestinationObjects =
                     ((VoipGridResponse<UserDestination>) response.body()).getObjects();
