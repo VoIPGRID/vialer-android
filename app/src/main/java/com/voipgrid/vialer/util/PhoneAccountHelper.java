@@ -90,6 +90,10 @@ public class PhoneAccountHelper {
 
             // Get phone account from API if one is provided in the systemuser API.
             if (phoneAccountId != null) {
+
+                // If no PhoneAccountId is returned, remove current PhoneAccount information from jsonstorage.
+                new JsonStorage(mContext).remove(PhoneAccount.class);
+
                 Call<PhoneAccount> phoneAccountCall = mApi.phoneAccount(phoneAccountId);
                 try {
                     Response<PhoneAccount> phoneAccountResponse = phoneAccountCall.execute();

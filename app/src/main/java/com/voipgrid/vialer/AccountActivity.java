@@ -78,20 +78,18 @@ public class AccountActivity extends LoginRequiredActivity implements
     private void populate() {
         if(mPreferences.hasSipPermission()) {
             mSwitch.setChecked(mPreferences.hasSipEnabled());
-            if(!mSwitch.isChecked()) {
-                mSipIdEditText.setVisibility(View.GONE);
-            }
             if(mPhoneAccount != null) {
                 mSipIdEditText.setText(mPhoneAccount.getAccountId());
             }
         } else {
             mSwitch.setVisibility(View.GONE);
-            mSipIdEditText.setVisibility(View.GONE);
         }
         ((EditText) findViewById(R.id.account_mobile_number_edit_text))
                 .setText(mSystemUser.getMobileNumber());
         ((EditText) findViewById(R.id.account_outgoing_number_edit_text))
                 .setText(mSystemUser.getOutgoingCli());
+        mSipIdEditText.setVisibility(mPreferences.hasSipEnabled() ? View.VISIBLE : View.GONE);
+        enableProgressBar(false);
     }
 
     @Override
@@ -174,9 +172,6 @@ public class AccountActivity extends LoginRequiredActivity implements
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        /* First, view updates */
-        mSipIdEditText.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-
         if (mPreferences.hasSipEnabled() == isChecked) {
             /* nothing changed, so return */
             return;
@@ -186,8 +181,9 @@ public class AccountActivity extends LoginRequiredActivity implements
         if (!isChecked) {
             // Unregister at middleware.
             MiddlewareHelper.executeUnregisterTask(this);
+            mSipIdEditText.setVisibility(View.GONE);
         } else {
-
+            enableProgressBar(true);
             new AsyncTask<Void, Void, PhoneAccount>() {
 
                 @Override
@@ -255,7 +251,7 @@ public class AccountActivity extends LoginRequiredActivity implements
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                mSwitch.setChecked(mPreferences.hasSipEnabled());
+                mSwitch.setChecked(mPreferences.hasSipEnabled() && mPreferences.hasPhoneAccount());
                 enableProgressBar(false);
             }
         }, 3000);
