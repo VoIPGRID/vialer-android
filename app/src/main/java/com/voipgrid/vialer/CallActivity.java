@@ -633,6 +633,6 @@ public class CallActivity extends AppCompatActivity
 
     @Override
     public boolean activateProximitySensor() {
-        return (mConnected && !mIncomingCallIsRinging) && !mKeyPadVisible;
+        return !mIncomingCallIsRinging && !mKeyPadVisible;
     }
 }
