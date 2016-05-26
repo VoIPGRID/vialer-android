@@ -244,9 +244,6 @@ public class CallActivity extends AppCompatActivity
                 mConnected = true;
                 mIncomingCallIsRinging = false;
 
-                playRingtone(false);
-                vibrate(false);
-
                 mProximityHelper.updateWakeLock();
                 break;
 
@@ -262,8 +259,6 @@ public class CallActivity extends AppCompatActivity
                 mConnected = false;
                 mIncomingCallIsRinging = false;
 
-                playRingtone(false);
-                vibrate(false);
                 finishWithDelay();
                 break;
 
@@ -545,6 +540,8 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case R.id.button_reject:
+                playRingtone(false);
+                vibrate(false);
                 if (mServiceBound) {
                     mSipService.decline(mSipService.getCurrentCall());
                     mAnalyticsHelper.sendEvent(
@@ -558,6 +555,8 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case R.id.button_pickup:
+                playRingtone(false);
+                vibrate(false);
                 if (MicrophonePermission.hasPermission(this)) {
                     if (mServiceBound) {
                         mSipService.answer(mSipService.getCurrentCall());
