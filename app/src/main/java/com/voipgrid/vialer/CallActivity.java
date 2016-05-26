@@ -197,6 +197,7 @@ public class CallActivity extends AppCompatActivity
                 }
             }
         }
+        mProximityHelper.startSensor();
     }
 
     private void displayCallInfo(String phoneNumber, String contactName) {
@@ -297,11 +298,9 @@ public class CallActivity extends AppCompatActivity
     @Override
     public void onStart() {
         super.onStart();
-
         // Register for updates.
         IntentFilter intentFilter = new IntentFilter(ACTION_BROADCAST_CALL_STATUS);
         mBroadcastManager.registerReceiver(mCallStatusReceiver, intentFilter);
-        mProximityHelper.startSensor();
     }
 
     @Override
@@ -328,8 +327,6 @@ public class CallActivity extends AppCompatActivity
         super.onStop();
         // Unregister the SipService BroadcastReceiver when the activity pauses.
         mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
-
-        mProximityHelper.stopSensor();
         if (mServiceBound) {
             unbindService(mConnection);
             mServiceBound = false;
@@ -341,6 +338,7 @@ public class CallActivity extends AppCompatActivity
         super.onDestroy();
         // Abandon focus so other apps can continue playing.
         mAudioManager.abandonAudioFocus(this);
+        mProximityHelper.stopSensor();
     }
 
     @Override

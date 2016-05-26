@@ -3,7 +3,9 @@ package com.voipgrid.vialer.onboarding;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.WebActivity;
+import com.voipgrid.vialer.util.ConnectivityHelper;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -36,6 +39,7 @@ public class LoginFragment extends OnboardingFragment implements
     private Button mLoginButton;
     private Button mForgotPasswordButton;
     private Button mInfoButton;
+    private ConnectivityHelper mConnectivityHelper;
 
     /**
      * Use this factory method to create a new instance of
@@ -58,6 +62,12 @@ public class LoginFragment extends OnboardingFragment implements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        Activity activity = getActivity();
+        mConnectivityHelper = new ConnectivityHelper(
+                (ConnectivityManager) activity.getSystemService(activity.CONNECTIVITY_SERVICE),
+                (TelephonyManager) activity.getSystemService(activity.TELEPHONY_SERVICE)
+        );
 
         mEmailEdittext = (EditText) view.findViewById(R.id.emailTextDialog);
         mEmailEdittext.addTextChangedListener(this);
@@ -149,7 +159,12 @@ public class LoginFragment extends OnboardingFragment implements
     }
 
     public void onError(String error) {
-        mListener.onAlertDialog(getString(R.string.onboarding_login_failed_title), getString(R.string.onboarding_login_failed_message));
+        if(!mConnectivityHelper.hasNetworkConnection()) {
+            error = getString(R.string.onboarding_no_internet_message);
+        } else {
+            error = getString(R.string.onboarding_login_failed_message);
+        }
+        mListener.onAlertDialog(getString(R.string.onboarding_login_failed_title), error);
     }
 
     interface FragmentInteractionListener extends OnboardingFragment.FragmentInteractionListener {
