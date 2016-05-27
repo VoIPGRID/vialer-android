@@ -69,4 +69,7 @@
 
     <dimen name="remove_button_height">50dp</dimen>
     <dimen name="remove_button_width">50dp</dimen>
+
+    <dimen name="lockring_button_size">56dp</dimen>
+    <dimen name="lockring_button_inset">14dp</dimen>
 </resources>
