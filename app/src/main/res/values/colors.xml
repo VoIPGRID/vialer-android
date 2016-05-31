@@ -57,4 +57,7 @@
     <color name="two_step_call_step_b">#F15A29</color>
     <color name="two_step_call_dots">#3D4154</color>
     <color name="two_step_call_step_shadow">#4D000000</color>
+
+    <color name="google_lock_ring_handle_color">#ffa3a3a3</color>
+    <color name="google_lock_ring_white_transparent">#00ffffff</color>
 </resources>

@@ -51,6 +51,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     // Modules.
     compile project(':pjsip')
+    compile project(':googlelockring')
     // Support libs.
     compile 'com.android.support:appcompat-v7:23.0.1'
     compile 'com.android.support:design:23.0.1'

@@ -62,7 +62,7 @@
                 android:id="@+id/two_step_button_hangup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_call"
+                android:src="@drawable/ic_call_end_white"
                 android:onClick="onClick"
                 app:backgroundTint="@color/call_fab_hangup_color"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"

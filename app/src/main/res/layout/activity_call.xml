@@ -54,7 +54,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/color_primary"
-            android:gravity="center_horizontal">
+            android:gravity="center_horizontal"
+            android:id="@+id/call_buttons_container">
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/button_speaker"
@@ -132,6 +133,7 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:id="@+id/ringing"
+                android:visibility="invisible"
                 >
 
                 <android.support.design.widget.FloatingActionButton
@@ -139,7 +141,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="75dp"
-                    android:src="@drawable/ic_call"
+                    android:src="@drawable/ic_call_end_white"
                     android:onClick="onClick"
                     app:backgroundTint="@color/call_fab_hangup_color"
                     app:elevation="@dimen/fab_elevation"
@@ -150,7 +152,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="75dp"
-                    android:src="@drawable/ic_call"
+                    android:src="@drawable/ic_call_white"
                     android:onClick="onClick"
                     app:backgroundTint="@color/call_fab_pickup_color"
                     app:elevation="@dimen/fab_elevation"
@@ -216,15 +218,47 @@
                     android:id="@+id/button_hangup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_call"
+                    android:src="@drawable/ic_call_end_white"
                     android:onClick="onClick"
                     app:backgroundTint="@color/call_fab_hangup_color"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
                     app:elevation="@dimen/fab_elevation"
                     app:borderWidth="@dimen/fab_border_width"
                     />
-
             </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                xmlns:googlelockring="http://schemas.android.com/apk/res-auto"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:visibility="invisible"
+                android:layout_gravity="center"
+                android:id="@+id/ringing_lock_screen"
+                >
+
+                <com.wearespindle.googlelockring.GoogleLockRing
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:id="@+id/google_lock_ring"
+                    android:focusable="true"
+                    android:gravity="center"
+                    googlelockring:glowRadius="@dimen/googlelockring_glow_radius"
+                    googlelockring:handleDrawable="@drawable/ic_google_lock_ring_handle"
+                    googlelockring:innerRadius="@dimen/googlelockring_inner_radius"
+                    googlelockring:outerRadius="@dimen/googlelockring_target_placement_radius"
+                    googlelockring:outerRingDrawable="@drawable/ic_google_lock_ring_outerring"
+                    googlelockring:pointDrawable="@drawable/ic_lockscreen_glowdot"
+                    googlelockring:snapMargin="@dimen/googlelockring_snap_margin"
+                    googlelockring:targetDescriptions="@array/google_lock_ring_descriptions"
+                    googlelockring:targetDrawables="@array/google_lock_ring_drawables"
+                    googlelockring:directionDescriptions="@array/google_lock_ring_direction_descriptions"
+                    />
+            </RelativeLayout>
 
         </FrameLayout>
 
