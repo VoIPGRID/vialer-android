@@ -87,7 +87,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
-            android:src="@drawable/ic_call_answer_color"
+            android:src="@drawable/ic_call_white"
             android:onClick="onClick"
             app:backgroundTint="@color/dialpad_fab_call_color"
             app:elevation="@dimen/fab_elevation"
