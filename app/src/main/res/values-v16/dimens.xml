@@ -4,6 +4,4 @@
     <dimen name="dialpad_button_star_text_size">7dp</dimen>
 
     <dimen name="dialpad_bottom_padding">90dp</dimen>
-    <dimen name="dialpad_calling_button_bottom_margin">0dp</dimen>
-
 </resources>
