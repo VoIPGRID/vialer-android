@@ -188,7 +188,7 @@ public class SipService extends Service implements
             }
             mEndpoint = createEndpoint(
                     transportType,
-                    createTransportConfig(getResources().getInteger(R.integer.sip_port))
+                    createTransportConfig()
             );
 
             if (mEndpoint != null) {
@@ -462,7 +462,8 @@ public class SipService extends Service implements
         return endpoint;
     }
 
-    private TransportConfig createTransportConfig(long port) {
+    private TransportConfig createTransportConfig() {
+        Integer port = getResources().getInteger(R.integer.default_sip_port);
         TransportConfig config = new TransportConfig();
 
         config.setPort(port);
