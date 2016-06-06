@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -109,6 +110,12 @@ public class SipService extends Service implements
 
     // Message throughput logging timestamp.
     private String mMessageStartTime;
+    private int mCurrentTransportId;
+
+    // Network status
+    private ConnectivityHelper mConnectivityHelper;
+    private Long mLatestConnectionType;
+    private boolean mReRegisterAccount = false;
 
     private static Map<String, Short> sCodecPrioMapping;
 
@@ -141,6 +148,13 @@ public class SipService extends Service implements
         }
     };
 
+    private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleNetworkStateChange(context);
+        }
+    };
+
     public class SipServiceBinder extends Binder {
         public SipService getService() {
             // Return this instance of SipService so clients can call public methods.
@@ -167,6 +181,36 @@ public class SipService extends Service implements
         return mBinder;
     }
 
+    /**
+     * Function to generate a transport string based on a setting.
+     * @return
+     */
+    private String getTransportString() {
+        String sipTransport = this.getString(R.string.sip_transport_type);
+        String tcp = "";
+
+        if (sipTransport.equals("tcp")) {
+
+            tcp = ";transport=tcp";
+        }
+        return tcp;
+    }
+
+    /**
+     * Function to get the transport type based on a setting.
+     * @return
+     */
+    private pjsip_transport_type_e getTransportType() {
+        String sipTransport = this.getString(R.string.sip_transport_type);
+
+        pjsip_transport_type_e transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_UDP;
+        if (sipTransport.equals("tcp")) {
+            transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_TCP;
+
+        }
+        return transportType;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -189,16 +233,7 @@ public class SipService extends Service implements
             // Try to load PJSIP library.
             loadPjsip();
 
-            pjsip_transport_type_e transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_UDP;
-            String sipTransport = this.getString(R.string.sip_transport_type);
-            String tcp = "";
-
-            if (sipTransport.equals("tcp")) {
-                transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_TCP;
-                tcp = ";transport=tcp";
-            }
             mEndpoint = createEndpoint(
-                    transportType,
                     createTransportConfig()
             );
 
@@ -213,18 +248,23 @@ public class SipService extends Service implements
                         phoneAccount.getPassword()
                 );
 
-                String sipAccountRegId = SipUri.sipAddress(this, phoneAccount.getAccountId()) + tcp;
-                String sipRegistratUri = SipUri.prependSIPUri(this, this.getString(R.string.sip_host)) + tcp;
+                String transportString = getTransportString();
+                String sipAccountRegId = SipUri.sipAddress(this, phoneAccount.getAccountId()) + transportString;
+                String sipRegistrarUri = SipUri.prependSIPUri(this, this.getString(R.string.sip_host)) + transportString;
 
                 AccountConfig accountConfig = createAccountConfig(
                         sipAccountRegId,
-                        sipRegistratUri,
+                        sipRegistrarUri,
                         credInfo
                 );
                 mSipAccount = createSipAccount(accountConfig, this, this);
 
                 setupCallInteractionReceiver();
                 setupKeyPadInteractionReceiver();
+
+                mLatestConnectionType = ConnectivityHelper.get(this).getConnectionType();
+                startNetworkingListener();
+
             } else {
                 Log.e(TAG, "There is no PJSIP endpoint!");
             }
@@ -262,6 +302,7 @@ public class SipService extends Service implements
         mRemoteLogger.d(TAG + " onDestroy");
         mBroadcastManager.unregisterReceiver(mCallInteractionReceiver);
         mBroadcastManager.unregisterReceiver(mKeyPadInteractionReceiver);
+        stopNetworkingListener();
 
         mSIPLogWriter.disableRemoteLogging();
 
@@ -317,6 +358,15 @@ public class SipService extends Service implements
         return START_NOT_STICKY;
     }
 
+    private void startNetworkingListener() {
+        this.registerReceiver(mNetworkStateReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    private void stopNetworkingListener() {
+        this.unregisterReceiver(mNetworkStateReceiver);
+    }
+
     private void broadcast(String status) {
         Intent intent = new Intent(SipConstants.ACTION_BROADCAST_CALL_STATUS);
         intent.putExtra(SipConstants.CALL_STATUS_KEY, status);
@@ -339,6 +389,31 @@ public class SipService extends Service implements
     @Override
     public void onAccountRegistered(Account account, OnRegStateParam param) {
         mRemoteLogger.d(TAG + " onAccountRegistered");
+
+        try {
+            // After registration setup new transport to reflect learned external IP to be used
+            // by sip headers.
+            mEndpoint.transportClose(mCurrentTransportId);
+            mCurrentTransportId = mEndpoint.transportCreate(getTransportType(), createTransportConfig());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // After the account has registered try to re-invite the current call
+        // so the contact uri will be updated for the call.
+        if (mReRegisterAccount) {
+            try {
+                // Set flag for updating contact header IP.
+                CallOpParam callOpParam = new CallOpParam(true);
+                CallSetting callSetting = callOpParam.getOpt();
+                callSetting.setFlag(pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT.swigValue());
+                getCurrentCall().reinvite(callOpParam);
+                mReRegisterAccount = false;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         // Check if it an incoming call and we did not respond to the middleware already.
         if (mCallType.equals(SipConstants.ACTION_VIALER_INCOMING) && !mHasRespondedToMiddleware) {
             // Set responded as soon as possible to avoid duplicate requests due to multiple
@@ -433,8 +508,7 @@ public class SipService extends Service implements
         }
     }
 
-    private Endpoint createEndpoint(pjsip_transport_type_e transportType,
-                                    TransportConfig transportConfig) {
+    private Endpoint createEndpoint(TransportConfig transportConfig) {
         mRemoteLogger.d(TAG + " createEndpoint");
         Endpoint endpoint = new Endpoint();
         EpConfig endpointConfig = new EpConfig();
@@ -486,7 +560,7 @@ public class SipService extends Service implements
         }
 
         try {
-            endpoint.transportCreate(transportType, transportConfig);
+            mCurrentTransportId = endpoint.transportCreate(getTransportType(), transportConfig);
             endpoint.libStart();
         } catch (Exception exception) {
             Log.e(TAG, "Unable to start the PJSIP library");
@@ -550,6 +624,7 @@ public class SipService extends Service implements
     @Override
     public void onCallOutgoing(Call call, Uri number) {
         mRemoteLogger.d(TAG + " onCallOutgoing");
+
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_RINGING);
         try {
@@ -693,6 +768,31 @@ public class SipService extends Service implements
                 xFer(call);
                 break;
         }
+    }
+
+    /**
+     * When there is a network connection change start with un-registration.
+     * This is needed to tell asterisks that we are connected to a different ip address.
+     *
+     * @param context
+     */
+    private void handleNetworkStateChange(Context context) {
+        mRemoteLogger.d(TAG + " handleNetworkStateChange");
+        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(context);
+        Long connectionType = connectivityHelper.getConnectionType();
+
+        if (!mLatestConnectionType.equals(connectionType) && connectivityHelper.hasNetworkConnection()) {
+            mReRegisterAccount = true;
+            // Renew sip registration. Unregister would come from the new IP anyway so that
+            // would not make a lot of sense so we update our existing registration from the
+            // new IP.
+            try {
+                mSipAccount.setRegistration(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        mLatestConnectionType = connectionType;
     }
 
     private void handleKeyPadInteraction(Call call, Intent intent) {
