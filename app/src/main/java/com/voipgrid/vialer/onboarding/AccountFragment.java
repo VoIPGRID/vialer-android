@@ -29,12 +29,12 @@ public class AccountFragment extends OnboardingFragment implements
     public static final String ARG_MOBILE = "mobile";
     public static final String ARG_OUTGOING = "outgoing";
 
-    private static final String SUPRESSED = "suppressed";
+    private static final String SUPPRESSED = "suppressed";
 
     private FragmentInteractionListener mListener;
 
-    private EditText mMobileEdittext;
-    private EditText mOutgoingEdittext;
+    private EditText mMobileEditText;
+    private EditText mOutgoingEditText;
     private Button mConfigureButton;
 
     /**
@@ -72,16 +72,16 @@ public class AccountFragment extends OnboardingFragment implements
         super.onViewCreated(view, savedInstanceState);
         Bundle arguments = getArguments();
         if (arguments != null) {
-            mMobileEdittext = (EditText) view.findViewById(R.id.mobileNumberTextDialog);
-            mMobileEdittext.setText(arguments.getString(ARG_MOBILE));
-            mMobileEdittext.addTextChangedListener(this);
-            mMobileEdittext.setOnTouchListener(new View.OnTouchListener() {
+            mMobileEditText = (EditText) view.findViewById(R.id.mobileNumberTextDialog);
+            mMobileEditText.setText(arguments.getString(ARG_MOBILE));
+            mMobileEditText.addTextChangedListener(this);
+            mMobileEditText.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     final int DRAWABLE_RIGHT = 2;
 
                     if (event.getAction() == MotionEvent.ACTION_UP) {
-                        if (event.getRawX() >= (mMobileEdittext.getRight() - mMobileEdittext.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        if (event.getRawX() >= (mMobileEditText.getRight() - mMobileEditText.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
                             mListener.onAlertDialog(getString(R.string.phonenumber_info_text_title),
                                     getString(R.string.phonenumber_info_text));
 
@@ -92,21 +92,22 @@ public class AccountFragment extends OnboardingFragment implements
                 }
             });
 
-            mOutgoingEdittext = (EditText) view.findViewById(R.id.outgoingNumberTextDialog);
+            mOutgoingEditText = (EditText) view.findViewById(R.id.outgoingNumberTextDialog);
             String outGoingNumber = arguments.getString(ARG_OUTGOING);
-            /* NB: sometimes the outgoing number is supressed (anonymous),
-            so we capture that here */
-            if (outGoingNumber.equals(SUPRESSED)) {
+
+            // Sometimes the outgoing number is suppressed (anonymous), so we capture that here.
+            if (outGoingNumber != null && outGoingNumber.equals(SUPPRESSED)) {
                 outGoingNumber = getString(R.string.supressed_number);
             }
-            mOutgoingEdittext.setText(outGoingNumber);
-            mOutgoingEdittext.addTextChangedListener(this);
+
+            mOutgoingEditText.setText(outGoingNumber);
+            mOutgoingEditText.addTextChangedListener(this);
 
             mConfigureButton = (Button) view.findViewById(R.id.button_configure);
             mConfigureButton.setOnClickListener(this);
 
             // enable configure button when mobile number is available for the SystemUser
-            if(mMobileEdittext.getText().length() > 0) {
+            if(mMobileEditText.getText().length() > 0) {
                 mConfigureButton.setEnabled(true);
             }
         }
@@ -138,7 +139,7 @@ public class AccountFragment extends OnboardingFragment implements
     @Override
     public void onClick(View view) {
         String mobileNumber = PhoneNumberUtils.formatMobileNumber(
-                String.valueOf(mMobileEdittext.getText()));
+                String.valueOf(mMobileEditText.getText()));
 
         if (PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
             mListener.onUpdateMobileNumber(this, mobileNumber);
@@ -162,7 +163,7 @@ public class AccountFragment extends OnboardingFragment implements
 
     @Override
     public void afterTextChanged(Editable s) {
-        if(mMobileEdittext.length() > 0 && mOutgoingEdittext.length() > 0) {
+        if(mMobileEditText.length() > 0 && mOutgoingEditText.length() > 0) {
             mConfigureButton.setEnabled(true);
         } else {
             mConfigureButton.setEnabled(false);
@@ -173,8 +174,8 @@ public class AccountFragment extends OnboardingFragment implements
         mListener.onConfigure(
                 this,
                 PhoneNumberUtils.formatMobileNumber(
-                        String.valueOf(mMobileEdittext.getText())),
-                String.valueOf(mOutgoingEdittext.getText())
+                        String.valueOf(mMobileEditText.getText())),
+                String.valueOf(mOutgoingEditText.getText())
         );
     }
 
