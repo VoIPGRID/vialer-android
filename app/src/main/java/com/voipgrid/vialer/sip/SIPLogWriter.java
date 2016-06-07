@@ -12,8 +12,25 @@ public class SIPLogWriter extends LogWriter {
 
     @Override
     public void write(LogEntry entry) {
+        Integer pjsipLogLevel = entry.getLevel();
         String logMessage = entry.getMsg().substring(13);
-        String logString = format("Level %d: %s", entry.getLevel(), logMessage);
-        Log.d(TAG, logString);
+        String logString = format("Level %d: %s", pjsipLogLevel, logMessage);
+        switch (pjsipLogLevel){
+            case 1:
+                Log.e(TAG, logString);
+                break;
+            case 2:
+                Log.w(TAG, logString);
+                break;
+            case 3:
+                Log.i(TAG, logString);
+                break;
+            case 4:
+                Log.d(TAG, logString);
+                break;
+            default:
+                Log.v(TAG, logString);
+                break;
+        }
     }
 }
