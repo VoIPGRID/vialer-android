@@ -2,7 +2,6 @@ package com.voipgrid.vialer;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -23,6 +22,7 @@ import com.voipgrid.vialer.contacts.ContactsPermission;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.contacts.UpdateChangedContactsService;
 import com.voipgrid.vialer.dialer.DialerActivity;
+import com.voipgrid.vialer.onboarding.AccountFragment;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -37,34 +37,44 @@ public class MainActivity extends NavigationDrawerActivity implements
         CallRecordFragment.OnFragmentInteractionListener {
 
     private ViewPager mViewPager;
-
-    private ConnectivityHelper mConnectivityHelper;
-    private JsonStorage mJsonStorage;
-
     private boolean mAskForPermission = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mJsonStorage = new JsonStorage(this);
+        JsonStorage jsonStorage = new JsonStorage(this);
+        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
+        Boolean hasSystemUser = jsonStorage.has(SystemUser.class);
+        SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
 
-        mConnectivityHelper = ConnectivityHelper.get(this);
-
-        /* check if the app has a SystemUser */
-        if (!mJsonStorage.has(SystemUser.class)) {
-            //start onboarding flow
+        // Check if the app has a SystemUser.
+        // When there is no SystemUser present start the on boarding process.
+        // When there is a SystemUser but there is no mobile number configured go to the
+        // on boarding part where the mobile number needs to be configured.
+        if (!hasSystemUser) {
+            // Start on boarding flow.
             startActivity(new Intent(this, SetupActivity.class));
             finish();
-        } else if (mConnectivityHelper.hasNetworkConnection()) {
-            //update SystemUser and PhoneAccount on background thread
+        } else if (systemUser.getMobileNumber() == null) {
+            Intent intent = new Intent(this, SetupActivity.class);
+
+            Bundle bundle = new Bundle();
+            bundle.putInt("fragment", R.id.fragment_account);
+            bundle.putString("activity", AccountFragment.class.getSimpleName());
+            intent.putExtras(bundle);
+
+            startActivity(intent);
+            finish();
+        } else if (connectivityHelper.hasNetworkConnection()) {
+            // Update SystemUser and PhoneAccount on background thread.
             new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
         }
+
         // Start UpdateActivity if app has updated.
         if (UpdateHelper.requiresUpdate(this)) {
             this.startActivity(new Intent(this, UpdateActivity.class));
             finish();
-            return;
         } else {
             if (SyncUtils.requiresFullContactSync(this)) {
                 SyncUtils.requestContactSync(this);
@@ -80,15 +90,14 @@ public class MainActivity extends NavigationDrawerActivity implements
 
             setContentView(R.layout.activity_main);
 
-            /* set the Toolbar to use as ActionBar */
+            // Set the Toolbar to use as ActionBar.
             setActionBar(R.id.action_bar);
 
             setNavigationDrawer(R.id.drawer_layout);
 
-            /* set tabs */
+            // Set tabs.
             setupTabs();
         }
-
     }
 
     @Override

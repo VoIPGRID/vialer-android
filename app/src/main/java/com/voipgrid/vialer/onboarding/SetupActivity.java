@@ -33,7 +33,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Activity that handles the onboarding.
+ * Activity that handles the on boarding.
  */
 public class SetupActivity extends AppCompatActivity implements
         OnboardingFragment.FragmentInteractionListener,
@@ -59,18 +59,34 @@ public class SetupActivity extends AppCompatActivity implements
         mJsonStorage = new JsonStorage(this);
         mPreferences = new Preferences(this);
 
-        Fragment firstFragment = null;
-        Bundle b = getIntent().getExtras();
-        if (b != null) {
-            int fragmentId = b.getInt("fragment");
-            mActivityToReturnToName = b.getString("activity");
-            firstFragment = ((SetUpVoipAccountFragment) getFragmentManager().findFragmentById(fragmentId)).newInstance();
-        }
-        if (findViewById(R.id.fragment_container) != null) {
-            if (firstFragment == null) {
-                firstFragment = LogoFragment.newInstance();
+        Fragment gotoFragment = null;
+        Integer fragmentId = null;
+        Bundle bundle = getIntent().getExtras();
+
+        if (bundle != null) {
+            fragmentId = bundle.getInt("fragment");
+            mActivityToReturnToName = bundle.getString("activity");
+            if (fragmentId == R.id.fragment_voip_account_missing) {
+                gotoFragment = ((SetUpVoipAccountFragment) getFragmentManager()
+                        .findFragmentById(fragmentId)).newInstance();
+            } else if (fragmentId == R.id.fragment_account) {
+                SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+                gotoFragment = ((AccountFragment) getFragmentManager()
+                        .findFragmentById(fragmentId))
+                        .newInstance(systemUser.getMobileNumber(), systemUser.getOutgoingCli());
             }
-            swapFragment(firstFragment, firstFragment.getClass().getSimpleName());
+        }
+
+        if (findViewById(R.id.fragment_container) != null) {
+            if (gotoFragment == null) {
+                gotoFragment = LogoFragment.newInstance();
+            }
+
+            if (fragmentId != null && fragmentId == R.id.fragment_account) {
+                swapFragment(gotoFragment, AccountFragment.class.getSimpleName());
+            } else {
+                swapFragment(gotoFragment, gotoFragment.getClass().getSimpleName());
+            }
         }
     }
 
@@ -80,7 +96,6 @@ public class SetupActivity extends AppCompatActivity implements
      * @param newFragment next step in the setup process to present to the user.
      */
     private void swapFragment(Fragment newFragment, String tag) {
-
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         if (tag != null) {
             transaction.addToBackStack(null);
@@ -89,12 +104,12 @@ public class SetupActivity extends AppCompatActivity implements
         }
         transaction.replace(R.id.fragment_container, newFragment, tag).commitAllowingStateLoss();
 
-        //Hide the keyboard when switching fragments
+        // Hide the keyboard when switching fragments.
         manageKeyboard();
     }
 
     /**
-     * display an alert with a certain title and message. The Finish button only does dialog
+     * Display an alert with a certain title and message. The Finish button only does dialog
      * dismiss.
      * @param title the title of the alert to show.
      * @param message the message body of the alert to show.
@@ -132,20 +147,8 @@ public class SetupActivity extends AppCompatActivity implements
         mPassword = password;
         enableProgressBar(true);
 
-        try {
-            mServiceGen = ServiceGenerator.getInstance();
-        } catch(PreviousRequestNotFinishedException e) {
-            e.printStackTrace();
-            return;
-        }
+        createAPIService(username, password);
 
-        mApi = mServiceGen.createService(
-                this,
-                Api.class,
-                getString(R.string.api_url),
-                username,
-                password
-        );
         Call<SystemUser> call = mApi.systemUser();
         call.enqueue(this);
     }
@@ -154,7 +157,10 @@ public class SetupActivity extends AppCompatActivity implements
     public void onUpdateMobileNumber(Fragment fragment, String mobileNumber) {
         enableProgressBar(true);
 
-        /* post mobileNumber to VoipGrip platform */
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        createAPIService(systemUser.getEmail(), systemUser.getPassword());
+
+        // Post mobileNumber to VoIPGRID platform.
         Call<MobileNumber> call = mApi.mobileNumber(new MobileNumber(mobileNumber));
         call.enqueue(this);
     }
@@ -163,20 +169,19 @@ public class SetupActivity extends AppCompatActivity implements
     public void onConfigure(Fragment fragment, String mobileNumber, String outgoingNumber) {
         enableProgressBar(true);
 
-        /*  save mobile and outgoing number */
+        // Save mobile and outgoing number.
         SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         systemUser.setMobileNumber(mobileNumber);
         systemUser.setOutgoingCli(outgoingNumber);
         mJsonStorage.save(systemUser);
 
         String phoneAccountId = systemUser.getPhoneAccountId();
+
         if (phoneAccountId != null) {
             Call<PhoneAccount> call = mApi.phoneAccount(phoneAccountId);
             call.enqueue(this);
         } else {
             enableProgressBar(false);
-            // TODO add UI to let the user know the sip features are not available without
-            // a sip account VIALA-157
             onNextStep(WelcomeFragment.newInstance(
                             ((SystemUser) mJsonStorage.get(SystemUser.class)).getFullName())
             );
@@ -230,7 +235,7 @@ public class SetupActivity extends AppCompatActivity implements
     private OnboardingFragment getCurrentFragment() {
         OnboardingFragment fragment = null;
         int count = 0;
-        while(fragment == null) {
+        while (fragment == null) {
             fragment = getCurrentFragment(tags[count]);
             count++;
         }
@@ -240,6 +245,7 @@ public class SetupActivity extends AppCompatActivity implements
     private OnboardingFragment getCurrentFragment(String tag) {
         OnboardingFragment fragment = (OnboardingFragment) getFragmentManager()
                 .findFragmentByTag(tag);
+
         if(fragment != null && fragment.isVisible()) {
             return fragment;
         }
@@ -265,7 +271,7 @@ public class SetupActivity extends AppCompatActivity implements
                 });
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-        }
+    }
 
     private void resetPassword(String email) {
         Api api = ServiceGenerator.createService(
@@ -294,6 +300,7 @@ public class SetupActivity extends AppCompatActivity implements
         if (mServiceGen != null){
             mServiceGen.release();
         }
+
         if (response.isSuccess()) {
             enableProgressBar(false);
             if (response.body() instanceof SystemUser) {
@@ -320,16 +327,25 @@ public class SetupActivity extends AppCompatActivity implements
                 if (mPreferences.hasSipPermission()) {
                     startService(new Intent(this, VialerGcmRegistrationService.class));
                 }
-                onNextStep(WelcomeFragment.newInstance(
-                                ((SystemUser) mJsonStorage.get(SystemUser.class)).getFullName())
-                );
+
+                SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+
+                onNextStep(WelcomeFragment.newInstance(systemUser.getFullName()));
             } else {
                 FragmentManager fragmentManager = getFragmentManager();
-                // First see if a AccountFragment exists
+
+                // First see if an AccountFragment exists
                 AccountFragment fragment = (AccountFragment) fragmentManager
                         .findFragmentByTag(AccountFragment.class.getSimpleName());
+
                 if (fragment != null) {
                     fragment.onNextStep();
+                }
+
+                // Check if the current fragment is the account fragment.
+                AccountFragment accountFragment = (AccountFragment) getCurrentFragment();
+                if (accountFragment != null) {
+                    accountFragment.onNextStep();
                 }
 
                 ForgotPasswordFragment forgotFragment = (ForgotPasswordFragment) fragmentManager
@@ -363,5 +379,32 @@ public class SetupActivity extends AppCompatActivity implements
                 }
             }
         });
+    }
+
+    /**
+     * Create the api service that is used to make the api calls.
+     *
+     * @param username String The username used to authenticate with the api.
+     * @param password String The password used to authenticate with the api.
+     * @return instance of the API service.
+     */
+    private Api createAPIService(String username, String password) {
+        if (mApi == null) {
+            try {
+                mServiceGen = ServiceGenerator.getInstance();
+            } catch (PreviousRequestNotFinishedException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            mApi = mServiceGen.createService(
+                    this,
+                    Api.class,
+                    getString(R.string.api_url),
+                    username,
+                    password
+            );
+        }
+        return mApi;
     }
 }
