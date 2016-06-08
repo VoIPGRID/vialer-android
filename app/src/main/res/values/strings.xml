@@ -168,4 +168,8 @@
 
     <string name="notification_contact_sync_done_title">Contact synchronisation</string>
     <string name="notification_contact_sync_done_content">The contact synchronisation is done! You are now able to search in your contacts.</string>
+
+    <!-- Remote logging -->
+    <string name="remote_logging_switch_title">Remote logging</string>
+    <string name="remote_logging_input_hint">Logging identifier</string>
 </resources>

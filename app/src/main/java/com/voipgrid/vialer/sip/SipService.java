@@ -16,6 +16,7 @@ import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerGcmListenerService;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
@@ -27,6 +28,7 @@ import com.voipgrid.vialer.util.GsmCallListener;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.PhonePermission;
+import com.voipgrid.vialer.util.RemoteLogger;
 
 import org.pjsip.pjsua2.Account;
 import org.pjsip.pjsua2.AccountConfig;
@@ -85,6 +87,9 @@ public class SipService extends Service implements
     private ToneGenerator mToneGenerator;
 
     private GsmCallListener mGsmCallListener;
+    private Preferences mPreferences;
+    private RemoteLogger mRemoteLogger;
+
     private Endpoint mEndpoint;
     private SipAccount mSipAccount;
     private String mToken;
@@ -173,6 +178,11 @@ public class SipService extends Service implements
 
         mBroadcastManager = LocalBroadcastManager.getInstance(this);
 
+        mPreferences = new Preferences(this);
+        mRemoteLogger = new RemoteLogger(this);
+
+        mRemoteLogger.d(TAG + " onCreate");
+
         PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
         if (phoneAccount != null) {
             /* Try to load PJSIP library */
@@ -219,6 +229,7 @@ public class SipService extends Service implements
             }
         } else {
             /* User has no Sip Account so service has no function at all. We stop the service */
+            mRemoteLogger.w("No sip account when trying to create service");
             broadcast(SipConstants.SIP_SERVICE_HAS_NO_ACCOUNT);
             stopSelf();
         }
@@ -247,8 +258,11 @@ public class SipService extends Service implements
 
     @Override
     public void onDestroy() {
+        mRemoteLogger.d(TAG + " onDestroy");
         mBroadcastManager.unregisterReceiver(mCallInteractionReceiver);
         mBroadcastManager.unregisterReceiver(mKeyPadInteractionReceiver);
+
+        mSIPLogWriter.disableRemoteLogging();
 
         /* Cleanup SipAccount */
         if(mSipAccount != null) {
@@ -275,10 +289,12 @@ public class SipService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        mRemoteLogger.d(TAG + " onStartCommand");
         mCallType = intent.getAction();
         Uri number = intent.getData();
         switch (mCallType) {
             case SipConstants.ACTION_VIALER_INCOMING :
+                mRemoteLogger.d(TAG + " incomingCall");
                 mUrl = intent.getStringExtra(SipConstants.EXTRA_RESPONSE_URL);
                 mToken = intent.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN);
                 mNumber = intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
@@ -287,6 +303,7 @@ public class SipService extends Service implements
                         VialerGcmListenerService.MESSAGE_START_TIME);
                 break;
             case SipConstants.ACTION_VIALER_OUTGOING :
+                mRemoteLogger.d(TAG + " outgoingCall");
                 SipCall call = new SipCall(mSipAccount, this);
                 call.setPhoneNumberUri(number);
                 call.setCallerId(intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME));
@@ -320,6 +337,7 @@ public class SipService extends Service implements
     /** AccountStatus **/
     @Override
     public void onAccountRegistered(Account account, OnRegStateParam param) {
+        mRemoteLogger.d(TAG + " onAccountRegistered");
         // Check if it an incoming call and we did not respond to the middleware already.
         if (mCallType.equals(SipConstants.ACTION_VIALER_INCOMING) && !mHasRespondedToMiddleware) {
             // Set responded as soon as possible to avoid duplicate requests due to multiple
@@ -376,13 +394,13 @@ public class SipService extends Service implements
     /** AccountStatus **/
     @Override
     public void onAccountUnregistered(Account account, OnRegStateParam param) {
-
+        mRemoteLogger.d(TAG + " onAccountUnRegistered");
     }
 
     /** AccountStatus **/
     @Override
     public void onAccountInvalidState(Account account, Throwable fault) {
-
+        mRemoteLogger.d(TAG + " onAccountInvalidState");
     }
 
     /**
@@ -392,11 +410,12 @@ public class SipService extends Service implements
      * @throws UnsatisfiedLinkError
      */
     private void loadPjsip() {
-        /* Try to load PJSIP library */
+        mRemoteLogger.d(TAG + " Loading PJSIP");
         try {
             System.loadLibrary("pjsua2");
         } catch (UnsatisfiedLinkError error) { /* Can not load PJSIP library */
             Log.e(TAG, error.getMessage());
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(error));
             /* Notify app */
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_LOAD_PJSIP);
             /* Stop the service since the app can not use SIP */
@@ -406,6 +425,7 @@ public class SipService extends Service implements
 
     private Endpoint createEndpoint(pjsip_transport_type_e transportType,
                                     TransportConfig transportConfig) {
+        mRemoteLogger.d(TAG + " createEndpoint");
         Endpoint endpoint = new Endpoint();
         EpConfig endpointConfig = new EpConfig();
 
@@ -419,17 +439,21 @@ public class SipService extends Service implements
             endpoint.libCreate();
         } catch (Exception e) {
             Log.e(TAG, "Unable to create the PJSIP library");
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
             stopSelf();
             return null;
         }
 
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG || mPreferences.remoteLoggingIsActive()) {
             endpointConfig.getLogConfig().setLevel(SipConstants.SIP_LOG_LEVEL);
             endpointConfig.getLogConfig().setConsoleLevel(SipConstants.SIP_CONSOLE_LOG_LEVEL);
             LogConfig logConfig = endpointConfig.getLogConfig();
             mSIPLogWriter = new SIPLogWriter();
+            if (mPreferences.remoteLoggingIsActive()) {
+                mSIPLogWriter.enabledRemoteLogging(mRemoteLogger);
+            }
             logConfig.setWriter(mSIPLogWriter);
             logConfig.setDecor(logConfig.getDecor() &
                             ~(pj_log_decoration.PJ_LOG_HAS_CR.swigValue() |
@@ -444,6 +468,7 @@ public class SipService extends Service implements
             endpoint.libInit(endpointConfig);
         } catch (Exception e) {
             Log.e(TAG, "Unable to init the PJSIP library");
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
             stopSelf();
@@ -455,6 +480,7 @@ public class SipService extends Service implements
             endpoint.libStart();
         } catch (Exception exception) {
             Log.e(TAG, "Unable to start the PJSIP library");
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(exception));
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
             stopSelf();
             return null;
@@ -472,10 +498,12 @@ public class SipService extends Service implements
 
     private SipAccount createSipAccount(AccountConfig accountConfig, AccountStatus accountStatus,
                                         CallStatus callStatus) {
+        mRemoteLogger.d(TAG + " createSipAccount");
         SipAccount sipAccount = null;
         try {
             sipAccount = new SipAccount(accountConfig, accountStatus, callStatus);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
         }
         return sipAccount;
@@ -492,6 +520,7 @@ public class SipService extends Service implements
 
     @Override
     public void onCallIncoming(Call call) {
+        mRemoteLogger.d(TAG + " onCallIncoming");
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(
                 mHasActiveCall ?
@@ -503,12 +532,14 @@ public class SipService extends Service implements
             call.answer(callOpParam);
             callVisibleForUser(call, CallActivity.TYPE_INCOMING_CALL, mNumber, mCallerId);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             onCallInvalidState(call, e);
         }
     }
 
     @Override
     public void onCallOutgoing(Call call, Uri number) {
+        mRemoteLogger.d(TAG + " onCallOutgoing");
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_RINGING);
         try {
@@ -517,12 +548,14 @@ public class SipService extends Service implements
             setCurrentCall(call);
             callVisibleForUser(call, CallActivity.TYPE_OUTGOING_CALL, number);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             onCallInvalidState(call, e);
         }
     }
 
     @Override
     public void onCallConnected(Call call) {
+        mRemoteLogger.d(TAG + " onCallConnected");
         broadcast(SipConstants.CALL_CONNECTED_MESSAGE);
         mCallIsConnected = true;
 
@@ -534,10 +567,12 @@ public class SipService extends Service implements
 
     @Override
     public void onCallDisconnected(final Call call) {
+        mRemoteLogger.d(TAG + " onCallDisconnected");
         try {
             // Try to unregister the sip account with the sip proxy.
             mSipAccount.setRegistration(false);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
         }
 
@@ -558,12 +593,15 @@ public class SipService extends Service implements
 
     @Override
     public void onCallInvalidState(Call call, Throwable fault) {
+        mRemoteLogger.d(TAG + " onCallInvalidState");
+        mRemoteLogger.d(TAG + " " + Log.getStackTraceString(fault));
         broadcast(SipConstants.CALL_INVALID_STATE);
         stopSelf();
     }
 
     @Override
     public void onCallMediaAvailable(Call call, AudioMedia media) {
+        mRemoteLogger.d(TAG + " onCallMediaAvailable");
         try {
             AudDevManager audDevManager = mEndpoint.audDevManager();
             media.startTransmit(audDevManager.getPlaybackDevMedia());
@@ -571,6 +609,7 @@ public class SipService extends Service implements
 
             broadcast(SipConstants.CALL_MEDIA_AVAILABLE_MESSAGE);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             broadcast(SipConstants.CALL_MEDIA_FAILED);
             e.printStackTrace();
         }
@@ -578,20 +617,23 @@ public class SipService extends Service implements
 
     @Override
     public void onCallMediaUnavailable(Call call) {
-
+        mRemoteLogger.d(TAG + " onCallMediaUnavailable");
     }
 
     @Override
     public void onCallStartRingback() {
+        mRemoteLogger.d(TAG + " onCallStartRingback");
         mHandler.postDelayed(mRingbackRunnable, 2000);
     }
 
     @Override
     public void onCallStopRingback() {
+        mRemoteLogger.d(TAG + " onCallStopRingback");
         mHandler.removeCallbacks(mRingbackRunnable);
     }
 
     private void callVisibleForUser(Call call, String type, Uri number) {
+        mRemoteLogger.d(TAG + " callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setDataAndType(number, type);
@@ -604,6 +646,7 @@ public class SipService extends Service implements
     }
 
     private void callVisibleForUser(Call call, String type, String number, String callerId) {
+        mRemoteLogger.d(TAG + " callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Uri sipAddressUri = SipUri.sipAddressUri(
@@ -617,6 +660,7 @@ public class SipService extends Service implements
     }
 
     private void handleCallInteraction(Call call, Intent intent) {
+        mRemoteLogger.d(TAG + " handleCallInteraction");
         String type = intent.getStringExtra(SipConstants.CALL_STATUS_ACTION);
         switch (type) {
             case SipConstants.CALL_UPDATE_MICROPHONE_VOLUME_ACTION :
@@ -642,9 +686,11 @@ public class SipService extends Service implements
     }
 
     private void handleKeyPadInteraction(Call call, Intent intent) {
+        mRemoteLogger.d(TAG + " handleKeyPadInteraction");
         try {
             call.dialDtmf(intent.getStringExtra(SipConstants.KEY_PAD_DTMF_TONE));
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
         }
     }
@@ -655,11 +701,13 @@ public class SipService extends Service implements
      * @param statusCode
      */
     private void hangUpWithStatusCode(Call call, pjsip_status_code statusCode) {
+        mRemoteLogger.d(TAG + " hangUpWithStatusCode");
         try {
             CallOpParam callOpParam = new CallOpParam(true);
             callOpParam.setStatusCode(statusCode);
             call.hangup(callOpParam);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
             stopSelf();
         }
@@ -667,17 +715,20 @@ public class SipService extends Service implements
 
     @Override
     public void hangUp(Call call, boolean userHangup) {
+        mRemoteLogger.d(TAG + " hangUp");
         mUserHangupCall = userHangup;
         hangUpWithStatusCode(call, pjsip_status_code.PJSIP_SC_DECLINE);
     }
 
     @Override
     public void decline(Call call) {
+        mRemoteLogger.d(TAG + " decline");
         hangUpWithStatusCode(call, pjsip_status_code.PJSIP_SC_BUSY_HERE);
     }
 
     @Override
     public void answer(Call call) {
+        mRemoteLogger.d(TAG + " answer");
         CallOpParam callOpParam = new CallOpParam(true);
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_ACCEPTED);
         try {
@@ -686,6 +737,7 @@ public class SipService extends Service implements
                 mCallIsConnected = true;
             }
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
             stopSelf();
         }
@@ -693,6 +745,7 @@ public class SipService extends Service implements
 
     @Override
     public void updateMicrophoneVolume(Call call, long newVolume) {
+        mRemoteLogger.d(TAG + " updateMicrophoneVolume");
         try {
             CallMediaInfoVector callMediaInfoVector = call.getInfo().getMedia();
             long size=callMediaInfoVector.size();
@@ -704,6 +757,7 @@ public class SipService extends Service implements
                 }
             }
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             broadcast(SipConstants.CALL_UPDATE_MICROPHONE_VOLUME_FAILED);
             e.printStackTrace();
         }
@@ -711,6 +765,7 @@ public class SipService extends Service implements
 
     @Override
     public void putOnHold(Call call) {
+        mRemoteLogger.d(TAG + " putOnHold");
         try {
             CallOpParam callOpParam = new CallOpParam(true);
             if(!mHasHold) {
@@ -724,6 +779,7 @@ public class SipService extends Service implements
             }
             mHasHold = !mHasHold;
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             broadcast(SipConstants.CALL_PUT_ON_HOLD_FAILED);
             e.printStackTrace();
         }
@@ -731,7 +787,7 @@ public class SipService extends Service implements
 
     @Override
     public void xFer(Call call) {
-
+        mRemoteLogger.d(TAG + " xFer");
     }
 
     private void setCurrentCall(Call call) {

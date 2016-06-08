@@ -18,7 +18,6 @@ import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -31,6 +30,7 @@ import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
+import com.voipgrid.vialer.util.RemoteLogger;
 import com.wearespindle.googlelockring.GoogleLockRing;
 import com.wearespindle.googlelockring.OnTriggerListener;
 
@@ -41,7 +41,7 @@ import com.wearespindle.googlelockring.OnTriggerListener;
 public class CallActivity extends AppCompatActivity
         implements View.OnClickListener, SipConstants, ProximitySensorInterface,
         AudioManager.OnAudioFocusChangeListener, OnTriggerListener {
-
+    private final static String TAG = CallActivity.class.getSimpleName();
     public static final String TYPE_OUTGOING_CALL = "type-outgoing-call";
     public static final String TYPE_INCOMING_CALL = "type-incoming-call";
     public static final String TYPE_CONNECTED_CALL = "type-connected-call";
@@ -68,6 +68,7 @@ public class CallActivity extends AppCompatActivity
 
     // Keep track of the start time of a call, so we can keep track of its duration.
     long mCallStartTime = 0;
+    private RemoteLogger mRemoteLogger;
     private SipService mSipService;
     private boolean mServiceBound = false;
 
@@ -119,6 +120,9 @@ public class CallActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mRemoteLogger = new RemoteLogger(this);
+
+        mRemoteLogger.d(TAG + " onCreate");
 
         // Check if we have permission to use the microphone. If not, request it.
         if (!MicrophonePermission.hasPermission(this)) {
@@ -184,6 +188,7 @@ public class CallActivity extends AppCompatActivity
             toggleCallStateButtonVisibility(type);
 
             if(mIsIncomingCall) {
+                mRemoteLogger.d(TAG + " inComingCall");
                 mIncomingCallIsRinging = true;
                 switch (mAudioManager.getRingerMode()) {
                     case AudioManager.RINGER_MODE_NORMAL:
@@ -199,6 +204,8 @@ public class CallActivity extends AppCompatActivity
                         vibrate(false);
                         break;
                 }
+            } else {
+                mRemoteLogger.d(TAG + " outgoingCall");
             }
         }
         mProximityHelper.startSensor();
@@ -207,6 +214,7 @@ public class CallActivity extends AppCompatActivity
     @Override
     public void onStart() {
         super.onStart();
+        mRemoteLogger.d(TAG + " onStart");
         // Register for updates.
         IntentFilter intentFilter = new IntentFilter(ACTION_BROADCAST_CALL_STATUS);
         mBroadcastManager.registerReceiver(mCallStatusReceiver, intentFilter);
@@ -215,6 +223,7 @@ public class CallActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        mRemoteLogger.d(TAG + " onResume");
         // Bind the SipService to the activity.
         bindService(new Intent(this, SipService.class), mConnection, Context.BIND_AUTO_CREATE);
 
@@ -234,6 +243,7 @@ public class CallActivity extends AppCompatActivity
     @Override
     public void onStop() {
         super.onStop();
+        mRemoteLogger.d(TAG + " onStop");
         // Unregister the SipService BroadcastReceiver when the activity pauses.
         mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
         if (mServiceBound) {
@@ -245,6 +255,7 @@ public class CallActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mRemoteLogger.d(TAG + " onDestroy");
         // Abandon focus so other apps can continue playing.
         mAudioManager.abandonAudioFocus(this);
         mProximityHelper.stopSensor();
@@ -303,6 +314,7 @@ public class CallActivity extends AppCompatActivity
      * @see SipConstants for the possible states.
      */
     private void onCallStatusUpdate(String newStatus) {
+        mRemoteLogger.d(TAG + " onCallStatusUpdate: " + newStatus);
         switch (newStatus) {
             case CALL_MEDIA_AVAILABLE_MESSAGE:
                 onCallStatusUpdate(CALL_STOP_RINGBACK_MESSAGE);
@@ -374,6 +386,7 @@ public class CallActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+        mRemoteLogger.d(TAG + " onBackPressed");
         View hangupButton = findViewById(R.id.button_hangup);
         View declineButton = findViewById(R.id.button_reject);
 
@@ -388,12 +401,14 @@ public class CallActivity extends AppCompatActivity
 
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
+        mRemoteLogger.d(TAG + " toggleSpeaker");
         mOnSpeaker = !mOnSpeaker;
         mAudioManager.setSpeakerphoneOn(!mAudioManager.isSpeakerphoneOn());
     }
 
     // Mute or un-mute a call when the user presses the button.
     private void toggleMute() {
+        mRemoteLogger.d(TAG + " toggleMute");
         mMute = !mMute;
         long newVolume = (mMute ?               // get new volume based on selection value
                     getResources().getInteger(R.integer.mute_microphone_volume_value) :   // muted
@@ -403,6 +418,7 @@ public class CallActivity extends AppCompatActivity
 
     // Show or hide the dialPad when the user presses the button.
     private void toggleDialPad() {
+        mRemoteLogger.d(TAG + " toggleDialPad");
         mKeyPadVisible = !mKeyPadVisible;
         boolean visible = mKeyPadViewContainer.getVisibility() == View.VISIBLE;
         mKeyPadViewContainer.setVisibility(visible ? View.GONE : View.VISIBLE);
@@ -411,6 +427,7 @@ public class CallActivity extends AppCompatActivity
 
     // Toggle the hold the call when the user presses the button.
     private void toggleOnHold() {
+        mRemoteLogger.d(TAG + " toggleOnHold");
         mOnHold = !mOnHold;
         if (mServiceBound) {
             mSipService.putOnHold(mSipService.getCurrentCall());
@@ -530,6 +547,7 @@ public class CallActivity extends AppCompatActivity
      * @param newVolume new volume level for the Rx level of the current media of active call.
      */
     void updateMicrophoneVolume(long newVolume) {
+        mRemoteLogger.d(TAG + " updateMicrophoneVolume");
         if (mServiceBound) {
             mSipService.updateMicrophoneVolume(mSipService.getCurrentCall(), newVolume);
         }
@@ -585,6 +603,7 @@ public class CallActivity extends AppCompatActivity
     }
 
     private void answer() {
+        mRemoteLogger.d(TAG + " answer");
         playRingtone(false);
         vibrate(false);
         View callButtonsContainer = findViewById(R.id.call_buttons_container);
@@ -609,6 +628,7 @@ public class CallActivity extends AppCompatActivity
     }
 
     private void decline() {
+        mRemoteLogger.d(TAG + " decline");
         playRingtone(false);
         vibrate(false);
         if (mServiceBound) {
@@ -653,6 +673,7 @@ public class CallActivity extends AppCompatActivity
     }
     @Override
     public void onAudioFocusChange(int focusChange) {
+        mRemoteLogger.d(TAG + " onAudioFocusChange");
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 // Check if we have a previous volume on audio gain.
