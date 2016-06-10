@@ -25,6 +25,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
+import com.logentries.logger.AndroidLogger;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
@@ -41,6 +42,7 @@ import com.voipgrid.vialer.util.NetworkStateViewHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.JsonStorage;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -73,6 +75,8 @@ public class DialerActivity extends LoginRequiredActivity implements
     private String t9Query;
     private boolean mHasPermission;
     private boolean mAskForPermission;
+
+    private AndroidLogger logger = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -166,4 +166,8 @@
 
     <string name="notification_contact_sync_done_title">Contact synchronisatie</string>
     <string name="notification_contact_sync_done_content">De contact synchronisatie is klaar! Het is nu mogelijk om te zoeken in je contacten.</string>
+
+    <!-- Remote logging -->
+    <string name="remote_logging_switch_title">Remote logging</string>
+    <string name="remote_logging_input_hint">Identificatie nummer</string>
 </resources>

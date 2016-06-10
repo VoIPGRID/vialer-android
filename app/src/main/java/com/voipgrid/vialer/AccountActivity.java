@@ -35,6 +35,7 @@ public class AccountActivity extends LoginRequiredActivity implements
 
     private CompoundButton mSwitch;
     private EditText mSipIdEditText;
+    private EditText mRemoteLogIdEditText;
 
     private PhoneAccount mPhoneAccount;
     private PhoneAccountHelper mPhoneAccountHelper;
@@ -61,11 +62,40 @@ public class AccountActivity extends LoginRequiredActivity implements
 
         /* enabled home button for the Toolbar */
         getSupportActionBar().setHomeButtonEnabled(true);
-
+        mRemoteLogIdEditText = (EditText) findViewById(R.id.remote_logging_id_edit_text);
+        mRemoteLogIdEditText.setVisibility(View.GONE);
         mSipIdEditText = ((EditText) findViewById(R.id.account_sip_id_edit_text));
         mSwitch = (CompoundButton) findViewById(R.id.account_sip_switch);
-
         mSwitch.setOnCheckedChangeListener(this);
+
+        initRemoteLoggingSwitch();
+    }
+
+    /**
+     * Function to set the initial state of the remote logging switch and a onCheckChangeListener.
+     */
+    private void initRemoteLoggingSwitch() {
+        CompoundButton remoteLoggingSwitch = (CompoundButton) findViewById(R.id.remote_logging_switch);
+        remoteLoggingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (mPreferences.remoteLoggingIsActive() == isChecked) {
+                    return;
+                }
+                mPreferences.setRemoteLogging(isChecked);
+                if (isChecked) {
+                    mRemoteLogIdEditText.setVisibility(View.VISIBLE);
+                    mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
+                } else {
+                    mRemoteLogIdEditText.setVisibility(View.GONE);
+                }
+            }
+        });
+        remoteLoggingSwitch.setChecked(mPreferences.remoteLoggingIsActive());
+        if (mPreferences.remoteLoggingIsActive()) {
+            mRemoteLogIdEditText.setVisibility(View.VISIBLE);
+            mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
+        }
     }
 
     private void updateAndPopulate() {
