@@ -575,20 +575,18 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case R.id.button_reject:
-                playRingtone(false);
-                vibrate(false);
                 decline();
                 break;
 
             case R.id.button_pickup:
-                playRingtone(false);
-                vibrate(false);
                 answer();
                 break;
         }
     }
 
     private void answer() {
+        playRingtone(false);
+        vibrate(false);
         View callButtonsContainer = findViewById(R.id.call_buttons_container);
         if (callButtonsContainer.getVisibility() == View.INVISIBLE) {
             callButtonsContainer.setVisibility(View.VISIBLE);
@@ -611,6 +609,8 @@ public class CallActivity extends AppCompatActivity
     }
 
     private void decline() {
+        playRingtone(false);
+        vibrate(false);
         if (mServiceBound) {
             mSipService.decline(mSipService.getCurrentCall());
             mAnalyticsHelper.sendEvent(
