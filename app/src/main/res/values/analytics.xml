@@ -8,9 +8,12 @@
     <!-- Middleware events -->
     <string name="analytics_event_category_middleware">middleware</string>
 
-    <string name="analytics_event_action_acceptance">acceptance</string>
-    <string name="analytics_event_label_middleware_accepted">accepted</string>
-    <string name="analytics_event_label_middleware_rejected">rejected</string>
+    <string name="analytics_event_action_middleware_accepted">accepted</string>
+    <string name="analytics_event_action_middleware_rejected">rejected</string>
+
+    <string name="analytics_event_label_wifi">Wifi</string>
+    <string name="analytics_event_label_4g">4G</string>
+    <string name="analytics_event_label_unknown">unknown</string>
 
     <string name="analytics_event_description_registration_failed">Failed middleware registration</string>
 
@@ -24,8 +27,13 @@
 
     <string name="analytics_event_label_accepted">Accepted</string>
     <string name="analytics_event_label_declined">Declined</string>
+    <string name="analytics_event_label_ringing">Ringing</string>
 
     <string name="analytics_event_label_connect_a_b">ConnectAB</string>
     <string name="analytics_event_label_sip">SIP</string>
 
+    <!-- Web view titles GA -->
+    <string name="analytics_statistics_title">Statistics</string>
+    <string name="analytics_dial_plan_title">Dialplan</string>
+    <string name="analytics_info_title">Info</string>
 </resources>
