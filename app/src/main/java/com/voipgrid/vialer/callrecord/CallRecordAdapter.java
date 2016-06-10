@@ -42,6 +42,8 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
 
     private Activity mActivity;
 
+    public boolean mCallAlreadySetup = false;
+
     /**
      * Construct a new CallRecordAdapter
      * @param activity
@@ -220,7 +222,6 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
                     mActivity, date.getTime(), DateUtils.SECOND_IN_MILLIS,
                     DateUtils.YEAR_IN_MILLIS, DateUtils.FORMAT_ABBREV_TIME));
         }
-
         return convertView;
     }
 
@@ -243,7 +244,8 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
             numberToCall = callRecord.getCaller();
         }
 
-        if (numberToCall != null) {
+        if (numberToCall != null && !mCallAlreadySetup) {
+            mCallAlreadySetup = true;
             new DialHelper(
                     mActivity,
                     new JsonStorage(mActivity),

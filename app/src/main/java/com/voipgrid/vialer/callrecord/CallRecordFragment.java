@@ -158,6 +158,7 @@ public class CallRecordFragment extends ListFragment implements
 
         mNetworkStateViewHelper.updateNetworkStateView();
         mNetworkStateViewHelper.startListening();
+        mAdapter.mCallAlreadySetup = false;
     }
 
     @Override
