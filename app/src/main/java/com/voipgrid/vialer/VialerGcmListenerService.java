@@ -51,13 +51,11 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
             AnalyticsHelper analyticsHelper = new AnalyticsHelper(
                     ((AnalyticsApplication) getApplication()).getDefaultTracker());
 
-            ConnectivityHelper connectivityHelper = new ConnectivityHelper(
-                    (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                    (TelephonyManager) getSystemService(TELEPHONY_SERVICE));
-            if(connectivityHelper.hasNetworkConnection() && connectivityHelper.hasFastData()) {
+            ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
+            if (connectivityHelper.hasNetworkConnection() && connectivityHelper.hasFastData()) {
 
                 String number = data.getString(PHONE_NUMBER);
-                if(number != null && number.equalsIgnoreCase(SUPPRESSED)) {
+                if (number != null && number.equalsIgnoreCase(SUPPRESSED)) {
                     number = getString(R.string.supressed_number);
                 }
 
@@ -73,11 +71,20 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                 // Inform the middleware the incoming call is received but the app can not handle
                 // the sip call because there is no LTE or Wifi connection available at this
                 // point.
+                String connectionType = connectivityHelper.getConnectionTypeString();
+                String analyticsLabel;
+                if (connectionType.equals(connectivityHelper.CONNECTION_WIFI)) {
+                    analyticsLabel = getString(R.string.analytics_event_label_wifi);
+                } else if (connectionType.equals(connectivityHelper.CONNECTION_4G)) {
+                    analyticsLabel = getString(R.string.analytics_event_label_4g);
+                } else {
+                    analyticsLabel = getString(R.string.analytics_event_label_unknown);
+                }
+
                 analyticsHelper.sendEvent(
                         getString(R.string.analytics_event_category_middleware),
-                        getString(R.string.analytics_event_action_acceptance),
-                        getString(R.string.analytics_event_label_middleware_rejected),
-                        connectivityHelper.getConnectionType()
+                        getString(R.string.analytics_event_action_middleware_rejected),
+                        analyticsLabel
                 );
                 replyServer(
                         data.getString(RESPONSE_URL),

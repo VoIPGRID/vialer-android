@@ -10,6 +10,8 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.AutoLoginToken;
@@ -32,6 +34,7 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
     public static final String TITLE = "key-title";
     public static final String USERNAME = "key-username";
     public static final String PASSWORD = "key-password";
+    public static final String GA_TITLE = "ga-title";
 
     private ProgressBar mProgressBar;
     private WebView mWebView;
@@ -91,6 +94,12 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
             /* request an autologin token and load the requested page */
             autoLoginToken();
         }
+
+        // Track the web view.
+        AnalyticsHelper analyticsHelper = new AnalyticsHelper(
+                ((AnalyticsApplication) getApplication()).getDefaultTracker()
+        );
+        analyticsHelper.sendScreenViewTrack(getIntent().getStringExtra(GA_TITLE));
     }
 
     @Override

@@ -72,6 +72,20 @@ public class AnalyticsHelper {
     }
 
     /**
+     * Send a custom screen to track with GA
+     * @param screenName String the screen to track
+     */
+    public void sendScreenViewTrack(String screenName) {
+        // Set the screen to track
+        mTracker.setScreenName(screenName);
+
+        // Send a screen view.
+        mTracker.send(
+                new HitBuilders.ScreenViewBuilder().build()
+        );
+    }
+
+    /**
      * Send a timing to GA.
      * @param category Category of the timing.
      * @param name Name of the timing.
@@ -86,5 +100,4 @@ public class AnalyticsHelper {
                         .build()
         );
     }
-
 }

@@ -28,5 +28,8 @@
     <screenName name="com.voipgrid.vialer.WebActivity">
         Web
     </screenName>
+    <screenName name="com.voipgrid.vialer.twostepcall.TwoStepCallActivity">
+        TwoStepCalling
+    </screenName>
 
 </resources>

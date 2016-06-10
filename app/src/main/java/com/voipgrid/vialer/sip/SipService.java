@@ -24,6 +24,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.GsmCallListener;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -185,7 +186,7 @@ public class SipService extends Service implements
 
         PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
         if (phoneAccount != null) {
-            /* Try to load PJSIP library */
+            // Try to load PJSIP library.
             loadPjsip();
 
             pjsip_transport_type_e transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_UDP;
@@ -354,11 +355,20 @@ public class SipService extends Service implements
                     mUrl
             );
 
+            ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
+            String connectionType = connectivityHelper.getConnectionTypeString();
+            String analyticsLabel;
+            if (connectionType.equals(connectivityHelper.CONNECTION_WIFI)) {
+                analyticsLabel = getString(R.string.analytics_event_label_wifi);
+            } else {
+                analyticsLabel = getString(R.string.analytics_event_label_4g);
+            }
+
             // Accepted event.
             analyticsHelper.sendEvent(
                     getString(R.string.analytics_event_category_middleware),
-                    getString(R.string.analytics_event_action_acceptance),
-                    getString(R.string.analytics_event_label_middleware_accepted)
+                    getString(R.string.analytics_event_action_middleware_accepted),
+                    analyticsLabel
             );
 
             long startTime = (long) (Double.parseDouble(mMessageStartTime) * 1000);  // To ms.

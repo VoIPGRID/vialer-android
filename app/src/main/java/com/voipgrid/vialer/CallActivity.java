@@ -189,6 +189,14 @@ public class CallActivity extends AppCompatActivity
 
             if(mIsIncomingCall) {
                 mRemoteLogger.d(TAG + " inComingCall");
+
+                // Ringing event.
+                mAnalyticsHelper.sendEvent(
+                        getString(R.string.analytics_event_category_call),
+                        getString(R.string.analytics_event_action_inbound),
+                        getString(R.string.analytics_event_label_ringing)
+                );
+
                 mIncomingCallIsRinging = true;
                 switch (mAudioManager.getRingerMode()) {
                     case AudioManager.RINGER_MODE_NORMAL:

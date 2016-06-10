@@ -3,6 +3,8 @@ package com.voipgrid.vialer.api.models;
 import android.net.Uri;
 
 import com.google.gson.annotations.SerializedName;
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 
 import java.util.HashSet;
 import java.util.Set;

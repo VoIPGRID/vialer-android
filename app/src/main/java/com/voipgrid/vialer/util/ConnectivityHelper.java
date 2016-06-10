@@ -5,6 +5,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 
+import com.voipgrid.vialer.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +18,10 @@ public class ConnectivityHelper {
     private static final long TYPE_SLOW = 0;
     private static final long TYPE_WIFI = 1;
     private static final long TYPE_LTE = 2;
+
+    public final String CONNECTION_WIFI = "Wifi";
+    public final String CONNECTION_4G = "4G";
+    public final String CONNECTION_UNKNOWN = "unknown";
 
     private final ConnectivityManager mConnectivityManager;
     private final TelephonyManager mTelephonyManager;
@@ -72,6 +78,24 @@ public class ConnectivityHelper {
         } else {
             return TYPE_SLOW;
         }
+    }
+
+    /**
+     * Get the connection type as string. This is mainly used for the GA tracking.
+     *
+     * @return String representation of the connection type.
+     */
+    public String getConnectionTypeString() {
+        long connectionType = getConnectionType();
+        String connectionString = CONNECTION_UNKNOWN;
+
+        if (connectionType == TYPE_WIFI) {
+            return CONNECTION_WIFI;
+        } else if (connectionType == TYPE_LTE) {
+            return CONNECTION_4G;
+        }
+
+        return connectionString;
     }
 
     /**
