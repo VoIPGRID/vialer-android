@@ -50,12 +50,20 @@
             style="@style/AccountTextInputLayoutStyle"
             />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_network_connection"
+            android:id="@+id/no_availability_text"
+            android:visibility="gone" />
+
         <Spinner
             android:id="@+id/menu_availability_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             style="@style/AccountTextInputLayoutStyle"/>
+
     </LinearLayout>
     <View style="@style/Divider"/>
 </LinearLayout>

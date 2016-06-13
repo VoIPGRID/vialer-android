@@ -2,6 +2,7 @@
     <string name="app_name">Vialer</string>
     <string name="navigation_drawer_open">Open navigation</string>
     <string name="navigation_drawer_close">Close navigation</string>
+    <string name="no_network_connection">No internet connection</string>
     <string name="feature_not_implemented">Feature is not implemented</string>
     <string name="title_activity_dialer">Dialer</string>
     <string name="allowed_dialpad_characters">0123456789*#+</string>
