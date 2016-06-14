@@ -39,6 +39,10 @@ public class PhoneNumberUtilsTest {
         // Test combination.
         phoneNumber = "+31508 0090a00  G";
         assertEquals("+31508009000", PhoneNumberUtils.format(phoneNumber));
+
+        // Test * for anonymouse callings.
+        phoneNumber = "*31*0508009000";
+        assertEquals("*31*0508009000", PhoneNumberUtils.format(phoneNumber));
     }
 
     /**

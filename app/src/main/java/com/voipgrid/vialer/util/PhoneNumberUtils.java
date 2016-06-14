@@ -11,7 +11,7 @@ public class PhoneNumberUtils {
      * @return String formatted phoneNumber
      */
     public static String format(String phoneNumber) {
-        return phoneNumber.replaceAll("[^+0-9]","");
+        return phoneNumber.replaceAll("[^*+0-9]","");
     }
 
     /**
