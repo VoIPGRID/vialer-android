@@ -171,4 +171,9 @@
     <!-- Remote logging -->
     <string name="remote_logging_switch_title">Remote logging</string>
     <string name="remote_logging_input_hint">Identificatie nummer</string>
+    <string name="yes">JA</string>
+    <string name="no">NEE</string>
+    <string name="remote_logging_unexpected_error">Onverwachtte fout</string>
+    <string name="remote_logging_send_crash_log">Zou u ons willen helpen met het verbeteren van onze diensten door het foutenrapport te versturen?</string>
+
 </resources>
