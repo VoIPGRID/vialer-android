@@ -173,4 +173,9 @@
     <!-- Remote logging -->
     <string name="remote_logging_switch_title">Remote logging</string>
     <string name="remote_logging_input_hint">Logging identifier</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
+    <string name="remote_logging_unexpected_error">Unexpected error</string>
+    <string name="remote_logging_send_crash_log">Would you like to help improve our services and send the crash log to us?</string>
+
 </resources>
