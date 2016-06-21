@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
+import com.voipgrid.vialer.dialer.NumberInputView;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
@@ -93,6 +94,13 @@ public class CallActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             onCallStatusUpdate(intent.getStringExtra(CALL_STATUS_KEY));
             onCallStatesUpdateButtons(intent.getStringExtra(CALL_STATUS_KEY));
+        }
+    };
+
+    private BroadcastReceiver mDTMFButtonPressed = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleDTMFButtonPressed(intent.getStringExtra(SipConstants.KEY_PAD_DTMF_TONE));
         }
     };
 
@@ -226,6 +234,10 @@ public class CallActivity extends AppCompatActivity
         // Register for updates.
         IntentFilter intentFilter = new IntentFilter(ACTION_BROADCAST_CALL_STATUS);
         mBroadcastManager.registerReceiver(mCallStatusReceiver, intentFilter);
+
+        intentFilter = new IntentFilter(
+                SipConstants.ACTION_BROADCAST_KEY_PAD_INTERACTION);
+        mBroadcastManager.registerReceiver(mDTMFButtonPressed, intentFilter);
     }
 
     @Override
@@ -254,6 +266,7 @@ public class CallActivity extends AppCompatActivity
         mRemoteLogger.d(TAG + " onStop");
         // Unregister the SipService BroadcastReceiver when the activity pauses.
         mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
+        mBroadcastManager.unregisterReceiver(mDTMFButtonPressed);
         if (mServiceBound) {
             unbindService(mConnection);
             mServiceBound = false;
@@ -431,6 +444,11 @@ public class CallActivity extends AppCompatActivity
         boolean visible = mKeyPadViewContainer.getVisibility() == View.VISIBLE;
         mKeyPadViewContainer.setVisibility(visible ? View.GONE : View.VISIBLE);
         mProximityHelper.updateWakeLock();
+
+        if (!visible) {
+            NumberInputView numberInputView = (NumberInputView) findViewById(R.id.number_input_edit_text);
+            numberInputView.clear();
+        }
     }
 
     // Toggle the hold the call when the user presses the button.
@@ -536,6 +554,12 @@ public class CallActivity extends AppCompatActivity
                 updateCallButton(microphoneButtonId, false);
                 updateCallButton(keypadButtonId, false);
                 updateCallButton(onHoldButtonId, false);
+
+                if (mKeyPadVisible) {
+                    toggleDialPad();
+                    updateCallButton(keypadButtonId, false);
+                }
+
                 break;
 
             case SERVICE_STOPPED:
@@ -564,6 +588,7 @@ public class CallActivity extends AppCompatActivity
     @Override
     public void onClick(View view) {
         Integer viewId = view.getId();
+
         switch (viewId) {
             case R.id.button_speaker:
                 toggleSpeaker();
@@ -679,6 +704,7 @@ public class CallActivity extends AppCompatActivity
             }
         }, 3000);
     }
+
     @Override
     public void onAudioFocusChange(int focusChange) {
         mRemoteLogger.d(TAG + " onAudioFocusChange");
@@ -739,4 +765,10 @@ public class CallActivity extends AppCompatActivity
 
     @Override
     public void onFinishFinalAnimation() {}
+
+    private void handleDTMFButtonPressed(String key) {
+        NumberInputView numberInputView = (NumberInputView) findViewById(R.id.number_input_edit_text);
+        String currentDTMF = numberInputView.getNumber();
+        numberInputView.setNumber(currentDTMF + key);
+    }
 }

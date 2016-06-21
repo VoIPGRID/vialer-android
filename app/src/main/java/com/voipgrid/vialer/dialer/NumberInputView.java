@@ -101,10 +101,11 @@ public class NumberInputView extends RelativeLayout implements
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        mRemoveButton.setVisibility(s.length() == 0 ? View.INVISIBLE : View.VISIBLE);
-
-        if (s.length() >= 0) {
+        if (s.length() >= 0 && mListener != null) {
             mListener.onInputChanged(s.toString());
+            mRemoveButton.setVisibility(View.VISIBLE);
+        } else {
+            mRemoveButton.setVisibility(View.INVISIBLE);
         }
     }
 
