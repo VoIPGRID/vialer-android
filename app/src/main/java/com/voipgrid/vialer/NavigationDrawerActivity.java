@@ -60,12 +60,12 @@ public abstract class NavigationDrawerActivity
     private DrawerLayout mDrawerLayout;
     private Spinner mSpinner;
     private Toolbar mToolbar;
+    private TextView mNoConnectionText;
 
     private Api mApi;
     private ConnectivityHelper mConnectivityHelper;
     private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
-
 
     private String mDestinationId;
     private boolean mFirstTimeOnItemSelected = true;
@@ -80,7 +80,6 @@ public abstract class NavigationDrawerActivity
 
         mJsonStorage = new JsonStorage(this);
         mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-
 
         if (mSystemUser != null){
             mApi = ServiceGenerator.createService(
@@ -284,6 +283,12 @@ public abstract class NavigationDrawerActivity
     public void onResponse(Call call, Response response) {
         if(!response.isSuccess()){
             Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG);
+
+            if(!mConnectivityHelper.hasNetworkConnection()) {
+                // First check if there is a entry already to avoid duplicates.
+                mSpinner.setVisibility(View.GONE);
+                mNoConnectionText.setVisibility(View.VISIBLE);
+            }
         }
         if(response.body() instanceof VoipGridResponse) {
             List<UserDestination> userDestinationObjects =
@@ -336,6 +341,9 @@ public abstract class NavigationDrawerActivity
 
         mSpinner.setAdapter(mSpinnerAdapter);
         mSpinner.setOnItemSelectedListener(this);
+
+        // Setup spinner placeholder text for when there is no connection and thus no spinner options
+        mNoConnectionText = (TextView) findViewById(R.id.no_availability_text);
     }
 
     @Override
