@@ -267,7 +267,8 @@ public class CallActivity extends AppCompatActivity
         // Unregister the SipService BroadcastReceiver when the activity pauses.
         mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
         mBroadcastManager.unregisterReceiver(mDTMFButtonPressed);
-        if (mServiceBound) {
+
+        if (mServiceBound && (mSipService != null && mSipService.getCurrentCall() == null)) {
             unbindService(mConnection);
             mServiceBound = false;
         }
@@ -547,9 +548,9 @@ public class CallActivity extends AppCompatActivity
                         acceptButton.setClickable(false);
                         acceptButton.setAlpha(0.5f);
                     }
-                } else {
-                    updateCallButton(R.id.button_hangup, false);
                 }
+
+                updateCallButton(R.id.button_hangup, false);
                 updateCallButton(speakerButtonId, false);
                 updateCallButton(microphoneButtonId, false);
                 updateCallButton(keypadButtonId, false);
