@@ -387,6 +387,7 @@ public class DialerActivity extends LoginRequiredActivity implements
     @Override
     public void onKeyPadButtonClick(String digit, String chars) {
         mNumberInputView.add(digit);
+        mNumberInputView.setCorrectFontSize();
     }
 
     private void toggleKeyPadView() {
