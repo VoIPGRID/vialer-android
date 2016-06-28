@@ -35,9 +35,6 @@ public class SystemUser {
 
     String partner;
 
-    @SerializedName("allow_app_account")
-    boolean hasSipPermission;
-
     /**
      * HashSet with list of Strings describing numbers which are not the main number
      * for multi entries in contact list. They are stored in a set because that forces
@@ -119,14 +116,6 @@ public class SystemUser {
 
     public void setPartner(String partner) {
         this.partner = partner;
-    }
-
-    public boolean hasSipPermission() {
-        return hasSipPermission;
-    }
-
-    public void setSipPermission(boolean hasSipPermission) {
-        this.hasSipPermission = hasSipPermission;
     }
 
     public HashSet<String> getSecondaryNumbers() {

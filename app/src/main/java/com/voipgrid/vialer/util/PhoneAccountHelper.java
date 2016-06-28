@@ -85,7 +85,7 @@ public class PhoneAccountHelper {
         PhoneAccount phoneAccount = null;
 
         if (systemUser != null) {
-            mPreferences.setSipPermission(systemUser.hasSipPermission());
+            mPreferences.setSipPermission(true);
             String phoneAccountId = systemUser.getPhoneAccountId();
 
             // Get phone account from API if one is provided in the systemuser API.

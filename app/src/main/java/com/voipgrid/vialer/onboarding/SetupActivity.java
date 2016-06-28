@@ -314,7 +314,7 @@ public class SetupActivity extends AppCompatActivity implements
                         }
                     });
                 } else {
-                    mPreferences.setSipPermission(systemUser.hasSipPermission());
+                    mPreferences.setSipPermission(true);
                     systemUser.setPassword(mPassword);
                     mJsonStorage.save(systemUser);
                     onNextStep(AccountFragment.newInstance(
