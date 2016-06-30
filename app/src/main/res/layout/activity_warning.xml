@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:layout_gravity="top"
-        app:theme="@style/ActionBar"
+        android:theme="@style/ActionBar"
         android:background="@color/color_primary"
         app:popupTheme="@style/ActionBar_Popup">
 

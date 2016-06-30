@@ -16,7 +16,7 @@
         android:layout_gravity="top"
         android:background="@color/color_primary"
         app:popupTheme="@style/ActionBar_Popup"
-        app:theme="@style/ActionBar" />
+        android:theme="@style/ActionBar" />
 
     <FrameLayout
         android:layout_width="match_parent"
