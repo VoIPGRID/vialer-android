@@ -1,12 +1,11 @@
-package com.voipgrid.vialer;
+package com.voipgrid.vialer.fcm;
 
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.Bundle;
-import android.telephony.TelephonyManager;
 
-import com.google.android.gms.gcm.GcmListenerService;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
+import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
@@ -18,6 +17,8 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.MiddlewareHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
+import java.util.Map;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,7 +28,7 @@ import retrofit2.Response;
  * Listen to messages from GCM. The backend server sends us GCM notifications when we have
  * incoming calls.
  */
-public class VialerGcmListenerService extends GcmListenerService implements MiddlewareHelper.Constants {
+public class FcmListenerService extends FirebaseMessagingService implements MiddlewareHelper.Constants {
     // Message format constants.
     private final static String MESSAGE_TYPE = "type";
 
@@ -44,17 +45,23 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
     public static final String MESSAGE_START_TIME = "message_start_time";
 
     @Override
-    public void onMessageReceived(String from, Bundle data) {
-        String request = data.getString(MESSAGE_TYPE, "");
-        if (request.equals(CALL_REQUEST_TYPE)) {
+    public void onMessageReceived(RemoteMessage remoteMessage) {
+        super.onMessageReceived(remoteMessage);
+        Map<String, String> data = remoteMessage.getData();
+        String requestType = data.get(MESSAGE_TYPE);
 
+        if (requestType == null) {
+            return;
+        }
+
+        if (requestType.equals(CALL_REQUEST_TYPE)) {
             AnalyticsHelper analyticsHelper = new AnalyticsHelper(
                     ((AnalyticsApplication) getApplication()).getDefaultTracker());
 
             ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
             if (connectivityHelper.hasNetworkConnection() && connectivityHelper.hasFastData()) {
 
-                String number = data.getString(PHONE_NUMBER);
+                String number = data.get(PHONE_NUMBER);
                 if (number != null && number.equalsIgnoreCase(SUPPRESSED)) {
                     number = getString(R.string.supressed_number);
                 }
@@ -62,10 +69,10 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                 // First start the SIP service with an incoming call.
                 startSipService(
                         number,
-                        data.getString(CALLER_ID),
-                        data.getString(RESPONSE_URL),
-                        data.getString(REQUEST_TOKEN),
-                        data.getString(MESSAGE_START_TIME)
+                        data.get(CALLER_ID) != null ? data.get(CALLER_ID) : "",
+                        data.get(RESPONSE_URL) != null ? data.get(RESPONSE_URL) : "",
+                        data.get(REQUEST_TOKEN) != null ? data.get(REQUEST_TOKEN) : "",
+                        data.get(MESSAGE_START_TIME) != null ? data.get(MESSAGE_START_TIME) : ""
                 );
             } else {
                 // Inform the middleware the incoming call is received but the app can not handle
@@ -87,15 +94,14 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
                         analyticsLabel
                 );
                 replyServer(
-                        data.getString(RESPONSE_URL),
-                        data.getString(REQUEST_TOKEN),
-                        data.getString(MESSAGE_START_TIME),
+                        data.get(RESPONSE_URL) != null ? data.get(RESPONSE_URL) : "",
+                        data.get(REQUEST_TOKEN) != null ? data.get(REQUEST_TOKEN) : "",
+                        data.get(MESSAGE_START_TIME) != null ? data.get(MESSAGE_START_TIME) : "",
                         false
                 );
             }
-
-        } else if (request.equals(MESSAGE_REQUEST_TYPE)) {
-            // TODO: notify a user of message in payload.
+        } else if (requestType.equals(MESSAGE_REQUEST_TYPE)){
+            // TODO implement this message.
         }
     }
 
@@ -149,7 +155,7 @@ public class VialerGcmListenerService extends GcmListenerService implements Midd
         intent.putExtra(SipConstants.EXTRA_REQUEST_TOKEN, token);
         intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, phoneNumber);
         intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, callerId);
-        intent.putExtra(VialerGcmListenerService.MESSAGE_START_TIME, messageStartTime);
+        intent.putExtra(FcmListenerService.MESSAGE_START_TIME, messageStartTime);
 
         startService(intent);
     }

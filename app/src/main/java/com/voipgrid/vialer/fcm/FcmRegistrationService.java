@@ -1,25 +1,21 @@
-package com.voipgrid.vialer;
+package com.voipgrid.vialer.fcm;
 
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.google.android.gms.iid.InstanceID;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.voipgrid.vialer.util.MiddlewareHelper;
-
-import java.io.IOException;
-
 
 /**
  * This class handles registration for GCM.
  */
-public class VialerGcmRegistrationService extends IntentService implements MiddlewareHelper.Constants {
+public class FcmRegistrationService extends IntentService implements MiddlewareHelper.Constants {
     public static final String TAG = IntentService.class.getSimpleName();
 
     /* For some unfathomable reason IntentService requires this constructor */
-    public VialerGcmRegistrationService() {
+    public FcmRegistrationService() {
         super(TAG);
     }
 
@@ -28,7 +24,7 @@ public class VialerGcmRegistrationService extends IntentService implements Middl
     @Override
     public synchronized void onHandleIntent(Intent intent) {
         /* Try to get a token and post it to the backend server */
-        String token = getPushToken();
+        String token = FirebaseInstanceId.getInstance().getToken();
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String currentToken = preferences.getString(CURRENT_TOKEN, "");
@@ -37,26 +33,5 @@ public class VialerGcmRegistrationService extends IntentService implements Middl
         if (token != null && (!token.equals(currentToken) || MiddlewareHelper.needsRegistration(this))) {
             MiddlewareHelper.register(this, token);
         }
-    }
-
-    /**
-     * Function to get the push token from google.
-     * @return
-     */
-    public String getPushToken() {
-        String token = null;
-        try {
-            /* InstanceID is the 'new' interface to GCM token registration. */
-            InstanceID iid = InstanceID.getInstance(this);
-            /* This may connect to the internet and throw an IOException */
-
-            token = iid.getToken(
-                    getString(R.string.gcm_registration_id),
-                    GoogleCloudMessaging.INSTANCE_ID_SCOPE, null
-            );
-        } catch (IOException e) {
-            return token;
-        }
-        return token;
     }
 }
