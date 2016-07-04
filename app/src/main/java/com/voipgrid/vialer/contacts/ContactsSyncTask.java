@@ -16,16 +16,19 @@ import android.util.Log;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
+import com.voipgrid.vialer.util.RemoteLogger;
+
 
 /**
  * Class that handles the syncing of the contacts to the t9 database.
  */
 public class ContactsSyncTask {
-    private static final String LOG_TAG = ContactsSyncTask.class.getName();
+    private static final String TAG = ContactsSyncTask.class.getName();
     private static final boolean DEBUG = false;
     private static final int mNotificationId = 1;
 
     private Context mContext;
+    private RemoteLogger mRemoteLogger;
 
     /**
      * AsyncTask that adds Data entry in Contacts app with "Call with AppName" action.
@@ -34,6 +37,9 @@ public class ContactsSyncTask {
      */
     public ContactsSyncTask(Context context) {
         mContext = context;
+        mRemoteLogger = new RemoteLogger(context);
+
+        mRemoteLogger.d(TAG + " onCreate");
     }
 
     /**
@@ -76,9 +82,12 @@ public class ContactsSyncTask {
      * Runs the sync for all contacts.
      */
     public void fullSync() {
+        mRemoteLogger.d(TAG + " fullSync");
+
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(mContext)) {
+            mRemoteLogger.d(TAG + " fullsync: no contact permission");
             // TODO VIALA-349 Delete sync account.
             return;
         }
@@ -192,10 +201,12 @@ public class ContactsSyncTask {
      * @param cursor The cursor of contact(s) to sync.
      */
     public void sync(Cursor cursor) {
+        mRemoteLogger.d(TAG + " sync");
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(mContext)) {
             // TODO VIALA-349 Delete sync account.
+            mRemoteLogger.d(TAG + " sync: no contact permission");
             return;
         }
 
@@ -244,7 +255,7 @@ public class ContactsSyncTask {
             numbers.close();
 
             if (DEBUG) {
-                Log.d(LOG_TAG, "Syncing contact: " +
+                Log.d(TAG, "Syncing contact: " +
                         syncContact.getContactId() +
                         " - " +
                         syncContact.getDisplayName());
