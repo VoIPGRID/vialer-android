@@ -239,6 +239,10 @@ public class Call {
     if (getClass() == Call.class) pjsua2JNI.Call_onCallRxOffer(swigCPtr, this, OnCallRxOfferParam.getCPtr(prm), prm); else pjsua2JNI.Call_onCallRxOfferSwigExplicitCall(swigCPtr, this, OnCallRxOfferParam.getCPtr(prm), prm);
   }
 
+  public void onCallTxOffer(OnCallTxOfferParam prm) {
+    if (getClass() == Call.class) pjsua2JNI.Call_onCallTxOffer(swigCPtr, this, OnCallTxOfferParam.getCPtr(prm), prm); else pjsua2JNI.Call_onCallTxOfferSwigExplicitCall(swigCPtr, this, OnCallTxOfferParam.getCPtr(prm), prm);
+  }
+
   public void onInstantMessage(OnInstantMessageParam prm) {
     if (getClass() == Call.class) pjsua2JNI.Call_onInstantMessage(swigCPtr, this, OnInstantMessageParam.getCPtr(prm), prm); else pjsua2JNI.Call_onInstantMessageSwigExplicitCall(swigCPtr, this, OnInstantMessageParam.getCPtr(prm), prm);
   }
