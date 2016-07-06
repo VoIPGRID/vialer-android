@@ -18,7 +18,7 @@ android {
     }
     productFlavors {
         vialer {
-            applicationId = "com.voipgrid.vialer"
+            applicationId "com.voipgrid.vialer"
             copy {
                 from 'src/vialer/'
                 include '*.json'
@@ -26,7 +26,7 @@ android {
             }
         }
         voys {
-            applicationId = "com.voys.app"
+            applicationId "com.voys.app"
             copy {
                 from 'src/voys/'
                 include '*.json'
@@ -54,7 +54,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.android.support:multidex:1.0.1'
     compile fileTree(include: ['*.jar'], dir: 'libs')
     // Modules.
     compile project(':pjsip')
