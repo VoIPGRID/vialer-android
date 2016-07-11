@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Vialer</string>
     <string name="navigation_drawer_open">Open navigation</string>
@@ -12,7 +13,7 @@
     <string name="settings_menu_item_title">Settings</string>
     <string name="logout_menu_item_title">Logout</string>
     <string name="title_activity_web">WebActivity</string>
-    <string name="auto_login_error">@string/login_error</string>
+    <string name="auto_login_error">WebActivity: %s</string>
     <string name="login_error">Login failed: %s</string>
     <string name="call_incoming">Incoming call</string>
     <string name="call_outgoing">Outgoing call</string>
@@ -31,7 +32,7 @@
     <string name="update_spinner_message">Please wait a moment</string>
 
     <!-- Dialog options -->
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="permission_settings">App permissions</string>
 
@@ -42,7 +43,6 @@
     <string name="cannot_logout_error_title">No available internet connection</string>
     <string name="cannot_logout_error_text">An internet connection is needed to log you off.</string>
     <string name="set_userdestination_api_fail">Editing of availability has failed. Please try again later.</string>
-
 
     <!-- Login fragment values -->
     <string name="login_header_label_text">Business</string>
@@ -92,6 +92,9 @@
     <string name="empty_view_missed_message">No missed calls.</string>
     <string name="empty_view_unauthorized_message">You are not allowed to see call records.</string>
 
+    <string name="title_activity_click_to_dial">ClickToDialActivity</string>
+    <string name="title_activity_warning">Warning</string>
+
     <string name="dialer_warning_no_connection_message">This app needs a data connection to setup phonecalls. Please connect to a cellular data connection or Wifi to start calling using the app.</string>
     <string name="dialer_warning_a_b_connect_connectivity_message">Your internet connection isn\'t fast enough to enable calling using VoIP. Two-step calling is therefore enabled. When you start a phonecall, we first call you on your mobile phone and when you pickup, we connect you to the person you want to call. It is possible that your telephony provider can charge you double rates for setting up two connections.</string>
     <string name="dialer_warning_a_b_connect_account_message">You dont\' have a VoIP account configured for this account. Please configure a VoIP account in the portal for use with this user. After configuring, you can call using VoIP from the app.</string>
@@ -99,8 +102,10 @@
 
     <string name="user_is_partner_error_title">Login failed</string>
     <string name="user_is_partner_error_message">This user is not allowed to use the app.</string>
+
     <string name="title_activity_account">@string/settings_menu_item_title</string>
     <string name="account_sip_id_edit_text_hint">VoIP account</string>
+    <string name="account_sip_password_edit_text_hint">Password</string>
     <string name="account_mobile_number_edit_text_hint">Mobile number</string>
     <string name="account_outgoing_number_edit_text_hint">Outgoing number</string>
     <string name="action_done">Done</string>

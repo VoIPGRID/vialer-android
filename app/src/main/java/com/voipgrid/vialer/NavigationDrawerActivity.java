@@ -276,13 +276,13 @@ public abstract class NavigationDrawerActivity
 
     @Override
     public void onFailure(Call call, Throwable t) {
-        Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG);
+        Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onResponse(Call call, Response response) {
         if(!response.isSuccess()){
-            Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG);
+            Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
 
             if(!mConnectivityHelper.hasNetworkConnection()) {
                 // First check if there is a entry already to avoid duplicates.
