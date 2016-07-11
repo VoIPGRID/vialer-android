@@ -53,7 +53,7 @@ public class NetworkStateViewHelper extends BroadcastReceiver implements View.On
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {;
+    public void onReceive(Context context, Intent intent) {
         updateNetworkStateView();
     }
 

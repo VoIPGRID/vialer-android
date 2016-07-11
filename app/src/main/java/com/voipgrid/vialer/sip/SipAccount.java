@@ -7,9 +7,6 @@ import org.pjsip.pjsua2.OnRegStateParam;
 
 /* Regulates SipCall event management and connection to server. Delegates to SIPInterface. */
 class SipAccount extends org.pjsip.pjsua2.Account {
-
-    public static final String TAG = SipCall.class.getSimpleName();
-
     // Callback handler for the onIncomingCall and onRegState events.
     private final AccountStatus mAccountStatus;
     private final CallStatus mCallStatus;
