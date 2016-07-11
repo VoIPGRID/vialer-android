@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -23,6 +24,9 @@ public class NumberInputView extends RelativeLayout implements
     private EditText mEditText;
     private ImageButton mRemoveButton;
     private OnInputChangedListener mListener;
+    private final int mNormalPhoneNumberLengthMax = 13;
+
+    private float mDefaultTextsize;
 
     public NumberInputView(Context context) {
         super(context);
@@ -54,6 +58,9 @@ public class NumberInputView extends RelativeLayout implements
         mRemoveButton = (ImageButton) findViewById(R.id.remove_button);
         mRemoveButton.setOnClickListener(this);
         mRemoveButton.setOnLongClickListener(this);
+
+        mEditText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.dialpad_number_input_text_size));
+        mDefaultTextsize = mEditText.getTextSize();
     }
 
     public void setOnInputChangedListener(OnInputChangedListener listener) {
@@ -73,7 +80,6 @@ public class NumberInputView extends RelativeLayout implements
                     mEditText.setCursorVisible(true);
                 }
                 break;
-
         }
     }
 
@@ -136,6 +142,19 @@ public class NumberInputView extends RelativeLayout implements
                 removeTextFromInput(startCursorPosition - 1, endCursorPosition);
             }
         }
+        setCorrectFontSize();
+    }
+
+    public void setCorrectFontSize() {
+        int charCount = mEditText.getText().length();
+        float charSize = mDefaultTextsize;
+
+        if (charCount > mNormalPhoneNumberLengthMax) {
+            for (int i = charCount; i > mNormalPhoneNumberLengthMax; i--) {
+                charSize = charSize / 1.03f;
+            }
+        }
+        mEditText.setTextSize(TypedValue.COMPLEX_UNIT_PX, charSize);
     }
 
     /**
