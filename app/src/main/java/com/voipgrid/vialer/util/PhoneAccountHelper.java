@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import com.voipgrid.vialer.Preferences;
-import com.voipgrid.vialer.VialerGcmRegistrationService;
+import com.voipgrid.vialer.fcm.FcmRegistrationService;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -142,7 +142,7 @@ public class PhoneAccountHelper {
      * Function for start the service that handles the middleware registration.
      */
     private void startMiddlewareRegistrationService() {
-        mContext.startService(new Intent(mContext, VialerGcmRegistrationService.class));
+        mContext.startService(new Intent(mContext, FcmRegistrationService.class));
     }
 
     /**

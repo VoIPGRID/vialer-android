@@ -93,32 +93,21 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name="com.google.android.gms.gcm.GcmReceiver"
-            android:exported="true"
-            android:permission="com.google.android.c2dm.permission.SEND" >
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-
-                <category android:name="com.voipgrid.vialer" />
-            </intent-filter>
-        </receiver>
-
         <service
-            android:name=".VialerGcmListenerService"
-            android:exported="false" >
+            android:name=".fcm.FcmListenerService">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
         <service
-            android:name=".VialerInstanceIdListenerService"
-            android:exported="false" >
+            android:name=".fcm.FcmInstanceIdListenerService">
             <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceId" />
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
         </service>
-        <service android:name=".VialerGcmRegistrationService" />
+
+
+        <service android:name=".fcm.FcmRegistrationService" />
 
         <activity
             android:name=".util.UpdateActivity"

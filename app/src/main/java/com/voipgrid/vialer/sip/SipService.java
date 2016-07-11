@@ -18,7 +18,7 @@ import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.VialerGcmListenerService;
+import com.voipgrid.vialer.fcm.FcmListenerService;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
@@ -301,7 +301,7 @@ public class SipService extends Service implements
                 mNumber = intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
                 mCallerId = intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME);
                 mMessageStartTime = intent.getStringExtra(
-                        VialerGcmListenerService.MESSAGE_START_TIME);
+                        FcmListenerService.MESSAGE_START_TIME);
                 break;
             case SipConstants.ACTION_VIALER_OUTGOING :
                 mRemoteLogger.d(TAG + " outgoingCall");

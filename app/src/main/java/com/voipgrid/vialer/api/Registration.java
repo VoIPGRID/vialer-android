@@ -21,12 +21,12 @@ public interface Registration {
                @Field("message_start_time") String messageStartTime);
 
     @FormUrlEncoded
-    @HTTP(method = "DELETE", path = "api/gcm-device/", hasBody = true)
+    @HTTP(method = "DELETE", path = "api/android-device/", hasBody = true)
     Call<ResponseBody> unregister(@Field("token") String token, @Field("sip_user_id") String sipId,
                                   @Field("app") String app);
 
     @FormUrlEncoded
-    @POST("api/gcm-device/")
+    @POST("api/android-device/")
     Call<ResponseBody> register(@Field("name") String name, @Field("token") String token,
                     @Field("sip_user_id") String sipUserId, @Field("os_version") String osVersion,
                     @Field("client_version") String clientVersion, @Field("app") String app);

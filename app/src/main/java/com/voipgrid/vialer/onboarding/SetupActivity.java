@@ -16,7 +16,7 @@ import com.voipgrid.vialer.AccountActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.VialerGcmRegistrationService;
+import com.voipgrid.vialer.fcm.FcmRegistrationService;
 import com.voipgrid.vialer.WebActivityHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
@@ -325,7 +325,7 @@ public class SetupActivity extends AppCompatActivity implements
             } else if (response.body() instanceof PhoneAccount) {
                 mJsonStorage.save(response.body());
                 if (mPreferences.hasSipPermission()) {
-                    startService(new Intent(this, VialerGcmRegistrationService.class));
+                    startService(new Intent(this, FcmRegistrationService.class));
                 }
 
                 SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
