@@ -2,16 +2,16 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="oval" >
-            <size android:width="@dimen/lockring_button_size" android:height="@dimen/lockring_button_size" />
+            <size android:width="@dimen/lock_ring_button_size" android:height="@dimen/lock_ring_button_size" />
             <solid android:color="@color/google_lock_ring_white_transparent" />
         </shape>
     </item>
 
     <item>
         <inset android:drawable="@drawable/ic_call_end_hangup_color"
-            android:insetRight="@dimen/lockring_button_inset"
-            android:insetTop="@dimen/lockring_button_inset"
-            android:insetLeft="@dimen/lockring_button_inset"
-            android:insetBottom="@dimen/lockring_button_inset" />
+            android:insetRight="@dimen/lock_ring_button_inset"
+            android:insetTop="@dimen/lock_ring_button_inset"
+            android:insetLeft="@dimen/lock_ring_button_inset"
+            android:insetBottom="@dimen/lock_ring_button_inset" />
     </item>
 </layer-list>

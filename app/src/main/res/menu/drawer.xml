@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single"
-        android:id="@+id/group1">
+    <group android:checkableBehavior="single">
         <item
             android:id="@+id/navigation_item_statistics"
             android:icon="@drawable/ic_menu_stats"
@@ -21,8 +20,7 @@
             android:title="@string/info_menu_item_title"/>
     </group>
 
-    <group android:checkableBehavior="single"
-        android:id="@+id/group2">
+    <group android:checkableBehavior="single">
         <item
             android:icon="@drawable/ic_menu_logout"
             android:id="@+id/navigation_item_logout"

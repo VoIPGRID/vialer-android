@@ -230,7 +230,7 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                xmlns:googlelockring="http://schemas.android.com/apk/res-auto"
+                xmlns:lockring="http://schemas.android.com/apk/res-auto"
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
@@ -240,23 +240,23 @@
                 android:id="@+id/ringing_lock_screen"
                 >
 
-                <com.wearespindle.googlelockring.GoogleLockRing
+                <com.wearespindle.spindlelockring.library.LockRing
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:id="@+id/google_lock_ring"
                     android:focusable="true"
                     android:gravity="center"
-                    googlelockring:glowRadius="@dimen/googlelockring_glow_radius"
-                    googlelockring:handleDrawable="@drawable/ic_google_lock_ring_handle"
-                    googlelockring:innerRadius="@dimen/googlelockring_inner_radius"
-                    googlelockring:outerRadius="@dimen/googlelockring_target_placement_radius"
-                    googlelockring:outerRingDrawable="@drawable/ic_google_lock_ring_outerring"
-                    googlelockring:pointDrawable="@drawable/ic_lockscreen_glowdot"
-                    googlelockring:snapMargin="@dimen/googlelockring_snap_margin"
-                    googlelockring:targetDescriptions="@array/google_lock_ring_descriptions"
-                    googlelockring:targetDrawables="@array/google_lock_ring_drawables"
-                    googlelockring:directionDescriptions="@array/google_lock_ring_direction_descriptions"
+                    lockring:glowRadius="@dimen/lock_ring_glow_radius"
+                    lockring:handleDrawable="@drawable/ic_lock_ring_handle"
+                    lockring:innerRadius="@dimen/lock_ring_inner_radius"
+                    lockring:outerRadius="@dimen/lock_ring_target_placement_radius"
+                    lockring:outerRingDrawable="@drawable/ic_lock_ring_outer_ring"
+                    lockring:pointDrawable="@drawable/ic_lock_screen_glow_dot"
+                    lockring:snapMargin="@dimen/lock_ring_snap_margin"
+                    lockring:targetDescriptions="@array/lock_ring_descriptions"
+                    lockring:targetDrawables="@array/lock_ring_drawables"
+                    lockring:directionDescriptions="@array/lock_ring_direction_descriptions"
                     />
             </RelativeLayout>
 

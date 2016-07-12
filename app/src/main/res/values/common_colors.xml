@@ -10,19 +10,11 @@
     <color name="actionbar_text_color_primary">@color/color_accent</color>
     <color name="actionbar_popup_text_color_primary">@color/color_text</color>
     <color name="actionbar_text_color_secondary">@color/color_accent</color>
-    <color name="actionbar_color_control_normal">@color/color_accent</color>
-    <color name="actionbar_color_control_highlight">@color/color_accent</color>
-    <color name="actionbar_color_control_activated">@color/color_accent</color>
 
     <color name="drawer_footer_text_color_version">#4D4D4D</color>
 
     <color name="key_pad_background_color">#ffffff</color>
     <color name="key_pad_divider_color">#E2E2E2</color>
-    <color name="color_click_to_dial_image">@color/color_primary</color>
-
-    <color name="check_icon">#75C25E</color>
-    <color name="error_icon">#DB4437</color>
-    <color name="progress_icon">#4D4D4D</color>
 
     <color name="dialpad_fab_call_color">#75C25E</color>
 
@@ -45,9 +37,6 @@
     <color name="call_fab_pickup_color">@color/dialpad_fab_call_color</color>
 
     <color name="dialpad_input_background_color">#FFFFFF</color>
-
-    <color name="call_status_text_color">#B3FFFFFF</color>
-    <color name="call_name_text_color">#D9FFFFFF</color>
 
     <color name="contact_name_text_color">#4D4D4D</color>
     <color name="contact_information_text_color">#8a000000</color>

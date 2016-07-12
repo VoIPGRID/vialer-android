@@ -342,7 +342,7 @@ public class CallRecordFragment extends ListFragment implements
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(String id);
+        void onFragmentInteraction(String id);
     }
 
 }

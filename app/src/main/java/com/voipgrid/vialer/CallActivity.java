@@ -32,8 +32,8 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
 import com.voipgrid.vialer.util.RemoteLogger;
-import com.wearespindle.googlelockring.GoogleLockRing;
-import com.wearespindle.googlelockring.OnTriggerListener;
+import com.wearespindle.spindlelockring.library.LockRing;
+import com.wearespindle.spindlelockring.library.OnTriggerListener;
 
 
 /**
@@ -123,7 +123,7 @@ public class CallActivity extends AppCompatActivity
 
     private int mPreviousVolume = -1;
 
-    private GoogleLockRing mGoogleLockRing;
+    private LockRing mLockRing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -319,9 +319,9 @@ public class CallActivity extends AppCompatActivity
                 ringingView.setVisibility(View.GONE);
                 findViewById(R.id.call_buttons_container).setVisibility(View.INVISIBLE);
 
-                mGoogleLockRing = (GoogleLockRing) findViewById(R.id.google_lock_ring);
-                mGoogleLockRing.setOnTriggerListener(this);
-                mGoogleLockRing.setShowTargetsOnIdle(false);
+                mLockRing = (LockRing) findViewById(R.id.google_lock_ring);
+                mLockRing.setOnTriggerListener(this);
+                mLockRing.setShowTargetsOnIdle(false);
             } else {
                 ringingLockScreenView.setVisibility(View.GONE);
                 ringingView.setVisibility(View.VISIBLE);
@@ -388,8 +388,8 @@ public class CallActivity extends AppCompatActivity
 
             case CALL_RINGING_OUT_MESSAGE:
                 mStateView.setText(R.string.call_outgoing);
-                findViewById(R.id.speaker).setEnabled(false);
-                findViewById(R.id.microphone).setEnabled(false);
+                findViewById(R.id.button_speaker).setEnabled(false);
+                findViewById(R.id.button_microphone).setEnabled(false);
                 break;
 
             case CALL_RINGING_IN_MESSAGE:
@@ -747,18 +747,18 @@ public class CallActivity extends AppCompatActivity
 
     @Override
     public void onTrigger(View view, int target) {
-        final int resId = mGoogleLockRing.getResourceIdForTarget(target);
+        final int resId = mLockRing.getResourceIdForTarget(target);
         switch (resId) {
-            case R.drawable.ic_google_lock_ring_answer:
+            case R.drawable.ic_lock_ring_answer:
                 answer();
                 break;
 
-            case R.drawable.ic_google_lock_ring_decline:
+            case R.drawable.ic_lock_ring_decline:
                 decline();
                 break;
         }
 
-        mGoogleLockRing.reset(true);
+        mLockRing.reset(true);
     }
 
     @Override
