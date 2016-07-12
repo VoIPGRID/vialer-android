@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-
     <string name="ga_trackingId">UA-401436-29</string>
 
     <!-- Enable automatic Activity measurement -->
@@ -25,8 +24,7 @@
     <screenName name="com.voipgrid.vialer.dialer.DialerActivity">
         Dialer
     </screenName>
-    <screenName name="com.voipgrid.vialer.WebActivity">
-        Web
+    <screenName name="com.voipgrid.vialer.twostepcall.TwoStepCallActivity">
+        TwoStepCalling
     </screenName>
-
 </resources>

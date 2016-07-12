@@ -3,14 +3,11 @@ package com.voipgrid.vialer.api.models;
 import android.net.Uri;
 
 import com.google.gson.annotations.SerializedName;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 
 import java.util.HashSet;
-import java.util.Set;
 
 /**
- * Created by eltjo on 31/07/15.
+ * Model for storing SystemUser info and parsing of JSON to model.
  */
 public class SystemUser {
 
@@ -34,6 +31,9 @@ public class SystemUser {
     String mobileNumber;
 
     String partner;
+
+    @SerializedName("client")
+    String clientId;
 
     /**
      * HashSet with list of Strings describing numbers which are not the main number
@@ -108,6 +108,20 @@ public class SystemUser {
             return uri.getLastPathSegment();
         }
         return null;
+    }
+
+    public void setClient(String client) {
+        // This method is not called by the serialization of the api so we have
+        // to escape the string in the get function.
+        this.clientId = client;
+    }
+
+    public String getClient() {
+        // Make sure we only have the numeric part of the client url.
+        if (this.clientId != null) {
+            return this.clientId.replaceAll("\\D+", "");
+        }
+        return this.clientId;
     }
 
     public String getPartner() {
