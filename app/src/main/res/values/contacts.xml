@@ -3,19 +3,9 @@
     <string name="profile_mimetype">vnd.android.cursor.item/com.voipgrid.vialer.profile</string>
 
     <string name="account_type">com.voipgrid.vialer.contacts</string>
-    <string name="account_token">1337</string>
 
-
-    <string name="phone_type">com.voipgrid.vialer.phone_type</string>
 
     <!-- <app> call <number> -->
-    <string name="contact_call_action_name">%1$s call %2$s</string>
     <string name="contacts_app_name">@string/app_name</string>
-
-    <string name="authtoken_type_read_only">Read only</string>
-    <string name="authtoken_type_read_only_label">Read only access to an Vialer account</string>
-
-    <string name="authtoken_type_full_access">Full access</string>
-    <string name="authtoken_type_full_access_label">Full access to an Vialer account</string>
 
 </resources>

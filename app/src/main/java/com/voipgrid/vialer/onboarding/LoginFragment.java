@@ -2,6 +2,7 @@ package com.voipgrid.vialer.onboarding;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -65,8 +66,8 @@ public class LoginFragment extends OnboardingFragment implements
 
         Activity activity = getActivity();
         mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) activity.getSystemService(activity.CONNECTIVITY_SERVICE),
-                (TelephonyManager) activity.getSystemService(activity.TELEPHONY_SERVICE)
+                (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE),
+                (TelephonyManager) activity.getSystemService(Context.TELEPHONY_SERVICE)
         );
 
         mEmailEdittext = (EditText) view.findViewById(R.id.emailTextDialog);

@@ -9,13 +9,11 @@
     app:rowCount="@integer/dialpad_row_count">
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_1"
         android:onClick="onClick"
         app:digit="1"
         style="@style/DialpadButton"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_2"
         android:onClick="onClick"
         app:digit="2"
         app:chars="abc"
@@ -24,64 +22,54 @@
         android:layout_height="wrap_content"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_3"
         android:onClick="onClick"
         app:digit="3"
         app:chars="def"
         style="@style/DialpadButton"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_4"
         android:onClick="onClick"
         app:digit="4"
         app:chars="ghi"
         style="@style/DialpadButton"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_5"
         android:onClick="onClick"
         app:digit="5"
         app:chars="jkl"
         style="@style/DialpadButton"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_6"
         app:digit="6"
         app:chars="mno"
         style="@style/DialpadButton"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_7"
         app:digit="7"
         app:chars="pqrs"
         style="@style/DialpadButton"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_8"
         app:digit="8"
         app:chars="tuv"
         style="@style/DialpadButton"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_9"
         app:digit="9"
         app:chars="wxyz"
         style="@style/DialpadButton"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_star"
         app:digit="*"
         style="@style/DialpadButton"
         />
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_0"
         app:digit="0"
         app:chars="+"
         style="@style/DialpadButton"/>
 
     <com.voipgrid.vialer.dialer.DialpadButton
-        android:id="@+id/button_hash"
         app:digit="#"
         style="@style/DialpadButton"/>
 

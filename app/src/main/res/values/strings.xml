@@ -3,15 +3,11 @@
     <string name="navigation_drawer_open">Open navigation</string>
     <string name="navigation_drawer_close">Close navigation</string>
     <string name="no_network_connection">No internet connection</string>
-    <string name="feature_not_implemented">Feature is not implemented</string>
     <string name="title_activity_dialer">Dialer</string>
     <string name="allowed_dialpad_characters">0123456789*#+</string>
-    <string name="title_activity_call">Call</string>
     <string name="title_state_calling">Calling</string>
     <string name="title_unknown_caller">Unknown</string>
-    <string name="title_number_label">Mobile</string>
     <string name="title_activity_setup">Setup</string>
-    <string name="title_pick_phone_number">Choose a phone number</string>
     <string name="statistics_menu_item_title">Statistics</string>
     <string name="settings_menu_item_title">Settings</string>
     <string name="logout_menu_item_title">Logout</string>
@@ -75,8 +71,6 @@
     <string name="outgoingnumber_edittext_hint">Outgoing number</string>
     <string name="phonenumber_info_text_title">Mobile phone number</string>
     <string name="phonenumber_info_text">To make two step calling possible, we need to have your mobile phone number.</string>
-    <string name="configure_missing_field_title">Warning</string>
-    <string name="configure_missing_field_message">Please fill in all fields before login!</string>
 
     <!-- Missing voip account fragment values -->
     <string name="set_voip_account_button_text">Set VoIP account</string>
@@ -89,7 +83,6 @@
     <string name="start_calling_button">Get started</string>
     <string name="onboarding_login_failed_title">Login failed</string>
     <string name="onboarding_login_failed_message">Please try again.</string>
-    <string name="onboarding_no_internet_title">Failed</string>
     <string name="onboarding_no_internet_message">An internet connection is required.</string>
     <string name="onboarding_account_configure_failed_title">Configuration failed</string>
     <string name="onboarding_account_configure_invalid_phone_number">The mobile number is invalid.</string>
@@ -99,21 +92,15 @@
     <string name="empty_view_missed_message">No missed calls.</string>
     <string name="empty_view_unauthorized_message">You are not allowed to see call records.</string>
 
-    <string name="title_activity_click_to_dial">ClickToDialActivity</string>
-    <string name="contacts_sync_success_mesage">Contacts sync successful</string>
-    <string name="call_failed">Call failed</string>
-    <string name="title_activity_warning">Warning</string>
     <string name="dialer_warning_no_connection_message">This app needs a data connection to setup phonecalls. Please connect to a cellular data connection or Wifi to start calling using the app.</string>
     <string name="dialer_warning_a_b_connect_connectivity_message">Your internet connection isn\'t fast enough to enable calling using VoIP. Two-step calling is therefore enabled. When you start a phonecall, we first call you on your mobile phone and when you pickup, we connect you to the person you want to call. It is possible that your telephony provider can charge you double rates for setting up two connections.</string>
     <string name="dialer_warning_a_b_connect_account_message">You dont\' have a VoIP account configured for this account. Please configure a VoIP account in the portal for use with this user. After configuring, you can call using VoIP from the app.</string>
     <string name="dialer_no_contacts_found_message">No contacts found</string>
-    <string name="dialer_too_many_contacts">Currently we support up to 750 contacts. We will support more contacts in the future.</string>
 
     <string name="user_is_partner_error_title">Login failed</string>
     <string name="user_is_partner_error_message">This user is not allowed to use the app.</string>
     <string name="title_activity_account">@string/settings_menu_item_title</string>
     <string name="account_sip_id_edit_text_hint">VoIP account</string>
-    <string name="account_sip_password_edit_text_hint">Password</string>
     <string name="account_mobile_number_edit_text_hint">Mobile number</string>
     <string name="account_outgoing_number_edit_text_hint">Outgoing number</string>
     <string name="action_done">Done</string>
@@ -131,11 +118,8 @@
 
     <string name="navigation_name_placeholder_text">No outgoing number configured</string>
     <string name="supressed_number">Anonymous</string>
-    <string name="dialer_choose_number">Choose number</string>
 
     <string name="dial_plan_menu_item_title">Dial plan</string>
-    <string name="accessibility_menu_item_title">Accessibility</string>
-    <string name="title_activity_test">TestActivity</string>
 
     <string name="two_step_call_description_platform">Outgoing number</string>
     <string name="two_step_call_description_step_a">Calling your phone</string>

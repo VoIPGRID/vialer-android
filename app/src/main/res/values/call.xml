@@ -3,7 +3,6 @@
 
     <!-- Call colors -->
     <color name="call_text_color">@color/color_accent</color>
-    <color name="call_background_tint">@color/color_accent</color>
 
     <!-- Call Theme -->
     <style name="CallTheme" parent="@style/AppTheme">

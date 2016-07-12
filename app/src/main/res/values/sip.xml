@@ -4,7 +4,6 @@
     <string name="sip_protocol">sip:</string>
     <string name="sip_transport_type">tcp</string>
     <integer name="default_sip_port">6060</integer>
-    <integer name="backup_sip_port">5060</integer>
     <string name="sip_auth_scheme">digest</string>
     <string name="sip_auth_realm">*</string>
 </resources>

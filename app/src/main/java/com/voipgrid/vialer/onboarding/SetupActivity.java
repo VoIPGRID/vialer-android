@@ -149,8 +149,10 @@ public class SetupActivity extends AppCompatActivity implements
 
         createAPIService(username, password);
 
-        Call<SystemUser> call = mApi.systemUser();
-        call.enqueue(this);
+        if (mApi != null) {
+            Call<SystemUser> call = mApi.systemUser();
+            call.enqueue(this);
+        }
     }
 
     @Override
@@ -389,14 +391,14 @@ public class SetupActivity extends AppCompatActivity implements
      * @return instance of the API service.
      */
     private Api createAPIService(String username, String password) {
-        if (mApi == null) {
-            try {
-                mServiceGen = ServiceGenerator.getInstance();
-            } catch (PreviousRequestNotFinishedException e) {
-                e.printStackTrace();
-                return null;
-            }
+        try {
+            mServiceGen = ServiceGenerator.getInstance();
+        } catch (PreviousRequestNotFinishedException e) {
+            e.printStackTrace();
+            return null;
+        }
 
+        if (mApi == null) {
             mApi = mServiceGen.createService(
                     this,
                     Api.class,

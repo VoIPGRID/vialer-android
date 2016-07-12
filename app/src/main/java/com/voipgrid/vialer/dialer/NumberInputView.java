@@ -206,7 +206,7 @@ public class NumberInputView extends RelativeLayout implements
     }
 
     interface OnInputChangedListener {
-        public void onInputChanged(String number);
+        void onInputChanged(String number);
     }
 
     public boolean isEmpty() {

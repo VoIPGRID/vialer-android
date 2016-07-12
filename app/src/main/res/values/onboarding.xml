@@ -3,9 +3,7 @@
     <!--
         Logo fragment values.
     -->
-    <dimen name="logo_title_label_text_size">42sp</dimen>
     <integer name="logo_dismiss_delay_ms">1000</integer>
-    <dimen name="anchorLeftMargin">0dp</dimen>
 
     <dimen name="onboarding_text_input_layout_text_size_">16dp</dimen>
 
@@ -15,7 +13,6 @@
     <color name="onboarding_button_normal_color">@color/onboarding_color_accent</color>
     <color name="onboarding_button_text_color">@color/onboarding_color_highlight</color>
 
-    <color name="onboarding_logo_color">@color/onboarding_color_accent</color>
     <color name="onboarding_edittext_hint_color">@color/onboarding_color_accent</color>
     <color name="onboarding_edittext_text_color">@color/onboarding_color_accent</color>
     <color name="onboarding_text_input_layout_text_color">@color/color_highlight</color>

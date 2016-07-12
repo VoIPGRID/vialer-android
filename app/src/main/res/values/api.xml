@@ -5,7 +5,6 @@
 
     <string name="web_url">https://partner.voipgrid.nl</string>
     <string name="web_user_change">/user/change/</string>
-    <string name="web_accessibility">/dashboard/</string>
     <string name="web_dial_plan">/dialplan/</string>
     <string name="web_statistics">/stats/dashboard/</string>
     <string name="web_autologin">%1$s/user/autologin/?username=%2$s&amp;token=%3$s&amp;next=%4$s</string>

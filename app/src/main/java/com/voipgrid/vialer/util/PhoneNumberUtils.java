@@ -40,11 +40,8 @@ public class PhoneNumberUtils {
             return false;
         }
 
-        if (!mobileNumber.equals(formatMobileNumber(mobileNumber))) {
-            return false;
-        }
+        return mobileNumber.equals(formatMobileNumber(mobileNumber));
 
-        return true;
     }
 
     public static boolean isAnonymousNumber(String number) {
