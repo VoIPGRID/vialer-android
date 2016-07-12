@@ -20,7 +20,8 @@
             android:layout_width="@dimen/navigation_drawer_header_image_width"
             android:layout_height="@dimen/navigation_drawer_header_image_height"
             android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:src="@drawable/ic_logo"/>
+            android:src="@drawable/ic_logo"
+            android:scaleType="fitStart" />
 
         <TextView
             android:id="@+id/text_view_name"

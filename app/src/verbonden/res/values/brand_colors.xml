@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_primary">#003a63</color>
+    <color name="color_primary_dark">#043252</color>
+    <color name="color_highlight">#00aeef</color>
+
+    <color name="dial_button_digit_color">@color/color_primary</color>
+    <color name="dial_button_chars_color">@android:color/secondary_text_light</color>
+    <color name="dial_button_pressed">#faf7f2</color>
+
+    <color name="progress_bar_color">#003a63</color>
+
+    <color name="dialer_warning_background">#FFFFFF</color>
+    <color name="dialer_warning_text">#92278f</color>
+</resources>

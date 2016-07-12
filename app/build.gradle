@@ -16,6 +16,10 @@ android {
         }
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    dexOptions {
+        // Prevent OutOfMemory with MultiDex during the build phase
+        javaMaxHeapSize "4g"
+    }
     productFlavors {
         vialer {
             applicationId "com.voipgrid.vialer"
@@ -29,6 +33,14 @@ android {
             applicationId "com.voys.app"
             copy {
                 from 'src/voys/'
+                include '*.json'
+                into '.'
+            }
+        }
+        verbonden {
+            applicationId "com.verbonden.app"
+            copy {
+                from 'src/verbonden/'
                 include '*.json'
                 into '.'
             }
@@ -56,6 +68,7 @@ repositories {
 dependencies {
     compile 'com.android.support:multidex:1.0.1'
     compile fileTree(include: ['*.jar'], dir: 'libs')
+
     // Modules.
     compile project(':pjsip')
     compile project(':googlelockring')

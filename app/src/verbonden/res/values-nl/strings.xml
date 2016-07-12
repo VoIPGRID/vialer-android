@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Verbonden</string>
+    <string name="configure_header_label_text">De Verbonden App stelt</string>
+
+    <string name="url_app_info">https://verbonden.nl/app/app-info-nl/</string>
+
+    <string name="info_button_title">Hoe werkt de Verbonden App</string>
+
+</resources>
