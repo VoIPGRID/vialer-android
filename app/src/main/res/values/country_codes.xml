@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="country_codes">
+    <string-array name="country_codes" translatable="false">
         <item>93,AF</item>
         <item>355,AL</item>
         <item>213,DZ</item>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="api_url">https://api.voipgrid.nl/</string>
-    <string name="registration_url">https://vialerpush.voipgrid.nl/</string>
+    <string name="api_url" translatable="false">https://api.voipgrid.nl/</string>
+    <string name="registration_url" translatable="false">https://vialerpush.voipgrid.nl/</string>
 
-    <string name="web_url">https://partner.voipgrid.nl</string>
-    <string name="web_user_change">/user/change/</string>
-    <string name="web_dial_plan">/dialplan/</string>
-    <string name="web_statistics">/stats/dashboard/</string>
-    <string name="web_autologin">%1$s/user/autologin/?username=%2$s&amp;token=%3$s&amp;next=%4$s</string>
+    <string name="web_url" translatable="false">https://partner.voipgrid.nl</string>
+    <string name="web_user_change" translatable="false">/user/change/</string>
+    <string name="web_dial_plan" translatable="false">/dialplan/</string>
+    <string name="web_statistics" translatable="false">/stats/dashboard/</string>
+    <string name="web_autologin" translatable="false">%1$s/user/autologin/?username=%2$s&amp;token=%3$s&amp;next=%4$s</string>
 </resources>

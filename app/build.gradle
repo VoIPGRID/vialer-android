@@ -35,8 +35,7 @@ android {
         }
     }
     lintOptions {
-        // Build fails due to missing translations. Workaround until that is fixed by us.
-        checkReleaseBuilds false
+        checkReleaseBuilds true
     }
     buildTypes {
         release {
