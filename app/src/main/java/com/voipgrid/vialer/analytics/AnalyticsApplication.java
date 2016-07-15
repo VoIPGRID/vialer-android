@@ -7,6 +7,8 @@ import android.support.multidex.MultiDex;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.util.JsonStorage;
 
 /**
  * This is a subclass of {@link Application} used to provide shared objects for this app, such as
@@ -31,7 +33,17 @@ public class AnalyticsApplication extends Application {
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
             // To enable debug logging use: adb shell setprop log.tag.GAv4 DEBUG
             mTracker = analytics.newTracker(R.xml.tracker);
+        }
 
+        JsonStorage storage = new JsonStorage(this);
+        SystemUser systemuser = (SystemUser) storage.get(SystemUser.class);
+
+        // Set client id as custom dimension on index 1.
+        if (systemuser != null){
+            String clientId = systemuser.getClient();
+            if (clientId != null) {
+                mTracker.set("&cd1", clientId);
+            }
         }
         return mTracker;
     }
