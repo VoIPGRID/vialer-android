@@ -29,6 +29,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.dialer.NumberInputView;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.util.CustomReceiver;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
 import com.voipgrid.vialer.util.RemoteLogger;
@@ -49,6 +50,7 @@ public class CallActivity extends AppCompatActivity
     public static final String CONTACT_NAME = "contact-name";
     public static final String PHONE_NUMBER = "phone-number";
     private static final long[] VIBRATOR_PATTERN = {1000L, 1000L};
+
     // Manager for "on speaker" action.
     private AudioManager mAudioManager;
     private ProximitySensorHelper mProximityHelper;
@@ -66,6 +68,8 @@ public class CallActivity extends AppCompatActivity
     private AnalyticsHelper mAnalyticsHelper;
     private Ringtone mRingtone;
     private Vibrator mVibrator;
+    private BroadcastReceiver mBroadcastAnswerReceiver;
+    private BroadcastReceiver mBroadcastDeclineReceiver;
 
     // Keep track of the start time of a call, so we can keep track of its duration.
     long mCallStartTime = 0;
@@ -195,7 +199,7 @@ public class CallActivity extends AppCompatActivity
 
             toggleCallStateButtonVisibility(type);
 
-            if(mIsIncomingCall) {
+            if (mIsIncomingCall) {
                 mRemoteLogger.d(TAG + " inComingCall");
 
                 // Ringing event.
@@ -227,6 +231,40 @@ public class CallActivity extends AppCompatActivity
         mProximityHelper.startSensor();
     }
 
+    private void createReceivers() {
+        mBroadcastAnswerReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (mConnected || !mIncomingCallIsRinging) {
+                    hangup(R.id.button_hangup);
+                } else {
+                    answer();
+                }
+            }
+        };
+        mBroadcastDeclineReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                decline();
+            }
+        };
+    }
+
+    private void registerReceivers() {
+        ((AudioManager) getSystemService(AUDIO_SERVICE)).registerMediaButtonEventReceiver(
+                new ComponentName(this, CustomReceiver.class));
+        registerReceiver(mBroadcastAnswerReceiver, new IntentFilter(CustomReceiver.CALL_BTN));
+        registerReceiver(mBroadcastDeclineReceiver, new IntentFilter(CustomReceiver.DECLINE_BTN));
+    }
+
+    private void unRegisterReceivers() {
+        try {
+            unregisterReceiver(mBroadcastAnswerReceiver);
+            unregisterReceiver(mBroadcastDeclineReceiver);
+        } catch (Exception e) {
+        }
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -243,6 +281,10 @@ public class CallActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        if (mBroadcastAnswerReceiver == null || mBroadcastDeclineReceiver == null) {
+            createReceivers();
+        }
+        registerReceivers();
         mRemoteLogger.d(TAG + " onResume");
         // Bind the SipService to the activity.
         bindService(new Intent(this, SipService.class), mConnection, Context.BIND_AUTO_CREATE);
@@ -253,11 +295,17 @@ public class CallActivity extends AppCompatActivity
             public void run() {
                 if (!mServiceBound) {
                     finishWithDelay();
-                } else if(mSipService.getCurrentCall() == null) {
+                } else if (mSipService.getCurrentCall() == null) {
                     onCallStatusUpdate(CALL_DISCONNECTED_MESSAGE);
                 }
             }
         }, 500);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterReceivers();
     }
 
     @Override
@@ -284,7 +332,7 @@ public class CallActivity extends AppCompatActivity
     }
 
     private void displayCallInfo(String phoneNumber, String contactName) {
-        if(contactName != null && !contactName.isEmpty()) {
+        if (contactName != null && !contactName.isEmpty()) {
             ((TextView) findViewById(R.id.name_text_view)).setText(contactName);
             ((TextView) findViewById(R.id.number_text_view)).setText(phoneNumber);
         } else {
@@ -294,6 +342,7 @@ public class CallActivity extends AppCompatActivity
 
     /**
      * Based on type show/hide and position the buttons to answer/decline a call.
+     *
      * @param type a string containing a call type (INCOMING or OUTGOING)
      */
     private void toggleCallStateButtonVisibility(String type) {
@@ -332,6 +381,7 @@ public class CallActivity extends AppCompatActivity
     /**
      * The call has transitioned to another state. We can now visually update the view with
      * extra info or perform required actions.
+     *
      * @param newStatus the new interaction state to which we should act.
      * @see SipConstants for the possible states.
      */
@@ -396,7 +446,7 @@ public class CallActivity extends AppCompatActivity
                 mStateView.setText(R.string.call_incoming);
                 break;
 
-            case SERVICE_STOPPED :
+            case SERVICE_STOPPED:
                 mConnected = false;
                 mIncomingCallIsRinging = false;
                 finishWithDelay();
@@ -404,17 +454,15 @@ public class CallActivity extends AppCompatActivity
         }
     }
 
-
-
     @Override
     public void onBackPressed() {
         mRemoteLogger.d(TAG + " onBackPressed");
         View hangupButton = findViewById(R.id.button_hangup);
         View declineButton = findViewById(R.id.button_reject);
 
-        if(hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
+        if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
             onClick(hangupButton);
-        } else if(declineButton != null && declineButton.getVisibility() == View.VISIBLE) {
+        } else if (declineButton != null && declineButton.getVisibility() == View.VISIBLE) {
             onClick(declineButton);
         } else {
             super.onBackPressed();
@@ -433,8 +481,8 @@ public class CallActivity extends AppCompatActivity
         mRemoteLogger.d(TAG + " toggleMute");
         mMute = !mMute;
         long newVolume = (mMute ?               // get new volume based on selection value
-                    getResources().getInteger(R.integer.mute_microphone_volume_value) :   // muted
-                    getResources().getInteger(R.integer.unmute_microphone_volume_value)); // un-muted
+                getResources().getInteger(R.integer.mute_microphone_volume_value) :   // muted
+                getResources().getInteger(R.integer.unmute_microphone_volume_value)); // un-muted
         updateMicrophoneVolume(newVolume);
     }
 
@@ -464,7 +512,7 @@ public class CallActivity extends AppCompatActivity
     /**
      * Update the state of a single call button.
      *
-     * @param viewId Integer The id of the button to change.
+     * @param viewId        Integer The id of the button to change.
      * @param buttonEnabled Boolean Whether the button needs to be enabled or disabled.
      */
     private void updateCallButton(Integer viewId, boolean buttonEnabled) {
@@ -515,6 +563,16 @@ public class CallActivity extends AppCompatActivity
                             buttonEnabled ? 1.0f : 0.5f
                     );
                 }
+
+        }
+    }
+
+    private void hangup(Integer viewId) {
+        if (mServiceBound) {
+            updateCallButton(viewId, false);
+            mSipService.hangUp(mSipService.getCurrentCall(), true);
+            mStateView.setText(R.string.call_hangup);
+            finishWithDelay();
         }
     }
 
@@ -618,12 +676,7 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case R.id.button_hangup:
-                if (mServiceBound) {
-                    updateCallButton(viewId, false);
-                    mSipService.hangUp(mSipService.getCurrentCall(), true);
-                    mStateView.setText(R.string.call_hangup);
-                    finishWithDelay();
-                }
+                hangup(viewId);
                 break;
 
             case R.id.button_reject:
@@ -678,8 +731,8 @@ public class CallActivity extends AppCompatActivity
     }
 
     private void playRingtone(boolean play) {
-        if(mRingtone != null) {
-            if(play && !mRingtone.isPlaying()) {
+        if (mRingtone != null) {
+            if (play && !mRingtone.isPlaying()) {
                 mRingtone.play();
             } else {
                 mRingtone.stop();
@@ -688,8 +741,8 @@ public class CallActivity extends AppCompatActivity
     }
 
     private void vibrate(boolean vibrate) {
-        if(mVibrator != null) {
-            if(vibrate) {
+        if (mVibrator != null) {
+            if (vibrate) {
                 mVibrator.vibrate(VIBRATOR_PATTERN, 0);
             } else {
                 mVibrator.cancel();
@@ -740,10 +793,12 @@ public class CallActivity extends AppCompatActivity
     }
 
     @Override
-    public void onGrabbed(View view, int handle) {}
+    public void onGrabbed(View view, int handle) {
+    }
 
     @Override
-    public void onReleased(View view, int handle) {}
+    public void onReleased(View view, int handle) {
+    }
 
     @Override
     public void onTrigger(View view, int target) {
@@ -762,10 +817,12 @@ public class CallActivity extends AppCompatActivity
     }
 
     @Override
-    public void onGrabbedStateChange(View view, int handle) {}
+    public void onGrabbedStateChange(View view, int handle) {
+    }
 
     @Override
-    public void onFinishFinalAnimation() {}
+    public void onFinishFinalAnimation() {
+    }
 
     private void handleDTMFButtonPressed(String key) {
         NumberInputView numberInputView = (NumberInputView) findViewById(R.id.number_input_edit_text);

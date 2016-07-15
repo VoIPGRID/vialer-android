@@ -1,7 +1,13 @@
 package com.voipgrid.vialer;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -11,6 +17,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
 import android.view.View;
 
 import com.google.android.gms.analytics.HitBuilders;
@@ -25,6 +32,7 @@ import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.onboarding.AccountFragment;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.CustomReceiver;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhonePermission;
@@ -38,6 +46,11 @@ public class MainActivity extends NavigationDrawerActivity implements
 
     private ViewPager mViewPager;
     private boolean mAskForPermission = true;
+
+    private AudioManager mAudioManager;
+    private CustomReceiver mMediaButtonReceiver;
+    private BroadcastReceiver mBroadcastReceiver;
+    private IntentFilter mIntentFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,9 +113,37 @@ public class MainActivity extends NavigationDrawerActivity implements
         }
     }
 
+    private void createReceivers() {
+        mMediaButtonReceiver = new CustomReceiver();
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                openDialer();
+            }
+        };
+    }
+
+    private void registerReceivers() {
+        if (mMediaButtonReceiver == null || mBroadcastReceiver == null){
+            createReceivers();
+        }
+        ((AudioManager)getSystemService(AUDIO_SERVICE)).registerMediaButtonEventReceiver(
+                new ComponentName(this, CustomReceiver.class));
+        registerReceiver(mMediaButtonReceiver, CustomReceiver.mMediaButtonFilter);
+        registerReceiver(mBroadcastReceiver, new IntentFilter(CustomReceiver.CALL_BTN));
+    }
+
+    private void unRegisterReceivers() {
+        try {
+            unregisterReceiver(mMediaButtonReceiver);
+            unregisterReceiver(mBroadcastReceiver);
+        } catch(Exception e) {}
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+        registerReceivers();
 
         // Ask for phone permissions.
         if (!PhonePermission.hasPermission(this)){
@@ -117,6 +158,12 @@ public class MainActivity extends NavigationDrawerActivity implements
                 ContactsPermission.askForPermission(this);
             }
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterReceivers();
     }
 
     @Override
@@ -204,7 +251,7 @@ public class MainActivity extends NavigationDrawerActivity implements
     /**
      * Show the dialer view
      */
-    private void openDialer() {
+    public void openDialer() {
         Intent intent = new Intent(this, DialerActivity.class);
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
             ActivityOptionsCompat options = ActivityOptionsCompat.

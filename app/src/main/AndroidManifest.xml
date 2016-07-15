@@ -29,6 +29,9 @@
     <!-- For intercepting incoming GSM calls -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
+    <!-- For using Bluetooth -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
     <uses-feature
         android:name="android.hardware.sensor.proximity"
         android:required="false" />
@@ -150,6 +153,14 @@
             android:enabled="true" >
             <intent-filter>
                 <action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".util.CustomReceiver"
+            android:enabled="true" >
+            <intent-filter android:priority="1000000000">
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
 
