@@ -8,8 +8,8 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 40
-        versionName "3.0 beta"
+        versionCode 41
+        versionName "3.0"
         multiDexEnabled true
         ndk {
             moduleName "pjsua2"
