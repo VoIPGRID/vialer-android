@@ -48,8 +48,7 @@ public class Preferences {
      * @return
      */
     public boolean remoteLoggingIsActive() {
-        // TODO SET DEFAULT TO FALSE AFTER BETA.
-        return  mPreferences.getBoolean(PREF_REMOTE_LOGGING, true);
+        return  mPreferences.getBoolean(PREF_REMOTE_LOGGING, false);
     }
 
     /**
