@@ -38,7 +38,7 @@ android {
             }
         }
         verbonden {
-            applicationId "com.verbonden.app"
+            applicationId "nl.verbonden.app"
             copy {
                 from 'src/verbonden/'
                 include '*.json'
