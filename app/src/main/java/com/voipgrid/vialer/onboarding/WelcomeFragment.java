@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 
 /**
@@ -20,6 +21,7 @@ import com.voipgrid.vialer.R;
 public class WelcomeFragment extends OnboardingFragment implements View.OnClickListener {
 
     public static final String ARG_NAME = "caller-name";
+    private Preferences mPreferences;
 
     /**
      * Use this factory method to create a new instance of
@@ -43,6 +45,7 @@ public class WelcomeFragment extends OnboardingFragment implements View.OnClickL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mPreferences = new Preferences(getActivity());
     }
 
     @Override
@@ -74,7 +77,15 @@ public class WelcomeFragment extends OnboardingFragment implements View.OnClickL
 
     @Override
     public void onClick(View view) {
-        mListener.onFinish(this);
+        if (!mPreferences.hasPhoneAccount()) {
+            mPreferences.setSipEnabled(false);
+            mListener.onNextStep(SetUpVoipAccountFragment.newInstance());
+        } else {
+            if (mPreferences.hasSipPermission()) {
+                mPreferences.setSipEnabled(true);
+            }
+            mListener.onFinish(this);
+        }
     }
 
     @Override

@@ -1,11 +1,10 @@
 package com.voipgrid.vialer;
 
-import android.net.ConnectivityManager;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.os.Handler;
 import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,35 +13,34 @@ import android.widget.EditText;
 import android.widget.Switch;
 
 import com.voipgrid.vialer.api.Api;
-import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.onboarding.SetupActivity;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
+import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.DialogHelper;
-import com.voipgrid.vialer.util.Middleware;
+import com.voipgrid.vialer.util.MiddlewareHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
 
-import java.io.IOException;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class AccountActivity extends AppCompatActivity implements
+public class AccountActivity extends LoginRequiredActivity implements
         Switch.OnCheckedChangeListener,
         Callback {
 
     private CompoundButton mSwitch;
     private EditText mSipIdEditText;
-
-    private ServiceGenerator mServiceGen;
+    private EditText mRemoteLogIdEditText;
 
     private PhoneAccount mPhoneAccount;
+    private PhoneAccountHelper mPhoneAccountHelper;
     private Preferences mPreferences;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
 
     private boolean mEditMode = false;
@@ -52,10 +50,8 @@ public class AccountActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account);
 
-        mStorage = new Storage(this);
-        mSystemUser = (SystemUser) mStorage.get(SystemUser.class);
-        mPhoneAccount = (PhoneAccount) mStorage.get(PhoneAccount.class);
-
+        mJsonStorage = new JsonStorage(this);
+        mPhoneAccountHelper = new PhoneAccountHelper(this);
         mPreferences = new Preferences(this);
 
         /* set the Toolbar to use as ActionBar */
@@ -66,11 +62,45 @@ public class AccountActivity extends AppCompatActivity implements
 
         /* enabled home button for the Toolbar */
         getSupportActionBar().setHomeButtonEnabled(true);
-        
+        mRemoteLogIdEditText = (EditText) findViewById(R.id.remote_logging_id_edit_text);
+        mRemoteLogIdEditText.setVisibility(View.GONE);
+        mSipIdEditText = ((EditText) findViewById(R.id.account_sip_id_edit_text));
         mSwitch = (CompoundButton) findViewById(R.id.account_sip_switch);
         mSwitch.setOnCheckedChangeListener(this);
 
-        mSipIdEditText = ((EditText) findViewById(R.id.account_sip_id_edit_text));
+        initRemoteLoggingSwitch();
+    }
+
+    /**
+     * Function to set the initial state of the remote logging switch and a onCheckChangeListener.
+     */
+    private void initRemoteLoggingSwitch() {
+        CompoundButton remoteLoggingSwitch = (CompoundButton) findViewById(R.id.remote_logging_switch);
+        remoteLoggingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (mPreferences.remoteLoggingIsActive() == isChecked) {
+                    return;
+                }
+                mPreferences.setRemoteLogging(isChecked);
+                if (isChecked) {
+                    mRemoteLogIdEditText.setVisibility(View.VISIBLE);
+                    mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
+                } else {
+                    mRemoteLogIdEditText.setVisibility(View.GONE);
+                }
+            }
+        });
+        remoteLoggingSwitch.setChecked(mPreferences.remoteLoggingIsActive());
+        if (mPreferences.remoteLoggingIsActive()) {
+            mRemoteLogIdEditText.setVisibility(View.VISIBLE);
+            mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
+        }
+    }
+
+    private void updateAndPopulate() {
+        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        mPhoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
 
         populate();
     }
@@ -78,20 +108,18 @@ public class AccountActivity extends AppCompatActivity implements
     private void populate() {
         if(mPreferences.hasSipPermission()) {
             mSwitch.setChecked(mPreferences.hasSipEnabled());
-            if(!mSwitch.isChecked()) {
-                mSipIdEditText.setVisibility(View.GONE);
-            }
             if(mPhoneAccount != null) {
                 mSipIdEditText.setText(mPhoneAccount.getAccountId());
             }
         } else {
             mSwitch.setVisibility(View.GONE);
-            mSipIdEditText.setVisibility(View.GONE);
         }
         ((EditText) findViewById(R.id.account_mobile_number_edit_text))
                 .setText(mSystemUser.getMobileNumber());
         ((EditText) findViewById(R.id.account_outgoing_number_edit_text))
                 .setText(mSystemUser.getOutgoingCli());
+        mSipIdEditText.setVisibility(mPreferences.hasSipEnabled() ? View.VISIBLE : View.GONE);
+        enableProgressBar(false);
     }
 
     @Override
@@ -153,25 +181,15 @@ public class AccountActivity extends AppCompatActivity implements
                 R.id.account_mobile_number_edit_text)).getText().toString();
         number = PhoneNumberUtils.formatMobileNumber(number);
 
-        ConnectivityHelper connectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
-
-        try {
-            mServiceGen = ServiceGenerator.getInstance();
-        } catch(PreviousRequestNotFinishedException e) {
-            return;
-        }
-        Api api = mServiceGen.createService(
+        Api api = ServiceGenerator.createService(
                 this,
-                connectivityHelper,
                 Api.class,
                 getString(R.string.api_url),
-                new OkClient(mServiceGen.getOkHttpClient(
-                        this, mSystemUser.getEmail(), mSystemUser.getPassword()))
+                mSystemUser.getEmail(),
+                mSystemUser.getPassword()
         );
-        api.mobileNumber(new MobileNumber(number), this);
+        Call<MobileNumber> call = api.mobileNumber(new MobileNumber(number));
+        call.enqueue(this);
 
         mSystemUser.setMobileNumber(number);
 
@@ -183,29 +201,7 @@ public class AccountActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void success(Object object, Response response) {
-        // Success callback for updating mobile number.
-        // Update the systemuser.
-        mStorage.save(mSystemUser);
-        mServiceGen.release();
-    }
-
-    @Override
-    public void failure(RetrofitError error) {
-        mServiceGen.release();
-        DialogHelper.displayAlert(
-                this,
-                getString(R.string.onboarding_account_configure_failed_title),
-                getString(R.string.onboarding_account_configure_invalid_phone_number)
-        );
-    }
-
-    @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        /* First, view updates */
-
-        mSipIdEditText.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-
         if (mPreferences.hasSipEnabled() == isChecked) {
             /* nothing changed, so return */
             return;
@@ -214,15 +210,123 @@ public class AccountActivity extends AppCompatActivity implements
 
         if (!isChecked) {
             // Unregister at middleware.
-            try {
-                // Blocking for now, quickfix for beta testers.
-                Middleware.unregister(this);
-            } catch (IOException exception) {
-
-            }
+            MiddlewareHelper.executeUnregisterTask(this);
+            mSipIdEditText.setVisibility(View.GONE);
         } else {
-            // Register. Fix this later in SIP vialer version.
-            // TODO: VIALA-364.
+            enableProgressBar(true);
+            new AsyncTask<Void, Void, PhoneAccount>() {
+
+                @Override
+                protected PhoneAccount doInBackground(Void... params) {
+                    return mPhoneAccountHelper.getLinkedPhoneAccount();
+                }
+
+                @Override
+                protected void onPostExecute(PhoneAccount phoneAccount) {
+                    super.onPostExecute(phoneAccount);
+
+                    if (phoneAccount != null) {
+                        mPhoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
+                        updateAndPopulate();
+                    } else {
+                        // Make sure sip is disabled in preference and the switch is returned
+                        // to disabled. Setting disabled in the settings first makes sure
+                        // the onCheckChanged does not execute the code that normally is executed
+                        // on a change in the check of the switch.
+                        setVoipAccount();
+                    }
+                }
+            }.execute();
         }
+    }
+
+    /**
+     * Loads setupactivity with the SetUpVoipAccountFragment.
+     */
+    private void setVoipAccount(){
+        Intent intent = new Intent(this, SetupActivity.class);
+        Bundle b = new Bundle();
+        b.putInt("fragment", R.id.fragment_voip_account_missing);
+        b.putString("activity", AccountActivity.class.getSimpleName());
+        intent.putExtras(b);
+
+        startActivity(intent);
+    }
+
+    @Override
+    public void onResponse(Call call, Response response) {
+        if (response.isSuccess()) {
+            // Success callback for updating mobile number.
+            // Update the systemuser.
+            mJsonStorage.save(mSystemUser);
+        } else {
+            failedFeedback();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Update and populate the fields.
+        updateAndPopulate();
+
+        // Update phone account and systemuser.
+        updateSystemUserAndPhoneAccount();
+
+        // When coming back from the SetUpVoipAccountFragment's created webactivity
+        // we cannot immediately check if a voipaccount has been set. Processing the
+        // fragment and the checks for a permitted sip permission can take 1 up to 3 seconds.
+        // For this reason we re-check if the mSwitch has the correct value after a timer.
+        enableProgressBar(true);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSwitch.setChecked(mPreferences.hasSipEnabled() && mPreferences.hasPhoneAccount());
+                enableProgressBar(false);
+            }
+        }, 3000);
+    }
+
+    @Override
+    public void onFailure(Call call, Throwable t) {
+        failedFeedback();
+    }
+
+    /**
+     * Function to update the systemuser and phone account. Update views after update.
+     */
+    private void updateSystemUserAndPhoneAccount() {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                mPhoneAccountHelper.updatePhoneAccount();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                updateAndPopulate();
+            }
+        }.execute();
+    }
+
+    private void enableProgressBar(boolean enabled) {
+        View view = findViewById(R.id.progressBar);
+        if(view != null) {
+            view.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
+    /**
+     * Function to inform the user of a failed requests.
+     */
+    private void failedFeedback() {
+        DialogHelper.displayAlert(
+                this,
+                getString(R.string.onboarding_account_configure_failed_title),
+                getString(R.string.onboarding_account_configure_invalid_phone_number)
+        );
     }
 }

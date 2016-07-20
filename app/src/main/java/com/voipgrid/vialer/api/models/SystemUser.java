@@ -3,6 +3,8 @@ package com.voipgrid.vialer.api.models;
 import android.net.Uri;
 
 import com.google.gson.annotations.SerializedName;
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,9 +34,6 @@ public class SystemUser {
     String mobileNumber;
 
     String partner;
-
-    @SerializedName("allow_app_account")
-    boolean hasSipPermission;
 
     /**
      * HashSet with list of Strings describing numbers which are not the main number
@@ -117,14 +116,6 @@ public class SystemUser {
 
     public void setPartner(String partner) {
         this.partner = partner;
-    }
-
-    public boolean hasSipPermission() {
-        return hasSipPermission;
-    }
-
-    public void setSipPermission(boolean hasSipPermission) {
-        this.hasSipPermission = hasSipPermission;
     }
 
     public HashSet<String> getSecondaryNumbers() {

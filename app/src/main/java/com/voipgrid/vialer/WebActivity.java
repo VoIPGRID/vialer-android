@@ -1,42 +1,43 @@
 package com.voipgrid.vialer;
 
 import android.graphics.Bitmap;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.AutoLoginToken;
-import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 
 /**
  * Activity to display the web pages within the app.
  */
-public class WebActivity extends AppCompatActivity implements retrofit.Callback<AutoLoginToken> {
+public class WebActivity extends LoginRequiredActivity implements Callback<AutoLoginToken> {
 
     public static final String PAGE = "key-page";
     public static final String TITLE = "key-title";
     public static final String USERNAME = "key-username";
     public static final String PASSWORD = "key-password";
+    public static final String GA_TITLE = "ga-title";
 
     private ProgressBar mProgressBar;
     private WebView mWebView;
-
-    private ConnectivityHelper mConnectivityHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +55,6 @@ public class WebActivity extends AppCompatActivity implements retrofit.Callback<
 
         /* enabled home button for the Toolbar */
         getSupportActionBar().setHomeButtonEnabled(true);
-
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
 
         /* get the ProgressBar */
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
@@ -98,6 +94,18 @@ public class WebActivity extends AppCompatActivity implements retrofit.Callback<
             /* request an autologin token and load the requested page */
             autoLoginToken();
         }
+
+        // Track the web view.
+        AnalyticsHelper analyticsHelper = new AnalyticsHelper(
+                ((AnalyticsApplication) getApplication()).getDefaultTracker()
+        );
+        analyticsHelper.sendScreenViewTrack(getIntent().getStringExtra(GA_TITLE));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        finish();
+        return true;
     }
 
     /**
@@ -107,58 +115,13 @@ public class WebActivity extends AppCompatActivity implements retrofit.Callback<
         mProgressBar.setVisibility(View.VISIBLE);
         Api api = ServiceGenerator.createService(
                 this,
-                mConnectivityHelper, Api.class,
+                Api.class,
                 getString(R.string.api_url),
-                new OkClient(ServiceGenerator.getOkHttpClient(
-                        this,
-                        getIntent().getStringExtra(USERNAME),
-                        getIntent().getStringExtra(PASSWORD)))
+                getIntent().getStringExtra(USERNAME),
+                getIntent().getStringExtra(PASSWORD)
         );
-        api.autoLoginToken(this);
-    }
-
-    /**
-     * Received an autologin token, now we can load the requested page with the received token
-     * @param autoLoginToken
-     * @param response
-     */
-    @Override
-    public void success(AutoLoginToken autoLoginToken, retrofit.client.Response response) {
-        String username = getIntent().getStringExtra(USERNAME);
-        try {
-            username = URLEncoder.encode(username, "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        loadPage(getString(
-                        R.string.web_autologin,
-                        getString(R.string.web_url),
-                        username,
-                        autoLoginToken,
-                        getIntent().getStringExtra(PAGE)
-                )
-        );
-    }
-
-    /**
-     * Failed to receive an autologin token. Show an error message to the user
-     * @param error
-     */
-    @Override
-    public void failure(RetrofitError error) {
-        final String errorMessage = error.getMessage();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mProgressBar.setVisibility(View.INVISIBLE);
-                Toast.makeText(
-                        getApplicationContext(),
-                        getString(R.string.auto_login_error, errorMessage),
-                        Toast.LENGTH_SHORT
-                ).show();
-            }
-        });
-
+        Call<AutoLoginToken> call = api.autoLoginToken();
+        call.enqueue(this);
     }
 
     /**
@@ -170,6 +133,50 @@ public class WebActivity extends AppCompatActivity implements retrofit.Callback<
             @Override
             public void run() {
                 mWebView.loadUrl(url);
+            }
+        });
+    }
+
+    @Override
+    public void onResponse(Call<AutoLoginToken> call, Response<AutoLoginToken> response) {
+        String username = getIntent().getStringExtra(USERNAME);
+
+        if (response.isSuccess() && response.body() != null) {
+            AutoLoginToken autoLoginToken = response.body();
+            try {
+                username = URLEncoder.encode(username, "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            loadPage(getString(
+                            R.string.web_autologin,
+                            getString(R.string.web_url),
+                            username,
+                            autoLoginToken,
+                            getIntent().getStringExtra(PAGE)
+                    )
+            );
+        } else {
+            failedFeedback(getString(R.string.webactivity_open_page_failed));
+        }
+    }
+
+    @Override
+    public void onFailure(Call<AutoLoginToken> call, Throwable t) {
+        failedFeedback(getString(R.string.webactivity_open_page_failed));
+    }
+
+    private void failedFeedback(String message) {
+        final String mMessage = message;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mProgressBar.setVisibility(View.INVISIBLE);
+                Toast.makeText(
+                        getApplicationContext(),
+                        getString(R.string.auto_login_error, mMessage),
+                        Toast.LENGTH_SHORT
+                ).show();
             }
         });
     }

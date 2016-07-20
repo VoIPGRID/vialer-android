@@ -10,12 +10,13 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.util.RemoteLogger;
 
 /**
  * SyncUtils provides functions to handling actions related to the contact sync.
  */
 public class SyncUtils {
-
+    private static final String TAG = SyncUtils.class.getName();
     /**
      * Check if their is a sync account present. If not create one.
      *
@@ -44,6 +45,7 @@ public class SyncUtils {
      * @param context
      */
     public static void requestContactSync(Context context) {
+        new RemoteLogger(context).d(TAG + " requestContactSync");
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(context)) {
@@ -67,6 +69,7 @@ public class SyncUtils {
      * @param context
      */
     public static void setPeriodicSync(Context context) {
+        new RemoteLogger(context).d(TAG + " setPeriodicSync");
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(context)) {
@@ -130,6 +133,7 @@ public class SyncUtils {
      * @param inProgress
      */
     public static void setFullSyncInProgress(Context context, boolean inProgress) {
+        new RemoteLogger(context).d(TAG + " setFullSyncInProgress");
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit().putBoolean(SyncConstants.FULL_SYNC_INPROGRESS, inProgress).apply();
     }

@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="t9lookup">
-        <item></item>
-        <item></item>
-        <item>*[abcàáâãäåæçABCÀÁÂÃÄÅÆÇ]*</item>
-        <item>*[defèéêëDEFÈÉÊËÐ]*</item>
-        <item>*[ghiìíîïGHIÌÍÎÏ]*</item>
-        <item>*[jklJKL]*</item>
-        <item>*[mnoñòóôõöøMNOÑÒÓÔÕÖØ]*</item>
-        <item>*[pqrsPQRS]*</item>
-        <item>*[tuvùúûüTUVÙÚÛÜ]*</item>
-        <item>*[wxyzýÿWXYZÝ]*</item>
-    </string-array>
+    <array name="google_lock_ring_drawables">
+        <item>@drawable/ic_google_lock_ring_answer</item>
+        <item>@null</item>
+        <item>@drawable/ic_google_lock_ring_decline</item>
+        <item>@null</item>
+    </array>
+    <array name="google_lock_ring_descriptions">
+        <item>answer</item>
+        <item>@null</item>
+        <item>decline</item>
+        <item>@null</item>
+    </array>
+    <array name="google_lock_ring_direction_descriptions">
+        <item>right</item>
+        <item>@null</item>
+        <item>left</item>
+        <item>@null</item>
+    </array>
 </resources>

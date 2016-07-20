@@ -6,7 +6,7 @@ import org.pjsip.pjsua2.Call;
  * Created by karsten on 02/07/15.
  */
 public interface CallInteraction {
-    void hangUp(Call call);
+    void hangUp(Call call, boolean userHangup);
     void answer(Call call);
     void decline(Call call);
     void updateMicrophoneVolume(Call call, long newVolume);

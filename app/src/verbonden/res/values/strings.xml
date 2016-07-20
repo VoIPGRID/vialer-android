@@ -1,0 +1,10 @@
+<resources>
+
+    <string name="app_name">Verbonden</string>
+    <string name="configure_header_label_text">Verbonden App is configuring</string>
+
+    <string name="url_app_info">https://verbonden.nl/app/app-info/</string>
+
+    <string name="info_button_title">How does the Verbonden App work?</string>
+
+</resources>

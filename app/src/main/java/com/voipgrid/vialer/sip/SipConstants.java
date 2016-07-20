@@ -147,4 +147,16 @@ public interface SipConstants {
     String KEY_PAD_DTMF_TONE = "KEY_PAD_DTMF_TONE";
 
     String ACTION_BROADCAST_KEY_PAD_INTERACTION = "com.voipgrid.vialer.VIALER_KEY_PAD_INTERACTION";
+
+    // Volume for the ringing tone on a scale of 0 - 100.
+    int RINGING_VOLUME = 75;
+
+    // Echo cancellation.
+    int WEBRTC_ECHO_CANCELLATION = 3;
+    int ECHO_CANCELLATION_TAIL_LENGTH = 75;
+
+    // Input verbosity level. Value 5 is reasonable.
+    int SIP_LOG_LEVEL = 10;
+    // For PJSIP debugging purpose 4 is a reasonable value.
+    int SIP_CONSOLE_LOG_LEVEL = 4;
 }

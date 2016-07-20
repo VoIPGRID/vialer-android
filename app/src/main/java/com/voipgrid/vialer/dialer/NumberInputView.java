@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -23,6 +24,9 @@ public class NumberInputView extends RelativeLayout implements
     private EditText mEditText;
     private ImageButton mRemoveButton;
     private OnInputChangedListener mListener;
+    private final int mNormalPhoneNumberLengthMax = 13;
+
+    private float mDefaultTextsize;
 
     public NumberInputView(Context context) {
         super(context);
@@ -44,16 +48,19 @@ public class NumberInputView extends RelativeLayout implements
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_number_input, this);
 
-        /* find the number input field and add a TextChangedListener to handle text changes */
+        // Find the number input field and add a TextChangedListener to handle text changes.
         mEditText = (EditText) findViewById(R.id.edit_text);
         mEditText.addTextChangedListener(this);
         mEditText.setOnClickListener(this);
         mEditText.setOnLongClickListener(this);
 
-        /* find the remove button and add an OnClickListener */
+        // Find the remove button and add an OnClickListener.
         mRemoveButton = (ImageButton) findViewById(R.id.remove_button);
         mRemoveButton.setOnClickListener(this);
         mRemoveButton.setOnLongClickListener(this);
+
+        mEditText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.dialpad_number_input_text_size));
+        mDefaultTextsize = mEditText.getTextSize();
     }
 
     public void setOnInputChangedListener(OnInputChangedListener listener) {
@@ -73,7 +80,6 @@ public class NumberInputView extends RelativeLayout implements
                     mEditText.setCursorVisible(true);
                 }
                 break;
-
         }
     }
 
@@ -101,11 +107,12 @@ public class NumberInputView extends RelativeLayout implements
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        /* set visibility for the delete Button based on number of characters */
-        mRemoveButton.setVisibility(count == 0 ? View.INVISIBLE : View.VISIBLE);
-
-        mListener.onInputChanged(s.toString());
+        if (s.length() >= 0 && mListener != null) {
+            mListener.onInputChanged(s.toString());
+            mRemoveButton.setVisibility(View.VISIBLE);
+        } else {
+            mRemoveButton.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -114,15 +121,40 @@ public class NumberInputView extends RelativeLayout implements
     }
 
     /**
-     * Remove last character from number input field
+     * Remove character from input field
      */
     public void remove() {
-        mEditText.setCursorVisible(false);
-        String text = mEditText.getText().toString();
-        int length = text.length();
-        if(length > 0) {
-            mEditText.setText(text.substring(0, length - 1));
+        // Check if there is actually text in the input field.
+        if (mEditText.length() > 0) {
+            mRemoveButton.animate();
+            Integer startCursorPosition = mEditText.getSelectionStart();
+            Integer endCursorPosition = mEditText.getSelectionEnd();
+
+            // Can not remove on index 0.
+            if (startCursorPosition == 0 && endCursorPosition == 0) {
+                return;
+            }
+
+            // Check if there is an selection to remove. Otherwise remove one character.
+            if ((endCursorPosition - startCursorPosition) > 0) {
+                removeTextFromInput(startCursorPosition, endCursorPosition);
+            } else {
+                removeTextFromInput(startCursorPosition - 1, endCursorPosition);
+            }
         }
+        setCorrectFontSize();
+    }
+
+    public void setCorrectFontSize() {
+        int charCount = mEditText.getText().length();
+        float charSize = mDefaultTextsize;
+
+        if (charCount > mNormalPhoneNumberLengthMax) {
+            for (int i = charCount; i > mNormalPhoneNumberLengthMax; i--) {
+                charSize = charSize / 1.03f;
+            }
+        }
+        mEditText.setTextSize(TypedValue.COMPLEX_UNIT_PX, charSize);
     }
 
     /**
@@ -130,7 +162,26 @@ public class NumberInputView extends RelativeLayout implements
      * @param text
      */
     public void add(CharSequence text) {
-        mEditText.getText().append(text);
+        Editable inputText = mEditText.getText();
+        Integer startCursorPosition = mEditText.getSelectionStart();
+        Integer endCursorPosition = mEditText.getSelectionEnd();
+
+        removeTextFromInput(startCursorPosition, endCursorPosition);
+
+        inputText.insert(startCursorPosition, text);
+    }
+
+    private void removeTextFromInput(Integer startCursorPosition, Integer endCursorPosition) {
+        // If there is a selection active delete the selected text.
+        if ((endCursorPosition - startCursorPosition) > 0) {
+            mEditText.getText().delete(startCursorPosition, endCursorPosition);
+        }
+
+        if (startCursorPosition == mEditText.length()) {
+            mEditText.setCursorVisible(false);
+        } else {
+            mEditText.setCursorVisible(true);
+        }
     }
 
     /**
@@ -143,6 +194,7 @@ public class NumberInputView extends RelativeLayout implements
 
     public void setNumber(String number) {
         mEditText.setText(number);
+        mEditText.setSelection(number.length());
     }
 
     /**

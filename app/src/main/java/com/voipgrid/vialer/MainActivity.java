@@ -2,7 +2,6 @@ package com.voipgrid.vialer;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -12,9 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.telephony.TelephonyManager;
 import android.view.View;
-import android.widget.TextView;
 
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -25,10 +22,14 @@ import com.voipgrid.vialer.contacts.ContactsPermission;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.contacts.UpdateChangedContactsService;
 import com.voipgrid.vialer.dialer.DialerActivity;
+import com.voipgrid.vialer.onboarding.AccountFragment;
 import com.voipgrid.vialer.onboarding.SetupActivity;
-import com.voipgrid.vialer.onboarding.StartupTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.PhoneAccountHelper;
+import com.voipgrid.vialer.util.PhonePermission;
+import com.voipgrid.vialer.util.UpdateActivity;
+import com.voipgrid.vialer.util.UpdateHelper;
 
 
 public class MainActivity extends NavigationDrawerActivity implements
@@ -36,62 +37,78 @@ public class MainActivity extends NavigationDrawerActivity implements
         CallRecordFragment.OnFragmentInteractionListener {
 
     private ViewPager mViewPager;
-
-    private ConnectivityHelper mConnectivityHelper;
-    private Preferences mPreferences;
-    private Storage mStorage;
-
     private boolean mAskForPermission = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mStorage = new Storage(this);
+        JsonStorage jsonStorage = new JsonStorage(this);
+        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
+        Boolean hasSystemUser = jsonStorage.has(SystemUser.class);
+        SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
 
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
-
-        mPreferences = new Preferences(this);
-
-        /* check if the app has a SystemUser */
-        if(!mStorage.has(SystemUser.class)) {
-            //start onboarding flow
+        // Check if the app has a SystemUser.
+        // When there is no SystemUser present start the on boarding process.
+        // When there is a SystemUser but there is no mobile number configured go to the
+        // on boarding part where the mobile number needs to be configured.
+        if (!hasSystemUser) {
+            // Start on boarding flow.
             startActivity(new Intent(this, SetupActivity.class));
             finish();
-        } else if(mConnectivityHelper.hasNetworkConnection()) {
-            //update SystemUser and PhoneAccount on background thread
-            new StartupTask(this).execute();
+        } else if (systemUser.getMobileNumber() == null) {
+            Intent intent = new Intent(this, SetupActivity.class);
+
+            Bundle bundle = new Bundle();
+            bundle.putInt("fragment", R.id.fragment_account);
+            bundle.putString("activity", AccountFragment.class.getSimpleName());
+            intent.putExtras(bundle);
+
+            startActivity(intent);
+            finish();
+        } else if (connectivityHelper.hasNetworkConnection()) {
+            // Update SystemUser and PhoneAccount on background thread.
+            new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
         }
 
-        if (SyncUtils.requiresFullContactSync(this)) {
-            SyncUtils.requestContactSync(this);
+        // Start UpdateActivity if app has updated.
+        if (UpdateHelper.requiresUpdate(this)) {
+            this.startActivity(new Intent(this, UpdateActivity.class));
+            finish();
         } else {
-            // Live contact updates are not supported below api level 18.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
-                    && ContactsPermission.hasPermission(this)) {
-                startService(new Intent(this, UpdateChangedContactsService.class));
+            if (SyncUtils.requiresFullContactSync(this)) {
+                SyncUtils.requestContactSync(this);
+            } else {
+                // Live contact updates are not supported below api level 18.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
+                        && ContactsPermission.hasPermission(this)) {
+                    startService(new Intent(this, UpdateChangedContactsService.class));
+                }
             }
+
+            SyncUtils.setPeriodicSync(this);
+
+            setContentView(R.layout.activity_main);
+
+            // Set the Toolbar to use as ActionBar.
+            setActionBar(R.id.action_bar);
+
+            setNavigationDrawer(R.id.drawer_layout);
+
+            // Set tabs.
+            setupTabs();
         }
-
-        SyncUtils.setPeriodicSync(this);
-
-        setContentView(R.layout.activity_main);
-
-        /* set the Toolbar to use as ActionBar */
-        setActionBar(R.id.action_bar);
-
-        setNavigationDrawer(R.id.drawer_layout);
-
-        /* set tabs */
-        setupTabs();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Ask for phone permissions.
+        if (!PhonePermission.hasPermission(this)){
+            PhonePermission.askForPermission(this);
+            return;
+        }
 
         if (!ContactsPermission.hasPermission(this)){
             // We need to avoid a permission loop.
@@ -181,12 +198,6 @@ public class MainActivity extends NavigationDrawerActivity implements
     public void onClick(View view) {
         switch(view.getId()) {
             case R.id.floating_action_button : openDialer(); break;
-            case R.id.dialer_warning :
-                Intent intent = new Intent(this, WarningActivity.class);
-                intent.putExtra(WarningActivity.TITLE, ((TextView) view).getText());
-                intent.putExtra(WarningActivity.MESSAGE, (String) view.getTag());
-                startActivity(intent);
-                break;
         }
     }
 

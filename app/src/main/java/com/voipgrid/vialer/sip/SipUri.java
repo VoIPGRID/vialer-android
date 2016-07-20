@@ -4,47 +4,54 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 /**
- * Created by eltjo on 02/09/15.
+ * Class for creating the correct sip addresses.
  */
 public class SipUri {
-
     /**
-     * Build Sip Uri
+     * A complete sip address including the sip account id.
      *
-     * @param protocol
-     * @param number
-     * @param host
-     * @return
-     */
-    public static Uri build(String protocol, String number, String host) {
-        return Uri.parse(String.format(
-                "%s%s@%s",
-                protocol,
-                PhoneNumberUtils.format(number),
-                host
-        ));
-    }
-
-    /**
-     * Build Sip Uri
+     * @param context Context reference.
+     * @param sipAccount the sip account id.
      *
-     * @param context
-     * @param number
-     * @return
+     * @return String with sip: in front and the sip account id example: sip:42@test.url.com
      */
-    public static Uri build(Context context, String number) {
-        return build(context.getString(R.string.sip_protocol),
-                number,
-                context.getString(R.string.sip_host)
+    public static String sipAddress(Context context, String sipAccount) {
+        return prependSIPUri(
+                context,
+                sipAccount + "@" + context.getString(R.string.sip_host)
         );
     }
 
-    public static Uri buildRegistrar(Context context) {
-        return Uri.parse(
-                context.getString(R.string.sip_protocol) + context.getString(R.string.sip_host)
-        );
+    /**
+     * Create a URI version of the sip address.
+     *
+     * @param context Context reference.
+     * @param sipAccount the sip account id.
+     *
+     * @return URI class with the sip address.
+     */
+    public static Uri sipAddressUri(Context context, String sipAccount) {
+        return Uri.parse(sipAddress(context, sipAccount));
+    }
+
+    /**
+     * Try to prepend the sip: in front of the given string
+     *
+     * @param context Context reference.
+     * @param uri the uri to prepend sip in front.
+     *
+     * @return String with sip: in front of it example. sip:test.url.com.
+     */
+    public static String prependSIPUri(Context context, String uri) {
+        String prependedSipUri = uri;
+        String sipProtocol = context.getString(R.string.sip_protocol);
+
+        if (!prependedSipUri.startsWith(sipProtocol)) {
+            prependedSipUri = sipProtocol + prependedSipUri;
+        }
+
+        return prependedSipUri;
     }
 }

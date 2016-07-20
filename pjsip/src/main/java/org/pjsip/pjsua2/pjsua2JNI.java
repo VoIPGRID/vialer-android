@@ -238,6 +238,8 @@ public class pjsua2JNI {
   public final static native int PJMEDIA_FORMAT_MPEG1VIDEO_get();
   public final static native int PJMEDIA_FORMAT_MPEG2VIDEO_get();
   public final static native int PJMEDIA_FORMAT_MPEG4_get();
+  public final static native int PJMEDIA_VID_PACKING_PACKETS_get();
+  public final static native int PJMEDIA_VID_PACKING_WHOLE_get();
   public final static native int PJSIP_CRED_DATA_PLAIN_PASSWD_get();
   public final static native int PJSIP_CRED_DATA_DIGEST_get();
   public final static native int PJSIP_CRED_DATA_EXT_AKA_get();
@@ -329,6 +331,8 @@ public class pjsua2JNI {
   public final static native int PJSUA_CALL_INCLUDE_DISABLED_MEDIA_get();
   public final static native int PJSUA_CALL_NO_SDP_OFFER_get();
   public final static native int PJSUA_MED_TP_CLOSE_MEMBER_get();
+  public final static native int PJSUA_SND_DEV_SPEAKER_ONLY_get();
+  public final static native int PJSUA_SND_DEV_NO_IMMEDIATE_OPEN_get();
   public final static native long new_StringVector__SWIG_0();
   public final static native long new_StringVector__SWIG_1(long jarg1);
   public final static native long StringVector_size(long jarg1, StringVector jarg1_);
@@ -829,6 +833,17 @@ public class pjsua2JNI {
   public final static native long VideoDevInfoVector_get(long jarg1, VideoDevInfoVector jarg1_, int jarg2);
   public final static native void VideoDevInfoVector_set(long jarg1, VideoDevInfoVector jarg1_, int jarg2, long jarg3, VideoDevInfo jarg3_);
   public final static native void delete_VideoDevInfoVector(long jarg1);
+  public final static native long new_CodecFmtpVector__SWIG_0();
+  public final static native long new_CodecFmtpVector__SWIG_1(long jarg1);
+  public final static native long CodecFmtpVector_size(long jarg1, CodecFmtpVector jarg1_);
+  public final static native long CodecFmtpVector_capacity(long jarg1, CodecFmtpVector jarg1_);
+  public final static native void CodecFmtpVector_reserve(long jarg1, CodecFmtpVector jarg1_, long jarg2);
+  public final static native boolean CodecFmtpVector_isEmpty(long jarg1, CodecFmtpVector jarg1_);
+  public final static native void CodecFmtpVector_clear(long jarg1, CodecFmtpVector jarg1_);
+  public final static native void CodecFmtpVector_add(long jarg1, CodecFmtpVector jarg1_, long jarg2, CodecFmtp jarg2_);
+  public final static native long CodecFmtpVector_get(long jarg1, CodecFmtpVector jarg1_, int jarg2);
+  public final static native void CodecFmtpVector_set(long jarg1, CodecFmtpVector jarg1_, int jarg2, long jarg3, CodecFmtp jarg3_);
+  public final static native void delete_CodecFmtpVector(long jarg1);
   public final static native void MediaFormat_id_set(long jarg1, MediaFormat jarg1_, long jarg2);
   public final static native long MediaFormat_id_get(long jarg1, MediaFormat jarg1_);
   public final static native void MediaFormat_type_set(long jarg1, MediaFormat jarg1_, int jarg2);
@@ -975,6 +990,7 @@ public class pjsua2JNI {
   public final static native long AudDevManager_enumDev(long jarg1, AudDevManager jarg1_) throws java.lang.Exception;
   public final static native void AudDevManager_setNullDev(long jarg1, AudDevManager jarg1_) throws java.lang.Exception;
   public final static native long AudDevManager_setNoDev(long jarg1, AudDevManager jarg1_);
+  public final static native void AudDevManager_setSndDevMode(long jarg1, AudDevManager jarg1_, long jarg2) throws java.lang.Exception;
   public final static native void AudDevManager_setEcOptions(long jarg1, AudDevManager jarg1_, long jarg2, long jarg3) throws java.lang.Exception;
   public final static native long AudDevManager_getEcTail(long jarg1, AudDevManager jarg1_) throws java.lang.Exception;
   public final static native boolean AudDevManager_sndIsActive(long jarg1, AudDevManager jarg1_);
@@ -1118,6 +1134,30 @@ public class pjsua2JNI {
   public final static native String CodecInfo_desc_get(long jarg1, CodecInfo jarg1_);
   public final static native long new_CodecInfo();
   public final static native void delete_CodecInfo(long jarg1);
+  public final static native void CodecFmtp_name_set(long jarg1, CodecFmtp jarg1_, String jarg2);
+  public final static native String CodecFmtp_name_get(long jarg1, CodecFmtp jarg1_);
+  public final static native void CodecFmtp_val_set(long jarg1, CodecFmtp jarg1_, String jarg2);
+  public final static native String CodecFmtp_val_get(long jarg1, CodecFmtp jarg1_);
+  public final static native long new_CodecFmtp();
+  public final static native void delete_CodecFmtp(long jarg1);
+  public final static native void VidCodecParam_dir_set(long jarg1, VidCodecParam jarg1_, int jarg2);
+  public final static native int VidCodecParam_dir_get(long jarg1, VidCodecParam jarg1_);
+  public final static native void VidCodecParam_packing_set(long jarg1, VidCodecParam jarg1_, int jarg2);
+  public final static native int VidCodecParam_packing_get(long jarg1, VidCodecParam jarg1_);
+  public final static native void VidCodecParam_encFmt_set(long jarg1, VidCodecParam jarg1_, long jarg2, MediaFormatVideo jarg2_);
+  public final static native long VidCodecParam_encFmt_get(long jarg1, VidCodecParam jarg1_);
+  public final static native void VidCodecParam_encFmtp_set(long jarg1, VidCodecParam jarg1_, long jarg2, CodecFmtpVector jarg2_);
+  public final static native long VidCodecParam_encFmtp_get(long jarg1, VidCodecParam jarg1_);
+  public final static native void VidCodecParam_encMtu_set(long jarg1, VidCodecParam jarg1_, long jarg2);
+  public final static native long VidCodecParam_encMtu_get(long jarg1, VidCodecParam jarg1_);
+  public final static native void VidCodecParam_decFmt_set(long jarg1, VidCodecParam jarg1_, long jarg2, MediaFormatVideo jarg2_);
+  public final static native long VidCodecParam_decFmt_get(long jarg1, VidCodecParam jarg1_);
+  public final static native void VidCodecParam_decFmtp_set(long jarg1, VidCodecParam jarg1_, long jarg2, CodecFmtpVector jarg2_);
+  public final static native long VidCodecParam_decFmtp_get(long jarg1, VidCodecParam jarg1_);
+  public final static native void VidCodecParam_ignoreFmtp_set(long jarg1, VidCodecParam jarg1_, boolean jarg2);
+  public final static native boolean VidCodecParam_ignoreFmtp_get(long jarg1, VidCodecParam jarg1_);
+  public final static native long new_VidCodecParam();
+  public final static native void delete_VidCodecParam(long jarg1);
   public final static native void PresenceStatus_status_set(long jarg1, PresenceStatus jarg1_, int jarg2);
   public final static native int PresenceStatus_status_get(long jarg1, PresenceStatus jarg1_);
   public final static native void PresenceStatus_statusText_set(long jarg1, PresenceStatus jarg1_, String jarg2);
@@ -1841,6 +1881,10 @@ public class pjsua2JNI {
   public final static native long OnCallRxOfferParam_opt_get(long jarg1, OnCallRxOfferParam jarg1_);
   public final static native long new_OnCallRxOfferParam();
   public final static native void delete_OnCallRxOfferParam(long jarg1);
+  public final static native void OnCallTxOfferParam_opt_set(long jarg1, OnCallTxOfferParam jarg1_, long jarg2, CallSetting jarg2_);
+  public final static native long OnCallTxOfferParam_opt_get(long jarg1, OnCallTxOfferParam jarg1_);
+  public final static native long new_OnCallTxOfferParam();
+  public final static native void delete_OnCallTxOfferParam(long jarg1);
   public final static native void OnCallRedirectedParam_targetUri_set(long jarg1, OnCallRedirectedParam jarg1_, String jarg2);
   public final static native String OnCallRedirectedParam_targetUri_get(long jarg1, OnCallRedirectedParam jarg1_);
   public final static native void OnCallRedirectedParam_e_set(long jarg1, OnCallRedirectedParam jarg1_, long jarg2, SipEvent jarg2_);
@@ -1957,6 +2001,8 @@ public class pjsua2JNI {
   public final static native void Call_onCallReplacedSwigExplicitCall(long jarg1, Call jarg1_, long jarg2, OnCallReplacedParam jarg2_);
   public final static native void Call_onCallRxOffer(long jarg1, Call jarg1_, long jarg2, OnCallRxOfferParam jarg2_);
   public final static native void Call_onCallRxOfferSwigExplicitCall(long jarg1, Call jarg1_, long jarg2, OnCallRxOfferParam jarg2_);
+  public final static native void Call_onCallTxOffer(long jarg1, Call jarg1_, long jarg2, OnCallTxOfferParam jarg2_);
+  public final static native void Call_onCallTxOfferSwigExplicitCall(long jarg1, Call jarg1_, long jarg2, OnCallTxOfferParam jarg2_);
   public final static native void Call_onInstantMessage(long jarg1, Call jarg1_, long jarg2, OnInstantMessageParam jarg2_);
   public final static native void Call_onInstantMessageSwigExplicitCall(long jarg1, Call jarg1_, long jarg2, OnInstantMessageParam jarg2_);
   public final static native void Call_onInstantMessageStatus(long jarg1, Call jarg1_, long jarg2, OnInstantMessageStatusParam jarg2_);
@@ -2173,6 +2219,7 @@ public class pjsua2JNI {
   public final static native long Endpoint_utilSslGetAvailableCiphers(long jarg1, Endpoint jarg1_) throws java.lang.Exception;
   public final static native void Endpoint_natDetectType(long jarg1, Endpoint jarg1_) throws java.lang.Exception;
   public final static native int Endpoint_natGetType(long jarg1, Endpoint jarg1_) throws java.lang.Exception;
+  public final static native void Endpoint_natUpdateStunServers(long jarg1, Endpoint jarg1_, long jarg2, StringVector jarg2_, boolean jarg3) throws java.lang.Exception;
   public final static native void Endpoint_natCheckStunServers(long jarg1, Endpoint jarg1_, long jarg2, StringVector jarg2_, boolean jarg3, long jarg4) throws java.lang.Exception;
   public final static native void Endpoint_natCancelCheckStunServers__SWIG_0(long jarg1, Endpoint jarg1_, long jarg2, boolean jarg3) throws java.lang.Exception;
   public final static native void Endpoint_natCancelCheckStunServers__SWIG_1(long jarg1, Endpoint jarg1_, long jarg2) throws java.lang.Exception;
@@ -2196,8 +2243,9 @@ public class pjsua2JNI {
   public final static native void Endpoint_codecSetParam(long jarg1, Endpoint jarg1_, String jarg2, long jarg3) throws java.lang.Exception;
   public final static native long Endpoint_videoCodecEnum(long jarg1, Endpoint jarg1_) throws java.lang.Exception;
   public final static native void Endpoint_videoCodecSetPriority(long jarg1, Endpoint jarg1_, String jarg2, short jarg3) throws java.lang.Exception;
-  public final static native long Endpoint_videoCodecGetParam(long jarg1, Endpoint jarg1_, String jarg2) throws java.lang.Exception;
-  public final static native void Endpoint_videoCodecSetParam(long jarg1, Endpoint jarg1_, String jarg2, long jarg3) throws java.lang.Exception;
+  public final static native long Endpoint_getVideoCodecParam(long jarg1, Endpoint jarg1_, String jarg2) throws java.lang.Exception;
+  public final static native void Endpoint_setVideoCodecParam(long jarg1, Endpoint jarg1_, String jarg2, long jarg3, VidCodecParam jarg3_) throws java.lang.Exception;
+  public final static native void Endpoint_resetVideoCodecParam(long jarg1, Endpoint jarg1_, String jarg2) throws java.lang.Exception;
   public final static native void Endpoint_onNatDetectionComplete(long jarg1, Endpoint jarg1_, long jarg2, OnNatDetectionCompleteParam jarg2_);
   public final static native void Endpoint_onNatDetectionCompleteSwigExplicitEndpoint(long jarg1, Endpoint jarg1_, long jarg2, OnNatDetectionCompleteParam jarg2_);
   public final static native void Endpoint_onNatCheckStunServersComplete(long jarg1, Endpoint jarg1_, long jarg2, OnNatCheckStunServersCompleteParam jarg2_);
@@ -2305,6 +2353,9 @@ public class pjsua2JNI {
   }
   public static void SwigDirector_Call_onCallRxOffer(Call self, long prm) {
     self.onCallRxOffer(new OnCallRxOfferParam(prm, false));
+  }
+  public static void SwigDirector_Call_onCallTxOffer(Call self, long prm) {
+    self.onCallTxOffer(new OnCallTxOfferParam(prm, false));
   }
   public static void SwigDirector_Call_onInstantMessage(Call self, long prm) {
     self.onInstantMessage(new OnInstantMessageParam(prm, false));

@@ -68,6 +68,10 @@ public class AudDevManager {
     return (cPtr == 0) ? null : new SWIGTYPE_p_p_void(cPtr, false);
   }
 
+  public void setSndDevMode(long mode) throws java.lang.Exception {
+    pjsua2JNI.AudDevManager_setSndDevMode(swigCPtr, this, mode);
+  }
+
   public void setEcOptions(long tail_msec, long options) throws java.lang.Exception {
     pjsua2JNI.AudDevManager_setEcOptions(swigCPtr, this, tail_msec, options);
   }

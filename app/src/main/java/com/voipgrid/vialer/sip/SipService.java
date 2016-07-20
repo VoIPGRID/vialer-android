@@ -9,21 +9,28 @@ import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.telephony.TelephonyManager;
+import android.util.Log;
 
-import com.squareup.okhttp.OkHttpClient;
+import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.VialerGcmListenerService;
+import com.voipgrid.vialer.fcm.FcmListenerService;
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.GsmCallListener;
+import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
+import com.voipgrid.vialer.util.PhonePermission;
+import com.voipgrid.vialer.util.RemoteLogger;
 
 import org.pjsip.pjsua2.Account;
 import org.pjsip.pjsua2.AccountConfig;
@@ -35,18 +42,29 @@ import org.pjsip.pjsua2.CallMediaInfo;
 import org.pjsip.pjsua2.CallMediaInfoVector;
 import org.pjsip.pjsua2.CallOpParam;
 import org.pjsip.pjsua2.CallSetting;
+import org.pjsip.pjsua2.CodecInfo;
+import org.pjsip.pjsua2.CodecInfoVector;
 import org.pjsip.pjsua2.Endpoint;
 import org.pjsip.pjsua2.EpConfig;
+import org.pjsip.pjsua2.LogConfig;
+import org.pjsip.pjsua2.MediaConfig;
 import org.pjsip.pjsua2.OnRegStateParam;
 import org.pjsip.pjsua2.TransportConfig;
+import org.pjsip.pjsua2.UaConfig;
+import org.pjsip.pjsua2.pj_log_decoration;
 import org.pjsip.pjsua2.pjmedia_type;
 import org.pjsip.pjsua2.pjsip_status_code;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
 import org.pjsip.pjsua2.pjsua_call_flag;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
+import java.util.HashMap;
+import java.util.Map;
+
+import okhttp3.ResponseBody;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static com.voipgrid.vialer.api.ServiceGenerator.getUserAgentHeader;
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -64,34 +82,54 @@ public class SipService extends Service implements
         CallInteraction {
 
     private final static String TAG = SipService.class.getSimpleName(); // TAG used for debug Logs
+    private final IBinder mBinder = new SipServiceBinder();
 
+    private Handler mHandler;
     private LocalBroadcastManager mBroadcastManager;
+    private ToneGenerator mToneGenerator;
+
+    private GsmCallListener mGsmCallListener;
+    private Preferences mPreferences;
+    private RemoteLogger mRemoteLogger;
 
     private Endpoint mEndpoint;
-
     private SipAccount mSipAccount;
-
-    private ConnectivityHelper mConnectivityHelper;
-
     private String mToken;
-
     private String mUrl;
-
     private String mNumber;
-
     private String mCallerId;
 
     private boolean mHasActiveCall = false;
-
     private String mCallType;
-
     private Call mCall;
-
     private boolean mHasHold = false;
+    private boolean mHasRespondedToMiddleware = false;
+    private SIPLogWriter mSIPLogWriter;
+    private boolean mUserHangupCall = false;
+    private boolean mCallIsConnected = false;
 
-    private Handler mHandler;
+    // Message throughput logging timestamp.
+    private String mMessageStartTime;
+    private int mCurrentTransportId;
 
-    private ToneGenerator mToneGenerator;
+    // Network status
+    private ConnectivityHelper mConnectivityHelper;
+    private Long mLatestConnectionType;
+    private boolean mReRegisterAccount = false;
+
+    private static Map<String, Short> sCodecPrioMapping;
+
+    static {
+        sCodecPrioMapping = new HashMap<>();
+        sCodecPrioMapping.put("PCMA/8000/1", (short) 210);
+        sCodecPrioMapping.put("G722/16000/1", (short) 209);
+        sCodecPrioMapping.put("iLBC/8000/1", (short) 208);
+        sCodecPrioMapping.put("PCMU/8000/1", (short) 0);
+        sCodecPrioMapping.put("speex/8000/1", (short) 0);
+        sCodecPrioMapping.put("speex/16000/1", (short) 0);
+        sCodecPrioMapping.put("speex/32000/1", (short) 0);
+        sCodecPrioMapping.put("GSM/8000/1", (short) 0);
+    }
 
     private BroadcastReceiver mCallInteractionReceiver = new BroadcastReceiver() {
         @Override
@@ -110,6 +148,20 @@ public class SipService extends Service implements
         }
     };
 
+    private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleNetworkStateChange(context);
+        }
+    };
+
+    public class SipServiceBinder extends Binder {
+        public SipService getService() {
+            // Return this instance of SipService so clients can call public methods.
+            return SipService.this;
+        }
+    }
+
     /**
      * SIP does not present Media by default.
      * Use Android's ToneGenerator to play a dial tone at certain required times.
@@ -123,13 +175,40 @@ public class SipService extends Service implements
             mHandler.postDelayed(mRingbackRunnable, 4000);
         }
     };
-    // Message throughput logging timestamp
-    private String mMessageStartTime;
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
+    }
+
+    /**
+     * Function to generate a transport string based on a setting.
+     * @return
+     */
+    private String getTransportString() {
+        String sipTransport = this.getString(R.string.sip_transport_type);
+        String tcp = "";
+
+        if (sipTransport.equals("tcp")) {
+
+            tcp = ";transport=tcp";
+        }
+        return tcp;
+    }
+
+    /**
+     * Function to get the transport type based on a setting.
+     * @return
+     */
+    private pjsip_transport_type_e getTransportType() {
+        String sipTransport = this.getString(R.string.sip_transport_type);
+
+        pjsip_transport_type_e transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_UDP;
+        if (sipTransport.equals("tcp")) {
+            transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_TCP;
+
+        }
+        return transportType;
     }
 
     @Override
@@ -138,54 +217,96 @@ public class SipService extends Service implements
 
         mHandler = new Handler();
 
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mToneGenerator = new ToneGenerator(
-                AudioManager.STREAM_MUSIC,
-                audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
+                AudioManager.STREAM_VOICE_CALL,
+                SipConstants.RINGING_VOLUME);
 
         mBroadcastManager = LocalBroadcastManager.getInstance(this);
 
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
-        );
+        mPreferences = new Preferences(this);
+        mRemoteLogger = new RemoteLogger(this);
 
-        /* Try to load PJSIP library */
-        loadPjsip();
+        mRemoteLogger.d(TAG + " onCreate");
 
-        PhoneAccount phoneAccount = new Storage<PhoneAccount>(this).get(PhoneAccount.class);
-        if(phoneAccount != null) {
+        PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
+        if (phoneAccount != null) {
+            // Try to load PJSIP library.
+            loadPjsip();
 
             mEndpoint = createEndpoint(
-                    pjsip_transport_type_e.PJSIP_TRANSPORT_UDP,
-                    createTransportConfig(getResources().getInteger(R.integer.sip_port))
+                    createTransportConfig()
             );
 
-            AuthCredInfo credInfo = new AuthCredInfo(
-                    "digest", "*",
-                    phoneAccount.getAccountId(), 0, phoneAccount.getPassword());
+            if (mEndpoint != null) {
+                setCodecPrio();
 
-            AccountConfig accountConfig = createAccountConfig(
-                    SipUri.build(this, phoneAccount.getAccountId()),
-                    SipUri.buildRegistrar(this),
-                    credInfo
-            );
-            mSipAccount = createSipAccount(accountConfig,  this, this);
+                AuthCredInfo credInfo = new AuthCredInfo(
+                        this.getString(R.string.sip_auth_scheme),
+                        this.getString(R.string.sip_auth_realm),
+                        phoneAccount.getAccountId(),
+                        0,
+                        phoneAccount.getPassword()
+                );
 
-            setupCallInteractionReceiver();
-            setupKeyPadInteractionReceiver();
+                String transportString = getTransportString();
+                String sipAccountRegId = SipUri.sipAddress(this, phoneAccount.getAccountId()) + transportString;
+                String sipRegistrarUri = SipUri.prependSIPUri(this, this.getString(R.string.sip_host)) + transportString;
+
+                AccountConfig accountConfig = createAccountConfig(
+                        sipAccountRegId,
+                        sipRegistrarUri,
+                        credInfo
+                );
+                mSipAccount = createSipAccount(accountConfig, this, this);
+
+                setupCallInteractionReceiver();
+                setupKeyPadInteractionReceiver();
+
+                mLatestConnectionType = ConnectivityHelper.get(this).getConnectionType();
+                startNetworkingListener();
+
+            } else {
+                Log.e(TAG, "There is no PJSIP endpoint!");
+            }
         } else {
             /* User has no Sip Account so service has no function at all. We stop the service */
+            mRemoteLogger.w("No sip account when trying to create service");
             broadcast(SipConstants.SIP_SERVICE_HAS_NO_ACCOUNT);
             stopSelf();
         }
 
     }
 
+    private void setCodecPrio() {
+        try {
+            CodecInfoVector codecList = mEndpoint.codecEnum();
+            String codecId;
+            CodecInfo info;
+            Short prio;
+
+            for (int i = 1; i < codecList.size(); i++) {
+                info = codecList.get(i);
+                codecId = info.getCodecId();
+                prio = sCodecPrioMapping.get(codecId);
+                if (prio != null) {
+                    mEndpoint.codecSetPriority(codecId, prio);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onDestroy() {
+        mRemoteLogger.d(TAG + " onDestroy");
         mBroadcastManager.unregisterReceiver(mCallInteractionReceiver);
         mBroadcastManager.unregisterReceiver(mKeyPadInteractionReceiver);
+        stopNetworkingListener();
+
+        if (mSIPLogWriter != null) {
+            mSIPLogWriter.disableRemoteLogging();
+        }
 
         /* Cleanup SipAccount */
         if(mSipAccount != null) {
@@ -212,18 +333,21 @@ public class SipService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        mRemoteLogger.d(TAG + " onStartCommand");
         mCallType = intent.getAction();
         Uri number = intent.getData();
         switch (mCallType) {
             case SipConstants.ACTION_VIALER_INCOMING :
+                mRemoteLogger.d(TAG + " incomingCall");
                 mUrl = intent.getStringExtra(SipConstants.EXTRA_RESPONSE_URL);
                 mToken = intent.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN);
                 mNumber = intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
                 mCallerId = intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME);
                 mMessageStartTime = intent.getStringExtra(
-                        VialerGcmListenerService.MESSAGE_START_TIME);
+                        FcmListenerService.MESSAGE_START_TIME);
                 break;
             case SipConstants.ACTION_VIALER_OUTGOING :
+                mRemoteLogger.d(TAG + " outgoingCall");
                 SipCall call = new SipCall(mSipAccount, this);
                 call.setPhoneNumberUri(number);
                 call.setCallerId(intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME));
@@ -234,6 +358,15 @@ public class SipService extends Service implements
         }
 
         return START_NOT_STICKY;
+    }
+
+    private void startNetworkingListener() {
+        this.registerReceiver(mNetworkStateReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    private void stopNetworkingListener() {
+        this.unregisterReceiver(mNetworkStateReceiver);
     }
 
     private void broadcast(String status) {
@@ -257,24 +390,87 @@ public class SipService extends Service implements
     /** AccountStatus **/
     @Override
     public void onAccountRegistered(Account account, OnRegStateParam param) {
-        if(mCallType.equals(SipConstants.ACTION_VIALER_INCOMING)) {
-            Registration registrationApi = ServiceGenerator.createService(
-                    this,
-                    mConnectivityHelper,
-                    Registration.class,
-                    mUrl,
-                    new OkClient(new OkHttpClient())
+        mRemoteLogger.d(TAG + " onAccountRegistered");
+
+        try {
+            // After registration setup new transport to reflect learned external IP to be used
+            // by sip headers.
+            mEndpoint.transportClose(mCurrentTransportId);
+            mCurrentTransportId = mEndpoint.transportCreate(getTransportType(), createTransportConfig());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // After the account has registered try to re-invite the current call
+        // so the contact uri will be updated for the call.
+        if (mReRegisterAccount) {
+            try {
+                // Set flag for updating contact header IP.
+                CallOpParam callOpParam = new CallOpParam(true);
+                CallSetting callSetting = callOpParam.getOpt();
+                callSetting.setFlag(pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT.swigValue());
+                getCurrentCall().reinvite(callOpParam);
+                mReRegisterAccount = false;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Check if it an incoming call and we did not respond to the middleware already.
+        if (mCallType.equals(SipConstants.ACTION_VIALER_INCOMING) && !mHasRespondedToMiddleware) {
+            // Set responded as soon as possible to avoid duplicate requests due to multiple
+            // onAccountRegistered calls in a row.
+            mHasRespondedToMiddleware = true;
+
+            AnalyticsHelper analyticsHelper = new AnalyticsHelper(
+                    ((AnalyticsApplication) getApplication()).getDefaultTracker()
             );
 
-            registrationApi.reply(mToken, true, mMessageStartTime, new Callback<Object>() {
+            Registration registrationApi = ServiceGenerator.createService(
+                    this,
+                    Registration.class,
+                    mUrl
+            );
+
+            ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
+            String connectionType = connectivityHelper.getConnectionTypeString();
+            String analyticsLabel;
+            if (connectionType.equals(connectivityHelper.CONNECTION_WIFI)) {
+                analyticsLabel = getString(R.string.analytics_event_label_wifi);
+            } else {
+                analyticsLabel = getString(R.string.analytics_event_label_4g);
+            }
+
+            // Accepted event.
+            analyticsHelper.sendEvent(
+                    getString(R.string.analytics_event_category_middleware),
+                    getString(R.string.analytics_event_action_middleware_accepted),
+                    analyticsLabel
+            );
+
+            long startTime = (long) (Double.parseDouble(mMessageStartTime) * 1000);  // To ms.
+            long startUpTime = System.currentTimeMillis() - startTime;
+
+            // Response timing.
+            analyticsHelper.sendTiming(
+                    getString(R.string.analytics_event_category_middleware),
+                    getString(R.string.analytics_event_name_call_response),
+                    startUpTime
+            );
+
+            retrofit2.Call<ResponseBody> call = registrationApi.reply(mToken, true, mMessageStartTime);
+            call.enqueue(new Callback<ResponseBody>() {
                 @Override
-                public void success(Object object, retrofit.client.Response response) {
-                /* No need to handle succes callback.
-                   Call is automatically routed to onIncomingCall */
+                public void onResponse(retrofit2.Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (!response.isSuccess()) {
+                        // Too late or middleware failure so stop the service.
+                        broadcast(SipConstants.SIP_SERVICE_ACCOUNT_REGISTRATION_FAILED);
+                        stopSelf();
+                    }
                 }
 
                 @Override
-                public void failure(RetrofitError error) {
+                public void onFailure(retrofit2.Call<ResponseBody> call, Throwable t) {
                     broadcast(SipConstants.SIP_SERVICE_ACCOUNT_REGISTRATION_FAILED);
                     stopSelf();
                 }
@@ -282,18 +478,16 @@ public class SipService extends Service implements
         }
     }
 
-
-
     /** AccountStatus **/
     @Override
     public void onAccountUnregistered(Account account, OnRegStateParam param) {
-
+        mRemoteLogger.d(TAG + " onAccountUnRegistered");
     }
 
     /** AccountStatus **/
     @Override
     public void onAccountInvalidState(Account account, Throwable fault) {
-
+        mRemoteLogger.d(TAG + " onAccountInvalidState");
     }
 
     /**
@@ -303,10 +497,12 @@ public class SipService extends Service implements
      * @throws UnsatisfiedLinkError
      */
     private void loadPjsip() {
-        /* Try to load PJSIP library */
+        mRemoteLogger.d(TAG + " Loading PJSIP");
         try {
             System.loadLibrary("pjsua2");
         } catch (UnsatisfiedLinkError error) { /* Can not load PJSIP library */
+            Log.e(TAG, error.getMessage());
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(error));
             /* Notify app */
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_LOAD_PJSIP);
             /* Stop the service since the app can not use SIP */
@@ -314,48 +510,103 @@ public class SipService extends Service implements
         }
     }
 
-    private Endpoint createEndpoint(pjsip_transport_type_e transportType,
-                                    TransportConfig transportConfig) {
+    private Endpoint createEndpoint(TransportConfig transportConfig) {
+        mRemoteLogger.d(TAG + " createEndpoint");
         Endpoint endpoint = new Endpoint();
+        EpConfig endpointConfig = new EpConfig();
+
+        // Set echo cancellation options for endpoint.
+        MediaConfig mediaConfig = endpointConfig.getMedConfig();
+        mediaConfig.setEcOptions(SipConstants.WEBRTC_ECHO_CANCELLATION);
+        mediaConfig.setEcTailLen(SipConstants.ECHO_CANCELLATION_TAIL_LENGTH);
+        endpointConfig.setMedConfig(mediaConfig);
+
         try {
             endpoint.libCreate();
-            endpoint.libInit(new EpConfig());
-            endpoint.transportCreate(transportType, transportConfig);
-            endpoint.libStart();
-        } catch (Exception exception) {
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to create the PJSIP library");
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
+            e.printStackTrace();
             broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
             stopSelf();
+            return null;
+        }
+
+        if (BuildConfig.DEBUG || mPreferences.remoteLoggingIsActive()) {
+            endpointConfig.getLogConfig().setLevel(SipConstants.SIP_LOG_LEVEL);
+            endpointConfig.getLogConfig().setConsoleLevel(SipConstants.SIP_CONSOLE_LOG_LEVEL);
+            LogConfig logConfig = endpointConfig.getLogConfig();
+            mSIPLogWriter = new SIPLogWriter();
+            if (mPreferences.remoteLoggingIsActive()) {
+                mSIPLogWriter.enabledRemoteLogging(mRemoteLogger);
+            }
+            logConfig.setWriter(mSIPLogWriter);
+            logConfig.setDecor(logConfig.getDecor() &
+                            ~(pj_log_decoration.PJ_LOG_HAS_CR.swigValue() |
+                                    pj_log_decoration.PJ_LOG_HAS_NEWLINE.swigValue())
+            );
+        }
+
+        UaConfig uaConfig = endpointConfig.getUaConfig();
+        uaConfig.setUserAgent(getUserAgentHeader(this));
+
+        try {
+            endpoint.libInit(endpointConfig);
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to init the PJSIP library");
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
+            e.printStackTrace();
+            broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
+            stopSelf();
+            return null;
+        }
+
+        try {
+            mCurrentTransportId = endpoint.transportCreate(getTransportType(), transportConfig);
+            endpoint.libStart();
+        } catch (Exception exception) {
+            Log.e(TAG, "Unable to start the PJSIP library");
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(exception));
+            broadcast(SipConstants.SIP_SERVICE_CAN_NOT_START_PJSIP);
+            stopSelf();
+            return null;
         }
         return endpoint;
     }
 
-    private TransportConfig createTransportConfig(long port) {
+    private TransportConfig createTransportConfig() {
+        Integer port = getResources().getInteger(R.integer.default_sip_port);
         TransportConfig config = new TransportConfig();
+
         config.setPort(port);
         return config;
     }
 
     private SipAccount createSipAccount(AccountConfig accountConfig, AccountStatus accountStatus,
                                         CallStatus callStatus) {
+        mRemoteLogger.d(TAG + " createSipAccount");
         SipAccount sipAccount = null;
         try {
             sipAccount = new SipAccount(accountConfig, accountStatus, callStatus);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
         }
         return sipAccount;
     }
 
-    private AccountConfig createAccountConfig(Uri idUri, Uri registrarUri, AuthCredInfo credInfo) {
+    private AccountConfig createAccountConfig(String idUri, String registrarUri, AuthCredInfo credInfo) {
         AccountConfig config = new AccountConfig();
-        config.setIdUri(idUri.toString());
-        config.getRegConfig().setRegistrarUri(registrarUri.toString());
+        config.setIdUri(idUri);
+        config.getRegConfig().setRegistrarUri(registrarUri);
         config.getSipConfig().getAuthCreds().add(credInfo);
+        config.getSipConfig().getProxies().add(registrarUri);
         return config;
     }
 
     @Override
     public void onCallIncoming(Call call) {
+        mRemoteLogger.d(TAG + " onCallIncoming");
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(
                 mHasActiveCall ?
@@ -367,12 +618,15 @@ public class SipService extends Service implements
             call.answer(callOpParam);
             callVisibleForUser(call, CallActivity.TYPE_INCOMING_CALL, mNumber, mCallerId);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             onCallInvalidState(call, e);
         }
     }
 
     @Override
     public void onCallOutgoing(Call call, Uri number) {
+        mRemoteLogger.d(TAG + " onCallOutgoing");
+
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_RINGING);
         try {
@@ -381,34 +635,60 @@ public class SipService extends Service implements
             setCurrentCall(call);
             callVisibleForUser(call, CallActivity.TYPE_OUTGOING_CALL, number);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             onCallInvalidState(call, e);
         }
     }
 
     @Override
     public void onCallConnected(Call call) {
+        mRemoteLogger.d(TAG + " onCallConnected");
         broadcast(SipConstants.CALL_CONNECTED_MESSAGE);
+        mCallIsConnected = true;
+
+        if (PhonePermission.hasPermission(getApplicationContext())) {
+            mGsmCallListener = new GsmCallListener(call, this);
+            registerReceiver(mGsmCallListener, new IntentFilter("android.intent.action.PHONE_STATE"));
+        }
     }
 
     @Override
     public void onCallDisconnected(final Call call) {
-        /* Cleanup the call */
-        if(call != null) {
-            // Deleting the call leads to inexplicable failures.
+        mRemoteLogger.d(TAG + " onCallDisconnected");
+        try {
+            // Try to unregister the sip account with the sip proxy.
+            mSipAccount.setRegistration(false);
+        } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
+            e.printStackTrace();
         }
+
+        // Play end of call beep only when the remote party hangs up and the call was connected.
+        if (!mUserHangupCall && mCallIsConnected) {
+            mToneGenerator.startTone(ToneGenerator.TONE_CDMA_NETWORK_BUSY, 1500);
+        }
+
+        // Cleanup the call
         setCurrentCall(null);
+        if (PhonePermission.hasPermission(getApplicationContext()) && mCallIsConnected) {
+            unregisterReceiver(mGsmCallListener);
+        }
         broadcast(SipConstants.CALL_DISCONNECTED_MESSAGE);
+
         stopSelf();
     }
 
     @Override
     public void onCallInvalidState(Call call, Throwable fault) {
+        mRemoteLogger.d(TAG + " onCallInvalidState");
+        mRemoteLogger.d(TAG + " " + Log.getStackTraceString(fault));
         broadcast(SipConstants.CALL_INVALID_STATE);
         stopSelf();
     }
 
     @Override
     public void onCallMediaAvailable(Call call, AudioMedia media) {
+        mRemoteLogger.d(TAG + " onCallMediaAvailable");
         try {
             AudDevManager audDevManager = mEndpoint.audDevManager();
             media.startTransmit(audDevManager.getPlaybackDevMedia());
@@ -416,6 +696,7 @@ public class SipService extends Service implements
 
             broadcast(SipConstants.CALL_MEDIA_AVAILABLE_MESSAGE);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             broadcast(SipConstants.CALL_MEDIA_FAILED);
             e.printStackTrace();
         }
@@ -423,20 +704,23 @@ public class SipService extends Service implements
 
     @Override
     public void onCallMediaUnavailable(Call call) {
-
+        mRemoteLogger.d(TAG + " onCallMediaUnavailable");
     }
 
     @Override
     public void onCallStartRingback() {
+        mRemoteLogger.d(TAG + " onCallStartRingback");
         mHandler.postDelayed(mRingbackRunnable, 2000);
     }
 
     @Override
     public void onCallStopRingback() {
+        mRemoteLogger.d(TAG + " onCallStopRingback");
         mHandler.removeCallbacks(mRingbackRunnable);
     }
 
     private void callVisibleForUser(Call call, String type, Uri number) {
+        mRemoteLogger.d(TAG + " callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setDataAndType(number, type);
@@ -449,63 +733,123 @@ public class SipService extends Service implements
     }
 
     private void callVisibleForUser(Call call, String type, String number, String callerId) {
+        mRemoteLogger.d(TAG + " callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setDataAndType(SipUri.build(this, number), type);
+        Uri sipAddressUri = SipUri.sipAddressUri(
+                this,
+                PhoneNumberUtils.format(number)
+        );
+        intent.setDataAndType(sipAddressUri, type);
         intent.putExtra(CallActivity.CONTACT_NAME, callerId);
         intent.putExtra(CallActivity.PHONE_NUMBER, number);
         startActivity(intent);
     }
 
     private void handleCallInteraction(Call call, Intent intent) {
+        mRemoteLogger.d(TAG + " handleCallInteraction");
         String type = intent.getStringExtra(SipConstants.CALL_STATUS_ACTION);
         switch (type) {
             case SipConstants.CALL_UPDATE_MICROPHONE_VOLUME_ACTION :
                 updateMicrophoneVolume(call,
                         intent.getLongExtra(SipConstants.MICROPHONE_VOLUME_KEY, 1));
                 break;
-            case SipConstants.CALL_PUT_ON_HOLD_ACTION : putOnHold(call); break;
-            case SipConstants.CALL_HANG_UP_ACTION : hangUp(call); break;
-            case SipConstants.CALL_PICK_UP_ACTION : answer(call); break;
-            case SipConstants.CALL_DECLINE_ACTION : decline(call); break;
-            case SipConstants.CALL_XFER_ACTION : xFer(call); break;
+            case SipConstants.CALL_PUT_ON_HOLD_ACTION :
+                putOnHold(call);
+                break;
+            case SipConstants.CALL_HANG_UP_ACTION :
+                hangUp(call, false);
+                break;
+            case SipConstants.CALL_PICK_UP_ACTION :
+                answer(call);
+                break;
+            case SipConstants.CALL_DECLINE_ACTION :
+                decline(call);
+                break;
+            case SipConstants.CALL_XFER_ACTION :
+                xFer(call);
+                break;
         }
     }
 
+    /**
+     * When there is a network connection change start with un-registration.
+     * This is needed to tell asterisks that we are connected to a different ip address.
+     *
+     * @param context
+     */
+    private void handleNetworkStateChange(Context context) {
+        mRemoteLogger.d(TAG + " handleNetworkStateChange");
+        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(context);
+        Long connectionType = connectivityHelper.getConnectionType();
+
+        if (!mLatestConnectionType.equals(connectionType) && connectivityHelper.hasNetworkConnection()) {
+            mReRegisterAccount = true;
+            // Renew sip registration. Unregister would come from the new IP anyway so that
+            // would not make a lot of sense so we update our existing registration from the
+            // new IP.
+            try {
+                mSipAccount.setRegistration(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        mLatestConnectionType = connectionType;
+    }
+
     private void handleKeyPadInteraction(Call call, Intent intent) {
+        mRemoteLogger.d(TAG + " handleKeyPadInteraction");
         try {
             call.dialDtmf(intent.getStringExtra(SipConstants.KEY_PAD_DTMF_TONE));
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
         }
     }
 
-    @Override
-    public void hangUp(Call call) {
+    /**
+     * Function for doing a SIP hangup with the given status code.
+     * @param call
+     * @param statusCode
+     */
+    private void hangUpWithStatusCode(Call call, pjsip_status_code statusCode) {
+        mRemoteLogger.d(TAG + " hangUpWithStatusCode");
         try {
             CallOpParam callOpParam = new CallOpParam(true);
-            callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_DECLINE);
+            callOpParam.setStatusCode(statusCode);
             call.hangup(callOpParam);
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
             stopSelf();
         }
     }
 
     @Override
+    public void hangUp(Call call, boolean userHangup) {
+        mRemoteLogger.d(TAG + " hangUp");
+        mUserHangupCall = userHangup;
+        hangUpWithStatusCode(call, pjsip_status_code.PJSIP_SC_DECLINE);
+    }
+
+    @Override
     public void decline(Call call) {
-        hangUp(call);
+        mRemoteLogger.d(TAG + " decline");
+        hangUpWithStatusCode(call, pjsip_status_code.PJSIP_SC_BUSY_HERE);
     }
 
     @Override
     public void answer(Call call) {
+        mRemoteLogger.d(TAG + " answer");
         CallOpParam callOpParam = new CallOpParam(true);
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_ACCEPTED);
         try {
             if(call != null) {
                 call.answer(callOpParam);
+                mCallIsConnected = true;
             }
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             e.printStackTrace();
             stopSelf();
         }
@@ -513,10 +857,11 @@ public class SipService extends Service implements
 
     @Override
     public void updateMicrophoneVolume(Call call, long newVolume) {
+        mRemoteLogger.d(TAG + " updateMicrophoneVolume");
         try {
             CallMediaInfoVector callMediaInfoVector = call.getInfo().getMedia();
             long size=callMediaInfoVector.size();
-            for(int i=0; i<size; i++) {
+            for(int i = 0; i < size; i++) {
                 CallMediaInfo callMediaInfo = callMediaInfoVector.get(i);
                 if(callMediaInfo.getType() == pjmedia_type.PJMEDIA_TYPE_AUDIO) {
                     AudioMedia audioMedia = AudioMedia.typecastFromMedia(call.getMedia(i));
@@ -524,6 +869,7 @@ public class SipService extends Service implements
                 }
             }
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             broadcast(SipConstants.CALL_UPDATE_MICROPHONE_VOLUME_FAILED);
             e.printStackTrace();
         }
@@ -531,17 +877,21 @@ public class SipService extends Service implements
 
     @Override
     public void putOnHold(Call call) {
+        mRemoteLogger.d(TAG + " putOnHold");
         try {
             CallOpParam callOpParam = new CallOpParam(true);
             if(!mHasHold) {
                 call.setHold(callOpParam);
+                broadcast(SipConstants.CALL_PUT_ON_HOLD_ACTION);
             } else {
                 CallSetting callSetting = callOpParam.getOpt();
                 callSetting.setFlag(pjsua_call_flag.PJSUA_CALL_UNHOLD.swigValue());
                 call.reinvite(callOpParam);
+                broadcast(SipConstants.CALL_UNHOLD_ACTION);
             }
             mHasHold = !mHasHold;
         } catch (Exception e) {
+            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
             broadcast(SipConstants.CALL_PUT_ON_HOLD_FAILED);
             e.printStackTrace();
         }
@@ -549,7 +899,7 @@ public class SipService extends Service implements
 
     @Override
     public void xFer(Call call) {
-
+        mRemoteLogger.d(TAG + " xFer");
     }
 
     private void setCurrentCall(Call call) {
@@ -557,7 +907,7 @@ public class SipService extends Service implements
         mHasActiveCall = (call != null);
     }
 
-    private Call getCurrentCall() {
+    public Call getCurrentCall() {
         return mCall;
     }
 }

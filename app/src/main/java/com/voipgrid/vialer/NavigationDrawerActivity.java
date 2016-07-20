@@ -13,7 +13,6 @@ import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -23,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
@@ -35,24 +35,24 @@ import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.onboarding.LogoutTask;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.Middleware;
-import com.voipgrid.vialer.util.Storage;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
+import com.voipgrid.vialer.util.MiddlewareHelper;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.OkClient;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * NavigationDrawerActivity adds support to add a Toolbar and DrawerLayout to an Activity.
  */
 public abstract class NavigationDrawerActivity
-        extends AppCompatActivity
+        extends LoginRequiredActivity
         implements Callback, AdapterView.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
 
@@ -60,12 +60,12 @@ public abstract class NavigationDrawerActivity
     private DrawerLayout mDrawerLayout;
     private Spinner mSpinner;
     private Toolbar mToolbar;
+    private TextView mNoConnectionText;
 
     private Api mApi;
     private ConnectivityHelper mConnectivityHelper;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
-
 
     private String mDestinationId;
     private boolean mFirstTimeOnItemSelected = true;
@@ -78,22 +78,21 @@ public abstract class NavigationDrawerActivity
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
         );
 
-        mStorage = new Storage(this);
-        mSystemUser = (SystemUser) mStorage.get(SystemUser.class);
-
+        mJsonStorage = new JsonStorage(this);
+        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
 
         if (mSystemUser != null){
             mApi = ServiceGenerator.createService(
                     this,
-                    mConnectivityHelper,
                     Api.class,
                     getString(R.string.api_url),
-                    new OkClient(ServiceGenerator.getOkHttpClient(
-                            this, mSystemUser.getEmail(), mSystemUser.getPassword()))
-            );
+                    mSystemUser.getEmail(),
+                    mSystemUser.getPassword());
+
 
             // Preload availability.
-            mApi.getUserDestination(this);
+            Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
+            call.enqueue(this);
         }
     }
 
@@ -137,18 +136,7 @@ public abstract class NavigationDrawerActivity
 
         mDrawerLayout.setDrawerListener(drawerToggle);
 
-        SystemUser systemUser = (SystemUser) new Storage(this).get(SystemUser.class);
-        if(systemUser != null) {
-            String phoneNumber = systemUser.getOutgoingCli();
-            if (!TextUtils.isEmpty(phoneNumber)) {
-                ((TextView) mDrawerLayout.findViewById(R.id.text_view_name)).setText(phoneNumber);
-            }
-
-            String email = systemUser.getEmail();
-            if (!TextUtils.isEmpty(email)) {
-                ((TextView) mDrawerLayout.findViewById(R.id.text_view_email)).setText(email);
-            }
-        }
+        setSystemUserInfo();
 
         setVersionInfo((TextView) mDrawerLayout.findViewById(R.id.text_view_version));
 
@@ -159,6 +147,20 @@ public abstract class NavigationDrawerActivity
 
         // Setup the spinner in the drawer.
         setupSpinner();
+    }
+
+    protected void setSystemUserInfo() {
+        if(mSystemUser != null) {
+            String phoneNumber = mSystemUser.getOutgoingCli();
+            if (!TextUtils.isEmpty(phoneNumber)) {
+                ((TextView) mDrawerLayout.findViewById(R.id.text_view_name)).setText(phoneNumber);
+            }
+
+            String email = mSystemUser.getEmail();
+            if (!TextUtils.isEmpty(email)) {
+                ((TextView) mDrawerLayout.findViewById(R.id.text_view_email)).setText(email);
+            }
+        }
     }
 
     private void setVersionInfo(TextView textView) {
@@ -192,11 +194,26 @@ public abstract class NavigationDrawerActivity
         int itemId = menuItem.getItemId();
         switch (itemId) {
             case R.id.navigation_item_statistics :
-                startWebActivity(getString(R.string.statistics_menu_item_title), getString(R.string.web_statistics)); break;
+                startWebActivity(
+                        getString(R.string.statistics_menu_item_title),
+                        getString(R.string.web_statistics),
+                        getString(R.string.analytics_statistics_title)
+                );
+                break;
             case R.id.navigation_item_dial_plan :
-                startWebActivity(getString(R.string.dial_plan_menu_item_title), getString(R.string.web_dial_plan)); break;
+                startWebActivity(
+                        getString(R.string.dial_plan_menu_item_title),
+                        getString(R.string.web_dial_plan),
+                        getString(R.string.analytics_dial_plan_title)
+                );
+                break;
             case R.id.navigation_item_info :
-                startWebActivity(getString(R.string.info_menu_item_title), getString(R.string.url_app_info)); break;
+                startWebActivity(
+                        getString(R.string.info_menu_item_title),
+                        getString(R.string.url_app_info),
+                        getString(R.string.analytics_info_title)
+                );
+                break;
             case R.id.navigation_item_settings :
                 startActivity(new Intent(this, AccountActivity.class)); break;
             case R.id.navigation_item_logout :
@@ -217,9 +234,9 @@ public abstract class NavigationDrawerActivity
             }
             /* Delete our account information */
             // TODO This may lead to bugs! Investigate better way in VIALA-408.
-            new Storage(this).clear();
+            mJsonStorage.clear();
             /* Mark ourselves as unregistered */
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Middleware.Constants.REGISTRATION_STATUS, Middleware.Constants.STATUS_UNREGISTERED).commit();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(MiddlewareHelper.Constants.REGISTRATION_STATUS, MiddlewareHelper.Constants.STATUS_UNREGISTERED).commit();
             /* Start a new session */
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -245,24 +262,39 @@ public abstract class NavigationDrawerActivity
      * @param title
      * @param page
      */
-    private void startWebActivity(String title, String page) {
-        SystemUser systemUser = new Storage<SystemUser>(this).get(SystemUser.class);
+    private void startWebActivity(String title, String page, String gaTitle) {
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         Intent intent = new Intent(this, WebActivity.class);
         intent.putExtra(WebActivity.PAGE, page);
         intent.putExtra(WebActivity.TITLE, title);
         intent.putExtra(WebActivity.USERNAME, systemUser.getEmail());
         intent.putExtra(WebActivity.PASSWORD, systemUser.getPassword());
+        intent.putExtra(WebActivity.GA_TITLE, gaTitle);
         startActivity(intent);
     }
 
+
     @Override
-    public void success(Object object, Response response) {
-        if(object instanceof VoipGridResponse) {
+    public void onFailure(Call call, Throwable t) {
+        Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG);
+    }
 
+    @Override
+    public void onResponse(Call call, Response response) {
+        if(!response.isSuccess()){
+            Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG);
+
+            if(!mConnectivityHelper.hasNetworkConnection()) {
+                // First check if there is a entry already to avoid duplicates.
+                mSpinner.setVisibility(View.GONE);
+                mNoConnectionText.setVisibility(View.VISIBLE);
+            }
+        }
+        if(response.body() instanceof VoipGridResponse) {
             List<UserDestination> userDestinationObjects =
-                    ((VoipGridResponse<UserDestination>) object).getObjects();
+                    ((VoipGridResponse<UserDestination>) response.body()).getObjects();
 
-            if (userDestinationObjects == null || userDestinationObjects.size() <=0){
+            if (userDestinationObjects == null || userDestinationObjects.size() <=0 || mSpinnerAdapter == null){
                 return;
             }
 
@@ -299,12 +331,6 @@ public abstract class NavigationDrawerActivity
         }
     }
 
-    @Override
-    public void failure(RetrofitError error) {
-        error.printStackTrace();
-    }
-
-
     /**
      * Function to setup the availability spinner.
      */
@@ -315,6 +341,9 @@ public abstract class NavigationDrawerActivity
 
         mSpinner.setAdapter(mSpinnerAdapter);
         mSpinner.setOnItemSelectedListener(this);
+
+        // Setup spinner placeholder text for when there is no connection and thus no spinner options
+        mNoConnectionText = (TextView) findViewById(R.id.no_availability_text);
     }
 
     @Override
@@ -328,7 +357,9 @@ public abstract class NavigationDrawerActivity
                     destination.getId() : null;
             params.phoneAccount = destination instanceof PhoneAccount ?
                     destination.getId() : null;
-            mApi.setSelectedUserDestination(mDestinationId, params, this);
+            Call<Object> call = mApi.setSelectedUserDestination(mDestinationId, params);
+            call.enqueue(this);
+
         }
     }
 
@@ -356,8 +387,14 @@ public abstract class NavigationDrawerActivity
         @Override
         public void onDrawerOpened(View drawerView) {
             super.onDrawerOpened(drawerView);
-            // Force a reload of availability every time the drawer is opened.
-            mApi.getUserDestination(mActivity);
+            if (mSpinner != null) {
+                // Force a reload of availability every time the drawer is opened.
+                Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
+                call.enqueue(mActivity);
+                // Make sure the systemuser info shown is up-to-date.
+                mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+                setSystemUserInfo();
+            }
         }
     }
 }

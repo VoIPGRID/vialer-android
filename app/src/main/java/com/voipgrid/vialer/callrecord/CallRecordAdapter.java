@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.callrecord;
 
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -12,12 +11,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.contacts.ContactsPermission;
+import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.IconHelper;
+import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,19 +36,21 @@ import de.hdodenhof.circleimageview.CircleImageView;
 /**
  * Adapter to display the call records
  */
-public class CallRecordAdapter extends BaseAdapter {
+public class CallRecordAdapter extends BaseAdapter implements View.OnClickListener {
 
     private List<CallRecord> mCallRecords;
 
-    private Context mContext;
+    private Activity mActivity;
+
+    public boolean mCallAlreadySetup = false;
 
     /**
      * Construct a new CallRecordAdapter
-     * @param context
+     * @param activity
      * @param callRecords
      */
-    public CallRecordAdapter(Context context, List<CallRecord> callRecords) {
-        mContext = context;
+    public CallRecordAdapter(Activity activity, List<CallRecord> callRecords) {
+        mActivity = activity;
         mCallRecords = callRecords;
     }
 
@@ -80,7 +89,7 @@ public class CallRecordAdapter extends BaseAdapter {
                 "OR " + ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER + " = ?";
 
         // Query the database.
-        Cursor contactCursor = mContext.getContentResolver().query(
+        Cursor contactCursor = mActivity.getContentResolver().query(
                 uri,
                 new String[] {
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY,
@@ -150,14 +159,14 @@ public class CallRecordAdapter extends BaseAdapter {
             }
 
             // Get possible name or null.
-            if (ContactsPermission.hasPermission(mContext)) {
+            if (ContactsPermission.hasPermission(mActivity)) {
                 name = getContactNameForNumber(number);
             }
         }
 
         if(convertView == null) {
             // Inflate the layout.
-            LayoutInflater inflater = ((Activity)mContext).getLayoutInflater();
+            LayoutInflater inflater = mActivity.getLayoutInflater();
             convertView = inflater.inflate(R.layout.list_item_call_record, parent, false);
         }
 
@@ -172,17 +181,28 @@ public class CallRecordAdapter extends BaseAdapter {
         viewHolder = new ViewHolder();
         viewHolder.title = (TextView) convertView.findViewById(R.id.text_view_contact_name);
         viewHolder.information = (TextView) convertView.findViewById(
-                R.id.text_view_contact_information);
+                R.id.text_view_contact_information
+        );
+
+        ImageButton callButton = (ImageButton) convertView.findViewById(R.id.call_record_call_button);
 
         // Store the holder with the view.
         convertView.setTag(viewHolder);
 
         if(callRecord != null) {
             // Set name or number as text.
-            if (name != null) {
+            if(number != null && PhoneNumberUtils.isAnonymousNumber(callRecord.getCaller())) {
+                viewHolder.title.setText(convertView.getContext().getString(R.string.supressed_number));
+                // Make call button invisible.
+                callButton.setVisibility(View.GONE);
+            } else if (name != null) {
                 viewHolder.title.setText(name);
+                callButton.setOnClickListener(this);
+                callButton.setVisibility(View.VISIBLE);
             } else {
                 viewHolder.title.setText(number);
+                callButton.setOnClickListener(this);
+                callButton.setVisibility(View.VISIBLE);
             }
 
             // Set the compound drawable to the view.
@@ -199,11 +219,42 @@ public class CallRecordAdapter extends BaseAdapter {
 
             // Set the call record date information to the view.
             viewHolder.information.setText(DateUtils.getRelativeDateTimeString(
-                    mContext, date.getTime(), DateUtils.SECOND_IN_MILLIS,
+                    mActivity, date.getTime(), DateUtils.SECOND_IN_MILLIS,
                     DateUtils.YEAR_IN_MILLIS, DateUtils.FORMAT_ABBREV_TIME));
         }
-
         return convertView;
+    }
+
+    @Override
+    public void onClick(View view) {
+        // Get the position of the list item the buttons is clicked for.
+        View parentRow = (View) view.getParent();
+        ListView listView = (ListView) parentRow.getParent();
+        final int position = listView.getPositionForView(parentRow);
+
+        // Get the call record.
+        CallRecord callRecord = getItem(position);
+        String direction = callRecord.getDirection();
+        String numberToCall = null;
+
+        // Determine direction and the number we need to call.
+        if (direction.equals(CallRecord.DIRECTION_OUTBOUND)) {
+            numberToCall = callRecord.getDialedNumber();
+        } else if (direction.equals(CallRecord.DIRECTION_INBOUND)) {
+            numberToCall = callRecord.getCaller();
+        }
+
+        if (numberToCall != null && !mCallAlreadySetup) {
+            mCallAlreadySetup = true;
+            new DialHelper(
+                    mActivity,
+                    new JsonStorage(mActivity),
+                    ConnectivityHelper.get(mActivity),
+                    new AnalyticsHelper(
+                            ((AnalyticsApplication) mActivity.getApplication()).getDefaultTracker()
+                    )
+            ).callNumber(numberToCall, "");
+        }
     }
 
     static class ViewHolder {

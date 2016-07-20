@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="registration_url">https://apppush.voys.nl</string>
     <string name="vialer_registration_url">https://apppush.voys.nl/api/register-gcm-device/</string>
-    <string name="gcm_registration_id">1016814386587</string>
-
 </resources>

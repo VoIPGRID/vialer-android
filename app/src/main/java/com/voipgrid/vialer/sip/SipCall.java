@@ -25,6 +25,7 @@ class SipCall extends org.pjsip.pjsua2.Call {
     private Uri mPhoneNumberUri;
     private String mPhoneNumber;
     private String mCallerId;
+    private boolean mOutgoingCall = false;
 
 
     /**
@@ -55,34 +56,34 @@ class SipCall extends org.pjsip.pjsua2.Call {
     @Override
     public void onCallState(OnCallStateParam onCallStateParam) {
         try {
-            CallInfo info = getInfo();  // Check to see if we can get CallInfo with this callback
-
+            CallInfo info = getInfo();  // Check to see if we can get CallInfo with this callback.
             pjsip_inv_state callState = info.getState();
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
-                // This means we're handling an incoming call.
-                if (!hasMedia()) { // Based on if we have media.
-                    mCallStatus.onCallStartRingback(); // Play a ringback sound.
-                } else {
-                    mCallStatus.onCallStopRingback();
-                }
+                // We are handling a outgoing call.
+                mOutgoingCall = true;
             } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_CONNECTING
                     || callState == pjsip_inv_state.PJSIP_INV_STATE_EARLY) {
-                // We have an incoming call here.
-                pjsip_status_code lastStatusCode = info.getLastStatusCode();
-                if (lastStatusCode == pjsip_status_code.PJSIP_SC_PROGRESS) {
-                    if (hasMedia()) { // This probably means someone gave us media
-                        mCallStatus.onCallStopRingback(); // If so stop the ringback
-                    }
-                } else if (lastStatusCode == pjsip_status_code.PJSIP_SC_OK) {
-                    if (hasMedia()) { // The call  setup succeeded.
-                        mCallStatus.onCallStopRingback();  // Stop ringback.
+
+                // Start ringing in early state on outgoing call.
+                if (callState == pjsip_inv_state.PJSIP_INV_STATE_EARLY) {
+                    if (!hasMedia() && mOutgoingCall) {
+                        mCallStatus.onCallStartRingback();
                     }
                 }
+
+                pjsip_status_code lastStatusCode = info.getLastStatusCode();
+                if (hasMedia() &&
+                        (lastStatusCode == pjsip_status_code.PJSIP_SC_PROGRESS ||
+                                lastStatusCode == pjsip_status_code.PJSIP_SC_OK)) {
+                    mCallStatus.onCallStopRingback();  // if so stop the ringback
+                }
             } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) {
+                // Call has been setup, stop ringback.
+                mCallStatus.onCallStopRingback();
                 mCallStatus.onCallConnected(this);
             } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED) {
-                mCallStatus.onCallDisconnected(this);
                 mCallStatus.onCallStopRingback();
+                mCallStatus.onCallDisconnected(this);
                 this.delete();
             }
 

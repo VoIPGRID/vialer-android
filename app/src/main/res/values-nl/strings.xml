@@ -3,6 +3,7 @@
     <string name="app_name">Vialer</string>
     <string name="navigation_drawer_open">Open menu</string>
     <string name="navigation_drawer_close">Sluit menu</string>
+    <string name="no_network_connection">Geen dataverbinding</string>
     <string name="feature_not_implemented">Feature is nog niet geïmplementeerd</string>
     <string name="title_activity_dialer">Kiezer</string>
     <string name="allowed_dialpad_characters">0123456789*#+</string>
@@ -30,13 +31,23 @@
     <string name="version_info">Versie: %1$s</string>
     <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
 
+    <!-- UpdateHelper -->
+    <string name="title_activity_update">Updaten</string>
+    <string name="update_spinner_title">Initialiseren</string>
+    <string name="update_spinner_message">Bezig met initialiseren, even geduld</string>
+
     <!-- Dialog options -->
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
+    <string name="permission_settings">App permissions</string>
+
+    <!-- WebActivity -->
+    <string name="webactivity_open_page_failed">Het openen van de webpagina is mislukt.</string>
 
     <!-- Sidebar fragment values -->
     <string name="cannot_logout_error_title">Geen internetverbinding beschikbaar</string>
     <string name="cannot_logout_error_text">Een internetverbinding is nodig om uit te loggen.</string>
+    <string name="set_userdestination_api_fail">Aanpassen van bereikbaarheid mislukt. Probeer later opnieuw.</string>
 
     <!-- Login fragment values -->
     <string name="login_header_label_text">Zakelijke</string>
@@ -57,9 +68,7 @@
     <string name="forgot_password_alert_title">Wachtwoord herstellen</string>
     <string name="forgot_password_alert_message">Als uw gebruikersnaam %1s is zullen we u een e-mail sturen met instructies om uw wachtwoord te herstellen.</string>
 
-    <!--
-        Configure fragment values.
-    -->
+    <!-- Configure fragment values. -->
     <string name="configure_button_title">Instellen</string>
     <string name="configure_header_label_text">Vialer stelt</string>
     <string name="configure_header_label_subtext">je account in</string>
@@ -69,9 +78,13 @@
     <string name="phonenumber_info_text">Om Twee stap bellen mogelijk te maken, hebben we je mobiele nummer nodig.</string>
     <string name="configure_missing_field_title">Let op</string>
     <string name="configure_missing_field_message">Vul alstublieft alle velden in</string>
-    <!--
-        Welcome fragment values
-     -->
+
+    <!-- Missing voip account fragment values -->
+    <string name="set_voip_account_button_text">Koppel VoIP account</string>
+    <string name="user_change_title">Gebruiker aanpassen</string>
+    <string name="voip_account_missing_text">Om gebruik te kunnen maken van bellen via VoIP, moet er een VoIP-account gekoppeld zijn aan je gebruiker.\n\nOp dit moment is er geen VoIP-account gekoppeld aan deze gebruiker.</string>
+
+    <!-- Welcome fragment values -->
     <string name="welcome_text">Welkom</string>
     <string name="placeholder_name">Naamloze gebruiker</string>
     <string name="start_calling_button">Aan de slag</string>
@@ -81,6 +94,7 @@
     <string name="onboarding_no_internet_message">Een internet verbinding is noodzakelijk.</string>
     <string name="onboarding_account_configure_failed_title">Configuratie mislukt</string>
     <string name="onboarding_account_configure_invalid_phone_number">Het mobiele telefoonnummer is niet correct.</string>
+
     <!-- strings empty view call records -->
     <string name="empty_view_default_message">Je hebt (nog) geen recente telefoongesprekken.</string>
     <string name="empty_view_missed_message">Je hebt geen gemiste telefoongesprekken.</string>
@@ -132,17 +146,34 @@
     <string name="two_step_call_state_invalid_number">Telefoonnummer incorrect</string>
 
     <!-- Permission strings -->
+    <string name="permission_microphone_dialog_title">Microfoon permissie</string>
+    <string name="permission_microphone_dialog_message">Permissie is nodig om te kunnen bellen.</string>
+    <string name="permission_microphone_missing_message">Kan geen gesprek opstarten, permissie tot de microfoon is noodzakelijk</string>
     <string name="permission_contact_dialog_title">Contact permissie</string>
     <string name="permission_contact_dialog_message">Permissie is nodig om vanuit de contacten te kunnen bellen</string>
     <string name="permission_contact_dialer_list_message">Kan geen contacten laden, permissie tot contacten is noodzakelijk</string>
+    <string name="permission_phone_dialog_title">Telefoon permissie</string>
+    <string name="permission_phone_dialog_message">Deze permissie is nodig om reguliere telefoontjes af te handelen tijdens een VoIP gesprek.</string>
+
     <string name="account_mobile_number_edit_text_hint">Mobiel nummer</string>
     <string name="account_outgoing_number_edit_text_hint">Uitgaand nummer</string>
-    <string name="account_sip_id_edit_text_hint">SIP Account</string>
+    <string name="account_sip_id_edit_text_hint">VoIP Account</string>
     <string name="account_sip_password_edit_text_hint">Wachtwoord</string>
     <string name="two_step_call_message_step_a_failed">Konden uw telefoon niet bereiken</string>
     <string name="two_step_call_message_step_b_failed">Konden andere partij niet bereiken</string>
 
-
     <string name="invalid_mobile_number_title">Ongeldig nummer</string>
     <string name="invalid_mobile_number_message">Het mobiele nummer moet beginnen met een landcode bijv. +31.</string>
+
+    <string name="notification_contact_sync_done_title">Contact synchronisatie</string>
+    <string name="notification_contact_sync_done_content">De contact synchronisatie is klaar! Het is nu mogelijk om te zoeken in je contacten.</string>
+
+    <!-- Remote logging -->
+    <string name="remote_logging_switch_title">Remote logging</string>
+    <string name="remote_logging_input_hint">Identificatie nummer</string>
+    <string name="yes">JA</string>
+    <string name="no">NEE</string>
+    <string name="remote_logging_unexpected_error">Onverwachtte fout</string>
+    <string name="remote_logging_send_crash_log">Zou u ons willen helpen met het verbeteren van onze diensten door het foutenrapport te versturen?</string>
+
 </resources>

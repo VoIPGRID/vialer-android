@@ -27,11 +27,8 @@ public class ContactsPermission {
      * @return Whether or not we have permission.
      */
     public static boolean hasPermission(Context context) {
-        if (ContextCompat.checkSelfPermission(context, mPermissionToCheck) ==
-                PackageManager.PERMISSION_GRANTED){
-            return true;
-        }
-        return false;
+        return (ContextCompat.checkSelfPermission(context, mPermissionToCheck) ==
+                PackageManager.PERMISSION_GRANTED);
     }
 
     /**

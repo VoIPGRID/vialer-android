@@ -12,16 +12,17 @@
         />
 
     <ImageButton
+        style="@style/DialpadButton"
         android:id="@+id/remove_button"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:layout_width="@dimen/remove_button_height"
+        android:layout_height="@dimen/remove_button_width"
         android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_centerInParent="true"
-        android:background="@android:color/transparent"
         android:src="@drawable/ic_backspace"
         android:tint="@color/tint_color_backspace"
         android:visibility="invisible"
-        />
+        android:background="@android:color/transparent"/>
 
 </RelativeLayout>

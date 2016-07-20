@@ -1,8 +1,11 @@
 package com.voipgrid.vialer.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 
+import com.voipgrid.vialer.MicrophonePermission;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
@@ -23,12 +26,12 @@ public class DialHelper {
     private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private final Preferences mPreferences;
-    private Storage mStorage;
+    private JsonStorage mJsonStorage;
 
-    public DialHelper(Context context, Storage storage,
+    public DialHelper(Context context, JsonStorage jsonStorage,
             ConnectivityHelper connectivityHelper, AnalyticsHelper analyticsHelper ) {
         mContext = context;
-        mStorage = storage;
+        mJsonStorage = jsonStorage;
         mConnectivityHelper = connectivityHelper;
         mAnalyticsHelper = analyticsHelper;
         mPreferences = new Preferences(context);
@@ -45,8 +48,13 @@ public class DialHelper {
         // We need internet for both type of calls.
         if (mConnectivityHelper.hasNetworkConnection()) {
             if (mPreferences.canUseSip()
-                    && mStorage.has(PhoneAccount.class)
+                    && mJsonStorage.has(PhoneAccount.class)
                     && mConnectivityHelper.hasFastData()) {
+                // Check if we have permission to use the microphone. If not, request it.
+                if (!MicrophonePermission.hasPermission(mContext)){
+                    MicrophonePermission.askForPermission((Activity) mContext);
+                    return;
+                }
                 callWithSip(number, contactName);
             } else {
                 callWithApi(number, contactName);
@@ -64,15 +72,18 @@ public class DialHelper {
         intent.setAction(SipConstants.ACTION_VIALER_OUTGOING);
 
         // set a phoneNumberUri as DATA for the intent to SipServiceOld.
-        intent.setData(SipUri.build(mContext, number));
+        Uri sipAddressUri = SipUri.sipAddressUri(
+                mContext,
+                PhoneNumberUtils.format(number)
+        );
+        intent.setData(sipAddressUri);
 
         intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, number);
         intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, contactName);
 
         mContext.startService(intent);
 
-        mAnalyticsHelper.send(
-                mContext.getString(R.string.analytics_dimension),
+        mAnalyticsHelper.sendEvent(
                 mContext.getString(R.string.analytics_event_category_call),
                 mContext.getString(R.string.analytics_event_action_outbound),
                 mContext.getString(R.string.analytics_event_label_sip)

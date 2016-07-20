@@ -8,3 +8,5 @@
 /.idea
 *.iml
 dialer2/build
+config.xml
+google-services.json

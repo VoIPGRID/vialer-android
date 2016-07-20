@@ -12,61 +12,53 @@ import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.models.ClickToDialParams;
 import com.voipgrid.vialer.models.PasswordResetParams;
 
-import retrofit.Callback;
-import retrofit.client.Response;
-import retrofit.http.Body;
-import retrofit.http.DELETE;
-import retrofit.http.GET;
-import retrofit.http.POST;
-import retrofit.http.PUT;
-import retrofit.http.Path;
-import retrofit.http.Query;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * API interface
  */
 public interface Api {
 
-    @GET("/api/autologin/token/")
-    void autoLoginToken(Callback<AutoLoginToken> callback);
+    @GET("api/autologin/token/")
+    Call<AutoLoginToken> autoLoginToken();
 
-    @POST("/api/mobileapp/")
-    TwoStepCallStatus twoStepCall(@Body ClickToDialParams params);
+    @POST("api/mobileapp/")
+    Call<TwoStepCallStatus> twoStepCall(@Body ClickToDialParams params);
 
-    @GET("/api/mobileapp/{call_id}/")
-    TwoStepCallStatus twoStepCall(@Path("call_id") String callId);
+    @GET("api/mobileapp/{call_id}/")
+    Call<TwoStepCallStatus> twoStepCall(@Path("call_id") String callId);
 
-    @DELETE("/api/mobileapp/{call_id}/")
-    void twoStepCallCancel(@Path("call_id") String callId, Callback<Object> callback);
+    @DELETE("api/mobileapp/{call_id}/")
+    Call<Object> twoStepCallCancel(@Path("call_id") String callId);
 
-    @GET("/api/permission/systemuser/profile/")
-    void systemUser(Callback<SystemUser> callback);
+    @GET("api/permission/systemuser/profile/")
+    Call<SystemUser> systemUser();
 
-    @GET("/api/permission/systemuser/profile/")
-    SystemUser systemUser();
+    @GET("api/phoneaccount/basic/phoneaccount/{account}/")
+    Call<PhoneAccount> phoneAccount(@Path("account") String accountId);
 
-    @GET("/api/phoneaccount/basic/phoneaccount/{account}/")
-    void phoneAccount(@Path("account") String accountId, Callback<PhoneAccount> callback);
+    @PUT("api/permission/mobile_number/")
+    Call<MobileNumber> mobileNumber(@Body MobileNumber mobileNumber);
 
-    @GET("/api/phoneaccount/basic/phoneaccount/{account}/")
-    PhoneAccount phoneAccount(@Path("account") String accountId);
+    @POST("api/permission/password_reset/")
+    Call<Object> resetPassword(@Body PasswordResetParams params);
 
-    @PUT("/api/permission/mobile_number/")
-    void mobileNumber(@Body MobileNumber mobileNumber, Callback<MobileNumber> callback);
+    @GET("api/cdr/record/")
+    Call<VoipGridResponse<CallRecord>> getRecentCalls(@Query("limit") int limit,
+                                                      @Query("offset") int offset,
+                                                      @Query("call_date__gt") String date);
 
-    @POST("/api/permission/password_reset/")
-    void resetPassword(@Body PasswordResetParams params, Callback<Response> callback);
+    @GET("api/userdestination/")
+    Call<VoipGridResponse<UserDestination>> getUserDestination();
 
-    @GET("/api/cdr/record/")
-    void getRecentCalls(@Query("limit") int limit, @Query("offset") int offset,
-                        @Query("call_date__gt") String date,
-                        Callback<VoipGridResponse<CallRecord>> callback);
-
-    @GET("/api/userdestination/")
-    void getUserDestination(Callback<VoipGridResponse<UserDestination>> callback);
-
-    @PUT("/api/selecteduserdestination/{id}/")
-    void setSelectedUserDestination(@Path("id") String id,
-                                    @Body SelectedUserDestinationParams params,
-                                    Callback<Response> callback);
+    @PUT("api/selecteduserdestination/{id}/")
+    Call<Object> setSelectedUserDestination(@Path("id") String id,
+                                    @Body SelectedUserDestinationParams params);
 }
