@@ -13,7 +13,7 @@ public class SIPLogWriter extends LogWriter {
     private final static String TAG = SIPLogWriter.class.getSimpleName(); // TAG used for debug Logs
 
     RemoteLogger remoteLogger = null;
-    private static final Pattern sipRegex = Pattern.compile("sip:\\d+");
+    private static final Pattern sipRegex = Pattern.compile("sip:\\+?\\d+");
 
     public void enabledRemoteLogging(RemoteLogger logger) {
         remoteLogger = logger;
