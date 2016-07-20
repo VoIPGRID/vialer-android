@@ -143,13 +143,13 @@ public class SetupActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onLogin(final Fragment fragment, final String username, String password) {
+    public void onLogin(final Fragment fragment, String username, String password) {
         mPassword = password;
         enableProgressBar(true);
 
-        createAPIService(username, password);
+        boolean success = createAPIService(username, password);
 
-        if (mApi != null) {
+        if (success) {
             Call<SystemUser> call = mApi.systemUser();
             call.enqueue(this);
         }
@@ -160,11 +160,13 @@ public class SetupActivity extends AppCompatActivity implements
         enableProgressBar(true);
 
         SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        createAPIService(systemUser.getEmail(), systemUser.getPassword());
+        boolean success = createAPIService(systemUser.getEmail(), systemUser.getPassword());
 
         // Post mobileNumber to VoIPGRID platform.
-        Call<MobileNumber> call = mApi.mobileNumber(new MobileNumber(mobileNumber));
-        call.enqueue(this);
+        if (success) {
+            Call<MobileNumber> call = mApi.mobileNumber(new MobileNumber(mobileNumber));
+            call.enqueue(this);
+        }
     }
 
     @Override
@@ -390,23 +392,21 @@ public class SetupActivity extends AppCompatActivity implements
      * @param password String The password used to authenticate with the api.
      * @return instance of the API service.
      */
-    private Api createAPIService(String username, String password) {
+    private boolean createAPIService(String username, String password) {
         try {
             mServiceGen = ServiceGenerator.getInstance();
         } catch (PreviousRequestNotFinishedException e) {
             e.printStackTrace();
-            return null;
+            return false;
         }
 
-        if (mApi == null) {
-            mApi = mServiceGen.createService(
-                    this,
-                    Api.class,
-                    getString(R.string.api_url),
-                    username,
-                    password
-            );
-        }
-        return mApi;
+        mApi = mServiceGen.createService(
+                this,
+                Api.class,
+                getString(R.string.api_url),
+                username,
+                password
+        );
+        return true;
     }
 }
