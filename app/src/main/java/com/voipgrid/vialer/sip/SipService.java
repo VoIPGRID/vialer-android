@@ -304,7 +304,9 @@ public class SipService extends Service implements
         mBroadcastManager.unregisterReceiver(mKeyPadInteractionReceiver);
         stopNetworkingListener();
 
-        mSIPLogWriter.disableRemoteLogging();
+        if (mSIPLogWriter != null) {
+            mSIPLogWriter.disableRemoteLogging();
+        }
 
         /* Cleanup SipAccount */
         if(mSipAccount != null) {
