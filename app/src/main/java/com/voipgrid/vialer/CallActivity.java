@@ -31,7 +31,7 @@ import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
-import com.voipgrid.vialer.util.RemoteLogger;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.wearespindle.spindlelockring.library.LockRing;
 import com.wearespindle.spindlelockring.library.OnTriggerListener;
 

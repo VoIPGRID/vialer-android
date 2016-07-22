@@ -24,6 +24,7 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.logging.RemoteLoggingActivity;
 import com.voipgrid.vialer.models.PasswordResetParams;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -35,7 +36,7 @@ import retrofit2.Response;
 /**
  * Activity that handles the on boarding.
  */
-public class SetupActivity extends AppCompatActivity implements
+public class SetupActivity extends RemoteLoggingActivity implements
         OnboardingFragment.FragmentInteractionListener,
         LoginFragment.FragmentInteractionListener,
         AccountFragment.FragmentInteractionListener,
