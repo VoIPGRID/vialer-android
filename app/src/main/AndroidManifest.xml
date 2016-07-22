@@ -121,7 +121,8 @@
             android:name=".onboarding.SetupActivity"
             android:label="@string/title_activity_setup"
             android:screenOrientation="portrait"
-            android:theme="@style/OnboardingTheme" >
+            android:theme="@style/OnboardingTheme"
+            android:noHistory="true">
         </activity>
         <activity
             android:name=".WebActivity"
