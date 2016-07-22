@@ -91,7 +91,13 @@ public class RemoteLogger {
     private void log(String tag, String message) {
         // Only do remote logging when it is enabled and not a debug build.
         if (mRemoteLoggingEnabled && !BuildConfig.DEBUG) {
-            logEntryLogger.log(formatMessage(tag, message));
+            try {
+                if (logEntryLogger != null) {
+                    logEntryLogger.log(formatMessage(tag, message));
+                }
+            } catch (Exception e) {
+                // Avoid crashing the app in background logging.
+            }
         }
     }
 
