@@ -32,6 +32,7 @@ public class LoginRequiredActivity extends AppCompatActivity {
 
         Preferences prefs = new Preferences(this);
         if (!prefs.isLoggedIn()) {
+            new RemoteLogger(this).w("Not logged in anymore! Redirecting to onboarding");
             // Go to onboarding.
             Intent intent = new Intent(new Intent(this, SetupActivity.class));
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
