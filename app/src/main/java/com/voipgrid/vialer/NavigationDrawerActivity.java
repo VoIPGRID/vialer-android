@@ -89,7 +89,6 @@ public abstract class NavigationDrawerActivity
                     mSystemUser.getEmail(),
                     mSystemUser.getPassword());
 
-
             // Preload availability.
             Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
             call.enqueue(this);
@@ -283,7 +282,6 @@ public abstract class NavigationDrawerActivity
     public void onResponse(Call call, Response response) {
         if(!response.isSuccess()){
             Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
-
             if(!mConnectivityHelper.hasNetworkConnection()) {
                 // First check if there is a entry already to avoid duplicates.
                 mSpinner.setVisibility(View.GONE);
