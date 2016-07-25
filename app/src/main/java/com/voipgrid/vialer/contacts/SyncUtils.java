@@ -10,7 +10,7 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.util.RemoteLogger;
+import com.voipgrid.vialer.logging.RemoteLogger;
 
 /**
  * SyncUtils provides functions to handling actions related to the contact sync.

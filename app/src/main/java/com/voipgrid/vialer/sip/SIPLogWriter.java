@@ -2,7 +2,7 @@ package com.voipgrid.vialer.sip;
 
 import android.util.Log;
 
-import com.voipgrid.vialer.util.RemoteLogger;
+import com.voipgrid.vialer.logging.RemoteLogger;
 
 import org.pjsip.pjsua2.LogEntry;
 import org.pjsip.pjsua2.LogWriter;

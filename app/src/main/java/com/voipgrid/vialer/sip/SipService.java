@@ -30,7 +30,7 @@ import com.voipgrid.vialer.util.GsmCallListener;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.PhonePermission;
-import com.voipgrid.vialer.util.RemoteLogger;
+import com.voipgrid.vialer.logging.RemoteLogger;
 
 import org.pjsip.pjsua2.Account;
 import org.pjsip.pjsua2.AccountConfig;

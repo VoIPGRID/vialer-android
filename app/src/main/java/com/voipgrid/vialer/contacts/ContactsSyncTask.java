@@ -16,7 +16,7 @@ import android.util.Log;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
-import com.voipgrid.vialer.util.RemoteLogger;
+import com.voipgrid.vialer.logging.RemoteLogger;
 
 
 /**

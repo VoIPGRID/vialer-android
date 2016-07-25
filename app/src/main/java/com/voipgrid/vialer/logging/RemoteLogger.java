@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.util;
+package com.voipgrid.vialer.logging;
 
 import android.content.Context;
 
@@ -28,10 +28,22 @@ public class RemoteLogger {
     private boolean mRemoteLoggingEnabled;
 
     public RemoteLogger(Context context) {
+        this(context, false);
+    }
+
+    public RemoteLogger(Context context, boolean forced) {
         mContext = context;
         createLogger();
         mIdentifier = new Preferences(mContext).getLoggerIdentifier();
-        mRemoteLoggingEnabled = new Preferences(mContext).remoteLoggingIsActive();
+        if (forced) {
+            forceRemoteLogging(true);
+        } else {
+            mRemoteLoggingEnabled = new Preferences(mContext).remoteLoggingIsActive();
+        }
+    }
+
+    public void forceRemoteLogging(boolean forced) {
+        mRemoteLoggingEnabled = forced;
     }
 
     /**
@@ -89,8 +101,8 @@ public class RemoteLogger {
      * @param message
      */
     private void log(String tag, String message) {
-        // Only do remote logging when it is enabled and not a debug build.
-        if (mRemoteLoggingEnabled && !BuildConfig.DEBUG) {
+        // Only do remote logging when it is enabled.
+        if (mRemoteLoggingEnabled) {
             try {
                 if (logEntryLogger != null) {
                     logEntryLogger.log(formatMessage(tag, message));
