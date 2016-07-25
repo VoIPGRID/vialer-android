@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
@@ -126,8 +125,16 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
     public void onResponse(Call call, Response response) {
         if (response.body() instanceof SystemUser) {
             SystemUser systemUser = ((SystemUser) response.body());
-            mJsonStorage.save(systemUser);
-            mSystemUser = systemUser;
+
+            // Update existing systemuser to avoid overriding values like password.
+            SystemUser currentSystemuser = mSystemUser;
+            currentSystemuser.setOutgoingCli(systemUser.getOutgoingCli());
+            currentSystemuser.setMobileNumber(systemUser.getMobileNumber());
+            currentSystemuser.setClient(systemUser.getClient());
+            currentSystemuser.setAppAccountUri(systemUser.getAppAccountUri());
+
+            mJsonStorage.save(currentSystemuser);
+            mSystemUser = currentSystemuser;
             // Check if a account has been set.
             String phoneAccountId = mSystemUser.getPhoneAccountId();
             if (phoneAccountId != null) {
