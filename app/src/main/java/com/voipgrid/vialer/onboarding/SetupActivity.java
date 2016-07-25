@@ -210,9 +210,13 @@ public class SetupActivity extends RemoteLoggingActivity implements
             PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(this);
             phoneAccountHelper.savePhoneAccountAndRegister(
                     (PhoneAccount) mJsonStorage.get(PhoneAccount.class));
-            startActivity(new Intent(this, AccountActivity.class));
+            Intent intent = new Intent(this, AccountActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         } else {
-            startActivity(new Intent(this, MainActivity.class));
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         }
         finish();
     }
