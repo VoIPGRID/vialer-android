@@ -7,7 +7,6 @@ import com.google.android.gms.analytics.Tracker;
  * Helper class to send events to Google Analytics
  */
 public class AnalyticsHelper {
-
     private Tracker mTracker;
 
     public AnalyticsHelper(Tracker tracker) {

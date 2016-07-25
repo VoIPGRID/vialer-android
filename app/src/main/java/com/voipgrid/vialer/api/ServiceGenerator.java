@@ -184,6 +184,6 @@ public class ServiceGenerator {
     }
 
     public void release() {
-        this.taken = false;
+        taken = false;
     }
 }

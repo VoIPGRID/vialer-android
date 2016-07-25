@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="account_type">nl.verbonden.app.contacts</string>
+    <string name="account_type" translatable="false">nl.verbonden.app.contacts</string>
 </resources>

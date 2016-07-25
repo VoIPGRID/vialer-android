@@ -7,6 +7,7 @@
     android:paddingTop="@dimen/empty_view_padding_top">
 
     <ImageView
+        android:contentDescription="@null"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"

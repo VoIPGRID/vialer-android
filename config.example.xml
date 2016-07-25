@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="analytics_id">YOUR ANALYTICS ID</string>
-    <string name="gcm_registration_id">YOUR GCM ID</string>
+    <string name="log_entry_token">YOUR LOGENTRY TOKEN</string>
 </resources>
 

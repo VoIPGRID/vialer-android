@@ -57,7 +57,6 @@
                     style="@style/AccountTextInputLayoutStyle"/>
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/account_sip_id"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
@@ -73,7 +72,6 @@
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/account_mobile_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
@@ -89,7 +87,6 @@
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/account_outgoing_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
@@ -116,7 +113,6 @@
                     style="@style/AccountTextInputLayoutStyle"/>
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/remote_logging_id"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:hintTextAppearance="@style/AccountTextInputLayoutStyle">

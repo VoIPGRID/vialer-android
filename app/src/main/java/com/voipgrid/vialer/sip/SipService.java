@@ -575,10 +575,7 @@ public class SipService extends Service implements
     }
 
     private TransportConfig createTransportConfig() {
-        Integer port = getResources().getInteger(R.integer.default_sip_port);
         TransportConfig config = new TransportConfig();
-
-        config.setPort(port);
         return config;
     }
 

@@ -1,1 +1,1 @@
-include ':app', ':googlelockring', ':pjsip'
+include ':app', ':pjsip'

@@ -2,8 +2,8 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval"
     >
-    <size android:height="@dimen/googlelockring_outerring_diameter"
-        android:width="@dimen/googlelockring_outerring_diameter"/>
+    <size android:height="@dimen/lock_ring_outer_ring_diameter"
+        android:width="@dimen/lock_ring_outer_ring_diameter"/>
     <solid android:color="#00000000"/>
     <stroke android:color="#ffffff" android:width="2dp"/>
 </shape>
