@@ -1,6 +1,10 @@
 package com.voipgrid.vialer;
 
 import android.app.KeyguardManager;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -64,6 +68,9 @@ public class CallActivity extends AppCompatActivity
     private boolean mOnHold = false;
     private boolean mKeyPadVisible = false;
     private boolean mOnSpeaker = false;
+    private boolean mBluetoothAudio = false;
+    private boolean mBluetoothEnabled = false;
+    private boolean mBluetoothDeviceConnected = false;
     private ViewGroup mKeyPadViewContainer;
     private AnalyticsHelper mAnalyticsHelper;
     private Ringtone mRingtone;
@@ -105,6 +112,58 @@ public class CallActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             handleDTMFButtonPressed(intent.getStringExtra(SipConstants.KEY_PAD_DTMF_TONE));
+        }
+    };
+
+    // Broadcast receiver for the Bluetooth connectivity.
+    private final BroadcastReceiver mBluetoothReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Boolean isBluetoothConnected = false;
+            final String action = intent.getAction();
+
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                // Handle a Bluetooth on/off event.
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+                switch (state) {
+                    case BluetoothAdapter.STATE_OFF:
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                    case BluetoothAdapter.STATE_TURNING_ON:
+                        isBluetoothConnected = false;
+                        break;
+                    case BluetoothAdapter.STATE_ON:
+                        isBluetoothConnected = true;
+                        break;
+                }
+
+                mBluetoothEnabled = isBluetoothConnected;
+            } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
+                // Handle a headset device connected action.
+                final int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothAdapter.ERROR);
+                switch (state) {
+                    case BluetoothHeadset.STATE_CONNECTED:
+                        isBluetoothConnected = true;
+                        break;
+                    case BluetoothHeadset.STATE_DISCONNECTED:
+                        isBluetoothConnected = false;
+                        break;
+                }
+                mBluetoothDeviceConnected = isBluetoothConnected;
+            } else {
+                // Handle a audio device connected action.
+                switch (action) {
+                    case BluetoothDevice.ACTION_ACL_CONNECTED:
+                        isBluetoothConnected = true;
+                        break;
+                    case BluetoothDevice.ACTION_ACL_DISCONNECTED:
+                        isBluetoothConnected = false;
+                        break;
+                }
+                mBluetoothDeviceConnected = isBluetoothConnected;
+            }
+
+            mBluetoothAudio = isBluetoothConnected;
+            toggleAudioOutput();
         }
     };
 
@@ -153,14 +212,13 @@ public class CallActivity extends AppCompatActivity
                 ((AnalyticsApplication) getApplication()).getDefaultTracker()
         );
 
-        mKeyPadViewContainer = (ViewGroup) findViewById(R.id.key_pad_container);
-
-        // Manager that handles the 'put on speaker' feature
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        mAudioManager.setSpeakerphoneOn(false); // Set default speaker usage to NO/Off.
-
         // Make sure what ever audio source is playing by other apps is paused.
         mAudioManager.requestAudioFocus(this, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+
+        setInitialBluetoothStatus();
+
+        mKeyPadViewContainer = (ViewGroup) findViewById(R.id.key_pad_container);
 
         // Make sure the hardware volume buttons control the volume of the call.
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
@@ -276,6 +334,16 @@ public class CallActivity extends AppCompatActivity
         intentFilter = new IntentFilter(
                 SipConstants.ACTION_BROADCAST_KEY_PAD_INTERACTION);
         mBroadcastManager.registerReceiver(mDTMFButtonPressed, intentFilter);
+
+        // Intent filter for the Bluetooth receiver.
+        intentFilter = new IntentFilter();
+        // When the user disables the entire bluetooth connection.
+        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        // When the user connects/disconnects a bluetooth audio device.
+        intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        registerReceiver(mBluetoothReceiver, intentFilter);
     }
 
     @Override
@@ -315,6 +383,7 @@ public class CallActivity extends AppCompatActivity
         // Unregister the SipService BroadcastReceiver when the activity pauses.
         mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
         mBroadcastManager.unregisterReceiver(mDTMFButtonPressed);
+        unregisterReceiver(mBluetoothReceiver);
 
         if (mServiceBound && (mSipService != null && mSipService.getCurrentCall() == null)) {
             unbindService(mConnection);
@@ -376,6 +445,24 @@ public class CallActivity extends AppCompatActivity
                 ringingView.setVisibility(View.VISIBLE);
             }
         }
+    }
+
+    /**
+     * Get the initial state of the connected bluetooth device.
+     */
+    private void setInitialBluetoothStatus() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter != null) {
+            mBluetoothEnabled = bluetoothAdapter.isEnabled();
+            if (mBluetoothEnabled)  {
+                mBluetoothAudio = bluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP) == BluetoothProfile.STATE_CONNECTED;
+                if (mBluetoothAudio) {
+                    mBluetoothDeviceConnected = true;
+                    toggleBluetoothButtonVisibilty(true);
+                }
+            }
+        }
+        toggleAudioOutput();
     }
 
     /**
@@ -473,7 +560,9 @@ public class CallActivity extends AppCompatActivity
     private void toggleSpeaker() {
         mRemoteLogger.d(TAG + " toggleSpeaker");
         mOnSpeaker = !mOnSpeaker;
-        mAudioManager.setSpeakerphoneOn(!mAudioManager.isSpeakerphoneOn());
+        if (!mBluetoothAudio) {
+            mAudioManager.setSpeakerphoneOn(mOnSpeaker);
+        }
     }
 
     // Mute or un-mute a call when the user presses the button.
@@ -520,6 +609,7 @@ public class CallActivity extends AppCompatActivity
         View microphoneButton;
         View keypadButton;
         View onHoldButton;
+        View bluetoothButton;
         View hangupButton;
 
         switch (viewId) {
@@ -554,6 +644,14 @@ public class CallActivity extends AppCompatActivity
                         buttonEnabled ? mOnHold ? 1.0f : 0.5f : 1.0f
                 );
                 break;
+            case R.id.button_bluetooth:
+                bluetoothButton = findViewById(viewId);
+                bluetoothButton.setActivated(mBluetoothAudio);
+                bluetoothButton.setVisibility(mBluetoothDeviceConnected ? View.VISIBLE : View.GONE);
+                bluetoothButton.setAlpha(
+                        buttonEnabled ? mBluetoothAudio ? 1.0f : 0.5f : 0.5f
+                );
+                break;
             case R.id.button_hangup:
                 hangupButton = findViewById(viewId);
                 if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
@@ -563,7 +661,7 @@ public class CallActivity extends AppCompatActivity
                             buttonEnabled ? 1.0f : 0.5f
                     );
                 }
-
+                break;
         }
     }
 
@@ -652,6 +750,7 @@ public class CallActivity extends AppCompatActivity
             case R.id.button_speaker:
                 toggleSpeaker();
                 updateCallButton(viewId, true);
+                toggleAudioOutput();
                 break;
 
             case R.id.button_microphone:
@@ -685,6 +784,12 @@ public class CallActivity extends AppCompatActivity
 
             case R.id.button_pickup:
                 answer();
+                break;
+
+            case R.id.button_bluetooth:
+                mBluetoothAudio = !mBluetoothAudio;
+                toggleAudioOutput();
+                updateCallButton(viewId, true);
                 break;
         }
     }
@@ -828,5 +933,40 @@ public class CallActivity extends AppCompatActivity
         NumberInputView numberInputView = (NumberInputView) findViewById(R.id.number_input_edit_text);
         String currentDTMF = numberInputView.getNumber();
         numberInputView.setNumber(currentDTMF + key);
+    }
+
+    /**
+     * Function to toggle the audio output to bluetooth or it's original state.
+     */
+    private void toggleAudioOutput() {
+        // Send audiostream to BT device.
+        if (mBluetoothAudio && mBluetoothEnabled) {
+            toggleBluetoothButtonVisibilty(true);
+            mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            mAudioManager.setBluetoothScoOn(true);
+            mAudioManager.startBluetoothSco();
+            mAudioManager.setSpeakerphoneOn(false);
+            updateCallButton(R.id.button_bluetooth, true);
+        } else {
+            // If device is not connected hide the BT button.
+            if (!mBluetoothDeviceConnected) {
+                toggleBluetoothButtonVisibilty(false);
+            }
+            mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            mAudioManager.setBluetoothScoOn(false);
+            mAudioManager.stopBluetoothSco();
+            mAudioManager.setSpeakerphoneOn(mOnSpeaker);
+            updateCallButton(R.id.button_bluetooth, false);
+        }
+    }
+
+    /**
+     * Function to toggle the visibility of the bluetooth button.
+     * @param visible
+     */
+    private void toggleBluetoothButtonVisibilty(boolean visible) {
+        View bluetoothButton = findViewById(R.id.button_bluetooth);
+
+        bluetoothButton.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 }
