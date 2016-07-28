@@ -6,6 +6,8 @@ import android.database.MatrixCursor;
 import android.provider.ContactsContract;
 import android.support.v4.content.AsyncTaskLoader;
 
+import com.voipgrid.vialer.logging.RemoteLogger;
+
 import java.util.List;
 
 /**
@@ -68,7 +70,17 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
                 if (mT9Query.substring(0, 1).matches("[2-9]")) {
                     if (T9NameMatcher.T9QueryMatchesName(mT9Query, displayName)) {
                         addResult = true;
-                        displayName = T9NameMatcher.highlightMatchedPart(mT9Query, displayName);
+                        try {
+                            displayName = T9NameMatcher.highlightMatchedPart(mT9Query, displayName);
+                        } catch (Exception e) {
+                            // TODO: Remove this piece of code if we find the bug. Until then
+                            // force remote logging.
+                            RemoteLogger logger = new RemoteLogger(getContext(), true);
+                            logger.e(e.getClass().getSimpleName());
+                            logger.e("QUERY: " + mT9Query);
+                            logger.e("DISPLAYNAME: " + displayName);
+                            // Displayname will be shown without highlighting.
+                        }
                     }
                 }
 
