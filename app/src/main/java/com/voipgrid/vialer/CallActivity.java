@@ -227,9 +227,8 @@ public class CallActivity extends AppCompatActivity
         // speaker is enabled. Since we are using this microphone for calling when the device
         // is on speaker. We want to make sure it does not get disabled. Mode in communication
         // unblocks any blocked microphone.
-        if (mAudioManager.isSpeakerphoneOn() && mAudioManager.getMode() != AudioManager.MODE_IN_COMMUNICATION) {
-            mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-        }
+        mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+
 
         mProximityHelper = new ProximitySensorHelper(this, this, findViewById(R.id.screen_off));
 
@@ -397,10 +396,6 @@ public class CallActivity extends AppCompatActivity
             unbindService(mConnection);
             mServiceBound = false;
         }
-
-        if (mAudioManager.isSpeakerphoneOn() && mAudioManager.getMode() != AudioManager.MODE_NORMAL) {
-            mAudioManager.setMode(AudioManager.MODE_NORMAL);
-        }
     }
 
     @Override
@@ -410,6 +405,7 @@ public class CallActivity extends AppCompatActivity
         // Abandon focus so other apps can continue playing.
         mAudioManager.abandonAudioFocus(this);
         mProximityHelper.stopSensor();
+        mAudioManager.setMode(AudioManager.MODE_NORMAL);
     }
 
     private void displayCallInfo(String phoneNumber, String contactName) {
