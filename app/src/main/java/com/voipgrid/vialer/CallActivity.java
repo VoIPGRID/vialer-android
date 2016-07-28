@@ -223,6 +223,14 @@ public class CallActivity extends AppCompatActivity
         // Make sure the hardware volume buttons control the volume of the call.
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 
+        // Some devices block microphones that can be used for noise cancellation when
+        // speaker is enabled. Since we are using this microphone for calling when the device
+        // is on speaker. We want to make sure it does not get disabled. Mode in communication
+        // unblocks any blocked microphone.
+        if (mAudioManager.isSpeakerphoneOn() && mAudioManager.getMode() != AudioManager.MODE_IN_COMMUNICATION) {
+            mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        }
+
         mProximityHelper = new ProximitySensorHelper(this, this, findViewById(R.id.screen_off));
 
         mRingtone = RingtoneManager.getRingtone(this, Settings.System.DEFAULT_RINGTONE_URI);
@@ -388,6 +396,10 @@ public class CallActivity extends AppCompatActivity
         if (mServiceBound && (mSipService != null && mSipService.getCurrentCall() == null)) {
             unbindService(mConnection);
             mServiceBound = false;
+        }
+
+        if (mAudioManager.isSpeakerphoneOn() && mAudioManager.getMode() != AudioManager.MODE_NORMAL) {
+            mAudioManager.setMode(AudioManager.MODE_NORMAL);
         }
     }
 
