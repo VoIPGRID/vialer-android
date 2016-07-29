@@ -64,6 +64,7 @@ public class CallActivity extends AppCompatActivity
     private boolean mIncomingCallIsRinging = false;
 
     private boolean mConnected = false;
+    private boolean mHasConnected = false;
     private boolean mMute = false;
     private boolean mOnHold = false;
     private boolean mKeyPadVisible = false;
@@ -497,6 +498,7 @@ public class CallActivity extends AppCompatActivity
                 mCallStartTime = System.currentTimeMillis();
                 mCallHandler.postDelayed(mCallDurationRunnable, 0);
                 mConnected = true;
+                mHasConnected = true;
                 mIncomingCallIsRinging = false;
 
                 mProximityHelper.updateWakeLock();
@@ -506,8 +508,14 @@ public class CallActivity extends AppCompatActivity
                 // We got a DISCONNECT. Probably save to stop ring back since it's over.
                 onCallStatusUpdate(CALL_STOP_RINGBACK_MESSAGE);
 
+                if (!mHasConnected) {
+                    // Call has never been connected. Meaning the dialed number was unreachable.
+                    mStateView.setText(R.string.call_unreachable);
+                } else {
+                    // Normal hangup.
+                    mStateView.setText(R.string.call_ended);
+                }
                 mAudioManager.setSpeakerphoneOn(false);
-                mStateView.setText(R.string.call_ended);
 
                 // Stop duration timer.
                 mCallHandler.removeCallbacks(mCallDurationRunnable);
