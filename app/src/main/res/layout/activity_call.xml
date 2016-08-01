@@ -116,11 +116,26 @@
                 />
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/button_bluetooth"
+                android:id="@+id/button_transfer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@id/button_onhold"
                 android:layout_toEndOf="@id/button_onhold"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/ic_transfer"
+                android:onClick="onClick"
+                app:backgroundTint="@color/call_buttons"
+                app:elevation="0dp"
+                app:borderWidth="0dp"
+                />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/button_bluetooth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/button_transfer"
+                android:layout_toEndOf="@id/button_transfer"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:src="@drawable/ic_bluetooth"
