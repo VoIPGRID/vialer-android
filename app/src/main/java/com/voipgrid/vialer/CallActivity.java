@@ -403,10 +403,18 @@ public class CallActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         mRemoteLogger.d(TAG + " onDestroy");
-        // Abandon focus so other apps can continue playing.
-        mAudioManager.abandonAudioFocus(this);
+        restoreAudioSettings();
         mProximityHelper.stopSensor();
+    }
+
+    /**
+     * Function to restore the audio manage to it's original state.
+     */
+    private void restoreAudioSettings() {
+        mAudioManager.setBluetoothScoOn(false);
+        mAudioManager.stopBluetoothSco();
         mAudioManager.setMode(AudioManager.MODE_NORMAL);
+        mAudioManager.abandonAudioFocus(this);
     }
 
     private void displayCallInfo(String phoneNumber, String contactName) {
