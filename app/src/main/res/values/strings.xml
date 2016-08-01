@@ -21,6 +21,7 @@
     <string name="call_on_hold">On hold</string>
     <string name="call_hangup">Hang up</string>
     <string name="call_connected">Connected</string>
+    <string name="call_unreachable">Unreachable</string>
     <string name="dialer_warning_a_b_connect">Two-step calling mode active</string>
     <string name="dialer_warning_no_connection">No data connection available</string>
     <string name="version_info">Version: %1$s</string>
