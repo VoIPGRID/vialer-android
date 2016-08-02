@@ -5,45 +5,44 @@ import org.pjsip.pjsua2.AccountInfo;
 import org.pjsip.pjsua2.OnIncomingCallParam;
 import org.pjsip.pjsua2.OnRegStateParam;
 
-/* Regulates SipCall event management and connection to server. Delegates to SIPInterface. */
+
+/**
+ * Class that reflects a sip account and handles registration.
+ */
 class SipAccount extends org.pjsip.pjsua2.Account {
     // Callback handler for the onIncomingCall and onRegState events.
     private final AccountStatus mAccountStatus;
-    private final CallStatus mCallStatus;
+    private SipService mSipService;
 
     /**
      *
      * @param accountConfig configuration to automagically communicate and setup some sort of
      *                      SIP session.
      * @param accountStatus callback object which is used to notify outside world of past events.
-     * @param callStatus callback object which is used to notify outside world of past events.
      * @throws Exception issue with creating an account.
      */
-    public SipAccount(AccountConfig accountConfig, AccountStatus accountStatus,
-                      CallStatus callStatus) throws Exception {
+    public SipAccount(SipService sipService, AccountConfig accountConfig, AccountStatus accountStatus) throws Exception {
         super();
         mAccountStatus = accountStatus;
-        mCallStatus = callStatus;
-        /* This automatically registers to the server */
+        mSipService = sipService;
+        // Calling create also registers at the server.
         create(accountConfig);
     }
 
     /**
      * Translate the callback to the interface, which is implemented by the SipService
-     * @see CallStatus
      *
      * @param incomingCallParam parameters containing the state of an incoming call.
      */
     @Override
     public void onIncomingCall(OnIncomingCallParam incomingCallParam) {
-        SipCall sipCall = new SipCall(this, incomingCallParam.getCallId(), mCallStatus);
-        mCallStatus.onCallIncoming(sipCall);
+        SipCall sipCall = new SipCall(mSipService, this, incomingCallParam.getCallId());
+        sipCall.onCallIncoming();
     }
 
     /**
      * Translate the callback to the interface, which is implemented by the SipService
      *
-     * @see CallStatus
      * @param regStateParam parameters containing the state of this registration.
      */
     @Override

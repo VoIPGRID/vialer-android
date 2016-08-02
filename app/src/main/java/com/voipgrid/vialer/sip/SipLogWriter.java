@@ -9,8 +9,8 @@ import org.pjsip.pjsua2.LogWriter;
 
 import java.util.regex.Pattern;
 
-public class SIPLogWriter extends LogWriter {
-    private final static String TAG = SIPLogWriter.class.getSimpleName(); // TAG used for debug Logs
+public class SipLogWriter extends LogWriter {
+    private final static String TAG = SipLogWriter.class.getSimpleName(); // TAG used for debug Logs
 
     RemoteLogger remoteLogger = null;
     private static final Pattern sipRegex = Pattern.compile("sip:\\+?\\d+");
@@ -22,7 +22,6 @@ public class SIPLogWriter extends LogWriter {
     public void disableRemoteLogging() {
         remoteLogger = null;
     }
-
 
     @Override
     public void write(LogEntry entry) {
