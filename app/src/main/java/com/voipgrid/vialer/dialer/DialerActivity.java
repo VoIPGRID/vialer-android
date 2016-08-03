@@ -62,7 +62,7 @@ public class DialerActivity extends LoginRequiredActivity implements
         AbsListView.OnScrollListener,
         AdapterView.OnItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
-    private static final String LAST_DIALED = "last_dialed";
+    public static final String LAST_DIALED = "last_dialed";
 
     private ListView mContactsListView;
     private NumberInputView mNumberInputView;
