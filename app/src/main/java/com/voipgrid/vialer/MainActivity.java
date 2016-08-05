@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Build;
@@ -17,7 +16,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.view.KeyEvent;
 import android.view.View;
 
 import com.google.android.gms.analytics.HitBuilders;
@@ -47,10 +45,8 @@ public class MainActivity extends NavigationDrawerActivity implements
     private ViewPager mViewPager;
     private boolean mAskForPermission = true;
 
-    private AudioManager mAudioManager;
     private CustomReceiver mMediaButtonReceiver;
     private BroadcastReceiver mBroadcastReceiver;
-    private IntentFilter mIntentFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +79,9 @@ public class MainActivity extends NavigationDrawerActivity implements
             // Update SystemUser and PhoneAccount on background thread.
             new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
         }
+
+        // We are logged in and passed the onboarding
+        new Preferences(this).setFinishedOnboarding(true);
 
         // Start UpdateActivity if app has updated.
         if (UpdateHelper.requiresUpdate(this)) {
