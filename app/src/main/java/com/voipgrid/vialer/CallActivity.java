@@ -72,6 +72,7 @@ public class CallActivity extends AppCompatActivity
     private boolean mBluetoothAudio = false;
     private boolean mBluetoothEnabled = false;
     private boolean mBluetoothDeviceConnected = false;
+    private boolean mSelfHangup = false;
     private ViewGroup mKeyPadViewContainer;
     private AnalyticsHelper mAnalyticsHelper;
     private Ringtone mRingtone;
@@ -512,7 +513,7 @@ public class CallActivity extends AppCompatActivity
                 // We got a DISCONNECT. Probably save to stop ring back since it's over.
                 onCallStatusUpdate(CALL_STOP_RINGBACK_MESSAGE);
 
-                if (!mHasConnected) {
+                if (!mHasConnected && !mSelfHangup) {
                     // Call has never been connected. Meaning the dialed number was unreachable.
                     mStateView.setText(R.string.call_unreachable);
                 } else {
@@ -693,6 +694,7 @@ public class CallActivity extends AppCompatActivity
         if (mServiceBound) {
             updateCallButton(viewId, false);
             mSipService.hangUp(mSipService.getCurrentCall(), true);
+            mSelfHangup = true;
             mStateView.setText(R.string.call_hangup);
             finishWithDelay();
         }
