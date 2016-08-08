@@ -12,6 +12,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.logging.RemoteLogger;
 
 import java.io.IOException;
 
@@ -114,6 +115,7 @@ public class ServiceGenerator {
                 if (response.code() == 401 &&
                         !context.getClass().getSimpleName().equals(
                                 SetupActivity.class.getSimpleName())) {
+                    new RemoteLogger(context).w("Logged out on 401 API response");
                     // Clear logged in values.
                     new JsonStorage(context).clear();
                     if (context instanceof Activity) {

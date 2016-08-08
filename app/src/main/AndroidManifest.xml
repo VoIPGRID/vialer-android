@@ -60,14 +60,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".util.StackTraceLog">
-            <intent-filter>
-                <action android:name="com.voipgrid.vialer.util.SEND_LOG" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
         <!-- Activity responsible for choosing outgoing calls -->
         <activity
             android:name=".dialer.DialerActivity"
@@ -121,7 +113,7 @@
             android:name=".onboarding.SetupActivity"
             android:label="@string/title_activity_setup"
             android:screenOrientation="portrait"
-            android:theme="@style/OnboardingTheme" >
+            android:theme="@style/OnboardingTheme">
         </activity>
         <activity
             android:name=".WebActivity"

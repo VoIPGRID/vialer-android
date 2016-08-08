@@ -24,6 +24,7 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.logging.RemoteLoggingActivity;
 import com.voipgrid.vialer.models.PasswordResetParams;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -35,7 +36,7 @@ import retrofit2.Response;
 /**
  * Activity that handles the on boarding.
  */
-public class SetupActivity extends AppCompatActivity implements
+public class SetupActivity extends RemoteLoggingActivity implements
         OnboardingFragment.FragmentInteractionListener,
         LoginFragment.FragmentInteractionListener,
         AccountFragment.FragmentInteractionListener,
@@ -209,9 +210,13 @@ public class SetupActivity extends AppCompatActivity implements
             PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(this);
             phoneAccountHelper.savePhoneAccountAndRegister(
                     (PhoneAccount) mJsonStorage.get(PhoneAccount.class));
-            startActivity(new Intent(this, AccountActivity.class));
+            Intent intent = new Intent(this, AccountActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         } else {
-            startActivity(new Intent(this, MainActivity.class));
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         }
         finish();
     }
