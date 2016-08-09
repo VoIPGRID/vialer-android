@@ -5,24 +5,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
 
-import com.voipgrid.vialer.sip.CallInteraction;
+import com.voipgrid.vialer.sip.SipCall;
 
-import org.pjsip.pjsua2.Call;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Calls that handles incoming GSM calls during a sip call.
  */
 public class GsmCallListener extends BroadcastReceiver {
 
-    private CallInteraction mCallInteraction;
-    private Call mCurrentCall;
+    private List<SipCall> mSipCalls;
+    private List<SipCall> mAlreadyHoldedCalls = new ArrayList<>();
 
     private String mLastState = "";
-    private boolean mIsOnHold = false;
 
-    public GsmCallListener(Call call, CallInteraction callInteraction) {
-        mCallInteraction = callInteraction;
-        mCurrentCall = call;
+    public GsmCallListener(List<SipCall> sipCalls) {
+        mSipCalls = sipCalls;
+    }
+
+    public void updateSipCallsList(List<SipCall> newSipCalls) {
+        mSipCalls = newSipCalls;
     }
 
     @Override
@@ -39,20 +42,35 @@ public class GsmCallListener extends BroadcastReceiver {
             return;
         }
 
-        // On GSM ringing put sip call on hold.
+        // Put all calls on hold that are not already on hold.
         if (state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
-            mCallInteraction.putOnHold(mCurrentCall);
-            mIsOnHold = true;
-        }
+            for (int i = 0; i < mSipCalls.size(); i++) {
+                SipCall call = mSipCalls.get(i);
+                try {
+                    if (call.isOnHold()) {
+                        mAlreadyHoldedCalls.add(call);
+                    } else {
+                        call.toggleHold();
+                    }
+                } catch (Exception e) {
 
-        // When GSM goes idle check if we had to put the SIP call on hold en release the hold.
-        if (state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
-            if (mIsOnHold) {
-                mCallInteraction.putOnHold(mCurrentCall);
-                mIsOnHold = false;
+                }
             }
         }
 
+        // Remove hold from calls that were not on hold in the first place.
+        if (state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+            for (int i = 0; i < mSipCalls.size(); i++) {
+                SipCall call = mSipCalls.get(i);
+                try {
+                    if (!mAlreadyHoldedCalls.contains(call)) {
+                        call.toggleHold();
+                    }
+                } catch (Exception e) {
+
+                }
+            }
+        }
         mLastState = state;
     }
 }

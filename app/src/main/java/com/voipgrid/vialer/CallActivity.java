@@ -30,7 +30,9 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
+import com.voipgrid.vialer.dialer.KeyPadView;
 import com.voipgrid.vialer.dialer.NumberInputView;
+import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.CustomReceiver;
@@ -46,7 +48,7 @@ import com.wearespindle.spindlelockring.library.OnTriggerListener;
  */
 public class CallActivity extends AppCompatActivity
         implements View.OnClickListener, SipConstants, ProximitySensorInterface,
-        AudioManager.OnAudioFocusChangeListener, OnTriggerListener {
+        AudioManager.OnAudioFocusChangeListener, OnTriggerListener, KeyPadView.OnKeyPadClickListener {
     private final static String TAG = CallActivity.class.getSimpleName();
     public static final String TYPE_OUTGOING_CALL = "type-outgoing-call";
     public static final String TYPE_INCOMING_CALL = "type-incoming-call";
@@ -80,6 +82,7 @@ public class CallActivity extends AppCompatActivity
     private Vibrator mVibrator;
     private BroadcastReceiver mBroadcastAnswerReceiver;
     private BroadcastReceiver mBroadcastDeclineReceiver;
+    private String mCurrentCallId;
 
     // Keep track of the start time of a call, so we can keep track of its duration.
     long mCallStartTime = 0;
@@ -106,15 +109,14 @@ public class CallActivity extends AppCompatActivity
     private BroadcastReceiver mCallStatusReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onCallStatusUpdate(intent.getStringExtra(CALL_STATUS_KEY));
-            onCallStatesUpdateButtons(intent.getStringExtra(CALL_STATUS_KEY));
-        }
-    };
-
-    private BroadcastReceiver mDTMFButtonPressed = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            handleDTMFButtonPressed(intent.getStringExtra(SipConstants.KEY_PAD_DTMF_TONE));
+            if (mCurrentCallId != null) {
+                if (!intent.getStringExtra(CALL_IDENTIFIER_KEY).equals(mCurrentCallId)) {
+                    return;
+                }
+            }
+            String status = intent.getStringExtra(CALL_STATUS_KEY);
+            onCallStatusUpdate(status);
+            onCallStatesUpdateButtons(status);
         }
     };
 
@@ -179,6 +181,7 @@ public class CallActivity extends AppCompatActivity
             SipService.SipServiceBinder binder = (SipService.SipServiceBinder) service;
             mSipService = binder.getService();
             mServiceBound = true;
+            mCurrentCallId = mSipService.getInitialCall().getIdentifier();
         }
 
         @Override
@@ -222,6 +225,8 @@ public class CallActivity extends AppCompatActivity
         setInitialBluetoothStatus();
 
         mKeyPadViewContainer = (ViewGroup) findViewById(R.id.key_pad_container);
+        KeyPadView keyPadView = (KeyPadView) mKeyPadViewContainer.findViewById(R.id.key_pad_view);
+        keyPadView.setOnKeyPadClickListener(this);
 
         // Make sure the hardware volume buttons control the volume of the call.
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
@@ -231,7 +236,6 @@ public class CallActivity extends AppCompatActivity
         // is on speaker. We want to make sure it does not get disabled. Mode in communication
         // unblocks any blocked microphone.
         mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-
 
         mProximityHelper = new ProximitySensorHelper(this, this, findViewById(R.id.screen_off));
 
@@ -341,10 +345,6 @@ public class CallActivity extends AppCompatActivity
         IntentFilter intentFilter = new IntentFilter(ACTION_BROADCAST_CALL_STATUS);
         mBroadcastManager.registerReceiver(mCallStatusReceiver, intentFilter);
 
-        intentFilter = new IntentFilter(
-                SipConstants.ACTION_BROADCAST_KEY_PAD_INTERACTION);
-        mBroadcastManager.registerReceiver(mDTMFButtonPressed, intentFilter);
-
         // Intent filter for the Bluetooth receiver.
         intentFilter = new IntentFilter();
         // When the user disables the entire bluetooth connection.
@@ -392,7 +392,6 @@ public class CallActivity extends AppCompatActivity
         mRemoteLogger.d(TAG + " onStop");
         // Unregister the SipService BroadcastReceiver when the activity pauses.
         mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
-        mBroadcastManager.unregisterReceiver(mDTMFButtonPressed);
         unregisterReceiver(mBluetoothReceiver);
 
         if (mServiceBound && (mSipService != null && mSipService.getCurrentCall() == null)) {
@@ -477,7 +476,7 @@ public class CallActivity extends AppCompatActivity
                 mBluetoothAudio = bluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP) == BluetoothProfile.STATE_CONNECTED;
                 if (mBluetoothAudio) {
                     mBluetoothDeviceConnected = true;
-                    toggleBluetoothButtonVisibilty(true);
+                    toggleBluetoothButtonVisibility(true);
                 }
             }
         }
@@ -494,10 +493,6 @@ public class CallActivity extends AppCompatActivity
     private void onCallStatusUpdate(String newStatus) {
         mRemoteLogger.d(TAG + " onCallStatusUpdate: " + newStatus);
         switch (newStatus) {
-            case CALL_MEDIA_AVAILABLE_MESSAGE:
-                onCallStatusUpdate(CALL_STOP_RINGBACK_MESSAGE);
-                break;
-
             case CALL_CONNECTED_MESSAGE:
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
                 mStateView.setText(R.string.call_connected);
@@ -511,9 +506,6 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case CALL_DISCONNECTED_MESSAGE:
-                // We got a DISCONNECT. Probably save to stop ring back since it's over.
-                onCallStatusUpdate(CALL_STOP_RINGBACK_MESSAGE);
-
                 if (!mHasConnected && !mSelfHangup) {
                     // Call has never been connected. Meaning the dialed number was unreachable.
                     mStateView.setText(R.string.call_unreachable);
@@ -560,6 +552,7 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case SERVICE_STOPPED:
+                // TODO: This broadcast is not received anymore due to refactor! Solve with transition to fragments.
                 mConnected = false;
                 mIncomingCallIsRinging = false;
                 finishWithDelay();
@@ -620,7 +613,11 @@ public class CallActivity extends AppCompatActivity
         mRemoteLogger.d(TAG + " toggleOnHold");
         mOnHold = !mOnHold;
         if (mServiceBound) {
-            mSipService.putOnHold(mSipService.getCurrentCall());
+            try {
+                mSipService.getInitialCall().toggleHold();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -702,8 +699,13 @@ public class CallActivity extends AppCompatActivity
     private void hangup(Integer viewId) {
         if (mServiceBound) {
             updateCallButton(viewId, false);
-            mSipService.hangUp(mSipService.getCurrentCall(), true);
-            mSelfHangup = true;
+            try {
+                mSipService.getInitialCall().hangup(true);
+                mSelfHangup = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             mStateView.setText(R.string.call_hangup);
             finishWithDelay();
         }
@@ -777,7 +779,7 @@ public class CallActivity extends AppCompatActivity
     void updateMicrophoneVolume(long newVolume) {
         mRemoteLogger.d(TAG + " updateMicrophoneVolume");
         if (mServiceBound) {
-            mSipService.updateMicrophoneVolume(mSipService.getCurrentCall(), newVolume);
+            mSipService.getInitialCall().updateMicrophoneVolume(newVolume);
         }
     }
 
@@ -857,7 +859,11 @@ public class CallActivity extends AppCompatActivity
 
         if (MicrophonePermission.hasPermission(this)) {
             if (mServiceBound) {
-                mSipService.answer(mSipService.getCurrentCall());
+                try {
+                    mSipService.getInitialCall().answer();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 mAnalyticsHelper.sendEvent(
                         getString(R.string.analytics_event_category_call),
                         getString(R.string.analytics_event_action_inbound),
@@ -876,7 +882,12 @@ public class CallActivity extends AppCompatActivity
         playRingtone(false);
         vibrate(false);
         if (mServiceBound) {
-            mSipService.decline(mSipService.getCurrentCall());
+            try {
+                mSipService.getInitialCall().decline();
+                mSelfHangup = true;
+            } catch (Exception e) {
+
+            }
             mAnalyticsHelper.sendEvent(
                     getString(R.string.analytics_event_category_call),
                     getString(R.string.analytics_event_action_inbound),
@@ -981,19 +992,13 @@ public class CallActivity extends AppCompatActivity
     public void onFinishFinalAnimation() {
     }
 
-    private void handleDTMFButtonPressed(String key) {
-        NumberInputView numberInputView = (NumberInputView) findViewById(R.id.number_input_edit_text);
-        String currentDTMF = numberInputView.getNumber();
-        numberInputView.setNumber(currentDTMF + key);
-    }
-
     /**
      * Function to toggle the audio output to bluetooth or it's original state.
      */
     private void toggleAudioOutput() {
         // Send audiostream to BT device.
         if (mBluetoothAudio && mBluetoothEnabled) {
-            toggleBluetoothButtonVisibilty(true);
+            toggleBluetoothButtonVisibility(true);
             mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             mAudioManager.setBluetoothScoOn(true);
             mAudioManager.startBluetoothSco();
@@ -1002,7 +1007,7 @@ public class CallActivity extends AppCompatActivity
         } else {
             // If device is not connected hide the BT button.
             if (!mBluetoothDeviceConnected) {
-                toggleBluetoothButtonVisibilty(false);
+                toggleBluetoothButtonVisibility(false);
             }
             mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             mAudioManager.setBluetoothScoOn(false);
@@ -1016,9 +1021,27 @@ public class CallActivity extends AppCompatActivity
      * Function to toggle the visibility of the bluetooth button.
      * @param visible
      */
-    private void toggleBluetoothButtonVisibilty(boolean visible) {
+    private void toggleBluetoothButtonVisibility(boolean visible) {
         View bluetoothButton = findViewById(R.id.button_bluetooth);
 
         bluetoothButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onKeyPadButtonClick(String digit, String chars) {
+        NumberInputView numberInputView = (NumberInputView) findViewById(R.id.number_input_edit_text);
+        String currentDTMF = numberInputView.getNumber();
+        numberInputView.setNumber(currentDTMF + digit);
+
+        if (mServiceBound) {
+            SipCall call = mSipService.getInitialCall();
+            if (call != null) {
+                try {
+                    call.dialDtmf(digit);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }
