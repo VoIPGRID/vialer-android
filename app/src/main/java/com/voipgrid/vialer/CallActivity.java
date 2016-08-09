@@ -19,28 +19,30 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateUtils;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.dialer.KeyPadView;
-import com.voipgrid.vialer.dialer.NumberInputView;
+import com.voipgrid.vialer.call.CallKeyPadFragment;
 import com.voipgrid.vialer.sip.SipCall;
+import com.voipgrid.vialer.call.CallConnectedFragment;
+import com.voipgrid.vialer.call.CallIncomingFragment;
+import com.voipgrid.vialer.call.CallLockRingFragment;
+import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.CustomReceiver;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
 import com.voipgrid.vialer.logging.RemoteLogger;
-import com.wearespindle.spindlelockring.library.LockRing;
-import com.wearespindle.spindlelockring.library.OnTriggerListener;
 
 
 /**
@@ -48,7 +50,8 @@ import com.wearespindle.spindlelockring.library.OnTriggerListener;
  */
 public class CallActivity extends AppCompatActivity
         implements View.OnClickListener, SipConstants, ProximitySensorInterface,
-        AudioManager.OnAudioFocusChangeListener, OnTriggerListener, KeyPadView.OnKeyPadClickListener {
+        AudioManager.OnAudioFocusChangeListener, CallKeyPadFragment.CallKeyPadFragmentListener,
+        CallTransferFragment.CallTransferFragmentListener {
     private final static String TAG = CallActivity.class.getSimpleName();
     public static final String TYPE_OUTGOING_CALL = "type-outgoing-call";
     public static final String TYPE_INCOMING_CALL = "type-incoming-call";
@@ -76,7 +79,6 @@ public class CallActivity extends AppCompatActivity
     private boolean mBluetoothEnabled = false;
     private boolean mBluetoothDeviceConnected = false;
     private boolean mSelfHangup = false;
-    private ViewGroup mKeyPadViewContainer;
     private AnalyticsHelper mAnalyticsHelper;
     private Ringtone mRingtone;
     private Vibrator mVibrator;
@@ -175,8 +177,7 @@ public class CallActivity extends AppCompatActivity
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
+        public void onServiceConnected(ComponentName className, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance.
             SipService.SipServiceBinder binder = (SipService.SipServiceBinder) service;
             mSipService = binder.getService();
@@ -191,8 +192,6 @@ public class CallActivity extends AppCompatActivity
     };
 
     private int mPreviousVolume = -1;
-
-    private LockRing mLockRing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -223,10 +222,6 @@ public class CallActivity extends AppCompatActivity
         mAudioManager.requestAudioFocus(this, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
 
         setInitialBluetoothStatus();
-
-        mKeyPadViewContainer = (ViewGroup) findViewById(R.id.key_pad_container);
-        KeyPadView keyPadView = (KeyPadView) mKeyPadViewContainer.findViewById(R.id.key_pad_view);
-        keyPadView.setOnKeyPadClickListener(this);
 
         // Make sure the hardware volume buttons control the volume of the call.
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
@@ -433,34 +428,29 @@ public class CallActivity extends AppCompatActivity
      * @param type a string containing a call type (INCOMING or OUTGOING)
      */
     private void toggleCallStateButtonVisibility(String type) {
-        View ringingView = findViewById(R.id.ringing);
-        View ringingLockScreenView = findViewById(R.id.ringing_lock_screen);
-        View connectedView = findViewById(R.id.connected);
         if (type.equals(TYPE_OUTGOING_CALL) || type.equals(TYPE_CONNECTED_CALL)) {
             // Hide answer, decline = decline.
-            ringingView.setVisibility(View.GONE);
-            ringingLockScreenView.setVisibility(View.GONE);
-            connectedView.setVisibility(View.VISIBLE);
-            findViewById(R.id.ringing).setVisibility(View.GONE);
-            findViewById(R.id.connected).setVisibility(View.VISIBLE);
+
+            Fragment callConnectedFragment = ((CallConnectedFragment) getFragmentManager()
+                    .findFragmentById(R.id.fragment_call_connected)).newInstance();
+            swapFragment(callConnectedFragment);
+
         } else if (type.equals(TYPE_INCOMING_CALL)) {
             // Hide the connected view.
-            connectedView.setVisibility(View.GONE);
 
             KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
             // Depended on if the user has the screen locked show the slide to answer view or
             // the two buttons to accept / decline a call.
             if (keyguardManager.inKeyguardRestrictedInputMode()) {
-                ringingLockScreenView.setVisibility(View.VISIBLE);
-                ringingView.setVisibility(View.GONE);
-                findViewById(R.id.call_buttons_container).setVisibility(View.INVISIBLE);
+                Fragment callLockRingFragment = ((CallLockRingFragment) getFragmentManager()
+                        .findFragmentById(R.id.fragment_call_lock_ring)).newInstance();
+                swapFragment(callLockRingFragment);
 
-                mLockRing = (LockRing) findViewById(R.id.google_lock_ring);
-                mLockRing.setOnTriggerListener(this);
-                mLockRing.setShowTargetsOnIdle(false);
+                findViewById(R.id.call_buttons_container).setVisibility(View.INVISIBLE);
             } else {
-                ringingLockScreenView.setVisibility(View.GONE);
-                ringingView.setVisibility(View.VISIBLE);
+                Fragment callIncomingFragment = ((CallIncomingFragment) getFragmentManager()
+                        .findFragmentById(R.id.fragment_call_incoming)).newInstance();
+                swapFragment(callIncomingFragment);
             }
         }
     }
@@ -564,9 +554,21 @@ public class CallActivity extends AppCompatActivity
     public void onBackPressed() {
         mRemoteLogger.d(TAG + " onBackPressed");
         View hangupButton = findViewById(R.id.button_hangup);
-        View declineButton = findViewById(R.id.button_reject);
+        View declineButton = findViewById(R.id.button_decline);
 
-        if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
+        if (mOnTransfer) {
+            mOnTransfer = false;
+            findViewById(R.id.call_info).setVisibility(View.VISIBLE);
+            findViewById(R.id.call_buttons_container).setVisibility(View.VISIBLE);
+
+            Fragment callConnectedFragment = ((CallConnectedFragment) getFragmentManager()
+                    .findFragmentById(R.id.fragment_call_connected)).newInstance();
+            swapFragment(callConnectedFragment);
+
+            toggleOnHold();
+            updateCallButton(R.id.button_onhold, true);
+            updateCallButton(R.id.button_transfer, true);
+        } else if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
             onClick(hangupButton);
         } else if (declineButton != null && declineButton.getVisibility() == View.VISIBLE) {
             onClick(declineButton);
@@ -598,14 +600,19 @@ public class CallActivity extends AppCompatActivity
     private void toggleDialPad() {
         mRemoteLogger.d(TAG + " toggleDialPad");
         mKeyPadVisible = !mKeyPadVisible;
-        boolean visible = mKeyPadViewContainer.getVisibility() == View.VISIBLE;
-        mKeyPadViewContainer.setVisibility(visible ? View.GONE : View.VISIBLE);
+
+        if (mKeyPadVisible) {
+            Fragment callKeyPadFragment = ((CallKeyPadFragment) getFragmentManager()
+                    .findFragmentById(R.id.fragment_call_key_pad)).newInstance();
+            swapFragment(callKeyPadFragment);
+        } else {
+            Fragment callConnectedFragment = ((CallConnectedFragment) getFragmentManager()
+                    .findFragmentById(R.id.fragment_call_connected)).newInstance();
+            swapFragment(callConnectedFragment);
+        }
+
         mProximityHelper.updateWakeLock();
 
-        if (!visible) {
-            NumberInputView numberInputView = (NumberInputView) findViewById(R.id.number_input_edit_text);
-            numberInputView.clear();
-        }
     }
 
     // Toggle the hold the call when the user presses the button.
@@ -696,7 +703,7 @@ public class CallActivity extends AppCompatActivity
         }
     }
 
-    private void hangup(Integer viewId) {
+    public void hangup(Integer viewId) {
         if (mServiceBound) {
             updateCallButton(viewId, false);
             try {
@@ -718,7 +725,7 @@ public class CallActivity extends AppCompatActivity
         Integer onHoldButtonId = R.id.button_onhold;
         Integer transferButtonId = R.id.button_transfer;
 
-        View declineButton = findViewById(R.id.button_reject);
+        View declineButton = findViewById(R.id.button_decline);
         View acceptButton = findViewById(R.id.button_pickup);
 
         switch (callState) {
@@ -763,7 +770,7 @@ public class CallActivity extends AppCompatActivity
                 updateCallButton(microphoneButtonId, false);
                 updateCallButton(keypadButtonId, false);
                 updateCallButton(onHoldButtonId, false);
-                updateCallButton(transferButtonId, true);
+                updateCallButton(transferButtonId, false);
                 break;
         }
     }
@@ -809,7 +816,6 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case R.id.button_transfer:
-                toggleDialPad();
                 if (!mOnTransfer) {
                     if (!mOnHold) {
                         onClick(findViewById(R.id.button_onhold));
@@ -818,7 +824,21 @@ public class CallActivity extends AppCompatActivity
                 } else {
                     mOnTransfer = false;
                 }
+
+                findViewById(R.id.call_info).setVisibility(View.GONE);
+                findViewById(R.id.call_buttons_container).setVisibility(View.GONE);
+                String originalCalledNumber = ((TextView) findViewById(R.id.name_text_view)).getText().toString();
+
+                if (originalCalledNumber.isEmpty()) {
+                    originalCalledNumber = ((TextView) findViewById(R.id.number_text_view)).getText().toString();
+                }
+
+                Fragment callTransferFragment = ((CallTransferFragment) getFragmentManager()
+                        .findFragmentById(R.id.fragment_call_transfer)).newInstance(originalCalledNumber);
+                swapFragment(callTransferFragment);
+
                 updateCallButton(viewId, true);
+
                 break;
 
             case R.id.button_onhold:
@@ -826,18 +846,6 @@ public class CallActivity extends AppCompatActivity
                     toggleOnHold();
                     updateCallButton(viewId, true);
                 }
-                break;
-
-            case R.id.button_hangup:
-                hangup(viewId);
-                break;
-
-            case R.id.button_reject:
-                decline();
-                break;
-
-            case R.id.button_pickup:
-                answer();
                 break;
 
             case R.id.button_bluetooth:
@@ -848,10 +856,18 @@ public class CallActivity extends AppCompatActivity
         }
     }
 
-    private void answer() {
+    private void swapFragment(Fragment newFragment) {
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.addToBackStack(null);
+
+        transaction.replace(R.id.fragment_container, newFragment, null).commitAllowingStateLoss();
+    }
+
+    public void answer() {
         mRemoteLogger.d(TAG + " answer");
         playRingtone(false);
         vibrate(false);
+
         View callButtonsContainer = findViewById(R.id.call_buttons_container);
         if (callButtonsContainer.getVisibility() == View.INVISIBLE) {
             callButtonsContainer.setVisibility(View.VISIBLE);
@@ -877,7 +893,7 @@ public class CallActivity extends AppCompatActivity
         }
     }
 
-    private void decline() {
+    public void decline() {
         mRemoteLogger.d(TAG + " decline");
         playRingtone(false);
         vibrate(false);
@@ -960,38 +976,6 @@ public class CallActivity extends AppCompatActivity
         return !mIncomingCallIsRinging && !mKeyPadVisible;
     }
 
-    @Override
-    public void onGrabbed(View view, int handle) {
-    }
-
-    @Override
-    public void onReleased(View view, int handle) {
-    }
-
-    @Override
-    public void onTrigger(View view, int target) {
-        final int resId = mLockRing.getResourceIdForTarget(target);
-        switch (resId) {
-            case R.drawable.ic_lock_ring_answer:
-                answer();
-                break;
-
-            case R.drawable.ic_lock_ring_decline:
-                decline();
-                break;
-        }
-
-        mLockRing.reset(true);
-    }
-
-    @Override
-    public void onGrabbedStateChange(View view, int handle) {
-    }
-
-    @Override
-    public void onFinishFinalAnimation() {
-    }
-
     /**
      * Function to toggle the audio output to bluetooth or it's original state.
      */
@@ -1028,20 +1012,32 @@ public class CallActivity extends AppCompatActivity
     }
 
     @Override
-    public void onKeyPadButtonClick(String digit, String chars) {
-        NumberInputView numberInputView = (NumberInputView) findViewById(R.id.number_input_edit_text);
-        String currentDTMF = numberInputView.getNumber();
-        numberInputView.setNumber(currentDTMF + digit);
-
+    public void callKeyPadButtonClicked(String dtmf) {
         if (mServiceBound) {
             SipCall call = mSipService.getInitialCall();
             if (call != null) {
                 try {
-                    call.dialDtmf(digit);
+                    call.dialDtmf(dtmf);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
+    }
+
+    @Override
+    public void callTransferToggleOnHoldInitialCall() {
+        findViewById(R.id.call_info).setVisibility(View.VISIBLE);
+        findViewById(R.id.call_buttons_container).setVisibility(View.VISIBLE);
+
+        Fragment callConnectedFragment = ((CallConnectedFragment) getFragmentManager()
+                .findFragmentById(R.id.fragment_call_connected)).newInstance();
+        swapFragment(callConnectedFragment);
+
+        toggleOnHold();
+        updateCallButton(R.id.button_onhold, true);
+
+        mOnTransfer = false;
+        updateCallButton(R.id.button_transfer, true);
     }
 }
