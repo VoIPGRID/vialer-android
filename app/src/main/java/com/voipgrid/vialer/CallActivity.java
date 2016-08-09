@@ -69,6 +69,7 @@ public class CallActivity extends AppCompatActivity
     private boolean mOnHold = false;
     private boolean mKeyPadVisible = false;
     private boolean mOnSpeaker = false;
+    private boolean mOnTransfer = false;
     private boolean mBluetoothAudio = false;
     private boolean mBluetoothEnabled = false;
     private boolean mBluetoothDeviceConnected = false;
@@ -636,6 +637,7 @@ public class CallActivity extends AppCompatActivity
         View onHoldButton;
         View bluetoothButton;
         View hangupButton;
+        View transferButton;
 
         switch (viewId) {
             case R.id.button_speaker:
@@ -667,6 +669,13 @@ public class CallActivity extends AppCompatActivity
                 onHoldButton.setActivated(mOnHold);
                 onHoldButton.setAlpha(
                         buttonEnabled ? mOnHold ? 1.0f : 0.5f : 1.0f
+                );
+                break;
+            case R.id.button_transfer:
+                transferButton = findViewById(viewId);
+                transferButton.setActivated(mOnTransfer);
+                transferButton.setAlpha(
+                        buttonEnabled ? mOnTransfer ? 1.0f : 0.5f : 1.0f
                 );
                 break;
             case R.id.button_bluetooth:
@@ -705,6 +714,7 @@ public class CallActivity extends AppCompatActivity
         Integer microphoneButtonId = R.id.button_microphone;
         Integer keypadButtonId = R.id.button_keypad;
         Integer onHoldButtonId = R.id.button_onhold;
+        Integer transferButtonId = R.id.button_transfer;
 
         View declineButton = findViewById(R.id.button_reject);
         View acceptButton = findViewById(R.id.button_pickup);
@@ -715,6 +725,7 @@ public class CallActivity extends AppCompatActivity
                 updateCallButton(microphoneButtonId, true);
                 updateCallButton(keypadButtonId, true);
                 updateCallButton(onHoldButtonId, true);
+                updateCallButton(transferButtonId, true);
                 break;
 
             case CALL_DISCONNECTED_MESSAGE:
@@ -737,6 +748,7 @@ public class CallActivity extends AppCompatActivity
                 updateCallButton(microphoneButtonId, false);
                 updateCallButton(keypadButtonId, false);
                 updateCallButton(onHoldButtonId, false);
+                updateCallButton(transferButtonId, false);
 
                 if (mKeyPadVisible) {
                     toggleDialPad();
@@ -749,6 +761,7 @@ public class CallActivity extends AppCompatActivity
                 updateCallButton(microphoneButtonId, false);
                 updateCallButton(keypadButtonId, false);
                 updateCallButton(onHoldButtonId, false);
+                updateCallButton(transferButtonId, true);
                 break;
         }
     }
@@ -791,6 +804,19 @@ public class CallActivity extends AppCompatActivity
                     toggleDialPad();
                     updateCallButton(viewId, true);
                 }
+                break;
+
+            case R.id.button_transfer:
+                toggleDialPad();
+                if (!mOnTransfer) {
+                    if (!mOnHold) {
+                        onClick(findViewById(R.id.button_onhold));
+                    }
+                    mOnTransfer = true;
+                } else {
+                    mOnTransfer = false;
+                }
+                updateCallButton(viewId, true);
                 break;
 
             case R.id.button_onhold:
