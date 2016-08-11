@@ -205,7 +205,7 @@ public class NumberInputView extends RelativeLayout implements
         return mEditText.getText().toString();
     }
 
-    interface OnInputChangedListener {
+    public interface OnInputChangedListener {
         void onInputChanged(String number);
     }
 
