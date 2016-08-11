@@ -38,6 +38,13 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
         keyPadView.setOnKeyPadClickListener(this);
 
         mNumberInputView = (NumberInputView) view.findViewById(R.id.number_input_edit_text);
+        mNumberInputView.setOnInputChangedListener(new NumberInputView.OnInputChangedListener() {
+            @Override
+            public void onInputChanged(String number) {
+                // This is needed to get the remove button to show up.
+            }
+        });
+
     }
 
     @Override

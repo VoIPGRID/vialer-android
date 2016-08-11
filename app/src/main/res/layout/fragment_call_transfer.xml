@@ -16,36 +16,36 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:layout_above="@+id/call_transfer_info_container"
-        android:visibility="invisible">
+        android:visibility="gone">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/button_transfer_hangup"
+                android:id="@+id/button_transfer_call"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 android:src="@drawable/ic_call_transfer"
-                android:onClick="onClick"
                 app:backgroundTint="@color/call_transfer_color"
                 app:elevation="@dimen/fab_elevation"
                 app:borderWidth="@dimen/fab_border_width"
+                style="@style/FloatingActionButton"
                 />
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/button_transfer_call"
+                android:id="@+id/button_transfer_hangup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:src="@drawable/ic_call_end_white"
-                android:onClick="onClick"
                 app:backgroundTint="@color/call_fab_hangup_color"
                 app:elevation="@dimen/fab_elevation"
-                app:borderWidth="@dimen/fab_border_width" />
+                app:borderWidth="@dimen/fab_border_width"
+                style="@style/FloatingActionButton" />
         </RelativeLayout>
     </RelativeLayout>
 
@@ -129,10 +129,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <RelativeLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start|center_vertical"
-                android:layout_weight=".90">
+                android:layout_gravity="start|center_vertical">
 
                 <TextView
                     android:id="@+id/call_transfer_status"
@@ -143,24 +142,6 @@
                     android:id="@+id/call_transfer_number"
                     android:layout_below="@id/call_transfer_status"
                     style="@style/CallTransferStatusStyle" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                >
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/call_transfer_hold"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_pause_gray"
-                    android:onClick="onClick"
-                    app:backgroundTint="#FFFFFF"
-                    app:elevation="0dp"
-                    app:borderWidth="0dp"
-                    />
             </RelativeLayout>
         </LinearLayout>
 

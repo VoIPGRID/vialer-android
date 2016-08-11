@@ -168,4 +168,7 @@
     <string name="remote_logging_unexpected_error">Unexpected error</string>
     <string name="remote_logging_send_crash_log">Would you like to help improve our services and send the crash log to us?</string>
 
+    <string name="call_transfer_complete_and">and</string>
+    <string name="call_transfer_complete_success"> Successfully transferred</string>
+
 </resources>
