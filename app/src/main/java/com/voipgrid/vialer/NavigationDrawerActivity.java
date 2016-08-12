@@ -67,7 +67,7 @@ public abstract class NavigationDrawerActivity
     private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
 
-    private String mDestinationId;
+    private String mSelectedUserDestinationId;
     private boolean mFirstTimeOnItemSelected = true;
 
     @Override
@@ -307,7 +307,7 @@ public abstract class NavigationDrawerActivity
             mSpinnerAdapter.add(notAvailableDestination);
 
             // Set current destination.
-            mDestinationId = userDestination.getId();
+            mSelectedUserDestinationId = userDestination.getSelectedUserDestination().getId();
 
             Destination activeDestination = userDestination.getActiveDestination();
 
@@ -355,7 +355,7 @@ public abstract class NavigationDrawerActivity
                     destination.getId() : null;
             params.phoneAccount = destination instanceof PhoneAccount ?
                     destination.getId() : null;
-            Call<Object> call = mApi.setSelectedUserDestination(mDestinationId, params);
+            Call<Object> call = mApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
             call.enqueue(this);
 
         }
