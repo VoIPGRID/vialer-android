@@ -57,10 +57,10 @@ public class UserDestination {
         // account of een fixed destination en van die keys heeft er altijd eentje een waarde
         if(selectedUserDestination != null) {
             String selectedDestinationId = null;
-            if(!TextUtils.isEmpty(selectedUserDestination.fixedDestinationId)) {
-                selectedDestinationId = selectedUserDestination.fixedDestinationId;
-            } else if(!TextUtils.isEmpty(selectedUserDestination.phoneAccountId)) {
-                selectedDestinationId = selectedUserDestination.phoneAccountId;
+            if(!TextUtils.isEmpty(selectedUserDestination.getFixedDestinationId())) {
+                selectedDestinationId = selectedUserDestination.getFixedDestinationId();
+            } else if(!TextUtils.isEmpty(selectedUserDestination.getPhoneAccountId())) {
+                selectedDestinationId = selectedUserDestination.getPhoneAccountId();
             }
 
             if(!TextUtils.isEmpty(selectedDestinationId)) {
@@ -88,15 +88,8 @@ public class UserDestination {
         return destinations;
     }
 
-    private class SelectedUserDestination {
-
-        @SerializedName("fixeddestination")
-        private String fixedDestinationId;
-
-        @SerializedName("phoneaccount")
-        private String phoneAccountId;
-
-        private int id;
+    public SelectedUserDestination getSelectUserDestination() {
+        return selectedUserDestination;
     }
 
     public String getId() {
