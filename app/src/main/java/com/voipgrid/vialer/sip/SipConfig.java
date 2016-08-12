@@ -323,12 +323,6 @@ public class SipConfig implements AccountStatus {
             mSipLogWriter.disableRemoteLogging();
         }
 
-        // Destroy SipAccount.
-        if(mSipAccount != null) {
-            mSipAccount.delete();
-            mSipAccount = null;
-        }
-
         // Destroy Endpoint.
         if(mEndpoint != null) {
             try {
