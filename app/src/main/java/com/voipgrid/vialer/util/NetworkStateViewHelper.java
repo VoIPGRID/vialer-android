@@ -49,7 +49,10 @@ public class NetworkStateViewHelper extends BroadcastReceiver implements View.On
      * Function to stop listening for connectivity changes.
      */
     public void stopListening() {
-        mContext.unregisterReceiver(this);
+        // Sometimes the event is already unregistered by the system causing a illegalArgumentExc.
+        try {
+            mContext.unregisterReceiver(this);
+        } catch (IllegalArgumentException e) {}
     }
 
     @Override

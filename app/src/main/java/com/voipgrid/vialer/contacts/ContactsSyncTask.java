@@ -185,11 +185,16 @@ public class ContactsSyncTask {
                 numberCursor.getString(
                         numberCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LABEL));
 
+        // We do not want to sync numbers that are null.
+        if (number == null) {
+            return null;
+        }
+
         // Strip whitespace.
         number = number.replace(" ", "");
 
-        // We do not want to sync numbers that are null or have no content.
-        if (number == null || number.length() < 1){
+        // We do not want to sync numbers that have no content.
+        if (number.length() < 1){
             return null;
         }
 

@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -20,6 +21,7 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.contacts.ContactsPermission;
+import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.IconHelper;
@@ -254,6 +256,7 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
                             ((AnalyticsApplication) mActivity.getApplication()).getDefaultTracker()
                     )
             ).callNumber(numberToCall, "");
+            PreferenceManager.getDefaultSharedPreferences(mActivity).edit().putString(DialerActivity.LAST_DIALED, numberToCall).apply();
         }
     }
 
