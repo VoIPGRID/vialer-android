@@ -14,6 +14,7 @@ import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
 import retrofit2.Call;
@@ -26,6 +27,7 @@ import retrofit2.Response;
 public class SetUpVoipAccountFragment extends OnboardingFragment implements
         View.OnClickListener, Callback {
 
+    private AccountHelper mAccountHelper;
     private Api mApi;
     private Context mContext;
     private FragmentInteractionListener mListener;
@@ -59,14 +61,15 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
         mContext = getActivity().getApplicationContext();
 
         mJsonStorage = new JsonStorage(mContext);
+        mAccountHelper = new AccountHelper(mContext);
 
         mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         mApi = ServiceGenerator.createService(
                 getActivity(),
                 Api.class,
                 getString(R.string.api_url),
-                mSystemUser.getEmail(),
-                mSystemUser.getPassword()
+                mAccountHelper.getEmail(),
+                mAccountHelper.getPassword()
         );
 
         mVoipAccountButton = (Button) view.findViewById(R.id.set_voip_account_button);
@@ -160,8 +163,8 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
                 mContext,
                 Api.class,
                 getString(R.string.api_url),
-                mSystemUser.getEmail(),
-                mSystemUser.getPassword()
+                mAccountHelper.getEmail(),
+                mAccountHelper.getPassword()
         );
         Call<SystemUser> call = mApi.systemUser();
         call.enqueue(this);

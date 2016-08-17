@@ -22,6 +22,7 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NetworkStateViewHelper;
@@ -204,13 +205,14 @@ public class CallRecordFragment extends ListFragment implements
 
     private void loadCallRecordsFromApi() {
         mHaveNetworkRecords = false;
-        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+
+        AccountHelper accountHelper = new AccountHelper(getActivity());
         Api api = ServiceGenerator.createService(
                 getContext(),
                 Api.class,
                 getString(R.string.api_url),
-                systemUser.getEmail(),
-                systemUser.getPassword());
+                accountHelper.getEmail(),
+                accountHelper.getPassword());
 
         Call<VoipGridResponse<CallRecord>> call = api.getRecentCalls(
                 50, 0, CallRecord.getLimitDate()

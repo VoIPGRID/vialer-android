@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
 /**
@@ -23,12 +24,12 @@ public class WebActivityHelper {
      * @param page
      */
     public void startWebActivity(String title, String page) {
-        SystemUser systemUser = (SystemUser) new JsonStorage(mContext).get(SystemUser.class);
+        AccountHelper accountHelper = new AccountHelper(mContext);
         Intent intent = new Intent(mContext, WebActivity.class);
         intent.putExtra(WebActivity.PAGE, page);
         intent.putExtra(WebActivity.TITLE, title);
-        intent.putExtra(WebActivity.USERNAME, systemUser.getEmail());
-        intent.putExtra(WebActivity.PASSWORD, systemUser.getPassword());
+        intent.putExtra(WebActivity.USERNAME, accountHelper.getEmail());
+        intent.putExtra(WebActivity.PASSWORD, accountHelper.getPassword());
         mContext.startActivity(intent);
     }
 }

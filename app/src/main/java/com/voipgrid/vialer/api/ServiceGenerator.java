@@ -10,6 +10,7 @@ import android.os.Build;
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.onboarding.SetupActivity;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.logging.RemoteLogger;
@@ -118,6 +119,7 @@ public class ServiceGenerator {
                     new RemoteLogger(context).w("Logged out on 401 API response");
                     // Clear logged in values.
                     new JsonStorage(context).clear();
+                    new AccountHelper(context).clearCredentials();
                     if (context instanceof Activity) {
                         // Start onboarding.
                         Intent intent = new Intent(context, SetupActivity.class);

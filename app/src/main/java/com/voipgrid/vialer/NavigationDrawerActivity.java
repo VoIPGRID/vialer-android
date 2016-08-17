@@ -34,6 +34,7 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.onboarding.LogoutTask;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.MiddlewareHelper;
@@ -81,13 +82,13 @@ public abstract class NavigationDrawerActivity
         mJsonStorage = new JsonStorage(this);
         mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
 
-        if (mSystemUser != null){
+        if (mSystemUser != null && !TextUtils.isEmpty(getPassword())) {
             mApi = ServiceGenerator.createService(
                     this,
                     Api.class,
                     getString(R.string.api_url),
-                    mSystemUser.getEmail(),
-                    mSystemUser.getPassword());
+                    getEmail(),
+                    getPassword());
 
             // Preload availability.
             Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
@@ -231,12 +232,12 @@ public abstract class NavigationDrawerActivity
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }
-            /* Delete our account information */
-            // TODO This may lead to bugs! Investigate better way in VIALA-408.
+            // Delete our account information.
             mJsonStorage.clear();
-            /* Mark ourselves as unregistered */
+            new AccountHelper(this).clearCredentials();
+            // Mark ourselves as unregistered.
             PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(MiddlewareHelper.Constants.REGISTRATION_STATUS, MiddlewareHelper.Constants.STATUS_UNREGISTERED).commit();
-            /* Start a new session */
+            // Start a new session.
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -262,12 +263,11 @@ public abstract class NavigationDrawerActivity
      * @param page
      */
     private void startWebActivity(String title, String page, String gaTitle) {
-        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         Intent intent = new Intent(this, WebActivity.class);
         intent.putExtra(WebActivity.PAGE, page);
         intent.putExtra(WebActivity.TITLE, title);
-        intent.putExtra(WebActivity.USERNAME, systemUser.getEmail());
-        intent.putExtra(WebActivity.PASSWORD, systemUser.getPassword());
+        intent.putExtra(WebActivity.USERNAME, getEmail());
+        intent.putExtra(WebActivity.PASSWORD, getPassword());
         intent.putExtra(WebActivity.GA_TITLE, gaTitle);
         startActivity(intent);
     }

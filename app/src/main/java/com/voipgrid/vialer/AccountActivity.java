@@ -185,8 +185,8 @@ public class AccountActivity extends LoginRequiredActivity implements
                 this,
                 Api.class,
                 getString(R.string.api_url),
-                mSystemUser.getEmail(),
-                mSystemUser.getPassword()
+                getEmail(),
+                getPassword()
         );
         Call<MobileNumber> call = api.mobileNumber(new MobileNumber(number));
         call.enqueue(this);
