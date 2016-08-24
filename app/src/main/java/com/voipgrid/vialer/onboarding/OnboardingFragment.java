@@ -1,7 +1,7 @@
 package com.voipgrid.vialer.onboarding;
 
+import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 
 /**
  * Superclass used by fragments in the onboarding. A FragmentInteractionListener is implemented
@@ -23,12 +23,12 @@ public abstract class OnboardingFragment extends Fragment {
     public abstract void onError(String error);
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
         try {
-            mListener = (FragmentInteractionListener) context;
+            mListener = (FragmentInteractionListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
+            throw new ClassCastException(activity.toString()
                     + " must implement ISetupFragmentInteractionListener");
         }
     }
