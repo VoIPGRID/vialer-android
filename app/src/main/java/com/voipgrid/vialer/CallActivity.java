@@ -864,8 +864,12 @@ public class CallActivity extends AppCompatActivity
     private void playRingtone(boolean play) {
         if (mRingtone != null) {
             if (play && !mRingtone.isPlaying()) {
+                mAudioManager.setMode(AudioManager.MODE_RINGTONE);
+                setVolumeControlStream(AudioManager.STREAM_RING);
                 mRingtone.play();
             } else {
+                mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
                 mRingtone.stop();
             }
         }
