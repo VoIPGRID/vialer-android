@@ -65,6 +65,12 @@ public class MainActivity extends NavigationDrawerActivity implements
             // Start on boarding flow.
             startActivity(new Intent(this, SetupActivity.class));
             finish();
+        } else if (UpdateHelper.requiresUpdate(this)) {
+            Intent intent = new Intent(this, UpdateActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+            return;
         } else if (systemUser.getMobileNumber() == null) {
             Intent intent = new Intent(this, SetupActivity.class);
 
@@ -83,33 +89,28 @@ public class MainActivity extends NavigationDrawerActivity implements
         // We are logged in and passed the onboarding
         new Preferences(this).setFinishedOnboarding(true);
 
-        // Start UpdateActivity if app has updated.
-        if (UpdateHelper.requiresUpdate(this)) {
-            this.startActivity(new Intent(this, UpdateActivity.class));
-            finish();
+
+        if (SyncUtils.requiresFullContactSync(this)) {
+            SyncUtils.requestContactSync(this);
         } else {
-            if (SyncUtils.requiresFullContactSync(this)) {
-                SyncUtils.requestContactSync(this);
-            } else {
-                // Live contact updates are not supported below api level 18.
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
-                        && ContactsPermission.hasPermission(this)) {
-                    startService(new Intent(this, UpdateChangedContactsService.class));
-                }
+            // Live contact updates are not supported below api level 18.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
+                    && ContactsPermission.hasPermission(this)) {
+                startService(new Intent(this, UpdateChangedContactsService.class));
             }
-
-            SyncUtils.setPeriodicSync(this);
-
-            setContentView(R.layout.activity_main);
-
-            // Set the Toolbar to use as ActionBar.
-            setActionBar(R.id.action_bar);
-
-            setNavigationDrawer(R.id.drawer_layout);
-
-            // Set tabs.
-            setupTabs();
         }
+
+        SyncUtils.setPeriodicSync(this);
+
+        setContentView(R.layout.activity_main);
+
+        // Set the Toolbar to use as ActionBar.
+        setActionBar(R.id.action_bar);
+
+        setNavigationDrawer(R.id.drawer_layout);
+
+        // Set tabs.
+        setupTabs();
     }
 
     private void createReceivers() {

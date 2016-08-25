@@ -6,4 +6,5 @@ package com.voipgrid.vialer.util;
 public interface AppVersions {
 
     int v2_1_1 = 35;
+    int v3_2_0 = 50;
 }

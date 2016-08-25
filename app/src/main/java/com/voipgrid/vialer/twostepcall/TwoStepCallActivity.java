@@ -14,6 +14,7 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 import com.voipgrid.vialer.models.ClickToDialParams;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 
@@ -51,8 +52,8 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
                 this,
                 Api.class,
                 getString(R.string.api_url),
-                mSystemUser.getEmail(),
-                mSystemUser.getPassword()
+                getEmail(),
+                getPassword()
         );
 
         String numberToCall = getIntent().getStringExtra(NUMBER_TO_CALL);

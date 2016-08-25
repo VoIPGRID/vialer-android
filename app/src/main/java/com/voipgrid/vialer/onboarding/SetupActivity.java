@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -26,6 +25,7 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.logging.RemoteLoggingActivity;
 import com.voipgrid.vialer.models.PasswordResetParams;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -160,8 +160,8 @@ public class SetupActivity extends RemoteLoggingActivity implements
     public void onUpdateMobileNumber(Fragment fragment, String mobileNumber) {
         enableProgressBar(true);
 
-        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        boolean success = createAPIService(systemUser.getEmail(), systemUser.getPassword());
+        AccountHelper accountHelper = new AccountHelper(this);
+        boolean success = createAPIService(accountHelper.getEmail(), accountHelper.getPassword());
 
         // Post mobileNumber to VoIPGRID platform.
         if (success) {
@@ -324,7 +324,10 @@ public class SetupActivity extends RemoteLoggingActivity implements
                     });
                 } else {
                     mPreferences.setSipPermission(true);
-                    systemUser.setPassword(mPassword);
+
+                    AccountHelper accountHelper = new AccountHelper(this);
+                    accountHelper.setCredentials(systemUser.getEmail(), mPassword);
+
                     mJsonStorage.save(systemUser);
                     onNextStep(AccountFragment.newInstance(
                             systemUser.getMobileNumber(),
