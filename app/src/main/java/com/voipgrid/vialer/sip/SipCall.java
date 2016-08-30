@@ -16,6 +16,7 @@ import org.pjsip.pjsua2.CallSetting;
 import org.pjsip.pjsua2.Media;
 import org.pjsip.pjsua2.OnCallMediaStateParam;
 import org.pjsip.pjsua2.OnCallStateParam;
+import org.pjsip.pjsua2.TimeVal;
 import org.pjsip.pjsua2.pjmedia_type;
 import org.pjsip.pjsua2.pjsip_inv_state;
 import org.pjsip.pjsua2.pjsip_status_code;
@@ -41,9 +42,13 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private boolean mIsOnHold;
     private boolean mOutgoingCall = false;
     private boolean mUserHangup = false;
+    private boolean mCallIsTransferred = false;
     private String mCallerId;
     private String mIdentifier;
     private String mPhoneNumber;
+    private String mCurrentCallState;
+    private long mCallStartTime = 0;
+    private long mCallDuration = 0;
 
     /**
      * Constructor used for outbound calls.
@@ -68,6 +73,19 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipService = sipService;
         mRemoteLogger = mSipService.getRemoteLogger();
         mSipBroadcaster = mSipService.getSipBroadcaster();
+    }
+
+
+    public int getCallDuration() {
+        TimeVal timeVal = new TimeVal();
+        try {
+            CallInfo callInfo = this.getInfo();
+            timeVal = callInfo.getConnectDuration();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return timeVal.getSec();
     }
 
     public String getIdentifier() {
@@ -98,12 +116,16 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         if (!this.isOnHold()) {
             super.setHold(callOpParam);
             this.setIsOnHold(true);
+
+            mCurrentCallState = SipConstants.CALL_PUT_ON_HOLD_ACTION;
             mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_PUT_ON_HOLD_ACTION);
         } else {
             CallSetting callSetting = callOpParam.getOpt();
             callSetting.setFlag(pjsua_call_flag.PJSUA_CALL_UNHOLD.swigValue());
             super.reinvite(callOpParam);
             this.setIsOnHold(false);
+
+            mCurrentCallState = SipConstants.CALL_UNHOLD_ACTION;
             mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_UNHOLD_ACTION);
         }
     }
@@ -133,6 +155,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
      * @throws Exception
      */
     public void xFerReplaces(SipCall transferTo) throws Exception {
+        mCallIsTransferred = true;
+        transferTo.setCallIsTransferred(true);
         CallOpParam callOpParam = new CallOpParam(true);
         super.xferReplaces(transferTo, callOpParam);
     }
@@ -167,6 +191,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         try {
             CallInfo info = getInfo();  // Check to see if we can get CallInfo with this callback.
             pjsip_inv_state callState = info.getState();
+
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                 // We are handling a outgoing call.
                 mOutgoingCall = true;
@@ -181,6 +206,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 }
 
                 pjsip_status_code lastStatusCode = info.getLastStatusCode();
+
                 if (hasMedia() &&
                         (lastStatusCode == pjsip_status_code.PJSIP_SC_PROGRESS ||
                                 lastStatusCode == pjsip_status_code.PJSIP_SC_OK)) {
@@ -233,6 +259,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         } catch (Exception e) {
             this.onCallInvalidState(e);
         }
+    }
+
+    public String getCurrentCallState() {
+        return mCurrentCallState;
+    }
+
+    public Boolean getIsCallConnected() {
+        return mCallIsConnected;
     }
 
     public Uri getPhoneNumberUri() {
@@ -312,26 +346,31 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public void onCallConnected() {
         mRemoteLogger.d(TAG + " onCallConnected");
+        mCallIsConnected = true;
         mSipService.startGsmCallListener();
+        mCurrentCallState = SipConstants.CALL_CONNECTED_MESSAGE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_CONNECTED_MESSAGE);
     }
 
     public void onCallDisconnected() {
         mRemoteLogger.d(TAG + " onCallDisconnected");
         // Play end of call beep only when the remote party hangs up and the call was connected.
-        if (!mUserHangup && mCallIsConnected) {
+        if (!mUserHangup && mCallIsConnected && !mCallIsTransferred) {
             mSipService.playBusyTone();
         }
+        mCallIsConnected = false;
         // Remove this call from the service.
         mSipService.removeCallFromList(this);
+        mCurrentCallState = SipConstants.CALL_DISCONNECTED_MESSAGE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_DISCONNECTED_MESSAGE);
     }
 
     public void onCallInvalidState(Throwable fault) {
         mRemoteLogger.d(TAG + " onCallInvalidState");
         mRemoteLogger.d(TAG + " " + Log.getStackTraceString(fault));
-        mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_INVALID_STATE);
         mSipService.removeCallFromList(this);
+        mCurrentCallState = SipConstants.CALL_INVALID_STATE;
+        mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_INVALID_STATE);
         fault.printStackTrace();
     }
 
@@ -362,5 +401,13 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     public void onCallStopRingback() {
         mRemoteLogger.d(TAG + " onCallStopRingback");
         mSipService.stopRingback();
+    }
+
+    public boolean getCallIsTransferred() {
+        return mCallIsTransferred;
+    }
+
+    public void setCallIsTransferred(boolean transferred) {
+        mCallIsTransferred = transferred;
     }
 }

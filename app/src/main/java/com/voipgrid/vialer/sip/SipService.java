@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
@@ -296,6 +295,7 @@ public class SipService extends Service {
      */
     public void removeCallFromList(SipCall call) {
         mCallList.remove(call);
+
         // Update the GsmCallListener with the updated call list.
         if (mGsmCallListener != null) {
             mGsmCallListener.updateSipCallsList(mCallList);
@@ -304,6 +304,10 @@ public class SipService extends Service {
         if (mCallList.isEmpty()) {
             setCurrentCall(null);
             stopSelf();
+        } else if (call.getCallIsTransferred()) {
+            setCurrentCall(null);
+        } else {
+            setCurrentCall(mCallList.get(0));
         }
     }
 
@@ -321,5 +325,13 @@ public class SipService extends Service {
 
     public SipCall getInitialCall() {
         return mInitialCall;
+    }
+
+    public SipCall getFirstCall() {
+        if (mCallList.size() > 0) {
+            return mCallList.get(0);
+        } else {
+            return null;
+        }
     }
 }
