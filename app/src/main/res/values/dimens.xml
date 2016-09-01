@@ -10,7 +10,7 @@
     <dimen name="fab_border_width">0dp</dimen>
 
     <!-- negative margins to remove the cardviews compat shadow margins -->
-    <dimen name="dialpad_calling_button_bottom_margin">16dp</dimen>
+    <dimen name="dialpad_calling_button_bottom_margin">2dp</dimen>
 
     <dimen name="dialpad_button_padding">4dp</dimen>
     <dimen name="dialpad_button_digit_text_size">18sp</dimen>
