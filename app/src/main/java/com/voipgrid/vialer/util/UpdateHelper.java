@@ -105,7 +105,7 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
             case v2_1_1:
                 setSipEnabled();
                 break;
-            case v3_2_0:
+            case v4_0:
                 migrateCredentials();
                 break;
         }

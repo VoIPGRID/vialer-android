@@ -9,7 +9,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 50
-        versionName "3.2.0"
+        versionName "4.0 beta"
         multiDexEnabled true
         ndk {
             moduleName "pjsua2"
