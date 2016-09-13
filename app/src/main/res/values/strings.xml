@@ -114,6 +114,7 @@
 
     <string name="url_app_info">http://vialerapp.com/app-info/</string>
 
+    <string name="add_destination_title">Destinations</string>
     <string name="info_menu_item_title">Info</string>
     <string name="info_button_title">How does Vialer work?</string>
     <string name="account_sip_switch">Call using VoIP</string>

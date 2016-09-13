@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -147,6 +148,30 @@ public abstract class NavigationDrawerActivity
 
         // Setup the spinner in the drawer.
         setupSpinner();
+
+        Typeface font = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
+
+        TextView destinationButton = (TextView) findViewById(R.id.add_destination_button);
+        destinationButton.setTypeface(font);
+        destinationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startWebActivity(
+                        getString(R.string.add_destination_title),
+                        getString(R.string.web_add_destination),
+                        getString(R.string.analytics_destination_title)
+                );
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Force a reload of availability when returned to the activity,
+        // per example when returning from the webview.
+        Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
+        call.enqueue(this);
     }
 
     protected void setSystemUserInfo() {
