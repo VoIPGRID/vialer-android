@@ -82,7 +82,10 @@ public class CallRecordFragment extends ListFragment implements
         }
 
         protected void onPostExecute(List<CallRecord> records) {
-            displayCachedRecords(records);
+            if(isAdded()){
+                // Only display Records when the fragment is still attached to an activity.
+                displayCachedRecords(records);
+            }
         }
     }
 
