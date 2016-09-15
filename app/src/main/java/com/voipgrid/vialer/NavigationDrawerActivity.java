@@ -159,7 +159,7 @@ public abstract class NavigationDrawerActivity
                 startWebActivity(
                         getString(R.string.add_destination_title),
                         getString(R.string.web_add_destination),
-                        getString(R.string.analytics_destination_title)
+                        getString(R.string.analytics_add_destination_title)
                 );
             }
         });
