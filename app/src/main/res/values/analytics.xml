@@ -20,14 +20,17 @@
     <string name="analytics_event_name_call_response">response time</string>
 
     <!-- Call events -->
-    <string name="analytics_event_category_call">call</string>
+    <string name="analytics_event_category_call">Call</string>
 
     <string name="analytics_event_action_inbound">Inbound</string>
     <string name="analytics_event_action_outbound">Outbound</string>
+    <string name="analytics_event_action_transfer">Transfer</string>
 
     <string name="analytics_event_label_accepted">Accepted</string>
     <string name="analytics_event_label_declined">Declined</string>
     <string name="analytics_event_label_ringing">Ringing</string>
+    <string name="analytics_event_label_success">Success</string>
+    <string name="analytics_event_label_fail">Fail</string>
 
     <string name="analytics_event_label_connect_a_b">ConnectAB</string>
     <string name="analytics_event_label_sip">SIP</string>

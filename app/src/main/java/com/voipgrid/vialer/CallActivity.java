@@ -1284,8 +1284,18 @@ public class CallActivity extends AppCompatActivity
         try {
             mTransferredNumber = mSipService.getCurrentCall().getPhoneNumber();
             mSipService.getFirstCall().xFerReplaces(mSipService.getCurrentCall());
+            mAnalyticsHelper.sendEvent(
+                    getString(R.string.analytics_event_category_call),
+                    getString(R.string.analytics_event_action_transfer),
+                    getString(R.string.analytics_event_label_success)
+            );
         } catch (Exception e) {
             e.printStackTrace();
+            mAnalyticsHelper.sendEvent(
+                    getString(R.string.analytics_event_category_call),
+                    getString(R.string.analytics_event_action_transfer),
+                    getString(R.string.analytics_event_label_fail)
+            );
         }
 
         mCallIsTransferred = true;
