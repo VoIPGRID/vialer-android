@@ -196,7 +196,11 @@ public class SetupActivity extends RemoteLoggingActivity implements
     @Override
     public void onSetVoipAccount(Fragment fragment) {
         WebActivityHelper webHelper = new WebActivityHelper(this);
-        webHelper.startWebActivity(getString(R.string.user_change_title), getString(R.string.web_user_change));
+        webHelper.startWebActivity(
+                getString(R.string.user_change_title),
+                getString(R.string.web_user_change),
+                getString(R.string.analytics_user_change)
+        );
     }
 
     @Override
