@@ -121,19 +121,21 @@ public class CallActivity extends AppCompatActivity
     Runnable mCallDurationRunnable = new Runnable() {
         @Override
         public void run() {
-            String firstCallIdentifier = mSipService.getFirstCall().getIdentifier();
-            String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
-            long seconds;
+            if(mSipService.getCurrentCall() != null && mSipService.getFirstCall() != null) {
+                String firstCallIdentifier = mSipService.getFirstCall().getIdentifier();
+                String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
+                long seconds;
 
-            if (firstCallIdentifier.equals(currentCallIdentifier)) {
-                seconds = mSipService.getFirstCall().getCallDuration();
-            } else {
-                seconds = mSipService.getCurrentCall().getCallDuration();
+                if (firstCallIdentifier.equals(currentCallIdentifier)) {
+                    seconds = mSipService.getFirstCall().getCallDuration();
+                } else {
+                    seconds = mSipService.getCurrentCall().getCallDuration();
+                }
+                mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
+
+                // Keep timer running for as long as possible.
+                mCallHandler.postDelayed(mCallDurationRunnable, 1000);
             }
-            mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
-
-            // Keep timer running for as long as possible.
-            mCallHandler.postDelayed(mCallDurationRunnable, 1000);
         }
     };
 
