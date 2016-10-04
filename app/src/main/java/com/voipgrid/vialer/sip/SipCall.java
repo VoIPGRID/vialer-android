@@ -297,7 +297,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mRemoteLogger.d(TAG + " onCallIncoming");
 
         // Determine whether we can accept the incoming call.
-        pjsip_status_code code = mSipService.getCurrentCall() != null ? pjsip_status_code.PJSIP_SC_BUSY_HERE : pjsip_status_code.PJSIP_SC_RINGING;
+        pjsip_status_code code = (mSipService.getCurrentCall() != null || mSipService.hasGSMCall())? pjsip_status_code.PJSIP_SC_BUSY_HERE : pjsip_status_code.PJSIP_SC_RINGING;
 
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(code);
