@@ -13,6 +13,7 @@ import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.models.ClickToDialParams;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -25,6 +26,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class TwoStepCallActivity extends LoginRequiredActivity implements View.OnClickListener, Callback<Object> {
+    private final static String TAG = TwoStepCallActivity.class.getSimpleName();
     public static final String NUMBER_TO_CALL = "number-to-call";
     private boolean cancelCall = false;
 
@@ -32,6 +34,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
 
     private AnalyticsHelper mAnalyticsHelper;
     private Api mApi;
+    private RemoteLogger mRemoteLogger;
     private SystemUser mSystemUser;
     private TwoStepCallTask mTwoStepCallTask;
     private TwoStepCallView mTwoStepCallView;
@@ -55,6 +58,8 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
                 getEmail(),
                 getPassword()
         );
+
+        mRemoteLogger = new RemoteLogger(this);
 
         String numberToCall = getIntent().getStringExtra(NUMBER_TO_CALL);
 
@@ -251,10 +256,16 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
                             Response<TwoStepCallStatus> response = call.execute();
                             if (response.isSuccess() && response.body() != null) {
                                 TwoStepCallStatus status = response.body();
-                                handleMessage(status.getStatus());
+                                if (status.getStatus() != null){
+                                    handleMessage(status.getStatus());
+                                } else {
+                                    mRemoteLogger.d(TAG + " status.getStatus() is null");
+                                }
                             }
                         } catch (IOException e) {
 
+                        } catch (StackOverflowError e) {
+                            mRemoteLogger.d(TAG + " StackOverflowError");
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
