@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.sip;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -9,6 +10,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
@@ -180,6 +182,14 @@ public class SipService extends Service {
                 unregisterReceiver(mGsmCallListener);
             }
         }
+    }
+
+    /**
+     * Returns boolean representing whether there is a gsm call or not.
+     */
+    public boolean hasGSMCall() {
+        return (((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE)).getCallState()
+                == TelephonyManager.CALL_STATE_OFFHOOK);
     }
 
     /**
