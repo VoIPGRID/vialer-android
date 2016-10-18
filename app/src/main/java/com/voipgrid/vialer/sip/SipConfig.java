@@ -73,9 +73,9 @@ public class SipConfig implements AccountStatus {
 
     static {
         sCodecPrioMapping = new HashMap<>();
-        sCodecPrioMapping.put("PCMA/8000/1", (short) 210);
-        sCodecPrioMapping.put("G722/16000/1", (short) 209);
-        sCodecPrioMapping.put("iLBC/8000/1", (short) 208);
+        sCodecPrioMapping.put("iLBC/8000/1", (short) 210);
+        sCodecPrioMapping.put("PCMA/8000/1", (short) 209);
+        sCodecPrioMapping.put("G722/16000/1", (short) 208);
         sCodecPrioMapping.put("PCMU/8000/1", (short) 0);
         sCodecPrioMapping.put("speex/8000/1", (short) 0);
         sCodecPrioMapping.put("speex/16000/1", (short) 0);
