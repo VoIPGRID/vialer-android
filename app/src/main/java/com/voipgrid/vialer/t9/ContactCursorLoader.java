@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.provider.ContactsContract;
 import android.support.v4.content.AsyncTaskLoader;
+import android.util.Base64;
 
 import com.voipgrid.vialer.logging.RemoteLogger;
 
@@ -79,6 +80,8 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
                             logger.e(e.getClass().getSimpleName());
                             logger.e("QUERY: " + mT9Query);
                             logger.e("DISPLAYNAME: " + displayName);
+                            // Log displayname B64 encoded in case of formatting done by our logging.
+                            logger.e("ENCODED DISPLAYNAME: " + Base64.encodeToString(displayName.getBytes(), 0));
                             // Displayname will be shown without highlighting.
                         }
                     }
