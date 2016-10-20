@@ -23,6 +23,7 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.logging.RemoteLoggingActivity;
 import com.voipgrid.vialer.models.PasswordResetParams;
 import com.voipgrid.vialer.util.AccountHelper;
@@ -44,12 +45,14 @@ public class SetupActivity extends RemoteLoggingActivity implements
         SetUpVoipAccountFragment.FragmentInteractionListener,
         Callback {
 
+    private final static String TAG = SetupActivity.class.getSimpleName();
     private String mPassword;
     private String mActivityToReturnToName = "";
 
     private Api mApi;
     private JsonStorage mJsonStorage;
     private Preferences mPreferences;
+    private RemoteLogger mRemoteLogger;
     private ServiceGenerator mServiceGen;
 
     @Override
@@ -59,6 +62,9 @@ public class SetupActivity extends RemoteLoggingActivity implements
 
         mJsonStorage = new JsonStorage(this);
         mPreferences = new Preferences(this);
+
+        // Forced logging due to user not being able to set/unset it at this point.
+        mRemoteLogger = new RemoteLogger(this, true);
 
         Fragment gotoFragment = null;
         Integer fragmentId = null;
@@ -327,6 +333,9 @@ public class SetupActivity extends RemoteLoggingActivity implements
                         }
                     });
                 } else {
+                    if (systemUser.getOutgoingCli() == null || systemUser.getOutgoingCli().isEmpty()) {
+                        mRemoteLogger.d(TAG + " onResponse getOutgoingCli is null");
+                    }
                     mPreferences.setSipPermission(true);
 
                     AccountHelper accountHelper = new AccountHelper(this);
