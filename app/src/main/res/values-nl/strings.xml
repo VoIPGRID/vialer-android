@@ -131,6 +131,11 @@
     <string name="tab_title_recents">recent</string>
     <string name="tab_title_missed">gemist</string>
 
+    <!-- Call notification values -->
+    <string name="callnotification_incoming_call">Inkomend gesprek</string>
+    <string name="callnotification_active_call">Actief gesprek</string>
+    <string name="callnotification_dialing">Kiezen</string>
+
     <string name="navigation_name_placeholder_text">Geen uitgaand nummer geconfigureerd</string>
     <string name="supressed_number">Anoniem</string>
 
