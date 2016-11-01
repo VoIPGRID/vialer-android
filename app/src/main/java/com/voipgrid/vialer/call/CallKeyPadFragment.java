@@ -15,9 +15,10 @@ import com.voipgrid.vialer.dialer.NumberInputView;
 /**
  * Fragment for the keypad when calling.
  */
-public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadClickListener {
+public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadClickListener, View.OnClickListener {
     private NumberInputView mNumberInputView;
     private CallKeyPadFragmentListener mCallback;
+    private View mHangupButton;
 
     public static CallKeyPadFragment newInstance() {
         CallKeyPadFragment fragment = new CallKeyPadFragment();
@@ -36,6 +37,9 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
         ViewGroup keyPadViewContainer = (ViewGroup) view.findViewById(R.id.fragment_call_key_pad);
         KeyPadView keyPadView = (KeyPadView) keyPadViewContainer.findViewById(R.id.key_pad_view);
         keyPadView.setOnKeyPadClickListener(this);
+
+        mHangupButton = view.findViewById(R.id.button_keypad_call_hangup);
+        mHangupButton.setOnClickListener(this);
 
         mNumberInputView = (NumberInputView) view.findViewById(R.id.number_input_edit_text);
         mNumberInputView.setOnInputChangedListener(new NumberInputView.OnInputChangedListener() {
@@ -73,7 +77,18 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
         mCallback.callKeyPadButtonClicked(digit);
     }
 
+    @Override
+    public void onClick(View view) {
+        int viewId = view.getId();
+
+        switch (viewId) {
+            case R.id.button_keypad_call_hangup:
+                mCallback.hangupFromKeypad();
+        }
+    }
+
     public interface CallKeyPadFragmentListener {
         void callKeyPadButtonClicked(String dtmf);
+        void hangupFromKeypad();
     }
 }
