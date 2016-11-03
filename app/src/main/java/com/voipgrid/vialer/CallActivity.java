@@ -1282,6 +1282,15 @@ public class CallActivity extends AppCompatActivity
     }
 
     @Override
+    public void hangupFromKeypad() {
+        try {
+            mSipService.getCurrentCall().hangup(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void callTransferConnectTheCalls() {
         try {
             mTransferredNumber = mSipService.getCurrentCall().getPhoneNumber();
