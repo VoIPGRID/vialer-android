@@ -1,10 +1,19 @@
 package com.voipgrid.vialer.sip;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.util.ConnectivityHelper;
 
 import org.pjsip.pjsua2.AudDevManager;
 import org.pjsip.pjsua2.AudioMedia;
@@ -16,6 +25,10 @@ import org.pjsip.pjsua2.CallSetting;
 import org.pjsip.pjsua2.Media;
 import org.pjsip.pjsua2.OnCallMediaStateParam;
 import org.pjsip.pjsua2.OnCallStateParam;
+import org.pjsip.pjsua2.RtcpStat;
+import org.pjsip.pjsua2.RtcpStreamStat;
+import org.pjsip.pjsua2.StreamInfo;
+import org.pjsip.pjsua2.StreamStat;
 import org.pjsip.pjsua2.TimeVal;
 import org.pjsip.pjsua2.pjmedia_type;
 import org.pjsip.pjsua2.pjsip_inv_state;
@@ -47,8 +60,42 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mIdentifier;
     private String mPhoneNumber;
     private String mCurrentCallState;
-    private long mCallStartTime = 0;
-    private long mCallDuration = 0;
+
+    private int mNetworkSwitchTime = 0;
+
+    private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleNetworkStateChange();
+        }
+    };
+
+    private void startNetworkingListener() {
+        mSipService.registerReceiver(mNetworkStateReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    private void stopNetworkingListener() {
+        mSipService.unregisterReceiver(mNetworkStateReceiver);
+    }
+
+    private void handleNetworkStateChange() {
+        if (getCallDuration() - mNetworkSwitchTime > 10) {
+            sendMos();
+        }
+        mNetworkSwitchTime = getCallDuration();
+    }
+
+    private void sendMos() {
+        if ((getCallDuration() - mNetworkSwitchTime) > 10) {
+            new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
+                    mSipService.getString(R.string.analytics_event_category_metrics),
+                    mSipService.getString(R.string.analytics_event_action_callmetrics),
+                    mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
+                    (100* (long) this.calculateMos())
+            );
+        }
+    }
 
     /**
      * Constructor used for outbound calls.
@@ -60,6 +107,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipService = sipService;
         mRemoteLogger = mSipService.getRemoteLogger();
         mSipBroadcaster = mSipService.getSipBroadcaster();
+        startNetworkingListener();
     }
 
     /**
@@ -73,8 +121,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipService = sipService;
         mRemoteLogger = mSipService.getRemoteLogger();
         mSipBroadcaster = mSipService.getSipBroadcaster();
+        startNetworkingListener();
     }
-
 
     public int getCallDuration() {
         TimeVal timeVal = new TimeVal();
@@ -86,6 +134,74 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
 
         return timeVal.getSec();
+    }
+
+    public String getCodec() {
+        try {
+            StreamInfo mStreaminfo = this.getStreamInfo(0);
+            return mStreaminfo.getCodecName();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    /**
+     *  This will calculate the current MOS value of the call.
+     *
+     *  Credits to: https://www.pingman.com/kb/article/how-is-mos-calculated-in-pingplotter-pro-50.html
+     */
+    private float getR() {
+        float r = 0;
+        try {
+            StreamStat mStreamStat = this.getStreamStat(0);
+
+            RtcpStat rtcpStat = mStreamStat.getRtcp();
+            RtcpStreamStat rtcpStreamStat = rtcpStat.getRxStat();
+
+            float rxJitter = (float) rtcpStreamStat.getJitterUsec().getMean() / 1000;
+            float averageRoundTripTime = (float) rtcpStat.getRttUsec().getMean() / 1000;
+            if (averageRoundTripTime == 0) {
+                averageRoundTripTime = 20; // Estimated by Bob
+            }
+
+            // Take the average latency, add jitter, but double the impact to latency
+            // then add 10 for protocol latencies
+            float effectiveLatency = averageRoundTripTime + rxJitter * 2 + 10;
+
+            // Implement a basic curve - deduct 4 for the R value at 160ms of latency
+            // (round trip).  Anything over that gets a much more agressive deduction.
+            if (effectiveLatency < 160) {
+                r = 93.2f - (effectiveLatency / 40);
+            } else {
+                r = 93.2f - (effectiveLatency - 120) / 10;
+            }
+
+            // Number of packets send and received.
+            float rxPackets = rtcpStreamStat.getPkt();
+            // Percentage package loss (100 = 100% loss - 0 = 0% loss)
+            float rxLoss = rtcpStreamStat.getLoss();
+            float rxPacketLoss;
+            if (rxPackets == 0) {
+                rxPacketLoss = 100f;
+            } else {
+                rxPacketLoss = (rxLoss / (rxPackets + rxLoss)) * 100f;
+            }
+
+            // Now, let's deduct 2.5 R values per percentage of packet loss.
+            r = r - (rxPacketLoss * 2.5f);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return r;
+    }
+
+    public float calculateMos() {
+        float r = getR();
+        if (r > 0) {
+            return 1f + 0.035f * r + .000007f * r * (r - 60f) * (100f - r);
+        }
+        return 0f;
     }
 
     public String getIdentifier() {
@@ -354,6 +470,9 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public void onCallDisconnected() {
         mRemoteLogger.d(TAG + " onCallDisconnected");
+        sendMos();
+        stopNetworkingListener();
+
         // Play end of call beep only when the remote party hangs up and the call was connected.
         if (!mUserHangup && mCallIsConnected && !mCallIsTransferred) {
             mSipService.playBusyTone();
@@ -409,5 +528,12 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public void setCallIsTransferred(boolean transferred) {
         mCallIsTransferred = transferred;
+    }
+
+    public Object getConnectionType() {
+        return new ConnectivityHelper(
+                (ConnectivityManager) mSipService.getSystemService(mSipService.CONNECTIVITY_SERVICE),
+                (TelephonyManager) mSipService.getSystemService(mSipService.TELEPHONY_SERVICE)
+        ).getConnectionTypeString();
     }
 }
