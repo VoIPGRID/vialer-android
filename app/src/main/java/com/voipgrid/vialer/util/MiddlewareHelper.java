@@ -89,6 +89,10 @@ public class MiddlewareHelper {
         JsonStorage jsonStorage = new JsonStorage(context);
         AccountHelper accountHelper = new AccountHelper(context);
 
+        if (!jsonStorage.has(PhoneAccount.class)) {
+            return;
+        }
+
         Registration api = ServiceGenerator.createService(
                 context,
                 Registration.class,
@@ -96,6 +100,7 @@ public class MiddlewareHelper {
                 accountHelper.getEmail(),
                 accountHelper.getPassword()
         );
+
         String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
         String fullName = ((SystemUser) jsonStorage.get(SystemUser.class)).getFullName();
         String appName = context.getPackageName();
