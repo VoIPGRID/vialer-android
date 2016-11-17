@@ -131,7 +131,11 @@ public class SipService extends Service {
         mRemoteLogger.d(TAG + " onDestroy");
         stopGsmCallListener();
 
-        mSipConfig.cleanUp();
+        // If no phoneaccount was found in the onCreate there won't be a sipconfig either.
+        // Check to avoid nullpointers.
+        if (mSipConfig != null) {
+            mSipConfig.cleanUp();
+        }
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
