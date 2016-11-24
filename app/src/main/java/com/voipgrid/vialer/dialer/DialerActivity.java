@@ -42,10 +42,10 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.CustomReceiver;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.IconHelper;
+import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.NetworkStateViewHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
-import com.voipgrid.vialer.util.JsonStorage;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -296,6 +296,11 @@ public class DialerActivity extends LoginRequiredActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        // Check if wifi should be turned back on.
+        if(ConnectivityHelper.mWifiKilled) {
+            mConnectivityHelper.useWifi(this, true);
+            ConnectivityHelper.mWifiKilled = false;
+        }
         registerReceivers();
 
         // Permission changed since last accessing this Activity.

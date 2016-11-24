@@ -104,6 +104,7 @@
     <string name="user_is_partner_error_title">Login failed</string>
     <string name="user_is_partner_error_message">This user is not allowed to use the app.</string>
 
+    <!-- Account fragment values -->
     <string name="title_activity_account">@string/settings_menu_item_title</string>
     <string name="account_sip_id_edit_text_hint">VoIP account</string>
     <string name="account_sip_password_edit_text_hint">Password</string>
@@ -111,6 +112,12 @@
     <string name="account_outgoing_number_edit_text_hint">Outgoing number</string>
     <string name="action_done">Done</string>
     <string name="action_edit">Edit</string>
+    <string name="call_connection_always_LTE">Only 4G</string>
+    <string name="call_connection_use_wifi">WiFi when connected</string>
+    <string name="call_connection_optional">Show pop-up for outgoing calls</string>
+    <string name="connection_preference_dialog_title">Advice: turn off WiFi for this call</string>
+    <string name="connection_preference_dialog_message">Mobile networks LTE(4G) are more stable which leads to a higher audio quality. \n\nTurn off WiFi for this call?</string>
+    <string name="connection_preference_switch_toast">Trying to handover to LTE(4G)</string>
 
     <string name="url_app_info">http://vialerapp.com/app-info/</string>
 

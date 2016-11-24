@@ -104,6 +104,7 @@
     <string name="user_is_partner_error_title">Login mislukt</string>
     <string name="user_is_partner_error_message">Deze gebruiker is niet toegestaan om deze app te gebruiken.</string>
 
+    <!-- Account fragment values -->
     <string name="title_activity_account">@string/settings_menu_item_title</string>
     <string name="account_sip_id_edit_text_hint">VoIP Account</string>
     <string name="account_sip_password_edit_text_hint">Wachtwoord</string>
@@ -111,6 +112,12 @@
     <string name="account_outgoing_number_edit_text_hint">Uitgaand nummer</string>
     <string name="action_done">Klaar</string>
     <string name="action_edit">Wijzig</string>
+    <string name="call_connection_always_LTE">Alleen 4G</string>
+    <string name="call_connection_use_wifi">WiFi wanneer verbonden</string>
+    <string name="call_connection_optional">Keuze weergeven bij uitgaand gesprek</string>
+    <string name="connection_preference_dialog_title">Tip: schakel WiFi uit voor dit gesprek</string>
+    <string name="connection_preference_dialog_message">Met mobiel internet (4G) is de verbinding stabieler en daarmee de geluidskwaliteit hoger. \n\nWiFi tijdelijk uitschakelen?</string>
+    <string name="connection_preference_switch_toast">Controleren of 4G beschikbaar is</string>
 
     <string name="url_app_info">http://vialerapp.com/nl/app-info/</string>
 

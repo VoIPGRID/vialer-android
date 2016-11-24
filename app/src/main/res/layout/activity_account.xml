@@ -15,23 +15,22 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:background="@color/color_primary"
-        app:popupTheme="@style/ActionBar_Popup"
-        android:theme="@style/ActionBar" />
+        android:theme="@style/ActionBar"
+        app:popupTheme="@style/ActionBar_Popup" />
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:id="@+id/fragment_container"
-        >
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <ProgressBar
+            android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/progressBar"
+            android:indeterminate="true"
             android:progressTint="@color/progress_bar_color"
-            android:visibility="invisible"
-            android:indeterminate="true" />
+            android:visibility="invisible" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -47,14 +46,14 @@
                 android:paddingTop="@dimen/activity_vertical_margin">
 
                 <Switch
-                    android:layout_marginLeft="4dp"
                     android:id="@+id/account_sip_switch"
+                    style="@style/AccountTextInputLayoutStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/account_sip_switch"
-                    android:paddingBottom="@dimen/activity_vertical_margin"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    style="@style/AccountTextInputLayoutStyle"/>
+                    android:layout_marginLeft="4dp"
+                    android:paddingBottom="@dimen/activity_vertical_margin"
+                    android:text="@string/account_sip_switch" />
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
@@ -97,20 +96,20 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:hint="@string/account_outgoing_number_edit_text_hint"
-                        android:inputType="textVisiblePassword"/>
+                        android:inputType="textVisiblePassword" />
 
                 </android.support.design.widget.TextInputLayout>
 
                 <Switch
-                    android:layout_marginLeft="4dp"
                     android:id="@+id/remote_logging_switch"
+                    style="@style/AccountTextInputLayoutStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/remote_logging_switch_title"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:layout_marginLeft="4dp"
                     android:paddingBottom="@dimen/activity_vertical_margin"
                     android:paddingTop="@dimen/activity_vertical_margin"
-                    android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    style="@style/AccountTextInputLayoutStyle"/>
+                    android:text="@string/remote_logging_switch_title" />
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
@@ -126,6 +125,24 @@
                         android:inputType="text" />
 
                 </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
+
+                    <TextView
+                        android:id="@+id/textView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Call using:"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+                </android.support.design.widget.TextInputLayout>
+
+                <Spinner
+                    android:id="@+id/call_connection_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 

@@ -20,7 +20,6 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.CallRecord;
-import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -160,6 +159,11 @@ public class CallRecordFragment extends ListFragment implements
     public void onResume() {
         super.onResume();
 
+        // Check if wifi should be turned back on.
+        if(ConnectivityHelper.mWifiKilled) {
+            mConnectivityHelper.useWifi(getActivity(), true);
+            ConnectivityHelper.mWifiKilled = false;
+        }
         mNetworkStateViewHelper.updateNetworkStateView();
         mNetworkStateViewHelper.startListening();
         mAdapter.mCallAlreadySetup = false;
