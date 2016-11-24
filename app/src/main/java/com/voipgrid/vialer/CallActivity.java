@@ -121,7 +121,7 @@ public class CallActivity extends AppCompatActivity
     Runnable mCallDurationRunnable = new Runnable() {
         @Override
         public void run() {
-            if(mSipService.getCurrentCall() != null && mSipService.getFirstCall() != null) {
+            if (mSipService.getCurrentCall() != null && mSipService.getFirstCall() != null) {
                 String firstCallIdentifier = mSipService.getFirstCall().getIdentifier();
                 String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
                 long seconds;
@@ -233,8 +233,16 @@ public class CallActivity extends AppCompatActivity
             }
 
             if (mIsIncomingCall) {
-                mSipService.getFirstCall().setCallerId(mCallerIdToDisplay);
-                mSipService.getFirstCall().setPhoneNumber(mPhoneNumberToDisplay);
+
+                // Wait one second before setting the callerId and phonenumber
+                // so the SipService can set the currentcall.
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSipService.getFirstCall().setCallerId(mCallerIdToDisplay);
+                        mSipService.getFirstCall().setPhoneNumber(mPhoneNumberToDisplay);
+                    }
+                }, 1000);
             }
         }
 
@@ -514,7 +522,7 @@ public class CallActivity extends AppCompatActivity
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter != null) {
             mBluetoothEnabled = bluetoothAdapter.isEnabled();
-            if (mBluetoothEnabled)  {
+            if (mBluetoothEnabled) {
                 mBluetoothAudio = bluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP) == BluetoothProfile.STATE_CONNECTED;
                 if (mBluetoothAudio) {
                     mBluetoothDeviceConnected = true;
@@ -1015,7 +1023,7 @@ public class CallActivity extends AppCompatActivity
     private void swapFragment(String tag, Map extraInfo) {
         Fragment newFragment = null;
 
-        switch(tag) {
+        switch (tag) {
             case TAG_CALL_INCOMING_FRAGMENT:
                 newFragment = ((CallIncomingFragment) getFragmentManager()
                         .findFragmentById(R.id.fragment_call_incoming)).newInstance();
@@ -1220,6 +1228,7 @@ public class CallActivity extends AppCompatActivity
 
     /**
      * Function to toggle the visibility of the bluetooth button.
+     *
      * @param visible
      */
     private void toggleBluetoothButtonVisibility(boolean visible) {
