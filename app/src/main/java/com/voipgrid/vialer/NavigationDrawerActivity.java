@@ -2,6 +2,7 @@ package com.voipgrid.vialer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -19,6 +20,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -37,9 +39,9 @@ import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.onboarding.LogoutTask;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.MiddlewareHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -58,7 +60,7 @@ public abstract class NavigationDrawerActivity
         implements Callback, AdapterView.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
 
-    private ArrayAdapter<Destination> mSpinnerAdapter;
+    private CustomFontSpinnerAdapter<Destination> mSpinnerAdapter;
     private DrawerLayout mDrawerLayout;
     private Spinner mSpinner;
     private Toolbar mToolbar;
@@ -148,21 +150,6 @@ public abstract class NavigationDrawerActivity
 
         // Setup the spinner in the drawer.
         setupSpinner();
-
-        Typeface font = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
-
-        TextView destinationButton = (TextView) findViewById(R.id.add_destination_button);
-        destinationButton.setTypeface(font);
-        destinationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startWebActivity(
-                        getString(R.string.add_destination_title),
-                        getString(R.string.web_add_destination),
-                        getString(R.string.analytics_add_destination_title)
-                );
-            }
-        });
     }
 
     @Override
@@ -327,7 +314,7 @@ public abstract class NavigationDrawerActivity
             Destination notAvailableDestination = new FixedDestination();
             notAvailableDestination.setDescription(getString(R.string.not_available));
 
-            // Clear old list and the not available destination.
+            // Clear old list and add the not available destination.
             mSpinnerAdapter.clear();
             mSpinnerAdapter.add(notAvailableDestination);
 
@@ -348,9 +335,41 @@ public abstract class NavigationDrawerActivity
                     activeIndex = i+1;
                 }
             }
-            // Update spinner.
+
+            // Create not available destination.
+            Destination addDestination = new FixedDestination();
+            String addDestinationText =  getString(R.string.fa_plus_circle) +
+                    "   " + getString(R.string.add_availability);
+            addDestination.setDescription(addDestinationText);
+            mSpinnerAdapter.add(addDestination);
+
             mSpinnerAdapter.notifyDataSetChanged();
             mSpinner.setSelection(activeIndex);
+        }
+    }
+
+    private static class CustomFontSpinnerAdapter<D> extends ArrayAdapter {
+        // Initialise custom font, for example:
+        Typeface font = Typeface.createFromAsset(getContext().getAssets(), "fontawesome-webfont.ttf");
+
+        private CustomFontSpinnerAdapter(Context context, int resource) {
+            super(context, resource);
+        }
+
+        // Affects default (closed) state of the spinner
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView view = (TextView) super.getView(position, convertView, parent);
+            view.setTypeface(font);
+            return view;
+        }
+
+        // Affects opened state of the spinner
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            TextView view = (TextView) super.getDropDownView(position, convertView, parent);
+            view.setTypeface(font);
+            return view;
         }
     }
 
@@ -359,7 +378,7 @@ public abstract class NavigationDrawerActivity
      */
     private void setupSpinner(){
         mSpinner = (Spinner) findViewById(R.id.menu_availability_spinner);
-        mSpinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
+        mSpinnerAdapter = new CustomFontSpinnerAdapter<>(this, android.R.layout.simple_spinner_item);
         mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         mSpinner.setAdapter(mSpinnerAdapter);
@@ -374,15 +393,22 @@ public abstract class NavigationDrawerActivity
         if(mFirstTimeOnItemSelected) {
             mFirstTimeOnItemSelected = false;
         } else {
-            Destination destination = (Destination) parent.getAdapter().getItem(position);
-            SelectedUserDestinationParams params = new SelectedUserDestinationParams();
-            params.fixedDestination = destination instanceof FixedDestination ?
-                    destination.getId() : null;
-            params.phoneAccount = destination instanceof PhoneAccount ?
-                    destination.getId() : null;
-            Call<Object> call = mApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
-            call.enqueue(this);
-
+            if(parent.getCount()-1 == position){
+                startWebActivity(
+                        getString(R.string.add_destination_title),
+                        getString(R.string.web_add_destination),
+                        getString(R.string.analytics_add_destination_title)
+                );
+            } else {
+                Destination destination = (Destination) parent.getAdapter().getItem(position);
+                SelectedUserDestinationParams params = new SelectedUserDestinationParams();
+                params.fixedDestination = destination instanceof FixedDestination ?
+                        destination.getId() : null;
+                params.phoneAccount = destination instanceof PhoneAccount ?
+                        destination.getId() : null;
+                Call<Object> call = mApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
+                call.enqueue(this);
+            }
         }
     }
 

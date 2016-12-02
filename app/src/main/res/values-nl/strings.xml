@@ -126,6 +126,7 @@
     <string name="info_button_title">Hoe werkt bellen met Vialer</string>
     <string name="account_sip_switch">Bellen via VoIP</string>
     <string name="account_availability_switch_title">Bereikbaarheid</string>
+    <string name="add_availability">Bereikbaarheid toevoegen</string>
     <string name="not_available">Niet bereikbaar</string>
     <string name="tab_title_recents">recent</string>
     <string name="tab_title_missed">gemist</string>

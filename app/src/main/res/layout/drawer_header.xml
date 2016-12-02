@@ -72,13 +72,6 @@
                 style="@style/AccountTextInputLayoutStyle"
                 android:layout_weight="1" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/fa_plus_circle"
-                android:id="@+id/add_destination_button"
-                android:layout_gravity="center" />
-
         </LinearLayout>
 
     </LinearLayout>
