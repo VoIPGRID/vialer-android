@@ -97,6 +97,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     }
 
+    private void sendBandwith() {
+        if (getCallDuration() > 10) {
+            new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
+                    mSipService.getString(R.string.analytics_event_category_metrics),
+                    mSipService.getString(R.string.analytics_event_action_callmetrics),
+                    mSipService.getString(R.string.analytics_event_label_bandwith, getCodec()),
+                    (int) this.getBandwithUsage()*1024
+            );
+        }
+    }
+
     /**
      * Constructor used for outbound calls.
      * @param sipService
@@ -144,6 +155,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public long getBandwithUsage() {
+        long bandwith = 0;
+        try {
+            bandwith = this.getStreamStat(0).getRtcp().getRxStat().getBytes();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Devide to get MB's
+        return bandwith/(1024*1024);
     }
 
     /**

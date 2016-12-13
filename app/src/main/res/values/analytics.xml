@@ -34,6 +34,7 @@
     <string name="analytics_event_label_success">Success</string>
     <string name="analytics_event_label_fail">Fail</string>
     <string name="analytics_event_label_mos">MOS for AudioCodec:%1$s on Networktype:%2$s</string>
+    <string name="analytics_event_label_bandwith">Bandwidth for AudioCodec:%1$s</string>
 
     <string name="analytics_event_label_connect_a_b">ConnectAB</string>
     <string name="analytics_event_label_sip">SIP</string>
