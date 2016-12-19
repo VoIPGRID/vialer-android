@@ -149,6 +149,6 @@ public class Preferences {
     }
 
     public long getConnectionPreference() {
-        return mPreferences.getLong(CONNECTION_PREFERENCE, CONNECTION_PREFERENCE_NONE);
+        return mPreferences.getLong(CONNECTION_PREFERENCE, CONNECTION_PREFERENCE_WIFI);
     }
 }
