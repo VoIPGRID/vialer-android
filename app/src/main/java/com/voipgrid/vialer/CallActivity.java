@@ -239,8 +239,11 @@ public class CallActivity extends AppCompatActivity
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mSipService.getFirstCall().setCallerId(mCallerIdToDisplay);
-                        mSipService.getFirstCall().setPhoneNumber(mPhoneNumberToDisplay);
+                        SipCall firstCall = mSipService.getFirstCall();
+                        if (firstCall != null) {
+                            firstCall.setCallerId(mCallerIdToDisplay);
+                            firstCall.setPhoneNumber(mPhoneNumberToDisplay);
+                        }
                     }
                 }, 1000);
             }
