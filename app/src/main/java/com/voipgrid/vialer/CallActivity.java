@@ -1181,6 +1181,7 @@ public class CallActivity extends AppCompatActivity
                     mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, mPreviousVolume, 0);
                     mPreviousVolume = -1;
                 }
+                mAudioManager.setSpeakerphoneOn(mOnSpeaker);
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS:
