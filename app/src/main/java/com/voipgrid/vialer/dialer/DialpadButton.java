@@ -105,7 +105,6 @@ public class DialpadButton extends LinearLayout {
         chars.setTextSize(getResources().getDimension(R.dimen.dialpad_button_chars_text_size));
         chars.setAllCaps(getResources().getBoolean(R.bool.dialpad_button_chars_all_caps));
         linearLayout.addView(chars);
-
     }
 
     /**
