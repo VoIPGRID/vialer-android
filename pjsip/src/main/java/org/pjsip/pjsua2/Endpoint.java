@@ -158,10 +158,6 @@ public class Endpoint {
     return pj_stun_nat_type.swigToEnum(pjsua2JNI.Endpoint_natGetType(swigCPtr, this));
   }
 
-  public void natUpdateStunServers(StringVector prmServers, boolean prmWait) throws java.lang.Exception {
-    pjsua2JNI.Endpoint_natUpdateStunServers(swigCPtr, this, StringVector.getCPtr(prmServers), prmServers, prmWait);
-  }
-
   public void natCheckStunServers(StringVector prmServers, boolean prmWait, SWIGTYPE_p_void prmUserData) throws java.lang.Exception {
     pjsua2JNI.Endpoint_natCheckStunServers(swigCPtr, this, StringVector.getCPtr(prmServers), prmServers, prmWait, SWIGTYPE_p_void.getCPtr(prmUserData));
   }
@@ -255,16 +251,13 @@ public class Endpoint {
     pjsua2JNI.Endpoint_videoCodecSetPriority(swigCPtr, this, codec_id, priority);
   }
 
-  public VidCodecParam getVideoCodecParam(String codec_id) throws java.lang.Exception {
-    return new VidCodecParam(pjsua2JNI.Endpoint_getVideoCodecParam(swigCPtr, this, codec_id), true);
+  public SWIGTYPE_p_void videoCodecGetParam(String codec_id) throws java.lang.Exception {
+    long cPtr = pjsua2JNI.Endpoint_videoCodecGetParam(swigCPtr, this, codec_id);
+    return (cPtr == 0) ? null : new SWIGTYPE_p_void(cPtr, false);
   }
 
-  public void setVideoCodecParam(String codec_id, VidCodecParam param) throws java.lang.Exception {
-    pjsua2JNI.Endpoint_setVideoCodecParam(swigCPtr, this, codec_id, VidCodecParam.getCPtr(param), param);
-  }
-
-  public void resetVideoCodecParam(String codec_id) throws java.lang.Exception {
-    pjsua2JNI.Endpoint_resetVideoCodecParam(swigCPtr, this, codec_id);
+  public void videoCodecSetParam(String codec_id, SWIGTYPE_p_void param) throws java.lang.Exception {
+    pjsua2JNI.Endpoint_videoCodecSetParam(swigCPtr, this, codec_id, SWIGTYPE_p_void.getCPtr(param));
   }
 
   public void onNatDetectionComplete(OnNatDetectionCompleteParam prm) {
