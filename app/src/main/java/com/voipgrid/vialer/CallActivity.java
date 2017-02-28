@@ -44,6 +44,7 @@ import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.util.CustomReceiver;
+import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
@@ -105,36 +106,42 @@ public class CallActivity extends AppCompatActivity
     private BroadcastReceiver mBroadcastDeclineReceiver;
     private String mCurrentCallId;
 
-    private String mPhoneNumberToDisplay;
-    private String mCallerIdToDisplay;
+    public String mPhoneNumberToDisplay;
+    public String mType;
+    public String mCallerIdToDisplay;
     private String mTransferredNumber;
     private boolean mCallIsTransferred = false;
+    private boolean mFromNotification = false;
 
     // Keep track of the start time of a call, so we can keep track of its duration.
     long mCallStartTime = 0;
     private RemoteLogger mRemoteLogger;
     private SipService mSipService;
     private boolean mServiceBound = false;
+    private NotificationHelper mNotificationHelper = new NotificationHelper();
+    private int mNotificationId;
 
     // Runs without a timer by re-posting this handler at the end of the runnable.
     Handler mCallHandler = new Handler();
     Runnable mCallDurationRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mSipService.getCurrentCall() != null && mSipService.getFirstCall() != null) {
-                String firstCallIdentifier = mSipService.getFirstCall().getIdentifier();
-                String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
-                long seconds;
+            if (mSipService != null) {
+                if (mSipService.getCurrentCall() != null && mSipService.getFirstCall() != null) {
+                    String firstCallIdentifier = mSipService.getFirstCall().getIdentifier();
+                    String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
+                    long seconds;
 
-                if (firstCallIdentifier.equals(currentCallIdentifier)) {
-                    seconds = mSipService.getFirstCall().getCallDuration();
-                } else {
-                    seconds = mSipService.getCurrentCall().getCallDuration();
+                    if (firstCallIdentifier.equals(currentCallIdentifier)) {
+                        seconds = mSipService.getFirstCall().getCallDuration();
+                    } else {
+                        seconds = mSipService.getCurrentCall().getCallDuration();
+                    }
+                    mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
+
+                    // Keep timer running for as long as possible.
+                    mCallHandler.postDelayed(mCallDurationRunnable, 1000);
                 }
-                mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
-
-                // Keep timer running for as long as possible.
-                mCallHandler.postDelayed(mCallDurationRunnable, 1000);
             }
         }
     };
@@ -318,8 +325,8 @@ public class CallActivity extends AppCompatActivity
          * We are being asked to present account data from a contact entry,
          * but heck: Let's call the contact :D
          */
-        String type = intent.getType();
-        if (type.equals(TYPE_INCOMING_CALL) || type.equals(TYPE_OUTGOING_CALL)) {
+        mType = intent.getType();
+        if (mType.equals(TYPE_INCOMING_CALL) || mType.equals(TYPE_OUTGOING_CALL)) {
             // Update the textView with a number URI.
             mPhoneNumberToDisplay = intent.getStringExtra(PHONE_NUMBER);
             mCallerIdToDisplay = intent.getStringExtra(CONTACT_NAME);
@@ -327,39 +334,51 @@ public class CallActivity extends AppCompatActivity
             displayCallInfo();
 
             // Start the SipService which manages all SIP traffic.
-            mIsIncomingCall = type.equals(TYPE_INCOMING_CALL);
-
-            toggleCallStateButtonVisibility(type);
-
-            if (mIsIncomingCall) {
-                mRemoteLogger.d(TAG + " inComingCall");
-
-                // Ringing event.
-                mAnalyticsHelper.sendEvent(
-                        getString(R.string.analytics_event_category_call),
-                        getString(R.string.analytics_event_action_inbound),
-                        getString(R.string.analytics_event_label_ringing)
-                );
-
-                mIncomingCallIsRinging = true;
-                switch (mAudioManager.getRingerMode()) {
-                    case AudioManager.RINGER_MODE_NORMAL:
-                        playRingtone(true);
-                        break;
-
-                    case AudioManager.RINGER_MODE_VIBRATE:
-                        vibrate(true);
-                        break;
-
-                    case AudioManager.RINGER_MODE_SILENT:
-                        playRingtone(false);
-                        vibrate(false);
-                        break;
-                }
+            mIsIncomingCall = mType.equals(TYPE_INCOMING_CALL);
+            mFromNotification = intent.getBooleanExtra(NotificationHelper.TAG, false);
+            if (mFromNotification) {
+                mNotificationId = mNotificationHelper.displayNotification(this, getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
+                toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
+                // Keep timer running for as long as possible.
+                mCallHandler.postDelayed(mCallDurationRunnable, 1000);
+                mCallDurationView.setVisibility(View.VISIBLE);
             } else {
-                mRemoteLogger.d(TAG + " outgoingCall");
+                toggleCallStateButtonVisibility(mType);
+
+                if (mIsIncomingCall) {
+                    mRemoteLogger.d(TAG + " inComingCall");
+
+                    mNotificationId = mNotificationHelper.displayNotification(this, getCallerInfo(), this.getString(R.string.callnotification_incoming_call), NotificationHelper.mCallNotifyId);
+
+                    // Ringing event.
+                    mAnalyticsHelper.sendEvent(
+                            getString(R.string.analytics_event_category_call),
+                            getString(R.string.analytics_event_action_inbound),
+                            getString(R.string.analytics_event_label_ringing)
+                    );
+
+                    mIncomingCallIsRinging = true;
+                    switch (mAudioManager.getRingerMode()) {
+                        case AudioManager.RINGER_MODE_NORMAL:
+                            playRingtone(true);
+                            break;
+
+                        case AudioManager.RINGER_MODE_VIBRATE:
+                            vibrate(true);
+                            break;
+
+                        case AudioManager.RINGER_MODE_SILENT:
+                            playRingtone(false);
+                            vibrate(false);
+                            break;
+                    }
+                } else {
+                    mRemoteLogger.d(TAG + " outgoingCall");
+                    mNotificationId = mNotificationHelper.displayNotification(this, getCallerInfo(), this.getString(R.string.callnotification_dialing), NotificationHelper.mCallNotifyId);
+                }
             }
         }
+
         mProximityHelper.startSensor();
     }
 
@@ -464,9 +483,26 @@ public class CallActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Try to unbind. Might fail if onStop already unbound the service.
+        try {
+            unbindService(mConnection);
+        } catch (Exception e) {
+        }
+        mNotificationHelper.removeNotification(mNotificationId);
         mRemoteLogger.d(TAG + " onDestroy");
         restoreAudioSettings();
         mProximityHelper.stopSensor();
+        // If the activity was started by clicking the callnotification there is nothing to go back to.
+        if (!mServiceBound && mFromNotification) {
+            triggerRebirth(this);
+        }
+    }
+
+    public static void triggerRebirth(Context context) {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+        System.exit(0);
     }
 
     /**
@@ -487,6 +523,13 @@ public class CallActivity extends AppCompatActivity
             ((TextView) findViewById(R.id.name_text_view)).setText(mPhoneNumberToDisplay);
             ((TextView) findViewById(R.id.number_text_view)).setText("");
         }
+    }
+
+    private String getCallerInfo() {
+        if (mCallerIdToDisplay != null && !mCallerIdToDisplay.isEmpty()) {
+            return mCallerIdToDisplay;
+        }
+        return mPhoneNumberToDisplay;
     }
 
     /**
@@ -557,6 +600,7 @@ public class CallActivity extends AppCompatActivity
                 mIncomingCallIsRinging = false;
 
                 mProximityHelper.updateWakeLock();
+                mNotificationHelper.updateNotification(this, getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
 
                 if (mOnTransfer && mSipService.getCurrentCall() != null && mSipService.getFirstCall() != null) {
                     CallTransferFragment callTransferFragment = (CallTransferFragment)

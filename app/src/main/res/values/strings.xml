@@ -136,6 +136,11 @@
 
     <string name="dial_plan_menu_item_title">Dial plan</string>
 
+    <!-- Call notification values -->
+    <string name="callnotification_incoming_call">Incoming call</string>
+    <string name="callnotification_active_call">Active call</string>
+    <string name="callnotification_dialing">Dialing</string>
+
     <string name="two_step_call_description_platform">Outgoing number</string>
     <string name="two_step_call_description_step_a">Calling your phone</string>
     <string name="two_step_call_description_step_b">Connecting you with</string>
