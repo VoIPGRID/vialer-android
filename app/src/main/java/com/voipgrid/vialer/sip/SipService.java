@@ -1,6 +1,8 @@
 package com.voipgrid.vialer.sip;
 
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -15,11 +17,10 @@ import android.telephony.TelephonyManager;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.util.GsmCallListener;
-import com.voipgrid.vialer.util.JsonStorage;
-import com.voipgrid.vialer.util.PhoneNumberUtils;
-import com.voipgrid.vialer.util.PhonePermission;
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.NotificationHelper;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,6 @@ public class SipService extends Service {
     private Intent mIncomingCallDetails = null;
     private ToneGenerator mToneGenerator;
 
-    private GsmCallListener mGsmCallListener;
     private Preferences mPreferences;
     private RemoteLogger mRemoteLogger;
     private SipBroadcaster mSipBroadcaster;
@@ -47,6 +47,45 @@ public class SipService extends Service {
 
     private List<SipCall> mCallList = new ArrayList<>();
     private String mInitialCallType;
+
+    private final BroadcastReceiver phoneStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try {
+                String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
+
+                // When the native call has been picked up and there is a current call in the ringing state
+                // Then decline the current call.
+                if (phoneState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                    if (mCurrentCall != null) {
+                        switch (mCurrentCall.getCurrentCallState()) {
+                            case SipConstants.CALL_INCOMING_RINGING:
+                                mCurrentCall.decline();
+                                break;
+                            case SipConstants.CALL_CONNECTED_MESSAGE:
+                                mCurrentCall.toggleHold();
+                                break;
+                        }
+                    }
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    /**
+     * Returns boolean representing whether there is a gsm call or not.
+     */
+    public boolean nativeCallHasBeenAnswered() {
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        return telephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
+    }
+
+    public boolean nativeCallIsRinging() {
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        return telephonyManager.getCallState() == TelephonyManager.CALL_STATE_RINGING;
+    }
 
     /**
      * Class the be able to bind a activity to this service.
@@ -94,6 +133,11 @@ public class SipService extends Service {
 
         mRemoteLogger.d(TAG + " onCreate");
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+
+        registerReceiver(phoneStateReceiver, filter);
+
         PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
         if (phoneAccount != null) {
             // Try to load PJSIP library.
@@ -129,7 +173,6 @@ public class SipService extends Service {
     @Override
     public void onDestroy() {
         mRemoteLogger.d(TAG + " onDestroy");
-        stopGsmCallListener();
 
         // If no phoneaccount was found in the onCreate there won't be a sipconfig either.
         // Check to avoid nullpointers.
@@ -139,20 +182,24 @@ public class SipService extends Service {
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
+        unregisterReceiver(phoneStateReceiver);
+
         super.onDestroy();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mRemoteLogger.d(TAG + " onStartCommand");
+
         mInitialCallType = intent.getAction();
         Uri number = intent.getData();
+
         switch (mInitialCallType) {
-            case SipConstants.ACTION_VIALER_INCOMING :
+            case SipConstants.ACTION_VIALER_INCOMING:
                 mRemoteLogger.d(TAG + " incomingCall");
                 mIncomingCallDetails = intent;
                 break;
-            case SipConstants.ACTION_VIALER_OUTGOING :
+            case SipConstants.ACTION_VIALER_OUTGOING:
                 mRemoteLogger.d(TAG + " outgoingCall");
                 makeCall(
                         number,
@@ -164,36 +211,25 @@ public class SipService extends Service {
             default:
                 stopSelf();
         }
+
+        if (intent.getType() != null) {
+            if (intent.getType().equals(SipConstants.CALL_DECLINE_INCOMING_CALL)) {
+                try {
+                    mCurrentCall.decline();
+                    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    notificationManager.cancelAll();
+                    stopSelf();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         return START_NOT_STICKY;
     }
 
     public SipBroadcaster getSipBroadcaster() {
         return mSipBroadcaster;
-    }
-
-    public void startGsmCallListener() {
-        if (PhonePermission.hasPermission(getApplicationContext())) {
-            if (mGsmCallListener == null) {
-                mGsmCallListener = new GsmCallListener(mCallList);
-                registerReceiver(mGsmCallListener, new IntentFilter("android.intent.action.PHONE_STATE"));
-            }
-        }
-    }
-
-    public void stopGsmCallListener() {
-        if (PhonePermission.hasPermission(getApplicationContext())) {
-            if (mGsmCallListener != null) {
-                unregisterReceiver(mGsmCallListener);
-            }
-        }
-    }
-
-    /**
-     * Returns boolean representing whether there is a gsm call or not.
-     */
-    public boolean hasGSMCall() {
-        return (((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE)).getCallState()
-                == TelephonyManager.CALL_STATE_OFFHOOK);
     }
 
     /**
@@ -291,10 +327,6 @@ public class SipService extends Service {
         mCurrentCall = call;
         if (!mCallList.contains(call) && call != null) {
             mCallList.add(call);
-            // Update the GsmCallListener with the updated call list.
-            if (mGsmCallListener != null) {
-                mGsmCallListener.updateSipCallsList(mCallList);
-            }
         }
     }
 
@@ -310,13 +342,10 @@ public class SipService extends Service {
     public void removeCallFromList(SipCall call) {
         mCallList.remove(call);
 
-        // Update the GsmCallListener with the updated call list.
-        if (mGsmCallListener != null) {
-            mGsmCallListener.updateSipCallsList(mCallList);
-        }
-
         if (mCallList.isEmpty()) {
             setCurrentCall(null);
+            NotificationHelper notificationHelper = NotificationHelper.getInstance(this);
+            notificationHelper.removeAllNotifications();
             stopSelf();
         } else if (call.getCallIsTransferred()) {
             setCurrentCall(null);
@@ -342,6 +371,7 @@ public class SipService extends Service {
     }
 
     public SipCall getFirstCall() {
+
         if (mCallList.size() > 0) {
             return mCallList.get(0);
         } else {

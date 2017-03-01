@@ -20,11 +20,6 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
     private CallKeyPadFragmentListener mCallback;
     private View mHangupButton;
 
-    public static CallKeyPadFragment newInstance() {
-        CallKeyPadFragment fragment = new CallKeyPadFragment();
-        return fragment;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_call_key_pad, container, false);

@@ -17,7 +17,7 @@
     <string name="login_error">Inloggen niet gelukt: %s</string>
     <string name="call_incoming">Inkomend gesprek</string>
     <string name="call_outgoing">Uitgaand gesprek</string>
-    <string name="call_ended">Gesprek beeëindigd</string>
+    <string name="call_ended">Gesprek beëindigd</string>
     <string name="call_on_hold">In de wacht</string>
     <string name="call_hangup">Ophangen</string>
     <string name="call_connected">Verbonden</string>
@@ -135,6 +135,7 @@
     <!-- Call notification values -->
     <string name="callnotification_incoming_call">Inkomend gesprek</string>
     <string name="callnotification_active_call">Actief gesprek</string>
+    <string name="callnotification_on_hold">In de wacht</string>
     <string name="callnotification_dialing">Kiezen</string>
 
     <string name="navigation_name_placeholder_text">Geen uitgaand nummer geconfigureerd</string>
@@ -185,5 +186,8 @@
 
     <string name="call_transfer_complete_and">en</string>
     <string name="call_transfer_complete_success"> Succesvol doorverbonden</string>
+    <string name="call_incoming_expanded">Inkomend gesprek van:</string>
+    <string name="call_incoming_accept">Antwoord</string>
+    <string name="call_incoming_decline">Weigeren</string>
 
 </resources>
