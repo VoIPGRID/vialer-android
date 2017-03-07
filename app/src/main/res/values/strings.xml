@@ -112,6 +112,7 @@
     <string name="account_outgoing_number_edit_text_hint">Outgoing number</string>
     <string name="action_done">Done</string>
     <string name="action_edit">Edit</string>
+    <string name="choose_network_text">Call using:</string>
     <string name="call_connection_always_LTE">Only 4G</string>
     <string name="call_connection_use_wifi">WiFi when connected</string>
     <string name="call_connection_optional">Show pop-up for outgoing calls</string>

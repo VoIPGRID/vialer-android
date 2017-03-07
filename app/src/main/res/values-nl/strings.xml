@@ -112,6 +112,7 @@
     <string name="account_outgoing_number_edit_text_hint">Uitgaand nummer</string>
     <string name="action_done">Klaar</string>
     <string name="action_edit">Wijzig</string>
+    <string name="choose_network_text">Bel via:</string>
     <string name="call_connection_always_LTE">Alleen 4G</string>
     <string name="call_connection_use_wifi">WiFi wanneer verbonden</string>
     <string name="call_connection_optional">Keuze weergeven bij uitgaand gesprek</string>

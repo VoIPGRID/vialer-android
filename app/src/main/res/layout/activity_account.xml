@@ -135,7 +135,7 @@
                         android:id="@+id/textView2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Call using:"
+                        android:text="@string/choose_network_text"
                         android:textAppearance="?android:attr/textAppearanceMedium" />
                 </android.support.design.widget.TextInputLayout>
 
