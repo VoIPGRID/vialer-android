@@ -94,7 +94,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                     mSipService.getString(R.string.analytics_event_category_metrics),
                     mSipService.getString(R.string.analytics_event_action_callmetrics),
                     mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
-                    (int) (100 * (long) this.calculateMos());
+                    (int) (100 * (long) this.calculateMos())
             );
         }
     }
