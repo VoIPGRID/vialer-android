@@ -16,12 +16,15 @@
     <string name="auto_login_error">WebActivity: %s</string>
     <string name="login_error">Login failed: %s</string>
     <string name="call_incoming">Incoming call</string>
+    <string name="call_incoming_expanded">Incoming call from:</string>
     <string name="call_outgoing">Outgoing call</string>
     <string name="call_ended">Call ended</string>
     <string name="call_on_hold">On hold</string>
     <string name="call_hangup">Hang up</string>
     <string name="call_connected">Connected</string>
     <string name="call_unreachable">Unreachable</string>
+    <string name="call_incoming_accept">Accept</string>
+    <string name="call_incoming_decline">Decline</string>
     <string name="dialer_warning_a_b_connect">Two-step calling mode active</string>
     <string name="dialer_warning_no_connection">No data connection available</string>
     <string name="version_info">Version: %1$s</string>
@@ -140,6 +143,7 @@
     <!-- Call notification values -->
     <string name="callnotification_incoming_call">Incoming call</string>
     <string name="callnotification_active_call">Active call</string>
+    <string name="callnotification_on_hold">On hold</string>
     <string name="callnotification_dialing">Dialing</string>
 
     <string name="two_step_call_description_platform">Outgoing number</string>

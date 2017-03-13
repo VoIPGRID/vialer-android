@@ -59,7 +59,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mCallerId;
     private String mIdentifier;
     private String mPhoneNumber;
-    private String mCurrentCallState;
+    private  String mCurrentCallState;
 
     private int mNetworkSwitchTime = 0;
 
@@ -71,8 +71,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     };
 
     private void startNetworkingListener() {
-        mSipService.registerReceiver(mNetworkStateReceiver,
-                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        mSipService.registerReceiver(
+                mNetworkStateReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        );
     }
 
     private void stopNetworkingListener() {
@@ -80,10 +82,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     private void handleNetworkStateChange() {
-        if (getCallDuration() - mNetworkSwitchTime > 10) {
+        if (mCallIsConnected) {
             sendMos();
+            mNetworkSwitchTime = getCallDuration();
         }
-        mNetworkSwitchTime = getCallDuration();
     }
 
     private void sendMos() {
@@ -92,18 +94,18 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                     mSipService.getString(R.string.analytics_event_category_metrics),
                     mSipService.getString(R.string.analytics_event_action_callmetrics),
                     mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
-                    (int) (100* (long) this.calculateMos())
+                    (int) (100 * (long) this.calculateMos());
             );
         }
     }
 
-    private void sendBandwith() {
+    private void sendBandwidth() {
         if (getCallDuration() > 10) {
             new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
                     mSipService.getString(R.string.analytics_event_category_metrics),
                     mSipService.getString(R.string.analytics_event_action_callmetrics),
                     mSipService.getString(R.string.analytics_event_label_bandwith, getCodec()),
-                    (int) this.getBandwithUsage()*1024
+                    (int) this.getBandwidthUsage() * 1024
             );
         }
     }
@@ -147,7 +149,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         return timeVal.getSec();
     }
 
-    public String getCodec() {
+    private String getCodec() {
         try {
             StreamInfo mStreaminfo = this.getStreamInfo(0);
             return mStreaminfo.getCodecName();
@@ -157,15 +159,15 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         return "";
     }
 
-    public long getBandwithUsage() {
-        long bandwith = 0;
+    private long getBandwidthUsage() {
+        long bandwidth = 0;
         try {
-            bandwith = this.getStreamStat(0).getRtcp().getRxStat().getBytes();
+            bandwidth = this.getStreamStat(0).getRtcp().getRxStat().getBytes();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // Devide to get MB's
-        return bandwith/(1024*1024);
+        // Divide to get MB's
+        return 1024 * 1024 / bandwidth;
     }
 
     /**
@@ -192,7 +194,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             float effectiveLatency = averageRoundTripTime + rxJitter * 2 + 10;
 
             // Implement a basic curve - deduct 4 for the R value at 160ms of latency
-            // (round trip).  Anything over that gets a much more agressive deduction.
+            // (round trip).  Anything over that gets a much more aggressive deduction.
             if (effectiveLatency < 160) {
                 r = 93.2f - (effectiveLatency / 40);
             } else {
@@ -218,7 +220,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         return r;
     }
 
-    public float calculateMos() {
+    private float calculateMos() {
         float r = getR();
         if (r > 0) {
             return 1f + 0.035f * r + .000007f * r * (r - 60f) * (100f - r);
@@ -311,7 +313,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         super.hangup(callOpParam);
     }
 
-    public void setIsOnHold(boolean onHold) {
+    private void setIsOnHold(boolean onHold) {
         mIsOnHold = onHold;
     }
 
@@ -435,16 +437,20 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mRemoteLogger.d(TAG + " onCallIncoming");
 
         // Determine whether we can accept the incoming call.
-        pjsip_status_code code = (mSipService.getCurrentCall() != null || mSipService.hasGSMCall())? pjsip_status_code.PJSIP_SC_BUSY_HERE : pjsip_status_code.PJSIP_SC_RINGING;
+        pjsip_status_code code = pjsip_status_code.PJSIP_SC_RINGING;
+        if (mSipService.getCurrentCall() != null || mSipService.nativeCallHasBeenAnswered() || mSipService.nativeCallIsRinging()) {
+            code = pjsip_status_code.PJSIP_SC_BUSY_HERE;
+        }
 
-        CallOpParam callOpParam = new CallOpParam();
-        callOpParam.setStatusCode(code);
+        mCurrentCallState = SipConstants.CALL_INCOMING_RINGING;
 
         // If we send back a ringing set the current call.
         if (code.equals(pjsip_status_code.PJSIP_SC_RINGING)) {
             mSipService.setCurrentCall(this);
         }
         try {
+            CallOpParam callOpParam = new CallOpParam();
+            callOpParam.setStatusCode(code);
             this.answer(callOpParam);
 
             // If we sent a ringing setup the CallActivity for a incoming call. This is always
@@ -458,6 +464,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                     callerId = incomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME);
                     number = incomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
                 }
+
                 mSipService.startIncomingCallActivity(number, callerId);
             }
         } catch (Exception e) {
@@ -485,7 +492,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     public void onCallConnected() {
         mRemoteLogger.d(TAG + " onCallConnected");
         mCallIsConnected = true;
-        mSipService.startGsmCallListener();
         mCurrentCallState = SipConstants.CALL_CONNECTED_MESSAGE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_CONNECTED_MESSAGE);
     }
@@ -493,6 +499,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     public void onCallDisconnected() {
         mRemoteLogger.d(TAG + " onCallDisconnected");
         sendMos();
+        sendBandwidth();
         stopNetworkingListener();
 
         // Play end of call beep only when the remote party hangs up and the call was connected.

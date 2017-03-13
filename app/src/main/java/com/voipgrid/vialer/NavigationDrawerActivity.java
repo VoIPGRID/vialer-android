@@ -18,6 +18,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,6 +66,7 @@ public abstract class NavigationDrawerActivity
     private Spinner mSpinner;
     private Toolbar mToolbar;
     private TextView mNoConnectionText;
+    private View mNavigationHeaderView;
 
     private Api mApi;
     private ConnectivityHelper mConnectivityHelper;
@@ -129,18 +131,26 @@ public abstract class NavigationDrawerActivity
                     "NavigationDrawerActivity must have a valid resource ID to a DrawerLayout");
         }
 
-        ((NavigationView) mDrawerLayout.findViewById(R.id.navigation_view))
-                .setNavigationItemSelectedListener(this);
+        NavigationView navigationView = (NavigationView) mDrawerLayout.findViewById(R.id.navigation_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle drawerToggle = new CustomActionBarDrawerToggle(
                 this,  mDrawerLayout, mToolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close
         );
 
-        mDrawerLayout.setDrawerListener(drawerToggle);
+        mDrawerLayout.addDrawerListener(drawerToggle);
 
+        // Version 23.1.0 switches NavigationView to using a RecyclerView (rather than the previous
+        // ListView) and the header is added as one of those elements. This means it is not
+        // instantly available to call findViewById() - a layout pass is
+        // needed before it is attached to the NavigationView.
+        mNavigationHeaderView = navigationView.getHeaderView(0);
+
+        // Set the email address and phone number of the logged in user.
         setSystemUserInfo();
 
+        // Set which version of the app the user is using.
         setVersionInfo((TextView) mDrawerLayout.findViewById(R.id.text_view_version));
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -161,16 +171,16 @@ public abstract class NavigationDrawerActivity
         call.enqueue(this);
     }
 
-    protected void setSystemUserInfo() {
+    private void setSystemUserInfo() {
         if(mSystemUser != null) {
             String phoneNumber = mSystemUser.getOutgoingCli();
             if (!TextUtils.isEmpty(phoneNumber)) {
-                ((TextView) mDrawerLayout.findViewById(R.id.text_view_name)).setText(phoneNumber);
+                ((TextView) mNavigationHeaderView.findViewById(R.id.text_view_name)).setText(phoneNumber);
             }
 
             String email = mSystemUser.getEmail();
             if (!TextUtils.isEmpty(email)) {
-                ((TextView) mDrawerLayout.findViewById(R.id.text_view_email)).setText(email);
+                ((TextView) mNavigationHeaderView.findViewById(R.id.text_view_email)).setText(email);
             }
         }
     }
@@ -248,7 +258,7 @@ public abstract class NavigationDrawerActivity
             mJsonStorage.clear();
             new AccountHelper(this).clearCredentials();
             // Mark ourselves as unregistered.
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(MiddlewareHelper.Constants.REGISTRATION_STATUS, MiddlewareHelper.Constants.STATUS_UNREGISTERED).commit();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(MiddlewareHelper.Constants.REGISTRATION_STATUS, MiddlewareHelper.Constants.STATUS_UNREGISTERED).apply();
             // Start a new session.
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -377,7 +387,7 @@ public abstract class NavigationDrawerActivity
      * Function to setup the availability spinner.
      */
     private void setupSpinner(){
-        mSpinner = (Spinner) findViewById(R.id.menu_availability_spinner);
+        mSpinner = (Spinner) mNavigationHeaderView.findViewById(R.id.menu_availability_spinner);
         mSpinnerAdapter = new CustomFontSpinnerAdapter<>(this, android.R.layout.simple_spinner_item);
         mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 

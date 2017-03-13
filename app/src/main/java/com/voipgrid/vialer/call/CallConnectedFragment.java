@@ -13,11 +13,6 @@ import com.voipgrid.vialer.R;
  * Fragment for when the call is connected.
  */
 public class CallConnectedFragment extends Fragment implements View.OnClickListener {
-    public static CallConnectedFragment newInstance() {
-        CallConnectedFragment fragment = new CallConnectedFragment();
-        return fragment;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_call_connected, container, false);

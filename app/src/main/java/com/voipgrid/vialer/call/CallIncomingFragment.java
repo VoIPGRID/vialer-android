@@ -13,10 +13,6 @@ import com.voipgrid.vialer.R;
  * Fragment for an incoming call.
  */
 public class CallIncomingFragment extends Fragment implements View.OnClickListener {
-    public static CallIncomingFragment newInstance() {
-        CallIncomingFragment fragment = new CallIncomingFragment();
-        return fragment;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

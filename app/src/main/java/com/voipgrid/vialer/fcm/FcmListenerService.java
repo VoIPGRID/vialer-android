@@ -24,6 +24,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.voipgrid.vialer.util.ConnectivityHelper.CONNECTION_4G;
+import static com.voipgrid.vialer.util.ConnectivityHelper.CONNECTION_WIFI;
+
 /**
  * Listen to messages from GCM. The backend server sends us GCM notifications when we have
  * incoming calls.
@@ -59,6 +62,7 @@ public class FcmListenerService extends FirebaseMessagingService implements Midd
                     ((AnalyticsApplication) getApplication()).getDefaultTracker());
 
             ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
+
             if (connectivityHelper.hasNetworkConnection() && connectivityHelper.hasFastData()) {
 
                 String number = data.get(PHONE_NUMBER);
@@ -80,12 +84,18 @@ public class FcmListenerService extends FirebaseMessagingService implements Midd
                 // point.
                 String connectionType = connectivityHelper.getConnectionTypeString();
                 String analyticsLabel;
-                if (connectionType.equals(connectivityHelper.CONNECTION_WIFI)) {
-                    analyticsLabel = getString(R.string.analytics_event_label_wifi);
-                } else if (connectionType.equals(connectivityHelper.CONNECTION_4G)) {
-                    analyticsLabel = getString(R.string.analytics_event_label_4g);
-                } else {
-                    analyticsLabel = getString(R.string.analytics_event_label_unknown);
+
+                switch (connectionType) {
+                    case CONNECTION_WIFI:
+                        analyticsLabel = getString(R.string.analytics_event_label_wifi);
+                        break;
+                    case CONNECTION_4G:
+                        analyticsLabel = getString(R.string.analytics_event_label_4g);
+                        break;
+                    default:
+                        analyticsLabel = getString(R.string.analytics_event_label_unknown);
+                        break;
+
                 }
 
                 analyticsHelper.sendEvent(

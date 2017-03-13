@@ -52,6 +52,13 @@ import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.voipgrid.vialer.call.CallTransferCompleteFragment.CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_ID;
+import static com.voipgrid.vialer.call.CallTransferCompleteFragment.CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER;
+import static com.voipgrid.vialer.call.CallTransferCompleteFragment.CALL_TRANSFER_COMPLETE_FRAGMENT_TRANSFERRED_PHONE_NUMBER;
+import static com.voipgrid.vialer.call.CallTransferFragment.CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_ID;
+import static com.voipgrid.vialer.call.CallTransferFragment.CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER;
+import static com.voipgrid.vialer.call.CallTransferFragment.CALL_TRANSFER_FRAGMENT_SECOND_CALL_IS_CONNECTED;
+
 
 /**
  * CallActivity for incoming or outgoing call.
@@ -63,6 +70,7 @@ public class CallActivity extends AppCompatActivity
     private final static String TAG = CallActivity.class.getSimpleName();
     public static final String TYPE_OUTGOING_CALL = "type-outgoing-call";
     public static final String TYPE_INCOMING_CALL = "type-incoming-call";
+    public static final String TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL = "type-incoming-accept-call-notification";
     public static final String TYPE_CONNECTED_CALL = "type-connected-call";
     public static final String CONTACT_NAME = "contact-name";
     public static final String PHONE_NUMBER = "phone-number";
@@ -111,14 +119,14 @@ public class CallActivity extends AppCompatActivity
     public String mCallerIdToDisplay;
     private String mTransferredNumber;
     private boolean mCallIsTransferred = false;
-    private boolean mFromNotification = false;
 
     // Keep track of the start time of a call, so we can keep track of its duration.
     long mCallStartTime = 0;
     private RemoteLogger mRemoteLogger;
     private SipService mSipService;
     private boolean mServiceBound = false;
-    private NotificationHelper mNotificationHelper = new NotificationHelper();
+
+    private NotificationHelper mNotificationHelper;
     private int mNotificationId;
 
     // Runs without a timer by re-posting this handler at the end of the runnable.
@@ -240,7 +248,6 @@ public class CallActivity extends AppCompatActivity
             }
 
             if (mIsIncomingCall) {
-
                 // Wait one second before setting the callerId and phonenumber
                 // so the SipService can set the currentcall.
                 new Handler().postDelayed(new Runnable() {
@@ -268,7 +275,6 @@ public class CallActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mRemoteLogger = new RemoteLogger(this);
-
         mRemoteLogger.d(TAG + " onCreate");
 
         // Check if we have permission to use the microphone. If not, request it.
@@ -282,6 +288,8 @@ public class CallActivity extends AppCompatActivity
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         setContentView(R.layout.activity_call);
+
+        mNotificationHelper = NotificationHelper.getInstance(this);
 
         // Set the AnalyticsHelper.
         mAnalyticsHelper = new AnalyticsHelper(
@@ -321,10 +329,7 @@ public class CallActivity extends AppCompatActivity
 
         Intent intent = getIntent();
 
-        /**
-         * We are being asked to present account data from a contact entry,
-         * but heck: Let's call the contact :D
-         */
+        // Get the intent to see if it's an outgoing or an incoming call.
         mType = intent.getType();
         if (mType.equals(TYPE_INCOMING_CALL) || mType.equals(TYPE_OUTGOING_CALL)) {
             // Update the textView with a number URI.
@@ -333,11 +338,13 @@ public class CallActivity extends AppCompatActivity
 
             displayCallInfo();
 
-            // Start the SipService which manages all SIP traffic.
             mIsIncomingCall = mType.equals(TYPE_INCOMING_CALL);
-            mFromNotification = intent.getBooleanExtra(NotificationHelper.TAG, false);
-            if (mFromNotification) {
-                mNotificationId = mNotificationHelper.displayNotification(this, getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
+            Boolean openedFromNotification = intent.getBooleanExtra(NotificationHelper.TAG, false);
+            if (openedFromNotification && !mIsIncomingCall) {
+                mNotificationId = mNotificationHelper.displayCallProgressNotification(
+                        getCallerInfo(), getString(R.string.callnotification_active_call), TYPE_CONNECTED_CALL,
+                        mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
+                );
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
                 // Keep timer running for as long as possible.
                 mCallHandler.postDelayed(mCallDurationRunnable, 1000);
@@ -348,7 +355,11 @@ public class CallActivity extends AppCompatActivity
                 if (mIsIncomingCall) {
                     mRemoteLogger.d(TAG + " inComingCall");
 
-                    mNotificationId = mNotificationHelper.displayNotification(this, getCallerInfo(), this.getString(R.string.callnotification_incoming_call), NotificationHelper.mCallNotifyId);
+                    mNotificationHelper.removeAllNotifications();
+                    mNotificationId = mNotificationHelper.displayCallProgressNotification(
+                            getCallerInfo(), getString(R.string.callnotification_incoming_call), mType,
+                            mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
+                    );
 
                     // Ringing event.
                     mAnalyticsHelper.sendEvent(
@@ -358,23 +369,14 @@ public class CallActivity extends AppCompatActivity
                     );
 
                     mIncomingCallIsRinging = true;
-                    switch (mAudioManager.getRingerMode()) {
-                        case AudioManager.RINGER_MODE_NORMAL:
-                            playRingtone(true);
-                            break;
 
-                        case AudioManager.RINGER_MODE_VIBRATE:
-                            vibrate(true);
-                            break;
-
-                        case AudioManager.RINGER_MODE_SILENT:
-                            playRingtone(false);
-                            vibrate(false);
-                            break;
-                    }
+                    setRingerMode();
                 } else {
                     mRemoteLogger.d(TAG + " outgoingCall");
-                    mNotificationId = mNotificationHelper.displayNotification(this, getCallerInfo(), this.getString(R.string.callnotification_dialing), NotificationHelper.mCallNotifyId);
+                    mNotificationId = mNotificationHelper.displayCallProgressNotification(
+                            getCallerInfo(), getString(R.string.callnotification_dialing), mType,
+                            mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
+                    );
                 }
             }
         }
@@ -436,6 +438,38 @@ public class CallActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        String intentType = intent.getType();
+
+        if (intentType != null) {
+            if (intentType.equals(CallActivity.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL)) {
+                mPhoneNumberToDisplay = intent.getStringExtra(PHONE_NUMBER);
+                mCallerIdToDisplay = intent.getStringExtra(CONTACT_NAME);
+
+                // Answer the call with a small delay to allow the activity to catch up.
+                // So the UI will be updated correctly.
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        answer();
+                        displayCallInfo();
+                    }
+                }, 500);
+
+                mNotificationHelper.removeNotification(mNotificationId);
+                mNotificationId = mNotificationHelper.displayCallProgressNotification(
+                        getCallerInfo(), getString(R.string.callnotification_active_call), TYPE_CONNECTED_CALL,
+                        mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
+                );
+            } else if (intent.getType().equals(TYPE_INCOMING_CALL)) {
+                setRingerMode();
+            }
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         if (mBroadcastAnswerReceiver == null || mBroadcastDeclineReceiver == null) {
@@ -446,6 +480,14 @@ public class CallActivity extends AppCompatActivity
 
         // Bind the SipService to the activity.
         bindService(new Intent(this, SipService.class), mConnection, Context.BIND_AUTO_CREATE);
+
+        if (!mOnTransfer && mSipService != null && mSipService.getCurrentCall() != null) {
+            if (mSipService.getCurrentCall().isOnHold() && !mOnHold) {
+                mOnHold = true;
+                updateCallButton(R.id.button_onhold, true);
+                onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
+            }
+        }
 
         // Make sure service is bound before updating status.
         new Handler().postDelayed(new Runnable() {
@@ -463,6 +505,13 @@ public class CallActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
+        if (mIncomingCallIsRinging) {
+            mNotificationHelper.removeAllNotifications();
+            mNotificationId = mNotificationHelper.displayNotificationWithCallActions(mCallerIdToDisplay, mPhoneNumberToDisplay);
+
+            vibrate(false);
+            playRingtone(false);
+        }
         unRegisterReceivers();
     }
 
@@ -471,8 +520,8 @@ public class CallActivity extends AppCompatActivity
         super.onStop();
         mRemoteLogger.d(TAG + " onStop");
         // Unregister the SipService BroadcastReceiver when the activity pauses.
-        mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
         unregisterReceiver(mBluetoothReceiver);
+        mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
 
         if (mServiceBound && (mSipService != null && mSipService.getCurrentCall() == null)) {
             unbindService(mConnection);
@@ -483,26 +532,17 @@ public class CallActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mRemoteLogger.d(TAG + " onDestroy");
         // Try to unbind. Might fail if onStop already unbound the service.
         try {
             unbindService(mConnection);
         } catch (Exception e) {
         }
-        mNotificationHelper.removeNotification(mNotificationId);
-        mRemoteLogger.d(TAG + " onDestroy");
+
+        mNotificationHelper.removeAllNotifications();
+
         restoreAudioSettings();
         mProximityHelper.stopSensor();
-        // If the activity was started by clicking the callnotification there is nothing to go back to.
-        if (!mServiceBound && mFromNotification) {
-            triggerRebirth(this);
-        }
-    }
-
-    public static void triggerRebirth(Context context) {
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
-        System.exit(0);
     }
 
     /**
@@ -516,12 +556,15 @@ public class CallActivity extends AppCompatActivity
     }
 
     private void displayCallInfo() {
+        TextView nameTextView = (TextView) findViewById(R.id.name_text_view);
+        TextView numberTextView = (TextView) findViewById(R.id.number_text_view);
+
         if (mCallerIdToDisplay != null && !mCallerIdToDisplay.isEmpty()) {
-            ((TextView) findViewById(R.id.name_text_view)).setText(mCallerIdToDisplay);
-            ((TextView) findViewById(R.id.number_text_view)).setText(mPhoneNumberToDisplay);
+            nameTextView.setText(mCallerIdToDisplay);
+            numberTextView.setText(mPhoneNumberToDisplay);
         } else {
-            ((TextView) findViewById(R.id.name_text_view)).setText(mPhoneNumberToDisplay);
-            ((TextView) findViewById(R.id.number_text_view)).setText("");
+            nameTextView.setText(mPhoneNumberToDisplay);
+            numberTextView.setText("");
         }
     }
 
@@ -600,7 +643,7 @@ public class CallActivity extends AppCompatActivity
                 mIncomingCallIsRinging = false;
 
                 mProximityHelper.updateWakeLock();
-                mNotificationHelper.updateNotification(this, getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
+                mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
 
                 if (mOnTransfer && mSipService.getCurrentCall() != null && mSipService.getFirstCall() != null) {
                     CallTransferFragment callTransferFragment = (CallTransferFragment)
@@ -629,62 +672,65 @@ public class CallActivity extends AppCompatActivity
                 playRingtone(false);
                 vibrate(false);
 
-                if (mCallIsTransferred) {
-                    toggleVisibilityCallInfo(false);
+                // When the user is transferring a call.
+                if (mOnTransfer) {
+                    // Transferring is successful done.
+                    if (mCallIsTransferred) {
+                        toggleVisibilityCallInfo(false);
 
-                    Map<String, String> map = new HashMap<>();
-                    map.put(MAP_ORIGINAL_CALLER_ID, mSipService.getFirstCall().getCallerId());
-                    map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipService.getFirstCall().getPhoneNumber());
-                    map.put(MAP_TRANSFERRED_PHONE_NUMBER, mTransferredNumber);
+                        Map<String, String> map = new HashMap<>();
+                        map.put(MAP_ORIGINAL_CALLER_ID, mSipService.getFirstCall().getCallerId());
+                        map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipService.getFirstCall().getPhoneNumber());
+                        map.put(MAP_TRANSFERRED_PHONE_NUMBER, mTransferredNumber);
 
-                    swapFragment(TAG_CALL_TRANSFER_COMPLETE_FRAGMENT, map);
+                        swapFragment(TAG_CALL_TRANSFER_COMPLETE_FRAGMENT, map);
 
-                    mOnTransfer = false;
-                    try {
-                        mSipService.getFirstCall().hangup(true);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        mOnTransfer = false;
+                        try {
+                            mSipService.getFirstCall().hangup(true);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else if (mSipService.getCurrentCall() != null) {
+                        // The "second" call has been disconnected. But there is still a call available.
+                        String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
+                        String initialCallIdentifier = mSipService.getFirstCall().getIdentifier();
+
+                        mConnected = true;
+                        toggleVisibilityCallInfo(true);
+
+                        findViewById(R.id.button_transfer).setVisibility(View.VISIBLE);
+                        swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
+
+                        newStatus = mSipService.getCurrentCall().getCurrentCallState();
+
+                        if (!currentCallIdentifier.equals(initialCallIdentifier)) {
+                            mCurrentCallId = mSipService.getCurrentCall().getIdentifier();
+                            mCallerIdToDisplay = mSipService.getCurrentCall().getCallerId();
+                            mPhoneNumberToDisplay = mSipService.getCurrentCall().getPhoneNumber();
+                        } else {
+                            mCurrentCallId = mSipService.getFirstCall().getIdentifier();
+                            newStatus = mSipService.getFirstCall().getCurrentCallState();
+                            mCallerIdToDisplay = mSipService.getFirstCall().getCallerId();
+                            mPhoneNumberToDisplay = mSipService.getFirstCall().getPhoneNumber();
+                        }
+
+                        displayCallInfo();
+
+                        mOnHold = mSipService.getCurrentCall().isOnHold();
+                        mOnTransfer = false;
+                        updateCallButton(R.id.button_transfer, true);
+                        updateCallButton(R.id.button_onhold, true);
+                        updateCallButton(R.id.button_keypad, true);
+                        updateCallButton(R.id.button_microphone, true);
+
+                        onCallStatusUpdate(mSipService.getCurrentCall().getCurrentCallState());
                     }
-                } else if (mOnTransfer && mSipService.getCurrentCall() != null) {
-                    String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
-                    String initialCallIdentifier = mSipService.getFirstCall().getIdentifier();
-
-                    mConnected = true;
-                    toggleVisibilityCallInfo(true);
-
-                    findViewById(R.id.button_transfer).setVisibility(View.VISIBLE);
-                    swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
-
-                    newStatus = mSipService.getCurrentCall().getCurrentCallState();
-
-                    if (!currentCallIdentifier.equals(initialCallIdentifier)) {
-                        mCurrentCallId = mSipService.getCurrentCall().getIdentifier();
-                        mCallerIdToDisplay = mSipService.getCurrentCall().getCallerId();
-                        mPhoneNumberToDisplay = mSipService.getCurrentCall().getPhoneNumber();
-                    } else {
-                        mCurrentCallId = mSipService.getFirstCall().getIdentifier();
-                        newStatus = mSipService.getFirstCall().getCurrentCallState();
-                        mCallerIdToDisplay = mSipService.getFirstCall().getCallerId();
-                        mPhoneNumberToDisplay = mSipService.getFirstCall().getPhoneNumber();
-                    }
-
-                    displayCallInfo();
-
-
-                    mOnHold = mSipService.getCurrentCall().isOnHold();
-                    mOnTransfer = false;
-                    updateCallButton(R.id.button_transfer, true);
-                    updateCallButton(R.id.button_onhold, true);
-                    updateCallButton(R.id.button_keypad, true);
-                    updateCallButton(R.id.button_microphone, true);
-
-                    onCallStatusUpdate(mSipService.getCurrentCall().getCurrentCallState());
-
                 } else {
                     finishWithDelay();
                 }
-                onCallStatesUpdateButtons(newStatus);
 
+                onCallStatesUpdateButtons(newStatus);
                 break;
 
             case CALL_PUT_ON_HOLD_ACTION:
@@ -692,6 +738,7 @@ public class CallActivity extends AppCompatActivity
                 mCallHandler.removeCallbacks(mCallDurationRunnable);
                 mCallDurationView.setVisibility(View.GONE);
                 mStateView.setText(R.string.call_on_hold);
+                mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_on_hold), NotificationHelper.mCallNotifyId);
                 break;
 
             case CALL_UNHOLD_ACTION:
@@ -699,6 +746,7 @@ public class CallActivity extends AppCompatActivity
                 mCallHandler.postDelayed(mCallDurationRunnable, 0);
                 mCallDurationView.setVisibility(View.VISIBLE);
                 mStateView.setText(R.string.call_connected);
+                mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
                 break;
 
             case CALL_RINGING_OUT_MESSAGE:
@@ -725,13 +773,16 @@ public class CallActivity extends AppCompatActivity
         mRemoteLogger.d(TAG + " onBackPressed");
         View hangupButton = findViewById(R.id.button_hangup);
         View declineButton = findViewById(R.id.button_decline);
+        View lockRingView = findViewById(R.id.lock_ring);
 
         int count = getFragmentManager().getBackStackEntryCount();
 
         if (count > 0 && mCallIsTransferred) {
+            // When transfer is done.
             getFragmentManager().popBackStack();
             finishWithDelay();
         } else if (mOnTransfer) {
+            // During a transfer.
             String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
             String firstCallIdentifier = mSipService.getFirstCall().getIdentifier();
 
@@ -750,9 +801,14 @@ public class CallActivity extends AppCompatActivity
                 updateCallButton(R.id.button_transfer, true);
             }
         } else if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
+            // In call dialog.
             hangup(R.id.button_hangup);
         } else if (declineButton != null && declineButton.getVisibility() == View.VISIBLE) {
-            hangup(R.id.button_hangup);
+            // Two button pickup visible.
+            decline();
+        } else if (lockRingView != null && lockRingView.getVisibility() == View.VISIBLE) {
+            // Lock ring visible.
+            decline();
         } else {
             super.onBackPressed();
         }
@@ -798,7 +854,6 @@ public class CallActivity extends AppCompatActivity
         }
 
         mProximityHelper.updateWakeLock();
-
     }
 
     // Toggle the hold the call when the user presses the button.
@@ -1072,18 +1127,15 @@ public class CallActivity extends AppCompatActivity
 
         switch (tag) {
             case TAG_CALL_INCOMING_FRAGMENT:
-                newFragment = ((CallIncomingFragment) getFragmentManager()
-                        .findFragmentById(R.id.fragment_call_incoming)).newInstance();
+                newFragment = new CallIncomingFragment();
                 break;
 
             case TAG_CALL_KEY_PAD_FRAGMENT:
-                newFragment = ((CallKeyPadFragment) getFragmentManager()
-                        .findFragmentById(R.id.fragment_call_key_pad)).newInstance();
+                newFragment = new CallKeyPadFragment();
                 break;
 
             case TAG_CALL_LOCK_RING_FRAGMENT:
-                newFragment = ((CallLockRingFragment) getFragmentManager()
-                        .findFragmentById(R.id.fragment_call_lock_ring)).newInstance();
+                newFragment = new CallLockRingFragment();
                 break;
 
             case TAG_CALL_TRANSFER_FRAGMENT:
@@ -1093,13 +1145,14 @@ public class CallActivity extends AppCompatActivity
                 } else {
                     originalCallerId = "";
                 }
-                newFragment = ((CallTransferFragment) getFragmentManager()
-                        .findFragmentById(R.id.fragment_call_transfer))
-                        .newInstance(
-                                originalCallerId,
-                                extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString(),
-                                extraInfo.get(MAP_SECOND_CALL_IS_CONNECTED).toString()
-                        );
+
+                Bundle callTransferFragmentBundle = new Bundle();
+                callTransferFragmentBundle.putString(CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_ID, originalCallerId);
+                callTransferFragmentBundle.putString(CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER, extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString());
+                callTransferFragmentBundle.putString(CALL_TRANSFER_FRAGMENT_SECOND_CALL_IS_CONNECTED, extraInfo.get(MAP_SECOND_CALL_IS_CONNECTED).toString());
+
+                newFragment = new CallTransferFragment();
+                newFragment.setArguments(callTransferFragmentBundle);
                 break;
 
             case TAG_CALL_TRANSFER_COMPLETE_FRAGMENT:
@@ -1108,18 +1161,17 @@ public class CallActivity extends AppCompatActivity
                 } else {
                     originalCallerId = "";
                 }
-                newFragment = ((CallTransferCompleteFragment) getFragmentManager()
-                        .findFragmentById(R.id.fragment_call_transfer_complete))
-                        .newInstance(
-                                originalCallerId,
-                                extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString(),
-                                extraInfo.get(MAP_TRANSFERRED_PHONE_NUMBER).toString()
-                        );
+                Bundle callTransferCompleteFragment = new Bundle();
+                callTransferCompleteFragment.putString(CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_ID, originalCallerId);
+                callTransferCompleteFragment.putString(CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER, extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString());
+                callTransferCompleteFragment.putString(CALL_TRANSFER_COMPLETE_FRAGMENT_TRANSFERRED_PHONE_NUMBER, extraInfo.get(MAP_TRANSFERRED_PHONE_NUMBER).toString());
+
+                newFragment = new CallTransferCompleteFragment();
+                newFragment.setArguments(callTransferCompleteFragment);
                 break;
 
             case TAG_CALL_CONNECTED_FRAGMENT:
-                newFragment = ((CallConnectedFragment) getFragmentManager()
-                        .findFragmentById(R.id.fragment_call_connected)).newInstance();
+                newFragment = new CallConnectedFragment();
                 break;
         }
 
@@ -1153,6 +1205,13 @@ public class CallActivity extends AppCompatActivity
                         getString(R.string.analytics_event_action_inbound),
                         getString(R.string.analytics_event_label_accepted)
                 );
+
+                mNotificationHelper.removeAllNotifications();
+                mNotificationId = mNotificationHelper.displayCallProgressNotification(
+                        getCallerInfo(), getString(R.string.callnotification_active_call), TYPE_CONNECTED_CALL,
+                        mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
+                );
+                mIsIncomingCall = false;
             }
         } else {
             Toast.makeText(CallActivity.this,
@@ -1230,10 +1289,12 @@ public class CallActivity extends AppCompatActivity
 
             case AudioManager.AUDIOFOCUS_LOSS:
                 // TODO VIALA-463: Handle the complete loss of audio. Eg: incoming GSM call.
+                mRemoteLogger.i(TAG + " Audiofocus loss");
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 // TODO VIALA-463: Handle temporary loss of audio. Eg: incoming GSM call.
+                mRemoteLogger.i(TAG + " Audiofocus loss transient");
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
@@ -1372,5 +1433,22 @@ public class CallActivity extends AppCompatActivity
     private void toggleVisibilityCallInfo(Boolean visible) {
         findViewById(R.id.call_info).setVisibility(visible ? View.VISIBLE : View.GONE);
         findViewById(R.id.call_buttons_container).setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    private void setRingerMode() {
+        switch (mAudioManager.getRingerMode()) {
+            case AudioManager.RINGER_MODE_NORMAL:
+                playRingtone(true);
+                break;
+
+            case AudioManager.RINGER_MODE_VIBRATE:
+                vibrate(true);
+                break;
+
+            case AudioManager.RINGER_MODE_SILENT:
+                playRingtone(false);
+                vibrate(false);
+                break;
+        }
     }
 }

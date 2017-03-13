@@ -17,11 +17,6 @@ import com.wearespindle.spindlelockring.library.OnTriggerListener;
 public class CallLockRingFragment extends Fragment implements OnTriggerListener {
     private LockRing mLockRing;
 
-    public static CallLockRingFragment newInstance() {
-        CallLockRingFragment fragment = new CallLockRingFragment();
-        return fragment;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_call_lock_ring, container, false);

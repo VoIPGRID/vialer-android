@@ -19,9 +19,9 @@ public class ConnectivityHelper {
     public static final long TYPE_WIFI = 1;
     public static final long TYPE_LTE = 2;
 
-    public final String CONNECTION_WIFI = "Wifi";
-    public final String CONNECTION_4G = "4G";
-    public final String CONNECTION_UNKNOWN = "unknown";
+    public static final String CONNECTION_WIFI = "Wifi";
+    public static final String CONNECTION_4G = "4G";
+    public static final String CONNECTION_UNKNOWN = "unknown";
 
     private final ConnectivityManager mConnectivityManager;
     private final TelephonyManager mTelephonyManager;

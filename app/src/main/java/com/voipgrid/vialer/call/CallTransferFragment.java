@@ -1,16 +1,14 @@
 package com.voipgrid.vialer.call;
 
 import android.app.Activity;
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.android.gms.vision.text.Text;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.dialer.KeyPadView;
 import com.voipgrid.vialer.dialer.NumberInputView;
@@ -19,9 +17,9 @@ import com.voipgrid.vialer.dialer.NumberInputView;
  * Fragment for transferring a call
  */
 public class CallTransferFragment extends Fragment implements KeyPadView.OnKeyPadClickListener, View.OnClickListener {
-    private static final String FRAGMENT_ARGUMENTS_ORIGINAL_CALLER_ID = "ORIGINAL_CALLER_ID";
-    private static final String FRAGMENT_ARGUMENTS_ORIGINAL_CALLER_PHONE_NUMBER = "ORIGINAL_CALLER_PHONE_NUMBER";
-    private static final String FRAGMENT_ARGUMENTS_SECOND_CALL_IS_CONNECTED = "SECOND_CALL_IS_CONNECTED";
+    public static final String CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_ID = "ORIGINAL_CALLER_ID";
+    public static final String CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER = "ORIGINAL_CALLER_PHONE_NUMBER";
+    public static final String CALL_TRANSFER_FRAGMENT_SECOND_CALL_IS_CONNECTED = "SECOND_CALL_IS_CONNECTED";
 
     private NumberInputView mNumberInputView;
     private String mOriginalCallerPhoneNumber;
@@ -32,22 +30,11 @@ public class CallTransferFragment extends Fragment implements KeyPadView.OnKeyPa
     private boolean mSecondCallConnected = false;
     private View mTransferCallButton;
 
-    public static CallTransferFragment newInstance(String originalCallerId, String originalCaller, String secondCallisConnected) {
-        CallTransferFragment fragment = new CallTransferFragment();
-        Bundle arguments = new Bundle();
-        arguments.putString(FRAGMENT_ARGUMENTS_ORIGINAL_CALLER_ID, originalCallerId);
-        arguments.putString(FRAGMENT_ARGUMENTS_ORIGINAL_CALLER_PHONE_NUMBER, originalCaller);
-        arguments.putString(FRAGMENT_ARGUMENTS_SECOND_CALL_IS_CONNECTED, secondCallisConnected);
-        fragment.setArguments(arguments);
-
-        return fragment;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mOriginalCallerId = getArguments().getString(FRAGMENT_ARGUMENTS_ORIGINAL_CALLER_ID);
-        mOriginalCallerPhoneNumber = getArguments().getString(FRAGMENT_ARGUMENTS_ORIGINAL_CALLER_PHONE_NUMBER);
-        mSecondCallConnected = Boolean.parseBoolean(getArguments().getString(FRAGMENT_ARGUMENTS_SECOND_CALL_IS_CONNECTED));
+        mOriginalCallerId = getArguments().getString(CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_ID);
+        mOriginalCallerPhoneNumber = getArguments().getString(CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER);
+        mSecondCallConnected = Boolean.parseBoolean(getArguments().getString(CALL_TRANSFER_FRAGMENT_SECOND_CALL_IS_CONNECTED));
         return inflater.inflate(R.layout.fragment_call_transfer, container, false);
     }
 
