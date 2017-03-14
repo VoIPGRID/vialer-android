@@ -800,13 +800,13 @@ public class CallActivity extends AppCompatActivity
                 updateCallButton(R.id.button_onhold, true);
                 updateCallButton(R.id.button_transfer, true);
             }
-        } else if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
+        } else if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE && mSipService.getCurrentCall() != null) {
             // In call dialog.
             hangup(R.id.button_hangup);
-        } else if (declineButton != null && declineButton.getVisibility() == View.VISIBLE) {
+        } else if (declineButton != null && declineButton.getVisibility() == View.VISIBLE && mSipService.getCurrentCall() != null) {
             // Two button pickup visible.
             decline();
-        } else if (lockRingView != null && lockRingView.getVisibility() == View.VISIBLE) {
+        } else if (lockRingView != null && lockRingView.getVisibility() == View.VISIBLE && mSipService.getCurrentCall() != null) {
             // Lock ring visible.
             decline();
         } else {

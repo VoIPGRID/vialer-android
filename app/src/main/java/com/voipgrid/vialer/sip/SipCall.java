@@ -56,6 +56,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private boolean mOutgoingCall = false;
     private boolean mUserHangup = false;
     private boolean mCallIsTransferred = false;
+    private boolean mRingbackStarted = false;
     private String mCallerId;
     private String mIdentifier;
     private String mPhoneNumber;
@@ -335,24 +336,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                 // We are handling a outgoing call.
                 mOutgoingCall = true;
-            } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_CONNECTING
-                    || callState == pjsip_inv_state.PJSIP_INV_STATE_EARLY) {
-
-                // Start ringing in early state on outgoing call.
-                if (callState == pjsip_inv_state.PJSIP_INV_STATE_EARLY) {
-                    if (!hasMedia() && mOutgoingCall) {
-                        onCallStartRingback();
-                    }
-                }
-
-                pjsip_status_code lastStatusCode = info.getLastStatusCode();
-
-                if (hasMedia() &&
-                        (lastStatusCode == pjsip_status_code.PJSIP_SC_PROGRESS ||
-                                lastStatusCode == pjsip_status_code.PJSIP_SC_OK)) {
-                    onCallStopRingback();  // if so stop the ringback
-                }
-            } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) {
+                onCallStartRingback();
+            }  else if (callState == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) {
                 // Call has been setup, stop ringback.
                 onCallStopRingback();
                 onCallConnected();
@@ -381,7 +366,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             CallMediaInfoVector media = ci.getMedia();
             // Administration to see if we connected some media to this call.
             boolean mediaAvailable = false;
-            for(int i=0; i < media.size(); ++i) {
+            for (int i = 0; i < media.size(); ++i) {
                 CallMediaInfo cmi = media.get(i);
                 boolean usableStatus = (cmi.getStatus() ==
                         pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE ||
@@ -525,6 +510,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     public void onCallMediaAvailable(AudioMedia media) {
         mRemoteLogger.d(TAG + " onCallMediaAvailable");
         try {
+            // There is media available so stop the ringback.
+            onCallStopRingback();
+
+            // Connect de audio device manager to the sip media.
             AudDevManager audDevManager = mSipService.getSipConfig().getEndpoint().audDevManager();
             media.startTransmit(audDevManager.getPlaybackDevMedia());
             audDevManager.getCaptureDevMedia().startTransmit(media);
@@ -542,13 +531,19 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public void onCallStartRingback() {
-        mRemoteLogger.d(TAG + " onCallStartRingback");
-        mSipService.startRingback();
+        if (!mRingbackStarted) {
+            mRemoteLogger.d(TAG + " onCallStartRingback");
+            mSipService.startRingback();
+            mRingbackStarted = true;
+        }
     }
 
     public void onCallStopRingback() {
-        mRemoteLogger.d(TAG + " onCallStopRingback");
-        mSipService.stopRingback();
+        if (mRingbackStarted) {
+            mRemoteLogger.d(TAG + " onCallStopRingback");
+            mSipService.stopRingback();
+            mRingbackStarted = false;
+        }
     }
 
     public boolean getCallIsTransferred() {
