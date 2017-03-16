@@ -1,12 +1,8 @@
 package com.voipgrid.vialer;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -33,7 +29,6 @@ import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
 import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.CustomReceiver;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.UpdateActivity;
@@ -48,7 +43,6 @@ public class MainActivity extends NavigationDrawerActivity implements
     private boolean mAskForPermission = true;
     private int requestCounter = -1;
 
-    private CustomReceiver mMediaButtonReceiver;
     private BroadcastReceiver mBroadcastReceiver;
 
     @Override
@@ -150,50 +144,19 @@ public class MainActivity extends NavigationDrawerActivity implements
         }
     }
 
-
-    private void createReceivers() {
-        mMediaButtonReceiver = new CustomReceiver();
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                openDialer();
-            }
-        };
-    }
-
-    private void registerReceivers() {
-        if (mMediaButtonReceiver == null || mBroadcastReceiver == null){
-            createReceivers();
-        }
-        ((AudioManager)getSystemService(AUDIO_SERVICE)).registerMediaButtonEventReceiver(
-                new ComponentName(this, CustomReceiver.class));
-        registerReceiver(mMediaButtonReceiver, CustomReceiver.mMediaButtonFilter);
-        registerReceiver(mBroadcastReceiver, new IntentFilter(CustomReceiver.CALL_BTN));
-    }
-
-    private void unRegisterReceivers() {
-        try {
-            unregisterReceiver(mMediaButtonReceiver);
-            unregisterReceiver(mBroadcastReceiver);
-        } catch(Exception e) {}
-    }
-
     @Override
     protected void onResume() {
         askForPermissions(requestCounter);
         super.onResume();
-        registerReceivers();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unRegisterReceivers();
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode ==
                 this.getResources().getInteger(R.integer.contact_permission_request_code)) {
             boolean allPermissionsGranted = true;

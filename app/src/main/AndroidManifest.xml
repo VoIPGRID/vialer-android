@@ -99,7 +99,6 @@
             </intent-filter>
         </service>
 
-
         <service android:name=".fcm.FcmRegistrationService" />
 
         <activity
@@ -144,13 +143,18 @@
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name=".util.CustomReceiver"
-            android:enabled="true" >
-            <intent-filter android:priority="1000000000">
+        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver" >
+            <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
+
             </intent-filter>
         </receiver>
+
+        <service android:name=".media.BluetoothMediaSessionService" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
 
         <service
             android:name="com.google.android.gms.analytics.AnalyticsService"

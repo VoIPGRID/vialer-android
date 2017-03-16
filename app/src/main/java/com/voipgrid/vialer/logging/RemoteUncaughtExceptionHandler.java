@@ -39,7 +39,7 @@ public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionH
             model = Build.MANUFACTURER + " " + model;
         }
 
-        RemoteLogger remoteLogger = new RemoteLogger(mContext, true);
+        RemoteLogger remoteLogger = new RemoteLogger(mContext, RemoteUncaughtExceptionHandler.class, true);
         // Log device information before sending the crash log.
         remoteLogger.e("Android version: " +  Build.VERSION.SDK_INT + "\n");
         remoteLogger.e("Device: " + model + "\n");

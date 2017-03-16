@@ -3,6 +3,7 @@ package com.voipgrid.vialer.logging;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.logentries.logger.AndroidLogger;
 import com.voipgrid.vialer.Preferences;
@@ -26,20 +27,30 @@ public class RemoteLogger {
     private static final String WARNING_TAG = "WARNING";
     private static final String EXCEPTION_TAG = "EXCEPTION";
 
+    private String TAG;
+
     private Context mContext;
     private AndroidLogger logEntryLogger = null;
 
     private String mIdentifier;
     private boolean mRemoteLoggingEnabled;
+    private boolean mLogToConsole = false;
 
-    public RemoteLogger(Context context) {
-        this(context, false);
+    public RemoteLogger(Context context, Class thisClass) {
+        this(context, thisClass, false);
     }
 
-    public RemoteLogger(Context context, boolean forced) {
+    public RemoteLogger(Context context, Class thisClass, int logToConsole) {
+        this(context, thisClass, false);
+
+        mLogToConsole = logToConsole == 1;
+    }
+    public RemoteLogger(Context context, Class thisClass, boolean forced) {
         mContext = context;
         createLogger();
         mIdentifier = new Preferences(mContext).getLoggerIdentifier();
+
+        TAG = thisClass.getSimpleName();
         if (forced) {
             forceRemoteLogging(true);
         } else {
@@ -131,7 +142,10 @@ public class RemoteLogger {
      * @param message
      */
     public void v(String message) {
-        log(VERBOSE_TAG, message);
+        log(VERBOSE_TAG, TAG + " " + message);
+        if (mLogToConsole) {
+            Log.v(TAG, message);
+        }
     }
 
     /**
@@ -139,7 +153,10 @@ public class RemoteLogger {
      * @param message
      */
     public void d(String message) {
-        log(DEBUG_TAG, message);
+        log(DEBUG_TAG, TAG + " " + message);
+        if (mLogToConsole) {
+            Log.d(TAG, message);
+        }
     }
 
     /**
@@ -147,7 +164,10 @@ public class RemoteLogger {
      * @param message
      */
     public void i(String message) {
-        log(INFO_TAG, message);
+        log(INFO_TAG, TAG + " " + message);
+        if (mLogToConsole) {
+            Log.i(TAG, message);
+        }
     }
 
     /**
@@ -155,7 +175,10 @@ public class RemoteLogger {
      * @param message
      */
     public void w(String message) {
-        log(WARNING_TAG, message);
+        log(WARNING_TAG, TAG + " " + message);
+        if (mLogToConsole) {
+            Log.w(TAG, message);
+        }
     }
 
     /**
@@ -163,7 +186,10 @@ public class RemoteLogger {
      * @param message
      */
     public void e(String message) {
-        log(EXCEPTION_TAG, message);
+        log(EXCEPTION_TAG, TAG + " " + message);
+        if (mLogToConsole) {
+            Log.e(TAG, message);
+        }
     }
 
 }

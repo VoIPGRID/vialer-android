@@ -398,7 +398,7 @@ public abstract class NavigationDrawerActivity
         mSpinner.setOnItemSelectedListener(this);
 
         // Setup spinner placeholder text for when there is no connection and thus no spinner options
-        mNoConnectionText = (TextView) findViewById(R.id.no_availability_text);
+        mNoConnectionText = (TextView) mNavigationHeaderView.findViewById(R.id.no_availability_text);
     }
 
     @Override
