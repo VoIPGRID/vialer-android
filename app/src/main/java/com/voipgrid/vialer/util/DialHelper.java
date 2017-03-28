@@ -44,7 +44,7 @@ public class DialHelper {
     }
 
     public void callNumber(final String number, final String contactName) {
-        if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.TYPE_WIFI) {
+        if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.TYPE_WIFI && mPreferences.hasSipEnabled()) {
             if(mPreferences.hasConnectionPerference(mConnectivityHelper.TYPE_LTE)) {
                 switchNetworkAndCallNumber(number, contactName);
             } else if(mPreferences.hasConnectionPerference(Preferences.CONNECTION_PREFERENCE_NONE)) {
