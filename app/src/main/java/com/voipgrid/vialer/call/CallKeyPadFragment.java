@@ -69,7 +69,9 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
     public void onKeyPadButtonClick(String digit, String chars) {
         String currentDTMF = mNumberInputView.getNumber();
         mNumberInputView.setNumber(currentDTMF + digit);
-        mCallback.callKeyPadButtonClicked(digit);
+        if (mCallback != null) {
+            mCallback.callKeyPadButtonClicked(digit);
+        }
     }
 
     @Override
