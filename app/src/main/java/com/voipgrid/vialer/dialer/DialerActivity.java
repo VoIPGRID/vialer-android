@@ -29,6 +29,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
@@ -124,19 +125,19 @@ public class DialerActivity extends LoginRequiredActivity implements
              * The app added a "Vialer call <number>" to the native contacts app. clicking this
              * opens the app with the appname's profile and the data necessary for opening the app.
              */
-            if((!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype)))
+            if ((!TextUtils.isEmpty(type) && type.equals(getString(R.string.profile_mimetype)))
                     || contactUri != null) {
                 // Redirect user to login.
                 // This can be needed when a user logs out and in the logged out state
                 // presses call with vialer in a contact.
-                if(!mJsonStorage.has(SystemUser.class)) {
+                if (!mJsonStorage.has(SystemUser.class)) {
                     startActivity(new Intent(this, SetupActivity.class));
                     finish();
                 }
 
-                Cursor cursor = getContentResolver().query(contactUri, new String[] {
+                Cursor cursor = getContentResolver().query(contactUri, new String[]{
                         ContactsContract.CommonDataKinds.StructuredName.PHONETIC_NAME,
-                        ContactsContract.Data.DATA3 }, null, null, null);
+                        ContactsContract.Data.DATA3}, null, null, null);
                 cursor.moveToFirst();
                 String number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA3));
                 mNumberInputView.setNumber(number);
@@ -208,6 +209,7 @@ public class DialerActivity extends LoginRequiredActivity implements
 
     /**
      * Function to get the bitmap from the uri.
+     *
      * @param thumbnailUriString String uri of the file
      * @return Bitmap of the uri.
      */
@@ -273,7 +275,7 @@ public class DialerActivity extends LoginRequiredActivity implements
                     }
 
                     if (!hasThumbnail) {
-                        String firstLetter = cursor.getString(1).replaceAll("\\<.*?>","").substring(0, 1);
+                        String firstLetter = cursor.getString(1).replaceAll("\\<.*?>", "").substring(0, 1);
                         Bitmap bitmapImage = IconHelper.getCallerIconBitmap(firstLetter, Color.BLUE);
                         ((CircleImageView) view).setImageBitmap(bitmapImage);
                     }
@@ -297,14 +299,14 @@ public class DialerActivity extends LoginRequiredActivity implements
     protected void onResume() {
         super.onResume();
         // Check if wifi should be turned back on.
-        if(ConnectivityHelper.mWifiKilled) {
+        if (ConnectivityHelper.mWifiKilled) {
             mConnectivityHelper.useWifi(this, true);
             ConnectivityHelper.mWifiKilled = false;
         }
         registerReceivers();
 
         // Permission changed since last accessing this Activity.
-        if (mHasPermission != ContactsPermission.hasPermission(this)){
+        if (mHasPermission != ContactsPermission.hasPermission(this)) {
             // Force a recreate of the Activity to reflect the new permission.
             Intent intent = getIntent();
             startActivity(intent);
@@ -312,7 +314,7 @@ public class DialerActivity extends LoginRequiredActivity implements
         }
 
         // If we don't have permission we need to ask for it.
-        if (!mHasPermission){
+        if (!mHasPermission) {
             // We need to avoid a permission loop.
             if (mAskForPermission) {
                 mAskForPermission = false;
@@ -362,14 +364,19 @@ public class DialerActivity extends LoginRequiredActivity implements
     /**
      * Initiate an outgoing call by starting CallActivity and pass a SipUri based on the number
      *
-     * @param number number to call
+     * @param number      number to call
      * @param contactName contact name to display
      */
     public void onCallNumber(String number, String contactName) {
-        new DialHelper(this, mJsonStorage, mConnectivityHelper, mAnalyticsHelper)
-                .callNumber(PhoneNumberUtils.format(number), contactName);
-        mSharedPreferences.edit().putString(LAST_DIALED, number).apply();
-        mNumberInputView.clear();
+        DialHelper dialHelper = new DialHelper(this, mJsonStorage, mConnectivityHelper, mAnalyticsHelper);
+        String phoneNumberToCall = PhoneNumberUtils.format(number);
+        if (number.length() < 1) {
+            Toast.makeText(this, getString(R.string.dialer_invalid_number), Toast.LENGTH_LONG).show();
+        } else {
+            dialHelper.callNumber(phoneNumberToCall, contactName);
+            mSharedPreferences.edit().putString(LAST_DIALED, number).apply();
+            mNumberInputView.clear();
+        }
     }
 
     private void createReceivers() {
@@ -382,10 +389,10 @@ public class DialerActivity extends LoginRequiredActivity implements
     }
 
     private void registerReceivers() {
-        if (mBroadcastReceiver == null){
+        if (mBroadcastReceiver == null) {
             createReceivers();
         }
-        ((AudioManager)getSystemService(AUDIO_SERVICE)).registerMediaButtonEventReceiver(
+        ((AudioManager) getSystemService(AUDIO_SERVICE)).registerMediaButtonEventReceiver(
                 new ComponentName(this, CustomReceiver.class));
         registerReceiver(mBroadcastReceiver, new IntentFilter(CustomReceiver.CALL_BTN));
     }
@@ -393,16 +400,17 @@ public class DialerActivity extends LoginRequiredActivity implements
     private void unRegisterReceivers() {
         try {
             unregisterReceiver(mBroadcastReceiver);
-        } catch(Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.button_call :
+            case R.id.button_call:
                 onCallButtonClicked();
                 break;
-            case R.id.button_dialpad :
+            case R.id.button_dialpad:
                 toggleKeyPadView();
                 break;
         }

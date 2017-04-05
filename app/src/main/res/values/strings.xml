@@ -103,6 +103,7 @@
     <string name="dialer_warning_a_b_connect_connectivity_message">Your internet connection isn\'t fast enough to enable calling using VoIP. Two-step calling is therefore enabled. When you start a phonecall, we first call you on your mobile phone and when you pickup, we connect you to the person you want to call. It is possible that your telephony provider can charge you double rates for setting up two connections.</string>
     <string name="dialer_warning_a_b_connect_account_message">You dont\' have a VoIP account configured for this account. Please configure a VoIP account in the portal for use with this user. After configuring, you can call using VoIP from the app.</string>
     <string name="dialer_no_contacts_found_message">No contacts found</string>
+    <string name="dialer_invalid_number">Phone number incorrect</string>
 
     <string name="user_is_partner_error_title">Login failed</string>
     <string name="user_is_partner_error_message">This user is not allowed to use the app.</string>
