@@ -21,6 +21,7 @@ import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.onboarding.SetupActivity;
+import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
@@ -260,6 +261,8 @@ public class AccountActivity extends LoginRequiredActivity implements
         if (!isChecked) {
             // Unregister at middleware.
             MiddlewareHelper.executeUnregisterTask(this);
+            // Stop the sipservice.
+            stopService(new Intent(this, SipService.class));
             mSipIdEditText.setVisibility(View.GONE);
         } else {
             enableProgressBar(true);
