@@ -18,7 +18,7 @@ import com.voipgrid.vialer.R;
 public class KeyPadView extends LinearLayout
         implements View.OnClickListener, View.OnLongClickListener {
 
-    private static final int DTMF_TONE_DURATION = 200;
+    public static final int DTMF_TONE_DURATION = 200;
 
     private OnKeyPadClickListener mListener;
     private ToneGenerator mToneGenerator;
@@ -44,8 +44,8 @@ public class KeyPadView extends LinearLayout
                     Context.AUDIO_SERVICE
             );
             mToneGenerator = new ToneGenerator(
-                    AudioManager.STREAM_MUSIC,
-                    audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                    AudioManager.STREAM_DTMF,
+                    (int) (Math.floor(audioManager.getStreamVolume(AudioManager.STREAM_DTMF) * 5))
             );
         }
 
