@@ -18,7 +18,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +36,7 @@ import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
+import com.voipgrid.vialer.fcm.FcmRegistrationService;
 import com.voipgrid.vialer.onboarding.LogoutTask;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -110,7 +110,7 @@ public abstract class NavigationDrawerActivity
      */
     protected void setActionBar(@IdRes int resId) {
         mToolbar = (Toolbar) findViewById(resId);
-        if(mToolbar == null) {
+        if (mToolbar == null) {
             throw new RuntimeException(
                     "NavigationDrawerActivity must have a valid resource ID to a Toolbar");
         }
@@ -119,14 +119,14 @@ public abstract class NavigationDrawerActivity
     }
 
     /**
-     *  Sets a DrawerLayout to use as the Activities NavigationDrawer and adds a DrawerListener.
-     *  Configures the ActionBar to show the navigation icon.
+     * Sets a DrawerLayout to use as the Activities NavigationDrawer and adds a DrawerListener.
+     * Configures the ActionBar to show the navigation icon.
      *
      * @param resId resource ID to a DrawerLayout in the Activity Layout
      */
     protected void setNavigationDrawer(@IdRes int resId) {
         mDrawerLayout = (DrawerLayout) findViewById(resId);
-        if(mDrawerLayout == null) {
+        if (mDrawerLayout == null) {
             throw new RuntimeException(
                     "NavigationDrawerActivity must have a valid resource ID to a DrawerLayout");
         }
@@ -135,7 +135,7 @@ public abstract class NavigationDrawerActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle drawerToggle = new CustomActionBarDrawerToggle(
-                this,  mDrawerLayout, mToolbar,
+                this, mDrawerLayout, mToolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close
         );
 
@@ -172,7 +172,7 @@ public abstract class NavigationDrawerActivity
     }
 
     private void setSystemUserInfo() {
-        if(mSystemUser != null) {
+        if (mSystemUser != null) {
             String phoneNumber = mSystemUser.getOutgoingCli();
             if (!TextUtils.isEmpty(phoneNumber)) {
                 ((TextView) mNavigationHeaderView.findViewById(R.id.text_view_name)).setText(phoneNumber);
@@ -186,11 +186,11 @@ public abstract class NavigationDrawerActivity
     }
 
     private void setVersionInfo(TextView textView) {
-        if(textView != null) {
+        if (textView != null) {
             try {
                 PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
                 String version = packageInfo.versionName;
-                if(version.contains("beta")) {
+                if (version.contains("beta")) {
                     textView.setText(getString(R.string.version_info_beta, version, packageInfo.versionCode));
                 } else {
                     textView.setText(getString(R.string.version_info, version));
@@ -215,31 +215,33 @@ public abstract class NavigationDrawerActivity
     public boolean onNavigationItemSelected(MenuItem menuItem) {
         int itemId = menuItem.getItemId();
         switch (itemId) {
-            case R.id.navigation_item_statistics :
+            case R.id.navigation_item_statistics:
                 startWebActivity(
                         getString(R.string.statistics_menu_item_title),
                         getString(R.string.web_statistics),
                         getString(R.string.analytics_statistics_title)
                 );
                 break;
-            case R.id.navigation_item_dial_plan :
+            case R.id.navigation_item_dial_plan:
                 startWebActivity(
                         getString(R.string.dial_plan_menu_item_title),
                         getString(R.string.web_dial_plan),
                         getString(R.string.analytics_dial_plan_title)
                 );
                 break;
-            case R.id.navigation_item_info :
+            case R.id.navigation_item_info:
                 startWebActivity(
                         getString(R.string.info_menu_item_title),
                         getString(R.string.url_app_info),
                         getString(R.string.analytics_info_title)
                 );
                 break;
-            case R.id.navigation_item_settings :
-                startActivity(new Intent(this, AccountActivity.class)); break;
-            case R.id.navigation_item_logout :
-                logout(); break;
+            case R.id.navigation_item_settings:
+                startActivity(new Intent(this, AccountActivity.class));
+                break;
+            case R.id.navigation_item_logout:
+                logout();
+                break;
         }
         return false;
     }
@@ -248,7 +250,7 @@ public abstract class NavigationDrawerActivity
      * Perform logout; Remove the stored SystemUser and PhoneAccount and show the login view
      */
     private void logout() {
-        if(mConnectivityHelper.hasNetworkConnection()){
+        if (mConnectivityHelper.hasNetworkConnection()) {
             try {
                 new LogoutTask(this).execute().get(1000, TimeUnit.MILLISECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -281,6 +283,7 @@ public abstract class NavigationDrawerActivity
 
     /**
      * Start a new WebActivity to display the page
+     *
      * @param title
      * @param page
      */
@@ -302,19 +305,19 @@ public abstract class NavigationDrawerActivity
 
     @Override
     public void onResponse(Call call, Response response) {
-        if(!response.isSuccess()){
+        if (!response.isSuccess()) {
             Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
-            if(!mConnectivityHelper.hasNetworkConnection()) {
+            if (!mConnectivityHelper.hasNetworkConnection()) {
                 // First check if there is a entry already to avoid duplicates.
                 mSpinner.setVisibility(View.GONE);
                 mNoConnectionText.setVisibility(View.VISIBLE);
             }
         }
-        if(response.body() instanceof VoipGridResponse) {
+        if (response.body() instanceof VoipGridResponse) {
             List<UserDestination> userDestinationObjects =
                     ((VoipGridResponse<UserDestination>) response.body()).getObjects();
 
-            if (userDestinationObjects == null || userDestinationObjects.size() <=0 || mSpinnerAdapter == null){
+            if (userDestinationObjects == null || userDestinationObjects.size() <= 0 || mSpinnerAdapter == null) {
                 return;
             }
 
@@ -337,18 +340,18 @@ public abstract class NavigationDrawerActivity
             int activeIndex = 0;
 
             // Add all possible destinations to array.
-            for(int i=0, size=destinations.size(); i<size; i++) {
+            for (int i = 0, size = destinations.size(); i < size; i++) {
                 Destination destination = destinations.get(i);
                 mSpinnerAdapter.add(destination);
-                if(activeDestination != null &&
+                if (activeDestination != null &&
                         destination.getId().equals(activeDestination.getId())) {
-                    activeIndex = i+1;
+                    activeIndex = i + 1;
                 }
             }
 
-            // Create not available destination.
+            // Create add destination field.
             Destination addDestination = new FixedDestination();
-            String addDestinationText =  getString(R.string.fa_plus_circle) +
+            String addDestinationText = getString(R.string.fa_plus_circle) +
                     "   " + getString(R.string.add_availability);
             addDestination.setDescription(addDestinationText);
             mSpinnerAdapter.add(addDestination);
@@ -386,7 +389,7 @@ public abstract class NavigationDrawerActivity
     /**
      * Function to setup the availability spinner.
      */
-    private void setupSpinner(){
+    private void setupSpinner() {
         mSpinner = (Spinner) mNavigationHeaderView.findViewById(R.id.menu_availability_spinner);
         mSpinnerAdapter = new CustomFontSpinnerAdapter<>(this, android.R.layout.simple_spinner_item);
         mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -400,10 +403,10 @@ public abstract class NavigationDrawerActivity
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if(mFirstTimeOnItemSelected) {
+        if (mFirstTimeOnItemSelected) {
             mFirstTimeOnItemSelected = false;
         } else {
-            if(parent.getCount()-1 == position){
+            if (parent.getCount() - 1 == position) {
                 startWebActivity(
                         getString(R.string.add_destination_title),
                         getString(R.string.web_add_destination),
@@ -411,13 +414,19 @@ public abstract class NavigationDrawerActivity
                 );
             } else {
                 Destination destination = (Destination) parent.getAdapter().getItem(position);
+                if (destination.getDescription() == getString(R.string.not_available)) {
+                    MiddlewareHelper.executeUnregisterTask(this);
+                }
                 SelectedUserDestinationParams params = new SelectedUserDestinationParams();
-                params.fixedDestination = destination instanceof FixedDestination ?
-                        destination.getId() : null;
-                params.phoneAccount = destination instanceof PhoneAccount ?
-                        destination.getId() : null;
+                params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
+                params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
                 Call<Object> call = mApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
                 call.enqueue(this);
+                if (!MiddlewareHelper.isRegistered(this)) {
+                    // If the previous destination was not available, or if we're not registered
+                    // for another reason, register again.
+                    startService(new Intent(this, FcmRegistrationService.class));
+                }
             }
         }
     }
