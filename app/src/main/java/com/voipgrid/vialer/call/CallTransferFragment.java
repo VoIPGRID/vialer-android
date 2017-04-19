@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.dialer.KeyPadView;
 import com.voipgrid.vialer.dialer.NumberInputView;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 /**
  * Fragment for transferring a call
@@ -130,7 +131,7 @@ public class CallTransferFragment extends Fragment implements KeyPadView.OnKeyPa
 
         switch (viewId) {
             case R.id.button_call:
-                String numberToCall = mNumberInputView.getNumber();
+                String numberToCall = PhoneNumberUtils.format(mNumberInputView.getNumber());
                 if (!TextUtils.isEmpty(numberToCall)) {
                     mCallback.callTransferMakeSecondCall(numberToCall);
 
