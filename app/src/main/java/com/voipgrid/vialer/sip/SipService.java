@@ -152,6 +152,21 @@ public class SipService extends Service {
             mRemoteLogger.w("No sip account when trying to create service");
             stopSelf();
         }
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // Check if the service is being used after 5 seconds and shutdown the service
+                // if required.
+                checkServiceBeingUsed();
+            }
+        }, 5000);
+    }
+
+    private void checkServiceBeingUsed() {
+        if (mCurrentCall == null) {
+            stopSelf();
+        }
     }
 
     public RemoteLogger getRemoteLogger() {
