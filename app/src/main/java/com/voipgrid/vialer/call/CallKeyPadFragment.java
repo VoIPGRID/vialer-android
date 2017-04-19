@@ -3,12 +3,15 @@ package com.voipgrid.vialer.call;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.dialer.DialpadButton;
 import com.voipgrid.vialer.dialer.KeyPadView;
 import com.voipgrid.vialer.dialer.NumberInputView;
 
@@ -19,6 +22,8 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
     private NumberInputView mNumberInputView;
     private CallKeyPadFragmentListener mCallback;
     private View mHangupButton;
+    private ToneGenerator mToneGenerator;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,6 +49,13 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
             }
         });
 
+        AudioManager audioManager = (AudioManager) getActivity().getSystemService(
+                Context.AUDIO_SERVICE
+        );
+        mToneGenerator = new ToneGenerator(
+                AudioManager.STREAM_DTMF,
+                (int) (Math.floor(audioManager.getStreamVolume(AudioManager.STREAM_DTMF) * 5))
+        );
     }
 
     @Override
@@ -77,7 +89,10 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
     @Override
     public void onClick(View view) {
         int viewId = view.getId();
-
+        if (view instanceof DialpadButton) {
+            DialpadButton button = (DialpadButton) view;
+            mToneGenerator.startTone(button.getDtmfTone(), KeyPadView.DTMF_TONE_DURATION);
+        }
         switch (viewId) {
             case R.id.button_keypad_call_hangup:
                 mCallback.hangupFromKeypad();
