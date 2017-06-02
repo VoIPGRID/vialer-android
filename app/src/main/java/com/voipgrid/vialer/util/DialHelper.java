@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.MicrophonePermission;
+import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;

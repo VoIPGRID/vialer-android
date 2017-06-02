@@ -13,9 +13,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,6 +39,8 @@ import com.voipgrid.vialer.call.CallLockRingFragment;
 import com.voipgrid.vialer.call.CallTransferCompleteFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.permissions.MicrophonePermission;
+import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
@@ -49,6 +51,7 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,7 +111,7 @@ public class CallActivity extends AppCompatActivity
     private boolean mBluetoothDeviceConnected = false;
     private boolean mSelfHangup = false;
     private AnalyticsHelper mAnalyticsHelper;
-    private Ringtone mRingtone;
+    private MediaPlayer mMediaPlayer;
     private Vibrator mVibrator;
     private BroadcastReceiver mBroadcastAnswerReceiver;
     private BroadcastReceiver mBroadcastDeclineReceiver;
@@ -313,7 +316,7 @@ public class CallActivity extends AppCompatActivity
 
         mProximityHelper = new ProximitySensorHelper(this, this, findViewById(R.id.screen_off));
 
-        mRingtone = RingtoneManager.getRingtone(this, Settings.System.DEFAULT_RINGTONE_URI);
+        setRingtoneMediaPlayer();
 
         mVibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
@@ -382,6 +385,44 @@ public class CallActivity extends AppCompatActivity
         }
 
         mProximityHelper.startSensor();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == this.getResources().getInteger(R.integer.read_external_storage_permission_request_code)) {
+            boolean allPermissionsGranted = true;
+            for (int i = 0; i < permissions.length; i++) {
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    allPermissionsGranted = false;
+                    break;
+                }
+            }
+            if (allPermissionsGranted) {
+                setRingtoneMediaPlayer();
+            }
+        }
+    }
+
+    private void setRingtoneMediaPlayer() {
+        if (ReadExternalStoragePermission.hasPermission(this)) {
+            try {
+                Uri ringtoneUri = Settings.System.DEFAULT_RINGTONE_URI;
+                if (getResources().getIdentifier("ringtone", "raw", this.getPackageName()) != 0) {
+                    String ringtoneLocation = String.format("android.resource://%s/%s/%s", this.getPackageName(), "raw", "ringtone");
+                    ringtoneUri = Uri.parse(ringtoneLocation);
+                }
+
+                mMediaPlayer = new MediaPlayer();
+                mMediaPlayer.setDataSource(this, ringtoneUri);
+                if (mAudioManager.getStreamVolume(AudioManager.STREAM_RING) != 0) {
+                    mMediaPlayer.setAudioStreamType(AudioManager.STREAM_RING);
+                    mMediaPlayer.setLooping(true);
+                    mMediaPlayer.prepare();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void createReceivers() {
@@ -464,6 +505,7 @@ public class CallActivity extends AppCompatActivity
                         mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
                 );
             } else if (intent.getType().equals(TYPE_INCOMING_CALL)) {
+                setRingtoneMediaPlayer();
                 setRingerMode();
             }
         }
@@ -1242,15 +1284,18 @@ public class CallActivity extends AppCompatActivity
     }
 
     private void playRingtone(boolean play) {
-        if (mRingtone != null) {
-            if (play && !mRingtone.isPlaying()) {
-                mAudioManager.setMode(AudioManager.MODE_RINGTONE);
+        if (mMediaPlayer != null) {
+            if (play && !mMediaPlayer.isPlaying()) {
                 setVolumeControlStream(AudioManager.STREAM_RING);
-                mRingtone.play();
+                mAudioManager.setMode(AudioManager.MODE_RINGTONE);
+                // Play the ringtone!
+                mMediaPlayer.start();
             } else {
+                mMediaPlayer.stop();
+                mMediaPlayer.release();
+                mMediaPlayer = null;
                 mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-                mRingtone.stop();
             }
         }
     }
@@ -1439,6 +1484,10 @@ public class CallActivity extends AppCompatActivity
         switch (mAudioManager.getRingerMode()) {
             case AudioManager.RINGER_MODE_NORMAL:
                 playRingtone(true);
+                boolean vibrateWhenRinging = Settings.System.getInt(getContentResolver(), "vibrate_when_ringing ", 0) != 0;
+                if (vibrateWhenRinging) {
+                    vibrate(true);
+                }
                 break;
 
             case AudioManager.RINGER_MODE_VIBRATE:

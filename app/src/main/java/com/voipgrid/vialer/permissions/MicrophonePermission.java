@@ -1,4 +1,4 @@
-package com.voipgrid.vialer;
+package com.voipgrid.vialer.permissions;
 
 import android.Manifest;
 import android.app.Activity;
@@ -11,7 +11,8 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
+
+import com.voipgrid.vialer.R;
 
 /**
  * Class for Android 6.0+ related microphone permissions.

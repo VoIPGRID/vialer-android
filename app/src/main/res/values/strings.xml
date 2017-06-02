@@ -168,11 +168,17 @@
     <string name="permission_microphone_dialog_title">Microphone permission</string>
     <string name="permission_microphone_dialog_message">Permission is needed to call</string>
     <string name="permission_microphone_missing_message">Cannot start a call, permission to use the microphone is required</string>
+
     <string name="permission_contact_dialog_title">Contact permission</string>
     <string name="permission_contact_dialog_message">Permission is needed to start calling from contact list</string>
     <string name="permission_contact_dialer_list_message">Unable to show contacts, permission is required</string>
+
     <string name="permission_phone_dialog_title">Phone permission</string>
-    <string name="permission_phone_dialog_message">This permission is needed to handle regular calls during a VoIP call.</string>
+    <string name="permission_phone_dialog_message">This permission is needed to handle regular calls during a VoIP call</string>
+
+    <string name="permission_read_external_storage_dialog_title">Read external storage permission</string>
+    <string name="permission_read_external_storage_dialog_message">Permission is needed to access and play ringtones</string>
+    <string name="permission_read_external_storage_missing_message">This permission is needed to access and play a ringtone that may be set</string>
 
     <string name="invalid_mobile_number_title">Invalid number</string>
     <string name="invalid_mobile_number_message">Your mobile number should start with your country code e.g. +31.</string>
