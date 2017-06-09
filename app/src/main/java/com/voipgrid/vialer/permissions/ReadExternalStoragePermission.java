@@ -14,10 +14,6 @@ import android.support.v7.app.AlertDialog;
 
 import com.voipgrid.vialer.R;
 
-/**
- * Created by redmerloen on 6/2/17.
- */
-
 public class ReadExternalStoragePermission {
     public static final int GRANTED = 0;
     public static final int DENIED = 1;
