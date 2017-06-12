@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.util;
+package com.voipgrid.vialer.permissions;
 
 import android.Manifest;
 import android.app.Activity;

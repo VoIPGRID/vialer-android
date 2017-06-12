@@ -23,17 +23,18 @@ import com.google.android.gms.analytics.Tracker;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
-import com.voipgrid.vialer.contacts.ContactsPermission;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.contacts.UpdateChangedContactsService;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.onboarding.AccountFragment;
 import com.voipgrid.vialer.onboarding.SetupActivity;
+import com.voipgrid.vialer.permissions.ContactsPermission;
+import com.voipgrid.vialer.permissions.PhonePermission;
+import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.CustomReceiver;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
-import com.voipgrid.vialer.util.PhonePermission;
 import com.voipgrid.vialer.util.UpdateActivity;
 import com.voipgrid.vialer.util.UpdateHelper;
 
@@ -144,6 +145,11 @@ public class MainActivity extends NavigationDrawerActivity implements
     protected void onResume() {
         super.onResume();
         registerReceivers();
+
+        if (!ReadExternalStoragePermission.hasPermission(this)) {
+            ReadExternalStoragePermission.askForPermission(this);
+            return;
+        }
 
         // Ask for phone permissions.
         if (!PhonePermission.hasPermission(this)){
