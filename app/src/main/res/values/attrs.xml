@@ -11,5 +11,4 @@
         <attr name="foreground_color" format="color" />
         <attr name="icon_resource" format="integer" />
     </declare-styleable>
-
 </resources>

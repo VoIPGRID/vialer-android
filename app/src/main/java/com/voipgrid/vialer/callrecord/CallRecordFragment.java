@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.voipgrid.vialer.EmptyView;
 import com.voipgrid.vialer.R;
@@ -24,7 +23,6 @@ import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
-import com.voipgrid.vialer.util.NetworkStateViewHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +50,6 @@ public class CallRecordFragment extends ListFragment implements
     private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private JsonStorage mJsonStorage;
-    private NetworkStateViewHelper mNetworkStateViewHelper;
 
     private String mFilter;
     private boolean mHaveNetworkRecords;
@@ -134,9 +131,6 @@ public class CallRecordFragment extends ListFragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mNetworkStateViewHelper = new NetworkStateViewHelper(
-                getActivity(), (TextView) view.findViewById(R.id.dialer_warning));
-
         mAdapter = new CallRecordAdapter(getActivity(), mCallRecords);
 
         /* setup swipe refresh layout */
@@ -164,8 +158,6 @@ public class CallRecordFragment extends ListFragment implements
             mConnectivityHelper.useWifi(getActivity(), true);
             ConnectivityHelper.mWifiKilled = false;
         }
-        mNetworkStateViewHelper.updateNetworkStateView();
-        mNetworkStateViewHelper.startListening();
         mAdapter.mCallAlreadySetup = false;
     }
 
@@ -188,7 +180,6 @@ public class CallRecordFragment extends ListFragment implements
     @Override
     public void onStop() {
         super.onStop();
-        mNetworkStateViewHelper.stopListening();
     }
 
     @Override
