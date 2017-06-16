@@ -38,6 +38,7 @@ public class AccountActivity extends LoginRequiredActivity implements
         Callback {
 
     private CompoundButton mSwitch;
+    private CompoundButton m3GSwitch;
     private EditText mSipIdEditText;
     private EditText mRemoteLogIdEditText;
 
@@ -74,6 +75,7 @@ public class AccountActivity extends LoginRequiredActivity implements
 
         initConnectionSpinner();
         initRemoteLoggingSwitch();
+        initUse3GSwitch();
     }
 
     private void initConnectionSpinner() {
@@ -146,6 +148,21 @@ public class AccountActivity extends LoginRequiredActivity implements
             mRemoteLogIdEditText.setVisibility(View.VISIBLE);
             mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
         }
+    }
+
+    private void initUse3GSwitch() {
+        CompoundButton use3GSwitch = (CompoundButton) findViewById(R.id.use_3g_switch);
+        use3GSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (mPreferences.has3GEnabled() == isChecked) {
+                    return;
+                }
+
+                mPreferences.set3GEnabled(isChecked);
+            }
+        });
+        use3GSwitch.setChecked(mPreferences.has3GEnabled());
     }
 
     private void updateAndPopulate() {

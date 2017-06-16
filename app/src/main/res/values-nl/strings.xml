@@ -196,4 +196,5 @@
     <string name="permission_read_external_storage_missing_message">Permissie tot de externe opslag is nodig om toegang tot je ringtones te krijgen</string>
     <string name="permission_read_external_storage_dialog_message">Deze permissie is nodig om ringtones te kunnen kiezen die op je externe opslag staan</string>
 
+    <string name="switch_use_3g">Gebruik 3G om te bellen</string>
 </resources>

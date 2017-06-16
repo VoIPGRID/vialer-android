@@ -196,5 +196,6 @@
 
     <string name="call_transfer_complete_and">and</string>
     <string name="call_transfer_complete_success"> Successfully transferred</string>
+    <string name="switch_use_3g">Use 3G to make calls</string>
 
 </resources>

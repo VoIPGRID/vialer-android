@@ -91,12 +91,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     private void sendMos() {
         if ((getCallDuration() - mNetworkSwitchTime) > 10) {
+            float mos = this.calculateMos();
             new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
                     mSipService.getString(R.string.analytics_event_category_metrics),
                     mSipService.getString(R.string.analytics_event_action_callmetrics),
                     mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
-                    (int) (100 * (long) this.calculateMos())
+                    (int) (100 * (long) mos)
             );
+            mRemoteLogger.e("MOS for CONNECTION: " + ConnectivityHelper.get(mSipService).getConnectionTypeString() + " with value: " + mos);
         }
     }
 

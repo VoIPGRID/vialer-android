@@ -1,8 +1,6 @@
 package com.voipgrid.vialer.logging;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.logentries.logger.AndroidLogger;
@@ -13,9 +11,6 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
-
-import static android.content.Context.CONNECTIVITY_SERVICE;
-import static android.content.Context.TELEPHONY_SERVICE;
 
 /**
  * Class used for sending logs to a remote service.
@@ -112,12 +107,7 @@ public class RemoteLogger {
     }
 
     private String getConnectionType() {
-        ConnectivityHelper mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) mContext.getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) mContext.getSystemService(TELEPHONY_SERVICE)
-        );
-
-        return mConnectivityHelper.getConnectionTypeString();
+        return ConnectivityHelper.get(mContext).getConnectionTypeString();
     }
     /**
      * Function to log the message for the given tag.

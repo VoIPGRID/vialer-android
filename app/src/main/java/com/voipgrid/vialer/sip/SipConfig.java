@@ -61,7 +61,7 @@ public class SipConfig implements AccountStatus {
     private boolean mReRegisterAccount = false;
     private boolean mHasRespondedToMiddleware = false;
     private int mCurrentTransportId;
-    private Long mLatestConnectionType;
+    private int mLatestConnectionType;
     private static Map<String, Short> sCodecPrioMapping;
 
     private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
@@ -354,9 +354,9 @@ public class SipConfig implements AccountStatus {
     private void handleNetworkStateChange(Context context) {
         mRemoteLogger.d("handleNetworkStateChange");
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(context);
-        Long connectionType = connectivityHelper.getConnectionType();
+        int connectionType = ConnectivityHelper.get(context).getConnectionType();
 
-        if (!mLatestConnectionType.equals(connectionType) && connectivityHelper.hasNetworkConnection()) {
+        if (!(mLatestConnectionType == connectionType) && connectivityHelper.hasNetworkConnection()) {
             mReRegisterAccount = true;
             // Renew sip registration. Unregister would come from the new IP anyway so that
             // would not make a lot of sense so we update our existing registration from the
@@ -417,14 +417,7 @@ public class SipConfig implements AccountStatus {
                 url
         );
 
-        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(mSipService);
-        String connectionType = connectivityHelper.getConnectionTypeString();
-        String analyticsLabel;
-        if (connectionType.equals(connectivityHelper.CONNECTION_WIFI)) {
-            analyticsLabel = mSipService.getString(R.string.analytics_event_label_wifi);
-        } else {
-            analyticsLabel = mSipService.getString(R.string.analytics_event_label_4g);
-        }
+        String analyticsLabel = ConnectivityHelper.get(mSipService).getAnalyticsLabel();
 
         // Accepted event.
         analyticsHelper.sendEvent(

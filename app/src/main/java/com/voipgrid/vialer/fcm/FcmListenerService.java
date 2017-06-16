@@ -24,9 +24,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.voipgrid.vialer.util.ConnectivityHelper.CONNECTION_4G;
-import static com.voipgrid.vialer.util.ConnectivityHelper.CONNECTION_WIFI;
-
 /**
  * Listen to messages from GCM. The backend server sends us GCM notifications when we have
  * incoming calls.
@@ -82,21 +79,7 @@ public class FcmListenerService extends FirebaseMessagingService implements Midd
                 // Inform the middleware the incoming call is received but the app can not handle
                 // the sip call because there is no LTE or Wifi connection available at this
                 // point.
-                String connectionType = connectivityHelper.getConnectionTypeString();
-                String analyticsLabel;
-
-                switch (connectionType) {
-                    case CONNECTION_WIFI:
-                        analyticsLabel = getString(R.string.analytics_event_label_wifi);
-                        break;
-                    case CONNECTION_4G:
-                        analyticsLabel = getString(R.string.analytics_event_label_4g);
-                        break;
-                    default:
-                        analyticsLabel = getString(R.string.analytics_event_label_unknown);
-                        break;
-
-                }
+                String analyticsLabel = connectivityHelper.getAnalyticsLabel();
 
                 analyticsHelper.sendEvent(
                         getString(R.string.analytics_event_category_middleware),
