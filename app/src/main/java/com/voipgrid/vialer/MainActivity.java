@@ -45,6 +45,7 @@ public class MainActivity extends NavigationDrawerActivity implements
 
     private ViewPager mViewPager;
     private boolean mAskForPermission = true;
+    private int requestCounter = -1;
 
     private CustomReceiver mMediaButtonReceiver;
     private BroadcastReceiver mBroadcastReceiver;
@@ -66,6 +67,7 @@ public class MainActivity extends NavigationDrawerActivity implements
             // Start on boarding flow.
             startActivity(new Intent(this, SetupActivity.class));
             finish();
+            return;
         } else if (UpdateHelper.requiresUpdate(this)) {
             Intent intent = new Intent(this, UpdateActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -82,14 +84,11 @@ public class MainActivity extends NavigationDrawerActivity implements
 
             startActivity(intent);
             finish();
+            return;
         } else if (connectivityHelper.hasNetworkConnection()) {
             // Update SystemUser and PhoneAccount on background thread.
             new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
         }
-
-        // We are logged in and passed the onboarding
-        new Preferences(this).setFinishedOnboarding(true);
-
 
         if (SyncUtils.requiresFullContactSync(this)) {
             SyncUtils.requestContactSync(this);
@@ -112,7 +111,41 @@ public class MainActivity extends NavigationDrawerActivity implements
 
         // Set tabs.
         setupTabs();
+
+        requestCounter = 0;
     }
+
+    private void askForPermissions(int requestNr) {
+        switch (requestNr) {
+            case 0:
+                int storagePermissionState = ReadExternalStoragePermission.getPermissionStatus(this, ReadExternalStoragePermission.mPermissionToCheck);
+                if (storagePermissionState != ReadExternalStoragePermission.BLOCKED || ReadExternalStoragePermission.firstRequest) {
+                    if (!ReadExternalStoragePermission.hasPermission(this)) {
+                        ReadExternalStoragePermission.askForPermission(this);
+                        requestCounter++;
+                        return;
+                    }
+                }
+            case 1:
+                // Ask for phone permissions.
+                if (!PhonePermission.hasPermission(this)) {
+                    PhonePermission.askForPermission(this);
+                    requestCounter++;
+                    return;
+                }
+            case 2:
+                if (!ContactsPermission.hasPermission(this)) {
+                    // We need to avoid a permission loop.
+                    if (mAskForPermission) {
+                        mAskForPermission = false;
+                        ContactsPermission.askForPermission(this);
+                        requestCounter++;
+                        return;
+                    }
+                }
+        }
+    }
+
 
     private void createReceivers() {
         mMediaButtonReceiver = new CustomReceiver();
@@ -143,27 +176,9 @@ public class MainActivity extends NavigationDrawerActivity implements
 
     @Override
     protected void onResume() {
+        askForPermissions(requestCounter);
         super.onResume();
         registerReceivers();
-
-        if (!ReadExternalStoragePermission.hasPermission(this)) {
-            ReadExternalStoragePermission.askForPermission(this);
-            return;
-        }
-
-        // Ask for phone permissions.
-        if (!PhonePermission.hasPermission(this)){
-            PhonePermission.askForPermission(this);
-            return;
-        }
-
-        if (!ContactsPermission.hasPermission(this)){
-            // We need to avoid a permission loop.
-            if (mAskForPermission) {
-                mAskForPermission = false;
-                ContactsPermission.askForPermission(this);
-            }
-        }
     }
 
     @Override
