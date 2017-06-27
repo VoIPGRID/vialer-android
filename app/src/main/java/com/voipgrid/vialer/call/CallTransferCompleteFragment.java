@@ -15,9 +15,9 @@ import com.voipgrid.vialer.R;
  * Fragment for when a transfer is completed.
  */
 public class CallTransferCompleteFragment extends Fragment {
-    public static final String CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_ID = "ORIGINAL_CALLER_ID";
-    public static final String CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER = "ORIGINAL_CALLER_PHONE_NUMBER";
-    public static final String CALL_TRANSFER_COMPLETE_FRAGMENT_TRANSFERRED_PHONE_NUMBER = "TRANSFERRED_PHONE_NUMBER";
+    public static final String ORIGINAL_CALLER_ID = "ORIGINAL_CALLER_ID";
+    public static final String ORIGINAL_CALLER_PHONE_NUMBER = "ORIGINAL_CALLER_PHONE_NUMBER";
+    public static final String TRANSFERRED_PHONE_NUMBER = "TRANSFERRED_PHONE_NUMBER";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -29,18 +29,18 @@ public class CallTransferCompleteFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         TextView originalCallerView = (TextView) view.findViewById(R.id.original_caller);
-        String callerId = getArguments().getString(CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_ID);
+        String callerId = getArguments().getString(ORIGINAL_CALLER_ID);
         if (!TextUtils.isEmpty(callerId)) {
             originalCallerView.setText(callerId);
         } else {
             originalCallerView.setText(
-                    getArguments().getString(CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER)
+                    getArguments().getString(ORIGINAL_CALLER_PHONE_NUMBER)
             );
         }
 
         TextView transferredCallerView = (TextView) view.findViewById(R.id.transfer_caller);
         transferredCallerView.setText(
-                getArguments().getString(CALL_TRANSFER_COMPLETE_FRAGMENT_TRANSFERRED_PHONE_NUMBER)
+                getArguments().getString(TRANSFERRED_PHONE_NUMBER)
         );
 
         new Handler().postDelayed(new Runnable() {
@@ -50,4 +50,6 @@ public class CallTransferCompleteFragment extends Fragment {
             }
         }, 3000);
     }
+
+
 }

@@ -24,7 +24,7 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <!--<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />-->
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- For intercepting incoming GSM calls -->
@@ -33,15 +33,17 @@
     <!-- For using Bluetooth -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <uses-feature
         android:name="android.hardware.sensor.proximity"
         android:required="false" />
 
-    <permission
-        android:name=".permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
+    <!--<permission-->
+        <!--android:name=".permission.C2D_MESSAGE"-->
+        <!--android:protectionLevel="signature" />-->
 
-    <uses-permission android:name=".permission.C2D_MESSAGE" />
+    <!--<uses-permission android:name=".permission.C2D_MESSAGE" />-->
 
     <application
         android:name=".VialerApplication"
@@ -87,7 +89,8 @@
         </activity>
 
         <service
-            android:name=".fcm.FcmListenerService">
+            android:name=".fcm.FcmListenerService"
+            android:enabled="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
@@ -100,6 +103,15 @@
         </service>
 
         <service android:name=".fcm.FcmRegistrationService" />
+
+        <receiver
+            android:name=".util.OnBootReceiver"
+            android:label="StartMyServiceAtBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".util.UpdateActivity"

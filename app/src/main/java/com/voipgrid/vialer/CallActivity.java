@@ -46,15 +46,6 @@ import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.voipgrid.vialer.call.CallTransferCompleteFragment.CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_ID;
-import static com.voipgrid.vialer.call.CallTransferCompleteFragment.CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER;
-import static com.voipgrid.vialer.call.CallTransferCompleteFragment.CALL_TRANSFER_COMPLETE_FRAGMENT_TRANSFERRED_PHONE_NUMBER;
-import static com.voipgrid.vialer.call.CallTransferFragment.CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_ID;
-import static com.voipgrid.vialer.call.CallTransferFragment.CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER;
-import static com.voipgrid.vialer.call.CallTransferFragment.CALL_TRANSFER_FRAGMENT_SECOND_CALL_IS_CONNECTED;
-import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
-import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.HANGUP_BTN;
-
 
 /**
  * CallActivity for incoming or outgoing call.
@@ -189,7 +180,7 @@ public class CallActivity extends AppCompatActivity
                     mRemoteLogger.i("Pickup call");
                     answer();
                 }
-            } else if (action.equals(DECLINE_BTN)) {
+            } else if (action.equals(BluetoothMediaButtonReceiver.DECLINE_BTN)) {
                 mRemoteLogger.i("Decline the call");
                 decline();
             }
@@ -359,7 +350,7 @@ public class CallActivity extends AppCompatActivity
         mBroadcastManager.registerReceiver(mCallStatusReceiver, intentFilter);
 
         registerReceiver(mBluetoothButtonReceiver, new IntentFilter(BluetoothMediaButtonReceiver.CALL_BTN));
-        registerReceiver(mBluetoothButtonReceiver, new IntentFilter(DECLINE_BTN));
+        registerReceiver(mBluetoothButtonReceiver, new IntentFilter(BluetoothMediaButtonReceiver.DECLINE_BTN));
     }
 
     @Override
@@ -382,19 +373,24 @@ public class CallActivity extends AppCompatActivity
             mRemoteLogger.e("Why are we here!?, is it from the wake lock??");
 
             if ((mType.equals(TYPE_OUTGOING_CALL) || mType.equals(TYPE_INCOMING_CALL)) && !mConnected) {
+                mRemoteLogger.i("Call is outgoing or incoming but is not connected! Make sure the correct view is shown");
                 toggleCallStateButtonVisibility(mType);
             } else {
+                mRemoteLogger.i("Call is already connected make sure the connected call view is visible");
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
             }
         }
 
         if (!mOnTransfer && mSipService != null && mSipService.getCurrentCall() != null) {
             if (mSipService.getCurrentCall().isOnHold()) {
+                mRemoteLogger.d("SipService has call on hold");
                 if (!mOnHold) {
+                    mRemoteLogger.i("But the activity DOES not have the call on hold. Match the sip service.");
                     mOnHold = true;
                     updateCallButton(R.id.button_onhold, true);
                     onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
                 } else if (!findViewById(R.id.button_onhold).isActivated()) {
+                    mRemoteLogger.i("Call is on hold but the button is not active. Update the button");
                     updateCallButton(R.id.button_onhold, true);
                 }
             }
@@ -516,13 +512,14 @@ public class CallActivity extends AppCompatActivity
             if (!mOnTransfer) {
                 swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
 
-                if (type.equals(TYPE_CONNECTED_CALL)) {
+                if (type.equals(TYPE_CONNECTED_CALL) && !mConnected) {
                     mMediaManager.callAnswered();
                 }
-                if (type.equals(TYPE_OUTGOING_CALL)) {
+                if (type.equals(TYPE_OUTGOING_CALL) && !mConnected) {
                     mMediaManager.callOutgoing();
                 }
             }
+
 
         } else if (type.equals(TYPE_INCOMING_CALL)) {
             // Hide the connected view.
@@ -575,7 +572,7 @@ public class CallActivity extends AppCompatActivity
                 if (!mHasConnected && !mSelfHangup) {
                     // Call has never been connected. Meaning the dialed number was unreachable.
                     mStateView.setText(R.string.call_unreachable);
-                    sendBroadcast(new Intent(DECLINE_BTN));
+                    sendBroadcast(new Intent(BluetoothMediaButtonReceiver.DECLINE_BTN));
                 } else {
                     // Normal hangup.
                     mStateView.setText(R.string.call_ended);
@@ -898,7 +895,7 @@ public class CallActivity extends AppCompatActivity
             }
             mStateView.setText(R.string.call_hangup);
             finishWithDelay();
-            sendBroadcast(new Intent(HANGUP_BTN));
+            sendBroadcast(new Intent(BluetoothMediaButtonReceiver.HANGUP_BTN));
         }
     }
 
@@ -1092,9 +1089,9 @@ public class CallActivity extends AppCompatActivity
                 }
 
                 Bundle callTransferFragmentBundle = new Bundle();
-                callTransferFragmentBundle.putString(CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_ID, originalCallerId);
-                callTransferFragmentBundle.putString(CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER, extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString());
-                callTransferFragmentBundle.putString(CALL_TRANSFER_FRAGMENT_SECOND_CALL_IS_CONNECTED, extraInfo.get(MAP_SECOND_CALL_IS_CONNECTED).toString());
+                callTransferFragmentBundle.putString(CallTransferFragment.ORIGINAL_CALLER_ID, originalCallerId);
+                callTransferFragmentBundle.putString(CallTransferFragment.ORIGINAL_CALLER_PHONE_NUMBER, extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString());
+                callTransferFragmentBundle.putString(CallTransferFragment.SECOND_CALL_IS_CONNECTED, extraInfo.get(MAP_SECOND_CALL_IS_CONNECTED).toString());
 
                 newFragment = new CallTransferFragment();
                 newFragment.setArguments(callTransferFragmentBundle);
@@ -1107,9 +1104,9 @@ public class CallActivity extends AppCompatActivity
                     originalCallerId = "";
                 }
                 Bundle callTransferCompleteFragment = new Bundle();
-                callTransferCompleteFragment.putString(CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_ID, originalCallerId);
-                callTransferCompleteFragment.putString(CALL_TRANSFER_COMPLETE_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER, extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString());
-                callTransferCompleteFragment.putString(CALL_TRANSFER_COMPLETE_FRAGMENT_TRANSFERRED_PHONE_NUMBER, extraInfo.get(MAP_TRANSFERRED_PHONE_NUMBER).toString());
+                callTransferCompleteFragment.putString(CallTransferCompleteFragment.ORIGINAL_CALLER_ID, originalCallerId);
+                callTransferCompleteFragment.putString(CallTransferCompleteFragment.ORIGINAL_CALLER_PHONE_NUMBER, extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString());
+                callTransferCompleteFragment.putString(CallTransferCompleteFragment.TRANSFERRED_PHONE_NUMBER, extraInfo.get(MAP_TRANSFERRED_PHONE_NUMBER).toString());
 
                 newFragment = new CallTransferCompleteFragment();
                 newFragment.setArguments(callTransferCompleteFragment);
@@ -1181,7 +1178,7 @@ public class CallActivity extends AppCompatActivity
                     getString(R.string.analytics_event_label_declined)
             );
             finishWithDelay();
-            sendBroadcast(new Intent(DECLINE_BTN));
+            sendBroadcast(new Intent(BluetoothMediaButtonReceiver.DECLINE_BTN));
         }
     }
 

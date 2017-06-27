@@ -49,6 +49,15 @@ public class MainActivity extends NavigationDrawerActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Bundle startBundle = getIntent().getExtras();
+        if (startBundle != null) {
+            boolean onBoot = startBundle.getBoolean("OnBoot");
+            if (onBoot) {
+                finish();
+                return;
+            }
+        }
+
         JsonStorage jsonStorage = new JsonStorage(this);
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
         Boolean hasSystemUser = jsonStorage.has(SystemUser.class);

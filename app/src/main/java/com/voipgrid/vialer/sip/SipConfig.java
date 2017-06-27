@@ -218,7 +218,7 @@ public class SipConfig implements AccountStatus {
         }
 
         if (BuildConfig.DEBUG || mSipService.getPreferences().remoteLoggingIsActive()) {
-//            setSipLogging(endpointConfig);
+            setSipLogging(endpointConfig);
         }
 
         UaConfig uaConfig = endpointConfig.getUaConfig();
