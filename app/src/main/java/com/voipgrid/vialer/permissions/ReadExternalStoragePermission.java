@@ -33,7 +33,7 @@ public class ReadExternalStoragePermission {
         return getPermissionStatus((Activity) context, mPermissionToCheck) == GRANTED;
     }
 
-    private static int getPermissionStatus(Activity activity, String androidPermissionName) {
+    public static int getPermissionStatus(Activity activity, String androidPermissionName) {
         if(ContextCompat.checkSelfPermission(activity, androidPermissionName) != PackageManager.PERMISSION_GRANTED) {
             if(!ActivityCompat.shouldShowRequestPermissionRationale(activity, androidPermissionName)){
                 return BLOCKED;

@@ -88,7 +88,7 @@ public class Preferences {
      * Function to set if a user passed onboarding.
      */
     public void setFinishedOnboarding(boolean passed) {
-        mPreferences.edit().putBoolean(PREF_FINISHED_ONBOARDING, passed);
+        mPreferences.edit().putBoolean(PREF_FINISHED_ONBOARDING, passed).apply();
     }
 
     /**

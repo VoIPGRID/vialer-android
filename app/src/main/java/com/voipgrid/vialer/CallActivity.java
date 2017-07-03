@@ -370,6 +370,10 @@ public class CallActivity extends AppCompatActivity
                             getString(R.string.analytics_event_label_ringing)
                     );
 
+                    if (!ReadExternalStoragePermission.hasPermission(this)) {
+                        ReadExternalStoragePermission.askForPermission(this);
+                    }
+
                     mIncomingCallIsRinging = true;
 
                     setRingtoneMediaPlayer();
