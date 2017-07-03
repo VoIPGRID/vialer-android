@@ -8,8 +8,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Switch;
 
 import com.voipgrid.vialer.api.Api;
@@ -18,19 +21,20 @@ import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.onboarding.SetupActivity;
-import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.PhoneAccountHelper;
+import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.DialogHelper;
-import com.voipgrid.vialer.util.MiddlewareHelper;
-import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
+import com.voipgrid.vialer.util.MiddlewareHelper;
+import com.voipgrid.vialer.util.PhoneAccountHelper;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class AccountActivity extends LoginRequiredActivity implements
-        Switch.OnCheckedChangeListener,
+        Switch.OnCheckedChangeListener, AdapterView.OnItemSelectedListener,
         Callback {
 
     private CompoundButton mSwitch;
@@ -68,7 +72,53 @@ public class AccountActivity extends LoginRequiredActivity implements
         mSwitch = (CompoundButton) findViewById(R.id.account_sip_switch);
         mSwitch.setOnCheckedChangeListener(this);
 
+        initConnectionSpinner();
         initRemoteLoggingSwitch();
+    }
+
+    private void initConnectionSpinner() {
+        Spinner spinner = (Spinner) findViewById(R.id.call_connection_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.connection_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setSelection(adapter.getPosition(converseFromPreference((mPreferences.getConnectionPreference()))));
+        spinner.setOnItemSelectedListener(this);
+    }
+
+    /**
+     * One way conversion to charsequence from preference (long) because bidirectional maps
+     * are not nativly supported in java.
+     */
+    private long converseToPreference(CharSequence connectionPreference) {
+        if (connectionPreference.equals(getString(R.string.call_connection_always_LTE))) {
+            return Preferences.CONNECTION_PREFERENCE_LTE;
+        } else if (connectionPreference.equals(getString(R.string.call_connection_use_wifi))) {
+            return Preferences.CONNECTION_PREFERENCE_WIFI;
+        }
+        return Preferences.CONNECTION_PREFERENCE_NONE;
+    }
+
+    /**
+     * One way conversion to preference (long) from charsequence because bidirectional maps
+     * are not nativly supported in java.
+     */
+    private CharSequence converseFromPreference(long preference) {
+        if (preference == Preferences.CONNECTION_PREFERENCE_LTE) {
+            return getString(R.string.call_connection_always_LTE);
+        } else if (preference == Preferences.CONNECTION_PREFERENCE_WIFI) {
+            return getString(R.string.call_connection_use_wifi);
+        }
+        return getString(R.string.call_connection_optional);
+    }
+
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        String selected = parent.getItemAtPosition(pos).toString();
+        mPreferences.setConnectionPreference(converseToPreference(selected));
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+        // No need to implement. The preferences class will return a default value.
     }
 
     /**
@@ -185,8 +235,8 @@ public class AccountActivity extends LoginRequiredActivity implements
                 this,
                 Api.class,
                 getString(R.string.api_url),
-                mSystemUser.getEmail(),
-                mSystemUser.getPassword()
+                getEmail(),
+                getPassword()
         );
         Call<MobileNumber> call = api.mobileNumber(new MobileNumber(number));
         call.enqueue(this);
@@ -211,6 +261,8 @@ public class AccountActivity extends LoginRequiredActivity implements
         if (!isChecked) {
             // Unregister at middleware.
             MiddlewareHelper.executeUnregisterTask(this);
+            // Stop the sipservice.
+            stopService(new Intent(this, SipService.class));
             mSipIdEditText.setVisibility(View.GONE);
         } else {
             enableProgressBar(true);

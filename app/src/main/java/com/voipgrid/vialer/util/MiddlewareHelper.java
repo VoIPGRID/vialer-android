@@ -87,15 +87,20 @@ public class MiddlewareHelper {
         editor.putLong(Constants.LAST_REGISTRATION, System.currentTimeMillis());
 
         JsonStorage jsonStorage = new JsonStorage(context);
-        SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
+        AccountHelper accountHelper = new AccountHelper(context);
+
+        if (!jsonStorage.has(PhoneAccount.class)) {
+            return;
+        }
 
         Registration api = ServiceGenerator.createService(
                 context,
                 Registration.class,
                 getBaseApiUrl(context),
-                systemUser.getEmail(),
-                systemUser.getPassword()
+                accountHelper.getEmail(),
+                accountHelper.getPassword()
         );
+
         String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
         String fullName = ((SystemUser) jsonStorage.get(SystemUser.class)).getFullName();
         String appName = context.getPackageName();
@@ -139,14 +144,14 @@ public class MiddlewareHelper {
         // Check if we have a phone account and a push token.
         if (new Preferences(context).hasPhoneAccount() && !token.equals("")) {
             JsonStorage jsonStorage = new JsonStorage(context);
-            SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
+            AccountHelper accountHelper = new AccountHelper(context);
 
             Registration api = ServiceGenerator.createService(
                     context,
                     Registration.class,
                     getBaseApiUrl(context),
-                    systemUser.getEmail(),
-                    systemUser.getPassword());
+                    accountHelper.getEmail(),
+                    accountHelper.getPassword());
             String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
             String appName = context.getPackageName();
             Call<ResponseBody> call = api.unregister(token, sipUserId, appName);

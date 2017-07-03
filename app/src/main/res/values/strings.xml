@@ -16,12 +16,15 @@
     <string name="auto_login_error">WebActivity: %s</string>
     <string name="login_error">Login failed: %s</string>
     <string name="call_incoming">Incoming call</string>
+    <string name="call_incoming_expanded">Incoming call from:</string>
     <string name="call_outgoing">Outgoing call</string>
     <string name="call_ended">Call ended</string>
     <string name="call_on_hold">On hold</string>
     <string name="call_hangup">Hang up</string>
     <string name="call_connected">Connected</string>
     <string name="call_unreachable">Unreachable</string>
+    <string name="call_incoming_accept">Accept</string>
+    <string name="call_incoming_decline">Decline</string>
     <string name="dialer_warning_a_b_connect">Two-step calling mode active</string>
     <string name="dialer_warning_no_connection">No data connection available</string>
     <string name="version_info">Version: %1$s</string>
@@ -100,10 +103,12 @@
     <string name="dialer_warning_a_b_connect_connectivity_message">Your internet connection isn\'t fast enough to enable calling using VoIP. Two-step calling is therefore enabled. When you start a phonecall, we first call you on your mobile phone and when you pickup, we connect you to the person you want to call. It is possible that your telephony provider can charge you double rates for setting up two connections.</string>
     <string name="dialer_warning_a_b_connect_account_message">You dont\' have a VoIP account configured for this account. Please configure a VoIP account in the portal for use with this user. After configuring, you can call using VoIP from the app.</string>
     <string name="dialer_no_contacts_found_message">No contacts found</string>
+    <string name="dialer_invalid_number">Phone number incorrect</string>
 
     <string name="user_is_partner_error_title">Login failed</string>
     <string name="user_is_partner_error_message">This user is not allowed to use the app.</string>
 
+    <!-- Account fragment values -->
     <string name="title_activity_account">@string/settings_menu_item_title</string>
     <string name="account_sip_id_edit_text_hint">VoIP account</string>
     <string name="account_sip_password_edit_text_hint">Password</string>
@@ -111,13 +116,22 @@
     <string name="account_outgoing_number_edit_text_hint">Outgoing number</string>
     <string name="action_done">Done</string>
     <string name="action_edit">Edit</string>
+    <string name="choose_network_text">Call using:</string>
+    <string name="call_connection_always_LTE">Only 4G</string>
+    <string name="call_connection_use_wifi">WiFi when connected</string>
+    <string name="call_connection_optional">Show pop-up for outgoing calls</string>
+    <string name="connection_preference_dialog_title">Advice: turn off WiFi for this call</string>
+    <string name="connection_preference_dialog_message">Mobile networks LTE(4G) are more stable which leads to a higher audio quality. \n\nTurn off WiFi for this call?</string>
+    <string name="connection_preference_switch_toast">Trying to handover to LTE(4G)</string>
 
     <string name="url_app_info">http://vialerapp.com/app-info/</string>
 
+    <string name="add_destination_title">Destinations</string>
     <string name="info_menu_item_title">Info</string>
     <string name="info_button_title">How does Vialer work?</string>
     <string name="account_sip_switch">Call using VoIP</string>
     <string name="account_availability_switch_title">Availability</string>
+    <string name="add_availability">Add availability</string>
     <string name="not_available">Not available</string>
     <string name="tab_title_recents">recent</string>
     <string name="tab_title_missed">missed</string>
@@ -126,6 +140,12 @@
     <string name="supressed_number">Anonymous</string>
 
     <string name="dial_plan_menu_item_title">Dial plan</string>
+
+    <!-- Call notification values -->
+    <string name="callnotification_incoming_call">Incoming call</string>
+    <string name="callnotification_active_call">Active call</string>
+    <string name="callnotification_on_hold">On hold</string>
+    <string name="callnotification_dialing">Dialing</string>
 
     <string name="two_step_call_description_platform">Outgoing number</string>
     <string name="two_step_call_description_step_a">Calling your phone</string>
@@ -148,11 +168,17 @@
     <string name="permission_microphone_dialog_title">Microphone permission</string>
     <string name="permission_microphone_dialog_message">Permission is needed to call</string>
     <string name="permission_microphone_missing_message">Cannot start a call, permission to use the microphone is required</string>
+
     <string name="permission_contact_dialog_title">Contact permission</string>
     <string name="permission_contact_dialog_message">Permission is needed to start calling from contact list</string>
     <string name="permission_contact_dialer_list_message">Unable to show contacts, permission is required</string>
+
     <string name="permission_phone_dialog_title">Phone permission</string>
-    <string name="permission_phone_dialog_message">This permission is needed to handle regular calls during a VoIP call.</string>
+    <string name="permission_phone_dialog_message">This permission is needed to handle regular calls during a VoIP call</string>
+
+    <string name="permission_read_external_storage_dialog_title">Read external storage permission</string>
+    <string name="permission_read_external_storage_dialog_message">Permission to the external storage is needed to access your ringtones</string>
+    <string name="permission_read_external_storage_missing_message">This permission is needed to choose a ringtone on your external storage</string>
 
     <string name="invalid_mobile_number_title">Invalid number</string>
     <string name="invalid_mobile_number_message">Your mobile number should start with your country code e.g. +31.</string>
@@ -167,5 +193,8 @@
     <string name="no">NO</string>
     <string name="remote_logging_unexpected_error">Unexpected error</string>
     <string name="remote_logging_send_crash_log">Would you like to help improve our services and send the crash log to us?</string>
+
+    <string name="call_transfer_complete_and">and</string>
+    <string name="call_transfer_complete_success"> Successfully transferred</string>
 
 </resources>

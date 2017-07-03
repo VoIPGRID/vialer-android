@@ -18,4 +18,9 @@
         <item>left</item>
         <item>@null</item>
     </array>
+    <string-array name="connection_array">
+        <item>@string/call_connection_always_LTE</item>
+        <item>@string/call_connection_use_wifi</item>
+        <item>@string/call_connection_optional</item>
+    </string-array>
 </resources>

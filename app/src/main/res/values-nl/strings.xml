@@ -17,7 +17,7 @@
     <string name="login_error">Inloggen niet gelukt: %s</string>
     <string name="call_incoming">Inkomend gesprek</string>
     <string name="call_outgoing">Uitgaand gesprek</string>
-    <string name="call_ended">Gesprek beeëindigd</string>
+    <string name="call_ended">Gesprek beëindigd</string>
     <string name="call_on_hold">In de wacht</string>
     <string name="call_hangup">Ophangen</string>
     <string name="call_connected">Verbonden</string>
@@ -100,10 +100,12 @@
     <string name="dialer_warning_a_b_connect_connectivity_message">Internetverbinding is niet snel genoeg om te bellen via VoIP. Bellen in twee stappen is ingeschakeld. Wanneer je iemand belt via de app bellen wij jou eerst op je GSM waarmee we je daarna verbinden met degene die je wilt bellen. Het kan zijn dat je telefonieleverancier voor het opzetten van twee verbindingen dubbele kosten in rekening brengt.</string>
     <string name="dialer_warning_a_b_connect_account_message">Je hebt nog geen VoIP account geconfigureerd voor dit gebruikersaccount. Je kan in de beheeromgeving een VoIP account selecteren welke zal worden gebruikt door de app. Zodra je dit hebt gedaan zal je ook via VoIP kunnen bellen in de app.</string>
     <string name="dialer_no_contacts_found_message">Geen contacten gevonden</string>
+    <string name="dialer_invalid_number">Telefoonnummer incorrect</string>
 
     <string name="user_is_partner_error_title">Login mislukt</string>
     <string name="user_is_partner_error_message">Deze gebruiker is niet toegestaan om deze app te gebruiken.</string>
 
+    <!-- Account fragment values -->
     <string name="title_activity_account">@string/settings_menu_item_title</string>
     <string name="account_sip_id_edit_text_hint">VoIP Account</string>
     <string name="account_sip_password_edit_text_hint">Wachtwoord</string>
@@ -111,16 +113,31 @@
     <string name="account_outgoing_number_edit_text_hint">Uitgaand nummer</string>
     <string name="action_done">Klaar</string>
     <string name="action_edit">Wijzig</string>
+    <string name="choose_network_text">Bel via:</string>
+    <string name="call_connection_always_LTE">Alleen 4G</string>
+    <string name="call_connection_use_wifi">WiFi wanneer verbonden</string>
+    <string name="call_connection_optional">Keuze weergeven bij uitgaand gesprek</string>
+    <string name="connection_preference_dialog_title">Tip: schakel WiFi uit voor dit gesprek</string>
+    <string name="connection_preference_dialog_message">Met mobiel internet (4G) is de verbinding stabieler en daarmee de geluidskwaliteit hoger. \n\nWiFi tijdelijk uitschakelen?</string>
+    <string name="connection_preference_switch_toast">Controleren of 4G beschikbaar is</string>
 
     <string name="url_app_info">http://vialerapp.com/nl/app-info/</string>
 
+    <string name="add_destination_title">Bestemmingen</string>
     <string name="info_menu_item_title">Info</string>
     <string name="info_button_title">Hoe werkt bellen met Vialer</string>
     <string name="account_sip_switch">Bellen via VoIP</string>
     <string name="account_availability_switch_title">Bereikbaarheid</string>
+    <string name="add_availability">Bereikbaarheid toevoegen</string>
     <string name="not_available">Niet bereikbaar</string>
     <string name="tab_title_recents">recent</string>
     <string name="tab_title_missed">gemist</string>
+
+    <!-- Call notification values -->
+    <string name="callnotification_incoming_call">Inkomend gesprek</string>
+    <string name="callnotification_active_call">Actief gesprek</string>
+    <string name="callnotification_on_hold">In de wacht</string>
+    <string name="callnotification_dialing">Kiezen</string>
 
     <string name="navigation_name_placeholder_text">Geen uitgaand nummer geconfigureerd</string>
     <string name="supressed_number">Anoniem</string>
@@ -167,5 +184,14 @@
     <string name="no">NEE</string>
     <string name="remote_logging_unexpected_error">Onverwachtte fout</string>
     <string name="remote_logging_send_crash_log">Zou u ons willen helpen met het verbeteren van onze diensten door het foutenrapport te versturen?</string>
+
+    <string name="call_transfer_complete_and">en</string>
+    <string name="call_transfer_complete_success"> Succesvol doorverbonden</string>
+    <string name="call_incoming_expanded">Inkomend gesprek van:</string>
+    <string name="call_incoming_accept">Antwoord</string>
+    <string name="call_incoming_decline">Weigeren</string>
+    <string name="permission_read_external_storage_dialog_title">Externe opslag permissie</string>
+    <string name="permission_read_external_storage_missing_message">Permissie tot de externe opslag is nodig om toegang tot je ringtones te krijgen</string>
+    <string name="permission_read_external_storage_dialog_message">Deze permissie is nodig om ringtones te kunnen kiezen die op je externe opslag staan</string>
 
 </resources>

@@ -34,15 +34,13 @@ public class PhoneAccountHelper {
         mJsonStorage = new JsonStorage(context);
 
         // Get credentials for api.
-        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        String username = systemUser.getEmail();
-        String password = systemUser.getPassword();
+        AccountHelper accountHelper = new AccountHelper(context);
 
         mApi = ServiceGenerator.createPortalService(
                 mContext,
                 Api.class,
-                username,
-                password
+                accountHelper.getEmail(),
+                accountHelper.getPassword()
         );
     }
 

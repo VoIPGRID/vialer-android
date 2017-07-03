@@ -43,4 +43,6 @@
 
     <color name="drawer_header_text_color_name">@color/color_accent</color>
     <color name="drawer_header_text_color_email">#B3FFFFFF</color>
+
+    <color name="call_transfer_color">#2B3EAD</color>
 </resources>

@@ -20,8 +20,8 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.CallRecord;
-import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NetworkStateViewHelper;
@@ -81,7 +81,10 @@ public class CallRecordFragment extends ListFragment implements
         }
 
         protected void onPostExecute(List<CallRecord> records) {
-            displayCachedRecords(records);
+            if(isAdded()){
+                // Only display Records when the fragment is still attached to an activity.
+                displayCachedRecords(records);
+            }
         }
     }
 
@@ -156,6 +159,11 @@ public class CallRecordFragment extends ListFragment implements
     public void onResume() {
         super.onResume();
 
+        // Check if wifi should be turned back on.
+        if(ConnectivityHelper.mWifiKilled) {
+            mConnectivityHelper.useWifi(getActivity(), true);
+            ConnectivityHelper.mWifiKilled = false;
+        }
         mNetworkStateViewHelper.updateNetworkStateView();
         mNetworkStateViewHelper.startListening();
         mAdapter.mCallAlreadySetup = false;
@@ -204,13 +212,14 @@ public class CallRecordFragment extends ListFragment implements
 
     private void loadCallRecordsFromApi() {
         mHaveNetworkRecords = false;
-        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+
+        AccountHelper accountHelper = new AccountHelper(getActivity());
         Api api = ServiceGenerator.createService(
                 getContext(),
                 Api.class,
                 getString(R.string.api_url),
-                systemUser.getEmail(),
-                systemUser.getPassword());
+                accountHelper.getEmail(),
+                accountHelper.getPassword());
 
         Call<VoipGridResponse<CallRecord>> call = api.getRecentCalls(
                 50, 0, CallRecord.getLimitDate()

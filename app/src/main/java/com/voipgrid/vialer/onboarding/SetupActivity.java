@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -24,8 +23,10 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.logging.RemoteLoggingActivity;
 import com.voipgrid.vialer.models.PasswordResetParams;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -44,12 +45,14 @@ public class SetupActivity extends RemoteLoggingActivity implements
         SetUpVoipAccountFragment.FragmentInteractionListener,
         Callback {
 
+    private final static String TAG = SetupActivity.class.getSimpleName();
     private String mPassword;
     private String mActivityToReturnToName = "";
 
     private Api mApi;
     private JsonStorage mJsonStorage;
     private Preferences mPreferences;
+    private RemoteLogger mRemoteLogger;
     private ServiceGenerator mServiceGen;
 
     @Override
@@ -59,6 +62,9 @@ public class SetupActivity extends RemoteLoggingActivity implements
 
         mJsonStorage = new JsonStorage(this);
         mPreferences = new Preferences(this);
+
+        // Forced logging due to user not being able to set/unset it at this point.
+        mRemoteLogger = new RemoteLogger(this, true);
 
         Fragment gotoFragment = null;
         Integer fragmentId = null;
@@ -160,8 +166,8 @@ public class SetupActivity extends RemoteLoggingActivity implements
     public void onUpdateMobileNumber(Fragment fragment, String mobileNumber) {
         enableProgressBar(true);
 
-        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        boolean success = createAPIService(systemUser.getEmail(), systemUser.getPassword());
+        AccountHelper accountHelper = new AccountHelper(this);
+        boolean success = createAPIService(accountHelper.getEmail(), accountHelper.getPassword());
 
         // Post mobileNumber to VoIPGRID platform.
         if (success) {
@@ -196,7 +202,11 @@ public class SetupActivity extends RemoteLoggingActivity implements
     @Override
     public void onSetVoipAccount(Fragment fragment) {
         WebActivityHelper webHelper = new WebActivityHelper(this);
-        webHelper.startWebActivity(getString(R.string.user_change_title), getString(R.string.web_user_change));
+        webHelper.startWebActivity(
+                getString(R.string.user_change_title),
+                getString(R.string.web_user_change),
+                getString(R.string.analytics_user_change)
+        );
     }
 
     @Override
@@ -323,8 +333,14 @@ public class SetupActivity extends RemoteLoggingActivity implements
                         }
                     });
                 } else {
+                    if (systemUser.getOutgoingCli() == null || systemUser.getOutgoingCli().isEmpty()) {
+                        mRemoteLogger.d(TAG + " onResponse getOutgoingCli is null");
+                    }
                     mPreferences.setSipPermission(true);
-                    systemUser.setPassword(mPassword);
+
+                    AccountHelper accountHelper = new AccountHelper(this);
+                    accountHelper.setCredentials(systemUser.getEmail(), mPassword);
+
                     mJsonStorage.save(systemUser);
                     onNextStep(AccountFragment.newInstance(
                             systemUser.getMobileNumber(),

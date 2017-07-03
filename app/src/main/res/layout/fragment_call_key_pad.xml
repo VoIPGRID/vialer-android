@@ -1,0 +1,71 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:id="@+id/fragment_call_key_pad">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/call_key_pad">
+
+        <LinearLayout
+            android:id="@+id/key_pad_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            android:orientation="vertical"
+            >
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="14dp"
+                android:background="@drawable/top_shadow"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/key_pad_background_color"
+                android:orientation="vertical"
+                >
+
+                <com.voipgrid.vialer.dialer.NumberInputView
+                    android:id="@+id/number_input_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/key_pad_divider_color"
+                    />
+
+                <com.voipgrid.vialer.dialer.KeyPadView
+                    android:id="@+id/key_pad_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    />
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/button_keypad_call_hangup"
+                    android:transitionName="floating_action_button_transition_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|bottom"
+                    android:onClick="onClick"
+                    android:src="@drawable/ic_call_end_white"
+                    app:backgroundTint="@color/call_fab_hangup_color"
+                    app:elevation="@dimen/fab_elevation"
+                    app:borderWidth="@dimen/fab_border_width"
+                    style="@style/FloatingActionButton"
+                    android:layout_marginBottom="@dimen/dialpad_calling_button_bottom_margin"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

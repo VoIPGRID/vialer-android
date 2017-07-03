@@ -1,39 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="analytics_screenname_missed">Missed</string>
-    <string name="analytics_screenname_recents">Recents</string>
+    <string name="analytics_screenname_missed" translatable="false">Missed</string>
+    <string name="analytics_screenname_recents" translatable="false">Recents</string>
 
-    <string name="analytics_dimension">@string/app_name</string>
+    <string name="analytics_dimension" translatable="false">@string/app_name</string>
 
     <!-- Middleware events -->
-    <string name="analytics_event_category_middleware">middleware</string>
+    <string name="analytics_event_category_middleware" translatable="false">middleware</string>
 
-    <string name="analytics_event_action_middleware_accepted">accepted</string>
-    <string name="analytics_event_action_middleware_rejected">rejected</string>
+    <string name="analytics_event_action_middleware_accepted" translatable="false">accepted</string>
+    <string name="analytics_event_action_middleware_rejected" translatable="false">rejected</string>
 
-    <string name="analytics_event_label_wifi">Wifi</string>
-    <string name="analytics_event_label_4g">4G</string>
-    <string name="analytics_event_label_unknown">unknown</string>
+    <string name="analytics_event_label_wifi" translatable="false">Wifi</string>
+    <string name="analytics_event_label_4g" translatable="false">4G</string>
+    <string name="analytics_event_label_unknown" translatable="false">unknown</string>
 
-    <string name="analytics_event_description_registration_failed">Failed middleware registration</string>
+    <string name="analytics_event_description_registration_failed" translatable="false">Failed middleware registration</string>
 
-    <string name="analytics_event_name_call_response">response time</string>
+    <string name="analytics_event_name_call_response" translatable="false">response time</string>
 
     <!-- Call events -->
-    <string name="analytics_event_category_call">call</string>
+    <string name="analytics_event_category_call" translatable="false">Call</string>
+    <string name="analytics_event_category_metrics" translatable="false">Metrics</string>
 
-    <string name="analytics_event_action_inbound">Inbound</string>
-    <string name="analytics_event_action_outbound">Outbound</string>
+    <string name="analytics_event_action_inbound" translatable="false">Inbound</string>
+    <string name="analytics_event_action_outbound" translatable="false">Outbound</string>
+    <string name="analytics_event_action_transfer" translatable="false">Transfer</string>
+    <string name="analytics_event_action_callmetrics" translatable="false">CallMetrics</string>
 
-    <string name="analytics_event_label_accepted">Accepted</string>
-    <string name="analytics_event_label_declined">Declined</string>
-    <string name="analytics_event_label_ringing">Ringing</string>
+    <string name="analytics_event_label_accepted" translatable="false">Accepted</string>
+    <string name="analytics_event_label_declined" translatable="false">Declined</string>
+    <string name="analytics_event_label_ringing" translatable="false">Ringing</string>
+    <string name="analytics_event_label_success" translatable="false">Success</string>
+    <string name="analytics_event_label_fail" translatable="false">Fail</string>
+    <string name="analytics_event_label_mos" translatable="false">MOS for AudioCodec:%1$s on Networktype:%2$s</string>
+    <string name="analytics_event_label_bandwith" translatable="false">Bandwidth for AudioCodec:%1$s</string>
 
-    <string name="analytics_event_label_connect_a_b">ConnectAB</string>
-    <string name="analytics_event_label_sip">SIP</string>
+    <string name="analytics_event_label_connect_a_b" translatable="false">ConnectAB</string>
+    <string name="analytics_event_label_sip" translatable="false">SIP</string>
 
     <!-- Web view titles GA -->
-    <string name="analytics_statistics_title">Statistics</string>
-    <string name="analytics_dial_plan_title">Dialplan</string>
-    <string name="analytics_info_title">Info</string>
+    <string name="analytics_statistics_title" translatable="false">StatisticsWebView</string>
+    <string name="analytics_dial_plan_title" translatable="false">DialplanWebview</string>
+    <string name="analytics_add_destination_title" translatable="false">AddFixedDestinationWebView</string>
+    <string name="analytics_user_change" translatable="false">UserProfileWebView</string>
+    <string name="analytics_info_title" translatable="false">Info</string>
 </resources>

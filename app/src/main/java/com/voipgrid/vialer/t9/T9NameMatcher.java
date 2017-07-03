@@ -87,7 +87,32 @@ public class T9NameMatcher {
 
         builder.append(matchedWithoutSpaces.substring(previousIndex, matchedWithoutSpaces.length()));
 
-        return builder.toString();
+        return dealWithSpecialCharacter(builder.toString());
+    }
+
+    /**
+     * Fixes inaccuracies in bolding when special chars are in the string.
+     * This method moves the missing chars from outside the tags to the inside.
+     */
+    public static String dealWithSpecialCharacter(String boldedText) {
+        String boldString = boldedText.split("<b>")[1].split("</b>")[0];
+        int count = boldString.length() - boldString.replaceAll("[^A-Za-z0-9 ]","").length();
+        if (count < 1) {
+            return boldedText;
+        }
+        String firstSplit = boldedText.split("</b>")[0];
+        try {
+            String secondSplit = boldedText.split("</b>")[1];
+            String stringToMove = secondSplit.substring(0, count);
+            if (stringToMove.charAt(stringToMove.length()-1) == ' '){
+                count ++;
+                stringToMove = secondSplit.substring(0, count);
+            }
+            return firstSplit+stringToMove+"</b>"+boldedText.substring((boldedText.lastIndexOf("</b>")+4+count));
+        } catch (IndexOutOfBoundsException e) {
+            return boldedText;
+        }
+
     }
 
     /**

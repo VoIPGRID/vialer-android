@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="dialpad_button_digit_text_size">9dp</dimen>
+    <dimen name="dialpad_button_chars_text_size">3dp</dimen>
+    <dimen name="dialpad_button_star_text_size">6dp</dimen>
+
+    <dimen name="dialpad_bottom_padding">70dp</dimen>
+    <dimen name="dialpad_number_input_text_size">10sp</dimen>
+
+</resources>

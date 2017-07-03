@@ -9,7 +9,7 @@
 package org.pjsip.pjsua2;
 
 public interface pjsua2Constants {
-  int INVALID_ID = pjsua2JNI.INVALID_ID_get();
-  int SUCCESS = pjsua2JNI.SUCCESS_get();
+  public final static int INVALID_ID = pjsua2JNI.INVALID_ID_get();
+  public final static int SUCCESS = pjsua2JNI.SUCCESS_get();
 
 }

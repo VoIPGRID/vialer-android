@@ -2,8 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.voipgrid.vialer">
 
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Custom ringtone permissions external storage -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- Contact management -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -22,9 +26,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-
-    <!-- Used for handling car-kits and other audio devices -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <!-- For intercepting incoming GSM calls -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -77,17 +78,12 @@
                 <data android:mimeType="@string/profile_mimetype" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".CallActivity"
             android:label="@string/app_name"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait" >
-            <intent-filter>
-                <action android:name="android.intent.action.DIAL" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="tel" />
-            </intent-filter>
         </activity>
 
         <service

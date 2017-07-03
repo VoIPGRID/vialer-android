@@ -4,7 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 
 /**
- * Created by eltjo on 31/07/15.
+ * Superclass used by fragments in the onboarding. A FragmentInteractionListener is implemented
+ * To provide the flow in the onboarding.
  */
 public abstract class OnboardingFragment extends Fragment {
 

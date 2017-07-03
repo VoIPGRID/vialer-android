@@ -20,7 +20,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.CallRecord;
-import com.voipgrid.vialer.contacts.ContactsPermission;
+import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;

@@ -82,10 +82,19 @@ public class SystemUser {
         this.appAccountUri = appAccountUri;
     }
 
+    /**
+     * This a LEGACY method and should not be used anymore.
+     * @return
+     */
+    @Deprecated
     public String getPassword() {
         return password;
     }
 
+    /**
+     * This a LEGACY method and should not be used anymore.
+     */
+    @Deprecated
     public void setPassword(String password) {
         this.password = password;
     }

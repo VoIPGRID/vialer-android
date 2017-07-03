@@ -15,6 +15,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 
 import com.voipgrid.vialer.BuildConfig;
+import com.voipgrid.vialer.api.models.SystemUser;
 
 /**
  * Class to setup the app to work with the newest code.
@@ -34,6 +35,7 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
     public UpdateHelper(Context context, OnUpdateCompleted listener){
         mContext = context;
         mJsonStorage = new JsonStorage(mContext);
+        mPreferences = new Preferences(mContext);
         this.mListener = listener;
     }
 
@@ -94,19 +96,22 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
         mListener.OnUpdateCompleted();
     }
 
-    /*
+    /**
      * Method to update application by given versionNumber.
+     * @param version
      */
     private void runMethod(int version) {
         switch (version) {
             case v2_1_1:
                 setSipEnabled();
                 break;
+            case v4_0:
+                migrateCredentials();
+                break;
         }
     }
 
     private void setSipEnabled() {
-        mPreferences = new Preferences(mContext);
         if (mPreferences.hasPhoneAccount() && mPreferences.hasSipPermission()){
             PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(mContext);
             phoneAccountHelper.savePhoneAccountAndRegister(
@@ -114,4 +119,15 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
         }
     }
 
+    /**
+     * Migrate credentials from systemuser to Account.
+     */
+    private void migrateCredentials() {
+        SystemUser user = (SystemUser) mJsonStorage.get(SystemUser.class);
+        if (user != null && user.getPassword() != null) {
+            new AccountHelper(mContext).setCredentials(user.getEmail(), user.getPassword());
+            // Cleanup.
+            user.setPassword(null);
+        }
+    }
 }

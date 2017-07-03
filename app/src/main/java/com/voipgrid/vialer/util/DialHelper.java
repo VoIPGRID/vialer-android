@@ -2,10 +2,14 @@ package com.voipgrid.vialer.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
+import android.support.v7.app.AlertDialog;
+import android.widget.Toast;
 
-import com.voipgrid.vialer.MicrophonePermission;
+import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
@@ -28,6 +32,8 @@ public class DialHelper {
     private final Preferences mPreferences;
     private JsonStorage mJsonStorage;
 
+    private int mMaximumNetworkSwitchDelay = 3000;
+
     public DialHelper(Context context, JsonStorage jsonStorage,
             ConnectivityHelper connectivityHelper, AnalyticsHelper analyticsHelper ) {
         mContext = context;
@@ -37,6 +43,54 @@ public class DialHelper {
         mPreferences = new Preferences(context);
     }
 
+    public void callNumber(final String number, final String contactName) {
+        if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.TYPE_WIFI && mPreferences.hasSipEnabled()) {
+            if(mPreferences.hasConnectionPerference(mConnectivityHelper.TYPE_LTE)) {
+                switchNetworkAndCallNumber(number, contactName);
+            } else if(mPreferences.hasConnectionPerference(Preferences.CONNECTION_PREFERENCE_NONE)) {
+                showConnectionPickerDialog(number, contactName);
+            } else if(mPreferences.hasConnectionPerference(Preferences.CONNECTION_PREFERENCE_WIFI)) {
+                makeCall(number, contactName);
+            }
+        } else {
+            makeCall(number, contactName);
+        }
+    }
+
+    private void switchNetworkAndCallNumber(final String number, final String contactName) {
+        mConnectivityHelper.attemptUsingLTE(mContext, mMaximumNetworkSwitchDelay);
+        Toast.makeText(mContext, mContext.getString(R.string.connection_preference_switch_toast), Toast.LENGTH_LONG).show();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                makeCall(number, contactName);
+            }
+        }, mMaximumNetworkSwitchDelay);
+    }
+
+    private void showConnectionPickerDialog(final String number, final String contactName) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setTitle(mContext.getString(R.string.connection_preference_dialog_title));
+        builder.setMessage(mContext.getString(R.string.connection_preference_dialog_message));
+        builder.setPositiveButton(mContext.getString(R.string.yes),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                        switchNetworkAndCallNumber(number, contactName);
+                    }
+                });
+        builder.setNegativeButton(mContext.getString(R.string.no),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                        makeCall(number, contactName);
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+
     /**
      * Setup a connection for the given number. When an PhoneAccount and a fast data connection
      * are both available the call will be setup using SIP otherwise make an API call to setup the
@@ -44,7 +98,7 @@ public class DialHelper {
      * @param number
      * @param contactName
      */
-    public void callNumber(String number, String contactName) {
+    public void makeCall(String number, String contactName) {
         // We need internet for both type of calls.
         if (mConnectivityHelper.hasNetworkConnection()) {
             if (mPreferences.canUseSip()

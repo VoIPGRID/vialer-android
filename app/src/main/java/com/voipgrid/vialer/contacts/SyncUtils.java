@@ -11,6 +11,7 @@ import android.provider.ContactsContract;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.permissions.ContactsPermission;
 
 /**
  * SyncUtils provides functions to handling actions related to the contact sync.

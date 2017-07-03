@@ -1,10 +1,8 @@
 package com.voipgrid.vialer.dialer;
 
 import android.content.Context;
-import android.content.Intent;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.sip.SipConstants;
+
 
 /**
  * Custom KeyPadClass to extend the LinearLayout to show dial pad buttons.
@@ -20,9 +18,8 @@ import com.voipgrid.vialer.sip.SipConstants;
 public class KeyPadView extends LinearLayout
         implements View.OnClickListener, View.OnLongClickListener {
 
-    private static final int DTMF_TONE_DURATION = 200;
+    public static final int DTMF_TONE_DURATION = 200;
 
-    private LocalBroadcastManager mBroadcastManager;
     private OnKeyPadClickListener mListener;
     private ToneGenerator mToneGenerator;
 
@@ -47,12 +44,10 @@ public class KeyPadView extends LinearLayout
                     Context.AUDIO_SERVICE
             );
             mToneGenerator = new ToneGenerator(
-                    AudioManager.STREAM_MUSIC,
-                    audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                    AudioManager.STREAM_DTMF,
+                    (int) (Math.floor(audioManager.getStreamVolume(AudioManager.STREAM_DTMF) * 5))
             );
         }
-
-        mBroadcastManager = LocalBroadcastManager.getInstance(getContext());
 
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE
@@ -82,7 +77,7 @@ public class KeyPadView extends LinearLayout
             DialpadButton button = (DialpadButton) view;
             mToneGenerator.startTone(button.getDtmfTone(), DTMF_TONE_DURATION);
             String digit = button.getDigit();
-            broadcast(digit);
+
             if (mListener != null) {
                 mListener.onKeyPadButtonClick(digit, button.getChars());
             }
@@ -101,12 +96,6 @@ public class KeyPadView extends LinearLayout
             }
         }
         return true;
-    }
-
-    private void broadcast(String key) {
-        Intent intent = new Intent(SipConstants.ACTION_BROADCAST_KEY_PAD_INTERACTION);
-        intent.putExtra(SipConstants.KEY_PAD_DTMF_TONE, key);
-        mBroadcastManager.sendBroadcast(intent);
     }
 
     public interface OnKeyPadClickListener {

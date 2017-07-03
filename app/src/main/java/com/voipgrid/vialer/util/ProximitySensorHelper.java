@@ -61,8 +61,13 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
         if (mProximitySensor != null) {
             mSensorManager.unregisterListener(this);
         }
-        if (mWakeLock.isHeld()) {
-            mWakeLock.release();
+
+        // If the wakelock hasn't been used, it will still be null.
+        if (mWakeLock != null) {
+            // If a wakelock exists, make sure it is released before shutting down the helper.
+            if (mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
         }
     }
 

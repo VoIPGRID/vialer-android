@@ -13,6 +13,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 /**
@@ -26,6 +29,7 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 public class AccountFragment extends OnboardingFragment implements
         View.OnClickListener,
         TextWatcher {
+    private final static String TAG = AccountFragment.class.getSimpleName();
     public static final String ARG_MOBILE = "mobile";
     public static final String ARG_OUTGOING = "outgoing";
 
@@ -36,6 +40,8 @@ public class AccountFragment extends OnboardingFragment implements
     private EditText mMobileEditText;
     private EditText mOutgoingEditText;
     private Button mConfigureButton;
+
+    private RemoteLogger mRemoteLogger;
 
     /**
      * Use this factory method to create a new instance of
@@ -94,6 +100,16 @@ public class AccountFragment extends OnboardingFragment implements
 
             mOutgoingEditText = (EditText) view.findViewById(R.id.outgoingNumberTextDialog);
             String outGoingNumber = arguments.getString(ARG_OUTGOING);
+
+            // Sometimes the outgoing number is not set properly for unknown reasons.
+            // TODO Find a better solution for this (VIALA-575) in future.
+            if (outGoingNumber == null || outGoingNumber.isEmpty()) {
+                // Forced logging due to user not being able to set/unset it at this point.
+                mRemoteLogger = new RemoteLogger(getActivity(), true);
+                mRemoteLogger.d(TAG + " no outGoingNumber");
+                SystemUser systemUser = (SystemUser) new JsonStorage(getActivity()).get(SystemUser.class);
+                outGoingNumber = systemUser.getOutgoingCli();
+            }
 
             // Sometimes the outgoing number is suppressed (anonymous), so we capture that here.
             if (outGoingNumber != null && outGoingNumber.equals(SUPPRESSED)) {

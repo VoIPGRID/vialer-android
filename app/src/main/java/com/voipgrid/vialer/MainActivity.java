@@ -23,17 +23,18 @@ import com.google.android.gms.analytics.Tracker;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
-import com.voipgrid.vialer.contacts.ContactsPermission;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.contacts.UpdateChangedContactsService;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.onboarding.AccountFragment;
 import com.voipgrid.vialer.onboarding.SetupActivity;
+import com.voipgrid.vialer.permissions.ContactsPermission;
+import com.voipgrid.vialer.permissions.PhonePermission;
+import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.CustomReceiver;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
-import com.voipgrid.vialer.util.PhonePermission;
 import com.voipgrid.vialer.util.UpdateActivity;
 import com.voipgrid.vialer.util.UpdateHelper;
 
@@ -44,6 +45,7 @@ public class MainActivity extends NavigationDrawerActivity implements
 
     private ViewPager mViewPager;
     private boolean mAskForPermission = true;
+    private int requestCounter = -1;
 
     private CustomReceiver mMediaButtonReceiver;
     private BroadcastReceiver mBroadcastReceiver;
@@ -65,6 +67,13 @@ public class MainActivity extends NavigationDrawerActivity implements
             // Start on boarding flow.
             startActivity(new Intent(this, SetupActivity.class));
             finish();
+            return;
+        } else if (UpdateHelper.requiresUpdate(this)) {
+            Intent intent = new Intent(this, UpdateActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+            return;
         } else if (systemUser.getMobileNumber() == null) {
             Intent intent = new Intent(this, SetupActivity.class);
 
@@ -75,42 +84,68 @@ public class MainActivity extends NavigationDrawerActivity implements
 
             startActivity(intent);
             finish();
+            return;
         } else if (connectivityHelper.hasNetworkConnection()) {
             // Update SystemUser and PhoneAccount on background thread.
             new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
         }
 
-        // We are logged in and passed the onboarding
-        new Preferences(this).setFinishedOnboarding(true);
-
-        // Start UpdateActivity if app has updated.
-        if (UpdateHelper.requiresUpdate(this)) {
-            this.startActivity(new Intent(this, UpdateActivity.class));
-            finish();
+        if (SyncUtils.requiresFullContactSync(this)) {
+            SyncUtils.requestContactSync(this);
         } else {
-            if (SyncUtils.requiresFullContactSync(this)) {
-                SyncUtils.requestContactSync(this);
-            } else {
-                // Live contact updates are not supported below api level 18.
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
-                        && ContactsPermission.hasPermission(this)) {
-                    startService(new Intent(this, UpdateChangedContactsService.class));
-                }
+            // Live contact updates are not supported below api level 18.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
+                    && ContactsPermission.hasPermission(this)) {
+                startService(new Intent(this, UpdateChangedContactsService.class));
             }
+        }
 
-            SyncUtils.setPeriodicSync(this);
+        SyncUtils.setPeriodicSync(this);
 
-            setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
 
-            // Set the Toolbar to use as ActionBar.
-            setActionBar(R.id.action_bar);
+        // Set the Toolbar to use as ActionBar.
+        setActionBar(R.id.action_bar);
 
-            setNavigationDrawer(R.id.drawer_layout);
+        setNavigationDrawer(R.id.drawer_layout);
 
-            // Set tabs.
-            setupTabs();
+        // Set tabs.
+        setupTabs();
+
+        requestCounter = 0;
+    }
+
+    private void askForPermissions(int requestNr) {
+        switch (requestNr) {
+            case 0:
+                int storagePermissionState = ReadExternalStoragePermission.getPermissionStatus(this, ReadExternalStoragePermission.mPermissionToCheck);
+                if (storagePermissionState != ReadExternalStoragePermission.BLOCKED || ReadExternalStoragePermission.firstRequest) {
+                    if (!ReadExternalStoragePermission.hasPermission(this)) {
+                        ReadExternalStoragePermission.askForPermission(this);
+                        requestCounter++;
+                        return;
+                    }
+                }
+            case 1:
+                // Ask for phone permissions.
+                if (!PhonePermission.hasPermission(this)) {
+                    PhonePermission.askForPermission(this);
+                    requestCounter++;
+                    return;
+                }
+            case 2:
+                if (!ContactsPermission.hasPermission(this)) {
+                    // We need to avoid a permission loop.
+                    if (mAskForPermission) {
+                        mAskForPermission = false;
+                        ContactsPermission.askForPermission(this);
+                        requestCounter++;
+                        return;
+                    }
+                }
         }
     }
+
 
     private void createReceivers() {
         mMediaButtonReceiver = new CustomReceiver();
@@ -141,22 +176,9 @@ public class MainActivity extends NavigationDrawerActivity implements
 
     @Override
     protected void onResume() {
+        askForPermissions(requestCounter);
         super.onResume();
         registerReceivers();
-
-        // Ask for phone permissions.
-        if (!PhonePermission.hasPermission(this)){
-            PhonePermission.askForPermission(this);
-            return;
-        }
-
-        if (!ContactsPermission.hasPermission(this)){
-            // We need to avoid a permission loop.
-            if (mAskForPermission) {
-                mAskForPermission = false;
-                ContactsPermission.askForPermission(this);
-            }
-        }
     }
 
     @Override
