@@ -184,9 +184,7 @@ public class SipConfig implements AccountStatus {
         endpointConfig.getLogConfig().setConsoleLevel(SipConstants.SIP_CONSOLE_LOG_LEVEL);
         LogConfig logConfig = endpointConfig.getLogConfig();
         mSipLogWriter = new SipLogWriter();
-        if (mSipService.getPreferences().remoteLoggingIsActive()) {
-            mSipLogWriter.enabledRemoteLogging(mRemoteLogger);
-        }
+        mSipLogWriter.enabledRemoteLogging(mRemoteLogger);
         logConfig.setWriter(mSipLogWriter);
         logConfig.setDecor(logConfig.getDecor() &
                 ~(pj_log_decoration.PJ_LOG_HAS_CR.swigValue() |
