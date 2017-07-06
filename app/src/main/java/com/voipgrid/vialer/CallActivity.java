@@ -783,6 +783,23 @@ public class CallActivity extends AppCompatActivity
                         updateCallButton(R.id.button_microphone, true);
 
                         onCallStatusUpdate(mSipService.getCurrentCall().getCurrentCallState());
+                    } else {
+                        if (mSipService != null && mSipService.getCurrentCall() == null && mSipService.getFirstCall() == null) {
+                            toggleVisibilityCallInfo(true);
+                            swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
+                            displayCallInfo();
+
+                            mOnTransfer = false;
+                            mOnHold = false;
+
+                            updateCallButton(R.id.button_transfer, false);
+                            updateCallButton(R.id.button_onhold, false);
+                            updateCallButton(R.id.button_keypad, false);
+                            updateCallButton(R.id.button_microphone, false);
+                            updateCallButton(R.id.button_hangup, false);
+
+                            onCallStatusUpdate(CALL_DISCONNECTED_MESSAGE);
+                        }
                     }
                 } else {
                     finishWithDelay();

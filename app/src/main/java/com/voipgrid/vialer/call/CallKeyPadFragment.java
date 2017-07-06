@@ -58,10 +58,16 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
         );
     }
 
+    /**
+     * Use the deprecated version of the onAttach method for api levels < 23
+     * The old android 4.1.2 API level 16 calls this method.
+     * If don't use this function no callback will be set.
+     *
+     * @param activity Activity the attached activity/
+     */
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Activity activity = (Activity) context;
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
 
         try {
             mCallback = (CallKeyPadFragmentListener) activity;
@@ -95,7 +101,9 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
         }
         switch (viewId) {
             case R.id.button_keypad_call_hangup:
-                mCallback.hangupFromKeypad();
+                if (mCallback != null) {
+                    mCallback.hangupFromKeypad();
+                }
         }
     }
 

@@ -170,7 +170,7 @@ public class DialerActivity extends LoginRequiredActivity implements
             @Override
             public void onInputChanged(String phoneNumber) {
                 // Keep this empty. A implemented version will be set if we have contact permissions
-                // be a empty one is required if we do not have permission.
+                // but an empty one is required if we do not have permission.
             }
         });
     }

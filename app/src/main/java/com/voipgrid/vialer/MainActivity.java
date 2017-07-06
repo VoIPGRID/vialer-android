@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -111,6 +112,9 @@ public class MainActivity extends NavigationDrawerActivity implements
 
         // Set tabs.
         setupTabs();
+
+        FloatingActionButton openDialerFab = (FloatingActionButton) findViewById(R.id.floating_action_button);
+        openDialerFab.setOnClickListener(this);
 
         requestCounter = 0;
     }
