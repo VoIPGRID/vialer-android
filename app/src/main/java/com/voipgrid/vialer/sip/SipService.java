@@ -164,7 +164,9 @@ public class SipService extends Service {
     }
 
     private void checkServiceBeingUsed() {
+        mRemoteLogger.d("checkServiceBeingUsed");
         if (mCurrentCall == null) {
+            mRemoteLogger.i("No active calls stop the service");
             stopSelf();
         }
     }

@@ -93,9 +93,9 @@ public class AccountActivity extends LoginRequiredActivity implements
      * are not nativly supported in java.
      */
     private long converseToPreference(CharSequence connectionPreference) {
-        if (connectionPreference.equals(getString(R.string.call_connection_always_LTE))) {
+        if (connectionPreference.equals(getString(R.string.call_connection_only_cellular))) {
             return Preferences.CONNECTION_PREFERENCE_LTE;
-        } else if (connectionPreference.equals(getString(R.string.call_connection_use_wifi))) {
+        } else if (connectionPreference.equals(getString(R.string.call_connection_use_wifi_cellular))) {
             return Preferences.CONNECTION_PREFERENCE_WIFI;
         }
         return Preferences.CONNECTION_PREFERENCE_NONE;
@@ -107,9 +107,9 @@ public class AccountActivity extends LoginRequiredActivity implements
      */
     private CharSequence converseFromPreference(long preference) {
         if (preference == Preferences.CONNECTION_PREFERENCE_LTE) {
-            return getString(R.string.call_connection_always_LTE);
+            return getString(R.string.call_connection_only_cellular);
         } else if (preference == Preferences.CONNECTION_PREFERENCE_WIFI) {
-            return getString(R.string.call_connection_use_wifi);
+            return getString(R.string.call_connection_use_wifi_cellular);
         }
         return getString(R.string.call_connection_optional);
     }
@@ -158,7 +158,6 @@ public class AccountActivity extends LoginRequiredActivity implements
                 if (mPreferences.has3GEnabled() == isChecked) {
                     return;
                 }
-
                 mPreferences.set3GEnabled(isChecked);
             }
         });
@@ -302,7 +301,7 @@ public class AccountActivity extends LoginRequiredActivity implements
                         // to disabled. Setting disabled in the settings first makes sure
                         // the onCheckChanged does not execute the code that normally is executed
                         // on a change in the check of the switch.
-                        setVoipAccount();
+                        setVoIPAccount();
                     }
                 }
             }.execute();
@@ -312,7 +311,7 @@ public class AccountActivity extends LoginRequiredActivity implements
     /**
      * Loads setupactivity with the SetUpVoipAccountFragment.
      */
-    private void setVoipAccount(){
+    private void setVoIPAccount(){
         Intent intent = new Intent(this, SetupActivity.class);
         Bundle b = new Bundle();
         b.putInt("fragment", R.id.fragment_voip_account_missing);

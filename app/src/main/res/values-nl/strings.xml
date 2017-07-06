@@ -114,12 +114,13 @@
     <string name="action_done">Klaar</string>
     <string name="action_edit">Wijzig</string>
     <string name="choose_network_text">Bel via:</string>
-    <string name="call_connection_always_LTE">Alleen 4G</string>
-    <string name="call_connection_use_wifi">WiFi wanneer verbonden</string>
-    <string name="call_connection_optional">Keuze weergeven bij uitgaand gesprek</string>
+    <string name="call_connection_only_cellular">Alleen mobiele data</string>
+    <string name="call_connection_use_wifi_cellular">Mobiele data en WiFi</string>
+    <string name="call_connection_optional">Keuze weergeven bij ieder uitgaand gesprek</string>
     <string name="connection_preference_dialog_title">Tip: schakel WiFi uit voor dit gesprek</string>
-    <string name="connection_preference_dialog_message">Met mobiel internet (4G) is de verbinding stabieler en daarmee de geluidskwaliteit hoger. \n\nWiFi tijdelijk uitschakelen?</string>
-    <string name="connection_preference_switch_toast">Controleren of 4G beschikbaar is</string>
+    <string name="connection_preference_dialog_message">Met mobiel internet is de verbinding stabieler en daarmee de geluidskwaliteit hoger. \n\nWiFi tijdelijk uitschakelen?</string>
+    <string name="connection_preference_switch_toast">Controleren of het mobiele netwerk beschikbaar is</string>
+    <string name="switch_use_3g">Gebruik 3G+ om te bellen</string>
 
     <string name="url_app_info">http://vialerapp.com/nl/app-info/</string>
 
@@ -196,5 +197,4 @@
     <string name="permission_read_external_storage_missing_message">Permissie tot de externe opslag is nodig om toegang tot je ringtones te krijgen</string>
     <string name="permission_read_external_storage_dialog_message">Deze permissie is nodig om ringtones te kunnen kiezen die op je externe opslag staan</string>
 
-    <string name="switch_use_3g">Gebruik 3G om te bellen</string>
 </resources>
