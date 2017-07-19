@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateUtils;
@@ -34,6 +35,7 @@ import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
+import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
@@ -173,16 +175,17 @@ public class CallActivity extends AppCompatActivity
             mRemoteLogger.i("mBluetoothButtonReceiver: " + action);
 
             if (action.equals(BluetoothMediaButtonReceiver.CALL_BTN)) {
+                mRemoteLogger.i("Pickup call");
+                answer();
+            } else if (action.equals(BluetoothMediaButtonReceiver.DECLINE_BTN)) {
+
                 if (mConnected || !mIncomingCallIsRinging) {
-                    mRemoteLogger.i("Hangup current call.");
+                    mRemoteLogger.i("Hangup the call");
                     hangup(R.id.button_hangup);
                 } else {
-                    mRemoteLogger.i("Pickup call");
-                    answer();
+                    mRemoteLogger.i("Hangup / Decline the call");
+                    decline();
                 }
-            } else if (action.equals(BluetoothMediaButtonReceiver.DECLINE_BTN)) {
-                mRemoteLogger.i("Decline the call");
-                decline();
             }
         }
     };
@@ -326,7 +329,7 @@ public class CallActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == this.getResources().getInteger(R.integer.read_external_storage_permission_request_code)) {
             boolean allPermissionsGranted = true;
             for (int i = 0; i < permissions.length; i++) {
@@ -370,7 +373,7 @@ public class CallActivity extends AppCompatActivity
         }
 
         if (mSipServiceBound && mSipService != null && mSipService.getFirstCall() != null) {
-            mRemoteLogger.e("Why are we here!?, is it from the wake lock??");
+            mRemoteLogger.i("Why are we here!?, is it from the wake lock??");
 
             if ((mType.equals(TYPE_OUTGOING_CALL) || mType.equals(TYPE_INCOMING_CALL)) && !mConnected) {
                 mRemoteLogger.i("Call is outgoing or incoming but is not connected! Make sure the correct view is shown");

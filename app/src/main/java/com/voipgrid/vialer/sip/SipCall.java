@@ -217,6 +217,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
             // Now, let's deduct 2.5 R values per percentage of packet loss.
             r = r - (rxPacketLoss * 2.5f);
+            Log.e(TAG, "asd");
         } catch (Exception e) {
             e.printStackTrace();
         }

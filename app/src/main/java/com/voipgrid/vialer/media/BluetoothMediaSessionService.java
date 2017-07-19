@@ -16,15 +16,17 @@ import com.voipgrid.vialer.logging.RemoteLogger;
 
 
 public class BluetoothMediaSessionService extends Service {
+
+    private final static String TAG = BluetoothMediaSessionService.class.getSimpleName();
+    private MediaSessionCompat mSession;
+    private Context mContext;
+    private RemoteLogger mRemoteLogger;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
-
-    private MediaSessionCompat mSession;
-    private Context mContext;
-    private RemoteLogger mRemoteLogger;
 
     @Override
     public void onCreate() {
@@ -59,12 +61,12 @@ public class BluetoothMediaSessionService extends Service {
 
     @Override
     public void onDestroy() {
+        mRemoteLogger.v("onDestroy");
         mSession.setActive(false);
 
         mSession.release();
     }
 
-    private final static String TAG = BluetoothMediaSessionService.class.getSimpleName();
 
     private final MediaSessionCompat.Callback mSessionCallback = new MediaSessionCompat.Callback() {
 

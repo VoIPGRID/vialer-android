@@ -373,13 +373,24 @@ class AudioRouter {
                 if (getAudioRoute() == Constants.ROUTE_BT && !mAudioIsLost) {
                     if (state == AudioManager.SCO_AUDIO_STATE_DISCONNECTED && hasBluetoothHeadset() && MediaManager.CURRENT_CALL_STATE != Constants.CALL_INVALID && !mSelfDisabledBluetooth) {
                         mRemoteLogger.i("SCO wants to disconnect but the device is still connected, maybe trigger button click?");
-                        KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_CALL);
-                        BluetoothMediaButtonReceiver.handleKeyEvent(mContext, keyEvent);
-                        if (MediaManager.CURRENT_CALL_STATE == Constants.CALL_RINGING) {
-                            mBluetoothScoState = STATE_BLUETOOTH_SCO_OFF;
-                            startBluetoothSco();
+                        if (MediaManager.CURRENT_CALL_STATE == Constants.CALL_ANSWERED) {
+                            mRemoteLogger.i("Call already in progress end call");
+                            KeyEvent hangupKeyEvent = new KeyEvent(
+                                    KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENDCALL
+                            );
+                            BluetoothMediaButtonReceiver.handleKeyEvent(mContext, hangupKeyEvent);
+                        } else {
+                            mRemoteLogger.i("Call still ringing pick up call / answered hangup call");
+                            KeyEvent pickupKeyEvent = new KeyEvent(
+                                    KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_CALL
+                            );
+                            BluetoothMediaButtonReceiver.handleKeyEvent(mContext, pickupKeyEvent);
+                            if (MediaManager.CURRENT_CALL_STATE == Constants.CALL_RINGING) {
+                                mBluetoothScoState = STATE_BLUETOOTH_SCO_OFF;
+                                startBluetoothSco();
+                                return;
+                            }
                         }
-                        return;
                     }
                 }
 

@@ -109,6 +109,7 @@ public class MediaManager implements
     public void callAnswered() {
         mRemoteLogger.v("callAnswered()");
         mAudioRouter.onAnsweredCall();
+        BluetoothMediaButtonReceiver.setCallAnswered();
     }
 
     /**
