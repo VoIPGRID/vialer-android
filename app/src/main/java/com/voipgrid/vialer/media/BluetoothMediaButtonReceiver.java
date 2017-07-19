@@ -3,16 +3,12 @@ package com.voipgrid.vialer.media;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.KeyEvent;
 
 import com.voipgrid.vialer.logging.RemoteLogger;
 
 
 public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
-
-    private static final String TAG = BluetoothMediaButtonReceiver.class.getSimpleName();
-
     public static final String CALL_BTN = "call_btn";
     public static final String HANGUP_BTN = "hangup_btn";
     public static final String DECLINE_BTN = "decl_btn";
@@ -77,7 +73,6 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
                 default:
                     break;
             }
-            Log.e(TAG, "mAnswer: " + mAnswer);
         }
     }
 
@@ -87,8 +82,7 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
         mContext.sendBroadcast(new Intent(mAnswer ? CALL_BTN : DECLINE_BTN));
     }
 
-    static void setCallAnswered() {
-        Log.e(TAG, "setCallAnswered");
+    public static void setCallAnswered() {
         mAnswer = true;
     }
 }

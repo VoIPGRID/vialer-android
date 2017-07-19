@@ -3,9 +3,8 @@ package com.voipgrid.vialer.media;
 import android.media.AudioManager;
 
 /**
- * Created by redmerloen on 6/2/17.
+ * Constants what state the audio and call can have.
  */
-
 public class Constants {
 
     /**

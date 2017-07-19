@@ -18,8 +18,6 @@ import com.voipgrid.vialer.logging.RemoteLogger;
  * Either earpiece / headset / bluetooth devices.
  */
 class AudioRouter {
-    private static final String TAG = AudioRouter.class.getSimpleName();
-
     private Context mContext;
     private AudioManager mAudioManager;
     private RemoteLogger mRemoteLogger;
@@ -154,19 +152,19 @@ class AudioRouter {
         mRemoteLogger.v("enableEarpiece()");
 
         if (!hasEarpiece()) {
-            mRemoteLogger.d("===> no earpiece");
+            mRemoteLogger.v("===> no earpiece");
             return STATE_EARPIECE_INVALID;
         }
 
         int route = getAudioRoute();
         if (route == Constants.ROUTE_HEADSET) {
-            mRemoteLogger.d("===> ROUTE_HEADSET");
+            mRemoteLogger.v("===> ROUTE_HEADSET");
             // Cannot use earpiece when a headset is plugged in.
             return STATE_EARPIECE_INVALID;
         }
 
         if (route == Constants.ROUTE_BT) {
-            mRemoteLogger.d("===> ROUTE_BT");
+            mRemoteLogger.v("===> ROUTE_BT");
             stopBluetoothSco();
         }
 

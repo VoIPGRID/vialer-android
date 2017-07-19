@@ -1149,6 +1149,7 @@ public class CallActivity extends AppCompatActivity
                         getString(R.string.analytics_event_action_inbound),
                         getString(R.string.analytics_event_label_accepted)
                 );
+                BluetoothMediaButtonReceiver.setCallAnswered();
 
                 mNotificationHelper.removeAllNotifications();
                 mNotificationId = mNotificationHelper.displayCallProgressNotification(
