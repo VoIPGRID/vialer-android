@@ -67,10 +67,10 @@ repositories {
 }
 
 ext {
-    supportLibVersion = "25.2.0"
+    supportLibVersion = "25.3.1"
     espressoVersion = "2.2"
     androidTestVersion = "0.5"
-    firebaseVersion = "10.2.0"
+    firebaseVersion = "11.0.1"
     jUnitVersion = "4.12"
     powerMockVersion = "1.6.4"
     okHttpVersion = "3.2.0"

@@ -13,11 +13,13 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,8 +58,7 @@ import retrofit2.Response;
 /**
  * NavigationDrawerActivity adds support to add a Toolbar and DrawerLayout to an Activity.
  */
-public abstract class NavigationDrawerActivity
-        extends LoginRequiredActivity
+public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         implements Callback, AdapterView.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
 
@@ -300,22 +301,27 @@ public abstract class NavigationDrawerActivity
 
     @Override
     public void onFailure(Call call, Throwable t) {
-        Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
+        if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
+            Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
     public void onResponse(Call call, Response response) {
         if (!response.isSuccess()) {
-            Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
+            if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
+                Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
+            }
             if (!mConnectivityHelper.hasNetworkConnection()) {
                 // First check if there is a entry already to avoid duplicates.
-                mSpinner.setVisibility(View.GONE);
-                mNoConnectionText.setVisibility(View.VISIBLE);
+                if (mSpinner != null && mNoConnectionText != null) {
+                    mSpinner.setVisibility(View.GONE);
+                    mNoConnectionText.setVisibility(View.VISIBLE);
+                }
             }
         }
         if (response.body() instanceof VoipGridResponse) {
-            List<UserDestination> userDestinationObjects =
-                    ((VoipGridResponse<UserDestination>) response.body()).getObjects();
+            List<UserDestination> userDestinationObjects = ((VoipGridResponse<UserDestination>) response.body()).getObjects();
 
             if (userDestinationObjects == null || userDestinationObjects.size() <= 0 || mSpinnerAdapter == null) {
                 return;
@@ -398,7 +404,7 @@ public abstract class NavigationDrawerActivity
         mSpinner.setOnItemSelectedListener(this);
 
         // Setup spinner placeholder text for when there is no connection and thus no spinner options
-        mNoConnectionText = (TextView) findViewById(R.id.no_availability_text);
+        mNoConnectionText = (TextView) mNavigationHeaderView.findViewById(R.id.no_availability_text);
     }
 
     @Override
@@ -414,7 +420,7 @@ public abstract class NavigationDrawerActivity
                 );
             } else {
                 Destination destination = (Destination) parent.getAdapter().getItem(position);
-                if (destination.getDescription() == getString(R.string.not_available)) {
+                if (destination.getDescription().equals(getString(R.string.not_available))) {
                     MiddlewareHelper.executeUnregisterTask(this);
                 }
                 SelectedUserDestinationParams params = new SelectedUserDestinationParams();

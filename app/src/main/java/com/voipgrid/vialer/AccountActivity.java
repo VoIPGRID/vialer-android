@@ -38,6 +38,7 @@ public class AccountActivity extends LoginRequiredActivity implements
         Callback {
 
     private CompoundButton mSwitch;
+    private CompoundButton m3GSwitch;
     private EditText mSipIdEditText;
     private EditText mRemoteLogIdEditText;
 
@@ -74,6 +75,7 @@ public class AccountActivity extends LoginRequiredActivity implements
 
         initConnectionSpinner();
         initRemoteLoggingSwitch();
+        initUse3GSwitch();
     }
 
     private void initConnectionSpinner() {
@@ -91,9 +93,9 @@ public class AccountActivity extends LoginRequiredActivity implements
      * are not nativly supported in java.
      */
     private long converseToPreference(CharSequence connectionPreference) {
-        if (connectionPreference.equals(getString(R.string.call_connection_always_LTE))) {
+        if (connectionPreference.equals(getString(R.string.call_connection_only_cellular))) {
             return Preferences.CONNECTION_PREFERENCE_LTE;
-        } else if (connectionPreference.equals(getString(R.string.call_connection_use_wifi))) {
+        } else if (connectionPreference.equals(getString(R.string.call_connection_use_wifi_cellular))) {
             return Preferences.CONNECTION_PREFERENCE_WIFI;
         }
         return Preferences.CONNECTION_PREFERENCE_NONE;
@@ -105,9 +107,9 @@ public class AccountActivity extends LoginRequiredActivity implements
      */
     private CharSequence converseFromPreference(long preference) {
         if (preference == Preferences.CONNECTION_PREFERENCE_LTE) {
-            return getString(R.string.call_connection_always_LTE);
+            return getString(R.string.call_connection_only_cellular);
         } else if (preference == Preferences.CONNECTION_PREFERENCE_WIFI) {
-            return getString(R.string.call_connection_use_wifi);
+            return getString(R.string.call_connection_use_wifi_cellular);
         }
         return getString(R.string.call_connection_optional);
     }
@@ -146,6 +148,20 @@ public class AccountActivity extends LoginRequiredActivity implements
             mRemoteLogIdEditText.setVisibility(View.VISIBLE);
             mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
         }
+    }
+
+    private void initUse3GSwitch() {
+        CompoundButton use3GSwitch = (CompoundButton) findViewById(R.id.use_3g_switch);
+        use3GSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (mPreferences.has3GEnabled() == isChecked) {
+                    return;
+                }
+                mPreferences.set3GEnabled(isChecked);
+            }
+        });
+        use3GSwitch.setChecked(mPreferences.has3GEnabled());
     }
 
     private void updateAndPopulate() {
@@ -285,7 +301,7 @@ public class AccountActivity extends LoginRequiredActivity implements
                         // to disabled. Setting disabled in the settings first makes sure
                         // the onCheckChanged does not execute the code that normally is executed
                         // on a change in the check of the switch.
-                        setVoipAccount();
+                        setVoIPAccount();
                     }
                 }
             }.execute();
@@ -295,7 +311,7 @@ public class AccountActivity extends LoginRequiredActivity implements
     /**
      * Loads setupactivity with the SetUpVoipAccountFragment.
      */
-    private void setVoipAccount(){
+    private void setVoIPAccount(){
         Intent intent = new Intent(this, SetupActivity.class);
         Bundle b = new Bundle();
         b.putInt("fragment", R.id.fragment_voip_account_missing);

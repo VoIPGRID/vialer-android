@@ -117,12 +117,13 @@
     <string name="action_done">Done</string>
     <string name="action_edit">Edit</string>
     <string name="choose_network_text">Call using:</string>
-    <string name="call_connection_always_LTE">Only 4G</string>
-    <string name="call_connection_use_wifi">WiFi when connected</string>
+    <string name="call_connection_only_cellular">Only cellular networks</string>
+    <string name="call_connection_use_wifi_cellular">Cellular networks and WiFi</string>
     <string name="call_connection_optional">Show pop-up for outgoing calls</string>
     <string name="connection_preference_dialog_title">Advice: turn off WiFi for this call</string>
-    <string name="connection_preference_dialog_message">Mobile networks LTE(4G) are more stable which leads to a higher audio quality. \n\nTurn off WiFi for this call?</string>
-    <string name="connection_preference_switch_toast">Trying to handover to LTE(4G)</string>
+    <string name="connection_preference_dialog_message">Cellular networks are more stable which leads to a higher audio quality. \n\nTurn off WiFi for this call?</string>
+    <string name="connection_preference_switch_toast">Trying to handover to the cellular network</string>
+    <string name="switch_use_3g">Also use 3G+ for calls</string>
 
     <string name="url_app_info">http://vialerapp.com/app-info/</string>
 

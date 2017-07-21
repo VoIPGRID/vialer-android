@@ -61,7 +61,7 @@ public class SipConfig implements AccountStatus {
     private boolean mReRegisterAccount = false;
     private boolean mHasRespondedToMiddleware = false;
     private int mCurrentTransportId;
-    private Long mLatestConnectionType;
+    private int mLatestConnectionType;
     private static Map<String, Short> sCodecPrioMapping;
 
     private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
@@ -116,12 +116,12 @@ public class SipConfig implements AccountStatus {
      * @throws LibraryInitFailedException
      */
     private void loadPjsip() throws LibraryInitFailedException {
-        mRemoteLogger.d(TAG + " Loading PJSIP");
+        mRemoteLogger.d("Loading PJSIP");
         try {
             System.loadLibrary("pjsua2");
         } catch (UnsatisfiedLinkError error) { /* Can not load PJSIP library */
             Log.e(TAG, error.getMessage());
-            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(error));
+            mRemoteLogger.e("" + Log.getStackTraceString(error));
             throw new LibraryInitFailedException();
         }
     }
@@ -184,9 +184,7 @@ public class SipConfig implements AccountStatus {
         endpointConfig.getLogConfig().setConsoleLevel(SipConstants.SIP_CONSOLE_LOG_LEVEL);
         LogConfig logConfig = endpointConfig.getLogConfig();
         mSipLogWriter = new SipLogWriter();
-        if (mSipService.getPreferences().remoteLoggingIsActive()) {
-            mSipLogWriter.enabledRemoteLogging(mRemoteLogger);
-        }
+        mSipLogWriter.enabledRemoteLogging(mRemoteLogger);
         logConfig.setWriter(mSipLogWriter);
         logConfig.setDecor(logConfig.getDecor() &
                 ~(pj_log_decoration.PJ_LOG_HAS_CR.swigValue() |
@@ -200,7 +198,7 @@ public class SipConfig implements AccountStatus {
      * @throws LibraryInitFailedException
      */
     private Endpoint createEndpoint() throws LibraryInitFailedException {
-        mRemoteLogger.d(TAG + " createEndpoint");
+        mRemoteLogger.d("createEndpoint");
         Endpoint endpoint = new Endpoint();
         EpConfig endpointConfig = new EpConfig();
 
@@ -212,7 +210,7 @@ public class SipConfig implements AccountStatus {
             endpoint.libCreate();
         } catch (Exception e) {
             Log.e(TAG, "Unable to create the PJSIP library");
-            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
+            mRemoteLogger.e("" + Log.getStackTraceString(e));
             e.printStackTrace();
             throw new LibraryInitFailedException();
         }
@@ -228,7 +226,7 @@ public class SipConfig implements AccountStatus {
             endpoint.libInit(endpointConfig);
         } catch (Exception e) {
             Log.e(TAG, "Unable to init the PJSIP library");
-            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
+            mRemoteLogger.e("" + Log.getStackTraceString(e));
             e.printStackTrace();
             throw new LibraryInitFailedException();
         }
@@ -240,7 +238,7 @@ public class SipConfig implements AccountStatus {
             endpoint.libStart();
         } catch (Exception exception) {
             Log.e(TAG, "Unable to start the PJSIP library");
-            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(exception));
+            mRemoteLogger.e("" + Log.getStackTraceString(exception));
             throw new LibraryInitFailedException();
         }
         return endpoint;
@@ -277,13 +275,13 @@ public class SipConfig implements AccountStatus {
      * @return
      */
     private SipAccount createSipAccount() {
-        mRemoteLogger.d(TAG + " createSipAccount");
+        mRemoteLogger.d("createSipAccount");
         AccountConfig accountConfig = createAccountConfig();
         SipAccount sipAccount = null;
         try {
             sipAccount = new SipAccount(mSipService, accountConfig, this);
         } catch (Exception e) {
-            mRemoteLogger.e(TAG + " " + Log.getStackTraceString(e));
+            mRemoteLogger.e("" + Log.getStackTraceString(e));
             e.printStackTrace();
         }
         return sipAccount;
@@ -352,11 +350,11 @@ public class SipConfig implements AccountStatus {
      * @param context
      */
     private void handleNetworkStateChange(Context context) {
-        mRemoteLogger.d(TAG + " handleNetworkStateChange");
+        mRemoteLogger.d("handleNetworkStateChange");
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(context);
-        Long connectionType = connectivityHelper.getConnectionType();
+        int connectionType = ConnectivityHelper.get(context).getConnectionType();
 
-        if (!mLatestConnectionType.equals(connectionType) && connectivityHelper.hasNetworkConnection()) {
+        if (!(mLatestConnectionType == connectionType) && connectivityHelper.hasNetworkConnection()) {
             mReRegisterAccount = true;
             // Renew sip registration. Unregister would come from the new IP anyway so that
             // would not make a lot of sense so we update our existing registration from the
@@ -417,14 +415,7 @@ public class SipConfig implements AccountStatus {
                 url
         );
 
-        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(mSipService);
-        String connectionType = connectivityHelper.getConnectionTypeString();
-        String analyticsLabel;
-        if (connectionType.equals(connectivityHelper.CONNECTION_WIFI)) {
-            analyticsLabel = mSipService.getString(R.string.analytics_event_label_wifi);
-        } else {
-            analyticsLabel = mSipService.getString(R.string.analytics_event_label_4g);
-        }
+        String analyticsLabel = ConnectivityHelper.get(mSipService).getAnalyticsLabel();
 
         // Accepted event.
         analyticsHelper.sendEvent(
@@ -464,7 +455,7 @@ public class SipConfig implements AccountStatus {
 
     @Override
     public void onAccountRegistered(Account account, OnRegStateParam param) {
-        mRemoteLogger.d(TAG + " onAccountRegistered");
+        mRemoteLogger.d("onAccountRegistered");
 
         try {
             // After registration setup new transport to reflect learned external IP to be used
@@ -489,12 +480,12 @@ public class SipConfig implements AccountStatus {
 
     @Override
     public void onAccountUnregistered(Account account, OnRegStateParam param) {
-        mRemoteLogger.d(TAG + " onAccountUnRegistered");
+        mRemoteLogger.d("onAccountUnRegistered");
     }
 
     @Override
     public void onAccountInvalidState(Account account, Throwable fault) {
-        mRemoteLogger.d(TAG + " onAccountInvalidState");
+        mRemoteLogger.d("onAccountInvalidState");
     }
 
     /**

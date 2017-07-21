@@ -20,6 +20,7 @@ public class Preferences {
     public static final String PREF_REMOTE_LOGGING = "PREF_REMOTE_LOGGING";
     public static final String PREF_REMOTE_LOGGING_ID = "PREF_REMOTE_LOGGING_ID";
     public static final String PREF_FINISHED_ONBOARDING = "PREF_FINISHED_ONBOARDING";
+    public static final String PREF_HAS_3G_ENABLED = "PREF_HAS_3G_ENABLED";
 
     public static final String CONNECTION_PREFERENCE = "CONNECTION_PREFERENCE";
     public static final long CONNECTION_PREFERENCE_NONE = -10;
@@ -29,6 +30,7 @@ public class Preferences {
 
     public static final boolean DEFAULT_VALUE_HAS_SIP_ENABLED = true;
     public static final boolean DEFAULT_VALUE_HAS_SIP_PERMISSION = false;
+    public static final boolean DEFAULT_VALUE_HAS_3G_ENABLED = true;
 
     private Context mContext;
     private SharedPreferences mPreferences;
@@ -129,7 +131,14 @@ public class Preferences {
      */
     public boolean hasSipEnabled() {
         return  mPreferences.getBoolean(PREF_HAS_SIP_ENABLED, DEFAULT_VALUE_HAS_SIP_ENABLED);
+    }
 
+    public boolean has3GEnabled() {
+        return mPreferences.getBoolean(PREF_HAS_3G_ENABLED, DEFAULT_VALUE_HAS_3G_ENABLED);
+    }
+
+    public void set3GEnabled(boolean use3G) {
+        mPreferences.edit().putBoolean(PREF_HAS_3G_ENABLED, use3G).apply();
     }
 
     /**

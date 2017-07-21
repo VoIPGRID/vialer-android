@@ -15,7 +15,6 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.models.ClickToDialParams;
-import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 
@@ -59,7 +58,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
                 getPassword()
         );
 
-        mRemoteLogger = new RemoteLogger(this);
+        mRemoteLogger = new RemoteLogger(this, TwoStepCallActivity.class);
 
         String numberToCall = getIntent().getStringExtra(NUMBER_TO_CALL);
 
@@ -259,13 +258,13 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
                                 if (status.getStatus() != null){
                                     handleMessage(status.getStatus());
                                 } else {
-                                    mRemoteLogger.d(TAG + " status.getStatus() is null");
+                                    mRemoteLogger.d("status.getStatus() is null");
                                 }
                             }
                         } catch (IOException e) {
 
                         } catch (StackOverflowError e) {
-                            mRemoteLogger.d(TAG + " StackOverflowError");
+                            mRemoteLogger.d("StackOverflowError");
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();

@@ -13,6 +13,10 @@
 
     <string name="analytics_event_label_wifi" translatable="false">Wifi</string>
     <string name="analytics_event_label_4g" translatable="false">4G</string>
+    <string name="analytics_event_label_hsdpa" translatable="false">HSDPA</string>
+    <string name="analytics_event_label_hspap" translatable="false">HSPAP</string>
+    <string name="analytics_event_label_hsupa" translatable="false">HSUPA</string>
+    <string name="analytics_event_label_evdo_b" translatable="false">EVDO_B</string>
     <string name="analytics_event_label_unknown" translatable="false">unknown</string>
 
     <string name="analytics_event_description_registration_failed" translatable="false">Failed middleware registration</string>

@@ -45,7 +45,7 @@ public class AccountHelper {
      */
     private void init() {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mRemoteLogger = new RemoteLogger(mContext);
+        mRemoteLogger = new RemoteLogger(mContext, AccountHelper.class);
 
         // Api level 18 only supports the easiest way to use the KeyStore without using
         // several workarounds.

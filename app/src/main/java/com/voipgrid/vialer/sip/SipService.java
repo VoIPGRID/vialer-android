@@ -129,9 +129,9 @@ public class SipService extends Service {
         mSipBroadcaster = new SipBroadcaster(this);
 
         mPreferences = new Preferences(this);
-        mRemoteLogger = new RemoteLogger(this);
+        mRemoteLogger = new RemoteLogger(this, SipService.class, 1);
 
-        mRemoteLogger.d(TAG + " onCreate");
+        mRemoteLogger.d("onCreate");
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
@@ -164,7 +164,9 @@ public class SipService extends Service {
     }
 
     private void checkServiceBeingUsed() {
+        mRemoteLogger.d("checkServiceBeingUsed");
         if (mCurrentCall == null) {
+            mRemoteLogger.i("No active calls stop the service");
             stopSelf();
         }
     }
@@ -187,7 +189,7 @@ public class SipService extends Service {
 
     @Override
     public void onDestroy() {
-        mRemoteLogger.d(TAG + " onDestroy");
+        mRemoteLogger.d("onDestroy");
 
         // If no phoneaccount was found in the onCreate there won't be a sipconfig either.
         // Check to avoid nullpointers.
@@ -204,18 +206,18 @@ public class SipService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mRemoteLogger.d(TAG + " onStartCommand");
+        mRemoteLogger.d("onStartCommand");
 
         mInitialCallType = intent.getAction();
         Uri number = intent.getData();
 
         switch (mInitialCallType) {
             case SipConstants.ACTION_VIALER_INCOMING:
-                mRemoteLogger.d(TAG + " incomingCall");
+                mRemoteLogger.d("incomingCall");
                 mIncomingCallDetails = intent;
                 break;
             case SipConstants.ACTION_VIALER_OUTGOING:
-                mRemoteLogger.d(TAG + " outgoingCall");
+                mRemoteLogger.d("outgoingCall");
                 makeCall(
                         number,
                         intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
@@ -258,7 +260,7 @@ public class SipService extends Service {
      * Start the ring back for a outgoing call.
      */
     public void startRingback() {
-        mRemoteLogger.d(TAG + " onCallStartRingback");
+        mRemoteLogger.d("onCallStartRingback");
         mHandler.postDelayed(mRingbackRunnable, 2000);
     }
 
@@ -266,7 +268,7 @@ public class SipService extends Service {
      * Stop the ring back for a outgoing call.
      */
     public void stopRingback() {
-        mRemoteLogger.d(TAG + " onCallStopRingback");
+        mRemoteLogger.d("onCallStopRingback");
         mHandler.removeCallbacks(mRingbackRunnable);
     }
 
@@ -301,7 +303,7 @@ public class SipService extends Service {
      * @param number
      */
     public void startOutgoingCallActivity(SipCall sipCall, Uri number) {
-        mRemoteLogger.d(TAG + " callVisibleForUser");
+        mRemoteLogger.d("callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setDataAndType(number, CallActivity.TYPE_OUTGOING_CALL);
@@ -317,7 +319,7 @@ public class SipService extends Service {
      * @param callerId
      */
     public void startIncomingCallActivity(String number, String callerId) {
-        mRemoteLogger.d(TAG + " callVisibleForUser");
+        mRemoteLogger.d("callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Uri sipAddressUri = SipUri.sipAddressUri(

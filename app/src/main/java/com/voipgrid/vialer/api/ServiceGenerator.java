@@ -9,15 +9,13 @@ import android.os.Build;
 
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
-import com.voipgrid.vialer.logging.RemoteLogger;
 
 import java.io.IOException;
-
-import static java.lang.String.format;
 
 import okhttp3.Cache;
 import okhttp3.Credentials;
@@ -27,6 +25,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static java.lang.String.format;
 
 
 /**
@@ -116,7 +116,7 @@ public class ServiceGenerator {
                 if (response.code() == 401 &&
                         !context.getClass().getSimpleName().equals(
                                 SetupActivity.class.getSimpleName())) {
-                    new RemoteLogger(context).w("Logged out on 401 API response");
+                    new RemoteLogger(context, ServiceGenerator.class).w("Logged out on 401 API response");
                     // Clear logged in values.
                     new JsonStorage(context).clear();
                     new AccountHelper(context).clearCredentials();

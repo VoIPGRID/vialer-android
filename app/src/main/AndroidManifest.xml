@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.voipgrid.vialer">
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -32,6 +33,8 @@
 
     <!-- For using Bluetooth -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <uses-feature
         android:name="android.hardware.sensor.proximity"
@@ -87,7 +90,8 @@
         </activity>
 
         <service
-            android:name=".fcm.FcmListenerService">
+            android:name=".fcm.FcmListenerService"
+            android:enabled="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
@@ -99,8 +103,16 @@
             </intent-filter>
         </service>
 
-
         <service android:name=".fcm.FcmRegistrationService" />
+
+        <receiver
+            android:name=".util.OnBootReceiver"
+            android:label="StartMyServiceAtBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".util.UpdateActivity"
@@ -144,13 +156,18 @@
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name=".util.CustomReceiver"
-            android:enabled="true" >
-            <intent-filter android:priority="1000000000">
+        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver" >
+            <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
+
             </intent-filter>
         </receiver>
+
+        <service android:name=".media.BluetoothMediaSessionService" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
 
         <service
             android:name="com.google.android.gms.analytics.AnalyticsService"

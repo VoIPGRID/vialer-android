@@ -38,9 +38,9 @@ public class ContactsSyncTask {
      */
     public ContactsSyncTask(Context context) {
         mContext = context;
-        mRemoteLogger = new RemoteLogger(context);
+        mRemoteLogger = new RemoteLogger(context, ContactsSyncTask.class);
 
-        mRemoteLogger.d(TAG + " onCreate");
+        mRemoteLogger.d("onCreate");
     }
 
     /**
@@ -83,12 +83,12 @@ public class ContactsSyncTask {
      * Runs the sync for all contacts.
      */
     public void fullSync() {
-        mRemoteLogger.d(TAG + " fullSync");
+        mRemoteLogger.d("fullSync");
 
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(mContext)) {
-            mRemoteLogger.d(TAG + " fullsync: no contact permission");
+            mRemoteLogger.d("fullsync: no contact permission");
             // TODO VIALA-349 Delete sync account.
             return;
         }
@@ -207,12 +207,12 @@ public class ContactsSyncTask {
      * @param cursor The cursor of contact(s) to sync.
      */
     public void sync(Cursor cursor) {
-        mRemoteLogger.d(TAG + " sync");
+        mRemoteLogger.d("sync");
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(mContext)) {
             // TODO VIALA-349 Delete sync account.
-            mRemoteLogger.d(TAG + " sync: no contact permission");
+            mRemoteLogger.d("sync: no contact permission");
             return;
         }
 
