@@ -41,6 +41,9 @@
     <string name="webactivity_open_page_failed">Het openen van de webpagina is mislukt.</string>
 
     <!-- Sidebar fragment values -->
+    <string name="logout_dialog_text">Weet je zeker dat je wilt uitloggen?</string>
+    <string name="logout_dialog_positive">Log uit</string>
+    <string name="logout_dialog_negative">Annuleer</string>
     <string name="cannot_logout_error_title">Geen internetverbinding beschikbaar</string>
     <string name="cannot_logout_error_text">Een internetverbinding is nodig om uit te loggen.</string>
     <string name="set_userdestination_api_fail">Aanpassen van bereikbaarheid mislukt. Probeer later opnieuw.</string>

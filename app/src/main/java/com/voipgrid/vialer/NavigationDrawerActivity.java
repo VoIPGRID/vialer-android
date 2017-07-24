@@ -19,7 +19,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -247,10 +246,29 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         return false;
     }
 
+    private void logout() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(this.getString(R.string.logout_dialog_text));
+        builder.setPositiveButton(this.getString(R.string.logout_dialog_positive),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        performLogout();
+                    }
+                });
+        builder.setNegativeButton(this.getString(R.string.logout_dialog_negative),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     /**
      * Perform logout; Remove the stored SystemUser and PhoneAccount and show the login view
      */
-    private void logout() {
+    private void performLogout() {
         if (mConnectivityHelper.hasNetworkConnection()) {
             try {
                 new LogoutTask(this).execute().get(1000, TimeUnit.MILLISECONDS);
