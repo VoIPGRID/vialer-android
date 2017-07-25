@@ -9,8 +9,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import com.voipgrid.vialer.AccountActivity;
 import com.voipgrid.vialer.MainActivity;
@@ -30,6 +32,8 @@ import com.voipgrid.vialer.models.PasswordResetParams;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
+
+import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -151,11 +155,20 @@ public class SetupActivity extends RemoteLoggingActivity implements
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        enableProgressBar(false);
+    }
+
+    @Override
     public void onLogin(final Fragment fragment, String username, String password) {
         mPassword = password;
         enableProgressBar(true);
 
         boolean success = createAPIService(username, password);
+
+        AccountHelper accountHelper = new AccountHelper(this);
+        accountHelper.setCredentials(username, password);
 
         if (success) {
             Call<SystemUser> call = mApi.systemUser();
@@ -381,9 +394,27 @@ public class SetupActivity extends RemoteLoggingActivity implements
                 }
             }
         } else {
-            if (response.errorBody() != null) {
-                failedFeedback(response.errorBody().toString());
+            String errorString = "";
+            try {
+                errorString = response.errorBody().string();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
+            Log.e("ASD", errorString);
+
+            if (errorString.equals("You need to change your password in the portal")) {
+                WebActivityHelper webHelper = new WebActivityHelper(this);
+                webHelper.startWebActivity(
+                        getString(R.string.password_change_title),
+                        getString(R.string.web_password_change),
+                        getString(R.string.analytics_password_change)
+                );
+                Toast.makeText(this, R.string.change_password_webview_toast, Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            failedFeedback(errorString);
         }
     }
 
