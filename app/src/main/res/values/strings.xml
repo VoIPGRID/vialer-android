@@ -25,8 +25,9 @@
     <string name="call_unreachable">Unreachable</string>
     <string name="call_incoming_accept">Accept</string>
     <string name="call_incoming_decline">Decline</string>
-    <string name="dialer_warning_a_b_connect">Two-step calling mode active</string>
-    <string name="dialer_warning_no_connection">No data connection available</string>
+    <string name="dialer_warning_a_b_connect">Poor connection, Two step calling enabled</string>
+    <string name="dialer_warning_no_connection">No connection, cannot call</string>
+    <string name="dialer_warning_voip_disabled">VoIP disabled, enable in settings</string>
     <string name="version_info">Version: %1$s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
 
