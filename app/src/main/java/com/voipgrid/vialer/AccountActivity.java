@@ -3,6 +3,7 @@ package com.voipgrid.vialer;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -172,6 +173,7 @@ public class AccountActivity extends LoginRequiredActivity implements
 
     private void populate() {
         if(mPreferences.hasSipPermission()) {
+            mSwitch.setChecked(mPreferences.hasSipEnabled());
             if(mPhoneAccount != null) {
                 mSipIdEditText.setText(mPhoneAccount.getAccountId());
             }
@@ -338,6 +340,19 @@ public class AccountActivity extends LoginRequiredActivity implements
 
         // Update phone account and systemuser.
         updateSystemUserAndPhoneAccount();
+
+        // When coming back from the SetUpVoipAccountFragment's created webactivity
+        // we cannot immediately check if a voipaccount has been set. Processing the
+        // fragment and the checks for a permitted sip permission can take 1 up to 3 seconds.
+        // For this reason we re-check if the mSwitch has the correct value after a timer.
+        enableProgressBar(true);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSwitch.setChecked(mPreferences.hasSipEnabled() && mPreferences.hasPhoneAccount());
+                enableProgressBar(false);
+            }
+        }, 3000);
     }
 
     @Override

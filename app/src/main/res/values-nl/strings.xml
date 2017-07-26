@@ -22,9 +22,8 @@
     <string name="call_hangup">Ophangen</string>
     <string name="call_connected">Verbonden</string>
     <string name="call_unreachable">Onbereikbaar</string>
-    <string name="dialer_warning_a_b_connect">"Slechte verbinding, Twee staps modus geactiveerd</string>
-    <string name="dialer_warning_no_connection">Geen verbinding, bellen niet mogelijk</string>
-    <string name="dialer_warning_voip_disabled">VoIP gedeactiveerd, activeer VoIP bij instellingen</string>
+    <string name="dialer_warning_a_b_connect">Twee staps modus ingeschakeld</string>
+    <string name="dialer_warning_no_connection">Geen dataverbinding beschikbaar</string>
     <string name="version_info">Versie: %1$s</string>
     <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
 

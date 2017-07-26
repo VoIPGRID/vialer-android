@@ -67,7 +67,7 @@ public class NetworkStateViewHelper extends BroadcastReceiver implements View.On
         mNetworkStateView.setVisibility(View.VISIBLE);
         if(!mConnectivityHelper.hasNetworkConnection()) {
             mNetworkStateView.setText(R.string.dialer_warning_no_connection);
-            mNetworkStateView.setTag(mContext.getString(R.string.dialer_warning_no_connection));
+            mNetworkStateView.setTag(mContext.getString(R.string.dialer_warning_no_connection_message));
         } else if(!mConnectivityHelper.hasFastData() && mPreferences.canUseSip()) {
             mNetworkStateView.setText(R.string.dialer_warning_a_b_connect);
             mNetworkStateView.setTag(mContext.getString(R.string.dialer_warning_a_b_connect_connectivity_message));
