@@ -11,9 +11,11 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -363,25 +365,16 @@ public class CallActivity extends AppCompatActivity
         if (mIncomingCallIsRinging && mPausedRinging) {
             mMediaManager.startIncomingCallRinger();
         }
+
         mPausedRinging = false;
 
         mRemoteLogger.d("onResume");
 
+
         // Bind the SipService to the activity.
         if (!mSipServiceBound && mSipService == null) {
+            mRemoteLogger.e("SipService not bound!");
             bindService(new Intent(this, SipService.class), mSipServiceConnection, Context.BIND_AUTO_CREATE);
-        }
-
-        if (mSipServiceBound && mSipService != null && mSipService.getFirstCall() != null) {
-            mRemoteLogger.i("Why are we here!?, is it from the wake lock??");
-
-            if ((mType.equals(TYPE_OUTGOING_CALL) || mType.equals(TYPE_INCOMING_CALL)) && !mConnected) {
-                mRemoteLogger.i("Call is outgoing or incoming but is not connected! Make sure the correct view is shown");
-                toggleCallStateButtonVisibility(mType);
-            } else {
-                mRemoteLogger.i("Call is already connected make sure the connected call view is visible");
-                toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
-            }
         }
 
         if (!mOnTransfer && mSipService != null && mSipService.getCurrentCall() != null) {
@@ -406,6 +399,7 @@ public class CallActivity extends AppCompatActivity
                 if (!mSipServiceBound) {
                     finishWithDelay();
                 } else if (mSipService.getCurrentCall() == null) {
+                    mRemoteLogger.d("runnable in onResume Current Call is null");
                     onCallStatusUpdate(CALL_DISCONNECTED_MESSAGE);
                 }
             }
@@ -416,20 +410,27 @@ public class CallActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
         mRemoteLogger.d("onPause");
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        boolean isScreenInteractive;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            isScreenInteractive = powerManager.isScreenOn();
+        } else {
+            isScreenInteractive = powerManager.isInteractive();
+        }
+
+        // Check if the screen is interactive because when the activity becomes active.
+        // After the screen turns on onStart and onPause are called again.
+        // Hence : onCreate - onStart - onResume - onPause - onStop - onStart - onPause.
+        if (!isScreenInteractive) {
+            mRemoteLogger.i("We come from an screen that has been off. Don't execute the onPause!");
+            return;
+        }
+
         if (mIncomingCallIsRinging) {
             mNotificationHelper.removeAllNotifications();
             mNotificationId = mNotificationHelper.displayNotificationWithCallActions(mCallerIdToDisplay, mPhoneNumberToDisplay);
 
-            mMediaManager.stopIncomingCallRinger();
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        mRemoteLogger.d("onStop");
-
-        if (mIncomingCallIsRinging) {
             mMediaManager.stopIncomingCallRinger();
             mPausedRinging = true;
         }
@@ -438,6 +439,7 @@ public class CallActivity extends AppCompatActivity
         unregisterReceiver(mBluetoothButtonReceiver);
 
         stopService();
+
     }
 
     @Override
@@ -446,6 +448,8 @@ public class CallActivity extends AppCompatActivity
         mRemoteLogger.d("onDestroy");
 
         mNotificationHelper.removeAllNotifications();
+
+        mProximityHelper.stopSensor();
 
         // Reset the audio manage.
         mMediaManager.deInit();
@@ -531,9 +535,9 @@ public class CallActivity extends AppCompatActivity
             // Depended on if the user has the screen locked show the slide to answer view or
             // the two buttons to accept / decline a call.
             if (keyguardManager.inKeyguardRestrictedInputMode()) {
-                swapFragment(TAG_CALL_LOCK_RING_FRAGMENT, null);
-
                 findViewById(R.id.call_buttons_container).setVisibility(View.INVISIBLE);
+
+                swapFragment(TAG_CALL_LOCK_RING_FRAGMENT, null);
             } else {
                 swapFragment(TAG_CALL_INCOMING_FRAGMENT, null);
             }
@@ -1188,7 +1192,6 @@ public class CallActivity extends AppCompatActivity
 
     private void finishWithDelay() {
         stopService();
-        mProximityHelper.stopSensor();
 
         new Handler().postDelayed(new Runnable() {
             @Override

@@ -246,7 +246,10 @@ public class MediaManager implements
                 mPreviousVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
                 mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, 1, 0);
                 if (CURRENT_CALL_STATE == Constants.CALL_RINGING) {
-                    mIncomingRinger.stop();
+                    mIncomingRinger.pause();
+                    mAudioIsLost = true;
+                    mAudioRouter.setAudioIsLost(true);
+                    mAudioChangedInterfaceListener.audioLost(true);;
                 }
                 break;
         }
