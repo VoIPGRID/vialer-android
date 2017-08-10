@@ -47,6 +47,9 @@
     <string name="webactivity_open_page_failed">Failed to open web page.</string>
 
     <!-- Sidebar fragment values -->
+    <string name="logout_dialog_text">Are you sure you want to logout?</string>
+    <string name="logout_dialog_positive">Logout</string>
+    <string name="logout_dialog_negative">Cancel</string>
     <string name="cannot_logout_error_title">No available internet connection</string>
     <string name="cannot_logout_error_text">An internet connection is needed to log you off.</string>
     <string name="set_userdestination_api_fail">Editing of availability has failed. Please try again later.</string>
