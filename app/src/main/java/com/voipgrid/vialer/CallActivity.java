@@ -370,7 +370,6 @@ public class CallActivity extends AppCompatActivity
 
         mRemoteLogger.d("onResume");
 
-
         // Bind the SipService to the activity.
         if (!mSipServiceBound && mSipService == null) {
             mRemoteLogger.e("SipService not bound!");
@@ -435,11 +434,15 @@ public class CallActivity extends AppCompatActivity
             mPausedRinging = true;
         }
 
-        mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
+        // Only unregister from the CallStatus when there is no active SipService.
+        // For when you
+        if (!mSipServiceBound && mSipService == null) {
+            mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
+        }
+
         unregisterReceiver(mBluetoothButtonReceiver);
 
         stopService();
-
     }
 
     @Override
