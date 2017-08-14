@@ -43,7 +43,7 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
         mProximityInterface = proximityInterface;
         mLockView = lockView;
         mRemoteLogger = new RemoteLogger(context, ProximitySensorHelper.class, 1);
-        mRemoteLogger.e("ProximitySensorHelper");
+        mRemoteLogger.v("ProximitySensorHelper");
 
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         setupWakeLock();

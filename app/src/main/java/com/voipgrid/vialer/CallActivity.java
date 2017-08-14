@@ -18,7 +18,6 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.view.WindowManager;
@@ -42,6 +41,7 @@ import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
@@ -54,7 +54,7 @@ import java.util.Map;
 /**
  * CallActivity for incoming or outgoing call.
  */
-public class CallActivity extends AppCompatActivity
+public class CallActivity extends LoginRequiredActivity
         implements View.OnClickListener, SipConstants, ProximitySensorInterface,
         CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
         MediaManager.AudioChangedInterface {
@@ -372,7 +372,7 @@ public class CallActivity extends AppCompatActivity
 
         // Bind the SipService to the activity.
         if (!mSipServiceBound && mSipService == null) {
-            mRemoteLogger.e("SipService not bound!");
+            mRemoteLogger.i("SipService not bound!");
             bindService(new Intent(this, SipService.class), mSipServiceConnection, Context.BIND_AUTO_CREATE);
         }
 
@@ -435,12 +435,19 @@ public class CallActivity extends AppCompatActivity
         }
 
         // Only unregister from the CallStatus when there is no active SipService.
-        // For when you
-        if (!mSipServiceBound && mSipService == null) {
-            mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
+        if (mSipService != null && mSipService.getCurrentCall() == null) {
+            try {
+                mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
+            } catch (IllegalArgumentException e) {
+                mRemoteLogger.w("Trying to unregister mCallStatusReceiver not registered.");
+            }
         }
 
-        unregisterReceiver(mBluetoothButtonReceiver);
+        try {
+            unregisterReceiver(mBluetoothButtonReceiver);
+        } catch(IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister mBluetoothReceiver not registered.");
+        }
 
         stopService();
     }
@@ -453,6 +460,12 @@ public class CallActivity extends AppCompatActivity
         mNotificationHelper.removeAllNotifications();
 
         mProximityHelper.stopSensor();
+
+        try {
+            unregisterReceiver(mBluetoothButtonReceiver);
+        } catch (IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister mBluetoothReceiver not registered.");
+        }
 
         // Reset the audio manage.
         mMediaManager.deInit();
@@ -678,18 +691,22 @@ public class CallActivity extends AppCompatActivity
                 break;
 
             case CALL_PUT_ON_HOLD_ACTION:
+                mOnHold = true;
                 // Remove a running timer which shows call duration.
                 mCallHandler.removeCallbacks(mCallDurationRunnable);
                 mCallDurationView.setVisibility(View.GONE);
                 mStateView.setText(R.string.call_on_hold);
+                updateCallButton(R.id.button_onhold, true);
                 mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_on_hold), NotificationHelper.mCallNotifyId);
                 break;
 
             case CALL_UNHOLD_ACTION:
+                mOnHold = false;
                 // Start the running timer which shows call duration.
                 mCallHandler.postDelayed(mCallDurationRunnable, 0);
                 mCallDurationView.setVisibility(View.VISIBLE);
                 mStateView.setText(R.string.call_connected);
+                updateCallButton(R.id.button_onhold, true);
                 mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
                 break;
 
@@ -1327,9 +1344,13 @@ public class CallActivity extends AppCompatActivity
         mRemoteLogger.i("==> " + lost);
 
         if (lost) {
-            if (mConnected) {
-                toggleOnHold();
-                updateCallButton(R.id.button_onhold, true);
+            // Don't put the call on hold when there is a native call is ringing.
+            mRemoteLogger.e("nativeCallStillRinging?: " + mSipService.nativeCallIsRinging());
+            if (mConnected && !mSipService.nativeCallIsRinging()) {
+                onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
+            }
+        } else {
+            if (mConnected && mSipService.getCurrentCall() != null && mSipService.getCurrentCall().isOnHold()) {
                 onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
             }
         }

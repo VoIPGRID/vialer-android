@@ -63,7 +63,7 @@ public class CallKeyPadFragment extends Fragment implements KeyPadView.OnKeyPadC
      * The old android 4.1.2 API level 16 calls this method.
      * If don't use this function no callback will be set.
      *
-     * @param activity Activity the attached activity/
+     * @param activity Activity the attached activity.
      */
     @Override
     public void onAttach(Activity activity) {

@@ -65,7 +65,7 @@ public class NotificationHelper {
         PendingIntent declinePendingIntent = PendingIntent.getService(mContext, 0, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Accept button intent.
-        Intent acceptIntent = new Intent(mContext, mContext.getClass());
+        Intent acceptIntent = new Intent(mContext, CallActivity.class);
         acceptIntent.setAction(mContext.getString(R.string.call_incoming_accept));
         acceptIntent.setType(CallActivity.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL);
         acceptIntent.putExtra(CallActivity.CONTACT_NAME, callerId);

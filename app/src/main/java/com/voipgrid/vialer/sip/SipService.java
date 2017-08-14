@@ -31,7 +31,6 @@ import java.util.List;
  *
  */
 public class SipService extends Service {
-    private final static String TAG = SipService.class.getSimpleName(); // TAG used for debug Logs
     private final IBinder mBinder = new SipServiceBinder();
 
     private Handler mHandler;
@@ -57,13 +56,21 @@ public class SipService extends Service {
                 // When the native call has been picked up and there is a current call in the ringing state
                 // Then decline the current call.
                 if (phoneState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                    mRemoteLogger.e("Native call is picked up.");
+                    mRemoteLogger.e("Is there an active call: " + (mCurrentCall != null));
                     if (mCurrentCall != null) {
+                        mRemoteLogger.e("Current call state: " + mCurrentCall.getCurrentCallState());
                         switch (mCurrentCall.getCurrentCallState()) {
                             case SipConstants.CALL_INCOMING_RINGING:
+                                mRemoteLogger.e("Our call is still ringing. So decline it.");
                                 mCurrentCall.decline();
                                 break;
                             case SipConstants.CALL_CONNECTED_MESSAGE:
-                                mCurrentCall.toggleHold();
+                                mRemoteLogger.e("Our call is connected.");
+                                if (!mCurrentCall.isOnHold()) {
+                                    mRemoteLogger.e("Call was not on hold already. So put call on hold.");
+                                    mCurrentCall.toggleHold();
+                                }
                                 break;
                         }
                     }
@@ -73,6 +80,11 @@ public class SipService extends Service {
             }
         }
     };
+
+    /**
+     * Set when the SipService is active. This is used to respond to the middleware.
+     */
+    public static boolean sipServiceActive = false;
 
     /**
      * Returns boolean representing whether there is a gsm call or not.
@@ -199,8 +211,13 @@ public class SipService extends Service {
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
-        unregisterReceiver(phoneStateReceiver);
+        try {
+            unregisterReceiver(phoneStateReceiver);
+        } catch(IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister phoneStateReceiver not registered.");
+        }
 
+        sipServiceActive = false;
         super.onDestroy();
     }
 
@@ -241,7 +258,6 @@ public class SipService extends Service {
                 }
             }
         }
-
         return START_NOT_STICKY;
     }
 
@@ -311,6 +327,8 @@ public class SipService extends Service {
         intent.putExtra(CallActivity.PHONE_NUMBER, sipCall.getPhoneNumber());
 
         startActivity(intent);
+
+        sipServiceActive = true;
     }
 
     /**
@@ -330,6 +348,7 @@ public class SipService extends Service {
         intent.putExtra(CallActivity.CONTACT_NAME, callerId);
         intent.putExtra(CallActivity.PHONE_NUMBER, number);
         startActivity(intent);
+        sipServiceActive = true;
     }
 
     /**

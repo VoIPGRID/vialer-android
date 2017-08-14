@@ -113,7 +113,7 @@ public class MiddlewareHelper {
             } else {
                 setRegistrationStatus(context, Constants.STATUS_FAILED);
                 // Disable sip because failed at middleware.
-                new Preferences(context).setSipEnabled(false);
+//                new Preferences(context).setSipEnabled(false);
 
                 analyticsHelper.sendException(
                         context.getString(
@@ -124,7 +124,7 @@ public class MiddlewareHelper {
         } catch (IOException e) {
             setRegistrationStatus(context, Constants.STATUS_FAILED);
             // Disable sip because failed at middleware.
-            new Preferences(context).setSipEnabled(false);
+//            new Preferences(context).setSipEnabled(false);
             e.printStackTrace();
         } finally {
             editor.apply();

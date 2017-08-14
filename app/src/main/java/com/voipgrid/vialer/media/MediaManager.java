@@ -108,7 +108,12 @@ public class MediaManager implements
      */
     public void callAnswered() {
         mRemoteLogger.v("callAnswered()");
-        mAudioRouter.onAnsweredCall();
+        if(mAudioRouter == null) {
+            mAudioRouter = new AudioRouter(mContext, this, mAudioManager);
+            mAudioRouter.onAnsweredCall();
+        } else {
+            mAudioRouter.onAnsweredCall();
+        }
         BluetoothMediaButtonReceiver.setCallAnswered();
     }
 
