@@ -1,7 +1,7 @@
 package com.voipgrid.vialer.call;
 
+import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -95,14 +95,21 @@ public class CallTransferFragment extends Fragment implements KeyPadView.OnKeyPa
         }
     }
 
+    /**
+     * Use the deprecated version of the onAttach method for api levels < 23
+     * The old android 4.1.2 API level 16 calls this method.
+     * If don't use this function no callback will be set.
+     *
+     * @param activity Activity the attached activity/
+     */
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
 
         try {
-            mCallback = (CallTransferFragmentListener) context;
+            mCallback = (CallTransferFragmentListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
+            throw new ClassCastException(activity.toString()
                     + " must implement CallKeyPadFragmentListener");
         }
     }

@@ -302,7 +302,11 @@ class AudioRouter {
 
     private void unregisterForWiredHeadsetIntentBroadcast() {
         mRemoteLogger.v("unregisterForWiredHeadsetIntentBroadcast()");
-        mContext.unregisterReceiver(mWiredHeadsetReceiver);
+        try {
+            mContext.unregisterReceiver(mWiredHeadsetReceiver);
+        } catch(IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister mWiredHeadsetReceiver not registered.");
+        }
         mWiredHeadsetReceiver = null;
     }
 
@@ -347,7 +351,12 @@ class AudioRouter {
 
     private void unregisterForBluetoothHeadsetIntentBroadcast() {
         mRemoteLogger.v("unregisterForBluetoothHeadsetIntentBroadcast()");
-        mContext.unregisterReceiver(mBluetoothHeadsetReceiver);
+        try {
+            mContext.unregisterReceiver(mBluetoothHeadsetReceiver);
+        } catch(IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister mBluetoothHeadsetReceiver not registered.");
+        }
+
         mBluetoothHeadsetReceiver = null;
     }
 
@@ -425,7 +434,11 @@ class AudioRouter {
 
     private void unregisterForBluetoothScoIntentBroadcast() {
         mRemoteLogger.v("unregisterForBluetoothScoIntentBroadcast()");
-        mContext.unregisterReceiver(mBluetoothScoReceiver);
+        try {
+            mContext.unregisterReceiver(mBluetoothScoReceiver);
+        } catch(IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister mBluetoothScoReceiver not registered.");
+        }
         mBluetoothScoReceiver = null;
     }
 

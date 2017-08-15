@@ -60,7 +60,7 @@ public class FcmListenerService extends FirebaseMessagingService implements Midd
 
             ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
 
-            if (connectivityHelper.hasNetworkConnection() && connectivityHelper.hasFastData()) {
+            if (!SipService.sipServiceActive && connectivityHelper.hasNetworkConnection() && connectivityHelper.hasFastData()) {
 
                 String number = data.get(PHONE_NUMBER);
                 if (number != null && (number.equalsIgnoreCase(SUPPRESSED) || number.toLowerCase().contains("xxxx"))) {

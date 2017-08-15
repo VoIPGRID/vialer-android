@@ -340,7 +340,11 @@ public class SipConfig implements AccountStatus {
     }
 
     private void stopNetworkingListener() {
-        mSipService.unregisterReceiver(mNetworkStateReceiver);
+        try {
+            mSipService.unregisterReceiver(mNetworkStateReceiver);
+        } catch(IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister mNetworkStateReceiver not registered.");
+        }
     }
 
     /**

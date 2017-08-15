@@ -5,11 +5,11 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import com.voipgrid.vialer.Preferences;
-import com.voipgrid.vialer.fcm.FcmRegistrationService;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.fcm.FcmRegistrationService;
 
 import java.io.IOException;
 
@@ -50,7 +50,10 @@ public class PhoneAccountHelper {
      */
     public SystemUser getAndUpdateSystemUser() {
         Call<SystemUser> call = mApi.systemUser();
-        SystemUser systemUser = null;
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        if (systemUser == null) {
+            systemUser = null;
+        }
         try {
             Response<SystemUser> response = call.execute();
             if (response.isSuccess() && response.body() != null) {
@@ -83,7 +86,10 @@ public class PhoneAccountHelper {
      */
     public PhoneAccount getLinkedPhoneAccount() {
         SystemUser systemUser = getAndUpdateSystemUser();
-        PhoneAccount phoneAccount = null;
+        PhoneAccount phoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
+        if (phoneAccount == null) {
+            phoneAccount = null;
+        }
 
         if (systemUser != null) {
             mPreferences.setSipPermission(true);

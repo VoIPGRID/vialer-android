@@ -150,33 +150,22 @@ public class MainActivity extends NavigationDrawerActivity implements
                         mAskForPermission = false;
                         ContactsPermission.askForPermission(this);
                         requestCounter++;
-                        return;
                     }
                 }
         }
     }
 
-    private void registerReceivers() {
-        mReachabilityReceiver.startListening();
-    }
-
-    private void unregisterReceivers() {
-        try {
-            mReachabilityReceiver.stopListening();
-        } catch(Exception e) {}
-    }
-
     @Override
     protected void onResume() {
         askForPermissions(requestCounter);
-        registerReceivers();
+        mReachabilityReceiver.startListening();
         super.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceivers();
+        mReachabilityReceiver.stopListening();
     }
 
     @Override

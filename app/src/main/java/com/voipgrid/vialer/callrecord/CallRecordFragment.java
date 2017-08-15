@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.callrecord;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -162,18 +161,14 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        if (context instanceof Activity) {
-            Activity activity = (Activity) context;
-            try {
-                mListener = (OnFragmentInteractionListener) activity;
-            } catch (ClassCastException e) {
-                throw new ClassCastException(
-                        activity.toString() + " must implement OnFragmentInteractionListener"
-                );
-            }
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(
+                    activity.toString() + " must implement OnFragmentInteractionListener"
+            );
         }
     }
 
