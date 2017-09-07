@@ -10,6 +10,7 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -44,13 +45,24 @@ public class FcmListenerService extends FirebaseMessagingService implements Midd
     // Extra field for notification throughput logging.
     public static final String MESSAGE_START_TIME = "message_start_time";
 
+    private RemoteLogger mRemoteLogger;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mRemoteLogger = new RemoteLogger(getApplicationContext(), FcmListenerService.class);
+        mRemoteLogger.d("onCreate");
+    }
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
+        mRemoteLogger.d("onMassageReceived");
         Map<String, String> data = remoteMessage.getData();
         String requestType = data.get(MESSAGE_TYPE);
 
         if (requestType == null) {
+            mRemoteLogger.e("No requestType");
             return;
         }
 
@@ -67,6 +79,7 @@ public class FcmListenerService extends FirebaseMessagingService implements Midd
                     number = getString(R.string.supressed_number);
                 }
 
+                mRemoteLogger.d("startSipService");
                 // First start the SIP service with an incoming call.
                 startSipService(
                         number,
@@ -76,6 +89,7 @@ public class FcmListenerService extends FirebaseMessagingService implements Midd
                         data.get(MESSAGE_START_TIME) != null ? data.get(MESSAGE_START_TIME) : ""
                 );
             } else {
+                mRemoteLogger.d("Reject due to lack of connection");
                 // Inform the middleware the incoming call is received but the app can not handle
                 // the sip call because there is no LTE or Wifi connection available at this
                 // point.
@@ -94,6 +108,7 @@ public class FcmListenerService extends FirebaseMessagingService implements Midd
                 );
             }
         } else if (requestType.equals(MESSAGE_REQUEST_TYPE)){
+            mRemoteLogger.d("Code not implemented");
             // TODO implement this message.
         }
     }
@@ -106,6 +121,7 @@ public class FcmListenerService extends FirebaseMessagingService implements Midd
      */
     private void replyServer(String responseUrl, String requestToken, String messageStartTime,
                              boolean isAvailable) {
+        mRemoteLogger.d("replyServer");
         Registration registrationApi = ServiceGenerator.createService(
                 this,
                 Registration.class,
@@ -134,6 +150,7 @@ public class FcmListenerService extends FirebaseMessagingService implements Midd
      */
     private void startSipService(String phoneNumber, String callerId, String url, String token,
                                  String messageStartTime) {
+        mRemoteLogger.d("startSipService");
         Intent intent = new Intent(this, SipService.class);
         intent.setAction(SipConstants.ACTION_VIALER_INCOMING);
 
