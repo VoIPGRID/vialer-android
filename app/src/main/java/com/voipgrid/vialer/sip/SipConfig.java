@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
@@ -441,8 +442,8 @@ public class SipConfig implements AccountStatus {
         retrofit2.Call<ResponseBody> call = registrationApi.reply(token, true, messageStartTime);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(retrofit2.Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (!response.isSuccess()) {
+            public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (!response.isSuccessful()) {
                     mRemoteLogger.w(
                             "Unsuccessful response to middleware: " + Integer.toString(response.code()));
                     mSipService.stopSelf();
@@ -450,7 +451,7 @@ public class SipConfig implements AccountStatus {
             }
 
             @Override
-            public void onFailure(retrofit2.Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Throwable t) {
                 mRemoteLogger.w("Failed sending response to middleware");
                 mSipService.stopSelf();
             }

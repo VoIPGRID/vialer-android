@@ -2,6 +2,7 @@ package com.voipgrid.vialer;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
@@ -138,10 +139,10 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
     }
 
     @Override
-    public void onResponse(Call<AutoLoginToken> call, Response<AutoLoginToken> response) {
+    public void onResponse(@NonNull Call<AutoLoginToken> call, @NonNull Response<AutoLoginToken> response) {
         String username = getIntent().getStringExtra(USERNAME);
 
-        if (response.isSuccess() && response.body() != null) {
+        if (response.isSuccessful() && response.body() != null) {
             AutoLoginToken autoLoginToken = response.body();
             try {
                 username = URLEncoder.encode(username, "utf-8");
@@ -162,7 +163,7 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
     }
 
     @Override
-    public void onFailure(Call<AutoLoginToken> call, Throwable t) {
+    public void onFailure(@NonNull Call<AutoLoginToken> call, @NonNull Throwable t) {
         failedFeedback(getString(R.string.webactivity_open_page_failed));
     }
 

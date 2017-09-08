@@ -1,23 +1,21 @@
 package com.voipgrid.vialer.fcm;
 
-import android.content.Intent;
-
 import com.google.firebase.iid.FirebaseInstanceIdService;
-import com.voipgrid.vialer.util.MiddlewareHelper;
+import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
+
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
 
 /**
- * Listen for updates in GCM instance id, and delegate them to the registration service.
+ * Listen for updates in FCM instance id, and delegate them to the registration service.
  */
-public class FcmInstanceIdListenerService extends FirebaseInstanceIdService
-        implements MiddlewareHelper.Constants {
+public class FcmInstanceIdListenerService extends FirebaseInstanceIdService {
 
     @Override
     public void onTokenRefresh() {
-        /* Restart the Registration service to try and acquire a new token.
-         * Before we do that, though, make sure the system knows our registration
-         * is no longer valid. */
+        new RemoteLogger(this, FcmInstanceIdListenerService.class, 1).d("onTokenRefresh");
+        // Make sure the system knows our registration is no longer valid.
         MiddlewareHelper.setRegistrationStatus(this, STATUS_UNREGISTERED);
-        Intent intent = new Intent(this, FcmRegistrationService.class);
-        startService(intent);
+        MiddlewareHelper.registerAtMiddleware(this);
     }
 }

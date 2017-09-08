@@ -3,6 +3,7 @@ package com.voipgrid.vialer.callrecord;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -276,9 +277,9 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     @Override
-    public void onResponse(Call<VoipGridResponse<CallRecord>> call,
-                           Response<VoipGridResponse<CallRecord>> response) {
-        if (response.isSuccess() && response.body() != null) {
+    public void onResponse(@NonNull Call<VoipGridResponse<CallRecord>> call,
+                           @NonNull Response<VoipGridResponse<CallRecord>> response) {
+        if (response.isSuccessful() && response.body() != null) {
             mHaveNetworkRecords = true;
             List<CallRecord> records = response.body().getObjects();
             displayCallRecords(records);

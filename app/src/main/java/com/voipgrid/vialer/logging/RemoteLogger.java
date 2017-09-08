@@ -6,6 +6,7 @@ import android.util.Log;
 import com.logentries.logger.AndroidLogger;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.fcm.FcmListenerService;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
@@ -126,6 +127,10 @@ public class RemoteLogger {
                         message = anonymizeSipLogging(message);
                     }
 
+                    if (TAG.equals(FcmListenerService.class.getSimpleName())) {
+                        message = anonymizePayloadLogging(message);
+                    }
+
                     if (message.contains("\n")) {
                         message = message.replaceAll("[\r\n]+", " ");
                     }
@@ -147,6 +152,13 @@ public class RemoteLogger {
         message = Pattern.compile("Digest username=\"(.+?)\"").matcher(message).replaceAll("Digest username=\"<SIP_USERNAME>\"");
         message = Pattern.compile("nonce=\"(.+?)\"").matcher(message).replaceAll("nonce=\"<NONCE>\"");
         message = Pattern.compile("username=(.+?)&").matcher(message).replaceAll("username=<USERNAME>");
+
+        return message;
+    }
+
+    private String anonymizePayloadLogging(String message) {
+        message = Pattern.compile("caller_id=(.+?),").matcher(message).replaceAll("callerid=<CALLER_ID>,");
+        message = Pattern.compile("phonenumber=(.+?),").matcher(message).replaceAll("phonenumber=<PHONENUMBER>,");
 
         return message;
     }

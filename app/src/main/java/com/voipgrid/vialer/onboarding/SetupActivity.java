@@ -8,14 +8,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.voipgrid.vialer.AccountActivity;
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.MainActivity;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.fcm.FcmRegistrationService;
 import com.voipgrid.vialer.WebActivityHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
@@ -25,10 +25,11 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.logging.RemoteLoggingActivity;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.models.PasswordResetParams;
 import com.voipgrid.vialer.util.AccountHelper;
-import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.PhoneAccountHelper;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -315,12 +316,12 @@ public class SetupActivity extends RemoteLoggingActivity implements
     }
 
     @Override
-    public void onResponse(Call call, Response response) {
+    public void onResponse(@NonNull Call call, @NonNull Response response) {
         if (mServiceGen != null){
             mServiceGen.release();
         }
 
-        if (response.isSuccess()) {
+        if (response.isSuccessful()) {
             enableProgressBar(false);
             if (response.body() instanceof SystemUser) {
                 SystemUser systemUser = ((SystemUser) response.body());
@@ -350,7 +351,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
             } else if (response.body() instanceof PhoneAccount) {
                 mJsonStorage.save(response.body());
                 if (mPreferences.hasSipPermission()) {
-                    startService(new Intent(this, FcmRegistrationService.class));
+                    MiddlewareHelper.registerAtMiddleware(this);
                 }
 
                 SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
@@ -380,12 +381,14 @@ public class SetupActivity extends RemoteLoggingActivity implements
                 }
             }
         } else {
-            failedFeedback(response.errorBody().toString());
+            if (response.errorBody() != null) {
+                failedFeedback(response.errorBody().toString());
+            }
         }
     }
 
     @Override
-    public void onFailure(Call call, Throwable t) {
+    public void onFailure(@NonNull Call call, @NonNull Throwable t) {
         if (mServiceGen != null){
             mServiceGen.release();
         }
