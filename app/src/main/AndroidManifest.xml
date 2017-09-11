@@ -103,8 +103,6 @@
             </intent-filter>
         </service>
 
-        <service android:name=".fcm.FcmRegistrationService" />
-
         <receiver
             android:name=".util.OnBootReceiver"
             android:label="StartMyServiceAtBootReceiver">

@@ -8,7 +8,7 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.test.RobolectricPowerMockAbstractTest;
 import com.voipgrid.vialer.util.JsonStorage;
-import com.voipgrid.vialer.util.MiddlewareHelper;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 
 import org.junit.Before;

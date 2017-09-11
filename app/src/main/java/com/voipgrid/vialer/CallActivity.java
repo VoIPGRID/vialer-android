@@ -580,7 +580,6 @@ public class CallActivity extends LoginRequiredActivity
                 mHasConnected = true;
                 mIncomingCallIsRinging = false;
 
-                mProximityHelper.updateWakeLock();
                 mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
 
                 if (mOnTransfer && mSipService.getCurrentCall() != null && mSipService.getFirstCall() != null) {
@@ -815,8 +814,6 @@ public class CallActivity extends LoginRequiredActivity
                 swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
             }
         }
-
-        mProximityHelper.updateWakeLock();
     }
 
     // Toggle the hold the call when the user presses the button.

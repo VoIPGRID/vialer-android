@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -37,22 +38,20 @@ import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
-import com.voipgrid.vialer.fcm.FcmRegistrationService;
-import com.voipgrid.vialer.onboarding.LogoutTask;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.MiddlewareHelper;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.REGISTRATION_STATUS;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
 
 /**
  * NavigationDrawerActivity adds support to add a Toolbar and DrawerLayout to an Activity.
@@ -270,16 +269,16 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
      */
     private void performLogout() {
         if (mConnectivityHelper.hasNetworkConnection()) {
-            try {
-                new LogoutTask(this).execute().get(1000, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                e.printStackTrace();
-            }
+            MiddlewareHelper.unregister(this);
+
             // Delete our account information.
             mJsonStorage.clear();
             new AccountHelper(this).clearCredentials();
             // Mark ourselves as unregistered.
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(MiddlewareHelper.Constants.REGISTRATION_STATUS, MiddlewareHelper.Constants.STATUS_UNREGISTERED).apply();
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .edit()
+                    .putInt(REGISTRATION_STATUS, STATUS_UNREGISTERED)
+                    .apply();
             // Start a new session.
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -318,15 +317,15 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
 
     @Override
-    public void onFailure(Call call, Throwable t) {
+    public void onFailure(@NonNull Call call, @NonNull Throwable t) {
         if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
             Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
-    public void onResponse(Call call, Response response) {
-        if (!response.isSuccess()) {
+    public void onResponse(@NonNull Call call, @NonNull Response response) {
+        if (!response.isSuccessful()) {
             if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
                 Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
             }
@@ -439,7 +438,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             } else {
                 Destination destination = (Destination) parent.getAdapter().getItem(position);
                 if (destination.getDescription().equals(getString(R.string.not_available))) {
-                    MiddlewareHelper.executeUnregisterTask(this);
+                    MiddlewareHelper.unregister(this);
                 }
                 SelectedUserDestinationParams params = new SelectedUserDestinationParams();
                 params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
@@ -449,7 +448,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 if (!MiddlewareHelper.isRegistered(this)) {
                     // If the previous destination was not available, or if we're not registered
                     // for another reason, register again.
-                    startService(new Intent(this, FcmRegistrationService.class));
+                    MiddlewareHelper.registerAtMiddleware(this);
                 }
             }
         }

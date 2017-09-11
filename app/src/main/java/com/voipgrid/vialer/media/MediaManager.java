@@ -122,7 +122,9 @@ public class MediaManager implements
      */
     public void callEnded() {
         mRemoteLogger.v("callEnded()");
-        mAudioRouter.onEndedCall();
+        if (mAudioRouter != null) {
+            mAudioRouter.onEndedCall();
+        }
     }
 
     /**

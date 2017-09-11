@@ -12,6 +12,9 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.REGISTRATION_STATUS;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UPDATE_NEEDED;
+
 /**
  * Class that handles the storage of json objects.
  */
@@ -72,8 +75,8 @@ public class JsonStorage<T> {
 
         // Make sure the registration is invalidated as well.
         editor.putInt(
-                MiddlewareHelper.Constants.REGISTRATION_STATUS,
-                MiddlewareHelper.Constants.STATUS_UPDATE_NEEDED
+                REGISTRATION_STATUS,
+                STATUS_UPDATE_NEEDED
         );
 
         editor.apply();

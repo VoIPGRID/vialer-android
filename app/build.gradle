@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "25.0.3"
     defaultConfig {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 64
         versionName "5.0"
         multiDexEnabled true
@@ -60,21 +60,26 @@ android {
 }
 
 repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    jcenter()
+    maven {
+        url "https://maven.google.com"
+    }
     flatDir {
         dirs 'libs'
     }
 }
 
 ext {
-    supportLibVersion = "25.3.1"
+    supportLibVersion = "26.0.2"
     espressoVersion = "2.2"
     androidTestVersion = "0.5"
-    firebaseVersion = "11.0.1"
+    firebaseVersion = "11.0.4"
     jUnitVersion = "4.12"
     powerMockVersion = "1.6.4"
-    okHttpVersion = "3.2.0"
-    retroFitVersion = "2.0.0-beta4"
+    okHttpVersion = "3.9.0"
+    retroFitVersion = "2.3.0"
+    roboElectricVersion = "3.4.2"
+    mockitoCoreVersion = "2.9.0"
 }
 
 dependencies {
@@ -111,8 +116,8 @@ dependencies {
     testCompile "junit:junit:${jUnitVersion}"
 
     // Testing below are supported api level because SNAPSHOT version is to unstable.
-    testCompile "org.robolectric:robolectric:3.0"
-    testCompile "org.mockito:mockito-core:1.10.19"
+    testCompile "org.robolectric:robolectric:${roboElectricVersion}"
+    testCompile "org.mockito:mockito-core:${mockitoCoreVersion}"
 
     // Setup for local tests.
     testCompile "org.powermock:powermock-module-junit4:${powerMockVersion}"
