@@ -63,6 +63,8 @@
     <string name="login_button_title">login</string>
     <string name="login_missing_field_title">Warning</string>
     <string name="login_missing_field_message">Please fill in all fields before login!</string>
+    <string name="change_password_webview_toast">To make use of the app, you need to login once and change your password</string>
+
 
     <!-- Forgot password fragment values -->
     <string name="header_forgot_password_title">Forgot password?</string>
@@ -85,6 +87,7 @@
     <!-- Missing voip account fragment values -->
     <string name="set_voip_account_button_text">Set VoIP account</string>
     <string name="user_change_title">Change user</string>
+    <string name="password_change_title">Change password</string>
     <string name="voip_account_missing_text">To setup a phone call via the VoIP function, a VoIP account has to be set in your user profile.\n\nAt this moment there is no VoIP account linked to your account.</string>
 
     <!-- Welcome fragment values -->

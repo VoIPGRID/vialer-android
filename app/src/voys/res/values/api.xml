@@ -2,4 +2,6 @@
 <resources>
     <string name="registration_url" translatable="false">https://apppush.voys.nl</string>
     <string name="vialer_registration_url" translatable="false">https://apppush.voys.nl/api/register-gcm-device/</string>
+    <string name="web_url" translatable="false">https://freedom.voys.nl</string>
+    <string name="web_password_change" translatable="false">https://freedom.voys.nl/user/login/</string>
 </resources>

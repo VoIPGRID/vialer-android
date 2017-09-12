@@ -3,12 +3,10 @@ package com.voipgrid.vialer;
 import android.content.Context;
 import android.content.Intent;
 
-import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.util.AccountHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 
 /**
- * Used to start a webactivity from anywhere in the application.
+ * Used to start a Web Activity from anywhere in the application.
  */
 public class WebActivityHelper {
 

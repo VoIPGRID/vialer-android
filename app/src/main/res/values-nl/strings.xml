@@ -60,6 +60,7 @@
     <string name="login_button_title">Inloggen</string>
     <string name="login_missing_field_title">Let op</string>
     <string name="login_missing_field_message">Vul alstublieft alle velden in</string>
+    <string name="change_password_webview_toast">Om gebruik van de app te kunnen maken moet je eenmalig inloggen en je wachtwoord wijzigen</string>
 
     <!-- Forgot password fragment values -->
     <string name="header_forgot_password_title">Wachtwoord vergeten</string>
@@ -82,6 +83,7 @@
     <!-- Missing voip account fragment values -->
     <string name="set_voip_account_button_text">Koppel VoIP account</string>
     <string name="user_change_title">Gebruiker aanpassen</string>
+    <string name="password_change_title">Wachtwoord aanpassen</string>
     <string name="voip_account_missing_text">Om gebruik te kunnen maken van bellen via VoIP, moet er een VoIP-account gekoppeld zijn aan je gebruiker.\n\nOp dit moment is er geen VoIP-account gekoppeld aan deze gebruiker.</string>
 
     <!-- Welcome fragment values -->

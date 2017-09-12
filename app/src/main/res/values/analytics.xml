@@ -48,5 +48,6 @@
     <string name="analytics_dial_plan_title" translatable="false">DialplanWebview</string>
     <string name="analytics_add_destination_title" translatable="false">AddFixedDestinationWebView</string>
     <string name="analytics_user_change" translatable="false">UserProfileWebView</string>
+    <string name="analytics_password_change" translatable="false">PasswordChangeWebView</string>
     <string name="analytics_info_title" translatable="false">Info</string>
 </resources>
