@@ -3,7 +3,8 @@
     <integer name="dialpad_row_count">4</integer>
     <integer name="dialpad_column_count">3</integer>
 
-    <integer name="dialpad_number_input_max_length">20</integer>
+    <integer name="dialpad_number_input_max_scaling_length">20</integer>
+    <integer name="dialpad_normal_phonenumber_length_max">13</integer>
 
     <integer name="contact_permission_request_code">1</integer>
     <integer name="microphone_permission_request_code">2</integer>

@@ -18,9 +18,9 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
  * Fragment for transferring a call
  */
 public class CallTransferFragment extends Fragment implements KeyPadView.OnKeyPadClickListener, View.OnClickListener {
-    public static final String CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_ID = "ORIGINAL_CALLER_ID";
-    public static final String CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER = "ORIGINAL_CALLER_PHONE_NUMBER";
-    public static final String CALL_TRANSFER_FRAGMENT_SECOND_CALL_IS_CONNECTED = "SECOND_CALL_IS_CONNECTED";
+    public static final String ORIGINAL_CALLER_ID = "ORIGINAL_CALLER_ID";
+    public static final String ORIGINAL_CALLER_PHONE_NUMBER = "ORIGINAL_CALLER_PHONE_NUMBER";
+    public static final String SECOND_CALL_IS_CONNECTED = "SECOND_CALL_IS_CONNECTED";
 
     private NumberInputView mNumberInputView;
     private String mOriginalCallerPhoneNumber;
@@ -33,9 +33,9 @@ public class CallTransferFragment extends Fragment implements KeyPadView.OnKeyPa
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mOriginalCallerId = getArguments().getString(CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_ID);
-        mOriginalCallerPhoneNumber = getArguments().getString(CALL_TRANSFER_FRAGMENT_ORIGINAL_CALLER_PHONE_NUMBER);
-        mSecondCallConnected = Boolean.parseBoolean(getArguments().getString(CALL_TRANSFER_FRAGMENT_SECOND_CALL_IS_CONNECTED));
+        mOriginalCallerId = getArguments().getString(ORIGINAL_CALLER_ID);
+        mOriginalCallerPhoneNumber = getArguments().getString(ORIGINAL_CALLER_PHONE_NUMBER);
+        mSecondCallConnected = Boolean.parseBoolean(getArguments().getString(SECOND_CALL_IS_CONNECTED));
         return inflater.inflate(R.layout.fragment_call_transfer, container, false);
     }
 
@@ -95,6 +95,13 @@ public class CallTransferFragment extends Fragment implements KeyPadView.OnKeyPa
         }
     }
 
+    /**
+     * Use the deprecated version of the onAttach method for api levels < 23
+     * The old android 4.1.2 API level 16 calls this method.
+     * If don't use this function no callback will be set.
+     *
+     * @param activity Activity the attached activity/
+     */
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);

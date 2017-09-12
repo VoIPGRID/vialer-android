@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.util;
 
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -66,7 +65,7 @@ public class NotificationHelper {
         PendingIntent declinePendingIntent = PendingIntent.getService(mContext, 0, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Accept button intent.
-        Intent acceptIntent = new Intent(mContext, mContext.getClass());
+        Intent acceptIntent = new Intent(mContext, CallActivity.class);
         acceptIntent.setAction(mContext.getString(R.string.call_incoming_accept));
         acceptIntent.setType(CallActivity.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL);
         acceptIntent.putExtra(CallActivity.CONTACT_NAME, callerId);
@@ -84,8 +83,10 @@ public class NotificationHelper {
                 .setContentTitle(notificationTitle)
                 .setContentText(number)
                 .setContentIntent(callPendingIntent)
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setPriority(Notification.PRIORITY_MAX)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_CALL)
+                .setOngoing(true)
                 .addAction(R.drawable.ic_call_decline_normal, mContext.getString(R.string.call_incoming_decline), declinePendingIntent)
                 .addAction(R.drawable.ic_call_answer_normal, mContext.getString(R.string.call_incoming_accept), acceptPendingIntent);
         mNotificationManager.notify(notifyId, mBuilder.build());
@@ -112,6 +113,7 @@ public class NotificationHelper {
         // Create new notification.
         mBuilder = new NotificationCompat.Builder(mContext)
                 .setSmallIcon(logo)
+                .setOngoing(true)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setContentIntent(resultPendingIntent);

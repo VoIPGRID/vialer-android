@@ -1,20 +1,21 @@
 package com.voipgrid.vialer.util;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 
 import com.voipgrid.vialer.Preferences;
-import com.voipgrid.vialer.fcm.FcmRegistrationService;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
 import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Response;
+
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UPDATE_NEEDED;
 
 
 /**
@@ -50,10 +51,13 @@ public class PhoneAccountHelper {
      */
     public SystemUser getAndUpdateSystemUser() {
         Call<SystemUser> call = mApi.systemUser();
-        SystemUser systemUser = null;
+        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        if (systemUser == null) {
+            systemUser = null;
+        }
         try {
             Response<SystemUser> response = call.execute();
-            if (response.isSuccess() && response.body() != null) {
+            if (response.isSuccessful() && response.body() != null) {
                 systemUser = response.body();
                 updateSystemUser(systemUser);
             }
@@ -83,7 +87,10 @@ public class PhoneAccountHelper {
      */
     public PhoneAccount getLinkedPhoneAccount() {
         SystemUser systemUser = getAndUpdateSystemUser();
-        PhoneAccount phoneAccount = null;
+        PhoneAccount phoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
+        if (phoneAccount == null) {
+            phoneAccount = null;
+        }
 
         if (systemUser != null) {
             mPreferences.setSipPermission(true);
@@ -98,7 +105,7 @@ public class PhoneAccountHelper {
                 Call<PhoneAccount> phoneAccountCall = mApi.phoneAccount(phoneAccountId);
                 try {
                     Response<PhoneAccount> phoneAccountResponse = phoneAccountCall.execute();
-                    if (phoneAccountResponse.isSuccess() && phoneAccountResponse.body() != null) {
+                    if (phoneAccountResponse.isSuccessful() && phoneAccountResponse.body() != null) {
                         phoneAccount = phoneAccountResponse.body();
                     }
                 } catch (IOException e) {
@@ -125,8 +132,7 @@ public class PhoneAccountHelper {
             boolean register = false;
             if (!phoneAccount.equals(existingPhoneAccount)) {
                 // New registration because phone account changed.
-                MiddlewareHelper.setRegistrationStatus(mContext,
-                        MiddlewareHelper.Constants.STATUS_UPDATE_NEEDED);
+                MiddlewareHelper.setRegistrationStatus(mContext, STATUS_UPDATE_NEEDED);
                 register = true;
             } else if (MiddlewareHelper.needsRegistration(mContext)) {
                 // New registration because we need a registration.
@@ -143,7 +149,7 @@ public class PhoneAccountHelper {
      * Function for start the service that handles the middleware registration.
      */
     private void startMiddlewareRegistrationService() {
-        mContext.startService(new Intent(mContext, FcmRegistrationService.class));
+        MiddlewareHelper.registerAtMiddleware(mContext);
     }
 
     /**

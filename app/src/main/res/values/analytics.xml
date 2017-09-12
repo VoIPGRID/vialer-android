@@ -13,6 +13,10 @@
 
     <string name="analytics_event_label_wifi" translatable="false">Wifi</string>
     <string name="analytics_event_label_4g" translatable="false">4G</string>
+    <string name="analytics_event_label_hsdpa" translatable="false">HSDPA</string>
+    <string name="analytics_event_label_hspap" translatable="false">HSPAP</string>
+    <string name="analytics_event_label_hsupa" translatable="false">HSUPA</string>
+    <string name="analytics_event_label_evdo_b" translatable="false">EVDO_B</string>
     <string name="analytics_event_label_unknown" translatable="false">unknown</string>
 
     <string name="analytics_event_description_registration_failed" translatable="false">Failed middleware registration</string>
@@ -44,5 +48,6 @@
     <string name="analytics_dial_plan_title" translatable="false">DialplanWebview</string>
     <string name="analytics_add_destination_title" translatable="false">AddFixedDestinationWebView</string>
     <string name="analytics_user_change" translatable="false">UserProfileWebView</string>
+    <string name="analytics_password_change" translatable="false">PasswordChangeWebView</string>
     <string name="analytics_info_title" translatable="false">Info</string>
 </resources>

@@ -1,20 +1,19 @@
 package com.voipgrid.vialer.logging;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.logentries.logger.AndroidLogger;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.fcm.FcmListenerService;
+import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
-
-import static android.content.Context.CONNECTIVITY_SERVICE;
-import static android.content.Context.TELEPHONY_SERVICE;
+import java.util.regex.Pattern;
 
 /**
  * Class used for sending logs to a remote service.
@@ -26,20 +25,30 @@ public class RemoteLogger {
     private static final String WARNING_TAG = "WARNING";
     private static final String EXCEPTION_TAG = "EXCEPTION";
 
+    private String TAG;
+
     private Context mContext;
     private AndroidLogger logEntryLogger = null;
 
     private String mIdentifier;
     private boolean mRemoteLoggingEnabled;
+    private boolean mLogToConsole = false;
 
-    public RemoteLogger(Context context) {
-        this(context, false);
+    public RemoteLogger(Context context, Class thisClass) {
+        this(context, thisClass, false);
     }
 
-    public RemoteLogger(Context context, boolean forced) {
+    public RemoteLogger(Context context, Class thisClass, int logToConsole) {
+        this(context, thisClass, false);
+
+        mLogToConsole = logToConsole == 1;
+    }
+    public RemoteLogger(Context context, Class thisClass, boolean forced) {
         mContext = context;
         createLogger();
         mIdentifier = new Preferences(mContext).getLoggerIdentifier();
+
+        TAG = thisClass.getSimpleName();
         if (forced) {
             forceRemoteLogging(true);
         } else {
@@ -101,12 +110,7 @@ public class RemoteLogger {
     }
 
     private String getConnectionType() {
-        ConnectivityHelper mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) mContext.getSystemService(CONNECTIVITY_SERVICE),
-                (TelephonyManager) mContext.getSystemService(TELEPHONY_SERVICE)
-        );
-
-        return mConnectivityHelper.getConnectionTypeString();
+        return ConnectivityHelper.get(mContext).getConnectionTypeString();
     }
     /**
      * Function to log the message for the given tag.
@@ -118,6 +122,19 @@ public class RemoteLogger {
         if (mRemoteLoggingEnabled) {
             try {
                 if (logEntryLogger != null) {
+
+                    if (TAG.equals(SipService.class.getSimpleName())) {
+                        message = anonymizeSipLogging(message);
+                    }
+
+                    if (TAG.equals(FcmListenerService.class.getSimpleName())) {
+                        message = anonymizePayloadLogging(message);
+                    }
+
+                    if (message.contains("\n")) {
+                        message = message.replaceAll("[\r\n]+", " ");
+                    }
+
                     logEntryLogger.log(formatMessage(tag, message));
                 }
             } catch (Exception e) {
@@ -126,12 +143,35 @@ public class RemoteLogger {
         }
     }
 
+    private String anonymizeSipLogging(String message) {
+        message = Pattern.compile("sip:\\+?\\d+").matcher(message).replaceAll("sip:SIP_USER_ID");
+        message = Pattern.compile("\"caller_id\" = (.+?);").matcher(message).replaceAll("<CALLER_ID>");
+        message = Pattern.compile("To:(.+?)>").matcher(message).replaceAll("To: <SIP_ANONYMIZED>");
+        message = Pattern.compile("From:(.+?)>").matcher(message).replaceAll("From: <SIP_ANONYMIZED>");
+        message = Pattern.compile("Contact:(.+?)>").matcher(message).replaceAll("Contact: <SIP_ANONYMIZED>");
+        message = Pattern.compile("Digest username=\"(.+?)\"").matcher(message).replaceAll("Digest username=\"<SIP_USERNAME>\"");
+        message = Pattern.compile("nonce=\"(.+?)\"").matcher(message).replaceAll("nonce=\"<NONCE>\"");
+        message = Pattern.compile("username=(.+?)&").matcher(message).replaceAll("username=<USERNAME>");
+
+        return message;
+    }
+
+    private String anonymizePayloadLogging(String message) {
+        message = Pattern.compile("caller_id=(.+?),").matcher(message).replaceAll("callerid=<CALLER_ID>,");
+        message = Pattern.compile("phonenumber=(.+?),").matcher(message).replaceAll("phonenumber=<PHONENUMBER>,");
+
+        return message;
+    }
+
     /**
      * Verbose log.
      * @param message
      */
     public void v(String message) {
-        log(VERBOSE_TAG, message);
+        log(VERBOSE_TAG, TAG + " " + message);
+        if (mLogToConsole) {
+            Log.v(TAG, message);
+        }
     }
 
     /**
@@ -139,7 +179,10 @@ public class RemoteLogger {
      * @param message
      */
     public void d(String message) {
-        log(DEBUG_TAG, message);
+        log(DEBUG_TAG, TAG + " " + message);
+        if (mLogToConsole) {
+            Log.d(TAG, message);
+        }
     }
 
     /**
@@ -147,7 +190,10 @@ public class RemoteLogger {
      * @param message
      */
     public void i(String message) {
-        log(INFO_TAG, message);
+        log(INFO_TAG, TAG + " " + message);
+        if (mLogToConsole) {
+            Log.i(TAG, message);
+        }
     }
 
     /**
@@ -155,7 +201,10 @@ public class RemoteLogger {
      * @param message
      */
     public void w(String message) {
-        log(WARNING_TAG, message);
+        log(WARNING_TAG, TAG + " " + message);
+        if (mLogToConsole) {
+            Log.w(TAG, message);
+        }
     }
 
     /**
@@ -163,7 +212,10 @@ public class RemoteLogger {
      * @param message
      */
     public void e(String message) {
-        log(EXCEPTION_TAG, message);
+        log(EXCEPTION_TAG, TAG + " " + message);
+        if (mLogToConsole) {
+            Log.e(TAG, message);
+        }
     }
 
 }

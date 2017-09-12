@@ -1,9 +1,9 @@
 package com.voipgrid.vialer.callrecord;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.voipgrid.vialer.EmptyView;
 import com.voipgrid.vialer.R;
@@ -21,10 +20,10 @@ import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
-import com.voipgrid.vialer.util.NetworkStateViewHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +51,6 @@ public class CallRecordFragment extends ListFragment implements
     private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private JsonStorage mJsonStorage;
-    private NetworkStateViewHelper mNetworkStateViewHelper;
 
     private String mFilter;
     private boolean mHaveNetworkRecords;
@@ -134,9 +132,6 @@ public class CallRecordFragment extends ListFragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mNetworkStateViewHelper = new NetworkStateViewHelper(
-                getActivity(), (TextView) view.findViewById(R.id.dialer_warning));
-
         mAdapter = new CallRecordAdapter(getActivity(), mCallRecords);
 
         /* setup swipe refresh layout */
@@ -164,31 +159,24 @@ public class CallRecordFragment extends ListFragment implements
             mConnectivityHelper.useWifi(getActivity(), true);
             ConnectivityHelper.mWifiKilled = false;
         }
-        mNetworkStateViewHelper.updateNetworkStateView();
-        mNetworkStateViewHelper.startListening();
         mAdapter.mCallAlreadySetup = false;
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        if (context instanceof Activity) {
-            Activity activity = (Activity) context;
-            try {
-                mListener = (OnFragmentInteractionListener) activity;
-            } catch (ClassCastException e) {
-                throw new ClassCastException(
-                        activity.toString() + " must implement OnFragmentInteractionListener"
-                );
-            }
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(
+                    activity.toString() + " must implement OnFragmentInteractionListener"
+            );
         }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mNetworkStateViewHelper.stopListening();
     }
 
     @Override
@@ -290,9 +278,9 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     @Override
-    public void onResponse(Call<VoipGridResponse<CallRecord>> call,
-                           Response<VoipGridResponse<CallRecord>> response) {
-        if (response.isSuccess() && response.body() != null) {
+    public void onResponse(@NonNull Call<VoipGridResponse<CallRecord>> call,
+                           @NonNull Response<VoipGridResponse<CallRecord>> response) {
+        if (response.isSuccessful() && response.body() != null) {
             mHaveNetworkRecords = true;
             List<CallRecord> records = response.body().getObjects();
             displayCallRecords(records);
@@ -311,6 +299,11 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     private void failedFeedback(Response response) {
+        if (getActivity() == null) {
+            new RemoteLogger(getContext(), CallRecordFragment.class, 1).e("java.lang.IllegalStateException: Fragment CallRecordFragment{a10f812} not attached to Activity");
+            return;
+        }
+
         String message = getString(R.string.empty_view_default_message);
 
         // Check if authorized.
@@ -320,8 +313,8 @@ public class CallRecordFragment extends ListFragment implements
         if (mAdapter.getCount() == 0) {
             setEmptyView(new EmptyView(getActivity(), message), true);
         } else {
-            /* adapter has cached values and we're not about to overwrite them. However,
-            we do want to notify the user. */
+            // Adapter has cached values and we're not about to overwrite them. However,
+            // we do want to notify the user.
             Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();
         }
         mSwipeRefreshLayout.setRefreshing(false);

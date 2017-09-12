@@ -45,11 +45,11 @@ public class DialHelper {
 
     public void callNumber(final String number, final String contactName) {
         if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.TYPE_WIFI && mPreferences.hasSipEnabled()) {
-            if(mPreferences.hasConnectionPerference(mConnectivityHelper.TYPE_LTE)) {
+            if(mPreferences.hasConnectionPreference(mConnectivityHelper.TYPE_LTE)) {
                 switchNetworkAndCallNumber(number, contactName);
-            } else if(mPreferences.hasConnectionPerference(Preferences.CONNECTION_PREFERENCE_NONE)) {
+            } else if(mPreferences.hasConnectionPreference(Preferences.CONNECTION_PREFERENCE_NONE)) {
                 showConnectionPickerDialog(number, contactName);
-            } else if(mPreferences.hasConnectionPerference(Preferences.CONNECTION_PREFERENCE_WIFI)) {
+            } else if(mPreferences.hasConnectionPreference(Preferences.CONNECTION_PREFERENCE_WIFI)) {
                 makeCall(number, contactName);
             }
         } else {

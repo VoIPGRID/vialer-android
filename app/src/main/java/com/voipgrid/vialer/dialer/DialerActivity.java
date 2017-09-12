@@ -1,10 +1,6 @@
 package com.voipgrid.vialer.dialer;
 
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
@@ -12,7 +8,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -38,14 +33,13 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.onboarding.SetupActivity;
+import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.t9.ContactCursorLoader;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.CustomReceiver;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.IconHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.NetworkStateViewHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import java.io.FileDescriptor;
@@ -75,8 +69,7 @@ public class DialerActivity extends LoginRequiredActivity implements
     private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private JsonStorage mJsonStorage;
-    private NetworkStateViewHelper mNetworkStateViewHelper;
-    private BroadcastReceiver mBroadcastReceiver;
+    private ReachabilityReceiver mReachabilityReceiver;
 
     private String t9Query;
     private boolean mHasPermission;
@@ -98,8 +91,8 @@ public class DialerActivity extends LoginRequiredActivity implements
 
         mConnectivityHelper = ConnectivityHelper.get(this);
 
-        mNetworkStateViewHelper = new NetworkStateViewHelper(
-                this, (TextView) findViewById(R.id.dialer_warning));
+        mReachabilityReceiver = new ReachabilityReceiver(this);
+
         mContactsListView = (ListView) findViewById(R.id.list_view);
         mEmptyView = (TextView) findViewById(R.id.message);
         mEmptyView.setText("");
@@ -170,7 +163,7 @@ public class DialerActivity extends LoginRequiredActivity implements
             @Override
             public void onInputChanged(String phoneNumber) {
                 // Keep this empty. A implemented version will be set if we have contact permissions
-                // be a empty one is required if we do not have permission.
+                // but an empty one is required if we do not have permission.
             }
         });
     }
@@ -303,7 +296,6 @@ public class DialerActivity extends LoginRequiredActivity implements
             mConnectivityHelper.useWifi(this, true);
             ConnectivityHelper.mWifiKilled = false;
         }
-        registerReceivers();
 
         // Permission changed since last accessing this Activity.
         if (mHasPermission != ContactsPermission.hasPermission(this)) {
@@ -321,21 +313,13 @@ public class DialerActivity extends LoginRequiredActivity implements
                 ContactsPermission.askForPermission(this);
             }
         }
-
-        mNetworkStateViewHelper.updateNetworkStateView();
-        mNetworkStateViewHelper.startListening();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unRegisterReceivers();
+        mReachabilityReceiver.startListening();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mNetworkStateViewHelper.stopListening();
+        mReachabilityReceiver.stopListening();
     }
 
     @Override
@@ -376,31 +360,6 @@ public class DialerActivity extends LoginRequiredActivity implements
             dialHelper.callNumber(phoneNumberToCall, contactName);
             mSharedPreferences.edit().putString(LAST_DIALED, number).apply();
             mNumberInputView.clear();
-        }
-    }
-
-    private void createReceivers() {
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                onCallButtonClicked();
-            }
-        };
-    }
-
-    private void registerReceivers() {
-        if (mBroadcastReceiver == null) {
-            createReceivers();
-        }
-        ((AudioManager) getSystemService(AUDIO_SERVICE)).registerMediaButtonEventReceiver(
-                new ComponentName(this, CustomReceiver.class));
-        registerReceiver(mBroadcastReceiver, new IntentFilter(CustomReceiver.CALL_BTN));
-    }
-
-    private void unRegisterReceivers() {
-        try {
-            unregisterReceiver(mBroadcastReceiver);
-        } catch (Exception e) {
         }
     }
 

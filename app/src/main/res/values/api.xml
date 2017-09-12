@@ -6,6 +6,7 @@
     <string name="web_add_destination" translatable="false">/fixeddestination/add/</string>
     <string name="web_url" translatable="false">https://partner.voipgrid.nl</string>
     <string name="web_user_change" translatable="false">/user/change/</string>
+    <string name="web_password_change" translatable="false">https://partner.voipgrid.nl/user/login/</string>
     <string name="web_dial_plan" translatable="false">/dialplan/</string>
     <string name="web_statistics" translatable="false">/stats/dashboard/</string>
     <string name="web_autologin" translatable="false">%1$s/user/autologin/?username=%2$s&amp;token=%3$s&amp;next=%4$s</string>

@@ -21,8 +21,6 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link SetupFragmentInteractionListener} interface
- * to handle interaction events.
  * Use the {@link AccountFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
@@ -105,8 +103,8 @@ public class AccountFragment extends OnboardingFragment implements
             // TODO Find a better solution for this (VIALA-575) in future.
             if (outGoingNumber == null || outGoingNumber.isEmpty()) {
                 // Forced logging due to user not being able to set/unset it at this point.
-                mRemoteLogger = new RemoteLogger(getActivity(), true);
-                mRemoteLogger.d(TAG + " no outGoingNumber");
+                mRemoteLogger = new RemoteLogger(getActivity(), AccountFragment.class, true);
+                mRemoteLogger.d("no outGoingNumber");
                 SystemUser systemUser = (SystemUser) new JsonStorage(getActivity()).get(SystemUser.class);
                 outGoingNumber = systemUser.getOutgoingCli();
             }

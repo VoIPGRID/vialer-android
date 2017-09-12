@@ -3,6 +3,7 @@ package com.voipgrid.vialer.twostepcall;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.TextView;
 
@@ -15,7 +16,6 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.models.ClickToDialParams;
-import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 
@@ -59,7 +59,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
                 getPassword()
         );
 
-        mRemoteLogger = new RemoteLogger(this);
+        mRemoteLogger = new RemoteLogger(this, TwoStepCallActivity.class);
 
         String numberToCall = getIntent().getStringExtra(NUMBER_TO_CALL);
 
@@ -142,9 +142,9 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
     }
 
     @Override
-    public void onResponse(Call<Object> call, Response<Object> response) {
+    public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
         // Response code of successful cancel request.
-        if (response.isSuccess()) {
+        if (response.isSuccessful()) {
             // Cancel the status update task.
             mTwoStepCallTask.cancel(false);
             // Update view.
@@ -159,7 +159,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
     }
 
     @Override
-    public void onFailure(Call<Object> call, Throwable t) {
+    public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
         failedFeedback();
     }
 
@@ -196,7 +196,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
             Call<TwoStepCallStatus> call = mApi.twoStepCall(new ClickToDialParams(mNumberA, mNumberB));
             try {
                 Response<TwoStepCallStatus> response = call.execute();
-                if (response.isSuccess() && response.body() != null) {
+                if (response.isSuccessful() && response.body() != null) {
                     status = response.body();
                 } else {
                     publishProgress(TwoStepCallUtils.STATE_INVALID_NUMBER);
@@ -254,18 +254,18 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
 
                         try {
                             Response<TwoStepCallStatus> response = call.execute();
-                            if (response.isSuccess() && response.body() != null) {
+                            if (response.isSuccessful() && response.body() != null) {
                                 TwoStepCallStatus status = response.body();
                                 if (status.getStatus() != null){
                                     handleMessage(status.getStatus());
                                 } else {
-                                    mRemoteLogger.d(TAG + " status.getStatus() is null");
+                                    mRemoteLogger.d("status.getStatus() is null");
                                 }
                             }
                         } catch (IOException e) {
 
                         } catch (StackOverflowError e) {
-                            mRemoteLogger.d(TAG + " StackOverflowError");
+                            mRemoteLogger.d("StackOverflowError");
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();

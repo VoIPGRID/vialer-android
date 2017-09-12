@@ -25,8 +25,11 @@
     <string name="call_unreachable">Unreachable</string>
     <string name="call_incoming_accept">Accept</string>
     <string name="call_incoming_decline">Decline</string>
-    <string name="dialer_warning_a_b_connect">Two-step calling mode active</string>
-    <string name="dialer_warning_no_connection">No data connection available</string>
+    <string name="dialer_connect_a_b_info">Two step modus will setup a call to your phone first and will call the other party when you answer the call.</string>
+    <string name="dialer_connect_a_b_info_title">Two step modus</string>
+    <string name="dialer_warning_a_b_connect">Poor connection, Two step calling enabled</string>
+    <string name="dialer_warning_no_connection">No connection, cannot call</string>
+    <string name="dialer_warning_voip_disabled">VoIP disabled, enable in settings</string>
     <string name="version_info">Version: %1$s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
 
@@ -44,6 +47,9 @@
     <string name="webactivity_open_page_failed">Failed to open web page.</string>
 
     <!-- Sidebar fragment values -->
+    <string name="logout_dialog_text">Are you sure you want to logout?</string>
+    <string name="logout_dialog_positive">Logout</string>
+    <string name="logout_dialog_negative">Cancel</string>
     <string name="cannot_logout_error_title">No available internet connection</string>
     <string name="cannot_logout_error_text">An internet connection is needed to log you off.</string>
     <string name="set_userdestination_api_fail">Editing of availability has failed. Please try again later.</string>
@@ -57,6 +63,8 @@
     <string name="login_button_title">login</string>
     <string name="login_missing_field_title">Warning</string>
     <string name="login_missing_field_message">Please fill in all fields before login!</string>
+    <string name="change_password_webview_toast">To make use of the app, you need to login once and change your password</string>
+
 
     <!-- Forgot password fragment values -->
     <string name="header_forgot_password_title">Forgot password?</string>
@@ -79,6 +87,7 @@
     <!-- Missing voip account fragment values -->
     <string name="set_voip_account_button_text">Set VoIP account</string>
     <string name="user_change_title">Change user</string>
+    <string name="password_change_title">Change password</string>
     <string name="voip_account_missing_text">To setup a phone call via the VoIP function, a VoIP account has to be set in your user profile.\n\nAt this moment there is no VoIP account linked to your account.</string>
 
     <!-- Welcome fragment values -->
@@ -117,12 +126,13 @@
     <string name="action_done">Done</string>
     <string name="action_edit">Edit</string>
     <string name="choose_network_text">Call using:</string>
-    <string name="call_connection_always_LTE">Only 4G</string>
-    <string name="call_connection_use_wifi">WiFi when connected</string>
+    <string name="call_connection_only_cellular">Only cellular networks</string>
+    <string name="call_connection_use_wifi_cellular">Cellular networks and WiFi</string>
     <string name="call_connection_optional">Show pop-up for outgoing calls</string>
     <string name="connection_preference_dialog_title">Advice: turn off WiFi for this call</string>
-    <string name="connection_preference_dialog_message">Mobile networks LTE(4G) are more stable which leads to a higher audio quality. \n\nTurn off WiFi for this call?</string>
-    <string name="connection_preference_switch_toast">Trying to handover to LTE(4G)</string>
+    <string name="connection_preference_dialog_message">Cellular networks are more stable which leads to a higher audio quality. \n\nTurn off WiFi for this call?</string>
+    <string name="connection_preference_switch_toast">Trying to handover to the cellular network</string>
+    <string name="switch_use_3g">Also use 3G+ for calls</string>
 
     <string name="url_app_info">http://vialerapp.com/app-info/</string>
 

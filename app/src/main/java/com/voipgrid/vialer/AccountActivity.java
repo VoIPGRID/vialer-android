@@ -3,7 +3,7 @@ package com.voipgrid.vialer;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +25,7 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.MiddlewareHelper;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -37,7 +37,8 @@ public class AccountActivity extends LoginRequiredActivity implements
         Switch.OnCheckedChangeListener, AdapterView.OnItemSelectedListener,
         Callback {
 
-    private CompoundButton mSwitch;
+    private CompoundButton m3GSwitch;
+    private CompoundButton mVoipSwitch;
     private EditText mSipIdEditText;
     private EditText mRemoteLogIdEditText;
 
@@ -69,11 +70,12 @@ public class AccountActivity extends LoginRequiredActivity implements
         mRemoteLogIdEditText = (EditText) findViewById(R.id.remote_logging_id_edit_text);
         mRemoteLogIdEditText.setVisibility(View.GONE);
         mSipIdEditText = ((EditText) findViewById(R.id.account_sip_id_edit_text));
-        mSwitch = (CompoundButton) findViewById(R.id.account_sip_switch);
-        mSwitch.setOnCheckedChangeListener(this);
+        mVoipSwitch = (CompoundButton) findViewById(R.id.account_sip_switch);
+        mVoipSwitch.setOnCheckedChangeListener(this);
 
         initConnectionSpinner();
         initRemoteLoggingSwitch();
+        initUse3GSwitch();
     }
 
     private void initConnectionSpinner() {
@@ -91,9 +93,9 @@ public class AccountActivity extends LoginRequiredActivity implements
      * are not nativly supported in java.
      */
     private long converseToPreference(CharSequence connectionPreference) {
-        if (connectionPreference.equals(getString(R.string.call_connection_always_LTE))) {
+        if (connectionPreference.equals(getString(R.string.call_connection_only_cellular))) {
             return Preferences.CONNECTION_PREFERENCE_LTE;
-        } else if (connectionPreference.equals(getString(R.string.call_connection_use_wifi))) {
+        } else if (connectionPreference.equals(getString(R.string.call_connection_use_wifi_cellular))) {
             return Preferences.CONNECTION_PREFERENCE_WIFI;
         }
         return Preferences.CONNECTION_PREFERENCE_NONE;
@@ -105,9 +107,9 @@ public class AccountActivity extends LoginRequiredActivity implements
      */
     private CharSequence converseFromPreference(long preference) {
         if (preference == Preferences.CONNECTION_PREFERENCE_LTE) {
-            return getString(R.string.call_connection_always_LTE);
+            return getString(R.string.call_connection_only_cellular);
         } else if (preference == Preferences.CONNECTION_PREFERENCE_WIFI) {
-            return getString(R.string.call_connection_use_wifi);
+            return getString(R.string.call_connection_use_wifi_cellular);
         }
         return getString(R.string.call_connection_optional);
     }
@@ -148,6 +150,20 @@ public class AccountActivity extends LoginRequiredActivity implements
         }
     }
 
+    private void initUse3GSwitch() {
+        CompoundButton use3GSwitch = (CompoundButton) findViewById(R.id.use_3g_switch);
+        use3GSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (mPreferences.has3GEnabled() == isChecked) {
+                    return;
+                }
+                mPreferences.set3GEnabled(isChecked);
+            }
+        });
+        use3GSwitch.setChecked(mPreferences.has3GEnabled());
+    }
+
     private void updateAndPopulate() {
         mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         mPhoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
@@ -157,12 +173,12 @@ public class AccountActivity extends LoginRequiredActivity implements
 
     private void populate() {
         if(mPreferences.hasSipPermission()) {
-            mSwitch.setChecked(mPreferences.hasSipEnabled());
+            mVoipSwitch.setChecked(mPreferences.hasSipEnabled());
             if(mPhoneAccount != null) {
                 mSipIdEditText.setText(mPhoneAccount.getAccountId());
             }
         } else {
-            mSwitch.setVisibility(View.GONE);
+            mVoipSwitch.setVisibility(View.GONE);
         }
         ((EditText) findViewById(R.id.account_mobile_number_edit_text))
                 .setText(mSystemUser.getMobileNumber());
@@ -260,7 +276,7 @@ public class AccountActivity extends LoginRequiredActivity implements
 
         if (!isChecked) {
             // Unregister at middleware.
-            MiddlewareHelper.executeUnregisterTask(this);
+            MiddlewareHelper.unregister(this);
             // Stop the sipservice.
             stopService(new Intent(this, SipService.class));
             mSipIdEditText.setVisibility(View.GONE);
@@ -285,7 +301,7 @@ public class AccountActivity extends LoginRequiredActivity implements
                         // to disabled. Setting disabled in the settings first makes sure
                         // the onCheckChanged does not execute the code that normally is executed
                         // on a change in the check of the switch.
-                        setVoipAccount();
+                        setVoIPAccount();
                     }
                 }
             }.execute();
@@ -295,7 +311,7 @@ public class AccountActivity extends LoginRequiredActivity implements
     /**
      * Loads setupactivity with the SetUpVoipAccountFragment.
      */
-    private void setVoipAccount(){
+    private void setVoIPAccount(){
         Intent intent = new Intent(this, SetupActivity.class);
         Bundle b = new Bundle();
         b.putInt("fragment", R.id.fragment_voip_account_missing);
@@ -306,8 +322,8 @@ public class AccountActivity extends LoginRequiredActivity implements
     }
 
     @Override
-    public void onResponse(Call call, Response response) {
-        if (response.isSuccess()) {
+    public void onResponse(@NonNull Call call, @NonNull Response response) {
+        if (response.isSuccessful()) {
             // Success callback for updating mobile number.
             // Update the systemuser.
             mJsonStorage.save(mSystemUser);
@@ -324,23 +340,10 @@ public class AccountActivity extends LoginRequiredActivity implements
 
         // Update phone account and systemuser.
         updateSystemUserAndPhoneAccount();
-
-        // When coming back from the SetUpVoipAccountFragment's created webactivity
-        // we cannot immediately check if a voipaccount has been set. Processing the
-        // fragment and the checks for a permitted sip permission can take 1 up to 3 seconds.
-        // For this reason we re-check if the mSwitch has the correct value after a timer.
-        enableProgressBar(true);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mSwitch.setChecked(mPreferences.hasSipEnabled() && mPreferences.hasPhoneAccount());
-                enableProgressBar(false);
-            }
-        }, 3000);
     }
 
     @Override
-    public void onFailure(Call call, Throwable t) {
+    public void onFailure(@NonNull Call call, @NonNull Throwable t) {
         failedFeedback();
     }
 

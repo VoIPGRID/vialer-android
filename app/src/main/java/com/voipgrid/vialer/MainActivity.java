@@ -1,14 +1,11 @@
 package com.voipgrid.vialer;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -31,8 +28,8 @@ import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
 import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
+import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.CustomReceiver;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.UpdateActivity;
@@ -47,12 +44,21 @@ public class MainActivity extends NavigationDrawerActivity implements
     private boolean mAskForPermission = true;
     private int requestCounter = -1;
 
-    private CustomReceiver mMediaButtonReceiver;
     private BroadcastReceiver mBroadcastReceiver;
+    private ReachabilityReceiver mReachabilityReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle startBundle = getIntent().getExtras();
+        if (startBundle != null) {
+            boolean onBoot = startBundle.getBoolean("OnBoot");
+            if (onBoot) {
+                finish();
+                return;
+            }
+        }
 
         JsonStorage jsonStorage = new JsonStorage(this);
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
@@ -112,7 +118,11 @@ public class MainActivity extends NavigationDrawerActivity implements
         // Set tabs.
         setupTabs();
 
+        FloatingActionButton openDialerFab = (FloatingActionButton) findViewById(R.id.floating_action_button);
+        openDialerFab.setOnClickListener(this);
+
         requestCounter = 0;
+        mReachabilityReceiver = new ReachabilityReceiver(this);
     }
 
     private void askForPermissions(int requestNr) {
@@ -140,56 +150,26 @@ public class MainActivity extends NavigationDrawerActivity implements
                         mAskForPermission = false;
                         ContactsPermission.askForPermission(this);
                         requestCounter++;
-                        return;
                     }
                 }
         }
     }
 
-
-    private void createReceivers() {
-        mMediaButtonReceiver = new CustomReceiver();
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                openDialer();
-            }
-        };
-    }
-
-    private void registerReceivers() {
-        if (mMediaButtonReceiver == null || mBroadcastReceiver == null){
-            createReceivers();
-        }
-        ((AudioManager)getSystemService(AUDIO_SERVICE)).registerMediaButtonEventReceiver(
-                new ComponentName(this, CustomReceiver.class));
-        registerReceiver(mMediaButtonReceiver, CustomReceiver.mMediaButtonFilter);
-        registerReceiver(mBroadcastReceiver, new IntentFilter(CustomReceiver.CALL_BTN));
-    }
-
-    private void unRegisterReceivers() {
-        try {
-            unregisterReceiver(mMediaButtonReceiver);
-            unregisterReceiver(mBroadcastReceiver);
-        } catch(Exception e) {}
-    }
-
     @Override
     protected void onResume() {
         askForPermissions(requestCounter);
+        mReachabilityReceiver.startListening();
         super.onResume();
-        registerReceivers();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unRegisterReceivers();
+        mReachabilityReceiver.stopListening();
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode ==
                 this.getResources().getInteger(R.integer.contact_permission_request_code)) {
             boolean allPermissionsGranted = true;

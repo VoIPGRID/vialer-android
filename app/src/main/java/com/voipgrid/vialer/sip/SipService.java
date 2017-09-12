@@ -31,7 +31,6 @@ import java.util.List;
  *
  */
 public class SipService extends Service {
-    private final static String TAG = SipService.class.getSimpleName(); // TAG used for debug Logs
     private final IBinder mBinder = new SipServiceBinder();
 
     private Handler mHandler;
@@ -48,6 +47,10 @@ public class SipService extends Service {
     private List<SipCall> mCallList = new ArrayList<>();
     private String mInitialCallType;
 
+    private int mCheckServiceUsedTimer = 10000;
+    private Handler mCheckServiceHandler;
+    private Runnable mCheckServiceRunnable;
+
     private final BroadcastReceiver phoneStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -57,13 +60,21 @@ public class SipService extends Service {
                 // When the native call has been picked up and there is a current call in the ringing state
                 // Then decline the current call.
                 if (phoneState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                    mRemoteLogger.e("Native call is picked up.");
+                    mRemoteLogger.e("Is there an active call: " + (mCurrentCall != null));
                     if (mCurrentCall != null) {
+                        mRemoteLogger.e("Current call state: " + mCurrentCall.getCurrentCallState());
                         switch (mCurrentCall.getCurrentCallState()) {
                             case SipConstants.CALL_INCOMING_RINGING:
+                                mRemoteLogger.e("Our call is still ringing. So decline it.");
                                 mCurrentCall.decline();
                                 break;
                             case SipConstants.CALL_CONNECTED_MESSAGE:
-                                mCurrentCall.toggleHold();
+                                mRemoteLogger.e("Our call is connected.");
+                                if (!mCurrentCall.isOnHold()) {
+                                    mRemoteLogger.e("Call was not on hold already. So put call on hold.");
+                                    mCurrentCall.toggleHold();
+                                }
                                 break;
                         }
                     }
@@ -75,13 +86,25 @@ public class SipService extends Service {
     };
 
     /**
-     * Returns boolean representing whether there is a gsm call or not.
+     * Set when the SipService is active. This is used to respond to the middleware.
+     */
+    public static boolean sipServiceActive = false;
+
+    /**
+     * Check if there is a native call answered.
+     *
+     * @return boolean true if there is a native call answered.
      */
     public boolean nativeCallHasBeenAnswered() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         return telephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
     }
 
+    /**
+     * See if there is a native GSM call Ringing
+     *
+     * @return boolean true when there is a native GSM call ringing
+     */
     public boolean nativeCallIsRinging() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         return telephonyManager.getCallState() == TelephonyManager.CALL_STATE_RINGING;
@@ -100,7 +123,7 @@ public class SipService extends Service {
     /**
      * SIP does not present Media by default.
      * Use Android's ToneGenerator to play a dial tone at certain required times.
-     * @see # for usage of delayed "mRingbackRunnable" callback.
+     * @see for usage of delayed "mRingbackRunnable" callback.
      */
     private Runnable mRingbackRunnable = new Runnable() {
         @Override
@@ -129,14 +152,27 @@ public class SipService extends Service {
         mSipBroadcaster = new SipBroadcaster(this);
 
         mPreferences = new Preferences(this);
-        mRemoteLogger = new RemoteLogger(this);
+        mRemoteLogger = new RemoteLogger(this, SipService.class, 1);
 
-        mRemoteLogger.d(TAG + " onCreate");
+        mRemoteLogger.d("onCreate");
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
 
         registerReceiver(phoneStateReceiver, filter);
+
+        // Create runnable to check if the SipService is still in use.
+        mCheckServiceHandler = new Handler();
+        mCheckServiceRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // Check if the service is being used after 10 seconds and shutdown the service
+                // if required.
+                checkServiceBeingUsed();
+                mCheckServiceHandler.postDelayed(this, mCheckServiceUsedTimer);
+            }
+        };
+        mCheckServiceHandler.postDelayed(mCheckServiceRunnable, mCheckServiceUsedTimer);
 
         PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
         if (phoneAccount != null) {
@@ -152,19 +188,12 @@ public class SipService extends Service {
             mRemoteLogger.w("No sip account when trying to create service");
             stopSelf();
         }
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Check if the service is being used after 5 seconds and shutdown the service
-                // if required.
-                checkServiceBeingUsed();
-            }
-        }, 5000);
     }
 
     private void checkServiceBeingUsed() {
+        mRemoteLogger.d("checkServiceBeingUsed");
         if (mCurrentCall == null) {
+            mRemoteLogger.i("No active calls stop the service");
             stopSelf();
         }
     }
@@ -187,7 +216,7 @@ public class SipService extends Service {
 
     @Override
     public void onDestroy() {
-        mRemoteLogger.d(TAG + " onDestroy");
+        mRemoteLogger.d("onDestroy");
 
         // If no phoneaccount was found in the onCreate there won't be a sipconfig either.
         // Check to avoid nullpointers.
@@ -197,25 +226,32 @@ public class SipService extends Service {
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
-        unregisterReceiver(phoneStateReceiver);
+        try {
+            unregisterReceiver(phoneStateReceiver);
+        } catch(IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister phoneStateReceiver not registered.");
+        }
 
+        mCheckServiceHandler.removeCallbacks(mCheckServiceRunnable);
+
+        sipServiceActive = false;
         super.onDestroy();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mRemoteLogger.d(TAG + " onStartCommand");
+        mRemoteLogger.d("onStartCommand");
 
         mInitialCallType = intent.getAction();
         Uri number = intent.getData();
 
         switch (mInitialCallType) {
             case SipConstants.ACTION_VIALER_INCOMING:
-                mRemoteLogger.d(TAG + " incomingCall");
+                mRemoteLogger.d("incomingCall");
                 mIncomingCallDetails = intent;
                 break;
             case SipConstants.ACTION_VIALER_OUTGOING:
-                mRemoteLogger.d(TAG + " outgoingCall");
+                mRemoteLogger.d("outgoingCall");
                 makeCall(
                         number,
                         intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
@@ -239,7 +275,6 @@ public class SipService extends Service {
                 }
             }
         }
-
         return START_NOT_STICKY;
     }
 
@@ -258,7 +293,7 @@ public class SipService extends Service {
      * Start the ring back for a outgoing call.
      */
     public void startRingback() {
-        mRemoteLogger.d(TAG + " onCallStartRingback");
+        mRemoteLogger.d("onCallStartRingback");
         mHandler.postDelayed(mRingbackRunnable, 2000);
     }
 
@@ -266,7 +301,7 @@ public class SipService extends Service {
      * Stop the ring back for a outgoing call.
      */
     public void stopRingback() {
-        mRemoteLogger.d(TAG + " onCallStopRingback");
+        mRemoteLogger.d("onCallStopRingback");
         mHandler.removeCallbacks(mRingbackRunnable);
     }
 
@@ -301,7 +336,7 @@ public class SipService extends Service {
      * @param number
      */
     public void startOutgoingCallActivity(SipCall sipCall, Uri number) {
-        mRemoteLogger.d(TAG + " callVisibleForUser");
+        mRemoteLogger.d("callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setDataAndType(number, CallActivity.TYPE_OUTGOING_CALL);
@@ -309,6 +344,8 @@ public class SipService extends Service {
         intent.putExtra(CallActivity.PHONE_NUMBER, sipCall.getPhoneNumber());
 
         startActivity(intent);
+
+        sipServiceActive = true;
     }
 
     /**
@@ -317,7 +354,7 @@ public class SipService extends Service {
      * @param callerId
      */
     public void startIncomingCallActivity(String number, String callerId) {
-        mRemoteLogger.d(TAG + " callVisibleForUser");
+        mRemoteLogger.d("callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Uri sipAddressUri = SipUri.sipAddressUri(
@@ -328,6 +365,7 @@ public class SipService extends Service {
         intent.putExtra(CallActivity.CONTACT_NAME, callerId);
         intent.putExtra(CallActivity.PHONE_NUMBER, number);
         startActivity(intent);
+        sipServiceActive = true;
     }
 
     /**

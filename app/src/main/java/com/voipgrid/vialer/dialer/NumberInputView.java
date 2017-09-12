@@ -14,19 +14,16 @@ import android.widget.RelativeLayout;
 import com.voipgrid.vialer.R;
 
 /**
- * Created by eltjo on 26/08/15.
+ * Custom NumberInput for the dialer.
  */
 public class NumberInputView extends RelativeLayout implements
         View.OnClickListener,
         View.OnLongClickListener,
         TextWatcher {
 
-    private EditText mEditText;
+    private EditText mNumberInputEditText;
     private ImageButton mRemoveButton;
     private OnInputChangedListener mListener;
-    private final int mNormalPhoneNumberLengthMax = 13;
-
-    private float mDefaultTextsize;
 
     public NumberInputView(Context context) {
         super(context);
@@ -49,18 +46,17 @@ public class NumberInputView extends RelativeLayout implements
         inflater.inflate(R.layout.view_number_input, this);
 
         // Find the number input field and add a TextChangedListener to handle text changes.
-        mEditText = (EditText) findViewById(R.id.edit_text);
-        mEditText.addTextChangedListener(this);
-        mEditText.setOnClickListener(this);
-        mEditText.setOnLongClickListener(this);
+        mNumberInputEditText = (EditText) findViewById(R.id.edit_text);
+        mNumberInputEditText.addTextChangedListener(this);
+        mNumberInputEditText.setOnClickListener(this);
+        mNumberInputEditText.setOnLongClickListener(this);
 
         // Find the remove button and add an OnClickListener.
         mRemoveButton = (ImageButton) findViewById(R.id.remove_button);
         mRemoveButton.setOnClickListener(this);
         mRemoveButton.setOnLongClickListener(this);
 
-        mEditText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.dialpad_number_input_text_size));
-        mDefaultTextsize = mEditText.getTextSize();
+        mNumberInputEditText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.dialpad_number_input_text_size));
     }
 
     public void setOnInputChangedListener(OnInputChangedListener listener) {
@@ -77,7 +73,7 @@ public class NumberInputView extends RelativeLayout implements
             // Set cursor in edit text.
             case R.id.edit_text:
                 if (!isEmpty()) {
-                    mEditText.setCursorVisible(true);
+                    mNumberInputEditText.setCursorVisible(true);
                 }
                 break;
         }
@@ -94,7 +90,7 @@ public class NumberInputView extends RelativeLayout implements
                 // Right now EditText does not show the "paste" option when cursor is not visible.
                 // To show that, make the cursor visible, and return false, letting the EditText
                 // show the option by itself.
-                mEditText.setCursorVisible(true);
+                mNumberInputEditText.setCursorVisible(true);
                 return false;
         }
         return false;
@@ -125,10 +121,10 @@ public class NumberInputView extends RelativeLayout implements
      */
     public void remove() {
         // Check if there is actually text in the input field.
-        if (mEditText.length() > 0) {
+        if (mNumberInputEditText.length() > 0) {
             mRemoveButton.animate();
-            Integer startCursorPosition = mEditText.getSelectionStart();
-            Integer endCursorPosition = mEditText.getSelectionEnd();
+            Integer startCursorPosition = mNumberInputEditText.getSelectionStart();
+            Integer endCursorPosition = mNumberInputEditText.getSelectionEnd();
 
             // Can not remove on index 0.
             if (startCursorPosition == 0 && endCursorPosition == 0) {
@@ -146,25 +142,38 @@ public class NumberInputView extends RelativeLayout implements
     }
 
     public void setCorrectFontSize() {
-        int charCount = mEditText.getText().length();
-        float charSize = mDefaultTextsize;
+        int charCount = mNumberInputEditText.getText().length();
+        float charSize = getTextSize();
 
-        if (charCount > mNormalPhoneNumberLengthMax) {
-            for (int i = charCount; i > mNormalPhoneNumberLengthMax; i--) {
-                charSize = charSize / 1.03f;
-            }
+        int inputMaxScalingLength = getResources().getInteger(R.integer.dialpad_number_input_max_scaling_length);
+        int maxLengthNormalPhoneNumber = getResources().getInteger(R.integer.dialpad_normal_phonenumber_length_max);
+
+        if (charCount > maxLengthNormalPhoneNumber && charCount < inputMaxScalingLength) {
+            charSize = charSize / 1.04f;
         }
-        mEditText.setTextSize(TypedValue.COMPLEX_UNIT_PX, charSize);
+
+        mNumberInputEditText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, charSize);
+    }
+
+    /**
+     * Get the actual text size. Normal getTextSize returns the size in pixels based on screen
+     * density.
+     *
+     * @return float the textSize of the input field
+     */
+    private float getTextSize() {
+        return mNumberInputEditText.getTextSize() / getResources().getDisplayMetrics().density;
     }
 
     /**
      * Add text to the number input field
+     *
      * @param text
      */
     public void add(CharSequence text) {
-        Editable inputText = mEditText.getText();
-        Integer startCursorPosition = mEditText.getSelectionStart();
-        Integer endCursorPosition = mEditText.getSelectionEnd();
+        Editable inputText = mNumberInputEditText.getText();
+        Integer startCursorPosition = mNumberInputEditText.getSelectionStart();
+        Integer endCursorPosition = mNumberInputEditText.getSelectionEnd();
 
         removeTextFromInput(startCursorPosition, endCursorPosition);
 
@@ -174,13 +183,13 @@ public class NumberInputView extends RelativeLayout implements
     private void removeTextFromInput(Integer startCursorPosition, Integer endCursorPosition) {
         // If there is a selection active delete the selected text.
         if ((endCursorPosition - startCursorPosition) > 0) {
-            mEditText.getText().delete(startCursorPosition, endCursorPosition);
+            mNumberInputEditText.getText().delete(startCursorPosition, endCursorPosition);
         }
 
-        if (startCursorPosition == mEditText.length()) {
-            mEditText.setCursorVisible(false);
+        if (startCursorPosition == mNumberInputEditText.length()) {
+            mNumberInputEditText.setCursorVisible(false);
         } else {
-            mEditText.setCursorVisible(true);
+            mNumberInputEditText.setCursorVisible(true);
         }
     }
 
@@ -188,21 +197,22 @@ public class NumberInputView extends RelativeLayout implements
      * Clear the number input field
      */
     public void clear() {
-        mEditText.setCursorVisible(false);
-        mEditText.getText().clear();
+        mNumberInputEditText.setCursorVisible(false);
+        mNumberInputEditText.getText().clear();
     }
 
     public void setNumber(String number) {
-        mEditText.setText(number);
-        mEditText.setSelection(number.length());
+        mNumberInputEditText.setText(number);
+        mNumberInputEditText.setSelection(number.length());
     }
 
     /**
      * Return the number input as String
-     * @return
+     *
+     * @return String representation of the number
      */
     public String getNumber() {
-        return mEditText.getText().toString();
+        return mNumberInputEditText.getText().toString();
     }
 
     public interface OnInputChangedListener {
@@ -210,7 +220,7 @@ public class NumberInputView extends RelativeLayout implements
     }
 
     public boolean isEmpty() {
-        return mEditText.length() == 0;
+        return mNumberInputEditText.length() == 0;
     }
 
 }

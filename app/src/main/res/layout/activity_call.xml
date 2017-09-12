@@ -125,15 +125,14 @@
                 android:id="@+id/button_bluetooth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/button_transfer"
                 android:layout_toEndOf="@id/button_transfer"
-                android:src="@drawable/ic_bluetooth"
+                android:layout_toRightOf="@id/button_transfer"
                 android:onClick="onClick"
-                android:visibility="gone"
+                android:src="@drawable/ic_bluetooth"
+                android:visibility="visible"
                 app:backgroundTint="@color/call_buttons"
-                app:elevation="0dp"
                 app:borderWidth="0dp"
-                />
+                app:elevation="0dp" />
 
         </RelativeLayout>
 
