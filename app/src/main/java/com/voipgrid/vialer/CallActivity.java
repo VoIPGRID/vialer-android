@@ -445,7 +445,7 @@ public class CallActivity extends LoginRequiredActivity
 
         try {
             unregisterReceiver(mBluetoothButtonReceiver);
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             mRemoteLogger.w("Trying to unregister mBluetoothReceiver not registered.");
         }
 
@@ -1340,15 +1340,18 @@ public class CallActivity extends LoginRequiredActivity
         mRemoteLogger.i("AudioLost or Recovered: ");
         mRemoteLogger.i("==> " + lost);
 
-        if (lost) {
-            // Don't put the call on hold when there is a native call is ringing.
-            mRemoteLogger.e("nativeCallStillRinging?: " + mSipService.nativeCallIsRinging());
-            if (mConnected && !mSipService.nativeCallIsRinging()) {
-                onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
-            }
+        if (mSipService == null) {
+            mRemoteLogger.e("mSipService is null");
         } else {
-            if (mConnected && mSipService.getCurrentCall() != null && mSipService.getCurrentCall().isOnHold()) {
-                onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
+            if (lost) {
+                // Don't put the call on hold when there is a native call is ringing.
+                if (mConnected && !mSipService.nativeCallIsRinging()) {
+                    onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
+                }
+            } else {
+                if (mConnected && mSipService.getCurrentCall() != null && mSipService.getCurrentCall().isOnHold()) {
+                    onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
+                }
             }
         }
     }
