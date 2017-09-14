@@ -2,6 +2,5 @@
 <resources>
     <string name="api_url" translatable="false">https://api.voipgrid.nl/</string>
     <string name="registration_url" translatable="false">https://vialerpush.voipgrid.nl/</string>
-    <string name="web_url" translatable="false">https://mijn.verbonden.nl</string>
-    <string name="web_password_change" translatable="false">/user/login/</string>
+    <string name="web_password_change" translatable="false">https://mijn.verbonden.nl/user/login/</string>
 </resources>
