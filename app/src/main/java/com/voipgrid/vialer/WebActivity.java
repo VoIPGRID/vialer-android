@@ -1,16 +1,13 @@
 package com.voipgrid.vialer;
 
 import android.graphics.Bitmap;
-import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
-import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -77,7 +74,6 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
 
         // Set webview client.
         mWebView.setWebViewClient(new WebViewClient() {
-
             @Override
             public boolean shouldOverrideUrlLoading(WebView webView, String url) {
                 webView.loadUrl(url);
@@ -111,11 +107,6 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
                         view.loadUrl(js);
                     }
                 }
-            }
-
-            @Override
-            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                handler.proceed();
             }
         });
 
@@ -168,7 +159,6 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
      * @param url
      */
     private void loadPage(final String url) {
-        Log.e("ASD", "URL: " + url);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -188,8 +178,6 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-
-            Log.e("ASD", getString(R.string.web_url));
 
             loadPage(getString(
                             R.string.web_autologin,
