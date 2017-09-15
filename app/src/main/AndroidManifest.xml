@@ -84,14 +84,16 @@
         </activity>
 
         <service
-            android:name=".fcm.FcmListenerService"
-            android:enabled="true">
+            android:name=".fcm.FcmMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
+
         <service
-            android:name=".fcm.FcmInstanceIdListenerService">
+            android:name=".fcm.FcmInstanceIdListenerService"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
@@ -103,6 +105,10 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED"/>
+                <data android:scheme="package"  />
             </intent-filter>
         </receiver>
 

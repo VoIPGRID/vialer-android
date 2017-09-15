@@ -123,7 +123,7 @@ public class DialHelper {
      */
     private void callWithSip(String number, String contactName) {
         Intent intent = new Intent(mContext, SipService.class);
-        intent.setAction(SipConstants.ACTION_VIALER_OUTGOING);
+        intent.setAction(SipConstants.ACTION_CALL_OUTGOING);
 
         // set a phoneNumberUri as DATA for the intent to SipServiceOld.
         Uri sipAddressUri = SipUri.sipAddressUri(
