@@ -13,6 +13,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
 import org.pjsip.pjsua2.AudDevManager;
@@ -25,10 +26,8 @@ import org.pjsip.pjsua2.CallSetting;
 import org.pjsip.pjsua2.Media;
 import org.pjsip.pjsua2.OnCallMediaStateParam;
 import org.pjsip.pjsua2.OnCallStateParam;
-import org.pjsip.pjsua2.RtcpStat;
-import org.pjsip.pjsua2.RtcpStreamStat;
+import org.pjsip.pjsua2.OnCallTsxStateParam;
 import org.pjsip.pjsua2.StreamInfo;
-import org.pjsip.pjsua2.StreamStat;
 import org.pjsip.pjsua2.TimeVal;
 import org.pjsip.pjsua2.pjmedia_type;
 import org.pjsip.pjsua2.pjsip_inv_state;
@@ -71,6 +70,29 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     };
 
+    @Override
+    public void onCallTsxState(OnCallTsxStateParam prm) {
+        super.onCallTsxState(prm);
+
+        // Check if the call is an ringing incoming call.
+        if (mCurrentCallState.equals(SipConstants.CALL_INCOMING_RINGING)) {
+            // Early state. Is where a call is being cancelled or completed elsewhere.
+            String packet = prm.getE().getBody().getTsxState().getSrc().getRdata().getWholeMsg();
+            if (!packet.isEmpty()) {
+                CallMissedReason reason = CallMissedReason.UNKNOWN;
+                if (packet.contains(CallMissedReason.CALL_ORIGINATOR_CANCEL.toString())) {
+                    reason = CallMissedReason.CALL_ORIGINATOR_CANCEL;
+                } else if (packet.contains(CallMissedReason.CALL_COMPLETED_ELSEWHERE.toString())) {
+                    reason = CallMissedReason.CALL_COMPLETED_ELSEWHERE;
+                }
+
+                if (reason != CallMissedReason.UNKNOWN) {
+                    mSipBroadcaster.broadcastMissedCalls(reason);
+                }
+            }
+        }
+    }
+
     private void startNetworkingListener() {
         mSipService.registerReceiver(
                 mNetworkStateReceiver,
@@ -111,7 +133,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
                     mSipService.getString(R.string.analytics_event_category_metrics),
                     mSipService.getString(R.string.analytics_event_action_callmetrics),
-                    mSipService.getString(R.string.analytics_event_label_bandwith, getCodec()),
+                    mSipService.getString(R.string.analytics_event_label_bandwidth, getCodec()),
                     (int) this.getBandwidthUsage() * 1024
             );
         }
@@ -158,81 +180,35 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     private String getCodec() {
         try {
-            StreamInfo mStreaminfo = this.getStreamInfo(0);
-            return mStreaminfo.getCodecName();
+            StreamInfo streaminfo = this.getStreamInfo(0);
+            return streaminfo.getCodecName();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return "";
     }
 
-    private long getBandwidthUsage() {
-        long bandwidth = 0;
+    private float getBandwidthUsage() {
+        float bandwidth = 0;
         try {
-            bandwidth = this.getStreamStat(0).getRtcp().getRxStat().getBytes();
+            bandwidth = SipCallStats.calculateBandwidthUsage(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         // Divide to get MB's
-        return 1024 * 1024 / bandwidth;
-    }
-
-    /**
-     *  This will calculate the current MOS value of the call.
-     *
-     *  Credits to: https://www.pingman.com/kb/article/how-is-mos-calculated-in-pingplotter-pro-50.html
-     */
-    private float getR() {
-        float r = 0;
-        try {
-            StreamStat mStreamStat = this.getStreamStat(0);
-
-            RtcpStat rtcpStat = mStreamStat.getRtcp();
-            RtcpStreamStat rtcpStreamStat = rtcpStat.getRxStat();
-
-            float rxJitter = (float) rtcpStreamStat.getJitterUsec().getMean() / 1000;
-            float averageRoundTripTime = (float) rtcpStat.getRttUsec().getMean() / 1000;
-            if (averageRoundTripTime == 0) {
-                averageRoundTripTime = 20; // Estimated by Bob
-            }
-
-            // Take the average latency, add jitter, but double the impact to latency
-            // then add 10 for protocol latencies
-            float effectiveLatency = averageRoundTripTime + rxJitter * 2 + 10;
-
-            // Implement a basic curve - deduct 4 for the R value at 160ms of latency
-            // (round trip).  Anything over that gets a much more aggressive deduction.
-            if (effectiveLatency < 160) {
-                r = 93.2f - (effectiveLatency / 40);
-            } else {
-                r = 93.2f - (effectiveLatency - 120) / 10;
-            }
-
-            // Number of packets send and received.
-            float rxPackets = rtcpStreamStat.getPkt();
-            // Percentage package loss (100 = 100% loss - 0 = 0% loss)
-            float rxLoss = rtcpStreamStat.getLoss();
-            float rxPacketLoss;
-            if (rxPackets == 0) {
-                rxPacketLoss = 100f;
-            } else {
-                rxPacketLoss = (rxLoss / (rxPackets + rxLoss)) * 100f;
-            }
-
-            // Now, let's deduct 2.5 R values per percentage of packet loss.
-            r = r - (rxPacketLoss * 2.5f);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return r;
+        return bandwidth;
     }
 
     private float calculateMos() {
-        float r = getR();
-        if (r > 0) {
-            return 1f + 0.035f * r + .000007f * r * (r - 60f) * (100f - r);
+        float MOS = 0;
+        try {
+            MOS = (float) SipCallStats.calculateMOS(this);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return 0f;
+
+        return MOS;
     }
 
     public String getIdentifier() {

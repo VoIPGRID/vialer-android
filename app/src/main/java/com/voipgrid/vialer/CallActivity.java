@@ -169,6 +169,29 @@ public class CallActivity extends LoginRequiredActivity
         }
     };
 
+    private BroadcastReceiver mCallMissedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            CallMissedReason reason = (CallMissedReason) intent.getSerializableExtra(CALL_MISSED_KEY);
+            String analyticsReason = "";
+
+            if (reason == CallMissedReason.CALL_COMPLETED_ELSEWHERE) {
+                analyticsReason = getString(R.string.analytics_event_label_missed_call_answered_elsewhere);
+            } else if (reason == CallMissedReason.CALL_ORIGINATOR_CANCEL) {
+                analyticsReason = getString(R.string.analytics_event_label_missed_originator_cancelled);
+            }
+
+            if (!analyticsReason.isEmpty()) {
+                mRemoteLogger.i(analyticsReason);
+                mAnalyticsHelper.sendEvent(
+                        getString(R.string.analytics_event_category_call),
+                        getString(R.string.analytics_event_action_inbound),
+                        analyticsReason
+                );
+            }
+        }
+    };
+
     private BroadcastReceiver mBluetoothButtonReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -354,6 +377,9 @@ public class CallActivity extends LoginRequiredActivity
         IntentFilter intentFilter = new IntentFilter(ACTION_BROADCAST_CALL_STATUS);
         mBroadcastManager.registerReceiver(mCallStatusReceiver, intentFilter);
 
+        IntentFilter missedCallsFilter = new IntentFilter(ACTION_BROADCAST_CALL_MISSED);
+        mBroadcastManager.registerReceiver(mCallMissedReceiver, missedCallsFilter);
+
         registerReceiver(mBluetoothButtonReceiver, new IntentFilter(BluetoothMediaButtonReceiver.CALL_BTN));
         registerReceiver(mBluetoothButtonReceiver, new IntentFilter(BluetoothMediaButtonReceiver.DECLINE_BTN));
     }
@@ -445,7 +471,7 @@ public class CallActivity extends LoginRequiredActivity
 
         try {
             unregisterReceiver(mBluetoothButtonReceiver);
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             mRemoteLogger.w("Trying to unregister mBluetoothReceiver not registered.");
         }
 
@@ -1209,10 +1235,17 @@ public class CallActivity extends LoginRequiredActivity
 
     private void finishWithDelay() {
         stopService();
-
+        final Context context = this;
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                // Check to see if the call activity is the last activity.
+                if (isTaskRoot()) {
+                    mRemoteLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
+                    Intent intent = new Intent(context, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
                 finish();  // Close this activity after 3 seconds.
             }
         }, 3000);
@@ -1340,15 +1373,18 @@ public class CallActivity extends LoginRequiredActivity
         mRemoteLogger.i("AudioLost or Recovered: ");
         mRemoteLogger.i("==> " + lost);
 
-        if (lost) {
-            // Don't put the call on hold when there is a native call is ringing.
-            mRemoteLogger.e("nativeCallStillRinging?: " + mSipService.nativeCallIsRinging());
-            if (mConnected && !mSipService.nativeCallIsRinging()) {
-                onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
-            }
+        if (mSipService == null) {
+            mRemoteLogger.e("mSipService is null");
         } else {
-            if (mConnected && mSipService.getCurrentCall() != null && mSipService.getCurrentCall().isOnHold()) {
-                onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
+            if (lost) {
+                // Don't put the call on hold when there is a native call is ringing.
+                if (mConnected && !mSipService.nativeCallIsRinging()) {
+                    onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
+                }
+            } else {
+                if (mConnected && mSipService.getCurrentCall() != null && mSipService.getCurrentCall().isOnHold()) {
+                    onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
+                }
             }
         }
     }

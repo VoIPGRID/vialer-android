@@ -31,7 +31,7 @@ import retrofit2.Response;
  * Listen to messages from FCM. The backend server sends us FCM notifications when we have
  * incoming calls.
  */
-public class FcmListenerService extends FirebaseMessagingService {
+public class FcmMessagingService extends FirebaseMessagingService {
     // Message format constants.
     private final static String MESSAGE_TYPE = "type";
 
@@ -52,7 +52,7 @@ public class FcmListenerService extends FirebaseMessagingService {
     @Override
     public void onCreate() {
         super.onCreate();
-        mRemoteLogger = new RemoteLogger(getApplicationContext(), FcmListenerService.class, 1);
+        mRemoteLogger = new RemoteLogger(getApplicationContext(), FcmMessagingService.class, 1);
         mRemoteLogger.d("onCreate");
     }
 
@@ -92,9 +92,14 @@ public class FcmListenerService extends FirebaseMessagingService {
                 }
             }
 
+            if (!connectionSufficient) {
+                mRemoteLogger.e("Connection is insufficient. For now do nothing and wait for next middleware push");
+                return;
+            }
+
             // Check to see if there is not already a sipServiceActive and the current connection is
             // fast enough to support VoIP call.
-            if (!SipService.sipServiceActive && connectionSufficient) {
+            if (!SipService.sipServiceActive) {
                 String number = data.get(PHONE_NUMBER);
 
                 // Is the current number suppressed.
@@ -181,7 +186,7 @@ public class FcmListenerService extends FirebaseMessagingService {
                                  String messageStartTime) {
         mRemoteLogger.d("startSipService");
         Intent intent = new Intent(this, SipService.class);
-        intent.setAction(SipConstants.ACTION_VIALER_INCOMING);
+        intent.setAction(SipConstants.ACTION_CALL_INCOMING);
 
         // Set a phoneNumberUri as DATA for the intent to SipServiceOld.
         Uri sipAddressUri = SipUri.sipAddressUri(
@@ -194,7 +199,7 @@ public class FcmListenerService extends FirebaseMessagingService {
         intent.putExtra(SipConstants.EXTRA_REQUEST_TOKEN, token);
         intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, phoneNumber);
         intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, callerId);
-        intent.putExtra(FcmListenerService.MESSAGE_START_TIME, messageStartTime);
+        intent.putExtra(FcmMessagingService.MESSAGE_START_TIME, messageStartTime);
 
         startService(intent);
     }

@@ -6,7 +6,7 @@ import android.util.Log;
 import com.logentries.logger.AndroidLogger;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.fcm.FcmListenerService;
+import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
@@ -127,7 +127,7 @@ public class RemoteLogger {
                         message = anonymizeSipLogging(message);
                     }
 
-                    if (TAG.equals(FcmListenerService.class.getSimpleName())) {
+                    if (TAG.equals(FcmMessagingService.class.getSimpleName())) {
                         message = anonymizePayloadLogging(message);
                     }
 

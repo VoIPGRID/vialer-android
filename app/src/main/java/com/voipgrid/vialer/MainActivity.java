@@ -118,7 +118,7 @@ public class MainActivity extends NavigationDrawerActivity implements
         // Set tabs.
         setupTabs();
 
-        FloatingActionButton openDialerFab = (FloatingActionButton) findViewById(R.id.floating_action_button);
+        FloatingActionButton openDialerFab = findViewById(R.id.floating_action_button);
         openDialerFab.setOnClickListener(this);
 
         requestCounter = 0;
