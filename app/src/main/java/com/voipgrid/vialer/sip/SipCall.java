@@ -13,6 +13,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
 import org.pjsip.pjsua2.AudDevManager;
@@ -25,6 +26,7 @@ import org.pjsip.pjsua2.CallSetting;
 import org.pjsip.pjsua2.Media;
 import org.pjsip.pjsua2.OnCallMediaStateParam;
 import org.pjsip.pjsua2.OnCallStateParam;
+import org.pjsip.pjsua2.OnCallTsxStateParam;
 import org.pjsip.pjsua2.StreamInfo;
 import org.pjsip.pjsua2.TimeVal;
 import org.pjsip.pjsua2.pjmedia_type;
@@ -68,6 +70,29 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     };
 
+    @Override
+    public void onCallTsxState(OnCallTsxStateParam prm) {
+        super.onCallTsxState(prm);
+
+        // Check if the call is an ringing incoming call.
+        if (mCurrentCallState.equals(SipConstants.CALL_INCOMING_RINGING)) {
+            // Early state. Is where a call is being cancelled or completed elsewhere.
+            String packet = prm.getE().getBody().getTsxState().getSrc().getRdata().getWholeMsg();
+            if (!packet.isEmpty()) {
+                CallMissedReason reason = CallMissedReason.UNKNOWN;
+                if (packet.contains(CallMissedReason.CALL_ORIGINATOR_CANCEL.toString())) {
+                    reason = CallMissedReason.CALL_ORIGINATOR_CANCEL;
+                } else if (packet.contains(CallMissedReason.CALL_COMPLETED_ELSEWHERE.toString())) {
+                    reason = CallMissedReason.CALL_COMPLETED_ELSEWHERE;
+                }
+
+                if (reason != CallMissedReason.UNKNOWN) {
+                    mSipBroadcaster.broadcastMissedCalls(reason);
+                }
+            }
+        }
+    }
+
     private void startNetworkingListener() {
         mSipService.registerReceiver(
                 mNetworkStateReceiver,
@@ -108,7 +133,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
                     mSipService.getString(R.string.analytics_event_category_metrics),
                     mSipService.getString(R.string.analytics_event_action_callmetrics),
-                    mSipService.getString(R.string.analytics_event_label_bandwith, getCodec()),
+                    mSipService.getString(R.string.analytics_event_label_bandwidth, getCodec()),
                     (int) this.getBandwidthUsage() * 1024
             );
         }

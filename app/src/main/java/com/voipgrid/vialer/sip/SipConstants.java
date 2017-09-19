@@ -1,31 +1,36 @@
 package com.voipgrid.vialer.sip;
 
+import com.voipgrid.vialer.BuildConfig;
+
 /**
  * Interface containing Sip settings or event keys.
  */
 public interface SipConstants {
+    String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
 
     /**
      * ACTION parameter for explicit Intents to start this Service for OUTGOING call.
      */
-    String ACTION_VIALER_OUTGOING = "com.voipgrid.vialer.VIALER_OUTGOING";
+    String ACTION_CALL_OUTGOING = PACKAGE_NAME + ".CALL_OUTGOING";
 
     /**
      * ACTION parameter for explicit Intents to start this Service for INCOMING call.
      */
-    String ACTION_VIALER_INCOMING = "com.voipgrid.vialer.VIALER_INCOMING";
+    String ACTION_CALL_INCOMING = PACKAGE_NAME + ".CALL_INCOMING";
 
     /**
      * ACTION parameter for explicit Intents to communicate Service information with a view through
      * Broadcasts.
      */
-    String ACTION_BROADCAST_CALL_STATUS = "com.voipgrid.vialer.VIALER_CALL_STATUS";
+    String ACTION_BROADCAST_CALL_STATUS = PACKAGE_NAME + ".CALL_STATUS";
 
     /**
      * ACTION parameter for explicit Intents to communicate Service information with a view through
      * Broadcasts.
      */
-    String ACTION_BROADCAST_SERVICE_INFO = "com.voipgrid.vialer.VIALER_SERVICE_INFO";
+    String ACTION_BROADCAST_SERVICE_INFO = PACKAGE_NAME + ".SERVICE_INFO";
+
+    String ACTION_BROADCAST_CALL_MISSED = PACKAGE_NAME + ".CALL_MISSED";
 
     /**
      * CallInteraction broadcast key for sending service info.
@@ -74,6 +79,8 @@ public interface SipConstants {
      */
     String CALL_IDENTIFIER_KEY = "call_identifier";
 
+    String CALL_MISSED_KEY = "call_missed";
+
     /**
      * CallInteraction broadcast type for communicating a "UNHOLD" to the SIP service through
      * Broadcasts.
@@ -94,6 +101,22 @@ public interface SipConstants {
     String CALL_INVALID_STATE = "CALL_INVALID_STATE";
     String CALL_MEDIA_FAILED = "CALL_MEDIA_FAILED";
     String CALL_UPDATE_MICROPHONE_VOLUME_FAILED = "CALL_UPDATE_MICROPHONE_VOLUME_FAILED";
+
+    enum CallMissedReason {
+        UNKNOWN("UNKNOWN"),
+        CALL_ORIGINATOR_CANCEL("ORIGINATOR_CANCEL"),
+        CALL_COMPLETED_ELSEWHERE("Call completed elsewhere");
+
+        private String stringValue;
+        CallMissedReason(String toString) {
+            stringValue = toString;
+        }
+
+        @Override
+        public String toString() {
+            return stringValue;
+        }
+    }
 
     // Volume for the ringing tone on a scale of 0 - 100.
     int RINGING_VOLUME = 75;

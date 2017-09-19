@@ -246,11 +246,11 @@ public class SipService extends Service {
         Uri number = intent.getData();
 
         switch (mInitialCallType) {
-            case SipConstants.ACTION_VIALER_INCOMING:
+            case SipConstants.ACTION_CALL_INCOMING:
                 mRemoteLogger.d("incomingCall");
                 mIncomingCallDetails = intent;
                 break;
-            case SipConstants.ACTION_VIALER_OUTGOING:
+            case SipConstants.ACTION_CALL_OUTGOING:
                 mRemoteLogger.d("outgoingCall");
                 makeCall(
                         number,
@@ -343,9 +343,10 @@ public class SipService extends Service {
         intent.putExtra(CallActivity.CONTACT_NAME, sipCall.getCallerId());
         intent.putExtra(CallActivity.PHONE_NUMBER, sipCall.getPhoneNumber());
 
+        sipServiceActive = true;
+
         startActivity(intent);
 
-        sipServiceActive = true;
     }
 
     /**
@@ -364,8 +365,8 @@ public class SipService extends Service {
         intent.setDataAndType(sipAddressUri, CallActivity.TYPE_INCOMING_CALL);
         intent.putExtra(CallActivity.CONTACT_NAME, callerId);
         intent.putExtra(CallActivity.PHONE_NUMBER, number);
-        startActivity(intent);
         sipServiceActive = true;
+        startActivity(intent);
     }
 
     /**
