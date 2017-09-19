@@ -40,12 +40,6 @@
         android:name="android.hardware.sensor.proximity"
         android:required="false" />
 
-    <permission
-        android:name=".permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-
-    <uses-permission android:name=".permission.C2D_MESSAGE" />
-
     <application
         android:name=".VialerApplication"
         android:allowBackup="true"
