@@ -203,4 +203,10 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
         startService(intent);
     }
+
+    @Override
+    public void onDeletedMessages() {
+        super.onDeletedMessages();
+        mRemoteLogger.d("Message deleted on the FCM server.");
+    }
 }

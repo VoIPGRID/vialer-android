@@ -59,7 +59,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mCallerId;
     private String mIdentifier;
     private String mPhoneNumber;
-    private  String mCurrentCallState;
+    private String mCurrentCallState = SipConstants.CALL_INVALID_STATE;
 
     private int mNetworkSwitchTime = 0;
 
