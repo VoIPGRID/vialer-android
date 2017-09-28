@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.logging;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import com.logentries.logger.AndroidLogger;
@@ -106,7 +107,11 @@ public class RemoteLogger {
      * @return
      */
     private String formatMessage(String tag, String message) {
-        return tag + " " + mIdentifier + " - " + getConnectionType() + " - " + message;
+        return tag + " " + mIdentifier + " - " + getDeviceName()  + " - " + getConnectionType() + " - " + message;
+    }
+
+    private String getDeviceName() {
+        return Build.BRAND + " " + Build.PRODUCT + " " + "(" + Build.MODEL + ")";
     }
 
     private String getConnectionType() {
