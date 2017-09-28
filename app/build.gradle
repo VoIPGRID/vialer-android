@@ -8,7 +8,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 26
         versionCode 68
-        versionName "5.1 - Alpha 03"
+        versionName "5.1 Alpha 03"
         multiDexEnabled true
         ndk {
             moduleName "pjsua2"

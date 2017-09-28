@@ -24,8 +24,8 @@ public class Preferences {
 
     public static final String CONNECTION_PREFERENCE = "CONNECTION_PREFERENCE";
     public static final long CONNECTION_PREFERENCE_NONE = -10;
-    public static final long CONNECTION_PREFERENCE_WIFI = ConnectivityHelper.TYPE_WIFI;
-    public static final long CONNECTION_PREFERENCE_LTE = ConnectivityHelper.TYPE_LTE;
+    public static final long CONNECTION_PREFERENCE_WIFI = ConnectivityHelper.Connection.WIFI.toInt();
+    public static final long CONNECTION_PREFERENCE_LTE = ConnectivityHelper.Connection.LTE.toInt();
 
 
     public static final boolean DEFAULT_VALUE_HAS_SIP_ENABLED = true;

@@ -62,7 +62,7 @@ public class SipConfig implements AccountStatus {
     private boolean mReRegisterAccount = false;
     private boolean mHasRespondedToMiddleware = false;
     private int mCurrentTransportId;
-    private int mLatestConnectionType;
+    private ConnectivityHelper.Connection mLatestConnectionType;
     private static Map<String, Short> sCodecPrioMapping;
 
     private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
@@ -356,7 +356,7 @@ public class SipConfig implements AccountStatus {
     private void handleNetworkStateChange(Context context) {
         mRemoteLogger.d("handleNetworkStateChange");
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(context);
-        int connectionType = ConnectivityHelper.get(context).getConnectionType();
+        ConnectivityHelper.Connection connectionType = ConnectivityHelper.get(context).getConnectionType();
 
         if (!(mLatestConnectionType == connectionType) && connectivityHelper.hasNetworkConnection()) {
             mReRegisterAccount = true;
