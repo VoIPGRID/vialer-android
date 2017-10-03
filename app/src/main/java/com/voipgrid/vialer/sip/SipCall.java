@@ -196,7 +196,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             e.printStackTrace();
         }
 
-        // Divide to get MB's
         return bandwidth;
     }
 

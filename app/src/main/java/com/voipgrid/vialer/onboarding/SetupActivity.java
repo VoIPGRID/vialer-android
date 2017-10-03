@@ -401,8 +401,6 @@ public class SetupActivity extends RemoteLoggingActivity implements
                 e.printStackTrace();
             }
 
-            Log.e("ASD", errorString);
-
             if (errorString.equals("You need to change your password in the portal")) {
                 WebActivityHelper webHelper = new WebActivityHelper(this);
                 webHelper.startWebActivity(

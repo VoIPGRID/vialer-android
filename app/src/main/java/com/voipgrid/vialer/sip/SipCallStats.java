@@ -99,6 +99,7 @@ class SipCallStats {
         RtcpStat rtcpStat = streamStat.getRtcp();
         RtcpStreamStat rtcpStreamRxStat = rtcpStat.getRxStat();
 
+        // Divide to get MB's
         return 1024 * 1024 / rtcpStreamRxStat.getBytes();
     }
 

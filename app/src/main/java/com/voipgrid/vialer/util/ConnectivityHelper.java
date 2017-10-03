@@ -45,23 +45,6 @@ public class ConnectivityHelper {
         }
     }
 
-//    public static final int TYPE_NO_CONNECTION = -1;
-//    public static final int TYPE_SLOW = 0;
-//    public static final int TYPE_WIFI = 1;
-//    public static final int TYPE_LTE = 2;
-//    public static final int TYPE_HSDPA = 3;
-//    public static final int TYPE_HSPAP = 4;
-//    public static final int TYPE_HSUPA = 5;
-//    public static final int TYPE_EVDO_B = 6;
-//
-//    public static final String CONNECTION_WIFI = "Wifi";
-//    public static final String CONNECTION_4G = "4G";
-//    public static final String CONNECTION_HSDPA = "HSDPA"; // ~ 2-14 Mbps
-//    public static final String CONNECTION_HSPAP = "HSPAP"; // ~ 10-20 Mbps
-//    public static final String CONNECTION_HSUPA = "HSUPA"; // ~ 1-23 Mbps
-//    public static final String CONNECTION_EVDO_B = "EVDO_B"; // ~ 5 Mbps
-//    public static final String CONNECTION_UNKNOWN = "unknown";
-
     private final ConnectivityManager mConnectivityManager;
     private final TelephonyManager mTelephonyManager;
     public static boolean mWifiKilled = false;
