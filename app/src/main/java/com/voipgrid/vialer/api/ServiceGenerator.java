@@ -179,7 +179,7 @@ public class ServiceGenerator {
         return retrofit.create(serviceClass);
     }
 
-    public static Cache getCache(Context context) {
+    private static Cache getCache(Context context) {
         return new Cache(context.getCacheDir(), 1024 * 1024 * 10);
     }
 

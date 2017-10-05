@@ -38,7 +38,12 @@
     <string name="analytics_event_label_success" translatable="false">Success</string>
     <string name="analytics_event_label_fail" translatable="false">Fail</string>
     <string name="analytics_event_label_mos" translatable="false">MOS for AudioCodec:%1$s on Networktype:%2$s</string>
-    <string name="analytics_event_label_bandwith" translatable="false">Bandwidth for AudioCodec:%1$s</string>
+    <string name="analytics_event_label_bandwidth" translatable="false">Bandwidth for AudioCodec:%1$s</string>
+
+    <string name="analytics_event_label_missed_originator_cancelled" translatable="false">Missed - Originator cancelled</string>
+    <string name="analytics_event_label_missed_call_answered_elsewhere" translatable="false">Missed - Call answered elsewhere</string>
+    <string name="analytics_event_label_declined_insufficient_internet_connection" translatable="false">Declined - Insufficient internet connection</string>
+    <string name="analytics_event_label_declined_availability_not_available" translatable="false">Declined - Availability is set to ‘Not available’</string>
 
     <string name="analytics_event_label_connect_a_b" translatable="false">ConnectAB</string>
     <string name="analytics_event_label_sip" translatable="false">SIP</string>
@@ -48,5 +53,6 @@
     <string name="analytics_dial_plan_title" translatable="false">DialplanWebview</string>
     <string name="analytics_add_destination_title" translatable="false">AddFixedDestinationWebView</string>
     <string name="analytics_user_change" translatable="false">UserProfileWebView</string>
+    <string name="analytics_password_change" translatable="false">PasswordChangeWebView</string>
     <string name="analytics_info_title" translatable="false">Info</string>
 </resources>

@@ -3,6 +3,7 @@ package com.voipgrid.vialer;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,7 +25,7 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.MiddlewareHelper;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -275,7 +276,7 @@ public class AccountActivity extends LoginRequiredActivity implements
 
         if (!isChecked) {
             // Unregister at middleware.
-            MiddlewareHelper.executeUnregisterTask(this);
+            MiddlewareHelper.unregister(this);
             // Stop the sipservice.
             stopService(new Intent(this, SipService.class));
             mSipIdEditText.setVisibility(View.GONE);
@@ -321,8 +322,8 @@ public class AccountActivity extends LoginRequiredActivity implements
     }
 
     @Override
-    public void onResponse(Call call, Response response) {
-        if (response.isSuccess()) {
+    public void onResponse(@NonNull Call call, @NonNull Response response) {
+        if (response.isSuccessful()) {
             // Success callback for updating mobile number.
             // Update the systemuser.
             mJsonStorage.save(mSystemUser);
@@ -342,7 +343,7 @@ public class AccountActivity extends LoginRequiredActivity implements
     }
 
     @Override
-    public void onFailure(Call call, Throwable t) {
+    public void onFailure(@NonNull Call call, @NonNull Throwable t) {
         failedFeedback();
     }
 

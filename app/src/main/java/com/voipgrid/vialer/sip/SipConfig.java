@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
@@ -14,7 +15,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.fcm.FcmListenerService;
+import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
@@ -61,7 +62,7 @@ public class SipConfig implements AccountStatus {
     private boolean mReRegisterAccount = false;
     private boolean mHasRespondedToMiddleware = false;
     private int mCurrentTransportId;
-    private int mLatestConnectionType;
+    private ConnectivityHelper.Connection mLatestConnectionType;
     private static Map<String, Short> sCodecPrioMapping;
 
     private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
@@ -188,7 +189,7 @@ public class SipConfig implements AccountStatus {
         logConfig.setWriter(mSipLogWriter);
         logConfig.setDecor(logConfig.getDecor() &
                 ~(pj_log_decoration.PJ_LOG_HAS_CR.swigValue() |
-                        pj_log_decoration.PJ_LOG_HAS_NEWLINE.swigValue())
+                  pj_log_decoration.PJ_LOG_HAS_NEWLINE.swigValue())
         );
     }
 
@@ -232,7 +233,6 @@ public class SipConfig implements AccountStatus {
         }
 
         TransportConfig transportConfig = createTransportConfig();
-
         try {
             mCurrentTransportId = endpoint.transportCreate(getTransportType(), transportConfig);
             endpoint.libStart();
@@ -356,7 +356,7 @@ public class SipConfig implements AccountStatus {
     private void handleNetworkStateChange(Context context) {
         mRemoteLogger.d("handleNetworkStateChange");
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(context);
-        int connectionType = ConnectivityHelper.get(context).getConnectionType();
+        ConnectivityHelper.Connection connectionType = ConnectivityHelper.get(context).getConnectionType();
 
         if (!(mLatestConnectionType == connectionType) && connectivityHelper.hasNetworkConnection()) {
             mReRegisterAccount = true;
@@ -402,7 +402,7 @@ public class SipConfig implements AccountStatus {
         }
 
         String url = incomingCallDetails.getStringExtra(SipConstants.EXTRA_RESPONSE_URL);
-        String messageStartTime = incomingCallDetails.getStringExtra(FcmListenerService.MESSAGE_START_TIME);
+        String messageStartTime = incomingCallDetails.getStringExtra(FcmMessagingService.MESSAGE_START_TIME);
         String token = incomingCallDetails.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN);
 
         // Set responded as soon as possible to avoid duplicate requests due to multiple
@@ -441,8 +441,8 @@ public class SipConfig implements AccountStatus {
         retrofit2.Call<ResponseBody> call = registrationApi.reply(token, true, messageStartTime);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(retrofit2.Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (!response.isSuccess()) {
+            public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (!response.isSuccessful()) {
                     mRemoteLogger.w(
                             "Unsuccessful response to middleware: " + Integer.toString(response.code()));
                     mSipService.stopSelf();
@@ -450,7 +450,7 @@ public class SipConfig implements AccountStatus {
             }
 
             @Override
-            public void onFailure(retrofit2.Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Throwable t) {
                 mRemoteLogger.w("Failed sending response to middleware");
                 mSipService.stopSelf();
             }
@@ -477,7 +477,7 @@ public class SipConfig implements AccountStatus {
         }
 
         // Check if it is an incoming call and we did not respond to the middleware already.
-        if (mSipService.getInitialCallType().equals(SipConstants.ACTION_VIALER_INCOMING) && !mHasRespondedToMiddleware) {
+        if (mSipService.getInitialCallType().equals(SipConstants.ACTION_CALL_INCOMING) && !mHasRespondedToMiddleware) {
             respondToMiddleware();
         }
     }

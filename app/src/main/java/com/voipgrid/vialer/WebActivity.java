@@ -1,10 +1,14 @@
 package com.voipgrid.vialer;
 
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
@@ -15,6 +19,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.AutoLoginToken;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 
 import java.io.UnsupportedEncodingException;
@@ -44,30 +49,31 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
 
-        /* set the Toolbar to use as ActionBar */
+        // Set the Toolbar to use as ActionBar
         setSupportActionBar((Toolbar) findViewById(R.id.action_bar));
 
-        /* set the Toolbar title */
+        // Set the Toolbar title
         getSupportActionBar().setTitle(getIntent().getStringExtra(TITLE));
 
-        /* enabled home as up for the Toolbar */
+        // Enabled home as up for the Toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        /* enabled home button for the Toolbar */
+        // Enabled home button for the Toolbar
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        /* get the ProgressBar */
+        // Get the ProgressBar
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
-        /* get the WebView */
+        // Get the WebView.
         mWebView = (WebView) findViewById(R.id.web_view);
 
-        /* enable javascript */
+        // Enable javascript.
         mWebView.getSettings().setJavaScriptEnabled(true);
 
-        /* set webview client */
-        mWebView.setWebViewClient(new WebViewClient() {
+        mWebView.getSettings().setDomStorageEnabled(true);
 
+        // Set webview client.
+        mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView webView, String url) {
                 webView.loadUrl(url);
@@ -82,8 +88,25 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                mProgressBar.setVisibility(View.INVISIBLE);
                 super.onPageFinished(view, url);
+
+                mProgressBar.setVisibility(View.INVISIBLE);
+
+                if (getIntent().getStringExtra(PAGE).equals(getString(R.string.web_password_change))) {
+                    final String js = "javascript:document.getElementById('id_username').value='" + getIntent().getStringExtra(USERNAME) + "';" +
+                            "document.getElementById('id_password').value='" + getIntent().getStringExtra(PASSWORD) + "';" +
+                            "document.forms[0].submit();";
+                    if (Build.VERSION.SDK_INT >= 19) {
+                        view.evaluateJavascript(js, new ValueCallback<String>() {
+                            @Override
+                            public void onReceiveValue(String s) {
+
+                            }
+                        });
+                    } else {
+                        view.loadUrl(js);
+                    }
+                }
             }
         });
 
@@ -91,7 +114,7 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
         if(uri.startsWith("http")) {
             loadPage(uri);
         } else {
-            /* request an autologin token and load the requested page */
+            // request an autologin token and load the requested page.
             autoLoginToken();
         }
 
@@ -104,6 +127,13 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
+
+        if (getIntent().getStringExtra(PAGE).equals(getString(R.string.web_password_change))) {
+            AccountHelper accountHelper = new AccountHelper(this);
+            accountHelper.clearCredentials();
+        }
         finish();
         return true;
     }
@@ -138,16 +168,17 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
     }
 
     @Override
-    public void onResponse(Call<AutoLoginToken> call, Response<AutoLoginToken> response) {
+    public void onResponse(@NonNull Call<AutoLoginToken> call, @NonNull Response<AutoLoginToken> response) {
         String username = getIntent().getStringExtra(USERNAME);
 
-        if (response.isSuccess() && response.body() != null) {
+        if (response.isSuccessful() && response.body() != null) {
             AutoLoginToken autoLoginToken = response.body();
             try {
                 username = URLEncoder.encode(username, "utf-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
+
             loadPage(getString(
                             R.string.web_autologin,
                             getString(R.string.web_url),
@@ -162,7 +193,7 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
     }
 
     @Override
-    public void onFailure(Call<AutoLoginToken> call, Throwable t) {
+    public void onFailure(@NonNull Call<AutoLoginToken> call, @NonNull Throwable t) {
         failedFeedback(getString(R.string.webactivity_open_page_failed));
     }
 

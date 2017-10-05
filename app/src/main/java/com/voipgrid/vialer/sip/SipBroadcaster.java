@@ -32,4 +32,10 @@ public class SipBroadcaster {
         intent.putExtra(SipConstants.CALL_STATUS_KEY, status);
         mBroadcastManager.sendBroadcast(intent);
     }
+
+    public void broadcastMissedCalls(SipConstants.CallMissedReason reason) {
+        Intent intent = new Intent(SipConstants.ACTION_BROADCAST_CALL_MISSED);
+        intent.putExtra(SipConstants.CALL_MISSED_KEY, reason);
+        mBroadcastManager.sendBroadcast(intent);
+    }
 }

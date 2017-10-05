@@ -9,11 +9,11 @@ import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -44,8 +44,8 @@ public class DialHelper {
     }
 
     public void callNumber(final String number, final String contactName) {
-        if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.TYPE_WIFI && mPreferences.hasSipEnabled()) {
-            if(mPreferences.hasConnectionPreference(mConnectivityHelper.TYPE_LTE)) {
+        if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.Connection.WIFI && mPreferences.hasSipEnabled()) {
+            if(mPreferences.hasConnectionPreference(ConnectivityHelper.Connection.LTE.toInt())) {
                 switchNetworkAndCallNumber(number, contactName);
             } else if(mPreferences.hasConnectionPreference(Preferences.CONNECTION_PREFERENCE_NONE)) {
                 showConnectionPickerDialog(number, contactName);
@@ -123,7 +123,7 @@ public class DialHelper {
      */
     private void callWithSip(String number, String contactName) {
         Intent intent = new Intent(mContext, SipService.class);
-        intent.setAction(SipConstants.ACTION_VIALER_OUTGOING);
+        intent.setAction(SipConstants.ACTION_CALL_OUTGOING);
 
         // set a phoneNumberUri as DATA for the intent to SipServiceOld.
         Uri sipAddressUri = SipUri.sipAddressUri(

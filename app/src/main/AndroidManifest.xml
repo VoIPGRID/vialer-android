@@ -25,7 +25,6 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- For intercepting incoming GSM calls -->
@@ -39,12 +38,6 @@
     <uses-feature
         android:name="android.hardware.sensor.proximity"
         android:required="false" />
-
-    <permission
-        android:name=".permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-
-    <uses-permission android:name=".permission.C2D_MESSAGE" />
 
     <application
         android:name=".VialerApplication"
@@ -90,27 +83,31 @@
         </activity>
 
         <service
-            android:name=".fcm.FcmListenerService"
-            android:enabled="true">
+            android:name=".fcm.FcmMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
+
         <service
-            android:name=".fcm.FcmInstanceIdListenerService">
+            android:name=".fcm.FcmInstanceIdListenerService"
+            android:enabled="true">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
         </service>
 
-        <service android:name=".fcm.FcmRegistrationService" />
-
         <receiver
             android:name=".util.OnBootReceiver"
-            android:label="StartMyServiceAtBootReceiver">
+            android:label="OnBootReceiverBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <!--For HTC devices-->
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
 

@@ -47,6 +47,10 @@ public class SipService extends Service {
     private List<SipCall> mCallList = new ArrayList<>();
     private String mInitialCallType;
 
+    private int mCheckServiceUsedTimer = 10000;
+    private Handler mCheckServiceHandler;
+    private Runnable mCheckServiceRunnable;
+
     private final BroadcastReceiver phoneStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -87,13 +91,20 @@ public class SipService extends Service {
     public static boolean sipServiceActive = false;
 
     /**
-     * Returns boolean representing whether there is a gsm call or not.
+     * Check if there is a native call answered.
+     *
+     * @return boolean true if there is a native call answered.
      */
     public boolean nativeCallHasBeenAnswered() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         return telephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
     }
 
+    /**
+     * See if there is a native GSM call Ringing
+     *
+     * @return boolean true when there is a native GSM call ringing
+     */
     public boolean nativeCallIsRinging() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         return telephonyManager.getCallState() == TelephonyManager.CALL_STATE_RINGING;
@@ -112,7 +123,7 @@ public class SipService extends Service {
     /**
      * SIP does not present Media by default.
      * Use Android's ToneGenerator to play a dial tone at certain required times.
-     * @see # for usage of delayed "mRingbackRunnable" callback.
+     * @see for usage of delayed "mRingbackRunnable" callback.
      */
     private Runnable mRingbackRunnable = new Runnable() {
         @Override
@@ -150,6 +161,19 @@ public class SipService extends Service {
 
         registerReceiver(phoneStateReceiver, filter);
 
+        // Create runnable to check if the SipService is still in use.
+        mCheckServiceHandler = new Handler();
+        mCheckServiceRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // Check if the service is being used after 10 seconds and shutdown the service
+                // if required.
+                checkServiceBeingUsed();
+                mCheckServiceHandler.postDelayed(this, mCheckServiceUsedTimer);
+            }
+        };
+        mCheckServiceHandler.postDelayed(mCheckServiceRunnable, mCheckServiceUsedTimer);
+
         PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
         if (phoneAccount != null) {
             // Try to load PJSIP library.
@@ -164,15 +188,6 @@ public class SipService extends Service {
             mRemoteLogger.w("No sip account when trying to create service");
             stopSelf();
         }
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Check if the service is being used after 5 seconds and shutdown the service
-                // if required.
-                checkServiceBeingUsed();
-            }
-        }, 5000);
     }
 
     private void checkServiceBeingUsed() {
@@ -217,6 +232,8 @@ public class SipService extends Service {
             mRemoteLogger.w("Trying to unregister phoneStateReceiver not registered.");
         }
 
+        mCheckServiceHandler.removeCallbacks(mCheckServiceRunnable);
+
         sipServiceActive = false;
         super.onDestroy();
     }
@@ -229,11 +246,11 @@ public class SipService extends Service {
         Uri number = intent.getData();
 
         switch (mInitialCallType) {
-            case SipConstants.ACTION_VIALER_INCOMING:
+            case SipConstants.ACTION_CALL_INCOMING:
                 mRemoteLogger.d("incomingCall");
                 mIncomingCallDetails = intent;
                 break;
-            case SipConstants.ACTION_VIALER_OUTGOING:
+            case SipConstants.ACTION_CALL_OUTGOING:
                 mRemoteLogger.d("outgoingCall");
                 makeCall(
                         number,
@@ -326,9 +343,10 @@ public class SipService extends Service {
         intent.putExtra(CallActivity.CONTACT_NAME, sipCall.getCallerId());
         intent.putExtra(CallActivity.PHONE_NUMBER, sipCall.getPhoneNumber());
 
+        sipServiceActive = true;
+
         startActivity(intent);
 
-        sipServiceActive = true;
     }
 
     /**
@@ -347,8 +365,8 @@ public class SipService extends Service {
         intent.setDataAndType(sipAddressUri, CallActivity.TYPE_INCOMING_CALL);
         intent.putExtra(CallActivity.CONTACT_NAME, callerId);
         intent.putExtra(CallActivity.PHONE_NUMBER, number);
-        startActivity(intent);
         sipServiceActive = true;
+        startActivity(intent);
     }
 
     /**

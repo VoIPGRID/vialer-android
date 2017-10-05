@@ -9,7 +9,7 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.test.RobolectricPowerMockAbstractTest;
 import com.voipgrid.vialer.util.JsonStorage;
-import com.voipgrid.vialer.util.MiddlewareHelper;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +22,9 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.REGISTRATION_STATUS;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_REGISTERED;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.*;
 
@@ -107,9 +110,9 @@ public class MiddlewareHelperTest extends RobolectricPowerMockAbstractTest {
 
         // Check registration status.
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        int status = preferences.getInt(MiddlewareHelper.Constants.REGISTRATION_STATUS, 10);
+        int status = preferences.getInt(REGISTRATION_STATUS, 10);
 
-        assertEquals(MiddlewareHelper.Constants.STATUS_REGISTERED, status);
+        assertEquals(STATUS_REGISTERED, status);
 
         // Shutdown the fake web server.
         server.shutdown();
@@ -160,9 +163,9 @@ public class MiddlewareHelperTest extends RobolectricPowerMockAbstractTest {
 
         // Check registration status.
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        int status = preferences.getInt(MiddlewareHelper.Constants.REGISTRATION_STATUS, 10);
+        int status = preferences.getInt(REGISTRATION_STATUS, 10);
 
-        assertTrue(status == MiddlewareHelper.Constants.STATUS_UNREGISTERED);
+        assertTrue(status == STATUS_UNREGISTERED);
 
         // Shutdown the fake web server.
         server.shutdown();

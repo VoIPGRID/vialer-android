@@ -1,11 +1,15 @@
 package com.voipgrid.vialer.logging;
 
 import android.content.Context;
+import android.os.Build;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.logentries.logger.AndroidLogger;
+import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
@@ -105,11 +109,26 @@ public class RemoteLogger {
      * @return
      */
     private String formatMessage(String tag, String message) {
-        return tag + " " + mIdentifier + " - " + getConnectionType() + " - " + message;
+        return tag + " " + mIdentifier + " - " + getAppVersion() + " - " + getDeviceName()  + " - " + getConnectionType() + " - " + message;
+    }
+
+    private String getAppVersion() {
+        return BuildConfig.VERSION_NAME;
+    }
+
+    private String getDeviceName() {
+        return Build.BRAND + " " + Build.PRODUCT + " " + "(" + Build.MODEL + ")";
     }
 
     private String getConnectionType() {
-        return ConnectivityHelper.get(mContext).getConnectionTypeString();
+        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(mContext);
+        if (connectivityHelper.getConnectionType() == ConnectivityHelper.Connection.WIFI || connectivityHelper.getConnectionType() == ConnectivityHelper.Connection.NO_CONNECTION) {
+            return connectivityHelper.getConnectionTypeString();
+        } else {
+            TelephonyManager manager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+            String carrierName = manager.getNetworkOperatorName();
+            return connectivityHelper.getConnectionTypeString() + " (" + carrierName + ")";
+        }
     }
     /**
      * Function to log the message for the given tag.
@@ -124,6 +143,10 @@ public class RemoteLogger {
 
                     if (TAG.equals(SipService.class.getSimpleName())) {
                         message = anonymizeSipLogging(message);
+                    }
+
+                    if (TAG.equals(FcmMessagingService.class.getSimpleName())) {
+                        message = anonymizePayloadLogging(message);
                     }
 
                     if (message.contains("\n")) {
@@ -147,6 +170,13 @@ public class RemoteLogger {
         message = Pattern.compile("Digest username=\"(.+?)\"").matcher(message).replaceAll("Digest username=\"<SIP_USERNAME>\"");
         message = Pattern.compile("nonce=\"(.+?)\"").matcher(message).replaceAll("nonce=\"<NONCE>\"");
         message = Pattern.compile("username=(.+?)&").matcher(message).replaceAll("username=<USERNAME>");
+
+        return message;
+    }
+
+    private String anonymizePayloadLogging(String message) {
+        message = Pattern.compile("caller_id=(.+?),").matcher(message).replaceAll("callerid=<CALLER_ID>,");
+        message = Pattern.compile("phonenumber=(.+?),").matcher(message).replaceAll("phonenumber=<PHONENUMBER>,");
 
         return message;
     }

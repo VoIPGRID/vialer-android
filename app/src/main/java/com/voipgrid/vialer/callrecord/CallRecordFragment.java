@@ -3,6 +3,7 @@ package com.voipgrid.vialer.callrecord;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -19,6 +20,7 @@ import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -276,9 +278,9 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     @Override
-    public void onResponse(Call<VoipGridResponse<CallRecord>> call,
-                           Response<VoipGridResponse<CallRecord>> response) {
-        if (response.isSuccess() && response.body() != null) {
+    public void onResponse(@NonNull Call<VoipGridResponse<CallRecord>> call,
+                           @NonNull Response<VoipGridResponse<CallRecord>> response) {
+        if (response.isSuccessful() && response.body() != null) {
             mHaveNetworkRecords = true;
             List<CallRecord> records = response.body().getObjects();
             displayCallRecords(records);
@@ -297,6 +299,11 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     private void failedFeedback(Response response) {
+        if (getActivity() == null) {
+            new RemoteLogger(getContext(), CallRecordFragment.class, 1).e("java.lang.IllegalStateException: Fragment CallRecordFragment{a10f812} not attached to Activity");
+            return;
+        }
+
         String message = getString(R.string.empty_view_default_message);
 
         // Check if authorized.
@@ -306,8 +313,8 @@ public class CallRecordFragment extends ListFragment implements
         if (mAdapter.getCount() == 0) {
             setEmptyView(new EmptyView(getActivity(), message), true);
         } else {
-            /* adapter has cached values and we're not about to overwrite them. However,
-            we do want to notify the user. */
+            // Adapter has cached values and we're not about to overwrite them. However,
+            // we do want to notify the user.
             Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();
         }
         mSwipeRefreshLayout.setRefreshing(false);
