@@ -30,6 +30,7 @@ public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionH
     private void logStackTrace(Throwable exception) {
         RemoteLogger remoteLogger = new RemoteLogger(mContext, RemoteUncaughtExceptionHandler.class, true);
         String stackTrace = Log.getStackTraceString(exception);
+        String traceID = remoteLogger.generateIdentifier();
 
         remoteLogger.e("*************************************");
         remoteLogger.e("************ BEGIN CRASH ************");
@@ -50,7 +51,7 @@ public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionH
         remoteLogger.e("************ CAUSE OF ERROR ************");
         String[] lines = stackTrace.split(System.getProperty("line.separator"));
         for (String line : lines) {
-            remoteLogger.e(line);
+            remoteLogger.e(traceID + "> " + line);
         }
         remoteLogger.e("************ END CRASH **************");
         remoteLogger.e("*************************************");
