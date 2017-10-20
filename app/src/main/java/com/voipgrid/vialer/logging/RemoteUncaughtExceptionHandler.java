@@ -2,11 +2,8 @@ package com.voipgrid.vialer.logging;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.CallSuper;
+import android.support.compat.BuildConfig;
 import android.util.Log;
-
-import com.voipgrid.vialer.BuildConfig;
-
 
 /**
  * Class that sends the uncaught exceptions to remote an presents the regular crash screen
@@ -15,16 +12,17 @@ import com.voipgrid.vialer.BuildConfig;
 public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     private Context mContext;
+    private Thread.UncaughtExceptionHandler mDefaultHandler;
 
     public RemoteUncaughtExceptionHandler(Context context) {
         mContext = context;
+        mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
     }
 
-    @CallSuper
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
         logStackTrace(throwable);
-        Thread.getDefaultUncaughtExceptionHandler().uncaughtException(thread, throwable);
+        mDefaultHandler.uncaughtException(thread, throwable);
     }
 
     private void logStackTrace(Throwable exception) {
