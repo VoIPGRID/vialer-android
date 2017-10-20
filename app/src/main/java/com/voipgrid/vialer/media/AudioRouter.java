@@ -58,6 +58,7 @@ class AudioRouter {
     // states are needed to keep track of intermediate states while the SCO
     // channel is enabled or disabled (switching state can take a few seconds).
     private int mBluetoothScoState = STATE_BLUETOOTH_SCO_INVALID;
+    private int mBluetoothScoPreviousState = STATE_BLUETOOTH_SCO_INVALID;
     private int mBluetoothScoStateBeforeSpeakerOn = STATE_BLUETOOTH_SCO_INVALID;
 
     private boolean mHasBluetoothHeadset = false;
@@ -378,7 +379,7 @@ class AudioRouter {
 
                 // Little hack to catch a single click on the headset. This will sent an KeyEvent to the BluetoothMediaButtonReceiver.
                 if (getAudioRoute() == Constants.ROUTE_BT && !mAudioIsLost) {
-                    if (state == AudioManager.SCO_AUDIO_STATE_DISCONNECTED && hasBluetoothHeadset() && MediaManager.CURRENT_CALL_STATE != Constants.CALL_INVALID && !mSelfDisabledBluetooth) {
+                    if (state == AudioManager.SCO_AUDIO_STATE_DISCONNECTED && hasBluetoothHeadset() && MediaManager.CURRENT_CALL_STATE != Constants.CALL_INVALID && !mSelfDisabledBluetooth && mBluetoothScoPreviousState == STATE_BLUETOOTH_SCO_ON) {
                         mRemoteLogger.i("SCO wants to disconnect but the device is still connected, maybe trigger button click?");
                         if (MediaManager.CURRENT_CALL_STATE == Constants.CALL_ANSWERED) {
                             mRemoteLogger.i("Call already in progress end call");
@@ -400,6 +401,8 @@ class AudioRouter {
                         }
                     }
                 }
+
+                mBluetoothScoPreviousState = mBluetoothScoState;
 
                 switch (state) {
                     case AudioManager.SCO_AUDIO_STATE_CONNECTED:
