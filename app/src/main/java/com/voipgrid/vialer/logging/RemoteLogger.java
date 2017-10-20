@@ -32,6 +32,7 @@ public class RemoteLogger {
 
     private Context mContext;
     private AndroidLogger logEntryLogger = null;
+    private AndroidLogger whiteLabeledLogger = null;
 
     private String mIdentifier;
     private boolean mRemoteLoggingEnabled;
@@ -77,7 +78,7 @@ public class RemoteLogger {
         }
 
         String logEntryToken = mContext.getString(R.string.log_entry_token);
-
+        String secondaryLogEntryToken = mContext.getString(R.string.secondary_log_entry_token);
         // Try to get a existing instance.
         try {
             logEntryLogger =  AndroidLogger.getInstance();
@@ -85,6 +86,9 @@ public class RemoteLogger {
             // Create instance.
             try {
                 logEntryLogger = AndroidLogger.createInstance(mContext, false, false, false, null, 0, logEntryToken, false);
+                if (!secondaryLogEntryToken.isEmpty()) {
+                    whiteLabeledLogger = AndroidLogger.createInstance(mContext, false, false, false, null, 0, secondaryLogEntryToken, false);
+                }
             } catch (IOException io) {
                 io.printStackTrace();
             }
@@ -154,6 +158,9 @@ public class RemoteLogger {
                     }
 
                     logEntryLogger.log(formatMessage(tag, message));
+                    if (whiteLabeledLogger != null) {
+                        whiteLabeledLogger.log(formatMessage(tag, message));
+                    }
                 }
             } catch (Exception e) {
                 // Avoid crashing the app in background logging.
