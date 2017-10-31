@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sip_host" translatable="false">proxy0-acc.voipgrid.nl</string>
+</resources>

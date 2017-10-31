@@ -28,6 +28,14 @@ android {
                 into '.'
             }
         }
+        acceptatie {
+            applicationId "com.voipgrid.vialer"
+            copy {
+                from 'src/acceptatie/'
+                include '*.json'
+                into '.'
+            }
+        }
         voys {
             applicationId "com.voys.app"
             copy {
