@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "25.0.3"
+    buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 71
         versionName "5.1"
         multiDexEnabled true
@@ -78,10 +78,10 @@ repositories {
 }
 
 ext {
-    supportLibVersion = "26.0.2"
+    supportLibVersion = "26.1.0"
     espressoVersion = "2.2"
     androidTestVersion = "0.5"
-    firebaseVersion = "11.2.2"
+    firebaseVersion = "11.4.2"
     jUnitVersion = "4.12"
     powerMockVersion = "1.6.4"
     okHttpVersion = "3.9.0"
@@ -94,9 +94,9 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
     // Modules.
-    compile project(':pjsip')
     compile files('libs/logentries-android.jar')
     compile(name: 'spindle-lock-ring', ext: 'aar')
+    compile(name: 'pjsip', ext: 'aar')
 
     // Support libs.
     compile "com.android.support:multidex:1.0.1"
@@ -112,7 +112,7 @@ dependencies {
     compile "com.google.android.gms:play-services-analytics:${firebaseVersion}"
 
     // Circle image view
-    compile "de.hdodenhof:circleimageview:2.0.0"
+    compile "de.hdodenhof:circleimageview:2.1.0"
     compile "com.amulyakhare:com.amulyakhare.textdrawable:1.0.1"
 
     // Retrofit and OkHttp
