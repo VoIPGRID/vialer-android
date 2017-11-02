@@ -10,6 +10,7 @@ android {
         versionCode 71
         versionName "5.1"
         multiDexEnabled true
+        flavorDimensions "default"
         ndk {
             moduleName "pjsua2"
         }
