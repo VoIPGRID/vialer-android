@@ -7,6 +7,7 @@ import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.api.models.UseEncryption;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.models.ClickToDialParams;
@@ -46,6 +47,9 @@ public interface Api {
 
     @PUT("api/permission/mobile_number/")
     Call<MobileNumber> mobileNumber(@Body MobileNumber mobileNumber);
+
+    @PUT("api/mobile/profile/")
+    Call<UseEncryption> useEncryption(@Body UseEncryption useEncryption);
 
     @POST("api/permission/password_reset/")
     Call<Object> resetPassword(@Body PasswordResetParams params);

@@ -7,23 +7,31 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.voipgrid.vialer.OnUpdateCompleted;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
+import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.api.models.UseEncryption;
+import com.voipgrid.vialer.logging.RemoteLogger;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Class to setup the app to work with the newest code.
  * All methods in this class should only be run once.
  */
-public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVersions {
+public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVersions, Callback<UseEncryption> {
 
-    private static final String LOG_TAG = UpdateHelper.class.getName();
+    private RemoteLogger mRemoteLogger;
     private String mVersionName;
     private Context mContext;
     private Preferences mPreferences;
@@ -31,12 +39,15 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
     private ProgressDialog mProgressDialog;
     private OnUpdateCompleted mListener;
     private final static String VERSION_CODE = "version_code";
+    private Boolean succesfulMigrate = true;
 
-    public UpdateHelper(Context context, OnUpdateCompleted listener){
+    public UpdateHelper(Context context, OnUpdateCompleted listener) {
         mContext = context;
         mJsonStorage = new JsonStorage(mContext);
         mPreferences = new Preferences(mContext);
         this.mListener = listener;
+
+        mRemoteLogger = new RemoteLogger(mContext, UpdateHelper.class);
     }
 
     @Override
@@ -65,14 +76,16 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
         // If the app has updated to a newer version from a older version we will check for upgrades.
         if (currentVersion > lastVersion) {
             if (BuildConfig.DEBUG) {
-                Log.d(LOG_TAG, "Updating to " + mVersionName + " - " + currentVersion);
+                mRemoteLogger.d("Updating to " + mVersionName + " - " + currentVersion);
             }
             // Run all required methods.
-            for (int i = lastVersion; i <= currentVersion; i++){
+            for (int i = lastVersion; i <= currentVersion; i++) {
                 runMethod(i);
             }
         }
-        prefs.edit().putInt(VERSION_CODE, currentVersion).apply();
+        if (succesfulMigrate) {
+            prefs.edit().putInt(VERSION_CODE, currentVersion).apply();
+        }
         return null;
     }
 
@@ -98,6 +111,7 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
 
     /**
      * Method to update application by given versionNumber.
+     *
      * @param version
      */
     private void runMethod(int version) {
@@ -108,11 +122,18 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
             case v4_0:
                 migrateCredentials();
                 break;
+            case v5_2:
+                enableSecureCalling();
+                break;
         }
     }
 
+    /**
+     * Migrate the default settings for sip permissions.
+     * V2_2_1
+     */
     private void setSipEnabled() {
-        if (mPreferences.hasPhoneAccount() && mPreferences.hasSipPermission()){
+        if (mPreferences.hasPhoneAccount() && mPreferences.hasSipPermission()) {
             PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(mContext);
             phoneAccountHelper.savePhoneAccountAndRegister(
                     (PhoneAccount) mJsonStorage.get(PhoneAccount.class));
@@ -121,6 +142,7 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
 
     /**
      * Migrate credentials from systemuser to Account.
+     * V4_0
      */
     private void migrateCredentials() {
         SystemUser user = (SystemUser) mJsonStorage.get(SystemUser.class);
@@ -129,5 +151,36 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
             // Cleanup.
             user.setPassword(null);
         }
+    }
+
+    /**
+     * Migrate secure calling permissions to use secure calling by default.
+     * V5_2
+     */
+    private void enableSecureCalling() {
+        AccountHelper accountHelper = new AccountHelper(mContext);
+
+        Api mApi = ServiceGenerator.createService(
+                mContext,
+                Api.class,
+                mContext.getString(R.string.api_url),
+                accountHelper.getEmail(),
+                accountHelper.getPassword()
+        );
+        Call<UseEncryption> call = mApi.useEncryption(new UseEncryption(true));
+        call.enqueue(this);
+    }
+
+    @Override
+    public void onResponse(Call<UseEncryption> call, Response<UseEncryption> response) {
+        if (!response.isSuccessful()) {
+            succesfulMigrate = false;
+        }
+    }
+
+    @Override
+    public void onFailure(Call<UseEncryption> call, Throwable t) {
+        mRemoteLogger.d("Setting secure calling failed.");
+        succesfulMigrate = false;
     }
 }
