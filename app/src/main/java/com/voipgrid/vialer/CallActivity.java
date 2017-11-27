@@ -783,6 +783,7 @@ public class CallActivity extends LoginRequiredActivity
                     }
                 } else {
                     mOnTransfer = false;
+
                     toggleVisibilityCallInfo(true);
                     swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
 

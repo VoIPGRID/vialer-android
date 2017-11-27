@@ -24,7 +24,6 @@ import org.pjsip.pjsua2.Account;
 import org.pjsip.pjsua2.AccountConfig;
 import org.pjsip.pjsua2.AuthCredInfo;
 import org.pjsip.pjsua2.CallOpParam;
-import org.pjsip.pjsua2.CallSetting;
 import org.pjsip.pjsua2.CodecInfo;
 import org.pjsip.pjsua2.CodecInfoVector;
 import org.pjsip.pjsua2.Endpoint;
@@ -38,6 +37,7 @@ import org.pjsip.pjsua2.UaConfig;
 import org.pjsip.pjsua2.pj_log_decoration;
 import org.pjsip.pjsua2.pjmedia_srtp_use;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
+import org.pjsip.pjsua2.pjsua_call_flag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +56,7 @@ import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_VIA;
  * Class that holds the sip backend (Endpoint + SipAccount).
  */
 public class SipConfig implements AccountStatus {
+
     private static final String TAG = SipConfig.class.getSimpleName();
 
     private Endpoint mEndpoint;
@@ -64,12 +65,9 @@ public class SipConfig implements AccountStatus {
     private SipAccount mSipAccount;
     private SipLogWriter mSipLogWriter;
     private SipService mSipService;
-    private SipIpAddressChange mSipIpAddressChange;
 
-    private boolean mReRegisterAccount = false;
     private boolean mHasRespondedToMiddleware = false;
     private int mCurrentTransportId;
-    private ConnectivityHelper.Connection mLatestConnectionType;
     private static Map<String, Short> sCodecPrioMapping;
     private boolean isChangingNetwork = false;
 
@@ -109,34 +107,36 @@ public class SipConfig implements AccountStatus {
         setCodecPrio();
         mSipAccount = createSipAccount();
         // Start listening for network changes after everything is setup.
-        mLatestConnectionType = ConnectivityHelper.get(mSipService).getConnectionType();
         startNetworkingListener();
     }
 
     private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e("ASD", "network change");
+            mRemoteLogger.d("Received a network change.");
+
             if (isChangingNetwork) {
-                Log.e("AD", "Already changing network");
+                mRemoteLogger.i("There is already a network change in progress.");
                 return;
             }
             isChangingNetwork = true;
 
             final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    doIpSwitch();
-                    isChangingNetwork = false;
-                }
+            handler.postDelayed(() -> {
+                mRemoteLogger.d("Wait 1 sec before doing the network switch");
+                doIpSwitch();
+                isChangingNetwork = false;
             }, 1000);
 
         }
     };
 
+    /**
+     * When there is a change in the network make use of the PJSIP handleIpChange
+     * functionality to handle the change in the network.
+     */
     private void doIpSwitch() {
-        Log.e("AD", "Do the switch");
+        mRemoteLogger.v("doIpSwitch()");
         IpChangeParam ipChangeParam = new IpChangeParam();
         ipChangeParam.setRestartListener(false);
 
@@ -144,6 +144,7 @@ public class SipConfig implements AccountStatus {
         String currentCallState = "";
         if (mSipService != null && mSipService.getCurrentCall() != null) {
             sipCall = mSipService.getCurrentCall();
+            sipCall.setIsIPChangeInProgress(true);
             currentCallState = sipCall.getCurrentCallState();
         }
 
@@ -151,14 +152,11 @@ public class SipConfig implements AccountStatus {
             return;
         }
 
-        if (currentCallState.equals(SipConstants.CALL_INVALID_STATE) || currentCallState.equals(SipConstants.CALL_INCOMING_RINGING)) {
-            return;
-        }
-
-        Log.e("ASD", "Change the ip address");
+        mRemoteLogger.i("Make PJSIP handle the ip address change.");
         try {
             mEndpoint.handleIpChange(ipChangeParam);
         } catch (Exception e) {
+            mRemoteLogger.w("PJSIP failed to change the ip address");
             e.printStackTrace();
         }
     }
@@ -187,7 +185,6 @@ public class SipConfig implements AccountStatus {
         try {
             System.loadLibrary("pjsua2");
         } catch (UnsatisfiedLinkError error) { /* Can not load PJSIP library */
-            Log.e(TAG, error.getMessage());
             mRemoteLogger.e("" + Log.getStackTraceString(error));
             throw new LibraryInitFailedException();
         }
@@ -420,56 +417,6 @@ public class SipConfig implements AccountStatus {
     }
 
     /**
-     * When there is a network connection change start with un-registration.
-     * This is needed to tell asterisks that we are connected to a different ip address.
-     *
-     * @param context
-     */
-    private void handleNetworkStateChange(Context context) {
-        IpChangeParam ipChangeParam = new IpChangeParam();
-        ipChangeParam.setRestartListener(true);
-        ipChangeParam.setRestartLisDelay(10);
-        try {
-            mEndpoint.handleIpChange(ipChangeParam);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-//        mRemoteLogger.d("handleNetworkStateChange");
-//        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(context);
-//        ConnectivityHelper.Connection connectionType = ConnectivityHelper.get(context).getConnectionType();
-//
-//        if (!(mLatestConnectionType == connectionType) && connectivityHelper.hasNetworkConnection()) {
-//            mReRegisterAccount = true;
-//            // Renew sip registration. Unregister would come from the new IP anyway so that
-//            // would not make a lot of sense so we update our existing registration from the
-//            // new IP.
-//            try {
-//                mSipAccount.setRegistration(true);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        mLatestConnectionType = connectionType;
-    }
-
-    /**
-     * Function to re-register to handle IP changes.
-     */
-    private void reRegister() {
-        // TODO Think about reinvites during settings up transfer.
-        try {
-            // Set flag for updating contact header IP.
-            CallOpParam callOpParam = new CallOpParam(true);
-            CallSetting callSetting = callOpParam.getOpt();
-            callSetting.setFlag(PJSUA_CALL_UPDATE_CONTACT.swigValue());
-            mSipService.getCurrentCall().reinvite(callOpParam);
-            mReRegisterAccount = false;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Response to the middleware on a incoming call to notify asterisk we are ready to accept
      * calls.
      */
@@ -541,19 +488,17 @@ public class SipConfig implements AccountStatus {
     public void onAccountRegistered(Account account, OnRegStateParam param) {
         mRemoteLogger.d("onAccountRegistered");
 
-        try {
-            // After registration setup new transport to reflect learned external IP to be used
-            // by sip headers.
-            mEndpoint.transportClose(mCurrentTransportId);
-            mCurrentTransportId = mEndpoint.transportCreate(getTransportType(), createTransportConfig());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // After the account has registered try to re-invite the current call
-        // so the contact uri will be updated for the call.
-        if (mReRegisterAccount) {
-            reRegister();
+        if (mSipService.getCurrentCall() != null) {
+            SipCall sipCall = mSipService.getCurrentCall();
+            if (sipCall.isIpChangeInProgress() && sipCall.getCurrentCallState().equals(SipConstants.CALL_INCOMING_RINGING)) {
+                CallOpParam callOpParam = new CallOpParam();
+                callOpParam.setOptions(pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT.swigValue());
+                try {
+                    sipCall.reinvite(callOpParam);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         // Check if it is an incoming call and we did not respond to the middleware already.

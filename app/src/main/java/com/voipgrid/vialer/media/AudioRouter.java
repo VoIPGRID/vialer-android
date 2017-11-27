@@ -379,7 +379,7 @@ class AudioRouter {
 
                 // Little hack to catch a single click on the headset. This will sent an KeyEvent to the BluetoothMediaButtonReceiver.
                 if (getAudioRoute() == Constants.ROUTE_BT && !mAudioIsLost) {
-                    if (state == AudioManager.SCO_AUDIO_STATE_DISCONNECTED && hasBluetoothHeadset() && MediaManager.CURRENT_CALL_STATE != Constants.CALL_INVALID && !mSelfDisabledBluetooth && mBluetoothScoPreviousState == STATE_BLUETOOTH_SCO_ON) {
+                    if (state == AudioManager.SCO_AUDIO_STATE_DISCONNECTED && hasBluetoothHeadset() && MediaManager.CURRENT_CALL_STATE != Constants.CALL_INVALID && !mSelfDisabledBluetooth) {
                         mRemoteLogger.i("SCO wants to disconnect but the device is still connected, maybe trigger button click?");
                         if (MediaManager.CURRENT_CALL_STATE == Constants.CALL_ANSWERED) {
                             mRemoteLogger.i("Call already in progress end call");

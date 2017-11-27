@@ -1,9 +1,6 @@
 package com.voipgrid.vialer.sip;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.telephony.TelephonyManager;
@@ -60,15 +57,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mIdentifier;
     private String mPhoneNumber;
     private String mCurrentCallState = SipConstants.CALL_INVALID_STATE;
-
-    private int mNetworkSwitchTime = 0;
-
-    private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            handleNetworkStateChange();
-        }
-    };
+    private boolean mIpChangeInProgress = false;
 
     @Override
     public void onCallTsxState(OnCallTsxStateParam prm) {
@@ -93,30 +82,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     }
 
-    private void startNetworkingListener() {
-        mSipService.registerReceiver(
-                mNetworkStateReceiver,
-                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        );
-    }
-
-    private void stopNetworkingListener() {
-        try {
-            mSipService.unregisterReceiver(mNetworkStateReceiver);
-        } catch(IllegalArgumentException e) {
-            mRemoteLogger.w("Trying to unregister mNetworkStateReceiver not registered.");
-        }
-    }
-
-    private void handleNetworkStateChange() {
-        if (mCallIsConnected) {
-            sendMos();
-            mNetworkSwitchTime = getCallDuration();
-        }
-    }
-
     private void sendMos() {
-        if ((getCallDuration() - mNetworkSwitchTime) > 10) {
+        if (getCallDuration() > 10) {
             float mos = this.calculateMos();
             new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
                     mSipService.getString(R.string.analytics_event_category_metrics),
@@ -139,6 +106,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     }
 
+    void setIsIPChangeInProgress(boolean inProgress){
+        mIpChangeInProgress = inProgress;
+    }
+
     /**
      * Constructor used for outbound calls.
      * @param sipService
@@ -149,7 +120,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipService = sipService;
         mRemoteLogger = mSipService.getRemoteLogger();
         mSipBroadcaster = mSipService.getSipBroadcaster();
-        startNetworkingListener();
     }
 
     /**
@@ -163,7 +133,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipService = sipService;
         mRemoteLogger = mSipService.getRemoteLogger();
         mSipBroadcaster = mSipService.getSipBroadcaster();
-        startNetworkingListener();
     }
 
     public int getCallDuration() {
@@ -313,6 +282,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         try {
             CallInfo info = getInfo();  // Check to see if we can get CallInfo with this callback.
             pjsip_inv_state callState = info.getState();
+            mRemoteLogger.e("CallState changed!");
+            mRemoteLogger.e(callState.toString());
 
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                 // We are handling a outgoing call.
@@ -323,9 +294,13 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 onCallStopRingback();
                 onCallConnected();
             } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED) {
-                onCallStopRingback();
-                onCallDisconnected();
-                delete();
+                if (mIpChangeInProgress && mCurrentCallState.equals(SipConstants.CALL_INCOMING_RINGING)) {
+                    mRemoteLogger.d("Network switch during ringing phase.");
+                } else {
+                    onCallStopRingback();
+                    onCallDisconnected();
+                    delete();
+                }
             }
 
         } catch (Exception e) {
@@ -455,18 +430,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     }
 
-    public void onCallConnected() {
+    private void onCallConnected() {
         mRemoteLogger.d("onCallConnected");
         mCallIsConnected = true;
         mCurrentCallState = SipConstants.CALL_CONNECTED_MESSAGE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_CONNECTED_MESSAGE);
     }
 
-    public void onCallDisconnected() {
+    private void onCallDisconnected() {
         mRemoteLogger.d("onCallDisconnected");
         sendMos();
         sendBandwidth();
-        stopNetworkingListener();
 
         // Play end of call beep only when the remote party hangs up and the call was connected.
         if (!mUserHangup && mCallIsConnected && !mCallIsTransferred) {
@@ -479,7 +453,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_DISCONNECTED_MESSAGE);
     }
 
-    public void onCallInvalidState(Throwable fault) {
+    private void onCallInvalidState(Throwable fault) {
         mRemoteLogger.d("onCallInvalidState");
         mRemoteLogger.d("" + Log.getStackTraceString(fault));
         mSipService.removeCallFromList(this);
@@ -488,7 +462,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         fault.printStackTrace();
     }
 
-    public void onCallMediaAvailable(AudioMedia media) {
+    private void onCallMediaAvailable(AudioMedia media) {
         mRemoteLogger.d("onCallMediaAvailable");
         try {
             // There is media available so stop the ringback.
@@ -507,36 +481,40 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     }
 
-    public void onCallMediaUnavailable() {
+    private void onCallMediaUnavailable() {
         mRemoteLogger.d("onCallMediaUnavailable");
     }
 
-    public void onCallStartRingback() {
-        Log.e(TAG, "ringbackstarted: " + mRingbackStarted);
+    private void onCallStartRingback() {
+        mRemoteLogger.d("onCallStartRingback: " + mRingbackStarted);
         if (!mRingbackStarted) {
+            mRemoteLogger.d("Ringback not started. Start it.");
             mRingbackStarted = true;
-            mRemoteLogger.d("onCallStartRingback");
             mSipService.startRingback();
         }
     }
 
-    public void onCallStopRingback() {
+    private void onCallStopRingback() {
         mRemoteLogger.d("onCallStopRingback");
         mSipService.stopRingback();
     }
 
-    public boolean getCallIsTransferred() {
+    boolean getCallIsTransferred() {
         return mCallIsTransferred;
     }
 
-    public void setCallIsTransferred(boolean transferred) {
+    private void setCallIsTransferred(boolean transferred) {
         mCallIsTransferred = transferred;
     }
 
-    public Object getConnectionType() {
+    private Object getConnectionType() {
         return new ConnectivityHelper(
                 (ConnectivityManager) mSipService.getSystemService(mSipService.CONNECTIVITY_SERVICE),
                 (TelephonyManager) mSipService.getSystemService(mSipService.TELEPHONY_SERVICE)
         ).getConnectionTypeString();
+    }
+
+    boolean isIpChangeInProgress() {
+        return mIpChangeInProgress;
     }
 }
