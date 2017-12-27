@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
-        targetSdkVersion 26
-        versionCode 74
-        versionName "5.1"
+        targetSdkVersion 27
+        versionCode 75
+        versionName "5.2"
         multiDexEnabled true
         flavorDimensions "default"
         ndk {
@@ -66,23 +66,25 @@ android {
     dexOptions {
         javaMaxHeapSize "4g"
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 repositories {
     jcenter()
-    maven {
-        url "https://maven.google.com"
-    }
+    google()
     flatDir {
         dirs 'libs'
     }
 }
 
 ext {
-    supportLibVersion = "26.1.0"
+    supportLibVersion = "27.0.2"
     espressoVersion = "2.2"
     androidTestVersion = "0.5"
-    firebaseVersion = "11.4.2"
+    firebaseVersion = "11.6.2"
     jUnitVersion = "4.12"
     powerMockVersion = "1.6.4"
     okHttpVersion = "3.9.0"
@@ -100,7 +102,7 @@ dependencies {
     compile(name: 'pjsip', ext: 'aar')
 
     // Support libs.
-    compile "com.android.support:multidex:1.0.1"
+    compile 'com.android.support:multidex:1.0.2'
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"
     compile "com.android.support:support-annotations:${supportLibVersion}"
@@ -113,8 +115,8 @@ dependencies {
     compile "com.google.android.gms:play-services-analytics:${firebaseVersion}"
 
     // Circle image view
-    compile "de.hdodenhof:circleimageview:2.1.0"
-    compile "com.amulyakhare:com.amulyakhare.textdrawable:1.0.1"
+    compile 'de.hdodenhof:circleimageview:2.1.0'
+    compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
 
     // Retrofit and OkHttp
     compile "com.squareup.retrofit2:retrofit:${retroFitVersion}"

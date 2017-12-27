@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="api_url" translatable="false">https://api.voipgrid.nl/</string>
+    <string name="api_url" translatable="false">https://partner.voipgrid.nl/</string>
     <string name="registration_url" translatable="false">https://vialerpush.voipgrid.nl/</string>
 
     <string name="web_add_destination" translatable="false">/fixeddestination/add/</string>
