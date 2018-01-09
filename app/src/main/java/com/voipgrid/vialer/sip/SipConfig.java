@@ -115,6 +115,11 @@ public class SipConfig implements AccountStatus {
         public void onReceive(Context context, Intent intent) {
             mRemoteLogger.d("Received a network change.");
 
+            if(isInitialStickyBroadcast()) {
+                mRemoteLogger.i("Ignoring network change as broadcast is old (sticky).");
+                return;
+            }
+
             if (isChangingNetwork) {
                 mRemoteLogger.i("There is already a network change in progress.");
                 return;
