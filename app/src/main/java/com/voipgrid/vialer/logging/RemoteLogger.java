@@ -9,6 +9,7 @@ import com.logentries.logger.AndroidLogger;
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -47,6 +48,7 @@ public class RemoteLogger {
 
         mLogToConsole = logToConsole == 1;
     }
+
     public RemoteLogger(Context context, Class thisClass, boolean forced) {
         mContext = context;
         createLogger();
@@ -58,6 +60,18 @@ public class RemoteLogger {
         } else {
             mRemoteLoggingEnabled = new Preferences(mContext).remoteLoggingIsActive();
         }
+    }
+
+    public RemoteLogger(Class thisClass) {
+        this(VialerApplication.get(), thisClass);
+    }
+
+    public RemoteLogger(Class thisClass, int logToConsole) {
+        this(VialerApplication.get(), thisClass, logToConsole);
+    }
+
+    public RemoteLogger(Class thisClass, boolean forced) {
+        this(VialerApplication.get(), thisClass, forced);
     }
 
     public void forceRemoteLogging(boolean forced) {
