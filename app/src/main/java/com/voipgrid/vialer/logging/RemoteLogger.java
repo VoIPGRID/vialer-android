@@ -39,18 +39,18 @@ public class RemoteLogger {
     private boolean mRemoteLoggingEnabled;
     private boolean mLogToConsole = false;
 
-    public RemoteLogger(Context context, Class thisClass) {
-        this(context, thisClass, false);
+    public RemoteLogger(Class thisClass) {
+        this(thisClass, false);
     }
 
-    public RemoteLogger(Context context, Class thisClass, int logToConsole) {
-        this(context, thisClass, false);
+    public RemoteLogger(Class thisClass, int logToConsole) {
+        this(thisClass, false);
 
         mLogToConsole = logToConsole == 1;
     }
 
-    public RemoteLogger(Context context, Class thisClass, boolean forced) {
-        mContext = context;
+    public RemoteLogger(Class thisClass, boolean forced) {
+        mContext = VialerApplication.get();
         createLogger();
         mIdentifier = new Preferences(mContext).getLoggerIdentifier();
 
@@ -60,18 +60,6 @@ public class RemoteLogger {
         } else {
             mRemoteLoggingEnabled = new Preferences(mContext).remoteLoggingIsActive();
         }
-    }
-
-    public RemoteLogger(Class thisClass) {
-        this(VialerApplication.get(), thisClass);
-    }
-
-    public RemoteLogger(Class thisClass, int logToConsole) {
-        this(VialerApplication.get(), thisClass, logToConsole);
-    }
-
-    public RemoteLogger(Class thisClass, boolean forced) {
-        this(VialerApplication.get(), thisClass, forced);
     }
 
     public void forceRemoteLogging(boolean forced) {

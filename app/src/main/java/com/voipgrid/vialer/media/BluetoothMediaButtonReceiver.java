@@ -36,7 +36,7 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
         mContext = context;
 
         if (mRemoteLogger == null) {
-            mRemoteLogger = new RemoteLogger(mContext, BluetoothMediaButtonReceiver.class, 1);
+            mRemoteLogger = new RemoteLogger(BluetoothMediaButtonReceiver.class, 1);
         }
 
         if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {

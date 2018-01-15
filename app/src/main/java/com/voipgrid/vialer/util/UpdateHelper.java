@@ -47,7 +47,7 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
         mPreferences = new Preferences(mContext);
         this.mListener = listener;
 
-        mRemoteLogger = new RemoteLogger(mContext, UpdateHelper.class);
+        mRemoteLogger = new RemoteLogger(UpdateHelper.class);
     }
 
     @Override
