@@ -35,16 +35,32 @@ public class T9NameMatcher {
      * @return Name with <b></b> tags.
      */
     public static String highlightMatchedPart(String t9Query, String displayName) {
-
         ArrayList<String> possibleQueries = T9Query.generateT9NameQueries(displayName);
+
         String queryOfWholeName = possibleQueries.get(0);
 
-        int start = queryOfWholeName.indexOf(t9Query);
+        int start = adjustStartBasedOnSpaces(displayName, queryOfWholeName.indexOf(t9Query));
         int end = start + t9Query.length();
 
         // Add a empty space behind the displayname to be able to substring untill the last char
         // without causing outofboundexceptions.
         return placeBoldingTags(displayName + " ", start, end, end-start);
+    }
+
+    /**
+     * Calculates the number of spaces in the display name before the start value and increases
+     * start based on this value.
+     *
+     * @param displayName
+     * @param start
+     * @return The value of start adjusted based on the number of spaces.
+     */
+    private static int adjustStartBasedOnSpaces(String displayName, int start) {
+        String substr = displayName.substring(0, start);
+
+        int spaceCount = substr.length() - substr.replace(" ", "").length();
+
+        return start + spaceCount;
     }
 
     /**

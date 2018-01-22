@@ -1,12 +1,12 @@
 package com.voipgrid.vialer.test.logging.formatting;
 
+import static org.junit.Assert.assertFalse;
+
 import com.voipgrid.vialer.logging.formatting.formatters.PayloadAnonymizer;
 import com.voipgrid.vialer.logging.formatting.formatters.SipLogAnonymizer;
 import com.voipgrid.vialer.sip.SipService;
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 
 public class SipLogAnonymizerTest {

@@ -1,12 +1,12 @@
 package com.voipgrid.vialer.test;
 
-import com.voipgrid.vialer.util.PhoneNumberUtils;
-
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import com.voipgrid.vialer.util.PhoneNumberUtils;
+
+import org.junit.Test;
 
 /**
  * PhoneNumberUtilsTest class for testing PhoneNumberUtils functions.
