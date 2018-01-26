@@ -1379,7 +1379,7 @@ public class CallActivity extends LoginRequiredActivity
         } else {
             if (lost) {
                 // Don't put the call on hold when there is a native call is ringing.
-                if (mConnected && !mSipService.nativeCallIsRinging()) {
+                if (mConnected && !mSipService.getNativeCallManager().nativeCallIsRinging()) {
                     onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
                 }
             } else {

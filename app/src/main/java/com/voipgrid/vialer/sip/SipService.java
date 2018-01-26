@@ -17,6 +17,7 @@ import android.telephony.TelephonyManager;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NotificationHelper;
@@ -43,6 +44,7 @@ public class SipService extends Service {
     private SipCall mCurrentCall;
     private SipCall mInitialCall;
     private SipConfig mSipConfig;
+    private NativeCallManager mNativeCallManager;
 
     private List<SipCall> mCallList = new ArrayList<>();
     private String mInitialCallType;
@@ -90,25 +92,6 @@ public class SipService extends Service {
      */
     public static boolean sipServiceActive = false;
 
-    /**
-     * Check if there is a native call answered.
-     *
-     * @return boolean true if there is a native call answered.
-     */
-    public boolean nativeCallHasBeenAnswered() {
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        return telephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
-    }
-
-    /**
-     * See if there is a native GSM call Ringing
-     *
-     * @return boolean true when there is a native GSM call ringing
-     */
-    public boolean nativeCallIsRinging() {
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        return telephonyManager.getCallState() == TelephonyManager.CALL_STATE_RINGING;
-    }
 
     /**
      * Class the be able to bind a activity to this service.
@@ -153,6 +136,7 @@ public class SipService extends Service {
 
         mPreferences = new Preferences(this);
         mRemoteLogger = new RemoteLogger(this, SipService.class, 1);
+        mNativeCallManager = new NativeCallManager((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE));
 
         mRemoteLogger.d("onCreate");
 
@@ -204,6 +188,10 @@ public class SipService extends Service {
 
     public Preferences getPreferences() {
         return mPreferences;
+    }
+
+    public NativeCallManager getNativeCallManager() {
+        return mNativeCallManager;
     }
 
     public String getInitialCallType() {
