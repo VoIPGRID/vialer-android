@@ -77,6 +77,9 @@ public class CallActivity extends LoginRequiredActivity
     private static final String MAP_TRANSFERRED_PHONE_NUMBER = "transferredNumber";
     private static final String MAP_SECOND_CALL_IS_CONNECTED = "secondCallIsConnected";
 
+    private static final int DELAYED_FINISH_MS = 3000;
+    private static final int DELAYED_FINISH_RETRY_MS = 1000;
+
     // Manager for "on speaker" action.
     private ProximitySensorHelper mProximityHelper;
     private TextView mCallDurationView;
@@ -246,6 +249,31 @@ public class CallActivity extends LoginRequiredActivity
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mSipServiceBound = false;
+        }
+    };
+
+    private Runnable delayedFinish = new Runnable() {
+
+        private Handler delayedHandler = new Handler();
+
+        @Override
+        public void run() {
+            // Check to see if the call activity is the last activity.
+            if (isTaskRoot()) {
+                mRemoteLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
+                Intent intent = new Intent(CallActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+
+            if(CallActivity.this.hasActiveCall()) {
+                mRemoteLogger.i("Call is still active " + DELAYED_FINISH_MS + "ms after finishWithDelay was called, trying again in " + DELAYED_FINISH_RETRY_MS + "ms");
+                this.delayedHandler.removeCallbacks(this);
+                this.delayedHandler.postDelayed(this, DELAYED_FINISH_RETRY_MS);
+                return;
+            }
+
+            finish();  // Close this activity after 3 seconds.
         }
     };
 
@@ -1236,20 +1264,17 @@ public class CallActivity extends LoginRequiredActivity
 
     private void finishWithDelay() {
         stopService();
-        final Context context = this;
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Check to see if the call activity is the last activity.
-                if (isTaskRoot()) {
-                    mRemoteLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
-                    Intent intent = new Intent(context, MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-                finish();  // Close this activity after 3 seconds.
-            }
-        }, 3000);
+        new Handler().postDelayed(delayedFinish, DELAYED_FINISH_MS);
+    }
+
+    /**
+     *
+     * @return TRUE if the sip service is available and has an active call, otherwise FALSE.
+     */
+    private boolean hasActiveCall() {
+        if (mSipService == null) return false;
+
+        return mSipService.getCurrentCall() != null;
     }
 
     private void stopService() {
