@@ -280,7 +280,7 @@ public class CallActivity extends LoginRequiredActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRemoteLogger = new RemoteLogger(this, CallActivity.class, 1);
+        mRemoteLogger = new RemoteLogger(CallActivity.class, 1);
         mRemoteLogger.d("onCreate");
 
         // Check if we have permission to use the microphone. If not, request it.

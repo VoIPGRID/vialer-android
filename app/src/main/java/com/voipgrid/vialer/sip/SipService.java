@@ -152,7 +152,7 @@ public class SipService extends Service {
         mSipBroadcaster = new SipBroadcaster(this);
 
         mPreferences = new Preferences(this);
-        mRemoteLogger = new RemoteLogger(this, SipService.class, 1);
+        mRemoteLogger = new RemoteLogger(SipService.class, 1);
 
         mRemoteLogger.d("onCreate");
 

@@ -39,7 +39,7 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
         mContext = context;
         mProximityInterface = proximityInterface;
         mLockView = lockView;
-        mRemoteLogger = new RemoteLogger(context, ProximitySensorHelper.class, 1);
+        mRemoteLogger = new RemoteLogger(ProximitySensorHelper.class, 1);
         mRemoteLogger.v("ProximitySensorHelper");
 
         mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);

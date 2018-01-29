@@ -59,7 +59,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
                 getPassword()
         );
 
-        mRemoteLogger = new RemoteLogger(this, TwoStepCallActivity.class);
+        mRemoteLogger = new RemoteLogger(TwoStepCallActivity.class);
 
         String numberToCall = getIntent().getStringExtra(NUMBER_TO_CALL);
 

@@ -32,7 +32,7 @@ class IncomingRinger {
         mActivity = activity;
         mContext = context;
         mAudioManager = audioManager;
-        mRemoteLogger = new RemoteLogger(context, IncomingRinger.class, 1);
+        mRemoteLogger = new RemoteLogger(IncomingRinger.class, 1);
 
         mRemoteLogger.d("IncomingRinger()");
 

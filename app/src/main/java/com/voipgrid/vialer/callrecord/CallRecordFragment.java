@@ -300,7 +300,7 @@ public class CallRecordFragment extends ListFragment implements
 
     private void failedFeedback(Response response) {
         if (getActivity() == null) {
-            new RemoteLogger(getContext(), CallRecordFragment.class, 1).e("java.lang.IllegalStateException: Fragment CallRecordFragment{a10f812} not attached to Activity");
+            new RemoteLogger(CallRecordFragment.class, 1).e("java.lang.IllegalStateException: Fragment CallRecordFragment{a10f812} not attached to Activity");
             return;
         }
 

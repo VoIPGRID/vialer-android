@@ -26,7 +26,7 @@ public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionH
     }
 
     private void logStackTrace(Throwable exception) {
-        RemoteLogger remoteLogger = new RemoteLogger(mContext, RemoteUncaughtExceptionHandler.class, true);
+        RemoteLogger remoteLogger = new RemoteLogger(RemoteUncaughtExceptionHandler.class, true);
         String stackTrace = Log.getStackTraceString(exception);
         String traceID = remoteLogger.generateIdentifier();
 

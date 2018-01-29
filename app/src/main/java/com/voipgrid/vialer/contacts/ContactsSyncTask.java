@@ -38,7 +38,7 @@ public class ContactsSyncTask {
      */
     public ContactsSyncTask(Context context) {
         mContext = context;
-        mRemoteLogger = new RemoteLogger(context, ContactsSyncTask.class);
+        mRemoteLogger = new RemoteLogger(ContactsSyncTask.class);
 
         mRemoteLogger.d("onCreate");
     }

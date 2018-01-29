@@ -52,7 +52,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     @Override
     public void onCreate() {
         super.onCreate();
-        mRemoteLogger = new RemoteLogger(getApplicationContext(), FcmMessagingService.class, 1);
+        mRemoteLogger = new RemoteLogger(FcmMessagingService.class, 1);
         mRemoteLogger.d("onCreate");
     }
 
