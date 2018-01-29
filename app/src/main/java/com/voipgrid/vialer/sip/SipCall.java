@@ -296,11 +296,11 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED) {
                 if (mIpChangeInProgress && mCurrentCallState.equals(SipConstants.CALL_INCOMING_RINGING)) {
                     mRemoteLogger.d("Network switch during ringing phase.");
-                } else {
-                    onCallStopRingback();
-                    onCallDisconnected();
-                    delete();
                 }
+
+                onCallStopRingback();
+                onCallDisconnected();
+                delete();
             }
 
         } catch (Exception e) {
