@@ -31,7 +31,7 @@ public class BluetoothMediaSessionService extends Service {
     @Override
     public void onCreate() {
         mContext = this;
-        mRemoteLogger = new RemoteLogger(BluetoothMediaSessionService.class, 1);
+        mRemoteLogger = new RemoteLogger(BluetoothMediaSessionService.class).enableConsoleLogging();
         mRemoteLogger.v("onCreate()");
         MediaSessionCompat session = new MediaSessionCompat(
                 this,

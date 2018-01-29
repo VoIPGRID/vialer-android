@@ -69,7 +69,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
         mPreferences = new Preferences(this);
 
         // Forced logging due to user not being able to set/unset it at this point.
-        mRemoteLogger = new RemoteLogger(SetupActivity.class, true);
+        mRemoteLogger = new RemoteLogger(SetupActivity.class).forceRemoteLogging(true);
 
         Fragment gotoFragment = null;
         Integer fragmentId = null;
