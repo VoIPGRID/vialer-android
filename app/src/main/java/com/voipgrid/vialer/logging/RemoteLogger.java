@@ -5,7 +5,6 @@ import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.logentries.logger.AndroidLogger;
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
@@ -32,8 +31,7 @@ public class RemoteLogger {
     private String TAG;
 
     private Context mContext;
-    private AndroidLogger logEntryLogger = null;
-    private AndroidLogger whiteLabeledLogger = null;
+    private static VialerLogger logEntryLogger = null;
 
     private String mIdentifier;
     private boolean mRemoteLoggingEnabled;
@@ -79,22 +77,12 @@ public class RemoteLogger {
             }
         }
 
-        String logEntryToken = mContext.getString(R.string.log_entry_token);
-        String secondaryLogEntryToken = mContext.getString(R.string.secondary_log_entry_token);
-        // Try to get a existing instance.
-        try {
-            logEntryLogger =  AndroidLogger.getInstance();
-        } catch (Exception e) {
-            // Create instance.
-            try {
-                logEntryLogger = AndroidLogger.createInstance(mContext, false, false, false, null, 0, logEntryToken, false);
-                if (!secondaryLogEntryToken.isEmpty()) {
-                    whiteLabeledLogger = AndroidLogger.createInstance(mContext, false, false, false, null, 0, secondaryLogEntryToken, false);
-                }
-            } catch (IOException io) {
-                io.printStackTrace();
-            }
-        }
+        if(logEntryLogger != null) return;
+
+        logEntryLogger = new VialerLogger(mContext, new LogEntriesFactory()).initialize(new String[] {
+                mContext.getString(R.string.log_entry_token),
+                mContext.getString(R.string.secondary_log_entry_token)
+        });
     }
 
     /**
@@ -160,9 +148,6 @@ public class RemoteLogger {
                     }
 
                     logEntryLogger.log(formatMessage(tag, message));
-                    if (whiteLabeledLogger != null) {
-                        whiteLabeledLogger.log(formatMessage(tag, message));
-                    }
                 }
             } catch (Exception e) {
                 // Avoid crashing the app in background logging.

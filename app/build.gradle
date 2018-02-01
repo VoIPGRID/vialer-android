@@ -86,11 +86,11 @@ ext {
     androidTestVersion = "0.5"
     firebaseVersion = "11.6.2"
     jUnitVersion = "4.12"
-    powerMockVersion = "1.6.4"
+    powerMockVersion = "1.7.3"
     okHttpVersion = "3.9.0"
     retroFitVersion = "2.3.0"
     roboElectricVersion = "3.4.2"
-    mockitoCoreVersion = "2.9.0"
+    mockitoCoreVersion = '2.13.0'
 }
 
 dependencies {
@@ -133,7 +133,7 @@ dependencies {
     // Setup for local tests.
     testCompile "org.powermock:powermock-module-junit4:${powerMockVersion}"
     testCompile "org.powermock:powermock-module-junit4-rule:${powerMockVersion}"
-    testCompile "org.powermock:powermock-api-mockito:${powerMockVersion}"
+    testCompile "org.powermock:powermock-api-mockito2:${powerMockVersion}"
     testCompile "org.powermock:powermock-classloading-xstream:${powerMockVersion}"
     testCompile "com.squareup.okhttp3:mockwebserver:${okHttpVersion}"
 
