@@ -9,6 +9,7 @@ import android.util.Log;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
+import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -379,8 +380,9 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
         // Determine whether we can accept the incoming call.
         pjsip_status_code code = pjsip_status_code.PJSIP_SC_RINGING;
-        if (mSipService.getCurrentCall() != null || mSipService.nativeCallHasBeenAnswered() || mSipService.nativeCallIsRinging()) {
+        if (mSipService.getCurrentCall() != null || mSipService.getNativeCallManager().isBusyWithNativeCall()) {
             code = pjsip_status_code.PJSIP_SC_BUSY_HERE;
+            LogHelper.using(mRemoteLogger).logBusyReason(mSipService);
         }
 
         mCurrentCallState = SipConstants.CALL_INCOMING_RINGING;
