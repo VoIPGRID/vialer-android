@@ -1,5 +1,12 @@
 package com.voipgrid.vialer.sip;
 
+import static com.voipgrid.vialer.api.ServiceGenerator.getUserAgentHeader;
+
+import static org.pjsip.pjsua2.pj_constants_.PJ_TRUE;
+import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_REINIT_MEDIA;
+import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT;
+import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_VIA;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +39,7 @@ import org.pjsip.pjsua2.IpChangeParam;
 import org.pjsip.pjsua2.LogConfig;
 import org.pjsip.pjsua2.MediaConfig;
 import org.pjsip.pjsua2.OnRegStateParam;
+import org.pjsip.pjsua2.StringVector;
 import org.pjsip.pjsua2.TransportConfig;
 import org.pjsip.pjsua2.UaConfig;
 import org.pjsip.pjsua2.pj_log_decoration;
@@ -45,12 +53,6 @@ import java.util.Map;
 import okhttp3.ResponseBody;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static com.voipgrid.vialer.api.ServiceGenerator.getUserAgentHeader;
-import static org.pjsip.pjsua2.pj_constants_.PJ_TRUE;
-import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_REINIT_MEDIA;
-import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT;
-import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_VIA;
 
 /**
  * Class that holds the sip backend (Endpoint + SipAccount).
@@ -294,6 +296,8 @@ public class SipConfig implements AccountStatus {
         UaConfig uaConfig = endpointConfig.getUaConfig();
         uaConfig.setUserAgent(getUserAgentHeader(mSipService));
 
+        configureStunServer(uaConfig);
+
         try {
             endpoint.libInit(endpointConfig);
         } catch (Exception e) {
@@ -527,5 +531,22 @@ public class SipConfig implements AccountStatus {
      */
     public class LibraryInitFailedException extends Exception {
 
+    }
+
+    /**
+     * Use a stun server if one has been configured.
+     *
+     * @param uaConfig
+     */
+    private void configureStunServer(UaConfig uaConfig) {
+        String stunHost = mSipService.getString(R.string.stun_host);
+
+        if(stunHost.isEmpty()) return;
+
+        StringVector stunHosts = new StringVector();
+        stunHosts.add(stunHost);
+        uaConfig.setStunServer(stunHosts);
+
+        mRemoteLogger.i("Using STUN server: " + stunHost);
     }
 }
