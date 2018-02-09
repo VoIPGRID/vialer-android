@@ -76,7 +76,7 @@ public class SipConfig implements AccountStatus {
     static {
         sCodecPrioMapping = new HashMap<>();
         sCodecPrioMapping.put("ilbc/8000", (short) 211);
-        sCodecPrioMapping.put("PCMA/8000", (short) 210);
+        sCodecPrioMapping.put("PCMA/8000", (short) 0);
         sCodecPrioMapping.put("G722/16000", (short) 0);
         sCodecPrioMapping.put("PCMU/8000", (short) 0);
         sCodecPrioMapping.put("speex/8000", (short) 0);
@@ -391,7 +391,7 @@ public class SipConfig implements AccountStatus {
             for (int i = 1; i < codecList.size(); i++) {
                 info = codecList.get(i);
                 codecId = info.getCodecId();
-                prio = sCodecPrioMapping.get(codecId);
+                prio = findCodecPriority(codecId);
                 if (prio != null) {
                     mEndpoint.codecSetPriority(codecId, prio);
                 }
@@ -399,6 +399,22 @@ public class SipConfig implements AccountStatus {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Searches and normalizes the codec priority mapping and attempts to find the mapped priority.
+     *
+     * @param codecId
+     * @return Short The codec's priority.
+     */
+    private Short findCodecPriority(String codecId) {
+        for(String codec : sCodecPrioMapping.keySet()) {
+            if(codecId.toLowerCase().contains(codec.toLowerCase())) {
+                return sCodecPrioMapping.get(codec);
+            }
+        }
+
+        return null;
     }
 
     /**
