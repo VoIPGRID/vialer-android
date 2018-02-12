@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -18,6 +17,7 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.call.NativeCallManager;
+import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NotificationHelper;
@@ -112,7 +112,7 @@ public class SipService extends Service {
         @Override
         public void run() {
             // Play a ring back tone to update a user that setup is ongoing.
-            mToneGenerator.startTone(ToneGenerator.TONE_SUP_DIAL, 1000);
+            mToneGenerator.startTone(ToneGenerator.Constants.TONE_SUP_DIAL, 1000);
             mHandler.postDelayed(mRingbackRunnable, 4000);
         }
     };
@@ -274,7 +274,7 @@ public class SipService extends Service {
      * Play the busy tone used when a call get's disconnected by the recipient.
      */
     public void playBusyTone() {
-        mToneGenerator.startTone(ToneGenerator.TONE_CDMA_NETWORK_BUSY, 1500);
+        mToneGenerator.startTone(ToneGenerator.Constants.TONE_CDMA_NETWORK_BUSY, 1500);
     }
 
     /**
