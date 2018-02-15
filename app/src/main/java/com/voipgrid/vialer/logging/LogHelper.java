@@ -1,5 +1,8 @@
 package com.voipgrid.vialer.logging;
 
+import com.google.firebase.messaging.RemoteMessage;
+import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.sip.SipService;
 
 public class LogHelper {
@@ -35,5 +38,18 @@ public class LogHelper {
         }
 
         mRemoteLogger.d(message);
+    }
+
+    /**
+     * Sends a log to the push logging environment, used to track success rates of push messages.
+     *
+     * @param remoteMessage
+     * @param uniqueKey
+     */
+    public void logMiddlewareMessageReceived(RemoteMessage remoteMessage, String uniqueKey) {
+        mRemoteLogger.getVialerLogger().logToEnvironment(
+                VialerApplication.get().getString(R.string.push_log_entries_token),
+                "MessageID: " + remoteMessage.getMessageId() + " - UniqueKey: " + uniqueKey
+        );
     }
 }
