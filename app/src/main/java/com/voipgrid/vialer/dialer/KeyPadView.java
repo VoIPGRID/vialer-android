@@ -2,7 +2,6 @@ package com.voipgrid.vialer.dialer;
 
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;

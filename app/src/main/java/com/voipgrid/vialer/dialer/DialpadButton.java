@@ -2,7 +2,6 @@ package com.voipgrid.vialer.dialer;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.media.ToneGenerator;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -131,18 +130,18 @@ public class DialpadButton extends LinearLayout {
 
     private void setDtmfTone(String digit) {
         switch (digit) {
-            case "0" : mTone = ToneGenerator.TONE_DTMF_0; break;
-            case "1" : mTone = ToneGenerator.TONE_DTMF_1; break;
-            case "2" : mTone = ToneGenerator.TONE_DTMF_2; break;
-            case "3" : mTone = ToneGenerator.TONE_DTMF_3; break;
-            case "4" : mTone = ToneGenerator.TONE_DTMF_4; break;
-            case "5" : mTone = ToneGenerator.TONE_DTMF_5; break;
-            case "6" : mTone = ToneGenerator.TONE_DTMF_6; break;
-            case "7" : mTone = ToneGenerator.TONE_DTMF_7; break;
-            case "8" : mTone = ToneGenerator.TONE_DTMF_8; break;
-            case "9" : mTone = ToneGenerator.TONE_DTMF_9; break;
-            case "#" : mTone = ToneGenerator.TONE_DTMF_P; break;
-            case "*" : mTone = ToneGenerator.TONE_DTMF_S; break;
+            case "0" : mTone = ToneGenerator.Constants.TONE_DTMF_0; break;
+            case "1" : mTone = ToneGenerator.Constants.TONE_DTMF_1; break;
+            case "2" : mTone = ToneGenerator.Constants.TONE_DTMF_2; break;
+            case "3" : mTone = ToneGenerator.Constants.TONE_DTMF_3; break;
+            case "4" : mTone = ToneGenerator.Constants.TONE_DTMF_4; break;
+            case "5" : mTone = ToneGenerator.Constants.TONE_DTMF_5; break;
+            case "6" : mTone = ToneGenerator.Constants.TONE_DTMF_6; break;
+            case "7" : mTone = ToneGenerator.Constants.TONE_DTMF_7; break;
+            case "8" : mTone = ToneGenerator.Constants.TONE_DTMF_8; break;
+            case "9" : mTone = ToneGenerator.Constants.TONE_DTMF_9; break;
+            case "#" : mTone = ToneGenerator.Constants.TONE_DTMF_P; break;
+            case "*" : mTone = ToneGenerator.Constants.TONE_DTMF_S; break;
             default : mTone = -1;
         }
     }
