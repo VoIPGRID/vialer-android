@@ -19,4 +19,8 @@ public class VialerApplication extends AnalyticsApplication {
         super.onCreate();
         sApplication = this;
     }
+
+    public static String getAppVersion() {
+        return BuildConfig.VERSION_NAME;
+    }
 }

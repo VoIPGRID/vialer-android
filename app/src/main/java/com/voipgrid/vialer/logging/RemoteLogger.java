@@ -1,81 +1,97 @@
 package com.voipgrid.vialer.logging;
 
 import android.content.Context;
-import android.os.Build;
-import android.telephony.TelephonyManager;
+import android.support.annotation.StringDef;
 import android.util.Log;
 
-import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.fcm.FcmMessagingService;
-import com.voipgrid.vialer.sip.SipService;
-import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.logging.file.LogFileCreator;
+import com.voipgrid.vialer.logging.formatting.LogFormatter;
+import com.voipgrid.vialer.logging.tracing.CallerLocator;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
-import java.util.regex.Pattern;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Class used for sending logs to a remote service.
  */
 public class RemoteLogger {
-    private static final String VERBOSE_TAG = "VERBOSE";
-    private static final String DEBUG_TAG = "DEBUG";
-    private static final String INFO_TAG = "INFO";
-    private static final String WARNING_TAG = "WARNING";
-    private static final String EXCEPTION_TAG = "EXCEPTION";
 
-    private String TAG;
+    @Retention(RetentionPolicy.CLASS)
+    @StringDef({VERBOSE_TAG, DEBUG_TAG, INFO_TAG, WARNING_TAG, EXCEPTION_TAG})
+    public @interface LogLevels {
+    }
+
+    public static final String VERBOSE_TAG = "VERBOSE";
+    public static final String DEBUG_TAG = "DEBUG";
+    public static final String INFO_TAG = "INFO";
+    public static final String WARNING_TAG = "WARNING";
+    public static final String EXCEPTION_TAG = "EXCEPTION";
+
+    private final String tag;
 
     private Context mContext;
     private static VialerLogger logEntryLogger = null;
+    private LogFormatter mLogFormatter;
+    private LogComposer mLogComposer;
+    private CallerLocator mCallerLocator;
+    private LogFileCreator mLogFileCreator;
 
-    private String mIdentifier;
     private boolean mRemoteLoggingEnabled;
     private boolean mLogToConsole = false;
 
     public RemoteLogger(Class thisClass) {
-        this(thisClass, false);
-    }
-
-    public RemoteLogger(Class thisClass, int logToConsole) {
-        this(thisClass, false);
-
-        mLogToConsole = logToConsole == 1;
-    }
-
-    public RemoteLogger(Class thisClass, boolean forced) {
         mContext = VialerApplication.get();
+        mLogFileCreator = new LogFileCreator(mContext);
         createLogger();
-        mIdentifier = new Preferences(mContext).getLoggerIdentifier();
-
-        TAG = thisClass.getSimpleName();
-        if (forced) {
-            forceRemoteLogging(true);
-        } else {
-            mRemoteLoggingEnabled = new Preferences(mContext).remoteLoggingIsActive();
-        }
+        mLogFormatter = new LogFormatter();
+        mLogComposer = new LogComposer(
+                new DeviceInformation(mContext),
+                new Preferences(mContext).getLoggerIdentifier(),
+                VialerApplication.getAppVersion()
+        );
+        mCallerLocator = new CallerLocator();
+        mRemoteLoggingEnabled = new Preferences(mContext).remoteLoggingIsActive();
+        tag = thisClass.getSimpleName();
     }
 
-    public void forceRemoteLogging(boolean forced) {
+    /**
+     * Also logs all messages to the console.
+     *
+     * @return this To allow method chaining.
+     */
+    public RemoteLogger enableConsoleLogging() {
+        mLogToConsole = true;
+
+        return this;
+    }
+
+    /**
+     * Forces messages to be logged to remote rather than taking the user setting.
+     *
+     * @return this To allow method chaining.
+     */
+    public RemoteLogger forceRemoteLogging(boolean forced) {
         mRemoteLoggingEnabled = forced;
+
+        return this;
+    }
+
+    /**
+     *
+     * @return VialerLogger The vialer logger being used currently
+     */
+    public VialerLogger getVialerLogger() {
+        return logEntryLogger;
     }
 
     /**
      * Function to create the remote logger instance.
      */
     private void createLogger() {
-        File logFile = new File(mContext.getFilesDir(), "LogentriesLogStorage.log");
-        if(!logFile.exists()) {
-            try {
-                logFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        mLogFileCreator.createIfDoesNotExist();
 
         if(logEntryLogger != null) return;
 
@@ -86,148 +102,105 @@ public class RemoteLogger {
     }
 
     /**
-     * Function to generate a small id used for loggin.
-     * @return
+     * Function to log the message for the given tag.
      */
-    public static String generateIdentifier() {
-        String uuid = UUID.randomUUID().toString();
-        int stripIndex = uuid.indexOf("-");
-        uuid = uuid.substring(0, stripIndex);
-        return uuid;
-    }
+    private void log(@LogLevels String level, String message) {
+        String tag = createLogTag();
 
-    /**
-     * Function to format a message to include severity level and identifier.
-     * @param tag Tag that indicates the severity.
-     * @param message
-     * @return
-     */
-    private String formatMessage(String tag, String message) {
-        return tag + " " + mIdentifier + " - " + getAppVersion() + " - " + getDeviceName()  + " - " + getConnectionType() + " - " + message;
-    }
+        if (mLogToConsole) {
+            logToConsole(level, tag, message);
+        }
 
-    private String getAppVersion() {
-        return BuildConfig.VERSION_NAME;
-    }
-
-    private String getDeviceName() {
-        return Build.BRAND + " " + Build.PRODUCT + " " + "(" + Build.MODEL + ")";
-    }
-
-    private String getConnectionType() {
-        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(mContext);
-        if (connectivityHelper.getConnectionType() == ConnectivityHelper.Connection.WIFI || connectivityHelper.getConnectionType() == ConnectivityHelper.Connection.NO_CONNECTION) {
-            return connectivityHelper.getConnectionTypeString();
-        } else {
-            TelephonyManager manager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-            String carrierName = manager.getNetworkOperatorName();
-            return connectivityHelper.getConnectionTypeString() + " (" + carrierName + ")";
+        if (mRemoteLoggingEnabled) {
+            logToRemote(level, tag, message);
         }
     }
+
     /**
-     * Function to log the message for the given tag.
+     * Logs the message to the console (logcat).
+     */
+    private void logToConsole(@LogLevels String level, String tag, String message) {
+        switch (level) {
+            case VERBOSE_TAG:
+                Log.v(tag, message);
+                break;
+            case DEBUG_TAG:
+                Log.d(tag, message);
+                break;
+            case INFO_TAG:
+                Log.i(tag, message);
+                break;
+            case WARNING_TAG:
+                Log.w(tag, message);
+                break;
+            case EXCEPTION_TAG:
+                Log.e(tag, message);
+                break;
+        }
+    }
+
+    /**
+     * Logs the message to the remote logger.
+     *
      * @param tag
      * @param message
      */
-    private void log(String tag, String message) {
-        // Only do remote logging when it is enabled.
-        if (mRemoteLoggingEnabled) {
-            try {
-                if (logEntryLogger != null) {
+    private void logToRemote(String level, String tag, String message) {
+        if( logEntryLogger == null ) return;
 
-                    if (TAG.equals(SipService.class.getSimpleName())) {
-                        message = anonymizeSipLogging(message);
-                    }
+        try {
+            message = mLogFormatter.applyAllFormatters(tag, message);
+            message = mLogComposer.compose(level, tag, message);
 
-                    if (TAG.equals(FcmMessagingService.class.getSimpleName())) {
-                        message = anonymizePayloadLogging(message);
-                    }
-
-                    if (message.contains("\n")) {
-                        message = message.replaceAll("[\r\n]+", " ");
-                    }
-
-                    logEntryLogger.log(formatMessage(tag, message));
-                }
-            } catch (Exception e) {
-                // Avoid crashing the app in background logging.
-            }
+            logEntryLogger.log(message);
+        } catch (Exception e) {
+            // Avoid crashing the app in background logging.
         }
     }
 
-    private String anonymizeSipLogging(String message) {
-        message = Pattern.compile("sip:\\+?\\d+").matcher(message).replaceAll("sip:SIP_USER_ID");
-        message = Pattern.compile("\"caller_id\" = (.+?);").matcher(message).replaceAll("<CALLER_ID>");
-        message = Pattern.compile("To:(.+?)>").matcher(message).replaceAll("To: <SIP_ANONYMIZED>");
-        message = Pattern.compile("From:(.+?)>").matcher(message).replaceAll("From: <SIP_ANONYMIZED>");
-        message = Pattern.compile("Contact:(.+?)>").matcher(message).replaceAll("Contact: <SIP_ANONYMIZED>");
-        message = Pattern.compile("Digest username=\"(.+?)\"").matcher(message).replaceAll("Digest username=\"<SIP_USERNAME>\"");
-        message = Pattern.compile("nonce=\"(.+?)\"").matcher(message).replaceAll("nonce=\"<NONCE>\"");
-        message = Pattern.compile("username=(.+?)&").matcher(message).replaceAll("username=<USERNAME>");
-
-        return message;
-    }
-
-    private String anonymizePayloadLogging(String message) {
-        message = Pattern.compile("caller_id=(.+?),").matcher(message).replaceAll("callerid=<CALLER_ID>,");
-        message = Pattern.compile("phonenumber=(.+?),").matcher(message).replaceAll("phonenumber=<PHONENUMBER>,");
-
-        return message;
+    /**
+     * Picks the correct log tag to use, only using the stack trace option when remote logging is enabled for
+     * performance reasons.
+     *
+     * @return String The log tag.
+     */
+    private String createLogTag() {
+        return mRemoteLoggingEnabled ? mCallerLocator.locate().format() : tag;
     }
 
     /**
      * Verbose log.
-     * @param message
      */
     public void v(String message) {
-        log(VERBOSE_TAG, TAG + " " + message);
-        if (mLogToConsole) {
-            Log.v(TAG, message);
-        }
+        log(VERBOSE_TAG, message);
     }
 
     /**
      * Debug log.
-     * @param message
      */
     public void d(String message) {
-        log(DEBUG_TAG, TAG + " " + message);
-        if (mLogToConsole) {
-            Log.d(TAG, message);
-        }
+        log(DEBUG_TAG, message);
     }
 
     /**
      * Info log.
-     * @param message
      */
     public void i(String message) {
-        log(INFO_TAG, TAG + " " + message);
-        if (mLogToConsole) {
-            Log.i(TAG, message);
-        }
+        log(INFO_TAG, message);
     }
 
     /**
      * Warning log.
-     * @param message
      */
     public void w(String message) {
-        log(WARNING_TAG, TAG + " " + message);
-        if (mLogToConsole) {
-            Log.w(TAG, message);
-        }
+        log(WARNING_TAG, message);
     }
 
     /**
      * Exception log.
-     * @param message
      */
     public void e(String message) {
-        log(EXCEPTION_TAG, TAG + " " + message);
-        if (mLogToConsole) {
-            Log.e(TAG, message);
-        }
+        log(EXCEPTION_TAG, message);
     }
 
 }

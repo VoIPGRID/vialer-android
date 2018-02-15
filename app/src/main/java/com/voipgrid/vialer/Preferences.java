@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.logging.LogUuidGenerator;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -43,7 +44,7 @@ public class Preferences {
     public String getLoggerIdentifier() {
         String identifier = mPreferences.getString(PREF_REMOTE_LOGGING_ID, null);
         if (identifier == null) {
-            identifier = RemoteLogger.generateIdentifier();
+            identifier = LogUuidGenerator.generate();
             setLoggerIdentifier(identifier);
         }
         return identifier;

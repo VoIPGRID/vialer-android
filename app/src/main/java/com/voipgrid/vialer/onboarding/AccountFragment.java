@@ -103,7 +103,7 @@ public class AccountFragment extends OnboardingFragment implements
             // TODO Find a better solution for this (VIALA-575) in future.
             if (outGoingNumber == null || outGoingNumber.isEmpty()) {
                 // Forced logging due to user not being able to set/unset it at this point.
-                mRemoteLogger = new RemoteLogger(AccountFragment.class, true);
+                mRemoteLogger = new RemoteLogger(AccountFragment.class).forceRemoteLogging(true);
                 mRemoteLogger.d("no outGoingNumber");
                 SystemUser systemUser = (SystemUser) new JsonStorage(getActivity()).get(SystemUser.class);
                 outGoingNumber = systemUser.getOutgoingCli();
