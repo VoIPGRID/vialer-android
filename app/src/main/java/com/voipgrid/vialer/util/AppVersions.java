@@ -7,5 +7,5 @@ public interface AppVersions {
 
     int v2_1_1 = 35;
     int v4_0 = 50;
-    int v5_2 = 75; // Due to change when secure calling is released.
+    int v5_2 = 77; // Due to change when secure calling is released.
 }
