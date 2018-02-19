@@ -1,6 +1,9 @@
 package com.voipgrid.vialer.util;
 
-import android.app.ProgressDialog;
+import static com.voipgrid.vialer.util.AppVersions.v2_1_1;
+import static com.voipgrid.vialer.util.AppVersions.v4_0;
+import static com.voipgrid.vialer.util.AppVersions.v5_2;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -8,35 +11,32 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
+import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.OnUpdateCompleted;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.Api;
-import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-
-import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UseEncryption;
 import com.voipgrid.vialer.logging.RemoteLogger;
 
+import java.io.IOException;
+
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
  * Class to setup the app to work with the newest code.
  * All methods in this class should only be run once.
  */
-public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVersions, Callback<UseEncryption> {
+public class UpdateHelper extends AsyncTask<Void, Void, Void> {
 
     private RemoteLogger mRemoteLogger;
-    private String mVersionName;
     private Context mContext;
     private Preferences mPreferences;
     private JsonStorage mJsonStorage;
-    private ProgressDialog mProgressDialog;
     private OnUpdateCompleted mListener;
     private final static String VERSION_CODE = "version_code";
     private Boolean succesfulMigrate = true;
@@ -51,32 +51,15 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
     }
 
     @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        mProgressDialog = ProgressDialog.show(
-                mContext, mContext.getString(R.string.update_spinner_title),
-                mContext.getString(R.string.update_spinner_message), true);
-    }
-
-    @Override
     protected Void doInBackground(Void... params) {
-        PackageInfo info;
-        try {
-            info = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        int currentVersion = info.versionCode;
-        mVersionName = info.versionName;
+        int currentVersion = BuildConfig.VERSION_CODE;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         int lastVersion = prefs.getInt(VERSION_CODE, 0);
 
         // If the app has updated to a newer version from a older version we will check for upgrades.
         if (currentVersion > lastVersion) {
             if (BuildConfig.DEBUG) {
-                mRemoteLogger.d("Updating to " + mVersionName + " - " + currentVersion);
+                mRemoteLogger.d("Updating to " + BuildConfig.VERSION_NAME + " - " + currentVersion);
             }
             // Run all required methods.
             for (int i = lastVersion; i <= currentVersion; i++) {
@@ -90,22 +73,13 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
     }
 
     public static boolean requiresUpdate(Context context) {
-        try {
-            PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            int lastVersion = PreferenceManager.getDefaultSharedPreferences(context).getInt(VERSION_CODE, 0);
-            if (info.versionCode != lastVersion) {
-                return true;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return false;
+        int lastVersion = PreferenceManager.getDefaultSharedPreferences(context).getInt(VERSION_CODE, 0);
+
+        return BuildConfig.VERSION_CODE != lastVersion;
     }
 
     @Override
     protected void onPostExecute(Void result) {
-        mProgressDialog.dismiss();
-
         mListener.OnUpdateCompleted();
     }
 
@@ -168,19 +142,12 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> implements AppVers
                 accountHelper.getPassword()
         );
         Call<UseEncryption> call = mApi.useEncryption(new UseEncryption(true));
-        call.enqueue(this);
-    }
 
-    @Override
-    public void onResponse(Call<UseEncryption> call, Response<UseEncryption> response) {
-        if (!response.isSuccessful()) {
+        try {
+            Response response = call.execute();
+            if(!response.isSuccessful()) succesfulMigrate = false;
+        } catch (IOException e) {
             succesfulMigrate = false;
         }
-    }
-
-    @Override
-    public void onFailure(Call<UseEncryption> call, Throwable t) {
-        mRemoteLogger.d("Setting secure calling failed.");
-        succesfulMigrate = false;
     }
 }
