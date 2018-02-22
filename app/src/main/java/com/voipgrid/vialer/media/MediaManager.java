@@ -114,7 +114,7 @@ public class MediaManager implements
         } else {
             mAudioRouter.onAnsweredCall();
         }
-        BluetoothMediaButtonReceiver.setCallAnswered();
+        BluetoothMediaButtonReceiver.setCallAnswered(true);
     }
 
     /**
@@ -125,6 +125,7 @@ public class MediaManager implements
         if (mAudioRouter != null) {
             mAudioRouter.onEndedCall();
         }
+        BluetoothMediaButtonReceiver.setCallAnswered(false);
     }
 
     /**

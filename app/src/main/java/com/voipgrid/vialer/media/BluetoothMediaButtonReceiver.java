@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.KeyEvent;
 
+import com.voipgrid.vialer.bluetooth.BluetoothKeyNormalizer;
 import com.voipgrid.vialer.logging.RemoteLogger;
 
 
@@ -17,6 +18,8 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
 
     private static RemoteLogger mRemoteLogger;
     private static Context mContext;
+
+    private static final BluetoothKeyNormalizer sBluetoothKeyNormalizer = BluetoothKeyNormalizer.defaultAliases();
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -39,40 +42,31 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
             mRemoteLogger = new RemoteLogger(BluetoothMediaButtonReceiver.class).enableConsoleLogging();
         }
 
-        if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-            int keyCode = keyEvent.getKeyCode();
+        if (keyEvent.getAction() != KeyEvent.ACTION_DOWN) return;
 
-            mRemoteLogger.d("handleKeyEvent()");
-            mRemoteLogger.d("===> " + keyEvent);
+        Integer keyCode = sBluetoothKeyNormalizer.normalize(keyEvent.getKeyCode());
 
-            switch (keyCode) {
-                // Headsets with a combined media/call button. These are very common
-                case KeyEvent.KEYCODE_MEDIA_PLAY:
-                // Headsets with a dedicated call button, separated from the media button
-                case KeyEvent.KEYCODE_CALL:
-                    if (!mAnswer) {
-                        mAnswer = true;
-                        sendAnswerBroadcast();
-                    }
-                    break;
-                case KeyEvent.KEYCODE_HEADSETHOOK:
-                // Some headsets like the gmb berlin sometimes send the pause signal on the media key.
-                case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                    mAnswer = !mAnswer;
-                    sendAnswerBroadcast();
-                    break;
-                // Headsets with dedicated hangup button
-                case KeyEvent.KEYCODE_MEDIA_STOP:
-                case KeyEvent.KEYCODE_ENDCALL:
-                    mAnswer = false;
-                    sendAnswerBroadcast();
-                    break;
-                // Currently not used.
-                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                case KeyEvent.KEYCODE_MEDIA_NEXT:
-                default:
-                    break;
+        if(keyCode == null) {
+            mRemoteLogger.i("Unable to handle KeyEvent: " + keyEvent.getKeyCode());
+            return;
+        }
+
+        mRemoteLogger.d("handleKeyEvent()");
+        mRemoteLogger.d("===> " + keyEvent);
+
+        if(keyCode == KeyEvent.KEYCODE_CALL) {
+            if (!mAnswer) {
+                mAnswer = true;
+                sendAnswerBroadcast();
             }
+        }
+        else if(keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE) {
+            mAnswer = !mAnswer;
+            sendAnswerBroadcast();
+        }
+        else if(keyCode == KeyEvent.KEYCODE_ENDCALL) {
+            mAnswer = false;
+            sendAnswerBroadcast();
         }
     }
 
@@ -82,7 +76,7 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
         mContext.sendBroadcast(new Intent(mAnswer ? CALL_BTN : DECLINE_BTN));
     }
 
-    public static void setCallAnswered() {
-        mAnswer = true;
+    public static void setCallAnswered(boolean answer) {
+        mAnswer = answer;
     }
 }
