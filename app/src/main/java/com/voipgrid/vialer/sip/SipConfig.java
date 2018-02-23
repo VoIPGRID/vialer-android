@@ -555,14 +555,17 @@ public class SipConfig implements AccountStatus {
      * @param uaConfig
      */
     private void configureStunServer(UaConfig uaConfig) {
-        String stunHost = mSipService.getString(R.string.stun_host);
+        String[] stunHosts = mSipService.getResources().getStringArray(R.array.stun_hosts);
 
-        if(stunHost.isEmpty()) return;
+        if(stunHosts.length <= 0) return;
 
-        StringVector stunHosts = new StringVector();
-        stunHosts.add(stunHost);
-        uaConfig.setStunServer(stunHosts);
+        StringVector stun = new StringVector();
 
-        mRemoteLogger.i("Using STUN server: " + stunHost);
+        for(String stunHost : stunHosts) {
+            mRemoteLogger.i("Configuring STUN server: " + stunHost);
+            stun.add(stunHost);
+        }
+
+        uaConfig.setStunServer(stun);
     }
 }

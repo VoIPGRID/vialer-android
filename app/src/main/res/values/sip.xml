@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="sip_host" translatable="false">sipproxy.voipgrid.nl</string>
-    <string name="stun_host" translatable="false">stun.voipgrid.nl</string>
     <string name="sip_protocol" translatable="false">sip:</string>
     <string name="sip_transport_type" translatable="false">tls</string>
     <string name="sip_auth_scheme" translatable="false">digest</string>
     <string name="sip_auth_realm" translatable="false">*</string>
+    <string-array name="stun_hosts">
+        <item>stun.l.google.com:19302</item>
+        <item>stun1.l.google.com:19302</item>
+        <item>stun2.l.google.com:19302</item>
+        <item>stun3.l.google.com:19302</item>
+        <item>stun4.l.google.com:19302</item>
+        <item>stun.voipgrid.nl</item>
+    </string-array>
 </resources>
