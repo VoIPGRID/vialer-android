@@ -274,7 +274,8 @@ public class DialerActivity extends LoginRequiredActivity implements
                     }
                     return true;
                 } else if (view instanceof TextView) {
-                    ((TextView) view).setText(Html.fromHtml(cursor.getString(columnIndex)));
+                    String result = cursor.getString(columnIndex);
+                    ((TextView) view).setText(Html.fromHtml(result != null ? result : ""));
                     return true;
                 }
                 return false;
