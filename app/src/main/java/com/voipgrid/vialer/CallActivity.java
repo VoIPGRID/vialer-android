@@ -1225,7 +1225,7 @@ public class CallActivity extends LoginRequiredActivity
                         getString(R.string.analytics_event_action_inbound),
                         getString(R.string.analytics_event_label_accepted)
                 );
-                BluetoothMediaButtonReceiver.setCallAnswered();
+                BluetoothMediaButtonReceiver.setCallAnswered(true);
 
                 mNotificationHelper.removeAllNotifications();
                 mNotificationId = mNotificationHelper.displayCallProgressNotification(
