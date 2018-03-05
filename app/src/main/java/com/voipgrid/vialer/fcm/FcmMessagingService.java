@@ -64,7 +64,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         Map<String, String> data = remoteMessage.getData();
         String requestType = data.get(MESSAGE_TYPE);
 
-        LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage, data.get(REQUEST_TOKEN));
+        LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage);
 
         if (requestType == null) {
             mRemoteLogger.e("No requestType");

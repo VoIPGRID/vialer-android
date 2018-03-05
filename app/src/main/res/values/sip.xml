@@ -5,7 +5,7 @@
     <string name="sip_transport_type" translatable="false">tls</string>
     <string name="sip_auth_scheme" translatable="false">digest</string>
     <string name="sip_auth_realm" translatable="false">*</string>
-    <string-array name="stun_hosts">
+    <string-array name="stun_hosts" translatable="false">
         <item>stun.l.google.com:19302</item>
         <item>stun1.l.google.com:19302</item>
         <item>stun2.l.google.com:19302</item>
