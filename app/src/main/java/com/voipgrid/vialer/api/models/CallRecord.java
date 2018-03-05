@@ -4,7 +4,7 @@ import android.text.format.DateFormat;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Date;
+import java.util.Calendar;
 
 /**
  * Call record class
@@ -16,7 +16,6 @@ public class CallRecord {
     public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     private static final String CALL_DATE_FORMAT = "yyyy-MM-dd";
-    private static final long CONSTANT_MINUS_THIRTY_DAYS = (30L * 24L * 60L * 60L * 1000L);
 
     private int amount;
 
@@ -35,8 +34,9 @@ public class CallRecord {
     private String direction;
 
     public static String getLimitDate() {
-        long callTimestamp = System.currentTimeMillis() - CallRecord.CONSTANT_MINUS_THIRTY_DAYS;
-        return DateFormat.format(CallRecord.CALL_DATE_FORMAT, new Date(callTimestamp)).toString();
+        Calendar currentTime = Calendar.getInstance();
+        currentTime.add(Calendar.MONTH, -1);
+        return DateFormat.format(CallRecord.CALL_DATE_FORMAT, currentTime).toString();
     }
 
     public int getAmount() {
