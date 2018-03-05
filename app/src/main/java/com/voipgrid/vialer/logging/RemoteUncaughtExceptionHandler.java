@@ -2,8 +2,9 @@ package com.voipgrid.vialer.logging;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.compat.BuildConfig;
 import android.util.Log;
+
+import com.voipgrid.vialer.BuildConfig;
 
 /**
  * Class that sends the uncaught exceptions to remote an presents the regular crash screen
