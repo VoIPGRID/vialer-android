@@ -36,8 +36,8 @@ public class FcmMessagingService extends FirebaseMessagingService {
     // Message format constants.
     private final static String MESSAGE_TYPE = "type";
 
-    private final static String CALL_REQUEST_TYPE = "call";
-    private final static String MESSAGE_REQUEST_TYPE = "message";
+    public final static String CALL_REQUEST_TYPE = "call";
+    public final static String MESSAGE_REQUEST_TYPE = "message";
 
     private final static String RESPONSE_URL = "response_api";
     private final static String REQUEST_TOKEN = "unique_key";
@@ -64,7 +64,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         Map<String, String> data = remoteMessage.getData();
         String requestType = data.get(MESSAGE_TYPE);
 
-        LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage);
+        LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage, requestType);
 
         if (requestType == null) {
             mRemoteLogger.e("No requestType");

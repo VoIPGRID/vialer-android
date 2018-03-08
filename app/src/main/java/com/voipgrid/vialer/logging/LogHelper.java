@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.logging;
 
+import static com.voipgrid.vialer.fcm.FcmMessagingService.CALL_REQUEST_TYPE;
+
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -7,8 +9,8 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.sip.SipService;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class LogHelper {
 
@@ -51,9 +53,12 @@ public class LogHelper {
      * Sends a log to the push logging environment, used to track success rates of push messages.
      *
      * @param remoteMessage
+     * @param requestType
      */
-    public void logMiddlewareMessageReceived(RemoteMessage remoteMessage) {
-        Map<String, String> message = new HashMap<>(remoteMessage.getData());
+    public void logMiddlewareMessageReceived(RemoteMessage remoteMessage, String requestType) {
+        if(!CALL_REQUEST_TYPE.equals(requestType)) return;
+
+        Map<String, String> message = new TreeMap<>(remoteMessage.getData());
 
         message.put("caller_id", "<CALLER_ID>");
         message.put("phonenumber", "<PHONE_NUMBER>");
