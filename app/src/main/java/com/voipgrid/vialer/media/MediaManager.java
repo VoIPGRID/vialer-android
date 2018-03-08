@@ -89,8 +89,14 @@ public class MediaManager implements
     public void deInit() {
         mRemoteLogger.v("deInit()");
 
-        mAudioRouter.deInit();
-        mIncomingRinger.stop();
+        if(mAudioRouter != null) {
+            mAudioRouter.deInit();
+        }
+
+        if(mIncomingRinger != null) {
+            mIncomingRinger.stop();
+        }
+
         resetAudioManager();
 
         mMediaManager = null;
@@ -204,6 +210,9 @@ public class MediaManager implements
      */
     private void resetAudioManager() {
         mRemoteLogger.v("resetAudioManager()...");
+
+        if(mAudioManager == null) return;
+
         mAudioManager.setMode(AudioManager.MODE_NORMAL);
         mAudioManager.abandonAudioFocus(this);
     }
