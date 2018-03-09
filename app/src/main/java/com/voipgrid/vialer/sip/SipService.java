@@ -324,17 +324,12 @@ public class SipService extends Service {
      * @param number
      */
     public void startOutgoingCallActivity(SipCall sipCall, Uri number) {
-        mRemoteLogger.d("callVisibleForUser");
-        Intent intent = new Intent(this, CallActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setDataAndType(number, CallActivity.TYPE_OUTGOING_CALL);
-        intent.putExtra(CallActivity.CONTACT_NAME, sipCall.getCallerId());
-        intent.putExtra(CallActivity.PHONE_NUMBER, sipCall.getPhoneNumber());
-
-        sipServiceActive = true;
-
-        startActivity(intent);
-
+        startCallActivity(
+                number,
+                CallActivity.TYPE_OUTGOING_CALL,
+                sipCall.getCallerId(),
+                sipCall.getPhoneNumber()
+        );
     }
 
     /**
@@ -343,16 +338,22 @@ public class SipService extends Service {
      * @param callerId
      */
     public void startIncomingCallActivity(String number, String callerId) {
+        startCallActivity(
+                SipUri.sipAddressUri(this, PhoneNumberUtils.format(number)),
+                CallActivity.TYPE_INCOMING_CALL,
+                callerId,
+                number
+        );
+    }
+
+    private void startCallActivity(Uri sipAddressUri, @CallActivity.CallTypes String type, String callerId, String number) {
         mRemoteLogger.d("callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        Uri sipAddressUri = SipUri.sipAddressUri(
-                this,
-                PhoneNumberUtils.format(number)
-        );
-        intent.setDataAndType(sipAddressUri, CallActivity.TYPE_INCOMING_CALL);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setDataAndType(sipAddressUri, type);
         intent.putExtra(CallActivity.CONTACT_NAME, callerId);
         intent.putExtra(CallActivity.PHONE_NUMBER, number);
+
         sipServiceActive = true;
         startActivity(intent);
     }
