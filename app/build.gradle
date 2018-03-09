@@ -86,7 +86,6 @@ ext {
     androidTestVersion = "0.5"
     firebaseVersion = "11.6.2"
     jUnitVersion = "4.12"
-    powerMockVersion = "1.7.3"
     okHttpVersion = "3.9.0"
     retroFitVersion = "2.3.0"
     roboElectricVersion = "3.4.2"
@@ -129,13 +128,6 @@ dependencies {
     // Testing below are supported api level because SNAPSHOT version is to unstable.
     testCompile "org.robolectric:robolectric:${roboElectricVersion}"
     testCompile "org.mockito:mockito-core:${mockitoCoreVersion}"
-
-    // Setup for local tests.
-    testCompile "org.powermock:powermock-module-junit4:${powerMockVersion}"
-    testCompile "org.powermock:powermock-module-junit4-rule:${powerMockVersion}"
-    testCompile "org.powermock:powermock-api-mockito2:${powerMockVersion}"
-    testCompile "org.powermock:powermock-classloading-xstream:${powerMockVersion}"
-    testCompile "com.squareup.okhttp3:mockwebserver:${okHttpVersion}"
 
     // Setup for instrumented tests.
     androidTestCompile "com.android.support.test:runner:${androidTestVersion}"
