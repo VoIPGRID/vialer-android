@@ -283,7 +283,11 @@ public class CallRecordFragment extends ListFragment implements
         if (response.isSuccessful() && response.body() != null) {
             mHaveNetworkRecords = true;
             List<CallRecord> records = response.body().getObjects();
-            displayCallRecords(records);
+
+            if(getActivity() != null && isAdded()) {
+                displayCallRecords(records);
+            }
+
             // Save the records to cache, if there are any.
             if (filter(records).size() > 0) {
                 new AsyncCallRecordSaver(records).execute();
