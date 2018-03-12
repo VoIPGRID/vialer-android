@@ -25,6 +25,7 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.sip.SipLogHandler;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
 import org.pjsip.pjsua2.Account;
@@ -112,29 +113,28 @@ public class SipConfig implements AccountStatus {
         startNetworkingListener();
     }
 
+    private static final int NETWORK_SWITCH_DELAY_MS = 500;
+
     private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mRemoteLogger.d("Received a network change.");
+            if(isChangingNetwork) return;
+
+            mRemoteLogger.d("Received a network change: " + intent.getAction());
 
             if(isInitialStickyBroadcast()) {
                 mRemoteLogger.i("Ignoring network change as broadcast is old (sticky).");
                 return;
             }
 
-            if (isChangingNetwork) {
-                mRemoteLogger.i("There is already a network change in progress.");
-                return;
-            }
             isChangingNetwork = true;
 
             final Handler handler = new Handler();
             handler.postDelayed(() -> {
-                mRemoteLogger.d("Wait 1 sec before doing the network switch");
+                mRemoteLogger.d("Wait " + NETWORK_SWITCH_DELAY_MS + "ms before doing the network switch");
                 doIpSwitch();
                 isChangingNetwork = false;
-            }, 1000);
-
+            }, NETWORK_SWITCH_DELAY_MS);
         }
     };
 
@@ -169,9 +169,12 @@ public class SipConfig implements AccountStatus {
     }
 
     private void startNetworkingListener() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(SipLogHandler.NETWORK_UNAVAILABLE_BROADCAST);
         mSipService.registerReceiver(
                 mNetworkStateReceiver,
-                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+                filter
         );
     }
 
