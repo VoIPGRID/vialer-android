@@ -19,7 +19,7 @@ public class LogHelper {
 
     private LogHelper(RemoteLogger remoteLogger) {
         mRemoteLogger = remoteLogger;
-        mGson = new GsonBuilder().disableHtmlEscaping().create();
+        mGson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
     }
 
     public static LogHelper using(RemoteLogger remoteLogger) {
