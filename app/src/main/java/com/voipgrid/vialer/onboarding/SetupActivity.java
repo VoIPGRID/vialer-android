@@ -108,12 +108,15 @@ public class SetupActivity extends RemoteLoggingActivity implements
      * @param newFragment next step in the setup process to present to the user.
      */
     private void swapFragment(Fragment newFragment, String tag) {
+        if(isFinishing()) return;
+
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         if (tag != null) {
             transaction.addToBackStack(null);
         } else {
             tag = "fragment";
         }
+
         transaction.replace(R.id.fragment_container, newFragment, tag).commitAllowingStateLoss();
 
         // Hide the keyboard when switching fragments.
