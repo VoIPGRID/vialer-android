@@ -6,8 +6,6 @@ import static com.voipgrid.vialer.util.AppVersions.v5_2;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
@@ -41,6 +39,16 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> {
     private final static String VERSION_CODE = "version_code";
     private Boolean succesfulMigrate = true;
 
+    /**
+     * The milliseconds since a migration was last attempted.
+     */
+    private static long lastMigrationAttempt = 0;
+
+    /**
+     * The time between migration attempts.
+     */
+    private static final long MIGRATION_ATTEMPT_TIMEOUT_MS = (60 * 60 * 24) * 1000;
+
     public UpdateHelper(Context context, OnUpdateCompleted listener) {
         mContext = context;
         mJsonStorage = new JsonStorage(mContext);
@@ -52,6 +60,7 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
+        lastMigrationAttempt = System.currentTimeMillis();
         int currentVersion = BuildConfig.VERSION_CODE;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         int lastVersion = prefs.getInt(VERSION_CODE, 0);
@@ -73,6 +82,8 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> {
     }
 
     public static boolean requiresUpdate(Context context) {
+        if(lastMigrationAttempt > (System.currentTimeMillis() - MIGRATION_ATTEMPT_TIMEOUT_MS) ) return false;
+
         int lastVersion = PreferenceManager.getDefaultSharedPreferences(context).getInt(VERSION_CODE, 0);
 
         return BuildConfig.VERSION_CODE != lastVersion;
@@ -145,9 +156,16 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> {
 
         try {
             Response response = call.execute();
-            if(!response.isSuccessful()) succesfulMigrate = false;
+            if(!response.isSuccessful()) {
+                handleApiFailure(response.code());
+            }
         } catch (IOException e) {
-            succesfulMigrate = false;
+            handleApiFailure(0);
         }
+    }
+
+    private void handleApiFailure(int code) {
+        mRemoteLogger.e("Enabling secure calling failed with code " + code);
+        succesfulMigrate = false;
     }
 }
