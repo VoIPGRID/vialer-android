@@ -15,9 +15,9 @@ import android.util.Log;
 
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
-import com.voipgrid.vialer.logging.RemoteLogger;
 
 
 /**
@@ -101,10 +101,6 @@ public class ContactsSyncTask {
         sync(cursor);
         SyncUtils.setFullSyncInProgress(mContext, false);
         SyncUtils.setRequiresFullContactSync(mContext, false);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            mContext.startService(new Intent(mContext, UpdateChangedContactsService.class));
-        }
 
         // When there was a full contact sync required inform the user.
         if (requireFullContactSync) {

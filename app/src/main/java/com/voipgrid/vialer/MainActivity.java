@@ -99,11 +99,7 @@ public class MainActivity extends NavigationDrawerActivity implements
         if (SyncUtils.requiresFullContactSync(this)) {
             SyncUtils.requestContactSync(this);
         } else {
-            // Live contact updates are not supported below api level 18.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
-                    && ContactsPermission.hasPermission(this)) {
-                startService(new Intent(this, UpdateChangedContactsService.class));
-            }
+            startContactObserverService();
         }
 
         SyncUtils.setPeriodicSync(this);
@@ -182,6 +178,7 @@ public class MainActivity extends NavigationDrawerActivity implements
             if (allPermissionsGranted) {
                 // ContactSync.
                 SyncUtils.requestContactSync(this);
+                startContactObserverService();
             }
         }
     }
@@ -226,6 +223,16 @@ public class MainActivity extends NavigationDrawerActivity implements
 
             }
         });
+    }
+
+    /**
+     * Starts the service that will listen for changes to contacts.
+     */
+    private void startContactObserverService() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
+                && ContactsPermission.hasPermission(this)) {
+            startService(new Intent(this, UpdateChangedContactsService.class));
+        }
     }
 
     private String getScreenName(String text) {
