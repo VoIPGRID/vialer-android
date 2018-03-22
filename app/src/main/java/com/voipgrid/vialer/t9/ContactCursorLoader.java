@@ -88,7 +88,7 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
                 }
 
                 if (number != null) {
-                    if (number.startsWith("+")) {
+                    if (number.startsWith("+") && number.length() >= 3) {
                         if(("0" + number.substring(3)).startsWith(mT9Query)) {
                             addResult = true;
                             number = "<b>" + number.substring(0, mT9Query.length() + 2) + "</b>" + number.substring(mT9Query.length() + 2);
