@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 public class SipLogAnonymizer implements Formatter {
     @Override
     public String format(String tag, String message) {
-
         message = Pattern.compile("sip:\\+?\\d+").matcher(message).replaceAll("sip:SIP_USER_ID");
         message = Pattern.compile("\"caller_id\" = (.+?);").matcher(message).replaceAll("<CALLER_ID>");
         message = Pattern.compile("To:(.+?)>").matcher(message).replaceAll("To: <SIP_ANONYMIZED>");
@@ -23,6 +22,6 @@ public class SipLogAnonymizer implements Formatter {
 
     @Override
     public boolean shouldFormat(String tag, String message) {
-        return tag.contains(SipService.class.getSimpleName());
+        return tag.contains(SipService.class.getSimpleName()) || tag.contains("Pjsip");
     }
 }
