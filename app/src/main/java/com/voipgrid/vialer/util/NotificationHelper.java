@@ -38,6 +38,8 @@ public class NotificationHelper {
 
     private static final String CONTACTS_NOTIFICATION_CHANNEL_ID = "vialer_contacts";
 
+    private static final String MEDIA_BUTTON_NOTIFICATION_CHANNEL_ID = "vialer_media_button";
+
     private static final int CONTACT_SYNC_NOTIFICATION_ID = 1;
 
     private NotificationHelper(Context context) {
@@ -166,6 +168,15 @@ public class NotificationHelper {
         }
     }
 
+    public Notification createMediaButtonNotification() {
+        createMediaButtonChannel();
+
+        return new NotificationCompat.Builder(mContext, MEDIA_BUTTON_NOTIFICATION_CHANNEL_ID)
+                .setContentTitle("")
+                .setContentText("")
+                .build();
+    }
+
     public void updateNotification(String title, String message, int notifyID) {
         mBuilder.setContentTitle(title);
         mBuilder.setContentText(message);
@@ -203,6 +214,20 @@ public class NotificationHelper {
                 mContext.getString(R.string.notification_channel_contacts),
                 NotificationManager.IMPORTANCE_HIGH
         );
+
+        mNotificationManager.createNotificationChannel(notificationChannel);
+    }
+
+    private void createMediaButtonChannel() {
+        if(androidVersionDoesNotRequireNotificationChannel()) return;
+
+        NotificationChannel notificationChannel = new NotificationChannel(
+                MEDIA_BUTTON_NOTIFICATION_CHANNEL_ID,
+                mContext.getString(R.string.notification_channel_media_button),
+                NotificationManager.IMPORTANCE_DEFAULT
+        );
+
+        notificationChannel.enableVibration(false);
 
         mNotificationManager.createNotificationChannel(notificationChannel);
     }

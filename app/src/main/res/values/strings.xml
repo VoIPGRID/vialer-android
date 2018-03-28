@@ -159,6 +159,7 @@
 
     <string name="notification_channel_calls">Calls</string>
     <string name="notification_channel_contacts">Contact synchronisation</string>
+    <string name="notification_channel_media_button">Bluetooth</string>
 
     <string name="two_step_call_description_platform">Outgoing number</string>
     <string name="two_step_call_description_step_a">Calling your phone</string>
