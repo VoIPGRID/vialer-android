@@ -10,6 +10,8 @@ public class VialerApplication extends AnalyticsApplication {
 
     private static VialerApplication sApplication;
 
+    private ActivityLifecycleTracker mActivityLifecycle;
+
     public static VialerApplication get() {
         return sApplication;
     }
@@ -18,9 +20,20 @@ public class VialerApplication extends AnalyticsApplication {
     public void onCreate() {
         super.onCreate();
         sApplication = this;
+        mActivityLifecycle = new ActivityLifecycleTracker();
+        registerActivityLifecycleCallbacks(mActivityLifecycle);
     }
 
     public static String getAppVersion() {
         return BuildConfig.VERSION_NAME;
+    }
+
+    /**
+     * Checks whether there is an activity in the foreground currently.
+     *
+     * @return TRUE if an activity is being displayed to the user.
+     */
+    public boolean isApplicationVisible() {
+        return mActivityLifecycle.isApplicationVisible();
     }
 }
