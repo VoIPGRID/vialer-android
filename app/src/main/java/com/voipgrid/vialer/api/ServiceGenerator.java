@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.util.Log;
 
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
@@ -20,13 +21,18 @@ import java.io.IOException;
 import okhttp3.Cache;
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import static java.lang.String.format;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /**
@@ -109,8 +115,21 @@ public class ServiceGenerator {
                 }
 
                 Request request = requestBuilder.build();
-
+Log.e("TEST123", String.valueOf(request.url()));
                 Response response = chain.proceed(request);
+// possibly only on a certain type of response?? e.g. middleware register @TODO
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("code",200);
+                    jsonObject.put("status","OK");
+                    jsonObject.put("message","Successful");
+
+                    MediaType contentType = response.body().contentType();
+                    ResponseBody body = ResponseBody.create(contentType, jsonObject.toString());
+                    response = response.newBuilder().body(body).code(401).build();
+                } catch (JSONException e) {
+                    Log.e("TEST123", "e", e);
+                }
 
                 // Check if we get a 401 and are not in the onboarding.
                 if (response.code() == 401 &&
