@@ -526,6 +526,12 @@ public class CallActivity extends LoginRequiredActivity
         mProximityHelper.stopSensor();
 
         try {
+            mBroadcastManager.unregisterReceiver(mCallMissedReceiver);
+        } catch (IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister mCallMissedReceiver not registered.");
+        }
+
+        try {
             unregisterReceiver(mBluetoothButtonReceiver);
         } catch (IllegalArgumentException e) {
             mRemoteLogger.w("Trying to unregister mBluetoothReceiver not registered.");
