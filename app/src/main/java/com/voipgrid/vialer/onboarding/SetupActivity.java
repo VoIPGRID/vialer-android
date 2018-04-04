@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -59,6 +58,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
     private Preferences mPreferences;
     private RemoteLogger mRemoteLogger;
     private ServiceGenerator mServiceGen;
+    private AlertDialog mAlertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +130,8 @@ public class SetupActivity extends RemoteLoggingActivity implements
      * @param message the message body of the alert to show.
      */
     private void displayAlert(String title, String message) {
+        if(isFinishing()) return;
+
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle(title);
         alertDialogBuilder
@@ -140,8 +142,8 @@ public class SetupActivity extends RemoteLoggingActivity implements
                         dialog.dismiss();
                     }
                 });
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
+        mAlertDialog = alertDialogBuilder.create();
+        mAlertDialog.show();
     }
 
     @Override
@@ -464,5 +466,15 @@ public class SetupActivity extends RemoteLoggingActivity implements
                 password
         );
         return true;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if(mAlertDialog != null) {
+            mAlertDialog.dismiss();
+            mAlertDialog = null;
+        }
     }
 }
