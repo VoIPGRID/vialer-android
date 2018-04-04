@@ -1,5 +1,6 @@
 package com.voipgrid.vialer;
 
+import com.github.anrwatchdog.ANRWatchDog;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 
 /**
@@ -22,6 +23,7 @@ public class VialerApplication extends AnalyticsApplication {
         sApplication = this;
         mActivityLifecycle = new ActivityLifecycleTracker();
         registerActivityLifecycleCallbacks(mActivityLifecycle);
+        new ANRWatchDog().start();
     }
 
     public static String getAppVersion() {
