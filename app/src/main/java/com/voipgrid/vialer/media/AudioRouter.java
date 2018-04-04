@@ -1,5 +1,8 @@
 package com.voipgrid.vialer.media;
 
+import static com.voipgrid.vialer.media.BluetoothMediaSessionService
+        .SHOULD_NOT_START_IN_FOREGROUND_EXTRA;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
@@ -81,7 +84,7 @@ class AudioRouter {
 
         mAudioRouterInterface = audioRouterInterface;
 
-        mContext.startService(new Intent(mContext, BluetoothMediaSessionService.class));
+        startMediaButtonService();
     }
 
     void deInit() {
@@ -553,6 +556,12 @@ class AudioRouter {
 
     public void setAudioIsLost(boolean lost) {
         mAudioIsLost = lost;
+    }
+
+    private void startMediaButtonService() {
+        Intent intent = new Intent(mContext, BluetoothMediaSessionService.class);
+        intent.putExtra(SHOULD_NOT_START_IN_FOREGROUND_EXTRA, true);
+        mContext.startService(intent);
     }
 
     interface AudioRouterInterface {
