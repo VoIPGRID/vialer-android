@@ -148,6 +148,9 @@
     <string name="callnotification_on_hold">In de wacht</string>
     <string name="callnotification_dialing">Kiezen</string>
 
+    <string name="notification_channel_calls">Telefoongesprekken</string>
+    <string name="notification_channel_contacts">Contact synchronisatie</string>
+
     <string name="navigation_name_placeholder_text">Geen uitgaand nummer geconfigureerd</string>
     <string name="supressed_number">Anoniem</string>
 

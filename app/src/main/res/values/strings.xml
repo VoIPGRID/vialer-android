@@ -157,6 +157,9 @@
     <string name="callnotification_on_hold">On hold</string>
     <string name="callnotification_dialing">Dialing</string>
 
+    <string name="notification_channel_calls">Calls</string>
+    <string name="notification_channel_contacts">Contact synchronisation</string>
+
     <string name="two_step_call_description_platform">Outgoing number</string>
     <string name="two_step_call_description_step_a">Calling your phone</string>
     <string name="two_step_call_description_step_b">Connecting you with</string>
