@@ -274,7 +274,7 @@ public class CallActivity extends LoginRequiredActivity
             }
 
             // Check to see if the call activity is the last activity.
-            if (isTaskRoot()) {
+            if (isTaskRoot() && VialerApplication.get().isApplicationVisible()) {
                 mRemoteLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
                 Intent intent = new Intent(CallActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
