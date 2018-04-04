@@ -119,6 +119,7 @@ public class CallActivity extends LoginRequiredActivity
     private RemoteLogger mRemoteLogger;
     private SipService mSipService;
     private boolean mSipServiceBound = false;
+    private boolean mShouldUnbind = false;
 
     private MediaManager mMediaManager;
 
@@ -434,7 +435,9 @@ public class CallActivity extends LoginRequiredActivity
         // Bind the SipService to the activity.
         if (!mSipServiceBound && mSipService == null) {
             mRemoteLogger.i("SipService not bound!");
-            bindService(new Intent(this, SipService.class), mSipServiceConnection, Context.BIND_AUTO_CREATE);
+            if (bindService(new Intent(this, SipService.class), mSipServiceConnection, Context.BIND_AUTO_CREATE)) {
+                mShouldUnbind = true;
+            }
         }
 
         if (!mOnTransfer && mSipService != null && mSipService.getCurrentCall() != null) {
@@ -1285,9 +1288,9 @@ public class CallActivity extends LoginRequiredActivity
     }
 
     private void stopService() {
-        if (mSipServiceBound && (mSipService != null && mSipService.getCurrentCall() == null)) {
+        if (!hasActiveCall() && mShouldUnbind) {
             unbindService(mSipServiceConnection);
-            mSipServiceBound = false;
+            mShouldUnbind = false;
         }
     }
 
