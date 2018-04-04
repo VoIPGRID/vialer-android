@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.contacts;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
@@ -14,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
+import com.voipgrid.vialer.VialerApplication;
 
 /**
  * UpdateChangedContactsService listens for changed contacts and syncs them for t9 search.
@@ -32,7 +34,7 @@ public class UpdateChangedContactsService extends Service {
         }
 
         // Create observer.
-        ContactUpdateContentObserver observer = new ContactUpdateContentObserver(new Handler());
+        ContactUpdateContentObserver observer = new ContactUpdateContentObserver(new Handler(), VialerApplication.get());
 
         // Register observer with service.
         getApplicationContext()
@@ -61,20 +63,24 @@ public class UpdateChangedContactsService extends Service {
     }
 
 
-    private class ContactUpdateContentObserver extends ContentObserver {
+    private static class ContactUpdateContentObserver extends ContentObserver {
         private final String LOG_TAG = ContactUpdateContentObserver.class.getName();
 
+        private static Thread syncThread;
+
         private SharedPreferences mPrefs;
+        private Context mContext;
 
         /**
          * Creates a content observer.
          *
          * @param handler The handler to run {@link #onChange} on, or null if none.
          */
-        public ContactUpdateContentObserver(Handler handler) {
+        public ContactUpdateContentObserver(Handler handler, Context context) {
             super(handler);
 
-            mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+            mContext = context;
         }
 
         @Override
@@ -84,6 +90,18 @@ public class UpdateChangedContactsService extends Service {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
+            if(syncThread != null && syncThread.isAlive()) return;
+
+            syncThread = new Thread(this::syncUpdatedContacts);
+
+            syncThread.start();
+        }
+
+        /**
+         * Runs the tasks required to handle a contact being updated/added.
+         *
+         */
+        private void syncUpdatedContacts() {
             // Updating during a full sync would trigger a loop.
             if (mPrefs.getBoolean(SyncConstants.FULL_SYNC_INPROGRESS, true)) {
                 return;
@@ -100,12 +118,13 @@ public class UpdateChangedContactsService extends Service {
                 return;
             }
 
+
             if (BuildConfig.DEBUG) {
                 Log.d(LOG_TAG, "Contact changed. Start syncing changed contacts.");
             }
 
             // Sync changed contacts.
-            new ContactsSyncTask(getApplicationContext()).sync(updatedContacts);
+            new ContactsSyncTask(mContext).sync(updatedContacts);
 
             if (BuildConfig.DEBUG) {
                 Log.d(LOG_TAG, "Done syncing changed contacts.");
@@ -120,7 +139,7 @@ public class UpdateChangedContactsService extends Service {
             // Contacts who have a phone number and are changed since last sync.
             return ContactsContract.Data.HAS_PHONE_NUMBER + " = 1 AND " +
                     ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP + " > " +
-                    SyncUtils.getLastSync(getApplicationContext());
+                    SyncUtils.getLastSync(mContext);
         }
 
         /**
@@ -128,7 +147,7 @@ public class UpdateChangedContactsService extends Service {
          * @return
          */
         private Cursor getUpdatedContactsCursor() {
-            Cursor cursor = getApplicationContext().getContentResolver().query(
+            Cursor cursor = mContext.getContentResolver().query(
                     ContactsContract.Contacts.CONTENT_URI,
                     null,
                     getSelection(),
