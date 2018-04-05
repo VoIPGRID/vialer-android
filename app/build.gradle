@@ -7,7 +7,7 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 88
+        versionCode 89
         versionName "5.3"
         multiDexEnabled true
         flavorDimensions "default"
