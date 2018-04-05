@@ -279,7 +279,9 @@ public class MediaManager implements
             mCurrentAudioRoute = newRoute;
             if (mCurrentAudioRoute == Constants.ROUTE_BT) {
                 if (CURRENT_CALL_STATE == Constants.CALL_RINGING) {
-                    mIncomingRinger.restart();
+                    if (mIncomingRinger != null) {
+                        mIncomingRinger.restart();
+                    }
                 }
             }
         }
