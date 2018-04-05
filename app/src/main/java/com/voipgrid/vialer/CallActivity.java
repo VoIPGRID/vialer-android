@@ -87,6 +87,12 @@ public class CallActivity extends LoginRequiredActivity
     private static final int DELAYED_FINISH_MS = 3000;
     private static final int DELAYED_FINISH_RETRY_MS = 1000;
 
+    /**
+     * If the sip service has not successfully bound in this amount of time, the call
+     * activity will attempt to finish.
+     */
+    private static final int MAX_ALLOWED_MS_TO_BIND_SIP_SERVICE = 3000;
+
     // Manager for "on speaker" action.
     private ProximitySensorHelper mProximityHelper;
     private TextView mCallDurationView;
@@ -466,7 +472,7 @@ public class CallActivity extends LoginRequiredActivity
                     onCallStatusUpdate(CALL_DISCONNECTED_MESSAGE);
                 }
             }
-        }, 500);
+        }, MAX_ALLOWED_MS_TO_BIND_SIP_SERVICE);
     }
 
     @Override
