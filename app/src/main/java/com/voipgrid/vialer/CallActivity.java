@@ -1101,16 +1101,9 @@ public class CallActivity extends LoginRequiredActivity
                 break;
 
             case R.id.button_keypad:
-                if (mOnTransfer) {
-                    if (mSipService.getCurrentCall().getIsCallConnected()) {
-                        toggleDialPad();
-                        updateCallButton(viewId, true);
-                    }
-                } else {
-                    if (mConnected) {
-                        toggleDialPad();
-                        updateCallButton(viewId, true);
-                    }
+                if (mSipService.getCurrentCall().getIsCallConnected()) {
+                    toggleDialPad();
+                    updateCallButton(viewId, true);
                 }
                 break;
 
