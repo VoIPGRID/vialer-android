@@ -209,14 +209,15 @@
     <string name="call_incoming_decline">Weigeren</string>
     <string name="permission_read_external_storage_dialog_title">Externe opslag permissie</string>
     <string name="permission_read_external_storage_missing_message">Permissie tot de externe opslag is nodig om toegang tot je ringtones te krijgen</string>
-    <string name="permission_read_external_storage_dialog_message">Deze permissie is nodig om ringtones te kunnen kiezen die op je externe opslag staan</string>
+    <string name="permission_read_external_storage_dialog_message">Deze permissie is nodig om ringtones te kunnen kiezen die op je externe opslag staan</string>      
     <string name="advanced_settings_title">Geavanceerde instellingen</string>
     <string name="advanced_settings_tls_description">Externe partijen kunnen je gesprekken afluisteren als deze functie is uitgeschakeld.</string>
     <string name="advanced_settings_tls_switch">Gebruik versleuteld bellen</string>
     <string name="advanced_settings_stun_switch">Gebruik STUN om te bellen</string>
     <string name="advanced_settings_stun_description">STUN kan de connectie met het netwerk verbeteren als je NAT problemen hebt.
     </string>
-
+    <string name="t9helper_title">Tip</string>
+    <string name="t9helper_text">Je kunt zoeken op %1$s door de volgende nummers op het toetsenbordin te drukken.</string>
     <string name="call_not_encrypted_warning_bar_text">Gesprek niet versleuteld</string>
 
 </resources>

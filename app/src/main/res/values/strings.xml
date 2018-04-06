@@ -220,5 +220,8 @@
     <string name="call_transfer_complete_and">and</string>
     <string name="call_transfer_complete_success"> Successfully transferred</string>
 
+    <string name="t9helper_title">Tips</string>
+    <string name="t9helper_text">You can search for %1$s by keying the numbers on the dialpad below.</string>
+    <string name="t9helper_joining_character" translatable="false">+</string>
     <string name="call_not_encrypted_warning_bar_text">Call not encrypted</string>
 </resources>
