@@ -437,10 +437,17 @@ public class DialerActivity extends LoginRequiredActivity implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        // If the number has been emptied while a query was still in progress, clear all the results.
+        if (mNumberInputView.getNumber().isEmpty()) {
+            clearContactList();
+            return;
+        }
+
         // Set new data on adapter and notify data changed.
         mContactsAdapter.swapCursor(data);
         mContactsAdapter.notifyDataSetChanged();
         mT9HelperFragment.setVisibility(View.GONE);
+
         // Set empty to no contacts found when result is empty.
         if (data != null && data.getCount() == 0) {
             mEmptyView.setText(getString(R.string.dialer_no_contacts_found_message));
