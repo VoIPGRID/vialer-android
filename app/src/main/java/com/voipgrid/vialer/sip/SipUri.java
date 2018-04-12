@@ -20,7 +20,7 @@ public class SipUri {
     public static String sipAddress(Context context, String sipAccount) {
         return prependSIPUri(
                 context,
-                sipAccount + "@" + context.getString(R.string.sip_host)
+                sipAccount + "@" + SipConfig.getSipHost()
         );
     }
 

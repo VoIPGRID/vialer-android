@@ -18,6 +18,7 @@ import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
@@ -334,7 +335,7 @@ public class SipConfig implements AccountStatus {
 
         String transportString = getTransportString();
         String sipAccountRegId = SipUri.sipAddress(mSipService, mPhoneAccount.getAccountId()) + transportString;
-        String sipRegistrarUri = SipUri.prependSIPUri(mSipService, mSipService.getString(R.string.sip_host)) + transportString;
+        String sipRegistrarUri = SipUri.prependSIPUri(mSipService, getSipHost()) + transportString;
 
         AccountConfig config = new AccountConfig();
         config.setIdUri(sipAccountRegId);
@@ -343,7 +344,7 @@ public class SipConfig implements AccountStatus {
         config.getSipConfig().getProxies().add(sipRegistrarUri);
 
         // TLS Configuration
-        if (mSipService.getString(R.string.sip_transport_type).equals("tls")) {
+        if (shouldUseTls()) {
             config.getMediaConfig().setSrtpSecureSignaling(1);
             config.getMediaConfig().setSrtpUse(pjmedia_srtp_use.PJMEDIA_SRTP_MANDATORY);
         }
@@ -564,5 +565,24 @@ public class SipConfig implements AccountStatus {
         }
 
         uaConfig.setStunServer(stun);
+    }
+
+    /**
+     * Find the current SIP domain that should be used for all calls.
+     *
+     * @return The domain as a string
+     */
+    @NonNull
+    public static String getSipHost() {
+        return VialerApplication.get().getString(shouldUseTls() ? R.string.sip_host_secure : R.string.sip_host);
+    }
+
+    /**
+     * Determine if TLS should be used for all calls.
+     *
+     * @return TRUE if TLS should be used
+     */
+    public static boolean shouldUseTls() {
+        return VialerApplication.get().getString(R.string.sip_transport_type).equals("tls");
     }
 }
