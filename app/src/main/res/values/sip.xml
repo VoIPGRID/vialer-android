@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="sip_host" translatable="false">sipproxy.voipgrid.nl</string>
+    <string name="sip_host_secure" translatable="false">sip.encryptedsip.com</string>
     <string name="sip_protocol" translatable="false">sip:</string>
     <string name="sip_transport_type" translatable="false">tls</string>
     <string name="sip_auth_scheme" translatable="false">digest</string>
