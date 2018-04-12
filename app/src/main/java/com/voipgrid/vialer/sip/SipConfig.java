@@ -74,16 +74,12 @@ public class SipConfig implements AccountStatus {
     private static Map<String, Short> sCodecPrioMapping;
     private boolean isChangingNetwork = false;
 
+    public static final short CODEC_DISABLED = (short) 0;
+    public static final short CODEC_PRIORITY_MAX = (short) 255;
+
     static {
         sCodecPrioMapping = new HashMap<>();
-        sCodecPrioMapping.put("ilbc/8000", (short) 211);
-        sCodecPrioMapping.put("PCMA/8000", (short) 0);
-        sCodecPrioMapping.put("G722/16000", (short) 0);
-        sCodecPrioMapping.put("PCMU/8000", (short) 0);
-        sCodecPrioMapping.put("speex/8000", (short) 0);
-        sCodecPrioMapping.put("speex/16000", (short) 0);
-        sCodecPrioMapping.put("speex/32000", (short) 0);
-        sCodecPrioMapping.put("GSM/8000", (short) 0);
+        sCodecPrioMapping.put("ilbc/8000", CODEC_PRIORITY_MAX);
     }
 
     public SipConfig(SipService sipService, PhoneAccount phoneAccount) {
@@ -391,13 +387,11 @@ public class SipConfig implements AccountStatus {
             CodecInfo info;
             Short prio;
 
-            for (int i = 1; i < codecList.size(); i++) {
+            for (int i = 0; i < codecList.size(); i++) {
                 info = codecList.get(i);
                 codecId = info.getCodecId();
                 prio = findCodecPriority(codecId);
-                if (prio != null) {
-                    mEndpoint.codecSetPriority(codecId, prio);
-                }
+                mEndpoint.codecSetPriority(codecId, prio != null ? prio : CODEC_DISABLED);
             }
         } catch (Exception e) {
             e.printStackTrace();
