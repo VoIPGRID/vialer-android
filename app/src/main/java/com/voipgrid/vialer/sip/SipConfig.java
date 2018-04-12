@@ -70,6 +70,7 @@ public class SipConfig implements AccountStatus {
     private SipAccount mSipAccount;
     private SipLogWriter mSipLogWriter;
     private SipService mSipService;
+    private Preferences mPreferences;
 
     private boolean mHasRespondedToMiddleware = false;
     private int mCurrentTransportId;
@@ -88,6 +89,7 @@ public class SipConfig implements AccountStatus {
         mSipService = sipService;
         mPhoneAccount = phoneAccount;
         mRemoteLogger = mSipService.getRemoteLogger();
+        mPreferences = new Preferences(VialerApplication.get());
     }
 
     public Endpoint getEndpoint() {
@@ -559,6 +561,11 @@ public class SipConfig implements AccountStatus {
      * @param uaConfig
      */
     private void configureStunServer(UaConfig uaConfig) {
+        if (!mPreferences.hasStunEnabled()) {
+            mRemoteLogger.i("User has disabled using STUN via settings menu");
+            return;
+        }
+
         String[] stunHosts = mSipService.getResources().getStringArray(R.array.stun_hosts);
 
         if(stunHosts.length <= 0) return;
