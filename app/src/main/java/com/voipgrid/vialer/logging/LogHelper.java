@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.sip.SipService;
 
 import java.util.Map;
@@ -67,5 +68,21 @@ public class LogHelper {
                 VialerApplication.get().getString(R.string.push_log_entries_token),
                 "ANDROID : " + mGson.toJson(message)
         );
+    }
+
+    /**
+     * Log the appropriate message based on the reason for secure calling not being enabled.
+     *
+     */
+    public void logNoTlsReason() {
+        SecureCalling secureCalling = SecureCalling.fromContext(VialerApplication.get());
+
+        if (!secureCalling.isEnabled()) {
+            if (secureCalling.isSetCorrectly()) {
+                mRemoteLogger.i("TLS will not be used for this call because the user has disabled it in advanced settings");
+            } else {
+                mRemoteLogger.w("TLS will not be used for this call because we have been unable to update the VoIP account");
+            }
+        }
     }
 }

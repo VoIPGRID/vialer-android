@@ -19,18 +19,19 @@ import android.widget.Spinner;
 import android.widget.Switch;
 
 import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.api.models.UseEncryption;
 import com.voipgrid.vialer.logging.RemoteLogger;
+
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -415,27 +416,29 @@ public class AccountActivity extends LoginRequiredActivity implements
     public void tlsSwitchChanged(CompoundButton compoundButton, final boolean b) {
         if (!isSetupComplete) return;
 
-        Call<UseEncryption> call = mApi.useEncryption(new UseEncryption(b));
+        SecureCalling secureCalling = SecureCalling.fromContext(this);
 
         enableProgressBar(true);
 
-        call.enqueue(new Callback<UseEncryption>() {
+        SecureCalling.Callback callback = new SecureCalling.Callback() {
             @Override
-            public void onResponse(Call<UseEncryption> call, Response<UseEncryption> response) {
-                if (response.isSuccessful()) {
-                    mPreferences.setTlsEnabled(b);
-                    mRemoteLogger.i("TLS switch has been set to: " + b);
-                }
-
+            public void onSuccess() {
+                mPreferences.setTlsEnabled(b);
+                mRemoteLogger.i("TLS switch has been set to: " + b);
                 initializeAdvancedSettings();
             }
 
             @Override
-            public void onFailure(Call<UseEncryption> call, Throwable t) {
-                mPreferences.setTlsEnabled(!b);
+            public void onFail() {
                 initializeAdvancedSettings();
             }
-        });
+        };
+
+        if(b) {
+            secureCalling.enable(callback);
+        } else {
+            secureCalling.disable(callback);
+        }
     }
 
     @OnCheckedChanged(R.id.stun_switch)

@@ -23,9 +23,11 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
+import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
+import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -79,6 +81,9 @@ public class SipConfig implements AccountStatus {
 
     public static final short CODEC_DISABLED = (short) 0;
     public static final short CODEC_PRIORITY_MAX = (short) 255;
+
+    public static final String TRANSPORT_TYPE_SECURE = "tls";
+    public static final String TRANSPORT_TYPE_STANDARD = "tcp";
 
     static {
         sCodecPrioMapping = new HashMap<>();
@@ -214,15 +219,7 @@ public class SipConfig implements AccountStatus {
      * @return
      */
     private String getTransportString() {
-        String sipTransport = getSipTransportType();
-        String tcp = "";
-
-        if (sipTransport.equals("tcp")) {
-            tcp = ";transport=tcp";
-        } else if (sipTransport.equals("tls")) {
-            tcp = ";transport=tls";
-        }
-        return tcp;
+        return ";transport=" + getSipTransportType();
     }
 
     /**
@@ -233,9 +230,9 @@ public class SipConfig implements AccountStatus {
         String sipTransport = getSipTransportType();
 
         pjsip_transport_type_e transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_UDP;
-        if (sipTransport.equals("tcp")) {
+        if (sipTransport.equals(TRANSPORT_TYPE_STANDARD)) {
             transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_TCP;
-        } else if (sipTransport.equals("tls")) {
+        } else if (sipTransport.equals(TRANSPORT_TYPE_SECURE)) {
             transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_TLS;
         }
         return transportType;
@@ -366,7 +363,13 @@ public class SipConfig implements AccountStatus {
 
     @NonNull
     private String getSipTransportType() {
-        return shouldUseTls() ? mSipService.getString(R.string.sip_transport_type) : "tcp";
+        if (!shouldUseTls()) {
+            LogHelper.using(mRemoteLogger).logNoTlsReason();
+
+            return TRANSPORT_TYPE_STANDARD;
+        }
+
+        return TRANSPORT_TYPE_SECURE;
     }
 
     /**
@@ -596,12 +599,6 @@ public class SipConfig implements AccountStatus {
      * @return TRUE if TLS should be used
      */
     public static boolean shouldUseTls() {
-        Preferences preferences = new Preferences(VialerApplication.get());
-
-        if (!preferences.hasTlsEnabled()) {
-            return false;
-        }
-
-        return VialerApplication.get().getString(R.string.sip_transport_type).equals("tls");
+        return SecureCalling.fromContext(VialerApplication.get()).isEnabled();
     }
 }
