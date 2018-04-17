@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.onboarding;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
@@ -50,7 +51,7 @@ public class AccountFragment extends OnboardingFragment implements
      * @return A new instance of fragment AccountFragment.
      */
     public static AccountFragment newInstance(String mobileNumberString,
-                                              String outgoingNumberString) {
+            String outgoingNumberString) {
         AccountFragment fragment = new AccountFragment();
         Bundle args = new Bundle();
         args.putString(ARG_MOBILE, mobileNumberString);
@@ -66,7 +67,7 @@ public class AccountFragment extends OnboardingFragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_account, container, false);
     }
@@ -152,16 +153,32 @@ public class AccountFragment extends OnboardingFragment implements
 
     @Override
     public void onClick(View view) {
-        String mobileNumber = PhoneNumberUtils.formatMobileNumber(
-                String.valueOf(mMobileEditText.getText()));
+        String mobileNumber = PhoneNumberUtils.formatMobileNumber(String.valueOf(mMobileEditText.getText()));
 
-        if (PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
-            mListener.onUpdateMobileNumber(this, mobileNumber);
-        } else {
+        if (!PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
             mListener.onAlertDialog(
                     getString(R.string.invalid_mobile_number_title),
                     getString(R.string.invalid_mobile_number_message)
             );
+            return;
+        }
+
+        if (userHasOutgoingNumberConfigured()) {
+            processMobileAndOutgoingNumber(mobileNumber);
+            return;
+        }
+
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.onboarding_account_configure_no_outgoing_number_title)
+                .setMessage(R.string.onboarding_account_configure_no_outgoing_number)
+                .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> processMobileAndOutgoingNumber(mobileNumber))
+                .setNegativeButton(android.R.string.no, null)
+                .show();
+    }
+
+    private void processMobileAndOutgoingNumber(String mobileNumber) {
+        if (PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
+            mListener.onUpdateMobileNumber(this, mobileNumber);
         }
     }
 
@@ -177,11 +194,7 @@ public class AccountFragment extends OnboardingFragment implements
 
     @Override
     public void afterTextChanged(Editable s) {
-        if(mMobileEditText.length() > 0 && mOutgoingEditText.length() > 0) {
-            mConfigureButton.setEnabled(true);
-        } else {
-            mConfigureButton.setEnabled(false);
-        }
+        mConfigureButton.setEnabled(userHasProvidedMobileNumber());
     }
 
     public void onNextStep() {
@@ -191,6 +204,14 @@ public class AccountFragment extends OnboardingFragment implements
                         String.valueOf(mMobileEditText.getText())),
                 String.valueOf(mOutgoingEditText.getText())
         );
+    }
+
+    private boolean userHasProvidedMobileNumber() {
+        return mMobileEditText.length() > 0;
+    }
+
+    private boolean userHasOutgoingNumberConfigured() {
+        return mOutgoingEditText.length() > 0;
     }
 
     interface FragmentInteractionListener extends OnboardingFragment.FragmentInteractionListener {
