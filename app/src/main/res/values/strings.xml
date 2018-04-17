@@ -135,6 +135,10 @@
     <string name="connection_preference_dialog_message">Cellular networks are more stable which leads to a higher audio quality. \n\nTurn off WiFi for this call?</string>
     <string name="connection_preference_switch_toast">Trying to handover to the cellular network</string>
     <string name="switch_use_3g">Also use 3G+ for calls</string>
+    <string name="advanced_settings_title">Advanced Settings</string>
+    <string name="advanced_settings_tls_switch">Encrypted Calling</string>
+    <string name="advanced_settings_tls_description">When disabled, calls will no longer be encrypted. Third parties may be able to intercept and listen to your phone calls.
+    </string>
 
     <string name="url_app_info">http://vialerapp.com/app-info/</string>
 

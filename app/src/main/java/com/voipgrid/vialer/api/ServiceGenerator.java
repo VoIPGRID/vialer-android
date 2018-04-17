@@ -179,6 +179,17 @@ public class ServiceGenerator {
         return retrofit.create(serviceClass);
     }
 
+    public static Api createApiService(Context context) {
+        AccountHelper accountHelper = new AccountHelper(context);
+        return ServiceGenerator.createService(
+                context,
+                Api.class,
+                context.getString(R.string.api_url),
+                accountHelper.getEmail(),
+                accountHelper.getPassword()
+        );
+    }
+
     private static Cache getCache(Context context) {
         return new Cache(context.getCacheDir(), 1024 * 1024 * 10);
     }

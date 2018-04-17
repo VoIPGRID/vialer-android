@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
@@ -211,7 +212,7 @@ public class SipConfig implements AccountStatus {
      * @return
      */
     private String getTransportString() {
-        String sipTransport = mSipService.getString(R.string.sip_transport_type);
+        String sipTransport = getSipTransportType();
         String tcp = "";
 
         if (sipTransport.equals("tcp")) {
@@ -227,7 +228,7 @@ public class SipConfig implements AccountStatus {
      * @return
      */
     private pjsip_transport_type_e getTransportType() {
-        String sipTransport = mSipService.getString(R.string.sip_transport_type);
+        String sipTransport = getSipTransportType();
 
         pjsip_transport_type_e transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_UDP;
         if (sipTransport.equals("tcp")) {
@@ -359,6 +360,11 @@ public class SipConfig implements AccountStatus {
 
 
         return config;
+    }
+
+    @NonNull
+    private String getSipTransportType() {
+        return shouldUseTls() ? mSipService.getString(R.string.sip_transport_type) : "tcp";
     }
 
     /**
@@ -583,6 +589,12 @@ public class SipConfig implements AccountStatus {
      * @return TRUE if TLS should be used
      */
     public static boolean shouldUseTls() {
+        Preferences preferences = new Preferences(VialerApplication.get());
+
+        if (!preferences.hasTlsEnabled()) {
+            return false;
+        }
+
         return VialerApplication.get().getString(R.string.sip_transport_type).equals("tls");
     }
 }
