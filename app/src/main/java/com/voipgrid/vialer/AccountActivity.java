@@ -183,7 +183,7 @@ public class AccountActivity extends LoginRequiredActivity implements
         ((EditText) findViewById(R.id.account_mobile_number_edit_text))
                 .setText(mSystemUser.getMobileNumber());
         ((EditText) findViewById(R.id.account_outgoing_number_edit_text))
-                .setText(mSystemUser.getOutgoingCli());
+                .setText(mSystemUser.getOutgoingCli() == null || mSystemUser.getOutgoingCli().isEmpty() ? " " : mSystemUser.getOutgoingCli());
         mSipIdEditText.setVisibility(mPreferences.hasSipEnabled() ? View.VISIBLE : View.GONE);
         enableProgressBar(false);
     }
