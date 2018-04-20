@@ -19,7 +19,7 @@ public class T9Query {
         numberQueries.add(number);
 
         // Best effort to convert +XX12345678 numbers to 0612345678
-        if (number.startsWith("+")) {
+        if (number.startsWith("+") && number.length() >= 3) {
             numberQueries.add("0" + number.substring(3));
         }
 
