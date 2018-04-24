@@ -50,6 +50,7 @@ public class AccountActivity extends LoginRequiredActivity implements
     @BindView(R.id.remote_logging_id_edit_text) EditText mRemoteLogIdEditText;
     @BindView(R.id.advanced_settings_layout) LinearLayout advancedSettings;
     @BindView(R.id.tls_switch) Switch tlsSwitch;
+    @BindView(R.id.stun_switch) Switch stunSwitch;
     @BindView(R.id.progressBar) ProgressBar mProgressBar;
 
     private PhoneAccount mPhoneAccount;
@@ -366,6 +367,7 @@ public class AccountActivity extends LoginRequiredActivity implements
         isSetupComplete = false;
         enableProgressBar(false);
         tlsSwitch.setChecked(mPreferences.hasTlsEnabled());
+        stunSwitch.setChecked(mPreferences.hasStunEnabled());
         isSetupComplete = true;
     }
 
@@ -434,6 +436,13 @@ public class AccountActivity extends LoginRequiredActivity implements
                 initializeAdvancedSettings();
             }
         });
+    }
 
+    @OnCheckedChanged(R.id.stun_switch)
+    public void stunSwitchChanged(CompoundButton compoundButton, boolean b) {
+        if (!isSetupComplete) return;
+        mPreferences.setStunEnabled(b);
+        mRemoteLogger.i("STUN has been set to: " + b);
+        initializeAdvancedSettings();
     }
 }

@@ -213,5 +213,8 @@
     <string name="advanced_settings_title">Geavanceerde instellingen</string>
     <string name="advanced_settings_tls_description">Externe partijen kunnen je gesprekken afluisteren als deze functie is uitgeschakeld.</string>
     <string name="advanced_settings_tls_switch">Gebruik versleuteld bellen</string>
+    <string name="advanced_settings_stun_switch">Gebruik STUN om te bellen</string>
+    <string name="advanced_settings_stun_description">STUN kan de connectie met het netwerk verbeteren als je NAT problemen hebt.
+    </string>
 
 </resources>

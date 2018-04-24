@@ -139,6 +139,9 @@
     <string name="advanced_settings_tls_switch">Encrypted Calling</string>
     <string name="advanced_settings_tls_description">When disabled, calls will no longer be encrypted. Third parties may be able to intercept and listen to your phone calls.
     </string>
+    <string name="advanced_settings_stun_switch">STUN</string>
+    <string name="advanced_settings_stun_description">Enabling STUN can improve connectivity when behind a Network Address Translator (NAT).
+    </string>
 
     <string name="url_app_info">http://vialerapp.com/app-info/</string>
 
