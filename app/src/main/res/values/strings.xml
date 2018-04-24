@@ -101,6 +101,12 @@
     <string name="onboarding_account_configure_invalid_phone_number">The mobile number is invalid.</string>
     <string name="onboarding_account_configure_no_outgoing_number_title">Missing outgoing number</string>
     <string name="onboarding_account_configure_no_outgoing_number">Please note that as you don\'t own an outgoing number, you may only call internal numbers.</string>
+    <string name="two_factor_authentication_field">Token</string>
+    <string name="two_factor_authentication_button">Continue</string>
+    <string name="two_factor_authentication_token_invalid_title">Two-factor Authentication</string>
+    <string name="two_factor_authentication_token_invalid_description">The two-factor token is invalid</string>
+    <string name="two_factor_authentication_header_label_text">Two-factor</string>
+    <string name="two_factor_authentication_header_label_subtext">Authentication</string>
 
     <!-- strings empty view call records -->
     <string name="empty_view_default_message">No recent calls available (yet).</string>

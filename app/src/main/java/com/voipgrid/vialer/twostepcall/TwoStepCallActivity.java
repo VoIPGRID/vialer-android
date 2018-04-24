@@ -51,13 +51,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
 
         mSystemUser = (SystemUser) new JsonStorage(this).get(SystemUser.class);
 
-        mApi = ServiceGenerator.createService(
-                this,
-                Api.class,
-                getString(R.string.api_url),
-                getEmail(),
-                getPassword()
-        );
+        mApi = ServiceGenerator.createApiService(this);
 
         mRemoteLogger = new RemoteLogger(TwoStepCallActivity.class);
 

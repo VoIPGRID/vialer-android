@@ -97,6 +97,12 @@
     <string name="onboarding_account_configure_invalid_phone_number">Het mobiele telefoonnummer is niet correct.</string>
     <string name="onboarding_account_configure_no_outgoing_number_title">Uitgaand nummer ontbreekt</string>
     <string name="onboarding_account_configure_no_outgoing_number">Vanwege het ontbreken van een uitgaand nummer kan je alleen interne nummers bellen.</string>
+    <string name="two_factor_authentication_field">Token</string>
+    <string name="two_factor_authentication_button">Ga verder</string>
+    <string name="two_factor_authentication_token_invalid_title">Twee-Staps Verificatie</string>
+    <string name="two_factor_authentication_token_invalid_description">Ingevoerde token is niet geldig</string>
+    <string name="two_factor_authentication_header_label_text">Twee-Staps</string>
+    <string name="two_factor_authentication_header_label_subtext">Verificatie</string>
 
     <!-- strings empty view call records -->
     <string name="empty_view_default_message">Je hebt (nog) geen recente telefoongesprekken.</string>
