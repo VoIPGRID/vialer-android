@@ -1,5 +1,6 @@
 package com.voipgrid.vialer;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +13,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 
@@ -20,6 +23,8 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.api.models.UseEncryption;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.DialogHelper;
@@ -29,6 +34,9 @@ import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -37,27 +45,35 @@ public class AccountActivity extends LoginRequiredActivity implements
         Switch.OnCheckedChangeListener, AdapterView.OnItemSelectedListener,
         Callback {
 
-    private CompoundButton m3GSwitch;
-    private CompoundButton mVoipSwitch;
-    private EditText mSipIdEditText;
-    private EditText mRemoteLogIdEditText;
+    @BindView(R.id.account_sip_switch) CompoundButton mVoipSwitch;
+    @BindView(R.id.account_sip_id_edit_text) EditText mSipIdEditText;
+    @BindView(R.id.remote_logging_id_edit_text) EditText mRemoteLogIdEditText;
+    @BindView(R.id.advanced_settings_layout) LinearLayout advancedSettings;
+    @BindView(R.id.tls_switch) Switch tlsSwitch;
+    @BindView(R.id.progressBar) ProgressBar mProgressBar;
 
     private PhoneAccount mPhoneAccount;
     private PhoneAccountHelper mPhoneAccountHelper;
     private Preferences mPreferences;
     private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
+    private Api mApi;
+    private RemoteLogger mRemoteLogger;
 
     private boolean mEditMode = false;
+    private boolean isSetupComplete = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account);
+        ButterKnife.bind(this);
 
         mJsonStorage = new JsonStorage(this);
         mPhoneAccountHelper = new PhoneAccountHelper(this);
         mPreferences = new Preferences(this);
+        mApi = ServiceGenerator.createApiService(this);
+        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
 
         /* set the Toolbar to use as ActionBar */
         setSupportActionBar((Toolbar) findViewById(R.id.action_bar));
@@ -67,15 +83,24 @@ public class AccountActivity extends LoginRequiredActivity implements
 
         /* enabled home button for the Toolbar */
         getSupportActionBar().setHomeButtonEnabled(true);
-        mRemoteLogIdEditText = (EditText) findViewById(R.id.remote_logging_id_edit_text);
         mRemoteLogIdEditText.setVisibility(View.GONE);
-        mSipIdEditText = ((EditText) findViewById(R.id.account_sip_id_edit_text));
-        mVoipSwitch = (CompoundButton) findViewById(R.id.account_sip_switch);
         mVoipSwitch.setOnCheckedChangeListener(this);
 
         initConnectionSpinner();
         initRemoteLoggingSwitch();
         initUse3GSwitch();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Update and populate the fields.
+        updateAndPopulate();
+
+        // Update phone account and systemuser.
+        updateSystemUserAndPhoneAccount();
+
+        initializeAdvancedSettings();
     }
 
     private void initConnectionSpinner() {
@@ -332,14 +357,16 @@ public class AccountActivity extends LoginRequiredActivity implements
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Update and populate the fields.
-        updateAndPopulate();
-
-        // Update phone account and systemuser.
-        updateSystemUserAndPhoneAccount();
+    /**
+     * Sets the advanced settings checkboxes to the correct position depending
+     * on the current values in shared preferences.
+     */
+    protected void initializeAdvancedSettings() {
+        if (isFinishing()) return;
+        isSetupComplete = false;
+        enableProgressBar(false);
+        tlsSwitch.setChecked(mPreferences.hasTlsEnabled());
+        isSetupComplete = true;
     }
 
     @Override
@@ -368,10 +395,7 @@ public class AccountActivity extends LoginRequiredActivity implements
     }
 
     private void enableProgressBar(boolean enabled) {
-        View view = findViewById(R.id.progressBar);
-        if(view != null) {
-            view.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
-        }
+        mProgressBar.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
     }
 
     /**
@@ -383,5 +407,33 @@ public class AccountActivity extends LoginRequiredActivity implements
                 getString(R.string.onboarding_account_configure_failed_title),
                 getString(R.string.onboarding_account_configure_invalid_phone_number)
         );
+    }
+
+    @OnCheckedChanged(R.id.tls_switch)
+    public void tlsSwitchChanged(CompoundButton compoundButton, final boolean b) {
+        if (!isSetupComplete) return;
+
+        Call<UseEncryption> call = mApi.useEncryption(new UseEncryption(b));
+
+        enableProgressBar(true);
+
+        call.enqueue(new Callback<UseEncryption>() {
+            @Override
+            public void onResponse(Call<UseEncryption> call, Response<UseEncryption> response) {
+                if (response.isSuccessful()) {
+                    mPreferences.setTlsEnabled(b);
+                    mRemoteLogger.i("TLS switch has been set to: " + b);
+                }
+
+                initializeAdvancedSettings();
+            }
+
+            @Override
+            public void onFailure(Call<UseEncryption> call, Throwable t) {
+                mPreferences.setTlsEnabled(!b);
+                initializeAdvancedSettings();
+            }
+        });
+
     }
 }
