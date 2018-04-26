@@ -58,7 +58,8 @@
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
+                    app:hintTextAppearance="@style/AccountTextInputLayoutStyle"
+                    android:id="@+id/account_sip_id_container">
 
                     <EditText
                         android:id="@+id/account_sip_id_edit_text"
@@ -145,7 +146,9 @@
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
+                    app:hintTextAppearance="@style/AccountTextInputLayoutStyle"
+                    android:id="@+id/remote_logging_id_container"
+                    android:visibility="gone">
 
                     <EditText
                         android:id="@+id/remote_logging_id_edit_text"
