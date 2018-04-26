@@ -1,11 +1,11 @@
 package com.voipgrid.vialer;
 
-import android.app.AlertDialog;
+import static com.voipgrid.vialer.util.ConnectivityHelper.converseFromPreference;
+import static com.voipgrid.vialer.util.ConnectivityHelper.converseToPreference;
+
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,21 +37,34 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
+import butterknife.OnItemSelected;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AccountActivity extends LoginRequiredActivity implements
-        Switch.OnCheckedChangeListener, AdapterView.OnItemSelectedListener,
-        Callback {
+public class AccountActivity extends LoginRequiredActivity {
+
+    @BindView(R.id.container) View mContainer;
+    @BindView(R.id.progressBar) ProgressBar mProgressBar;
 
     @BindView(R.id.account_sip_switch) CompoundButton mVoipSwitch;
+    @BindView(R.id.account_sip_id_container) View mSipIdContainer;
     @BindView(R.id.account_sip_id_edit_text) EditText mSipIdEditText;
+
+    @BindView(R.id.account_mobile_number_edit_text) EditText mMobileNumberEditText;
+    @BindView(R.id.account_outgoing_number_edit_text) EditText mOutgoingNumberEditText;
+
+    @BindView(R.id.use_3g_switch) CompoundButton mUse3GSwitch;
+
+    @BindView(R.id.call_connection_spinner) Spinner mConnectionSpinner;
+
+    @BindView(R.id.remote_logging_switch) CompoundButton mRemoteLoggingSwitch;
+    @BindView(R.id.remote_logging_id_container) View mRemoteLogIdContainer;
     @BindView(R.id.remote_logging_id_edit_text) EditText mRemoteLogIdEditText;
+
     @BindView(R.id.advanced_settings_layout) LinearLayout advancedSettings;
     @BindView(R.id.tls_switch) Switch tlsSwitch;
     @BindView(R.id.stun_switch) Switch stunSwitch;
-    @BindView(R.id.progressBar) ProgressBar mProgressBar;
 
     private PhoneAccount mPhoneAccount;
     private PhoneAccountHelper mPhoneAccountHelper;
@@ -62,7 +75,7 @@ public class AccountActivity extends LoginRequiredActivity implements
     private RemoteLogger mRemoteLogger;
 
     private boolean mEditMode = false;
-    private boolean isSetupComplete = false;
+    private boolean mIsSetupComplete = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,16 +89,7 @@ public class AccountActivity extends LoginRequiredActivity implements
         mApi = ServiceGenerator.createApiService(this);
         mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
 
-        /* set the Toolbar to use as ActionBar */
-        setSupportActionBar((Toolbar) findViewById(R.id.action_bar));
-
-        /* enabled home as up for the Toolbar */
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        /* enabled home button for the Toolbar */
-        getSupportActionBar().setHomeButtonEnabled(true);
-        mRemoteLogIdEditText.setVisibility(View.GONE);
-        mVoipSwitch.setOnCheckedChangeListener(this);
+        setupActionBar();
 
         initConnectionSpinner();
         initRemoteLoggingSwitch();
@@ -104,200 +108,41 @@ public class AccountActivity extends LoginRequiredActivity implements
         initializeAdvancedSettings();
     }
 
+    private void setupActionBar() {
+        /* set the Toolbar to use as ActionBar */
+        setSupportActionBar(findViewById(R.id.action_bar));
+
+        /* enabled home as up for the Toolbar */
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        /* enabled home button for the Toolbar */
+        getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
     private void initConnectionSpinner() {
-        Spinner spinner = (Spinner) findViewById(R.id.call_connection_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.connection_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setSelection(adapter.getPosition(converseFromPreference((mPreferences.getConnectionPreference()))));
-        spinner.setOnItemSelectedListener(this);
+        mConnectionSpinner.setAdapter(adapter);
+        mConnectionSpinner.setSelection(adapter.getPosition(converseFromPreference((mPreferences.getConnectionPreference()), this)));
     }
 
-    /**
-     * One way conversion to charsequence from preference (long) because bidirectional maps
-     * are not nativly supported in java.
-     */
-    private long converseToPreference(CharSequence connectionPreference) {
-        if (connectionPreference.equals(getString(R.string.call_connection_only_cellular))) {
-            return Preferences.CONNECTION_PREFERENCE_LTE;
-        } else if (connectionPreference.equals(getString(R.string.call_connection_use_wifi_cellular))) {
-            return Preferences.CONNECTION_PREFERENCE_WIFI;
-        }
-        return Preferences.CONNECTION_PREFERENCE_NONE;
-    }
-
-    /**
-     * One way conversion to preference (long) from charsequence because bidirectional maps
-     * are not nativly supported in java.
-     */
-    private CharSequence converseFromPreference(long preference) {
-        if (preference == Preferences.CONNECTION_PREFERENCE_LTE) {
-            return getString(R.string.call_connection_only_cellular);
-        } else if (preference == Preferences.CONNECTION_PREFERENCE_WIFI) {
-            return getString(R.string.call_connection_use_wifi_cellular);
-        }
-        return getString(R.string.call_connection_optional);
-    }
-
-    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        String selected = parent.getItemAtPosition(pos).toString();
-        mPreferences.setConnectionPreference(converseToPreference(selected));
-    }
-
-    public void onNothingSelected(AdapterView<?> parent) {
-        // No need to implement. The preferences class will return a default value.
-    }
-
-    /**
-     * Function to set the initial state of the remote logging switch and a onCheckChangeListener.
-     */
     private void initRemoteLoggingSwitch() {
-        CompoundButton remoteLoggingSwitch = (CompoundButton) findViewById(R.id.remote_logging_switch);
-        remoteLoggingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                if (mPreferences.remoteLoggingIsActive() == isChecked) {
-                    return;
-                }
-                mPreferences.setRemoteLogging(isChecked);
-                if (isChecked) {
-                    mRemoteLogIdEditText.setVisibility(View.VISIBLE);
-                    mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
-                } else {
-                    mRemoteLogIdEditText.setVisibility(View.GONE);
-                }
-            }
-        });
-        remoteLoggingSwitch.setChecked(mPreferences.remoteLoggingIsActive());
+        mRemoteLoggingSwitch.setChecked(mPreferences.remoteLoggingIsActive());
         if (mPreferences.remoteLoggingIsActive()) {
-            mRemoteLogIdEditText.setVisibility(View.VISIBLE);
+            mRemoteLogIdContainer.setVisibility(View.VISIBLE);
             mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
         }
     }
 
     private void initUse3GSwitch() {
-        CompoundButton use3GSwitch = (CompoundButton) findViewById(R.id.use_3g_switch);
-        use3GSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (mPreferences.has3GEnabled() == isChecked) {
-                    return;
-                }
-                mPreferences.set3GEnabled(isChecked);
-            }
-        });
-        use3GSwitch.setChecked(mPreferences.has3GEnabled());
+        mUse3GSwitch.setChecked(mPreferences.has3GEnabled());
     }
 
-    private void updateAndPopulate() {
-        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        mPhoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
+    @OnCheckedChanged(R.id.account_sip_switch)
+    public void onSipCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (mPreferences.hasSipEnabled() == isChecked) return;
 
-        populate();
-    }
-
-    private void populate() {
-        if(mPreferences.hasSipPermission()) {
-            mVoipSwitch.setChecked(mPreferences.hasSipEnabled());
-            if(mPhoneAccount != null) {
-                mSipIdEditText.setText(mPhoneAccount.getAccountId());
-            }
-        } else {
-            mVoipSwitch.setVisibility(View.GONE);
-        }
-        ((EditText) findViewById(R.id.account_mobile_number_edit_text))
-                .setText(mSystemUser.getMobileNumber());
-        ((EditText) findViewById(R.id.account_outgoing_number_edit_text))
-                .setText(mSystemUser.getOutgoingCli() == null || mSystemUser.getOutgoingCli().isEmpty() ? " " : mSystemUser.getOutgoingCli());
-        mSipIdEditText.setVisibility(mPreferences.hasSipEnabled() ? View.VISIBLE : View.GONE);
-        enableProgressBar(false);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_account, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_edit).setVisible(!mEditMode);
-        menu.findItem(R.id.action_done).setVisible(mEditMode);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_edit || id == R.id.action_done) {
-            if (id == R.id.action_edit) {
-                mEditMode = true;
-            }
-            if (id == R.id.action_done) {
-
-                if (isValidNumber()) {
-                    mEditMode = false;
-                    save();
-                } else {
-                    DialogHelper.displayAlert(
-                            this,
-                            getString(R.string.invalid_mobile_number_title),
-                            getString(R.string.invalid_mobile_number_message)
-                    );
-                }
-            }
-            invalidateOptionsMenu();
-            invalidateEditText();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * isValidNumber returns true if the number currently entered is a valid phone number.
-     */
-    private boolean isValidNumber() {
-        String mobileNumber = ((EditText) findViewById(
-                R.id.account_mobile_number_edit_text)).getText().toString();
-
-        return PhoneNumberUtils.isValidMobileNumber(PhoneNumberUtils.formatMobileNumber(mobileNumber));
-    }
-
-    private void save() {
-        findViewById(R.id.container).setFocusableInTouchMode(true);
-
-        String number = ((EditText) findViewById(
-                R.id.account_mobile_number_edit_text)).getText().toString();
-        number = PhoneNumberUtils.formatMobileNumber(number);
-
-        Api api = ServiceGenerator.createService(
-                this,
-                Api.class,
-                getString(R.string.api_url),
-                getEmail(),
-                getPassword()
-        );
-        Call<MobileNumber> call = api.mobileNumber(new MobileNumber(number));
-        call.enqueue(this);
-
-        mSystemUser.setMobileNumber(number);
-
-        populate();
-    }
-
-    private void invalidateEditText() {
-        findViewById(R.id.account_mobile_number_edit_text).setEnabled(mEditMode);
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (mPreferences.hasSipEnabled() == isChecked) {
-            /* nothing changed, so return */
-            return;
-        }
         mPreferences.setSipEnabled(isChecked);
 
         if (!isChecked) {
@@ -305,7 +150,7 @@ public class AccountActivity extends LoginRequiredActivity implements
             MiddlewareHelper.unregister(this);
             // Stop the sipservice.
             stopService(new Intent(this, SipService.class));
-            mSipIdEditText.setVisibility(View.GONE);
+            mSipIdContainer.setVisibility(View.GONE);
         } else {
             enableProgressBar(true);
             new AsyncTask<Void, Void, PhoneAccount>() {
@@ -327,35 +172,171 @@ public class AccountActivity extends LoginRequiredActivity implements
                         // to disabled. Setting disabled in the settings first makes sure
                         // the onCheckChanged does not execute the code that normally is executed
                         // on a change in the check of the switch.
-                        setVoIPAccount();
+                        SetupActivity.launchToSetVoIPAccount(AccountActivity.this);
                     }
                 }
             }.execute();
         }
     }
 
-    /**
-     * Loads setupactivity with the SetUpVoipAccountFragment.
-     */
-    private void setVoIPAccount(){
-        Intent intent = new Intent(this, SetupActivity.class);
-        Bundle b = new Bundle();
-        b.putInt("fragment", R.id.fragment_voip_account_missing);
-        b.putString("activity", AccountActivity.class.getSimpleName());
-        intent.putExtras(b);
+    @OnCheckedChanged(R.id.use_3g_switch)
+    void on3GCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+        if (mPreferences.has3GEnabled() == isChecked) {
+            return;
+        }
+        mPreferences.set3GEnabled(isChecked);
+    }
 
-        startActivity(intent);
+    @OnItemSelected(R.id.call_connection_spinner)
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        String selected = parent.getItemAtPosition(pos).toString();
+        mPreferences.setConnectionPreference(converseToPreference(selected, this));
+    }
+
+    @OnCheckedChanged(R.id.remote_logging_switch)
+    void onRemoteLoggingCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+        if (mPreferences.remoteLoggingIsActive() == isChecked) {
+            return;
+        }
+        mPreferences.setRemoteLogging(isChecked);
+        if (isChecked) {
+            mRemoteLogIdContainer.setVisibility(View.VISIBLE);
+            mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
+        } else {
+            mRemoteLogIdContainer.setVisibility(View.GONE);
+        }
+    }
+
+    @OnCheckedChanged(R.id.tls_switch)
+    void tlsSwitchChanged(CompoundButton compoundButton, final boolean b) {
+        if (!mIsSetupComplete) return;
+
+        SecureCalling secureCalling = SecureCalling.fromContext(this);
+
+        enableProgressBar(true);
+
+        SecureCalling.Callback callback = new SecureCallingUpdatedCallback(b);
+
+        if(b) {
+            secureCalling.enable(callback);
+        } else {
+            secureCalling.disable(callback);
+        }
+    }
+
+    @OnCheckedChanged(R.id.stun_switch)
+    void stunSwitchChanged(CompoundButton compoundButton, boolean b) {
+        if (!mIsSetupComplete) return;
+        mPreferences.setStunEnabled(b);
+        mRemoteLogger.i("STUN has been set to: " + b);
+        initializeAdvancedSettings();
+    }
+
+    private void updateAndPopulate() {
+        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        mPhoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
+
+        populate();
+    }
+
+    private void populate() {
+        if(mPreferences.hasSipPermission()) {
+            mVoipSwitch.setChecked(mPreferences.hasSipEnabled());
+            if(mPhoneAccount != null) {
+                mSipIdEditText.setText(mPhoneAccount.getAccountId());
+            }
+        } else {
+            mVoipSwitch.setVisibility(View.GONE);
+        }
+        mMobileNumberEditText.setText(mSystemUser.getMobileNumber());
+        mOutgoingNumberEditText.setText(mSystemUser.getOutgoingCli());
+        mSipIdContainer.setVisibility(mPreferences.hasSipEnabled() ? View.VISIBLE : View.GONE);
+        enableProgressBar(false);
     }
 
     @Override
-    public void onResponse(@NonNull Call call, @NonNull Response response) {
-        if (response.isSuccessful()) {
-            // Success callback for updating mobile number.
-            // Update the systemuser.
-            mJsonStorage.save(mSystemUser);
-        } else {
-            failedFeedback();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_account, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.action_edit).setVisible(!mEditMode);
+        menu.findItem(R.id.action_done).setVisible(mEditMode);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id != R.id.action_edit && id != R.id.action_done) return super.onOptionsItemSelected(item);
+
+        if (isBusyWithApiRequest()) return true;
+
+        if (id == R.id.action_edit) {
+            mEditMode = true;
         }
+        else {
+            if (isValidNumber()) {
+                saveMobileNumber();
+            } else {
+                DialogHelper.displayAlert(
+                        this,
+                        getString(R.string.invalid_mobile_number_title),
+                        getString(R.string.invalid_mobile_number_message)
+                );
+            }
+        }
+
+        updateUiBasedOnCurrentEditMode();
+
+        return true;
+    }
+
+    /**
+     * Updates the UI, enabling/disabling fields and changing the menu icon
+     * based on the current value of mEditMode.
+     *
+     */
+    private void updateUiBasedOnCurrentEditMode() {
+        invalidateOptionsMenu();
+        mMobileNumberEditText.setEnabled(mEditMode);
+    }
+
+    /**
+     * isValidNumber returns true if the number currently entered is a valid phone number.
+     */
+    private boolean isValidNumber() {
+        String mobileNumber = mMobileNumberEditText.getText().toString();
+
+        return PhoneNumberUtils.isValidMobileNumber(PhoneNumberUtils.formatMobileNumber(mobileNumber));
+    }
+
+    /**
+     * Sends an API request to update the phone number.
+     *
+     */
+    private void saveMobileNumber() {
+        mContainer.setFocusableInTouchMode(true);
+
+        String number = PhoneNumberUtils.formatMobileNumber(mMobileNumberEditText.getText().toString());
+
+        mApi
+                .mobileNumber(new MobileNumber(number))
+                .enqueue(new MobileNumberUpdatedCallback(number));
+
+        enableProgressBar(true);
+    }
+
+    /**
+     * Check if we are currently busy doing an API request.
+     *
+     * @return TRUE if an api request is in progress
+     */
+    private boolean isBusyWithApiRequest() {
+        return mProgressBar.getVisibility() == View.VISIBLE;
     }
 
     /**
@@ -364,16 +345,11 @@ public class AccountActivity extends LoginRequiredActivity implements
      */
     protected void initializeAdvancedSettings() {
         if (isFinishing()) return;
-        isSetupComplete = false;
+        mIsSetupComplete = false;
         enableProgressBar(false);
         tlsSwitch.setChecked(mPreferences.hasTlsEnabled());
         stunSwitch.setChecked(mPreferences.hasStunEnabled());
-        isSetupComplete = true;
-    }
-
-    @Override
-    public void onFailure(@NonNull Call call, @NonNull Throwable t) {
-        failedFeedback();
+        mIsSetupComplete = true;
     }
 
     /**
@@ -401,50 +377,76 @@ public class AccountActivity extends LoginRequiredActivity implements
     }
 
     /**
-     * Function to inform the user of a failed requests.
+     * The class that will handle the API response when updating the mobile number.
+     *
      */
-    private void failedFeedback() {
-        DialogHelper.displayAlert(
-                this,
-                getString(R.string.onboarding_account_configure_failed_title),
-                getString(R.string.onboarding_account_configure_invalid_phone_number)
-        );
-    }
+    private class MobileNumberUpdatedCallback implements Callback<MobileNumber> {
 
-    @OnCheckedChanged(R.id.tls_switch)
-    public void tlsSwitchChanged(CompoundButton compoundButton, final boolean b) {
-        if (!isSetupComplete) return;
+        private String mNumber;
 
-        SecureCalling secureCalling = SecureCalling.fromContext(this);
+        MobileNumberUpdatedCallback(String number) {
+            mNumber = number;
+        }
 
-        enableProgressBar(true);
-
-        SecureCalling.Callback callback = new SecureCalling.Callback() {
-            @Override
-            public void onSuccess() {
-                mPreferences.setTlsEnabled(b);
-                mRemoteLogger.i("TLS switch has been set to: " + b);
-                initializeAdvancedSettings();
+        @Override
+        public void onResponse(Call<MobileNumber> call, Response<MobileNumber> response) {
+            if (!response.isSuccessful()) {
+                failedFeedback();
+                return;
             }
 
-            @Override
-            public void onFail() {
-                initializeAdvancedSettings();
-            }
-        };
+            mEditMode = false;
 
-        if(b) {
-            secureCalling.enable(callback);
-        } else {
-            secureCalling.disable(callback);
+            updateUiBasedOnCurrentEditMode();
+
+            mSystemUser.setMobileNumber(mNumber);
+
+            mJsonStorage.save(mSystemUser);
+
+            populate();
+        }
+
+        @Override
+        public void onFailure(Call<MobileNumber> call, Throwable t) {
+            failedFeedback();
+        }
+
+        /**
+         * Function to inform the user of a failed requests.
+         */
+        private void failedFeedback() {
+            enableProgressBar(false);
+
+            DialogHelper.displayAlert(
+                    AccountActivity.this,
+                    getString(R.string.onboarding_account_configure_failed_title),
+                    getString(R.string.onboarding_account_configure_invalid_phone_number)
+            );
         }
     }
 
-    @OnCheckedChanged(R.id.stun_switch)
-    public void stunSwitchChanged(CompoundButton compoundButton, boolean b) {
-        if (!isSetupComplete) return;
-        mPreferences.setStunEnabled(b);
-        mRemoteLogger.i("STUN has been set to: " + b);
-        initializeAdvancedSettings();
+    /**
+     * This class will handle the API response when updating the secure calling setting.
+     *
+     */
+    private class SecureCallingUpdatedCallback implements SecureCalling.Callback {
+
+        private boolean mSwitchEnabled;
+
+        SecureCallingUpdatedCallback(boolean b) {
+            mSwitchEnabled = b;
+        }
+
+        @Override
+        public void onSuccess() {
+            mPreferences.setTlsEnabled(mSwitchEnabled);
+            mRemoteLogger.i("TLS switch has been set to: " + mSwitchEnabled);
+            initializeAdvancedSettings();
+        }
+
+        @Override
+        public void onFail() {
+            initializeAdvancedSettings();
+        }
     }
 }

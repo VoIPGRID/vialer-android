@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.onboarding;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -476,5 +477,15 @@ public class SetupActivity extends RemoteLoggingActivity implements
             mAlertDialog.dismiss();
             mAlertDialog = null;
         }
+    }
+
+    public static void launchToSetVoIPAccount(Activity fromActivity) {
+        Intent intent = new Intent(fromActivity, SetupActivity.class);
+        Bundle b = new Bundle();
+        b.putInt("fragment", R.id.fragment_voip_account_missing);
+        b.putString("activity", AccountActivity.class.getSimpleName());
+        intent.putExtras(b);
+
+        fromActivity.startActivity(intent);
     }
 }

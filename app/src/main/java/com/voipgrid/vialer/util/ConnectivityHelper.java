@@ -231,4 +231,30 @@ public class ConnectivityHelper {
             waitForLTE(context, timeout+(timeout/10), timeout/10);
         }
     }
+
+    /**
+     * One way conversion to charsequence from preference (long) because bidirectional maps
+     * are not nativly supported in java.
+     */
+    public static long converseToPreference(CharSequence connectionPreference, Context context) {
+        if (connectionPreference.equals(context.getString(R.string.call_connection_only_cellular))) {
+            return Preferences.CONNECTION_PREFERENCE_LTE;
+        } else if (connectionPreference.equals(context.getString(R.string.call_connection_use_wifi_cellular))) {
+            return Preferences.CONNECTION_PREFERENCE_WIFI;
+        }
+        return Preferences.CONNECTION_PREFERENCE_NONE;
+    }
+
+    /**
+     * One way conversion to preference (long) from charsequence because bidirectional maps
+     * are not nativly supported in java.
+     */
+    public static CharSequence converseFromPreference(long preference, Context context) {
+        if (preference == Preferences.CONNECTION_PREFERENCE_LTE) {
+            return context.getString(R.string.call_connection_only_cellular);
+        } else if (preference == Preferences.CONNECTION_PREFERENCE_WIFI) {
+            return context.getString(R.string.call_connection_use_wifi_cellular);
+        }
+        return context.getString(R.string.call_connection_optional);
+    }
 }
