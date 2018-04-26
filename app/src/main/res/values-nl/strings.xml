@@ -216,8 +216,8 @@
     <string name="advanced_settings_stun_switch">Gebruik STUN om te bellen</string>
     <string name="advanced_settings_stun_description">STUN kan de connectie met het netwerk verbeteren als je NAT problemen hebt.
     </string>
-    <string name="t9helper_title">Tip</string>
-    <string name="t9helper_text">Je kunt zoeken op %1$s door de volgende nummers op het toetsenbordin te drukken.</string>
     <string name="call_not_encrypted_warning_bar_text">Gesprek niet versleuteld</string>
 
+    <string name="t9helper_title">Tip</string>
+    <string name="t9helper_text">Je kunt zoeken op %1$s door de volgende nummers op het toetsenbord in te drukken.</string>
 </resources>
