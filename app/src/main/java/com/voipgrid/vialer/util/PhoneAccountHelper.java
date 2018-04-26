@@ -75,6 +75,7 @@ public class PhoneAccountHelper {
      */
     private void updateSystemUser(SystemUser systemUser) {
         SystemUser currentSystemuser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        if(currentSystemuser == null) return;
         currentSystemuser.setOutgoingCli(systemUser.getOutgoingCli());
         currentSystemuser.setMobileNumber(systemUser.getMobileNumber());
         currentSystemuser.setClient(systemUser.getClient());
