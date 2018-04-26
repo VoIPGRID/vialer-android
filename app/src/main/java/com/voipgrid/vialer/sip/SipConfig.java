@@ -1,7 +1,5 @@
 package com.voipgrid.vialer.sip;
 
-import static com.voipgrid.vialer.api.ServiceGenerator.getUserAgentHeader;
-
 import static org.pjsip.pjsua2.pj_constants_.PJ_TRUE;
 import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_REINIT_MEDIA;
 import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT;
@@ -31,6 +29,7 @@ import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.UserAgent;
 
 import org.pjsip.pjsua2.Account;
 import org.pjsip.pjsua2.AccountConfig;
@@ -294,7 +293,7 @@ public class SipConfig implements AccountStatus {
         }
 
         UaConfig uaConfig = endpointConfig.getUaConfig();
-        uaConfig.setUserAgent(getUserAgentHeader(mSipService));
+        uaConfig.setUserAgent(new UserAgent(mSipService).generate());
 
         configureStunServer(uaConfig);
 
