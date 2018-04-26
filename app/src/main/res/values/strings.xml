@@ -220,4 +220,5 @@
     <string name="call_transfer_complete_and">and</string>
     <string name="call_transfer_complete_success"> Successfully transferred</string>
 
+    <string name="call_not_encrypted_warning_bar_text">Call not encrypted</string>
 </resources>

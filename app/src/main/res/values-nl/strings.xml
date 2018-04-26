@@ -217,4 +217,6 @@
     <string name="advanced_settings_stun_description">STUN kan de connectie met het netwerk verbeteren als je NAT problemen hebt.
     </string>
 
+    <string name="call_not_encrypted_warning_bar_text">Gesprek niet versleuteld</string>
+
 </resources>

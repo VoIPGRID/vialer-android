@@ -1,8 +1,10 @@
 package com.voipgrid.vialer.api;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -24,11 +26,21 @@ public class SecureCalling {
     private static final String PREF_VOIP_ACCOUNT_HAS_SECURE_CALLING_ENABLED =
             "PREF_VOIP_ACCOUNT_HAS_SECURE_CALLING_ENABLED_";
 
+    /**
+     * An event that is broadcast when the secure calling API issues a response.
+     */
+    public static final String ACTION_SECURE_CALLING_API_CALL_RESPONSE = "ACTION_SECURE_CALLING_API_CALL_RESPONSE";
+
+    public static final String EXTRA_API_CALL_SUCCEEDED = "EXTRA_API_CALL_SUCCEEDED";
+
+    public static final String EXTRA_API_CALL_WAS_ATTEMPTING_TO_ENABLE = "EXTRA_API_WAS_ATTEMPTING_TO_ENABLE";
+
     private SharedPreferences mSharedPreferences;
     private Api mApi;
     private RemoteLogger mRemoteLogger;
     private Preferences mPreferences;
     private String mIdentifier;
+    private LocalBroadcastManager mLocalBroadcastManager;
 
     /**
      * @param identifier This is the identifier that will be appended to the end of the shared
@@ -36,11 +48,12 @@ public class SecureCalling {
      *                   be updated when the VoIP account is switched.
      */
     public SecureCalling(SharedPreferences sharedPreferences, Api api, Preferences preferences,
-            String identifier, RemoteLogger remoteLogger) {
+            String identifier, LocalBroadcastManager localBroadcastManager, RemoteLogger remoteLogger) {
         mSharedPreferences = sharedPreferences;
         mApi = api;
         mIdentifier = identifier;
         mPreferences = preferences;
+        mLocalBroadcastManager = localBroadcastManager;
         mRemoteLogger = remoteLogger;
     }
 
@@ -65,6 +78,7 @@ public class SecureCalling {
                 ServiceGenerator.createApiService(context),
                 new Preferences(context),
                 systemUser != null ? systemUser.getPhoneAccountId() : "",
+                LocalBroadcastManager.getInstance(context),
                 remoteLogger
         );
     }
@@ -130,6 +144,18 @@ public class SecureCalling {
      */
     private void handleSuccessfulApiCall(boolean enabled) {
         mSharedPreferences.edit().putBoolean(getSharedPreferencesKey(), enabled).apply();
+        mLocalBroadcastManager.sendBroadcast(createIntent(true, enabled));
+    }
+
+    private void handleFailedApiCall(boolean enabled) {
+        mLocalBroadcastManager.sendBroadcast(createIntent(false, enabled));
+    }
+
+    private Intent createIntent(boolean success, boolean enabled) {
+        Intent intent = new Intent(ACTION_SECURE_CALLING_API_CALL_RESPONSE);
+        intent.putExtra(EXTRA_API_CALL_SUCCEEDED, success);
+        intent.putExtra(EXTRA_API_CALL_WAS_ATTEMPTING_TO_ENABLE, enabled);
+        return intent;
     }
 
     /**
@@ -188,6 +214,8 @@ public class SecureCalling {
 
             mRemoteLogger.e("Secure calling API call failed with code: " + response.code());
 
+            handleFailedApiCall(mEnable);
+
             if (mCallback != null) {
                 mCallback.onFail();
             }
@@ -196,6 +224,8 @@ public class SecureCalling {
         @Override
         public void onFailure(Call<UseEncryption> call, Throwable t) {
             mRemoteLogger.e("Secure calling API call failed with error: " + t.getMessage());
+
+            handleFailedApiCall(mEnable);
 
             if (mCallback != null) {
                 mCallback.onFail();

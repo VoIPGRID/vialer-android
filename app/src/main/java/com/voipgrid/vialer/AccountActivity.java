@@ -25,7 +25,6 @@ import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.logging.RemoteLogger;
-
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.sip.SipService;

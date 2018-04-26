@@ -37,6 +37,10 @@
             <com.voipgrid.vialer.reachability.ReachabilityBarView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+
+            <com.voipgrid.vialer.EncryptionBarView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <android.support.design.widget.CoordinatorLayout
