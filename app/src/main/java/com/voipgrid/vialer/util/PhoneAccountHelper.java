@@ -1,10 +1,13 @@
 package com.voipgrid.vialer.util;
 
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UPDATE_NEEDED;
+
 import android.content.Context;
 import android.os.AsyncTask;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -14,8 +17,6 @@ import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Response;
-
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UPDATE_NEEDED;
 
 
 /**
@@ -27,12 +28,14 @@ public class PhoneAccountHelper {
     private Context mContext;
     private Preferences mPreferences;
     private JsonStorage mJsonStorage;
+    private SecureCalling mSecureCalling;
 
     public PhoneAccountHelper(Context context) {
         mContext = context;
 
         mPreferences = new Preferences(context);
         mJsonStorage = new JsonStorage(context);
+        mSecureCalling = SecureCalling.fromContext(context);
 
         // Get credentials for api.
         AccountHelper accountHelper = new AccountHelper(context);
@@ -161,6 +164,7 @@ public class PhoneAccountHelper {
 
         if (linkedPhoneAccount != null) {
             savePhoneAccountAndRegister(linkedPhoneAccount);
+            mSecureCalling.updateApiBasedOnCurrentPreferenceSetting(null);
         } else {
             // User has no phone account linked so remove it from the local storage.
             mJsonStorage.remove(PhoneAccount.class);

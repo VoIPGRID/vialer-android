@@ -2,7 +2,6 @@ package com.voipgrid.vialer.util;
 
 import static com.voipgrid.vialer.util.AppVersions.v2_1_1;
 import static com.voipgrid.vialer.util.AppVersions.v4_0;
-import static com.voipgrid.vialer.util.AppVersions.v5_2;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,18 +11,9 @@ import android.preference.PreferenceManager;
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.OnUpdateCompleted;
 import com.voipgrid.vialer.Preferences;
-import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.api.Api;
-import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.api.models.UseEncryption;
 import com.voipgrid.vialer.logging.RemoteLogger;
-
-import java.io.IOException;
-
-import retrofit2.Call;
-import retrofit2.Response;
 
 /**
  * Class to setup the app to work with the newest code.
@@ -107,9 +97,6 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> {
             case v4_0:
                 migrateCredentials();
                 break;
-            case v5_2:
-                enableSecureCalling();
-                break;
         }
     }
 
@@ -136,36 +123,5 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> {
             // Cleanup.
             user.setPassword(null);
         }
-    }
-
-    /**
-     * Migrate secure calling permissions to use secure calling by default.
-     * V5_2
-     */
-    private void enableSecureCalling() {
-        AccountHelper accountHelper = new AccountHelper(mContext);
-
-        Api mApi = ServiceGenerator.createService(
-                mContext,
-                Api.class,
-                mContext.getString(R.string.api_url),
-                accountHelper.getEmail(),
-                accountHelper.getPassword()
-        );
-        Call<UseEncryption> call = mApi.useEncryption(new UseEncryption(true));
-
-        try {
-            Response response = call.execute();
-            if(!response.isSuccessful()) {
-                handleApiFailure(response.code());
-            }
-        } catch (IOException e) {
-            handleApiFailure(0);
-        }
-    }
-
-    private void handleApiFailure(int code) {
-        mRemoteLogger.e("Enabling secure calling failed with code " + code);
-        succesfulMigrate = false;
     }
 }
