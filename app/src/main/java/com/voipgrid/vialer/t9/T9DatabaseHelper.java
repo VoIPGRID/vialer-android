@@ -364,4 +364,34 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
         return matchList;
     }
 
+    /**
+     * Searches the database for a single random contact.
+     *
+     * @return The display name of the chosen contact.
+     */
+    public String getRandomContactName() {
+        SQLiteDatabase db = getReadableDatabase();
+
+        final Cursor cursor = db.rawQuery(
+                "SELECT " + T9ContactColumns.DISPLAY_NAME + " FROM " + Tables.T9_CONTACT +  " ORDER BY RANDOM() LIMIT 1",
+                null
+        );
+
+        if (cursor == null) {
+            return null;
+        }
+
+        if (cursor.getCount() <= 0) return null;
+
+        cursor.moveToFirst();
+
+        String displayName = cursor.getString(0);
+
+        // Close resources.
+        cursor.close();
+        db.close();
+
+        return displayName;
+    }
+
 }

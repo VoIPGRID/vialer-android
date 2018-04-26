@@ -30,9 +30,9 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.onboarding.SetupActivity;
+import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.t9.ContactCursorLoader;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -46,6 +46,8 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
@@ -59,12 +61,8 @@ public class DialerActivity extends LoginRequiredActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
     public static final String LAST_DIALED = "last_dialed";
 
-    private ListView mContactsListView;
-    private NumberInputView mNumberInputView;
     private SharedPreferences mSharedPreferences;
     private SimpleCursorAdapter mContactsAdapter = null;
-    private TextView mEmptyView;
-    private ViewGroup mKeyPadViewContainer;
 
     private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
@@ -72,13 +70,22 @@ public class DialerActivity extends LoginRequiredActivity implements
     private ReachabilityReceiver mReachabilityReceiver;
 
     private String t9Query;
+
     private boolean mHasPermission;
     private boolean mAskForPermission;
+
+    @BindView(R.id.list_view) ListView mContactsListView;
+    @BindView(R.id.t9helper) View mT9HelperFragment;
+    @BindView(R.id.message) TextView mEmptyView;
+
+    @BindView(R.id.key_pad_container) ViewGroup mKeyPadViewContainer;
+    @BindView(R.id.number_input_edit_text) NumberInputView mNumberInputView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dialer);
+        ButterKnife.bind(this);
 
         // Set the AnalyticsHelper
         mAnalyticsHelper = new AnalyticsHelper(
@@ -93,8 +100,6 @@ public class DialerActivity extends LoginRequiredActivity implements
 
         mReachabilityReceiver = new ReachabilityReceiver(this);
 
-        mContactsListView = (ListView) findViewById(R.id.list_view);
-        mEmptyView = (TextView) findViewById(R.id.message);
         mEmptyView.setText("");
 
         // This should be called before setupContactParts.
@@ -155,10 +160,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         KeyPadView keyPadView = (KeyPadView) findViewById(R.id.key_pad_view);
         keyPadView.setOnKeyPadClickListener(this);
 
-        mKeyPadViewContainer = (ViewGroup) findViewById(R.id.key_pad_container);
-
-        mNumberInputView = (NumberInputView) findViewById(R.id.number_input_edit_text);
-
         mNumberInputView.setOnInputChangedListener(new NumberInputView.OnInputChangedListener() {
             @Override
             public void onInputChanged(String phoneNumber) {
@@ -197,6 +198,7 @@ public class DialerActivity extends LoginRequiredActivity implements
     private void clearContactList() {
         mContactsAdapter.swapCursor(null);
         mContactsAdapter.notifyDataSetChanged();
+        mT9HelperFragment.setVisibility(View.VISIBLE);
         mEmptyView.setText("");
     }
 
@@ -438,6 +440,7 @@ public class DialerActivity extends LoginRequiredActivity implements
         // Set new data on adapter and notify data changed.
         mContactsAdapter.swapCursor(data);
         mContactsAdapter.notifyDataSetChanged();
+        mT9HelperFragment.setVisibility(View.GONE);
         // Set empty to no contacts found when result is empty.
         if (data != null && data.getCount() == 0) {
             mEmptyView.setText(getString(R.string.dialer_no_contacts_found_message));

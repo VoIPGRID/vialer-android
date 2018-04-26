@@ -90,6 +90,7 @@ ext {
     retroFitVersion = "2.3.0"
     roboElectricVersion = "3.4.2"
     mockitoCoreVersion = '2.13.0'
+    butterKnifeVersion = '8.8.1'
 }
 
 dependencies {
@@ -136,6 +137,9 @@ dependencies {
     androidTestImplementation "com.android.support.test:rules:${androidTestVersion}"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:${espressoVersion}"
     androidTestImplementation "com.android.support:support-annotations:${supportLibVersion}"
+
+    implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
+    annotationProcessor "com.jakewharton:butterknife-compiler:${butterKnifeVersion}"
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.
