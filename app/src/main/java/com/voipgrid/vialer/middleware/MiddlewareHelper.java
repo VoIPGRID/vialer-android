@@ -84,13 +84,14 @@ public class MiddlewareHelper {
             return;
         }
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        final SharedPreferences.Editor editor = preferences.edit();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
 
         editor.putLong(LAST_REGISTRATION, System.currentTimeMillis());
 
         JsonStorage jsonStorage = new JsonStorage(context);
         AccountHelper accountHelper = new AccountHelper(context);
+        Preferences preferences = new Preferences(context);
 
         if (!jsonStorage.has(PhoneAccount.class)) {
             return;
@@ -102,7 +103,13 @@ public class MiddlewareHelper {
         String fullName = ((SystemUser) jsonStorage.get(SystemUser.class)).getFullName();
         String appName = context.getPackageName();
         Call<ResponseBody> call = api.register(
-                fullName, token, sipUserId, Build.VERSION.CODENAME, Build.VERSION.RELEASE, appName
+                fullName,
+                token,
+                sipUserId,
+                Build.VERSION.CODENAME,
+                Build.VERSION.RELEASE,
+                appName,
+                (preferences.remoteLoggingIsActive() ? preferences.getLoggerIdentifier() : null)
         );
         editor.putString(CURRENT_TOKEN, token);
 
