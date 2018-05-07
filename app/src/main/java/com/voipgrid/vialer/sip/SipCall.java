@@ -3,6 +3,7 @@ package com.voipgrid.vialer.sip;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -11,6 +12,8 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
+import com.voipgrid.vialer.media.monitoring.PacketStats;
 import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 
@@ -64,7 +67,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     public void onCallTsxState(OnCallTsxStateParam prm) {
         super.onCallTsxState(prm);
 
-        // Check if the call is an ringing incoming call.
+         // Check if the call is an ringing incoming call.
         if (mCurrentCallState.equals(SipConstants.CALL_INCOMING_RINGING)) {
             // Early state. Is where a call is being cancelled or completed elsewhere.
             String packet = prm.getE().getBody().getTsxState().getSrc().getRdata().getWholeMsg();
@@ -437,6 +440,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mCallIsConnected = true;
         mCurrentCallState = SipConstants.CALL_CONNECTED_MESSAGE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_CONNECTED_MESSAGE);
+        new Thread(new CallMediaMonitor(this)).start();
+    }
+
+    /**
+     * Find the media packets sent/received for this call.
+     *
+     * @return
+     */
+    public @Nullable
+    PacketStats getMediaPacketStats() {
+        return PacketStats.Builder.fromSipCall(this);
     }
 
     private void onCallDisconnected() {
