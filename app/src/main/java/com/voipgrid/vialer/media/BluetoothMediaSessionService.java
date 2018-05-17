@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,9 +14,11 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
 import com.voipgrid.vialer.logging.RemoteLogger;
-
+import com.voipgrid.vialer.util.NotificationHelper;
 
 public class BluetoothMediaSessionService extends Service {
+
+    public static final String SHOULD_NOT_START_IN_FOREGROUND_EXTRA = "com.voipgrid.vialer.media.SHOULD_NOT_START_IN_FOREGROUND_EXTRA";
 
     private final static String TAG = BluetoothMediaSessionService.class.getSimpleName();
     private MediaSessionCompat mSession;
@@ -31,12 +34,9 @@ public class BluetoothMediaSessionService extends Service {
     @Override
     public void onCreate() {
         mContext = this;
-        mRemoteLogger = new RemoteLogger(this, BluetoothMediaSessionService.class, 1);
+        mRemoteLogger = new RemoteLogger(BluetoothMediaSessionService.class).enableConsoleLogging();
         mRemoteLogger.v("onCreate()");
-        MediaSessionCompat session = new MediaSessionCompat(
-                this,
-                TAG
-        );
+        MediaSessionCompat session = new MediaSessionCompat(this, TAG);
         PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder();
         stateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE |
                 PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID | PlaybackStateCompat.ACTION_PAUSE |
@@ -52,11 +52,26 @@ public class BluetoothMediaSessionService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mRemoteLogger.v("onStartCommand");
+
+        if (shouldBecomeForegroundService(intent)) {
+            startForeground(1, NotificationHelper.getInstance(this).createMediaButtonNotification());
+        }
+
         mSession.setActive(true);
 
         MediaButtonReceiver.handleIntent(mSession, intent);
 
         return START_NOT_STICKY;
+    }
+
+    /**
+     * Determines if this service should be run as a foreground service based on the passed intent and the OS version.
+     *
+     * @param intent
+     * @return TRUE if the service should be run in foreground
+     */
+    private boolean shouldBecomeForegroundService(Intent intent) {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && ! intent.getBooleanExtra(SHOULD_NOT_START_IN_FOREGROUND_EXTRA, false);
     }
 
     @Override
@@ -81,6 +96,9 @@ public class BluetoothMediaSessionService extends Service {
                     BluetoothMediaButtonReceiver.handleKeyEvent(mContext, keyEvent);
                 }
             }
+
+            stopSelf();
+
             return true;
         }
     };

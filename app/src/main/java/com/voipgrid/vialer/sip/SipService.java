@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -17,6 +16,8 @@ import android.telephony.TelephonyManager;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.call.NativeCallManager;
+import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NotificationHelper;
@@ -43,6 +44,7 @@ public class SipService extends Service {
     private SipCall mCurrentCall;
     private SipCall mInitialCall;
     private SipConfig mSipConfig;
+    private NativeCallManager mNativeCallManager;
 
     private List<SipCall> mCallList = new ArrayList<>();
     private String mInitialCallType;
@@ -90,25 +92,6 @@ public class SipService extends Service {
      */
     public static boolean sipServiceActive = false;
 
-    /**
-     * Check if there is a native call answered.
-     *
-     * @return boolean true if there is a native call answered.
-     */
-    public boolean nativeCallHasBeenAnswered() {
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        return telephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
-    }
-
-    /**
-     * See if there is a native GSM call Ringing
-     *
-     * @return boolean true when there is a native GSM call ringing
-     */
-    public boolean nativeCallIsRinging() {
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        return telephonyManager.getCallState() == TelephonyManager.CALL_STATE_RINGING;
-    }
 
     /**
      * Class the be able to bind a activity to this service.
@@ -129,7 +112,7 @@ public class SipService extends Service {
         @Override
         public void run() {
             // Play a ring back tone to update a user that setup is ongoing.
-            mToneGenerator.startTone(ToneGenerator.TONE_SUP_DIAL, 1000);
+            mToneGenerator.startTone(ToneGenerator.Constants.TONE_SUP_DIAL, 1000);
             mHandler.postDelayed(mRingbackRunnable, 4000);
         }
     };
@@ -152,7 +135,8 @@ public class SipService extends Service {
         mSipBroadcaster = new SipBroadcaster(this);
 
         mPreferences = new Preferences(this);
-        mRemoteLogger = new RemoteLogger(this, SipService.class, 1);
+        mRemoteLogger = new RemoteLogger(SipService.class).enableConsoleLogging();
+        mNativeCallManager = new NativeCallManager((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE));
 
         mRemoteLogger.d("onCreate");
 
@@ -204,6 +188,10 @@ public class SipService extends Service {
 
     public Preferences getPreferences() {
         return mPreferences;
+    }
+
+    public NativeCallManager getNativeCallManager() {
+        return mNativeCallManager;
     }
 
     public String getInitialCallType() {
@@ -286,7 +274,7 @@ public class SipService extends Service {
      * Play the busy tone used when a call get's disconnected by the recipient.
      */
     public void playBusyTone() {
-        mToneGenerator.startTone(ToneGenerator.TONE_CDMA_NETWORK_BUSY, 1500);
+        mToneGenerator.startTone(ToneGenerator.Constants.TONE_CDMA_NETWORK_BUSY, 1500);
     }
 
     /**
@@ -336,17 +324,12 @@ public class SipService extends Service {
      * @param number
      */
     public void startOutgoingCallActivity(SipCall sipCall, Uri number) {
-        mRemoteLogger.d("callVisibleForUser");
-        Intent intent = new Intent(this, CallActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setDataAndType(number, CallActivity.TYPE_OUTGOING_CALL);
-        intent.putExtra(CallActivity.CONTACT_NAME, sipCall.getCallerId());
-        intent.putExtra(CallActivity.PHONE_NUMBER, sipCall.getPhoneNumber());
-
-        sipServiceActive = true;
-
-        startActivity(intent);
-
+        startCallActivity(
+                number,
+                CallActivity.TYPE_OUTGOING_CALL,
+                sipCall.getCallerId(),
+                sipCall.getPhoneNumber()
+        );
     }
 
     /**
@@ -355,16 +338,22 @@ public class SipService extends Service {
      * @param callerId
      */
     public void startIncomingCallActivity(String number, String callerId) {
+        startCallActivity(
+                SipUri.sipAddressUri(this, PhoneNumberUtils.format(number)),
+                CallActivity.TYPE_INCOMING_CALL,
+                callerId,
+                number
+        );
+    }
+
+    private void startCallActivity(Uri sipAddressUri, @CallActivity.CallTypes String type, String callerId, String number) {
         mRemoteLogger.d("callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        Uri sipAddressUri = SipUri.sipAddressUri(
-                this,
-                PhoneNumberUtils.format(number)
-        );
-        intent.setDataAndType(sipAddressUri, CallActivity.TYPE_INCOMING_CALL);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setDataAndType(sipAddressUri, type);
         intent.putExtra(CallActivity.CONTACT_NAME, callerId);
         intent.putExtra(CallActivity.PHONE_NUMBER, number);
+
         sipServiceActive = true;
         startActivity(intent);
     }

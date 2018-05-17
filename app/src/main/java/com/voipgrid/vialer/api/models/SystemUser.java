@@ -19,6 +19,8 @@ public class SystemUser {
 
     String email;
 
+    String preposition;
+
     @SerializedName("outgoing_cli")
     String outgoingCli;
 
@@ -108,7 +110,11 @@ public class SystemUser {
     }
 
     public String getFullName() {
-        return getFirstName() + " " + getLastName();
+        if(getPreposition().equals("")) {
+            return getFirstName() + " "  + getLastName();
+        }
+
+        return getFirstName() + " " + getPreposition() + " " + getLastName();
     }
 
     public String getPhoneAccountId() {
@@ -147,5 +153,9 @@ public class SystemUser {
 
     public void setSecondaryNumbers(HashSet<String> secondaryNumbers) {
         this.secondaryNumbers = secondaryNumbers;
+    }
+
+    public String getPreposition() {
+        return preposition != null ? preposition : "";
     }
 }

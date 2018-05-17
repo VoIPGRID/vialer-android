@@ -283,7 +283,11 @@ public class CallRecordFragment extends ListFragment implements
         if (response.isSuccessful() && response.body() != null) {
             mHaveNetworkRecords = true;
             List<CallRecord> records = response.body().getObjects();
-            displayCallRecords(records);
+
+            if(getActivity() != null && isAdded()) {
+                displayCallRecords(records);
+            }
+
             // Save the records to cache, if there are any.
             if (filter(records).size() > 0) {
                 new AsyncCallRecordSaver(records).execute();
@@ -300,7 +304,7 @@ public class CallRecordFragment extends ListFragment implements
 
     private void failedFeedback(Response response) {
         if (getActivity() == null) {
-            new RemoteLogger(getContext(), CallRecordFragment.class, 1).e("java.lang.IllegalStateException: Fragment CallRecordFragment{a10f812} not attached to Activity");
+            new RemoteLogger(CallRecordFragment.class).enableConsoleLogging().e("CallRecordFragment is no longer attached to an activity");
             return;
         }
 

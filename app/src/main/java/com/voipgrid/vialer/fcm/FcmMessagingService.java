@@ -13,6 +13,7 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
@@ -35,8 +36,8 @@ public class FcmMessagingService extends FirebaseMessagingService {
     // Message format constants.
     private final static String MESSAGE_TYPE = "type";
 
-    private final static String CALL_REQUEST_TYPE = "call";
-    private final static String MESSAGE_REQUEST_TYPE = "message";
+    public final static String CALL_REQUEST_TYPE = "call";
+    public final static String MESSAGE_REQUEST_TYPE = "message";
 
     private final static String RESPONSE_URL = "response_api";
     private final static String REQUEST_TOKEN = "unique_key";
@@ -52,7 +53,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     @Override
     public void onCreate() {
         super.onCreate();
-        mRemoteLogger = new RemoteLogger(getApplicationContext(), FcmMessagingService.class, 1);
+        mRemoteLogger = new RemoteLogger(FcmMessagingService.class).enableConsoleLogging();
         mRemoteLogger.d("onCreate");
     }
 
@@ -62,6 +63,8 @@ public class FcmMessagingService extends FirebaseMessagingService {
         mRemoteLogger.d("onMessageReceived");
         Map<String, String> data = remoteMessage.getData();
         String requestType = data.get(MESSAGE_TYPE);
+
+        LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage, requestType);
 
         if (requestType == null) {
             mRemoteLogger.e("No requestType");

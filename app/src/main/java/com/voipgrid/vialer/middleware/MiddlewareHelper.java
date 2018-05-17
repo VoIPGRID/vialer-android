@@ -142,7 +142,7 @@ public class MiddlewareHelper {
      * @param context
      */
     public static void unregister(final Context context) {
-        final RemoteLogger remoteLogger = new RemoteLogger(context, MiddlewareHelper.class, 1);
+        final RemoteLogger remoteLogger = new RemoteLogger(MiddlewareHelper.class).enableConsoleLogging();
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String token = preferences.getString(CURRENT_TOKEN, "");
@@ -203,7 +203,7 @@ public class MiddlewareHelper {
      * @param context Context
      */
     public static void registerAtMiddleware(Context context) {
-        RemoteLogger remoteLogger = new RemoteLogger(context, MiddlewareHelper.class, 1);
+        RemoteLogger remoteLogger = new RemoteLogger(MiddlewareHelper.class).enableConsoleLogging();
 
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         remoteLogger.d("New refresh token: " + refreshedToken);

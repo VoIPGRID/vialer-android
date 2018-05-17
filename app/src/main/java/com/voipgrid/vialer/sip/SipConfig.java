@@ -1,39 +1,53 @@
 package com.voipgrid.vialer.sip;
 
+import static org.pjsip.pjsua2.pj_constants_.PJ_TRUE;
+import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_REINIT_MEDIA;
+import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT;
+import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_VIA;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
+import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
+import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.sip.SipLogHandler;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.UserAgent;
 
 import org.pjsip.pjsua2.Account;
 import org.pjsip.pjsua2.AccountConfig;
 import org.pjsip.pjsua2.AuthCredInfo;
 import org.pjsip.pjsua2.CallOpParam;
-import org.pjsip.pjsua2.CallSetting;
 import org.pjsip.pjsua2.CodecInfo;
 import org.pjsip.pjsua2.CodecInfoVector;
 import org.pjsip.pjsua2.Endpoint;
 import org.pjsip.pjsua2.EpConfig;
+import org.pjsip.pjsua2.IpChangeParam;
 import org.pjsip.pjsua2.LogConfig;
 import org.pjsip.pjsua2.MediaConfig;
 import org.pjsip.pjsua2.OnRegStateParam;
+import org.pjsip.pjsua2.StringVector;
 import org.pjsip.pjsua2.TransportConfig;
 import org.pjsip.pjsua2.UaConfig;
 import org.pjsip.pjsua2.pj_log_decoration;
+import org.pjsip.pjsua2.pjmedia_srtp_use;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
 import org.pjsip.pjsua2.pjsua_call_flag;
 
@@ -44,12 +58,11 @@ import okhttp3.ResponseBody;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.voipgrid.vialer.api.ServiceGenerator.getUserAgentHeader;
-
 /**
  * Class that holds the sip backend (Endpoint + SipAccount).
  */
 public class SipConfig implements AccountStatus {
+
     private static final String TAG = SipConfig.class.getSimpleName();
 
     private Endpoint mEndpoint;
@@ -58,36 +71,29 @@ public class SipConfig implements AccountStatus {
     private SipAccount mSipAccount;
     private SipLogWriter mSipLogWriter;
     private SipService mSipService;
+    private Preferences mPreferences;
 
-    private boolean mReRegisterAccount = false;
     private boolean mHasRespondedToMiddleware = false;
     private int mCurrentTransportId;
-    private int mLatestConnectionType;
     private static Map<String, Short> sCodecPrioMapping;
+    private boolean isChangingNetwork = false;
 
-    private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            handleNetworkStateChange(context);
-        }
-    };
+    public static final short CODEC_DISABLED = (short) 0;
+    public static final short CODEC_PRIORITY_MAX = (short) 255;
+
+    public static final String TRANSPORT_TYPE_SECURE = "tls";
+    public static final String TRANSPORT_TYPE_STANDARD = "tcp";
 
     static {
         sCodecPrioMapping = new HashMap<>();
-        sCodecPrioMapping.put("iLBC/8000/1", (short) 210);
-        sCodecPrioMapping.put("PCMA/8000/1", (short) 0);
-        sCodecPrioMapping.put("G722/16000/1", (short) 0);
-        sCodecPrioMapping.put("PCMU/8000/1", (short) 0);
-        sCodecPrioMapping.put("speex/8000/1", (short) 0);
-        sCodecPrioMapping.put("speex/16000/1", (short) 0);
-        sCodecPrioMapping.put("speex/32000/1", (short) 0);
-        sCodecPrioMapping.put("GSM/8000/1", (short) 0);
+        sCodecPrioMapping.put("ilbc/8000", CODEC_PRIORITY_MAX);
     }
 
     public SipConfig(SipService sipService, PhoneAccount phoneAccount) {
         mSipService = sipService;
         mPhoneAccount = phoneAccount;
         mRemoteLogger = mSipService.getRemoteLogger();
+        mPreferences = new Preferences(VialerApplication.get());
     }
 
     public Endpoint getEndpoint() {
@@ -108,8 +114,80 @@ public class SipConfig implements AccountStatus {
         setCodecPrio();
         mSipAccount = createSipAccount();
         // Start listening for network changes after everything is setup.
-        mLatestConnectionType = ConnectivityHelper.get(mSipService).getConnectionType();
         startNetworkingListener();
+    }
+
+    private static final int NETWORK_SWITCH_DELAY_MS = 500;
+
+    private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(isChangingNetwork) return;
+
+            mRemoteLogger.d("Received a network change: " + intent.getAction());
+
+            if(isInitialStickyBroadcast()) {
+                mRemoteLogger.i("Ignoring network change as broadcast is old (sticky).");
+                return;
+            }
+
+            isChangingNetwork = true;
+
+            final Handler handler = new Handler();
+            handler.postDelayed(() -> {
+                mRemoteLogger.d("Wait " + NETWORK_SWITCH_DELAY_MS + "ms before doing the network switch");
+                doIpSwitch();
+                isChangingNetwork = false;
+            }, NETWORK_SWITCH_DELAY_MS);
+        }
+    };
+
+    /**
+     * When there is a change in the network make use of the PJSIP handleIpChange
+     * functionality to handle the change in the network.
+     */
+    private void doIpSwitch() {
+        mRemoteLogger.v("doIpSwitch()");
+        IpChangeParam ipChangeParam = new IpChangeParam();
+        ipChangeParam.setRestartListener(false);
+
+        SipCall sipCall = null;
+        String currentCallState = "";
+        if (mSipService != null && mSipService.getCurrentCall() != null) {
+            sipCall = mSipService.getCurrentCall();
+            sipCall.setIsIPChangeInProgress(true);
+            currentCallState = sipCall.getCurrentCallState();
+        }
+
+        if (sipCall == null) {
+            return;
+        }
+
+        mRemoteLogger.i("Make PJSIP handle the ip address change.");
+        try {
+            mEndpoint.handleIpChange(ipChangeParam);
+        } catch (Exception e) {
+            mRemoteLogger.w("PJSIP failed to change the ip address");
+            e.printStackTrace();
+        }
+    }
+
+    private void startNetworkingListener() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(SipLogHandler.NETWORK_UNAVAILABLE_BROADCAST);
+        mSipService.registerReceiver(
+                mNetworkStateReceiver,
+                filter
+        );
+    }
+
+    private void stopNetworkingListener() {
+        try {
+            mSipService.unregisterReceiver(mNetworkStateReceiver);
+        } catch(IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister mNetworkStateReceiver not registered.");
+        }
     }
 
     /**
@@ -121,7 +199,6 @@ public class SipConfig implements AccountStatus {
         try {
             System.loadLibrary("pjsua2");
         } catch (UnsatisfiedLinkError error) { /* Can not load PJSIP library */
-            Log.e(TAG, error.getMessage());
             mRemoteLogger.e("" + Log.getStackTraceString(error));
             throw new LibraryInitFailedException();
         }
@@ -141,13 +218,7 @@ public class SipConfig implements AccountStatus {
      * @return
      */
     private String getTransportString() {
-        String sipTransport = mSipService.getString(R.string.sip_transport_type);
-        String tcp = "";
-
-        if (sipTransport.equals("tcp")) {
-            tcp = ";transport=tcp";
-        }
-        return tcp;
+        return ";transport=" + getSipTransportType();
     }
 
     /**
@@ -155,11 +226,13 @@ public class SipConfig implements AccountStatus {
      * @return
      */
     private pjsip_transport_type_e getTransportType() {
-        String sipTransport = mSipService.getString(R.string.sip_transport_type);
+        String sipTransport = getSipTransportType();
 
         pjsip_transport_type_e transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_UDP;
-        if (sipTransport.equals("tcp")) {
+        if (sipTransport.equals(TRANSPORT_TYPE_STANDARD)) {
             transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_TCP;
+        } else if (sipTransport.equals(TRANSPORT_TYPE_SECURE)) {
+            transportType = pjsip_transport_type_e.PJSIP_TRANSPORT_TLS;
         }
         return transportType;
     }
@@ -206,7 +279,6 @@ public class SipConfig implements AccountStatus {
         // Set echo cancellation options for endpoint.
         MediaConfig mediaConfig = createMediaConfig(endpointConfig);
         endpointConfig.setMedConfig(mediaConfig);
-
         try {
             endpoint.libCreate();
         } catch (Exception e) {
@@ -221,7 +293,9 @@ public class SipConfig implements AccountStatus {
         }
 
         UaConfig uaConfig = endpointConfig.getUaConfig();
-        uaConfig.setUserAgent(getUserAgentHeader(mSipService));
+        uaConfig.setUserAgent(new UserAgent(mSipService).generate());
+
+        configureStunServer(uaConfig);
 
         try {
             endpoint.libInit(endpointConfig);
@@ -241,6 +315,7 @@ public class SipConfig implements AccountStatus {
             mRemoteLogger.e("" + Log.getStackTraceString(exception));
             throw new LibraryInitFailedException();
         }
+
         return endpoint;
     }
 
@@ -259,7 +334,7 @@ public class SipConfig implements AccountStatus {
 
         String transportString = getTransportString();
         String sipAccountRegId = SipUri.sipAddress(mSipService, mPhoneAccount.getAccountId()) + transportString;
-        String sipRegistrarUri = SipUri.prependSIPUri(mSipService, mSipService.getString(R.string.sip_host)) + transportString;
+        String sipRegistrarUri = SipUri.prependSIPUri(mSipService, getSipHost()) + transportString;
 
         AccountConfig config = new AccountConfig();
         config.setIdUri(sipAccountRegId);
@@ -267,7 +342,33 @@ public class SipConfig implements AccountStatus {
         config.getSipConfig().getAuthCreds().add(credInfo);
         config.getSipConfig().getProxies().add(sipRegistrarUri);
 
+        // TLS Configuration
+        if (shouldUseTls()) {
+            config.getMediaConfig().setSrtpSecureSignaling(1);
+            config.getMediaConfig().setSrtpUse(pjmedia_srtp_use.PJMEDIA_SRTP_MANDATORY);
+        }
+
+        // IP Address account configuration
+        config.getIpChangeConfig().setShutdownTp(false);
+        config.getIpChangeConfig().setHangupCalls(false);
+        config.getIpChangeConfig().setReinviteFlags(PJSUA_CALL_UPDATE_CONTACT.swigValue() | PJSUA_CALL_REINIT_MEDIA.swigValue() | PJSUA_CALL_UPDATE_VIA.swigValue());
+
+        config.getNatConfig().setContactRewriteUse(PJ_TRUE.swigValue());
+        config.getNatConfig().setContactRewriteMethod(4);
+
+
         return config;
+    }
+
+    @NonNull
+    private String getSipTransportType() {
+        if (!shouldUseTls()) {
+            LogHelper.using(mRemoteLogger).logNoTlsReason();
+
+            return TRANSPORT_TYPE_STANDARD;
+        }
+
+        return TRANSPORT_TYPE_SECURE;
     }
 
     /**
@@ -297,17 +398,31 @@ public class SipConfig implements AccountStatus {
             CodecInfo info;
             Short prio;
 
-            for (int i = 1; i < codecList.size(); i++) {
+            for (int i = 0; i < codecList.size(); i++) {
                 info = codecList.get(i);
                 codecId = info.getCodecId();
-                prio = sCodecPrioMapping.get(codecId);
-                if (prio != null) {
-                    mEndpoint.codecSetPriority(codecId, prio);
-                }
+                prio = findCodecPriority(codecId);
+                mEndpoint.codecSetPriority(codecId, prio != null ? prio : CODEC_DISABLED);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Searches and normalizes the codec priority mapping and attempts to find the mapped priority.
+     *
+     * @param codecId
+     * @return Short The codec's priority.
+     */
+    private Short findCodecPriority(String codecId) {
+        for(String codec : sCodecPrioMapping.keySet()) {
+            if(codecId.toLowerCase().contains(codec.toLowerCase())) {
+                return sCodecPrioMapping.get(codec);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -331,61 +446,6 @@ public class SipConfig implements AccountStatus {
                 mEndpoint.delete();
                 mEndpoint = null;
             }
-        }
-    }
-
-    private void startNetworkingListener() {
-        mSipService.registerReceiver(mNetworkStateReceiver,
-                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-    }
-
-    private void stopNetworkingListener() {
-        try {
-            mSipService.unregisterReceiver(mNetworkStateReceiver);
-        } catch(IllegalArgumentException e) {
-            mRemoteLogger.w("Trying to unregister mNetworkStateReceiver not registered.");
-        }
-    }
-
-    /**
-     * When there is a network connection change start with un-registration.
-     * This is needed to tell asterisks that we are connected to a different ip address.
-     *
-     * @param context
-     */
-    private void handleNetworkStateChange(Context context) {
-        mRemoteLogger.d("handleNetworkStateChange");
-        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(context);
-        int connectionType = ConnectivityHelper.get(context).getConnectionType();
-
-        if (!(mLatestConnectionType == connectionType) && connectivityHelper.hasNetworkConnection()) {
-            mReRegisterAccount = true;
-            // Renew sip registration. Unregister would come from the new IP anyway so that
-            // would not make a lot of sense so we update our existing registration from the
-            // new IP.
-            try {
-                mSipAccount.setRegistration(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        mLatestConnectionType = connectionType;
-    }
-
-    /**
-     * Function to re-register to handle IP changes.
-     */
-    private void reRegister() {
-        // TODO Think about reinvites during settings up transfer.
-        try {
-            // Set flag for updating contact header IP.
-            CallOpParam callOpParam = new CallOpParam(true);
-            CallSetting callSetting = callOpParam.getOpt();
-            callSetting.setFlag(pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT.swigValue());
-            mSipService.getCurrentCall().reinvite(callOpParam);
-            mReRegisterAccount = false;
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -461,19 +521,17 @@ public class SipConfig implements AccountStatus {
     public void onAccountRegistered(Account account, OnRegStateParam param) {
         mRemoteLogger.d("onAccountRegistered");
 
-        try {
-            // After registration setup new transport to reflect learned external IP to be used
-            // by sip headers.
-            mEndpoint.transportClose(mCurrentTransportId);
-            mCurrentTransportId = mEndpoint.transportCreate(getTransportType(), createTransportConfig());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // After the account has registered try to re-invite the current call
-        // so the contact uri will be updated for the call.
-        if (mReRegisterAccount) {
-            reRegister();
+        if (mSipService.getCurrentCall() != null) {
+            SipCall sipCall = mSipService.getCurrentCall();
+            if (sipCall.isIpChangeInProgress() && sipCall.getCurrentCallState().equals(SipConstants.CALL_INCOMING_RINGING)) {
+                CallOpParam callOpParam = new CallOpParam();
+                callOpParam.setOptions(pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT.swigValue());
+                try {
+                    sipCall.reinvite(callOpParam);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         // Check if it is an incoming call and we did not respond to the middleware already.
@@ -497,5 +555,49 @@ public class SipConfig implements AccountStatus {
      */
     public class LibraryInitFailedException extends Exception {
 
+    }
+
+    /**
+     * Use a stun server if one has been configured.
+     *
+     * @param uaConfig
+     */
+    private void configureStunServer(UaConfig uaConfig) {
+        if (!mPreferences.hasStunEnabled()) {
+            mRemoteLogger.i("User has disabled using STUN via settings menu");
+            return;
+        }
+
+        String[] stunHosts = mSipService.getResources().getStringArray(R.array.stun_hosts);
+
+        if(stunHosts.length <= 0) return;
+
+        StringVector stun = new StringVector();
+
+        for(String stunHost : stunHosts) {
+            mRemoteLogger.i("Configuring STUN server: " + stunHost);
+            stun.add(stunHost);
+        }
+
+        uaConfig.setStunServer(stun);
+    }
+
+    /**
+     * Find the current SIP domain that should be used for all calls.
+     *
+     * @return The domain as a string
+     */
+    @NonNull
+    public static String getSipHost() {
+        return VialerApplication.get().getString(shouldUseTls() ? R.string.sip_host_secure : R.string.sip_host);
+    }
+
+    /**
+     * Determine if TLS should be used for all calls.
+     *
+     * @return TRUE if TLS should be used
+     */
+    public static boolean shouldUseTls() {
+        return SecureCalling.fromContext(VialerApplication.get()).isEnabled();
     }
 }

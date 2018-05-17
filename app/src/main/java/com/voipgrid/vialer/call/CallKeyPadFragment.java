@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.dialer.DialpadButton;
 import com.voipgrid.vialer.dialer.KeyPadView;
 import com.voipgrid.vialer.dialer.NumberInputView;
+import com.voipgrid.vialer.dialer.ToneGenerator;
 
 /**
  * Fragment for the keypad when calling.

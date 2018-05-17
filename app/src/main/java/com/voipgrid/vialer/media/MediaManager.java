@@ -51,7 +51,7 @@ public class MediaManager implements
         mContext = context;
         mAudioChangedInterfaceListener = audioChangedInterface;
 
-        mRemoteLogger = new RemoteLogger(context, MediaManager.class, 1);
+        mRemoteLogger = new RemoteLogger(MediaManager.class).enableConsoleLogging();
 
         setAudioManager();
 
@@ -89,8 +89,14 @@ public class MediaManager implements
     public void deInit() {
         mRemoteLogger.v("deInit()");
 
-        mAudioRouter.deInit();
-        mIncomingRinger.stop();
+        if(mAudioRouter != null) {
+            mAudioRouter.deInit();
+        }
+
+        if(mIncomingRinger != null) {
+            mIncomingRinger.stop();
+        }
+
         resetAudioManager();
 
         mMediaManager = null;
@@ -114,7 +120,7 @@ public class MediaManager implements
         } else {
             mAudioRouter.onAnsweredCall();
         }
-        BluetoothMediaButtonReceiver.setCallAnswered();
+        BluetoothMediaButtonReceiver.setCallAnswered(true);
     }
 
     /**
@@ -125,6 +131,7 @@ public class MediaManager implements
         if (mAudioRouter != null) {
             mAudioRouter.onEndedCall();
         }
+        BluetoothMediaButtonReceiver.setCallAnswered(false);
     }
 
     /**
@@ -203,6 +210,9 @@ public class MediaManager implements
      */
     private void resetAudioManager() {
         mRemoteLogger.v("resetAudioManager()...");
+
+        if(mAudioManager == null) return;
+
         mAudioManager.setMode(AudioManager.MODE_NORMAL);
         mAudioManager.abandonAudioFocus(this);
     }
@@ -269,7 +279,9 @@ public class MediaManager implements
             mCurrentAudioRoute = newRoute;
             if (mCurrentAudioRoute == Constants.ROUTE_BT) {
                 if (CURRENT_CALL_STATE == Constants.CALL_RINGING) {
-                    mIncomingRinger.restart();
+                    if (mIncomingRinger != null) {
+                        mIncomingRinger.restart();
+                    }
                 }
             }
         }

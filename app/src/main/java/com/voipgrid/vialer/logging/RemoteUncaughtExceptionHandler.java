@@ -2,11 +2,9 @@ package com.voipgrid.vialer.logging;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.CallSuper;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
-
 
 /**
  * Class that sends the uncaught exceptions to remote an presents the regular crash screen
@@ -15,21 +13,23 @@ import com.voipgrid.vialer.BuildConfig;
 public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     private Context mContext;
+    private Thread.UncaughtExceptionHandler mDefaultHandler;
 
     public RemoteUncaughtExceptionHandler(Context context) {
         mContext = context;
+        mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
     }
 
-    @CallSuper
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
         logStackTrace(throwable);
-        Thread.getDefaultUncaughtExceptionHandler().uncaughtException(thread, throwable);
+        mDefaultHandler.uncaughtException(thread, throwable);
     }
 
     private void logStackTrace(Throwable exception) {
-        RemoteLogger remoteLogger = new RemoteLogger(mContext, RemoteUncaughtExceptionHandler.class, true);
+        RemoteLogger remoteLogger = new RemoteLogger(RemoteUncaughtExceptionHandler.class).forceRemoteLogging(true);
         String stackTrace = Log.getStackTraceString(exception);
+        String traceID = LogUuidGenerator.generate();
 
         remoteLogger.e("*************************************");
         remoteLogger.e("************ BEGIN CRASH ************");
@@ -50,7 +50,7 @@ public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionH
         remoteLogger.e("************ CAUSE OF ERROR ************");
         String[] lines = stackTrace.split(System.getProperty("line.separator"));
         for (String line : lines) {
-            remoteLogger.e(line);
+            remoteLogger.e(traceID + "> " + line);
         }
         remoteLogger.e("************ END CRASH **************");
         remoteLogger.e("*************************************");

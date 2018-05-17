@@ -3,6 +3,8 @@ package com.voipgrid.vialer.t9;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Class for generating a T9 query from a name.
@@ -19,7 +21,7 @@ public class T9Query {
         numberQueries.add(number);
 
         // Best effort to convert +XX12345678 numbers to 0612345678
-        if (number.startsWith("+")) {
+        if (number.startsWith("+") && number.length() >= 3) {
             numberQueries.add("0" + number.substring(3));
         }
 
@@ -91,6 +93,47 @@ public class T9Query {
             }
         }
         return t9Query.toString();
+    }
+
+    /**
+     * Get the string of letters from the map that map to the provided digit. (e.g. 2 will return ABC).
+     *
+     * @param digit The digit to look up the corresponding letters for.
+     * @return A list of the matched letters.
+     */
+    public static List<Character> getLettersForDigit(int digit) {
+        HashMap<Character, Character> t9Mapping = getT9Mapping();
+        ArrayList<Character> found = new ArrayList<>();
+
+        for (Map.Entry<Character, Character> entry : t9Mapping.entrySet()) {
+            Character key = entry.getKey();
+            Character value = entry.getValue();
+
+            if (value == digit) {
+                found.add(key);
+            }
+        }
+
+        return found;
+    }
+
+    /**
+     * Gets the letters as a continuous string that map to the provided digit.
+     * @see #getLettersForDigit(int)
+     *
+     * @param digit The digit to look up the corresponding letters for.
+     * @return A string containing the matched letters.
+     */
+    public static String getLettersForDigitAsString(int digit) {
+        List<Character> characters = getLettersForDigit(digit);
+
+        StringBuilder builder = new StringBuilder();
+
+        for (Character c : characters) {
+            builder.append(c);
+        }
+
+        return builder.toString().toUpperCase();
     }
 
     /**

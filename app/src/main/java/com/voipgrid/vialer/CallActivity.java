@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringDef;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateUtils;
 import android.view.View;
@@ -47,6 +48,8 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,6 +61,10 @@ public class CallActivity extends LoginRequiredActivity
         implements View.OnClickListener, SipConstants, ProximitySensorInterface,
         CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
         MediaManager.AudioChangedInterface {
+
+    @StringDef({TYPE_INCOMING_CALL, TYPE_OUTGOING_CALL, TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL, TYPE_CONNECTED_CALL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallTypes {}
 
     public static final String TYPE_OUTGOING_CALL = "type-outgoing-call";
     public static final String TYPE_INCOMING_CALL = "type-incoming-call";
@@ -76,6 +83,15 @@ public class CallActivity extends LoginRequiredActivity
     private static final String MAP_ORIGINAL_CALLER_ID = "originalCallerId";
     private static final String MAP_TRANSFERRED_PHONE_NUMBER = "transferredNumber";
     private static final String MAP_SECOND_CALL_IS_CONNECTED = "secondCallIsConnected";
+
+    private static final int DELAYED_FINISH_MS = 3000;
+    private static final int DELAYED_FINISH_RETRY_MS = 1000;
+
+    /**
+     * If the sip service has not successfully bound in this amount of time, the call
+     * activity will attempt to finish.
+     */
+    private static final int MAX_ALLOWED_MS_TO_BIND_SIP_SERVICE = 3000;
 
     // Manager for "on speaker" action.
     private ProximitySensorHelper mProximityHelper;
@@ -109,6 +125,7 @@ public class CallActivity extends LoginRequiredActivity
     private RemoteLogger mRemoteLogger;
     private SipService mSipService;
     private boolean mSipServiceBound = false;
+    private boolean mShouldUnbind = false;
 
     private MediaManager mMediaManager;
 
@@ -249,10 +266,35 @@ public class CallActivity extends LoginRequiredActivity
         }
     };
 
+    private Runnable delayedFinish = new Runnable() {
+
+        private Handler delayedHandler = new Handler();
+
+        @Override
+        public void run() {
+            if(CallActivity.this.hasActiveCall()) {
+                mRemoteLogger.i("Call is still active " + DELAYED_FINISH_MS + "ms after finishWithDelay was called, trying again in " + DELAYED_FINISH_RETRY_MS + "ms");
+                this.delayedHandler.removeCallbacks(this);
+                this.delayedHandler.postDelayed(this, DELAYED_FINISH_RETRY_MS);
+                return;
+            }
+
+            // Check to see if the call activity is the last activity.
+            if (isTaskRoot() && VialerApplication.get().isApplicationVisible()) {
+                mRemoteLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
+                Intent intent = new Intent(CallActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+
+            finish();  // Close this activity after 3 seconds.
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRemoteLogger = new RemoteLogger(this, CallActivity.class, 1);
+        mRemoteLogger = new RemoteLogger(CallActivity.class).enableConsoleLogging();
         mRemoteLogger.d("onCreate");
 
         // Check if we have permission to use the microphone. If not, request it.
@@ -399,7 +441,9 @@ public class CallActivity extends LoginRequiredActivity
         // Bind the SipService to the activity.
         if (!mSipServiceBound && mSipService == null) {
             mRemoteLogger.i("SipService not bound!");
-            bindService(new Intent(this, SipService.class), mSipServiceConnection, Context.BIND_AUTO_CREATE);
+            if (bindService(new Intent(this, SipService.class), mSipServiceConnection, Context.BIND_AUTO_CREATE)) {
+                mShouldUnbind = true;
+            }
         }
 
         if (!mOnTransfer && mSipService != null && mSipService.getCurrentCall() != null) {
@@ -428,7 +472,7 @@ public class CallActivity extends LoginRequiredActivity
                     onCallStatusUpdate(CALL_DISCONNECTED_MESSAGE);
                 }
             }
-        }, 500);
+        }, MAX_ALLOWED_MS_TO_BIND_SIP_SERVICE);
     }
 
     @Override
@@ -486,6 +530,12 @@ public class CallActivity extends LoginRequiredActivity
         mNotificationHelper.removeAllNotifications();
 
         mProximityHelper.stopSensor();
+
+        try {
+            mBroadcastManager.unregisterReceiver(mCallMissedReceiver);
+        } catch (IllegalArgumentException e) {
+            mRemoteLogger.w("Trying to unregister mCallMissedReceiver not registered.");
+        }
 
         try {
             unregisterReceiver(mBluetoothButtonReceiver);
@@ -783,6 +833,7 @@ public class CallActivity extends LoginRequiredActivity
                     }
                 } else {
                     mOnTransfer = false;
+
                     toggleVisibilityCallInfo(true);
                     swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
 
@@ -1050,16 +1101,9 @@ public class CallActivity extends LoginRequiredActivity
                 break;
 
             case R.id.button_keypad:
-                if (mOnTransfer) {
-                    if (mSipService.getCurrentCall().getIsCallConnected()) {
-                        toggleDialPad();
-                        updateCallButton(viewId, true);
-                    }
-                } else {
-                    if (mConnected) {
-                        toggleDialPad();
-                        updateCallButton(viewId, true);
-                    }
+                if (mSipService.getCurrentCall().getIsCallConnected()) {
+                    toggleDialPad();
+                    updateCallButton(viewId, true);
                 }
                 break;
 
@@ -1196,7 +1240,7 @@ public class CallActivity extends LoginRequiredActivity
                         getString(R.string.analytics_event_action_inbound),
                         getString(R.string.analytics_event_label_accepted)
                 );
-                BluetoothMediaButtonReceiver.setCallAnswered();
+                BluetoothMediaButtonReceiver.setCallAnswered(true);
 
                 mNotificationHelper.removeAllNotifications();
                 mNotificationId = mNotificationHelper.displayCallProgressNotification(
@@ -1235,26 +1279,23 @@ public class CallActivity extends LoginRequiredActivity
 
     private void finishWithDelay() {
         stopService();
-        final Context context = this;
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Check to see if the call activity is the last activity.
-                if (isTaskRoot()) {
-                    mRemoteLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
-                    Intent intent = new Intent(context, MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-                finish();  // Close this activity after 3 seconds.
-            }
-        }, 3000);
+        new Handler().postDelayed(delayedFinish, DELAYED_FINISH_MS);
+    }
+
+    /**
+     *
+     * @return TRUE if the sip service is available and has an active call, otherwise FALSE.
+     */
+    private boolean hasActiveCall() {
+        if (mSipService == null) return false;
+
+        return mSipService.getCurrentCall() != null;
     }
 
     private void stopService() {
-        if (mSipServiceBound && (mSipService != null && mSipService.getCurrentCall() == null)) {
+        if (!hasActiveCall() && mShouldUnbind) {
             unbindService(mSipServiceConnection);
-            mSipServiceBound = false;
+            mShouldUnbind = false;
         }
     }
 
@@ -1378,7 +1419,7 @@ public class CallActivity extends LoginRequiredActivity
         } else {
             if (lost) {
                 // Don't put the call on hold when there is a native call is ringing.
-                if (mConnected && !mSipService.nativeCallIsRinging()) {
+                if (mConnected && !mSipService.getNativeCallManager().nativeCallIsRinging()) {
                     onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
                 }
             } else {

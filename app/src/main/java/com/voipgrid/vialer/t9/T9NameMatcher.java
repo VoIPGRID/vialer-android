@@ -36,90 +36,63 @@ public class T9NameMatcher {
      */
     public static String highlightMatchedPart(String t9Query, String displayName) {
         ArrayList<String> possibleQueries = T9Query.generateT9NameQueries(displayName);
+
         String queryOfWholeName = possibleQueries.get(0);
 
-        String strippedDisplayName = displayName.replaceAll(" ", "");
-
-        int start = queryOfWholeName.indexOf(t9Query);
+        int start = adjustStartBasedOnSpaces(displayName, queryOfWholeName.indexOf(t9Query));
         int end = start + t9Query.length();
 
-        // Create a string with the highlighted part without whitespace.
-        StringBuilder builder = new StringBuilder();
-        builder.append(strippedDisplayName.substring(0, start));
-        builder.append("<b>" + strippedDisplayName.substring(start, end) + "</b>");
-        builder.append(strippedDisplayName.substring(end, strippedDisplayName.length()));
-
-        String matchedWithoutSpaces = builder.toString();
-
-        // Clear builder.
-        builder.setLength(0);
-
-        // Loop over indexes of existing spaces.
-        int index = displayName.indexOf(" ");
-        int previousIndex = 0;
-        int count = 0;
-        while (index >= 0) {
-            // Start of the substring.
-            int subStart = previousIndex;
-            int subEnd;
-
-            if (index > (start + count) && index < (end + count)) {
-                // The whitespace is between the <b> tags so add 3 for the first <b>.
-                subEnd = index + 3;
-            } else if (index >= end){
-                // The whitespace is after the <b> tags so add 7 for the <b> and </b>.
-                subEnd = index + 7;
-            } else {
-                // The whitespace is before the <b> tags.
-                subEnd = index;
-            }
-
-            // Subtract the amount of whitespace added.
-            subEnd -= count;
-
-            // Create a substring with trailing whitespace.
-            builder.append(matchedWithoutSpaces.substring(subStart, subEnd) + " ");
-
-            previousIndex = subEnd;
-            count++;
-            index = displayName.indexOf(" ", index + 1);
-        }
-
-        builder.append(matchedWithoutSpaces.substring(previousIndex, matchedWithoutSpaces.length()));
-
-        return dealWithSpecialCharacter(builder.toString());
+        // Add a empty space behind the displayname to be able to substring untill the last char
+        // without causing outofboundexceptions.
+        return placeBoldingTags(displayName + " ", start, end, end-start);
     }
 
     /**
-     * Fixes inaccuracies in bolding when special chars are in the string.
-     * This method moves the missing chars from outside the tags to the inside.
+     * Calculates the number of spaces in the display name before the start value and increases
+     * start based on this value.
+     *
+     * @param displayName
+     * @param start
+     * @return The value of start adjusted based on the number of spaces.
      */
-    public static String dealWithSpecialCharacter(String boldedText) {
-        String boldString = boldedText.split("<b>")[1].split("</b>")[0];
-        int count = boldString.length() - boldString.replaceAll("[^A-Za-z0-9 ]","").length();
-        if (count < 1) {
-            return boldedText;
-        }
-        String firstSplit = boldedText.split("</b>")[0];
-        try {
-            String secondSplit = boldedText.split("</b>")[1];
-            String stringToMove = secondSplit.substring(0, count);
-            if (stringToMove.charAt(stringToMove.length()-1) == ' '){
-                count ++;
-                stringToMove = secondSplit.substring(0, count);
-            }
-            return firstSplit+stringToMove+"</b>"+boldedText.substring((boldedText.lastIndexOf("</b>")+4+count));
-        } catch (IndexOutOfBoundsException e) {
-            return boldedText;
+    private static int adjustStartBasedOnSpaces(String displayName, int start) {
+        String substr = displayName.substring(0, start);
+
+        int spaceCount = substr.length() - substr.replace(" ", "").length();
+
+        return start + spaceCount;
+    }
+
+    /**
+     * Recursively builds a string with the correct highlighting.
+     */
+    private static String placeBoldingTags(String fullString, int start, int end, int charCount) {
+        // Replace special chars that impact the regexes used for substrings.
+        fullString = fullString.replaceAll("[*+?^<>|$\\\\]", " ");
+        String highlightString = fullString.substring(start, end);
+
+        int charsInHighlight = highlightString.replaceAll("[^A-Za-z]","").length();
+        // Increase the endIndex if our highlightString is now to small.
+        if (charsInHighlight < charCount) {
+            return placeBoldingTags(fullString, start, end+1, charCount);
         }
 
+        // Clean up the front of the string.
+        if (!Character.isLetter(highlightString.charAt(0))) {
+            return placeBoldingTags(fullString, start+1, end, charCount);
+        }
+
+        String preHighlight = fullString.split(highlightString)[0];
+        String pastHighlight = fullString.split(highlightString)[1];
+
+        String result = preHighlight + "<b>" + highlightString + "</b>" + pastHighlight;
+        return result;
     }
 
     /**
      * Custom Comparator to sort the list based on string length DESC.
      */
     private static class T9QueryComparator implements Comparator<String> {
-
         public int compare(String s1, String s2) {
             return s2.length() - s1.length();
         }

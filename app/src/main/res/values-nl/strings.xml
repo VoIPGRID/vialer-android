@@ -95,6 +95,8 @@
     <string name="onboarding_no_internet_message">Een internet verbinding is noodzakelijk.</string>
     <string name="onboarding_account_configure_failed_title">Configuratie mislukt</string>
     <string name="onboarding_account_configure_invalid_phone_number">Het mobiele telefoonnummer is niet correct.</string>
+    <string name="onboarding_account_configure_no_outgoing_number_title">Uitgaand nummer ontbreekt</string>
+    <string name="onboarding_account_configure_no_outgoing_number">Vanwege het ontbreken van een uitgaand nummer kan je alleen interne nummers bellen.</string>
 
     <!-- strings empty view call records -->
     <string name="empty_view_default_message">Je hebt (nog) geen recente telefoongesprekken.</string>
@@ -147,6 +149,10 @@
     <string name="callnotification_active_call">Actief gesprek</string>
     <string name="callnotification_on_hold">In de wacht</string>
     <string name="callnotification_dialing">Kiezen</string>
+
+    <string name="notification_channel_calls">Telefoongesprekken</string>
+    <string name="notification_channel_contacts">Contact synchronisatie</string>
+    <string name="notification_channel_media_button">Bluetooth</string>
 
     <string name="navigation_name_placeholder_text">Geen uitgaand nummer geconfigureerd</string>
     <string name="supressed_number">Anoniem</string>
@@ -203,6 +209,15 @@
     <string name="call_incoming_decline">Weigeren</string>
     <string name="permission_read_external_storage_dialog_title">Externe opslag permissie</string>
     <string name="permission_read_external_storage_missing_message">Permissie tot de externe opslag is nodig om toegang tot je ringtones te krijgen</string>
-    <string name="permission_read_external_storage_dialog_message">Deze permissie is nodig om ringtones te kunnen kiezen die op je externe opslag staan</string>
+    <string name="permission_read_external_storage_dialog_message">Deze permissie is nodig om ringtones te kunnen kiezen die op je externe opslag staan</string>      
+    <string name="advanced_settings_title">Geavanceerde instellingen</string>
+    <string name="advanced_settings_tls_description">Externe partijen kunnen je gesprekken afluisteren als deze functie is uitgeschakeld.</string>
+    <string name="advanced_settings_tls_switch">Gebruik versleuteld bellen</string>
+    <string name="advanced_settings_stun_switch">Gebruik STUN om te bellen</string>
+    <string name="advanced_settings_stun_description">STUN kan de connectie met het netwerk verbeteren als je NAT problemen hebt.
+    </string>
+    <string name="call_not_encrypted_warning_bar_text">Gesprek niet versleuteld</string>
 
+    <string name="t9helper_title">Tip</string>
+    <string name="t9helper_text">Je kunt zoeken op %1$s door de volgende nummers op het toetsenbord in te drukken.</string>
 </resources>

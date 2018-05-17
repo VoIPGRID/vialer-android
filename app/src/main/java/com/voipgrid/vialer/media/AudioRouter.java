@@ -1,5 +1,8 @@
 package com.voipgrid.vialer.media;
 
+import static com.voipgrid.vialer.media.BluetoothMediaSessionService
+        .SHOULD_NOT_START_IN_FOREGROUND_EXTRA;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
@@ -58,6 +61,7 @@ class AudioRouter {
     // states are needed to keep track of intermediate states while the SCO
     // channel is enabled or disabled (switching state can take a few seconds).
     private int mBluetoothScoState = STATE_BLUETOOTH_SCO_INVALID;
+    private int mBluetoothScoPreviousState = STATE_BLUETOOTH_SCO_INVALID;
     private int mBluetoothScoStateBeforeSpeakerOn = STATE_BLUETOOTH_SCO_INVALID;
 
     private boolean mHasBluetoothHeadset = false;
@@ -71,7 +75,7 @@ class AudioRouter {
         mContext = context;
         mAudioManager = audioManager;
 
-        mRemoteLogger = new RemoteLogger(context, AudioRouter.class, 1);
+        mRemoteLogger = new RemoteLogger(AudioRouter.class).enableConsoleLogging();
         mRemoteLogger.d("AudioRouter()");
 
         registerForBluetoothScoIntentBroadcast();
@@ -80,7 +84,7 @@ class AudioRouter {
 
         mAudioRouterInterface = audioRouterInterface;
 
-        mContext.startService(new Intent(mContext, BluetoothMediaSessionService.class));
+        startMediaButtonService();
     }
 
     void deInit() {
@@ -401,6 +405,8 @@ class AudioRouter {
                     }
                 }
 
+                mBluetoothScoPreviousState = mBluetoothScoState;
+
                 switch (state) {
                     case AudioManager.SCO_AUDIO_STATE_CONNECTED:
                         mRemoteLogger.v("==> Bluetooth sco audio connected");
@@ -550,6 +556,12 @@ class AudioRouter {
 
     public void setAudioIsLost(boolean lost) {
         mAudioIsLost = lost;
+    }
+
+    private void startMediaButtonService() {
+        Intent intent = new Intent(mContext, BluetoothMediaSessionService.class);
+        intent.putExtra(SHOULD_NOT_START_IN_FOREGROUND_EXTRA, true);
+        mContext.startService(intent);
     }
 
     interface AudioRouterInterface {

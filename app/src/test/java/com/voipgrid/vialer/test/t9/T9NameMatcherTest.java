@@ -1,11 +1,12 @@
 package com.voipgrid.vialer.test.t9;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import com.voipgrid.vialer.t9.T9NameMatcher;
 
 import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Class for testing the T9NameMatcher class.
@@ -50,44 +51,29 @@ public class T9NameMatcherTest {
 
     @Test
     public void highlightMatchedPartTest() {
-        String name = "Henk van den Berg";
-        String query;
-        String expectedResult;
-
-        // hen.
-        query = "436";
-        expectedResult = "<b>Hen</b>k van den Berg";
-        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+        t9matcherTest("436", "<b>Hen</b>k van den Berg ");
 
         // henk.
-        query = "4365";
-        expectedResult = "<b>Henk</b> van den Berg";
-        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+        t9matcherTest("4365", "<b>Henk</b> van den Berg ");
 
         // van.
-        query = "826";
-        expectedResult = "Henk <b>van</b> den Berg";
-        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+        t9matcherTest("826", "Henk <b>van</b> den Berg ");
 
         // vande.
-        query = "82633";
-        expectedResult = "Henk <b>van de</b>n Berg";
-        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+        t9matcherTest("82633", "Henk <b>van de</b>n Berg ");
 
         // den.
-        query = "336";
-        expectedResult = "Henk van <b>den</b> Berg";
-        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+        t9matcherTest("336", "Henk van <b>den</b> Berg ");
 
         // denb.
-        query = "3362";
-        expectedResult = "Henk van <b>den B</b>erg";
-        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+        t9matcherTest("3362", "Henk van <b>den B</b>erg ");
 
         // berg.
-        query = "2374";
-        expectedResult = "Henk van den <b>Berg</b>";
-        assertTrue(expectedResult.equals(T9NameMatcher.highlightMatchedPart(query, name)));
+        t9matcherTest("2374", "Henk van den <b>Berg</b> ");
     }
 
+    private void t9matcherTest(String query, String expected) {
+        String name = "Henk van den Berg";
+        assertEquals(expected, T9NameMatcher.highlightMatchedPart(query, name));
+    }
 }

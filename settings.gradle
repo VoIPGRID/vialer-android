@@ -1,1 +1,1 @@
-include ':app', ':pjsip'
+include ':app'

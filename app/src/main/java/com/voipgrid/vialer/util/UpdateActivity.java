@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.util;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -12,6 +13,8 @@ import com.voipgrid.vialer.R;
  * Activity to start the updating process.
  */
 public class UpdateActivity extends Activity {
+
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,5 +33,21 @@ public class UpdateActivity extends Activity {
             }
         });
         updateHelper.execute();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mProgressDialog = ProgressDialog.show(
+                this, this.getString(R.string.update_spinner_title),
+                this.getString(R.string.update_spinner_message), true);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mProgressDialog != null) {
+            mProgressDialog.dismiss();
+        }
     }
 }

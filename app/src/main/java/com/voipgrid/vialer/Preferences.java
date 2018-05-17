@@ -6,7 +6,7 @@ import android.preference.PreferenceManager;
 
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.LogUuidGenerator;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -21,16 +21,20 @@ public class Preferences {
     public static final String PREF_REMOTE_LOGGING_ID = "PREF_REMOTE_LOGGING_ID";
     public static final String PREF_FINISHED_ONBOARDING = "PREF_FINISHED_ONBOARDING";
     public static final String PREF_HAS_3G_ENABLED = "PREF_HAS_3G_ENABLED";
+    public static final String PREF_HAS_TLS_ENABLED = "PREF_HAS_TLS_ENABLED";
+    public static final String PREF_HAS_STUN_ENABLED = "PREF_HAS_STUN_ENABLED";
 
     public static final String CONNECTION_PREFERENCE = "CONNECTION_PREFERENCE";
     public static final long CONNECTION_PREFERENCE_NONE = -10;
-    public static final long CONNECTION_PREFERENCE_WIFI = ConnectivityHelper.TYPE_WIFI;
-    public static final long CONNECTION_PREFERENCE_LTE = ConnectivityHelper.TYPE_LTE;
+    public static final long CONNECTION_PREFERENCE_WIFI = ConnectivityHelper.Connection.WIFI.toInt();
+    public static final long CONNECTION_PREFERENCE_LTE = ConnectivityHelper.Connection.LTE.toInt();
 
 
     public static final boolean DEFAULT_VALUE_HAS_SIP_ENABLED = true;
     public static final boolean DEFAULT_VALUE_HAS_SIP_PERMISSION = false;
     public static final boolean DEFAULT_VALUE_HAS_3G_ENABLED = true;
+    public static final boolean DEFAULT_VALUE_HAS_TLS_ENABLED = true;
+    public static final boolean DEFAULT_VALUE_HAS_STUN_ENABLED = true;
 
     private Context mContext;
     private SharedPreferences mPreferences;
@@ -43,7 +47,7 @@ public class Preferences {
     public String getLoggerIdentifier() {
         String identifier = mPreferences.getString(PREF_REMOTE_LOGGING_ID, null);
         if (identifier == null) {
-            identifier = RemoteLogger.generateIdentifier();
+            identifier = LogUuidGenerator.generate();
             setLoggerIdentifier(identifier);
         }
         return identifier;
@@ -159,5 +163,21 @@ public class Preferences {
 
     public long getConnectionPreference() {
         return mPreferences.getLong(CONNECTION_PREFERENCE, CONNECTION_PREFERENCE_WIFI);
+    }
+
+    public boolean hasTlsEnabled() {
+        return mPreferences.getBoolean(PREF_HAS_TLS_ENABLED, DEFAULT_VALUE_HAS_TLS_ENABLED);
+    }
+
+    public void setTlsEnabled(boolean tlsEnabled) {
+        mPreferences.edit().putBoolean(PREF_HAS_TLS_ENABLED, tlsEnabled).apply();
+    }
+
+    public boolean hasStunEnabled() {
+        return mPreferences.getBoolean(PREF_HAS_STUN_ENABLED, DEFAULT_VALUE_HAS_STUN_ENABLED);
+    }
+
+    public void setStunEnabled(boolean stunEnabled) {
+        mPreferences.edit().putBoolean(PREF_HAS_STUN_ENABLED, stunEnabled).apply();
     }
 }

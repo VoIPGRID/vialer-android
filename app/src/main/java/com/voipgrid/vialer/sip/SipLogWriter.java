@@ -1,12 +1,15 @@
 package com.voipgrid.vialer.sip;
 
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.sip.SipLogHandler;
 
 import org.pjsip.pjsua2.LogEntry;
 import org.pjsip.pjsua2.LogWriter;
 
 public class SipLogWriter extends LogWriter {
     private RemoteLogger mRemoteLogger;
+
+    private SipLogHandler mSipLogHandler = new SipLogHandler();
 
     void enabledRemoteLogging(RemoteLogger logger) {
         mRemoteLogger = logger;
@@ -21,6 +24,8 @@ public class SipLogWriter extends LogWriter {
     public void write(LogEntry entry) {
         Integer pjsipLogLevel = entry.getLevel();
         String logString = entry.getMsg().substring(13);
+
+        mSipLogHandler.handle(logString);
 
         if (mRemoteLogger == null) {
             return;

@@ -76,7 +76,7 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
                         } catch (Exception e) {
                             // TODO: Remove this piece of code if we find the bug. Until then
                             // force remote logging.
-                            RemoteLogger logger = new RemoteLogger(getContext(), ContactCursorLoader.class, true);
+                            RemoteLogger logger = new RemoteLogger(ContactCursorLoader.class).forceRemoteLogging(true);
                             logger.e(e.getClass().getSimpleName());
                             logger.e("QUERY: " + mT9Query);
                             logger.e("DISPLAYNAME: " + displayName);
@@ -88,7 +88,7 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
                 }
 
                 if (number != null) {
-                    if (number.startsWith("+")) {
+                    if (number.startsWith("+") && number.length() >= 3) {
                         if(("0" + number.substring(3)).startsWith(mT9Query)) {
                             addResult = true;
                             number = "<b>" + number.substring(0, mT9Query.length() + 2) + "</b>" + number.substring(mT9Query.length() + 2);
