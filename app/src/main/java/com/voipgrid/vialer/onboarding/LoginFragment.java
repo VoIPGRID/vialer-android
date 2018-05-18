@@ -160,12 +160,7 @@ public class LoginFragment extends OnboardingFragment implements
     }
 
     public void onError(String error) {
-        if(!mConnectivityHelper.hasNetworkConnection()) {
-            error = getString(R.string.onboarding_no_internet_message);
-        } else {
-            error = getString(R.string.onboarding_login_failed_message);
-        }
-        mListener.onAlertDialog(getString(R.string.onboarding_login_failed_title), error);
+        reportErrorOrConnectivityError(R.string.onboarding_login_failed_title, R.string.onboarding_login_failed_message);
     }
 
     interface FragmentInteractionListener extends OnboardingFragment.FragmentInteractionListener {

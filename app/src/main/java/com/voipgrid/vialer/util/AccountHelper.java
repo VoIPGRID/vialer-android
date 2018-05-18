@@ -28,6 +28,7 @@ public class AccountHelper {
     private static final String EMAIL_KEY = "EMAIL_KEY";
     private static final String PASSWORD_KEY = "PASSWORD_KEY";
     private static final String KEY_ALIAS = "PASS_ALIAS";
+    private static final String API_TOKEN_KEY = "TOKEN_KEY";
 
     private Context mContext;
     private KeyStore mKeyStore;
@@ -93,6 +94,12 @@ public class AccountHelper {
         setPassword(password);
     }
 
+    public void setCredentials(String email, String password, String token) {
+        setEmail(email);
+        setPassword(password);
+        setApiToken(token);
+    }
+
     private void setPassword(String password) {
         String encryptedPassword = encrypt(password);
         mPrefs.edit().putString(PASSWORD_KEY, encryptedPassword).apply();
@@ -101,6 +108,11 @@ public class AccountHelper {
     private void setEmail(String email) {
         // No need to encrypt since it's also stored as info on the systemuser.
         mPrefs.edit().putString(EMAIL_KEY, email).apply();
+    }
+
+    public void setApiToken(String token) {
+        String encryptedApiToken = encrypt(token);
+        mPrefs.edit().putString(API_TOKEN_KEY, encryptedApiToken).apply();
     }
 
     private String encrypt(String value) {
@@ -156,8 +168,14 @@ public class AccountHelper {
         return decrypt(encryptedPassword);
     }
 
+    public String getApiToken() {
+        String encryptedToken = mPrefs.getString(API_TOKEN_KEY, null);
+        return decrypt(encryptedToken);
+    }
+
     public void clearCredentials() {
         mPrefs.edit().remove(EMAIL_KEY).apply();
         mPrefs.edit().remove(PASSWORD_KEY).apply();
+        mPrefs.edit().remove(API_TOKEN_KEY).apply();
     }
 }

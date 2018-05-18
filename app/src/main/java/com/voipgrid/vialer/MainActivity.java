@@ -18,17 +18,20 @@ import android.view.View;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.contacts.UpdateChangedContactsService;
 import com.voipgrid.vialer.dialer.DialerActivity;
+import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.onboarding.AccountFragment;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
 import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
@@ -43,8 +46,8 @@ public class MainActivity extends NavigationDrawerActivity implements
     private ViewPager mViewPager;
     private boolean mAskForPermission = true;
     private int requestCounter = -1;
+    private RemoteLogger mRemoteLogger;
 
-    private BroadcastReceiver mBroadcastReceiver;
     private ReachabilityReceiver mReachabilityReceiver;
 
     @Override
@@ -60,6 +63,7 @@ public class MainActivity extends NavigationDrawerActivity implements
             }
         }
 
+        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
         JsonStorage jsonStorage = new JsonStorage(this);
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
         Boolean hasSystemUser = jsonStorage.has(SystemUser.class);
@@ -94,6 +98,7 @@ public class MainActivity extends NavigationDrawerActivity implements
         } else if (connectivityHelper.hasNetworkConnection()) {
             // Update SystemUser and PhoneAccount on background thread.
             new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
+            fetchApiTokenIfDoesNotExist();
         }
 
         if (SyncUtils.requiresFullContactSync(this)) {
@@ -119,6 +124,18 @@ public class MainActivity extends NavigationDrawerActivity implements
 
         requestCounter = 0;
         mReachabilityReceiver = new ReachabilityReceiver(this);
+    }
+
+    /**
+     * If we do not currently have an api token stored, fetch one from the server.
+     *
+     */
+    private void fetchApiTokenIfDoesNotExist() {
+        if (getApiToken() != null) return;
+
+        mRemoteLogger.i("There is no api-key currently stored, will attempt to fetch one");
+
+        ApiTokenFetcher.usingSavedCredentials(this).setListener(new ApiTokenListener()).fetch();
     }
 
     private void askForPermissions(int requestNr) {
@@ -301,5 +318,30 @@ public class MainActivity extends NavigationDrawerActivity implements
         public int getCount() {
             return 2;
         }
+    }
+
+    /**
+     * Listen for the api token request and display a dialog to enter the two-factor token
+     * if one is required.
+     *
+     */
+    private class ApiTokenListener implements ApiTokenFetcher.ApiTokenListener {
+        @Override
+        public void twoFactorCodeRequired() {
+            if(isFinishing()) {
+                return;
+            }
+
+            mRemoteLogger.i("Prompting the user to enter a two-factor code");
+
+            TwoFactorAuthenticationDialogFragment twoFactorAuthenticationDialogFragment = new TwoFactorAuthenticationDialogFragment();
+            twoFactorAuthenticationDialogFragment.show(getFragmentManager(), "");
+        }
+
+        @Override
+        public void onSuccess(String apiToken) {}
+
+        @Override
+        public void onFailure() {}
     }
 }

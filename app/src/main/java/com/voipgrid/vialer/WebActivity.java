@@ -39,6 +39,7 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
     public static final String TITLE = "key-title";
     public static final String USERNAME = "key-username";
     public static final String PASSWORD = "key-password";
+    public static final String API_TOKEN = "key-api-token";
     public static final String GA_TITLE = "ga-title";
 
     private ProgressBar mProgressBar;
@@ -143,12 +144,11 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
      */
     private void autoLoginToken() {
         mProgressBar.setVisibility(View.VISIBLE);
-        Api api = ServiceGenerator.createService(
+        Api api = ServiceGenerator.createApiService(
                 this,
-                Api.class,
-                getString(R.string.api_url),
                 getIntent().getStringExtra(USERNAME),
-                getIntent().getStringExtra(PASSWORD)
+                getIntent().getStringExtra(PASSWORD),
+                getIntent().getStringExtra(API_TOKEN)
         );
         Call<AutoLoginToken> call = api.autoLoginToken();
         call.enqueue(this);

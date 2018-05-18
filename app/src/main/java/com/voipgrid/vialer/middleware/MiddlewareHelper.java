@@ -96,13 +96,7 @@ public class MiddlewareHelper {
             return;
         }
 
-        Registration api = ServiceGenerator.createService(
-                context,
-                Registration.class,
-                getBaseApiUrl(context),
-                accountHelper.getEmail(),
-                accountHelper.getPassword()
-        );
+        Registration api = ServiceGenerator.createRegistrationService(context);
 
         String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
         String fullName = ((SystemUser) jsonStorage.get(SystemUser.class)).getFullName();
@@ -152,12 +146,7 @@ public class MiddlewareHelper {
             JsonStorage jsonStorage = new JsonStorage(context);
             AccountHelper accountHelper = new AccountHelper(context);
 
-            Registration api = ServiceGenerator.createService(
-                    context,
-                    Registration.class,
-                    getBaseApiUrl(context),
-                    accountHelper.getEmail(),
-                    accountHelper.getPassword());
+            Registration api = ServiceGenerator.createRegistrationService(context);
             String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
             String appName = context.getPackageName();
 

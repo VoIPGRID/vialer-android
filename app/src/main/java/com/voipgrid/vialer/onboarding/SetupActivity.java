@@ -20,7 +20,7 @@ import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.WebActivityHelper;
 import com.voipgrid.vialer.api.Api;
-import com.voipgrid.vialer.api.PreviousRequestNotFinishedException;
+import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -48,6 +48,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
         AccountFragment.FragmentInteractionListener,
         ForgotPasswordFragment.FragmentInteractionListener,
         SetUpVoipAccountFragment.FragmentInteractionListener,
+        TwoFactorAuthenticationFragment.FragmentInteractionListener,
         Callback {
 
     private final static String TAG = SetupActivity.class.getSimpleName();
@@ -60,6 +61,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
     private RemoteLogger mRemoteLogger;
     private ServiceGenerator mServiceGen;
     private AlertDialog mAlertDialog;
+    private String mUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,33 +169,13 @@ public class SetupActivity extends RemoteLoggingActivity implements
     }
 
     @Override
-    public void onLogin(final Fragment fragment, String username, String password) {
-        mPassword = password;
-        enableProgressBar(true);
-
-        boolean success = createAPIService(username, password);
-
-        AccountHelper accountHelper = new AccountHelper(this);
-        accountHelper.setCredentials(username, password);
-
-        if (success) {
-            Call<SystemUser> call = mApi.systemUser();
-            call.enqueue(this);
-        }
-    }
-
-    @Override
     public void onUpdateMobileNumber(Fragment fragment, String mobileNumber) {
         enableProgressBar(true);
 
-        AccountHelper accountHelper = new AccountHelper(this);
-        boolean success = createAPIService(accountHelper.getEmail(), accountHelper.getPassword());
+        mApi = ServiceGenerator.createApiService(this);
 
-        // Post mobileNumber to VoIPGRID platform.
-        if (success) {
-            Call<MobileNumber> call = mApi.mobileNumber(new MobileNumber(mobileNumber));
-            call.enqueue(this);
-        }
+        Call<MobileNumber> call = mApi.mobileNumber(new MobileNumber(mobileNumber));
+        call.enqueue(this);
     }
 
     @Override
@@ -266,6 +248,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
     private String[] tags = {
             LogoFragment.class.getSimpleName(),
             LoginFragment.class.getSimpleName(),
+            TwoFactorAuthenticationFragment.class.getSimpleName(),
             ForgotPasswordFragment.class.getSimpleName(),
             AccountFragment.class.getSimpleName(),
             WelcomeFragment.class.getSimpleName()
@@ -313,11 +296,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
     }
 
     private void resetPassword(String email) {
-        Api api = ServiceGenerator.createService(
-                this,
-                Api.class,
-                getString(R.string.api_url)
-        );
+        Api api = ServiceGenerator.createApiService(this, null, null, null);
         Call<Object> call = api.resetPassword(new PasswordResetParams(email));
         call.enqueue(this);
     }
@@ -336,10 +315,6 @@ public class SetupActivity extends RemoteLoggingActivity implements
 
     @Override
     public void onResponse(@NonNull Call call, @NonNull Response response) {
-        if (mServiceGen != null){
-            mServiceGen.release();
-        }
-
         if (response.isSuccessful()) {
             enableProgressBar(false);
             if (response.body() instanceof SystemUser) {
@@ -362,6 +337,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
                     accountHelper.setCredentials(systemUser.getEmail(), mPassword);
 
                     mJsonStorage.save(systemUser);
+
                     onNextStep(AccountFragment.newInstance(
                             systemUser.getMobileNumber(),
                             systemUser.getOutgoingCli()
@@ -424,9 +400,6 @@ public class SetupActivity extends RemoteLoggingActivity implements
 
     @Override
     public void onFailure(@NonNull Call call, @NonNull Throwable t) {
-        if (mServiceGen != null){
-            mServiceGen.release();
-        }
         failedFeedback("Failed");
     }
 
@@ -444,31 +417,6 @@ public class SetupActivity extends RemoteLoggingActivity implements
         });
     }
 
-    /**
-     * Create the api service that is used to make the api calls.
-     *
-     * @param username String The username used to authenticate with the api.
-     * @param password String The password used to authenticate with the api.
-     * @return instance of the API service.
-     */
-    private boolean createAPIService(String username, String password) {
-        try {
-            mServiceGen = ServiceGenerator.getInstance();
-        } catch (PreviousRequestNotFinishedException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        mApi = mServiceGen.createService(
-                this,
-                Api.class,
-                getString(R.string.api_url),
-                username,
-                password
-        );
-        return true;
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -479,6 +427,31 @@ public class SetupActivity extends RemoteLoggingActivity implements
         }
     }
 
+    @Override
+    public void onLogin(final Fragment fragment, String username, String password) {
+        mUsername = username;
+        mPassword = password;
+        enableProgressBar(true);
+        enableProgressBar(true);
+
+        mApi = ServiceGenerator.createApiService(this, mUsername, mPassword, null);
+
+        ApiTokenFetcher
+                .forCredentials(this, mUsername, mPassword)
+                .setListener(new ApiTokenFetchListener())
+                .fetch();
+    }
+
+    @Override
+    public void userDidSupply2faCode(String code) {
+        enableProgressBar(true);
+
+        ApiTokenFetcher
+                .forCredentials(this, mUsername, mPassword)
+                .setListener(new ApiTokenFetchListener())
+                .fetch(code);
+    }
+
     public static void launchToSetVoIPAccount(Activity fromActivity) {
         Intent intent = new Intent(fromActivity, SetupActivity.class);
         Bundle b = new Bundle();
@@ -487,5 +460,32 @@ public class SetupActivity extends RemoteLoggingActivity implements
         intent.putExtras(b);
 
         fromActivity.startActivity(intent);
+    }
+
+    private class ApiTokenFetchListener implements ApiTokenFetcher.ApiTokenListener {
+
+        @Override
+        public void twoFactorCodeRequired() {
+            enableProgressBar(false);
+            onNextStep(TwoFactorAuthenticationFragment.newInstance());
+        }
+
+        @Override
+        public void onSuccess(String apiToken) {
+            enableProgressBar(false);
+            AccountHelper accountHelper = new AccountHelper(SetupActivity.this);
+            accountHelper.setCredentials(mUsername, mPassword, apiToken);
+
+            mApi = ServiceGenerator.createApiService(SetupActivity.this);
+
+            Call<SystemUser> call2 = mApi.systemUser();
+            call2.enqueue(SetupActivity.this);
+        }
+
+        @Override
+        public void onFailure() {
+            enableProgressBar(false);
+            failedFeedback("Failed");
+        }
     }
 }

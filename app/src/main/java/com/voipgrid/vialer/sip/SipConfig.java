@@ -473,11 +473,7 @@ public class SipConfig implements AccountStatus {
                 ((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()
         );
 
-        Registration registrationApi = ServiceGenerator.createService(
-                mSipService,
-                Registration.class,
-                url
-        );
+        Registration registrationApi = ServiceGenerator.createRegistrationService(mSipService);
 
         String analyticsLabel = ConnectivityHelper.get(mSipService).getAnalyticsLabel();
 

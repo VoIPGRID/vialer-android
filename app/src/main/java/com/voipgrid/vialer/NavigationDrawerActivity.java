@@ -87,12 +87,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
 
         if (mSystemUser != null && !TextUtils.isEmpty(getPassword())) {
-            mApi = ServiceGenerator.createService(
-                    this,
-                    Api.class,
-                    getString(R.string.api_url),
-                    getEmail(),
-                    getPassword());
+            mApi = ServiceGenerator.createApiService(this);
 
             // Preload availability.
             Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
@@ -311,6 +306,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         intent.putExtra(WebActivity.TITLE, title);
         intent.putExtra(WebActivity.USERNAME, getEmail());
         intent.putExtra(WebActivity.PASSWORD, getPassword());
+        intent.putExtra(WebActivity.API_TOKEN, getApiToken());
         intent.putExtra(WebActivity.GA_TITLE, gaTitle);
         startActivity(intent);
     }
