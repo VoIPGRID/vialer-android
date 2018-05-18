@@ -205,6 +205,10 @@ public class AccountActivity extends LoginRequiredActivity {
         } else {
             mRemoteLogIdContainer.setVisibility(View.GONE);
         }
+
+        // If the remote logging setting is changed we want to re-register with the middleware to make sure that
+        // the token is configured correctly.
+        MiddlewareHelper.registerAtMiddleware(this);
     }
 
     @OnCheckedChanged(R.id.tls_switch)
