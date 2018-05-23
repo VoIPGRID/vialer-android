@@ -29,5 +29,5 @@ public interface Registration {
     @POST("api/android-device/")
     Call<ResponseBody> register(@Field("name") String name, @Field("token") String token,
                     @Field("sip_user_id") String sipUserId, @Field("os_version") String osVersion,
-                    @Field("client_version") String clientVersion, @Field("app") String app);
+                    @Field("client_version") String clientVersion, @Field("app") String app, @Field("remote_logging_id") String remoteLoggingId);
 }

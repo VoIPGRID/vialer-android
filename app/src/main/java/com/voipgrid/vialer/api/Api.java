@@ -2,6 +2,8 @@ package com.voipgrid.vialer.api;
 
 import com.voipgrid.vialer.api.models.AutoLoginToken;
 import com.voipgrid.vialer.api.models.CallRecord;
+import com.voipgrid.vialer.api.models.ApiTokenRequest;
+import com.voipgrid.vialer.api.models.ApiTokenResponse;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -29,6 +31,9 @@ public interface Api {
 
     @GET("api/autologin/token/")
     Call<AutoLoginToken> autoLoginToken();
+
+    @POST("api/permission/apitoken/")
+    Call<ApiTokenResponse> apiToken(@Body ApiTokenRequest apiTokenRequest);
 
     @POST("api/mobileapp/")
     Call<TwoStepCallStatus> twoStepCall(@Body ClickToDialParams params);

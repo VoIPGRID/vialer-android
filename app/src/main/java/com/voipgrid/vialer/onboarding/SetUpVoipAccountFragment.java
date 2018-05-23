@@ -64,13 +64,7 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
         mAccountHelper = new AccountHelper(mContext);
 
         mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        mApi = ServiceGenerator.createService(
-                getActivity(),
-                Api.class,
-                getString(R.string.api_url),
-                mAccountHelper.getEmail(),
-                mAccountHelper.getPassword()
-        );
+        mApi = ServiceGenerator.createApiService(getActivity());
 
         mVoipAccountButton = (Button) view.findViewById(R.id.set_voip_account_button);
         mVoipAccountButton.setOnClickListener(this);
@@ -159,13 +153,7 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
     }
 
     private void requestSystemUser() {
-        mApi = ServiceGenerator.createService(
-                mContext,
-                Api.class,
-                getString(R.string.api_url),
-                mAccountHelper.getEmail(),
-                mAccountHelper.getPassword()
-        );
+        mApi = ServiceGenerator.createApiService(mContext);
         Call<SystemUser> call = mApi.systemUser();
         call.enqueue(this);
     }

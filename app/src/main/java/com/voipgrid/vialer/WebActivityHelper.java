@@ -32,6 +32,7 @@ public class WebActivityHelper {
         intent.putExtra(WebActivity.TITLE, title);
         intent.putExtra(WebActivity.USERNAME, accountHelper.getEmail());
         intent.putExtra(WebActivity.PASSWORD, accountHelper.getPassword());
+        intent.putExtra(WebActivity.API_TOKEN, accountHelper.getApiToken());
         if (gaTitle != null) {
             intent.putExtra(WebActivity.GA_TITLE, gaTitle);
         }

@@ -37,15 +37,7 @@ public class PhoneAccountHelper {
         mJsonStorage = new JsonStorage(context);
         mSecureCalling = SecureCalling.fromContext(context);
 
-        // Get credentials for api.
-        AccountHelper accountHelper = new AccountHelper(context);
-
-        mApi = ServiceGenerator.createPortalService(
-                mContext,
-                Api.class,
-                accountHelper.getEmail(),
-                accountHelper.getPassword()
-        );
+        mApi = ServiceGenerator.createApiService(mContext);
     }
 
     /**

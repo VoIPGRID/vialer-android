@@ -44,4 +44,8 @@ public class LoginRequiredActivity extends RemoteLoggingActivity {
     protected String getPassword() {
         return mAccountHelper.getPassword();
     }
+
+    protected String getApiToken() {
+        return mAccountHelper.getApiToken();
+    }
 }

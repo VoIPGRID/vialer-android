@@ -159,11 +159,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     private void replyServer(String responseUrl, String requestToken, String messageStartTime,
                              boolean isAvailable) {
         mRemoteLogger.d("replyServer");
-        Registration registrationApi = ServiceGenerator.createService(
-                this,
-                Registration.class,
-                responseUrl
-        );
+        Registration registrationApi = ServiceGenerator.createRegistrationService(this);
 
         Call<ResponseBody> call = registrationApi.reply(requestToken, isAvailable, messageStartTime);
         call.enqueue(new Callback<ResponseBody>() {
