@@ -93,7 +93,7 @@ public class MiddlewareHelper {
         AccountHelper accountHelper = new AccountHelper(context);
         Preferences preferences = new Preferences(context);
 
-        if (!jsonStorage.has(PhoneAccount.class)) {
+        if (!jsonStorage.has(PhoneAccount.class) || !jsonStorage.has(SystemUser.class)) {
             return;
         }
 
