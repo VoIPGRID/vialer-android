@@ -115,7 +115,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         mAskForPermission = true;
         // Check for contact permissions before doing contact related work.
         if (mHasPermission) { // Handling this intent is only needed when we have contact permissions.
-
             // This should be called after setupKeyPad.
             setupContactParts();
 
@@ -326,25 +325,20 @@ public class DialerActivity extends LoginRequiredActivity implements
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        if (requestCode ==
-                this.getResources().getInteger(R.integer.contact_permission_request_code)) {
-            boolean allPermissionsGranted = true;
-            for (int i = 0; i < permissions.length; i++) {
-                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                    allPermissionsGranted = false;
-                    break;
-                }
-            }
-            if (allPermissionsGranted) {
-                // ContactSync.
-                SyncUtils.requestContactSync(this);
-                // Reload Activity to reflect new permission.
-                Intent intent = getIntent();
-                startActivity(intent);
-                finish();
-            }
+    public void onRequestPermissionsResult(int requestCode,String[] permissions, int[] grantResults) {
+        if (!allPermissionsGranted(permissions, grantResults)) {
+            return;
+        }
+
+        if (requestCode == this.getResources().getInteger(R.integer.contact_permission_request_code)) {
+            // ContactSync.
+            SyncUtils.requestContactSync(this);
+            // Reload Activity to reflect new permission.
+            Intent intent = getIntent();
+            startActivity(intent);
+            finish();
+        } else if (requestCode == this.getResources().getInteger(R.integer.microphone_permission_request_code)) {
+            onCallNumber(mNumberInputView.getNumber(), null);
         }
     }
 
@@ -362,7 +356,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         } else {
             dialHelper.callNumber(phoneNumberToCall, contactName);
             mSharedPreferences.edit().putString(LAST_DIALED, number).apply();
-            mNumberInputView.clear();
         }
     }
 
@@ -423,7 +416,7 @@ public class DialerActivity extends LoginRequiredActivity implements
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-                         int totalItemCount) {
+            int totalItemCount) {
 
     }
 
