@@ -58,11 +58,11 @@ public class ServiceGenerator {
     }
 
     public static Api createApiService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
-        return ServiceGenerator.createService(context, Api.class, username, password, token);
+        return ServiceGenerator.createService(context, Api.class, username, password, token, getVgApiUrl(context));
     }
 
     public static Registration createRegistrationService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
-        return ServiceGenerator.createService(context, Registration.class, username, password, token);
+        return ServiceGenerator.createService(context, Registration.class, username, password, token, getRegistrationUrl(context));
     }
 
     public static Registration createRegistrationService(Context context) {
@@ -77,11 +77,11 @@ public class ServiceGenerator {
      * @param <S>
      * @return
      */
-    private static <S> S createService(final Context context, Class<S> serviceClass, @Nullable String username, @Nullable String password, @Nullable String token) {
+    private static <S> S createService(final Context context, Class<S> serviceClass, @Nullable String username, @Nullable String password, @Nullable String token, String url) {
         sAuthorizationInterceptor.setCredentials(username, password, token);
 
         if (sRetrofit == null) {
-            sRetrofit = builder.baseUrl(getVgApiUrl(context))
+            sRetrofit = builder.baseUrl(url)
                     .client(getHttpClient(context))
                     .addConverterFactory(
                             GsonConverterFactory.create(new GsonBuilder().serializeNulls().create())
@@ -99,4 +99,9 @@ public class ServiceGenerator {
     private static String getVgApiUrl(Context context) {
         return context.getString(R.string.api_url);
     }
+
+    private static String getRegistrationUrl(Context context) {
+        return context.getString(R.string.registration_url);
+    }
+
 }
