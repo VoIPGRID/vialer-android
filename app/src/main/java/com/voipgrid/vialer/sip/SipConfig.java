@@ -498,7 +498,6 @@ public class SipConfig implements AccountStatus {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                Log.e("TEST123", "Middlware response: " + call.request().url() + " - " + response.code());
                 if (!response.isSuccessful()) {
                     mRemoteLogger.w(
                             "Unsuccessful response to middleware: " + Integer.toString(response.code()));
