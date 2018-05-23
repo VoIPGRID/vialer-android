@@ -11,6 +11,8 @@ import com.voipgrid.vialer.api.interceptors.LogUserOutOnUnauthorizedResponse;
 import com.voipgrid.vialer.api.interceptors.ModifyCacheLifetimeBasedOnConnectivity;
 import com.voipgrid.vialer.util.AccountHelper;
 
+import java.util.HashMap;
+
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -30,8 +32,9 @@ public class ServiceGenerator {
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
     private static Retrofit.Builder builder = new Retrofit.Builder();
-    private static Retrofit sRetrofit;
     private static final AddAuthorizationCredentialsToRequest sAuthorizationInterceptor = new AddAuthorizationCredentialsToRequest();
+
+    private static HashMap<String, Retrofit> sRetrofit = new HashMap<>();
 
     private ServiceGenerator() {
     }
@@ -80,16 +83,16 @@ public class ServiceGenerator {
     private static <S> S createService(final Context context, Class<S> serviceClass, @Nullable String username, @Nullable String password, @Nullable String token, String url) {
         sAuthorizationInterceptor.setCredentials(username, password, token);
 
-        if (sRetrofit == null) {
-            sRetrofit = builder.baseUrl(url)
+        if (sRetrofit.get(url) == null) {
+            sRetrofit.put(url, builder.baseUrl(url)
                     .client(getHttpClient(context))
                     .addConverterFactory(
                             GsonConverterFactory.create(new GsonBuilder().serializeNulls().create())
                     )
-                    .build();
+                    .build());
         }
 
-        return sRetrofit.create(serviceClass);
+        return sRetrofit.get(url).create(serviceClass);
     }
 
     private static Cache getCache(Context context) {
