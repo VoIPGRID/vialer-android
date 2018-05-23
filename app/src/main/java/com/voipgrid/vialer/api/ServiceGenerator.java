@@ -11,6 +11,8 @@ import com.voipgrid.vialer.api.interceptors.LogUserOutOnUnauthorizedResponse;
 import com.voipgrid.vialer.api.interceptors.ModifyCacheLifetimeBasedOnConnectivity;
 import com.voipgrid.vialer.util.AccountHelper;
 
+import java.util.HashMap;
+
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -30,8 +32,9 @@ public class ServiceGenerator {
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
     private static Retrofit.Builder builder = new Retrofit.Builder();
-    private static Retrofit sRetrofit;
     private static final AddAuthorizationCredentialsToRequest sAuthorizationInterceptor = new AddAuthorizationCredentialsToRequest();
+
+    private static HashMap<String, Retrofit> sRetrofit = new HashMap<>();
 
     private ServiceGenerator() {
     }
@@ -58,11 +61,11 @@ public class ServiceGenerator {
     }
 
     public static Api createApiService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
-        return ServiceGenerator.createService(context, Api.class, username, password, token);
+        return ServiceGenerator.createService(context, Api.class, username, password, token, getVgApiUrl(context));
     }
 
     public static Registration createRegistrationService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
-        return ServiceGenerator.createService(context, Registration.class, username, password, token);
+        return ServiceGenerator.createService(context, Registration.class, username, password, token, getRegistrationUrl(context));
     }
 
     public static Registration createRegistrationService(Context context) {
@@ -77,19 +80,19 @@ public class ServiceGenerator {
      * @param <S>
      * @return
      */
-    private static <S> S createService(final Context context, Class<S> serviceClass, @Nullable String username, @Nullable String password, @Nullable String token) {
+    private static <S> S createService(final Context context, Class<S> serviceClass, @Nullable String username, @Nullable String password, @Nullable String token, String url) {
         sAuthorizationInterceptor.setCredentials(username, password, token);
 
-        if (sRetrofit == null) {
-            sRetrofit = builder.baseUrl(getVgApiUrl(context))
+        if (sRetrofit.get(url) == null) {
+            sRetrofit.put(url, builder.baseUrl(url)
                     .client(getHttpClient(context))
                     .addConverterFactory(
                             GsonConverterFactory.create(new GsonBuilder().serializeNulls().create())
                     )
-                    .build();
+                    .build());
         }
 
-        return sRetrofit.create(serviceClass);
+        return sRetrofit.get(url).create(serviceClass);
     }
 
     private static Cache getCache(Context context) {
@@ -99,4 +102,9 @@ public class ServiceGenerator {
     private static String getVgApiUrl(Context context) {
         return context.getString(R.string.api_url);
     }
+
+    private static String getRegistrationUrl(Context context) {
+        return context.getString(R.string.registration_url);
+    }
+
 }
