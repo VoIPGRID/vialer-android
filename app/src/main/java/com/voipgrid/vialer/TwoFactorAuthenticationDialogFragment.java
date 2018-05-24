@@ -108,8 +108,8 @@ public class TwoFactorAuthenticationDialogFragment extends DialogFragment {
                 return;
             }
 
+            mButtonContinue.setEnabled(true);
             mCodeField.setEnabled(true);
-            mTwoFactorFragmentHelper.pasteCodeFromClipboard();
 
             new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.two_factor_authentication_token_invalid_title)

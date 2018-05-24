@@ -96,9 +96,10 @@ public class MainActivity extends NavigationDrawerActivity implements
             finish();
             return;
         } else if (connectivityHelper.hasNetworkConnection()) {
+            fetchApiTokenIfDoesNotExist();
+
             // Update SystemUser and PhoneAccount on background thread.
             new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
-            fetchApiTokenIfDoesNotExist();
         }
 
         if (SyncUtils.requiresFullContactSync(this)) {
@@ -131,7 +132,7 @@ public class MainActivity extends NavigationDrawerActivity implements
      *
      */
     private void fetchApiTokenIfDoesNotExist() {
-        if (getApiToken() != null) return;
+        if (hasApiToken()) return;
 
         mRemoteLogger.i("There is no api-key currently stored, will attempt to fetch one");
 
@@ -336,6 +337,7 @@ public class MainActivity extends NavigationDrawerActivity implements
 
             TwoFactorAuthenticationDialogFragment twoFactorAuthenticationDialogFragment = new TwoFactorAuthenticationDialogFragment();
             twoFactorAuthenticationDialogFragment.show(getFragmentManager(), "");
+            twoFactorAuthenticationDialogFragment.setCancelable(false);
         }
 
         @Override

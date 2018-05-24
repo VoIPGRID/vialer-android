@@ -85,14 +85,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
         mJsonStorage = new JsonStorage(this);
         mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-
-        if (mSystemUser != null && !TextUtils.isEmpty(getPassword())) {
-            mApi = ServiceGenerator.createApiService(this);
-
-            // Preload availability.
-            Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
-            call.enqueue(this);
-        }
+        refreshCurrentAvailability();
     }
 
     /**
@@ -159,8 +152,19 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     @Override
     protected void onResume() {
         super.onResume();
-        // Force a reload of availability when returned to the activity,
-        // per example when returning from the webview.
+        refreshCurrentAvailability();
+    }
+
+    /**
+     * Perform a request to refresh the current availability stats. This happens asynchronously.
+     *
+     */
+    private void refreshCurrentAvailability() {
+        if (mSystemUser == null || !hasApiToken()) {
+            return;
+        }
+
+        mApi = ServiceGenerator.createApiService(this);
         Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
         call.enqueue(this);
     }
@@ -461,23 +465,17 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
      */
     private class CustomActionBarDrawerToggle extends ActionBarDrawerToggle {
 
-        private Callback mActivity;
-
-        public CustomActionBarDrawerToggle(Activity activity, DrawerLayout drawerLayout,
+        CustomActionBarDrawerToggle(Activity activity, DrawerLayout drawerLayout,
                                            Toolbar toolbar, int openDrawerContentDescRes,
                                            int closeDrawerContentDescRes) {
-            super(activity, drawerLayout, toolbar, openDrawerContentDescRes,
-                    closeDrawerContentDescRes);
-            mActivity = (Callback) activity;
+            super(activity, drawerLayout, toolbar, openDrawerContentDescRes, closeDrawerContentDescRes);
         }
 
         @Override
         public void onDrawerOpened(View drawerView) {
             super.onDrawerOpened(drawerView);
             if (mSpinner != null) {
-                // Force a reload of availability every time the drawer is opened.
-                Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
-                call.enqueue(mActivity);
+                refreshCurrentAvailability();
                 // Make sure the systemuser info shown is up-to-date.
                 mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
                 setSystemUserInfo();

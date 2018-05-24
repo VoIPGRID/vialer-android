@@ -48,4 +48,8 @@ public class LoginRequiredActivity extends RemoteLoggingActivity {
     protected String getApiToken() {
         return mAccountHelper.getApiToken();
     }
+
+    protected boolean hasApiToken() {
+        return getApiToken() != null;
+    }
 }
