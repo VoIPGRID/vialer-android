@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.api.interceptors;
 
+import android.util.Log;
+
 import java.io.IOException;
 
 import okhttp3.Credentials;
@@ -23,10 +25,13 @@ public class AddAuthorizationCredentialsToRequest implements Interceptor {
         Request original = chain.request();
         Request.Builder requestBuilder = original.newBuilder();
 
-        if (hasApiToken()) {
+        if (hasApiToken() && !chain.request().url().toString().contains("call-response")) {
+            Log.e("TEST123", chain.request().url() + " is using api token: " + createApiTokenAuthHeader());
             requestBuilder.header(AUTHORIZATION_HEADER_NAME, createApiTokenAuthHeader());
         }
         else if (hasUsernameAndPassword()) {
+            Log.e("TEST123", chain.request().url() + " is using username and password: " + createUsernameAndPasswordAuthHeader());
+
             requestBuilder.header(AUTHORIZATION_HEADER_NAME, createUsernameAndPasswordAuthHeader());
         }
 
