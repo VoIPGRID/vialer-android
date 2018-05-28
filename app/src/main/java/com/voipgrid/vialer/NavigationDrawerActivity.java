@@ -274,10 +274,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             mJsonStorage.clear();
             new AccountHelper(this).clearCredentials();
             // Mark ourselves as unregistered.
-            PreferenceManager.getDefaultSharedPreferences(this)
-                    .edit()
-                    .putInt(REGISTRATION_STATUS, STATUS_UNREGISTERED)
-                    .apply();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().clear().apply();
             // Start a new session.
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
