@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.util.ColorHelper;
 import com.voipgrid.vialer.util.HtmlHelper;
 
@@ -27,9 +28,9 @@ public class T9HelperFragment extends Fragment {
 
     private T9DatabaseHelper mT9DatabaseHelper;
 
-    private HtmlHelper mHtmlHelper;
+    private HtmlHelper mHtmlHelper = new HtmlHelper();
 
-    private ColorHelper mColorHelper;
+    private ColorHelper mColorHelper = new ColorHelper();
 
     private Unbinder mUnbinder;
 
@@ -54,18 +55,12 @@ public class T9HelperFragment extends Fragment {
     private static final String DEFAULT_NAME = "Felix";
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mT9DatabaseHelper = new T9DatabaseHelper(context);
-        mHtmlHelper = new HtmlHelper();
-        mColorHelper = new ColorHelper();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_t9_helper, container, false);
 
         mUnbinder = ButterKnife.bind(this, view);
+
+        mT9DatabaseHelper = new T9DatabaseHelper(VialerApplication.get());
 
         return view;
     }
@@ -156,6 +151,10 @@ public class T9HelperFragment extends Fragment {
      * @return An example first name to use in the helper
      */
     private String getExampleFirstNameToDemonstrateT9() {
+        if (mT9DatabaseHelper == null) {
+            return DEFAULT_NAME;
+        }
+
         String contactName = mT9DatabaseHelper.getRandomContactName();
 
         if (contactName == null) {
