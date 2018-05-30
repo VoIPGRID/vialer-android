@@ -1,6 +1,5 @@
 package com.voipgrid.vialer;
 
-import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -31,7 +30,6 @@ import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
 import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
-import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
