@@ -6,6 +6,8 @@ import static com.voipgrid.vialer.util.ConnectivityHelper.converseToPreference;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.SecureCalling;
@@ -28,6 +31,7 @@ import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
@@ -73,6 +77,7 @@ public class AccountActivity extends LoginRequiredActivity {
     private SystemUser mSystemUser;
     private Api mApi;
     private RemoteLogger mRemoteLogger;
+    private ClipboardHelper mClipboardHelper;
 
     private boolean mEditMode = false;
     private boolean mIsSetupComplete = false;
@@ -88,6 +93,7 @@ public class AccountActivity extends LoginRequiredActivity {
         mPreferences = new Preferences(this);
         mApi = ServiceGenerator.createApiService(this);
         mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mClipboardHelper =  ClipboardHelper.fromContext(this);
 
         setupActionBar();
 
@@ -129,6 +135,30 @@ public class AccountActivity extends LoginRequiredActivity {
 
     private void initRemoteLoggingSwitch() {
         mRemoteLoggingSwitch.setChecked(mPreferences.remoteLoggingIsActive());
+        mRemoteLogIdEditText.setInputType(InputType.TYPE_NULL);
+        mRemoteLogIdEditText.setTextIsSelectable(true);
+        mRemoteLogIdEditText.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            public void onDestroyActionMode(ActionMode mode) {
+            }
+
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+        });
+        mRemoteLogIdEditText.setOnLongClickListener(view -> {
+            mClipboardHelper.copyToClipboard(mRemoteLogIdEditText.getText().toString());
+            Toast.makeText(AccountActivity.this,R.string.remote_logging_id_copied , Toast.LENGTH_SHORT).show();
+            return true;
+        });
         if (mPreferences.remoteLoggingIsActive()) {
             mRemoteLogIdContainer.setVisibility(View.VISIBLE);
             mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
@@ -221,7 +251,7 @@ public class AccountActivity extends LoginRequiredActivity {
 
         SecureCalling.Callback callback = new SecureCallingUpdatedCallback(b);
 
-        if(b) {
+        if (b) {
             secureCalling.enable(callback);
         } else {
             secureCalling.disable(callback);
@@ -244,9 +274,9 @@ public class AccountActivity extends LoginRequiredActivity {
     }
 
     private void populate() {
-        if(mPreferences.hasSipPermission()) {
+        if (mPreferences.hasSipPermission()) {
             mVoipSwitch.setChecked(mPreferences.hasSipEnabled());
-            if(mPhoneAccount != null) {
+            if (mPhoneAccount != null) {
                 mSipIdEditText.setText(mPhoneAccount.getAccountId());
             }
         } else {
@@ -275,14 +305,15 @@ public class AccountActivity extends LoginRequiredActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id != R.id.action_edit && id != R.id.action_done) return super.onOptionsItemSelected(item);
+        if (id != R.id.action_edit && id != R.id.action_done) {
+            return super.onOptionsItemSelected(item);
+        }
 
         if (isBusyWithApiRequest()) return true;
 
         if (id == R.id.action_edit) {
             mEditMode = true;
-        }
-        else {
+        } else {
             if (isValidNumber()) {
                 saveMobileNumber();
             } else {
@@ -302,7 +333,6 @@ public class AccountActivity extends LoginRequiredActivity {
     /**
      * Updates the UI, enabling/disabling fields and changing the menu icon
      * based on the current value of mEditMode.
-     *
      */
     private void updateUiBasedOnCurrentEditMode() {
         invalidateOptionsMenu();
@@ -320,7 +350,6 @@ public class AccountActivity extends LoginRequiredActivity {
 
     /**
      * Sends an API request to update the phone number.
-     *
      */
     private void saveMobileNumber() {
         mContainer.setFocusableInTouchMode(true);
@@ -382,7 +411,6 @@ public class AccountActivity extends LoginRequiredActivity {
 
     /**
      * The class that will handle the API response when updating the mobile number.
-     *
      */
     private class MobileNumberUpdatedCallback implements Callback<MobileNumber> {
 
@@ -431,7 +459,6 @@ public class AccountActivity extends LoginRequiredActivity {
 
     /**
      * This class will handle the API response when updating the secure calling setting.
-     *
      */
     private class SecureCallingUpdatedCallback implements SecureCalling.Callback {
 
