@@ -86,6 +86,7 @@ public class DialHelper {
                         makeCall(number, contactName);
                     }
                 });
+        builder.setCancelable(false);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -105,7 +106,7 @@ public class DialHelper {
                     && mJsonStorage.has(PhoneAccount.class)
                     && mConnectivityHelper.hasFastData()) {
                 // Check if we have permission to use the microphone. If not, request it.
-                if (!MicrophonePermission.hasPermission(mContext)){
+                if (!MicrophonePermission.hasPermission(mContext)) {
                     MicrophonePermission.askForPermission((Activity) mContext);
                     return;
                 }

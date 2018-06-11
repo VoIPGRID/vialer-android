@@ -258,6 +258,7 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
             ).callNumber(numberToCall, "");
             PreferenceManager.getDefaultSharedPreferences(mActivity).edit().putString(DialerActivity.LAST_DIALED, numberToCall).apply();
         }
+            mCallAlreadySetup = false;
     }
 
     static class ViewHolder {
