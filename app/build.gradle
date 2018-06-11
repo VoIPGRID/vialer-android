@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "26.0.2"
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 98
+        versionCode 99
         versionName "5.4.3"
         multiDexEnabled true
         flavorDimensions "default"
@@ -53,6 +53,14 @@ android {
                 into '.'
             }
         }
+        annabel {
+            applicationId "com.bellenmetannabel.app"
+            copy {
+                from 'src/annabel/'
+                include '*.json'
+                into '.'
+            }
+        }
     }
     lintOptions {
         checkReleaseBuilds true
@@ -73,8 +81,8 @@ android {
 }
 
 repositories {
-    jcenter()
     google()
+    jcenter()
     flatDir {
         dirs 'libs'
     }

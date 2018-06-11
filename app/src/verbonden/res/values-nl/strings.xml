@@ -2,10 +2,10 @@
 <resources>
 
     <string name="app_name">Verbonden</string>
-    <string name="configure_header_label_text">De Verbonden App stelt</string>
+    <string name="configure_header_label_text">Verbonden stelt</string>
 
     <string name="url_app_info">https://verbonden.nl/app/app-info-nl/</string>
 
-    <string name="info_button_title">Hoe werkt de Verbonden App</string>
+    <string name="info_button_title">Hoe werkt bellen via Verbonden?</string>
 
 </resources>

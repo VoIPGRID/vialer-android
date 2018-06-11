@@ -142,7 +142,7 @@
 
     <string name="add_destination_title">Bestemmingen</string>
     <string name="info_menu_item_title">Info</string>
-    <string name="info_button_title">Hoe werkt bellen met Vialer</string>
+    <string name="info_button_title">Hoe werkt bellen via Vialer?</string>
     <string name="account_sip_switch">Bellen via VoIP</string>
     <string name="account_availability_switch_title">Bereikbaarheid</string>
     <string name="add_availability">Bereikbaarheid toevoegen</string>

@@ -1,0 +1,6 @@
+<resources>
+
+    <dimen name="navigation_drawer_header_image_width">150dp</dimen>
+    <dimen name="navigation_drawer_header_image_height">37dp</dimen>
+
+</resources>
