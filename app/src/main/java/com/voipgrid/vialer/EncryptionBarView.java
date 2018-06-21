@@ -101,8 +101,7 @@ public class EncryptionBarView extends RelativeLayout {
                 if (apiCallFailed(intent) || apiCallDisabledEncryption(intent)) {
                     sIsEligibleToDisplay = true;
                 }
-            }
-            else if (ACTION_BROADCAST_CALL_STATUS.equals(action)) {
+            } else if (ACTION_BROADCAST_CALL_STATUS.equals(action)) {
                 sIsEligibleToDisplay = false;
             }
         }

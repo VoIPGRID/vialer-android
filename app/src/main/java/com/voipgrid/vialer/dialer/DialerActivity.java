@@ -68,6 +68,7 @@ public class DialerActivity extends LoginRequiredActivity implements
     private ConnectivityHelper mConnectivityHelper;
     private JsonStorage mJsonStorage;
     private ReachabilityReceiver mReachabilityReceiver;
+    private DialHelper mDialHelper;
 
     private String t9Query;
 
@@ -99,6 +100,8 @@ public class DialerActivity extends LoginRequiredActivity implements
         mConnectivityHelper = ConnectivityHelper.get(this);
 
         mReachabilityReceiver = new ReachabilityReceiver(this);
+
+        mDialHelper = DialHelper.fromActivity(this);
 
         mEmptyView.setText("");
 
@@ -338,7 +341,7 @@ public class DialerActivity extends LoginRequiredActivity implements
             startActivity(intent);
             finish();
         } else if (requestCode == this.getResources().getInteger(R.integer.microphone_permission_request_code)) {
-            onCallNumber(mNumberInputView.getNumber(), null);
+            mDialHelper.callAttemptedNumber();
         }
     }
 
@@ -349,12 +352,11 @@ public class DialerActivity extends LoginRequiredActivity implements
      * @param contactName contact name to display
      */
     public void onCallNumber(String number, String contactName) {
-        DialHelper dialHelper = new DialHelper(this, mJsonStorage, mConnectivityHelper, mAnalyticsHelper);
         String phoneNumberToCall = PhoneNumberUtils.format(number);
         if (number.length() < 1) {
             Toast.makeText(this, getString(R.string.dialer_invalid_number), Toast.LENGTH_LONG).show();
         } else {
-            dialHelper.callNumber(phoneNumberToCall, contactName);
+            mDialHelper.callNumber(phoneNumberToCall, contactName);
             mSharedPreferences.edit().putString(LAST_DIALED, number).apply();
         }
     }

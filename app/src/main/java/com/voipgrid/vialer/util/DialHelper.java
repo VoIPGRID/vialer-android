@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
@@ -33,14 +34,23 @@ public class DialHelper {
     private JsonStorage mJsonStorage;
 
     private int mMaximumNetworkSwitchDelay = 3000;
+    private static String sNumberAttemptedToCall;
 
-    public DialHelper(Context context, JsonStorage jsonStorage,
+    private DialHelper(Context context, JsonStorage jsonStorage,
             ConnectivityHelper connectivityHelper, AnalyticsHelper analyticsHelper ) {
         mContext = context;
         mJsonStorage = jsonStorage;
         mConnectivityHelper = connectivityHelper;
         mAnalyticsHelper = analyticsHelper;
         mPreferences = new Preferences(context);
+    }
+
+    public static DialHelper fromActivity (Activity activity) {
+        JsonStorage jsonStorage = new JsonStorage(activity);
+        ConnectivityHelper connectivityHelper = ConnectivityHelper.get(activity);
+        AnalyticsHelper analyticsHelper = new AnalyticsHelper(((AnalyticsApplication) activity.getApplication()).getDefaultTracker());
+
+        return new DialHelper(activity, jsonStorage, connectivityHelper, analyticsHelper);
     }
 
     public void callNumber(final String number, final String contactName) {
@@ -107,6 +117,7 @@ public class DialHelper {
                     && mConnectivityHelper.hasFastData()) {
                 // Check if we have permission to use the microphone. If not, request it.
                 if (!MicrophonePermission.hasPermission(mContext)) {
+                    sNumberAttemptedToCall = number;
                     MicrophonePermission.askForPermission((Activity) mContext);
                     return;
                 }
@@ -115,6 +126,16 @@ public class DialHelper {
                 callWithApi(number, contactName);
             }
         }
+    }
+
+    /**
+     * Dial number requested before the first microphone permission.
+     */
+
+    public void callAttemptedNumber() {
+        if(sNumberAttemptedToCall == null) return;
+        makeCall(sNumberAttemptedToCall, "");
+        sNumberAttemptedToCall = null;
     }
 
     /**
