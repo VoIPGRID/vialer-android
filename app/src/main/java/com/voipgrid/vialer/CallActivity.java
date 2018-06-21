@@ -1,5 +1,8 @@
 package com.voipgrid.vialer;
 
+import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.CALL_BTN;
+import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
+
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.KeyguardManager;
@@ -7,7 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -18,7 +20,6 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringDef;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.view.WindowManager;
@@ -42,6 +43,7 @@ import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -132,6 +134,8 @@ public class CallActivity extends LoginRequiredActivity
     private NotificationHelper mNotificationHelper;
     private int mNotificationId;
 
+    private BroadcastReceiverManager mBroadcastReceiverManager;
+
     // Runs without a timer by re-posting this handler at the end of the runnable.
     Handler mCallHandler = new Handler();
     Runnable mCallDurationRunnable = new Runnable() {
@@ -156,9 +160,6 @@ public class CallActivity extends LoginRequiredActivity
             }
         }
     };
-
-    // Broadcast manager to notify all call status listeners and listen for call interactions.
-    private LocalBroadcastManager mBroadcastManager;
 
     // Broadcast receiver for presenting changes in call state to user.
     private BroadcastReceiver mCallStatusReceiver = new BroadcastReceiver() {
@@ -216,10 +217,10 @@ public class CallActivity extends LoginRequiredActivity
 
             mRemoteLogger.i("mBluetoothButtonReceiver: " + action);
 
-            if (action.equals(BluetoothMediaButtonReceiver.CALL_BTN)) {
+            if (action.equals(CALL_BTN)) {
                 mRemoteLogger.i("Pickup call");
                 answer();
-            } else if (action.equals(BluetoothMediaButtonReceiver.DECLINE_BTN)) {
+            } else if (action.equals(DECLINE_BTN)) {
 
                 if (mConnected || !mIncomingCallIsRinging) {
                     mRemoteLogger.i("Hangup the call");
@@ -309,9 +310,6 @@ public class CallActivity extends LoginRequiredActivity
 
         setContentView(R.layout.activity_call);
 
-        // Fetch a broadcast manager for communication.
-        mBroadcastManager = LocalBroadcastManager.getInstance(this);
-
         mNotificationHelper = NotificationHelper.getInstance(this);
 
         // Set the AnalyticsHelper.
@@ -323,8 +321,7 @@ public class CallActivity extends LoginRequiredActivity
 
         mProximityHelper = new ProximitySensorHelper(this, this, findViewById(R.id.screen_off));
 
-        // Fetch a broadcast manager for communication to the sip service
-        mBroadcastManager = LocalBroadcastManager.getInstance(this);
+        mBroadcastReceiverManager = BroadcastReceiverManager.fromContext(this);
 
         mStateView = (TextView) findViewById(R.id.state_text_view);
         mCallDurationView = (TextView) findViewById(R.id.duration_text_view);
@@ -415,15 +412,10 @@ public class CallActivity extends LoginRequiredActivity
     public void onStart() {
         super.onStart();
         mRemoteLogger.d("onStart");
-        // Register for updates.
-        IntentFilter intentFilter = new IntentFilter(ACTION_BROADCAST_CALL_STATUS);
-        mBroadcastManager.registerReceiver(mCallStatusReceiver, intentFilter);
 
-        IntentFilter missedCallsFilter = new IntentFilter(ACTION_BROADCAST_CALL_MISSED);
-        mBroadcastManager.registerReceiver(mCallMissedReceiver, missedCallsFilter);
-
-        registerReceiver(mBluetoothButtonReceiver, new IntentFilter(BluetoothMediaButtonReceiver.CALL_BTN));
-        registerReceiver(mBluetoothButtonReceiver, new IntentFilter(BluetoothMediaButtonReceiver.DECLINE_BTN));
+        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mCallStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
+        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mCallMissedReceiver, ACTION_BROADCAST_CALL_MISSED);
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mBluetoothButtonReceiver, CALL_BTN, DECLINE_BTN);
     }
 
     @Override
@@ -504,21 +496,6 @@ public class CallActivity extends LoginRequiredActivity
             mPausedRinging = true;
         }
 
-        // Only unregister from the CallStatus when there is no active SipService.
-        if (mSipService != null && mSipService.getCurrentCall() == null) {
-            try {
-                mBroadcastManager.unregisterReceiver(mCallStatusReceiver);
-            } catch (IllegalArgumentException e) {
-                mRemoteLogger.w("Trying to unregister mCallStatusReceiver not registered.");
-            }
-        }
-
-        try {
-            unregisterReceiver(mBluetoothButtonReceiver);
-        } catch (IllegalArgumentException e) {
-            mRemoteLogger.w("Trying to unregister mBluetoothReceiver not registered.");
-        }
-
         stopService();
     }
 
@@ -531,17 +508,7 @@ public class CallActivity extends LoginRequiredActivity
 
         mProximityHelper.stopSensor();
 
-        try {
-            mBroadcastManager.unregisterReceiver(mCallMissedReceiver);
-        } catch (IllegalArgumentException e) {
-            mRemoteLogger.w("Trying to unregister mCallMissedReceiver not registered.");
-        }
-
-        try {
-            unregisterReceiver(mBluetoothButtonReceiver);
-        } catch (IllegalArgumentException e) {
-            mRemoteLogger.w("Trying to unregister mBluetoothReceiver not registered.");
-        }
+        mBroadcastReceiverManager.unregisterReceiver(mCallMissedReceiver, mCallStatusReceiver, mBluetoothButtonReceiver);
 
         // Reset the audio manage.
         mMediaManager.deInit();
@@ -670,7 +637,7 @@ public class CallActivity extends LoginRequiredActivity
                 if (!mHasConnected && !mSelfHangup) {
                     // Call has never been connected. Meaning the dialed number was unreachable.
                     mStateView.setText(R.string.call_unreachable);
-                    sendBroadcast(new Intent(BluetoothMediaButtonReceiver.DECLINE_BTN));
+                    sendBroadcast(new Intent(DECLINE_BTN));
                 } else {
                     // Normal hangup.
                     mStateView.setText(R.string.call_ended);
@@ -1273,7 +1240,7 @@ public class CallActivity extends LoginRequiredActivity
                     getString(R.string.analytics_event_label_declined)
             );
             finishWithDelay();
-            sendBroadcast(new Intent(BluetoothMediaButtonReceiver.DECLINE_BTN));
+            sendBroadcast(new Intent(DECLINE_BTN));
         }
     }
 
