@@ -148,6 +148,8 @@ dependencies {
 
     implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterKnifeVersion}"
+
+    implementation 'com.yakivmospan:scytale:1.0.1'
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.
