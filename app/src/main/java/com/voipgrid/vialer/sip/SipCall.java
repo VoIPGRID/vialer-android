@@ -482,6 +482,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         // Play end of call beep only when the remote party hangs up and the call was connected.
         if (!mUserHangup && mCallIsConnected && !mCallIsTransferred) {
             mSipService.playBusyTone();
+            VialerStatistics.remoteDidHangUpCall(this);
         }
         mCallIsConnected = false;
         // Remove this call from the service.
