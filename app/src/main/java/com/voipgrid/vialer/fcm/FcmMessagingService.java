@@ -69,6 +69,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         int attempt = Integer.parseInt(data.get(ATTEMPT));
 
         LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage, requestType);
+        VialerStatistics.pushNotificationWasReceived(remoteMessage);
 
         if (requestType == null) {
             mRemoteLogger.e("No requestType");
