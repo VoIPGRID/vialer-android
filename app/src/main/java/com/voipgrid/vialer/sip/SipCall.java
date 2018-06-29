@@ -17,6 +17,7 @@ import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
 import com.voipgrid.vialer.media.monitoring.PacketStats;
 import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
 import com.voipgrid.vialer.statistics.CallCompletionStatsDispatcher;
+import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.StringUtil;
 
@@ -216,11 +217,13 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public void decline() throws Exception {
         hangupWithStatusCode(pjsip_status_code.PJSIP_SC_BUSY_HERE);
+        VialerStatistics.userDeclinedIncomingCall(this);
     }
 
     public void hangup(boolean userHangup) throws Exception {
         mUserHangup = userHangup;
         hangupWithStatusCode(pjsip_status_code.PJSIP_SC_DECLINE);
+        VialerStatistics.userDidHangUpCall(this);
     }
 
     public void toggleHold() throws Exception {

@@ -173,11 +173,12 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void userDeclinedIncomingCall(RemoteMessage middlewarePayload) {
+    public static void userDeclinedIncomingCall(SipCall sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
-                .withMiddlewareInformation(middlewarePayload)
+                .withCallInformation(sipCall)
+                .withBluetoothInformation()
                 .addValue(KEY_CALL_DIRECTION, VALUE_CALL_DIRECTION_INCOMING)
                 .addValue(KEY_CALL_SETUP_SUCCESSFUL, VALUE_CALL_SETUP_FAILED)
                 .addValue(KEY_FAILED_REASON, VALUE_FAILED_REASON_DECLINED)
@@ -206,7 +207,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void userDiDHangUpCall(SipCall sipCall) {
+    public static void userDidHangUpCall(SipCall sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
