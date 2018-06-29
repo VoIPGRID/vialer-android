@@ -155,6 +155,9 @@ public class VialerStatistics {
                 .get()
                 .withDefaults()
                 .withMiddlewareInformation(middlewarePayload)
+                .withBluetoothInformation()
+                .addValue(KEY_CALL_DIRECTION, VALUE_CALL_DIRECTION_INCOMING)
+                .addValue(KEY_CALL_SETUP_SUCCESSFUL, VALUE_CALL_SETUP_FAILED)
                 .addValue(KEY_FAILED_REASON, VALUE_FAILED_INSUFFICIENT_NETWORK)
                 .send();
     }
