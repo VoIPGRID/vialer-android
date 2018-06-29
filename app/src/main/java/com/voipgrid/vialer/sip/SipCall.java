@@ -90,8 +90,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 CallMissedReason reason = CallMissedReason.UNKNOWN;
                 if (packet.contains(CallMissedReason.CALL_ORIGINATOR_CANCEL.toString())) {
                     reason = CallMissedReason.CALL_ORIGINATOR_CANCEL;
+                    VialerStatistics.incomingCallWasCancelledByOriginator(this);
                 } else if (packet.contains(CallMissedReason.CALL_COMPLETED_ELSEWHERE.toString())) {
                     reason = CallMissedReason.CALL_COMPLETED_ELSEWHERE;
+                    VialerStatistics.incomingCallWasCompletedElsewhere(this);
                 }
 
                 if (reason != CallMissedReason.UNKNOWN) {
