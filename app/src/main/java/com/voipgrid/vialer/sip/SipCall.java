@@ -90,8 +90,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 CallMissedReason reason = CallMissedReason.UNKNOWN;
                 if (packet.contains(CallMissedReason.CALL_ORIGINATOR_CANCEL.toString())) {
                     reason = CallMissedReason.CALL_ORIGINATOR_CANCEL;
+                    VialerStatistics.incomingCallWasCancelledByOriginator(this);
                 } else if (packet.contains(CallMissedReason.CALL_COMPLETED_ELSEWHERE.toString())) {
                     reason = CallMissedReason.CALL_COMPLETED_ELSEWHERE;
+                    VialerStatistics.incomingCallWasCompletedElsewhere(this);
                 }
 
                 if (reason != CallMissedReason.UNKNOWN) {
@@ -214,11 +216,13 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public void decline() throws Exception {
         hangupWithStatusCode(pjsip_status_code.PJSIP_SC_BUSY_HERE);
+        VialerStatistics.userDeclinedIncomingCall(this);
     }
 
     public void hangup(boolean userHangup) throws Exception {
         mUserHangup = userHangup;
         hangupWithStatusCode(pjsip_status_code.PJSIP_SC_DECLINE);
+        VialerStatistics.userDidHangUpCall(this);
     }
 
     public void toggleHold() throws Exception {

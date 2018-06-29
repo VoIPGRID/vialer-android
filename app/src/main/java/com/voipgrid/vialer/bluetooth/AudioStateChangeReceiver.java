@@ -50,7 +50,15 @@ public class AudioStateChangeReceiver extends BroadcastReceiver {
 
         new Thread(() -> {
             BluetoothManager bluetoothManager = (BluetoothManager) VialerApplication.get().getSystemService(Context.BLUETOOTH_SERVICE);
+            if (bluetoothManager == null) {
+                return;
+            }
             BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
+
+            if (bluetoothAdapter == null) {
+                return;
+            }
+
             if (sBluetoothProfile != null) {
                 bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, sBluetoothProfile);
             }
