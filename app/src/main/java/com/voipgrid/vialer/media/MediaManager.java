@@ -5,6 +5,7 @@ import android.content.Context;
 import android.media.AudioManager;
 
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.statistics.AppState;
 
 /**
  * MediaManager manager class for the call activity.
@@ -291,6 +292,7 @@ public class MediaManager implements
     public void btDeviceConnected(boolean connected) {
         mRemoteLogger.d("btDeviceConnected()");
         mRemoteLogger.d("==> " + connected);
+        AppState.isUsingBluetoothAudio = connected;
         mAudioChangedInterfaceListener.bluetoothDeviceConnected(connected);
     }
 

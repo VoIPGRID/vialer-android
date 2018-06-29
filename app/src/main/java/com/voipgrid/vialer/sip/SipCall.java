@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -16,6 +17,7 @@ import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
 import com.voipgrid.vialer.media.monitoring.PacketStats;
 import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.StringUtil;
 
 import org.pjsip.pjsua2.AudDevManager;
 import org.pjsip.pjsua2.AudioMedia;
@@ -36,6 +38,8 @@ import org.pjsip.pjsua2.pjsip_status_code;
 import org.pjsip.pjsua2.pjsua_call_flag;
 import org.pjsip.pjsua2.pjsua_call_media_status;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.UUID;
 
 
@@ -43,6 +47,11 @@ import java.util.UUID;
  * Call class used to interact with a call.
  */
 public class SipCall extends org.pjsip.pjsua2.Call {
+
+    @StringDef({CALL_DIRECTION_OUTGOING, CALL_DIRECTION_INCOMING})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallDirection {}
+
     public static final String TAG = SipCall.class.getSimpleName();
 
     private Uri mPhoneNumberUri;
@@ -53,21 +62,25 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     private boolean mCallIsConnected = false;
     private boolean mIsOnHold;
-    private boolean mOutgoingCall = false;
     private boolean mUserHangup = false;
     private boolean mCallIsTransferred = false;
     private boolean mRingbackStarted = false;
+    @CallDirection private String mCallDirection;
     private String mCallerId;
     private String mIdentifier;
     private String mPhoneNumber;
     private String mCurrentCallState = SipConstants.CALL_INVALID_STATE;
     private boolean mIpChangeInProgress = false;
+    private String mMiddlewareKey;
+
+    private static final String CALL_DIRECTION_OUTGOING = "outgoing";
+    private static final String CALL_DIRECTION_INCOMING = "incoming";
 
     @Override
     public void onCallTsxState(OnCallTsxStateParam prm) {
         super.onCallTsxState(prm);
 
-         // Check if the call is an ringing incoming call.
+        // Check if the call is an ringing incoming call.
         if (mCurrentCallState.equals(SipConstants.CALL_INCOMING_RINGING)) {
             // Early state. Is where a call is being cancelled or completed elsewhere.
             String packet = prm.getE().getBody().getTsxState().getSrc().getRdata().getWholeMsg();
@@ -290,8 +303,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             mRemoteLogger.e(callState.toString());
 
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
-                // We are handling a outgoing call.
-                mOutgoingCall = true;
                 onCallStartRingback();
             }  else if (callState == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) {
                 // Call has been setup, stop ringback.
@@ -380,6 +391,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public void onCallIncoming() {
         mRemoteLogger.d("onCallIncoming");
+        mCallDirection = CALL_DIRECTION_INCOMING;
 
         // Determine whether we can accept the incoming call.
         pjsip_status_code code = pjsip_status_code.PJSIP_SC_RINGING;
@@ -420,6 +432,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public void onCallOutgoing(Uri phoneNumber, boolean startActivity) {
         mRemoteLogger.d("onCallOutgoing");
+        mCallDirection = CALL_DIRECTION_OUTGOING;
+
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_RINGING);
         try {
@@ -532,5 +546,45 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     boolean isIpChangeInProgress() {
         return mIpChangeInProgress;
+    }
+
+    public void setMiddlewareKey(String middlewareKey) {
+        mMiddlewareKey = middlewareKey;
+    }
+
+    public String getMiddlewareKey() {
+        return mMiddlewareKey;
+    }
+
+    public String getAsteriskCallId() {
+        try {
+            return getInfo().getCallIdString();
+        } catch (Exception e) {
+            mRemoteLogger.e("Unable to get call id: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public String getCallDirection() {
+        return mCallDirection;
+    }
+
+    /**
+     * Extracts the call transport (e.g. TLS/TCP/UDP) from the local contact string.
+     *
+     */
+    public String getTransport() {
+        try {
+            String transport = getInfo().getLocalContact();
+
+            if (transport == null) return null;
+
+            if (!transport.contains("transport")) return null;
+
+            return StringUtil.extractFirstCaptureGroupFromString(transport, "transport=([^;]+);");
+        } catch (Exception e) {
+            mRemoteLogger.e("Unable to get call id: " + e.getMessage());
+            return null;
+        }
     }
 }

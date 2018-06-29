@@ -1,7 +1,7 @@
 package com.voipgrid.vialer.api.models;
 
 import com.google.gson.annotations.SerializedName;
-
+import com.voipgrid.vialer.util.StringUtil;
 /**
  * Created by eltjo on 03/08/15.
  */
@@ -18,6 +18,8 @@ public class PhoneAccount implements Destination {
     private String id;
 
     private String description;
+
+    private String country;
 
     public String getAccountId() {
         return accountId;
@@ -80,5 +82,21 @@ public class PhoneAccount implements Destination {
         if (!getAccountId().equals(that.getAccountId())) return false;
         if (!getPassword().equals(that.getPassword())) return false;
         return getNumber().equals(that.getNumber());
+    }
+
+    /**
+     * Extract the country from the country string.
+     *
+     * @return
+     */
+    public String getCountry() {
+        if (country == null) {
+            return null;
+        }
+
+        if (!country.contains("/")) {
+            return country;
+        }
+        return StringUtil.extractFirstCaptureGroupFromString(country, "\\/([a-z]+)\\/$");
     }
 }

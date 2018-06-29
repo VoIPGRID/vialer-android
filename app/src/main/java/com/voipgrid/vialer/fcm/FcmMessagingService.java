@@ -18,6 +18,7 @@ import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
+import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -39,11 +40,12 @@ public class FcmMessagingService extends FirebaseMessagingService {
     public final static String CALL_REQUEST_TYPE = "call";
     public final static String MESSAGE_REQUEST_TYPE = "message";
 
-    private final static String RESPONSE_URL = "response_api";
-    private final static String REQUEST_TOKEN = "unique_key";
-    private final static String PHONE_NUMBER = "phonenumber";
-    private final static String CALLER_ID = "caller_id";
-    private static final String SUPPRESSED = "supressed";
+    public final static String RESPONSE_URL = "response_api";
+    public final static String REQUEST_TOKEN = "unique_key";
+    public final static String PHONE_NUMBER = "phonenumber";
+    public final static String CALLER_ID = "caller_id";
+    public static final String SUPPRESSED = "supressed";
+    public static final String ATTEMPT = "attempt";
 
     // Extra field for notification throughput logging.
     public static final String MESSAGE_START_TIME = "message_start_time";

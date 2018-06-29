@@ -38,6 +38,10 @@ class SipAccount extends org.pjsip.pjsua2.Account {
     public void onIncomingCall(OnIncomingCallParam incomingCallParam) {
         SipCall sipCall = new SipCall(mSipService, this, incomingCallParam.getCallId());
         sipCall.onCallIncoming();
+
+        if (mSipService != null && mSipService.getIncomingCallDetails() != null) {
+            sipCall.setMiddlewareKey(mSipService.getIncomingCallDetails().getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN));
+        }
     }
 
     /**
