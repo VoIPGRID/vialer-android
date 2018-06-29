@@ -49,6 +49,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
     // Extra field for notification throughput logging.
     public static final String MESSAGE_START_TIME = "message_start_time";
+    private static final int MAX_MIDDLEWARE_PUSH_ATTEMPTS = 8;
 
     private RemoteLogger mRemoteLogger;
 
@@ -65,6 +66,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         mRemoteLogger.d("onMessageReceived");
         Map<String, String> data = remoteMessage.getData();
         String requestType = data.get(MESSAGE_TYPE);
+        int attempt = Integer.parseInt(data.get(ATTEMPT));
 
         LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage, requestType);
 
@@ -98,12 +100,14 @@ public class FcmMessagingService extends FirebaseMessagingService {
             }
 
             if (!connectionSufficient) {
+                if (attempt >= MAX_MIDDLEWARE_PUSH_ATTEMPTS) {
+                    VialerStatistics.incomingCallFailedDueToInsufficientNetwork(remoteMessage);
+                }
                 mRemoteLogger.e("Connection is insufficient. For now do nothing and wait for next middleware push");
                 return;
             }
 
-            // Check to see if there is not already a sipServiceActive and the current connection is
-            // fast enough to support VoIP call.
+            // Check to see if there is not already a sipServiceActive
             if (!SipService.sipServiceActive) {
                 String number = data.get(PHONE_NUMBER);
 

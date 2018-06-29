@@ -99,7 +99,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void incomingCallWasSuccessfullySetup(SipCall sipCall) {
+    public static void callWasSuccessfullySetup(SipCall sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -109,17 +109,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void outgoingCallWasSuccessfullySetup(SipCall sipCall) {
-        VialerStatistics
-                .get()
-                .withDefaults()
-                .withCallInformation(sipCall)
-                .withBluetoothInformation()
-                .addValue(KEY_CALL_SETUP_SUCCESSFUL, VALUE_CALL_SETUP_SUCCESSFUL)
-                .send();
-    }
-
-    public static void incomingCallFailedDueToSipError(SipCall sipCall, int sipErrorCode) {
+    private static void incomingCallFailedDueToSipError(SipCall sipCall, int sipErrorCode) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -165,6 +155,9 @@ public class VialerStatistics {
                 .get()
                 .withDefaults()
                 .withMiddlewareInformation(middlewarePayload)
+                .withBluetoothInformation()
+                .addValue(KEY_CALL_DIRECTION, VALUE_CALL_DIRECTION_INCOMING)
+                .addValue(KEY_CALL_SETUP_SUCCESSFUL, VALUE_CALL_SETUP_FAILED)
                 .addValue(KEY_FAILED_REASON, VALUE_FAILED_INSUFFICIENT_NETWORK)
                 .send();
     }
@@ -237,7 +230,7 @@ public class VialerStatistics {
         Map<String, String> data = middlewarePayload.getData();
         double messageStartTime = Double.valueOf(data.get(MESSAGE_START_TIME));
         addValue(KEY_MIDDLEWARE_KEY, data.get(REQUEST_TOKEN));
-        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(System.currentTimeMillis() - messageStartTime));
+        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(messageStartTime)));
         addValue(KEY_MIDDLEWARE_ATTEMPTS, data.get(ATTEMPT));
 
         return this;
@@ -266,7 +259,15 @@ public class VialerStatistics {
         addValue(KEY_CALL_DIRECTION, call.getCallDirection());
         addValue(KEY_CONNECTION_TYPE, call.getTransport() != null ? call.getTransport().toUpperCase() : "");
 
+        if (call.getMessageStartTime() != null) {
+            addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(Double.valueOf(call.getMessageStartTime()))));
+        }
+
         return this;
+    }
+
+    private double calculateTimeToInitialResponse(double messageStartTime) {
+        return System.currentTimeMillis() - messageStartTime;
     }
 
     private VialerStatistics withBluetoothInformation() {

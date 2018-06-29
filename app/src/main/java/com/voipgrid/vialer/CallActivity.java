@@ -21,6 +21,7 @@ import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringDef;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -43,6 +44,7 @@ import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
+import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.NotificationHelper;
@@ -630,6 +632,11 @@ public class CallActivity extends LoginRequiredActivity
                             getFragmentManager().findFragmentByTag(TAG_CALL_TRANSFER_FRAGMENT);
                     callTransferFragment.secondCallIsConnected();
                 }
+
+                if (mSipService.getCurrentCall() != null) {
+                    VialerStatistics.callWasSuccessfullySetup(mSipService.getCurrentCall());
+                }
+
                 mCallDurationView.setVisibility(View.VISIBLE);
                 break;
 

@@ -62,6 +62,15 @@ public class PacketStats {
     }
 
     /**
+     * Returns TRUE if both sides of the call have transmitted audio.
+     *
+     * @return
+     */
+    public boolean hasTwoWayAudio() {
+        return !isEitherSideMissingAudio();
+    }
+
+    /**
      * Check if any media has been transmitted for this call.
      *
      * @return If any media has been sent or received TRUE, otherwise FALSE.

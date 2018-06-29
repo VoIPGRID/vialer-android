@@ -16,6 +16,7 @@ import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
 import com.voipgrid.vialer.media.monitoring.PacketStats;
 import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
+import com.voipgrid.vialer.statistics.CallCompletionStatsDispatcher;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.StringUtil;
 
@@ -72,9 +73,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mCurrentCallState = SipConstants.CALL_INVALID_STATE;
     private boolean mIpChangeInProgress = false;
     private String mMiddlewareKey;
+    private String mMessageStartTime;
 
-    private static final String CALL_DIRECTION_OUTGOING = "outgoing";
-    private static final String CALL_DIRECTION_INCOMING = "incoming";
+    public static final String CALL_DIRECTION_OUTGOING = "outgoing";
+    public static final String CALL_DIRECTION_INCOMING = "incoming";
 
     @Override
     public void onCallTsxState(OnCallTsxStateParam prm) {
@@ -481,6 +483,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipService.removeCallFromList(this);
         mCurrentCallState = SipConstants.CALL_DISCONNECTED_MESSAGE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_DISCONNECTED_MESSAGE);
+        new CallCompletionStatsDispatcher().callDidComplete(this);
     }
 
     private void onCallInvalidState(Throwable fault) {
@@ -552,8 +555,16 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mMiddlewareKey = middlewareKey;
     }
 
+    public void setMessageStartTime(String messageStartTime) {
+        mMessageStartTime = messageStartTime;
+    }
+
     public String getMiddlewareKey() {
         return mMiddlewareKey;
+    }
+
+    public String getMessageStartTime() {
+        return mMessageStartTime;
     }
 
     public String getAsteriskCallId() {
