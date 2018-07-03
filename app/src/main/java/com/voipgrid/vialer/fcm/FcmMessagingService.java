@@ -150,6 +150,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
                         data.get(MESSAGE_START_TIME) != null ? data.get(MESSAGE_START_TIME) : "",
                         false
                 );
+                VialerStatistics.incomingCallFailedDueToOngoingVialerCall(remoteMessage);
             }
         } else if (requestType.equals(MESSAGE_REQUEST_TYPE)){
             mRemoteLogger.d("Code not implemented");
