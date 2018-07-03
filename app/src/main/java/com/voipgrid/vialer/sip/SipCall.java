@@ -407,6 +407,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             LogHelper.using(mRemoteLogger).logBusyReason(mSipService);
         }
 
+        if (mSipService.getCurrentCall() != null) {
+            VialerStatistics.incomingCallFailedDueToOngoingVialerCall(this);
+        }
+
+        if (mSipService.getNativeCallManager().isBusyWithNativeCall()) {
+            VialerStatistics.incomingCallFailedDueToOngoingGsmCall(this);
+        }
+
         mCurrentCallState = SipConstants.CALL_INCOMING_RINGING;
 
         // If we send back a ringing set the current call.

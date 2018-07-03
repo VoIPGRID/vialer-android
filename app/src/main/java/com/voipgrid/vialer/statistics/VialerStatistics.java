@@ -29,6 +29,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_DIRECTION
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_FAILED;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_SUCCESSFUL;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_GSM_CALL_IN_PROGRESS;
+import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_VIALER_CALL_IN_PROGRESS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_INSUFFICIENT_NETWORK;
 import static com.voipgrid.vialer.statistics.StatsConstants
         .VALUE_FAILED_NO_CALL_RECEIVED_FROM_ASTERISK;
@@ -162,14 +163,36 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void incomingCallFailedDueToOngoingGsmCall(RemoteMessage middlewarePayload) {
+    public static void incomingCallFailedDueToOngoingGsmCall(SipCall sipCall) {
+        VialerStatistics
+                .get()
+                .withDefaults()
+                .withCallInformation(sipCall)
+                .withBluetoothInformation()
+                .addValue(KEY_CALL_SETUP_SUCCESSFUL, VALUE_CALL_SETUP_FAILED)
+                .addValue(KEY_FAILED_REASON, VALUE_FAILED_GSM_CALL_IN_PROGRESS)
+                .send();
+    }
+
+    public static void incomingCallFailedDueToOngoingVialerCall(RemoteMessage middlewarePayload) {
         VialerStatistics
                 .get()
                 .withDefaults()
                 .withMiddlewareInformation(middlewarePayload)
                 .addValue(KEY_CALL_DIRECTION, VALUE_CALL_DIRECTION_INCOMING)
                 .addValue(KEY_CALL_SETUP_SUCCESSFUL, VALUE_CALL_SETUP_FAILED)
-                .addValue(KEY_FAILED_REASON, VALUE_FAILED_GSM_CALL_IN_PROGRESS)
+                .addValue(KEY_FAILED_REASON, VALUE_FAILED_VIALER_CALL_IN_PROGRESS)
+                .send();
+    }
+
+    public static void incomingCallFailedDueToOngoingVialerCall(SipCall sipCall) {
+        VialerStatistics
+                .get()
+                .withDefaults()
+                .withCallInformation(sipCall)
+                .withBluetoothInformation()
+                .addValue(KEY_CALL_SETUP_SUCCESSFUL, VALUE_CALL_SETUP_FAILED)
+                .addValue(KEY_FAILED_REASON, VALUE_FAILED_VIALER_CALL_IN_PROGRESS)
                 .send();
     }
 
