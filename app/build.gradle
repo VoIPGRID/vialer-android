@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "26.0.2"
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 98
-        versionName "5.4.3"
+        versionCode 103
+        versionName "5.5"
         multiDexEnabled true
         flavorDimensions "default"
         ndk {
@@ -53,6 +53,14 @@ android {
                 into '.'
             }
         }
+        annabel {
+            applicationId "com.bellenmetannabel.app"
+            copy {
+                from 'src/annabel/'
+                include '*.json'
+                into '.'
+            }
+        }
     }
     lintOptions {
         checkReleaseBuilds true
@@ -73,8 +81,8 @@ android {
 }
 
 repositories {
-    jcenter()
     google()
+    jcenter()
     flatDir {
         dirs 'libs'
     }
@@ -140,6 +148,8 @@ dependencies {
 
     implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterKnifeVersion}"
+
+    implementation 'com.yakivmospan:scytale:1.0.1'
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

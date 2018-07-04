@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ANNAbel</string>
+    <string name="configure_header_label_text">ANNAbel stelt</string>
+
+    <string name="url_app_info">https://help.bellenmetannabel.nl/index.php/Vialer</string>
+
+    <string name="info_button_title">Hoe werkt bellen via ANNAbel?</string>
+
+</resources>

@@ -53,6 +53,13 @@ public class SipService extends Service {
     private Handler mCheckServiceHandler;
     private Runnable mCheckServiceRunnable;
 
+    /**
+     * This will track whether this instance of SipService has ever handled a call,
+     * if this is the case we can shut down the sip service immediately if we don't
+     * have a call when onStartCommand is run.
+     */
+    private boolean mSipServiceHasHandledACall = false;
+
     private final BroadcastReceiver phoneStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -229,6 +236,16 @@ public class SipService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mRemoteLogger.d("onStartCommand");
+        mRemoteLogger.i("onStartCommand mSipServiceHasHandledACall: " + mSipServiceHasHandledACall);
+
+        // If the SipService has already handled a call but now has no call, this suggests
+        // that the SipService is stuck not doing anything so it should be immediately shut
+        // down.
+        if (mSipServiceHasHandledACall && mCurrentCall == null) {
+            mRemoteLogger.i("onStartCommand was triggered after a call has already been handled but with no current call, stopping SipService...");
+            stopSelf();
+            return START_NOT_STICKY;
+        }
 
         mInitialCallType = intent.getAction();
         Uri number = intent.getData();
@@ -300,7 +317,7 @@ public class SipService extends Service {
      * @param phoneNumber
      */
     public void makeCall(Uri number, String contactName, String phoneNumber) {
-       makeCall(number, contactName, phoneNumber, false);
+        makeCall(number, contactName, phoneNumber, false);
     }
 
     /**
@@ -364,6 +381,7 @@ public class SipService extends Service {
      * @param call
      */
     public void setCurrentCall(SipCall call) {
+        mSipServiceHasHandledACall = true;
         if (call != null && mInitialCall == null) {
             setInitialCall(call);
         }

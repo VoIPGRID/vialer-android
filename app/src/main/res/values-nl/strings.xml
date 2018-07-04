@@ -142,7 +142,7 @@
 
     <string name="add_destination_title">Bestemmingen</string>
     <string name="info_menu_item_title">Info</string>
-    <string name="info_button_title">Hoe werkt bellen met Vialer</string>
+    <string name="info_button_title">Hoe werkt bellen via Vialer?</string>
     <string name="account_sip_switch">Bellen via VoIP</string>
     <string name="account_availability_switch_title">Bereikbaarheid</string>
     <string name="add_availability">Bereikbaarheid toevoegen</string>
@@ -206,6 +206,7 @@
     <string name="yes">JA</string>
     <string name="no">NEE</string>
     <string name="remote_logging_unexpected_error">Onverwachtte fout</string>
+    <string name="remote_logging_id_copied">Logging id gekopieerd</string>
     <string name="remote_logging_send_crash_log">Zou u ons willen helpen met het verbeteren van onze diensten door het foutenrapport te versturen?</string>
 
     <string name="call_transfer_complete_and">en</string>

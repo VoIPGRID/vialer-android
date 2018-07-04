@@ -36,4 +36,13 @@ public class ClipboardHelper {
 
         return item.getText().toString();
     }
+
+    /**
+     * Copy data to Clipboard
+     */
+    public void copyToClipboard(String data) {
+
+        ClipData clipData = ClipData.newPlainText("data", data);
+        mClipboard.setPrimaryClip(clipData);
+    }
 }

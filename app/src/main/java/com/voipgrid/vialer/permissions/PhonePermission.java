@@ -75,7 +75,7 @@ public class PhonePermission {
 
         // Request code for the callback verifying in the Activity.
         final int requestCode = activity.getResources().getInteger(
-                R.integer.microphone_permission_request_code);
+                R.integer.phone_permission_request_code);
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
                 PhonePermission.mPermissionToCheck)) {

@@ -30,6 +30,7 @@ public class MicrophonePermission {
 
     /**
      * Function to check if the we have the microphone permission.
+     *
      * @param context Context needed for the check.
      * @return Whether or not we have permission.
      */
@@ -38,8 +39,8 @@ public class MicrophonePermission {
     }
 
     private static int getPermissionStatus(Activity activity, String androidPermissionName) {
-        if(ContextCompat.checkSelfPermission(activity, androidPermissionName) != PackageManager.PERMISSION_GRANTED) {
-            if(!ActivityCompat.shouldShowRequestPermissionRationale(activity, androidPermissionName)){
+        if (ContextCompat.checkSelfPermission(activity, androidPermissionName) != PackageManager.PERMISSION_GRANTED) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(activity, androidPermissionName)) {
                 return BLOCKED;
             }
             return DENIED;
@@ -47,7 +48,7 @@ public class MicrophonePermission {
         return GRANTED;
     }
 
-    private static void showPermissionDeniedDialog(final Activity activity){
+    private static void showPermissionDeniedDialog(final Activity activity) {
         final int requestCode = activity.getResources().getInteger(
                 R.integer.microphone_permission_request_code);
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -64,7 +65,7 @@ public class MicrophonePermission {
         dialog.show();
     }
 
-    private static void showPermissionBlockedDialog(final Activity activity){
+    private static void showPermissionBlockedDialog(final Activity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.permission_microphone_dialog_title));
         builder.setMessage(activity.getString(R.string.permission_microphone_missing_message));
@@ -91,6 +92,7 @@ public class MicrophonePermission {
 
     /**
      * Function to ask the user for the microphone permissions.
+     *
      * @param activity The activity where to show the permissions dialogs.
      */
     public static void askForPermission(final Activity activity) {
@@ -102,18 +104,15 @@ public class MicrophonePermission {
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
                 MicrophonePermission.mPermissionToCheck)) {
-
             if (permissionStatus == DENIED) {
                 // Permission has previously been denied.
-               showPermissionDeniedDialog(activity);
+                showPermissionDeniedDialog(activity);
             }
-
-        } else if(permissionStatus == BLOCKED && firstRequest) {
+        } else if (permissionStatus == BLOCKED && firstRequest) {
             // Permission has not yet been requested. Request it immediately.
             ActivityCompat.requestPermissions(activity, mPermissions, requestCode);
             firstRequest = false;
-        }
-        else if (permissionStatus == BLOCKED && !firstRequest){
+        } else if (permissionStatus == BLOCKED && !firstRequest) {
             // Permission denied with 'do-not-ask-again' flag set.
             showPermissionBlockedDialog(activity);
         }

@@ -248,16 +248,10 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
 
         if (numberToCall != null && !mCallAlreadySetup) {
             mCallAlreadySetup = true;
-            new DialHelper(
-                    mActivity,
-                    new JsonStorage(mActivity),
-                    ConnectivityHelper.get(mActivity),
-                    new AnalyticsHelper(
-                            ((AnalyticsApplication) mActivity.getApplication()).getDefaultTracker()
-                    )
-            ).callNumber(numberToCall, "");
+            DialHelper.fromActivity(mActivity).callNumber(numberToCall, "");
             PreferenceManager.getDefaultSharedPreferences(mActivity).edit().putString(DialerActivity.LAST_DIALED, numberToCall).apply();
         }
+            mCallAlreadySetup = false;
     }
 
     static class ViewHolder {

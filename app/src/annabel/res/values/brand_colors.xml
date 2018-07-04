@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_primary">#988bbe</color>
+    <color name="color_primary_dark">#8d7fb7</color>
+    <color name="color_highlight">#00aeef</color>
+
+    <color name="dial_button_digit_color">#8272b0</color>
+    <color name="dial_button_chars_color">#fff</color>
+    <color name="dial_button_pressed">#7765a9</color>
+
+    <color name="progress_bar_color">#8272b0</color>
+
+    <color name="dialer_warning_background">#B2B2B2</color>
+    <color name="dialer_warning_text">#7765a9</color>
+</resources>

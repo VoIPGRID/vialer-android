@@ -1,6 +1,5 @@
 package com.voipgrid.vialer;
 
-import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -18,6 +17,7 @@ import android.view.View;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
@@ -31,8 +31,8 @@ import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
 import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
-import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.UpdateActivity;
@@ -44,9 +44,11 @@ public class MainActivity extends NavigationDrawerActivity implements
         CallRecordFragment.OnFragmentInteractionListener {
 
     private ViewPager mViewPager;
+    private View mView;
     private boolean mAskForPermission = true;
     private int requestCounter = -1;
     private RemoteLogger mRemoteLogger;
+    private DialHelper mDialHelper;
 
     private ReachabilityReceiver mReachabilityReceiver;
 
@@ -68,6 +70,7 @@ public class MainActivity extends NavigationDrawerActivity implements
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
         Boolean hasSystemUser = jsonStorage.has(SystemUser.class);
         SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
+        mDialHelper = DialHelper.fromActivity(this);
 
         // Check if the app has a SystemUser.
         // When there is no SystemUser present start the on boarding process.
@@ -184,8 +187,10 @@ public class MainActivity extends NavigationDrawerActivity implements
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode ==
-                this.getResources().getInteger(R.integer.contact_permission_request_code)) {
+        if (!allPermissionsGranted(permissions, grantResults)) {
+            return;
+        }
+        if (requestCode == this.getResources().getInteger(R.integer.contact_permission_request_code)) {
             boolean allPermissionsGranted = true;
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
@@ -198,6 +203,8 @@ public class MainActivity extends NavigationDrawerActivity implements
                 SyncUtils.requestContactSync(this);
                 startContactObserverService();
             }
+        } else if (requestCode == this.getResources().getInteger(R.integer.microphone_permission_request_code)) {
+            mDialHelper.callAttemptedNumber();
         }
     }
 

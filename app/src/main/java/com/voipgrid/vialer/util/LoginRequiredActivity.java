@@ -50,6 +50,6 @@ public class LoginRequiredActivity extends RemoteLoggingActivity {
     }
 
     protected boolean hasApiToken() {
-        return getApiToken() != null;
+        return mAccountHelper.hasApiToken();
     }
 }
