@@ -97,6 +97,14 @@ public class DefaultDataProvider {
         return String.valueOf(Build.VERSION.SDK_INT);
     }
 
+    public String getDeviceManufacturer() {
+        return Build.MANUFACTURER;
+    }
+
+    public String getDeviceModel() {
+        return Build.MODEL;
+    }
+
     public String getAppVersion() {
         return VialerApplication.getAppVersion();
     }
