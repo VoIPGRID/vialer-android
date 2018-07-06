@@ -58,6 +58,7 @@ import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
 import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
 import com.voipgrid.vialer.util.JsonStorage;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -230,9 +231,8 @@ public class VialerStatistics {
 
     private VialerStatistics withMiddlewareInformation(RemoteMessage middlewarePayload) {
         Map<String, String> data = middlewarePayload.getData();
-        double messageStartTime = Double.valueOf(data.get(MESSAGE_START_TIME));
         addValue(KEY_MIDDLEWARE_KEY, data.get(REQUEST_TOKEN));
-        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(messageStartTime)));
+        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(data.get(MESSAGE_START_TIME))));
         addValue(KEY_MIDDLEWARE_ATTEMPTS, data.get(ATTEMPT));
 
         return this;
@@ -264,14 +264,23 @@ public class VialerStatistics {
         addValue(KEY_CONNECTION_TYPE, call.getTransport() != null ? call.getTransport().toUpperCase() : "");
 
         if (call.getMessageStartTime() != null) {
-            addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(Double.valueOf(call.getMessageStartTime()))));
+            addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(call.getMessageStartTime())));
         }
 
         return this;
     }
 
-    private double calculateTimeToInitialResponse(double messageStartTime) {
-        return System.currentTimeMillis() - messageStartTime;
+    /**
+     * Convert the initial response time from the middleware (scientific notation, microseconds) to a standard long
+     * in milliseconds and then find the delta between that and the current time.
+     *
+     * @param startTime
+     * @return
+     */
+    private long calculateTimeToInitialResponse(String startTime) {
+        long startTimeInMilliseconds = Long.parseLong(new BigDecimal(startTime).toPlainString().replace(".", "")) / 10000;
+
+        return System.currentTimeMillis() - startTimeInMilliseconds;
     }
 
     private VialerStatistics withBluetoothInformation() {

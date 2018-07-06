@@ -66,7 +66,6 @@ public class FcmMessagingService extends FirebaseMessagingService {
         mRemoteLogger.d("onMessageReceived");
         Map<String, String> data = remoteMessage.getData();
         String requestType = data.get(MESSAGE_TYPE);
-        int attempt = Integer.parseInt(data.get(ATTEMPT));
 
         LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage, requestType);
 
@@ -100,6 +99,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
             }
 
             if (!connectionSufficient) {
+                int attempt = Integer.parseInt(data.get(ATTEMPT));
                 if (attempt >= MAX_MIDDLEWARE_PUSH_ATTEMPTS) {
                     VialerStatistics.incomingCallFailedDueToInsufficientNetwork(remoteMessage);
                 }
