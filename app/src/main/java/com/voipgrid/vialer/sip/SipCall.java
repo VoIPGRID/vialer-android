@@ -614,7 +614,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     /**
-     * Will return the last callinfo recovered during call state change, if no c
+     * Will return the last callinfo recovered during call state change, if no lastCallInfo exists, it will attempt to retrieve it.
      *
      * @return
      */
