@@ -42,6 +42,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants
         .VALUE_FAILED_REASON_ORIGINATOR_CANCELLED;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_REMOTE;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_USER;
+import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_WIFI;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_OS;
 
 import android.content.Context;
@@ -58,6 +59,7 @@ import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
 import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
 import com.voipgrid.vialer.util.JsonStorage;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -252,9 +254,8 @@ public class VialerStatistics {
 
     private VialerStatistics withMiddlewareInformation(RemoteMessage middlewarePayload) {
         Map<String, String> data = middlewarePayload.getData();
-        double messageStartTime = Double.valueOf(data.get(MESSAGE_START_TIME));
         addValue(KEY_MIDDLEWARE_KEY, data.get(REQUEST_TOKEN));
-        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(messageStartTime)));
+        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(data.get(MESSAGE_START_TIME))));
         addValue(KEY_MIDDLEWARE_ATTEMPTS, data.get(ATTEMPT));
 
         return this;
@@ -266,7 +267,9 @@ public class VialerStatistics {
         addValue(KEY_APP_VERSION, mDefaultDataProvider.getAppVersion());
         addValue(KEY_APP_STATUS, mDefaultDataProvider.getAppStatus());
         addValue(KEY_NETWORK, mDefaultDataProvider.getNetwork());
-        addValue(KEY_NETWORK_OPERATOR, mDefaultDataProvider.getNetworkOperator());
+        if (!mDefaultDataProvider.getNetwork().equals(VALUE_NETWORK_WIFI)) {
+            addValue(KEY_NETWORK_OPERATOR, mDefaultDataProvider.getNetworkOperator());
+        }
         addValue(KEY_CLIENT_COUNTRY, mDefaultDataProvider.getClientCountry());
         addValue(KEY_SIP_USER_ID, mDefaultDataProvider.getSipUserId());
 
@@ -284,14 +287,23 @@ public class VialerStatistics {
         addValue(KEY_CONNECTION_TYPE, call.getTransport() != null ? call.getTransport().toUpperCase() : "");
 
         if (call.getMessageStartTime() != null) {
-            addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(Double.valueOf(call.getMessageStartTime()))));
+            addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(call.getMessageStartTime())));
         }
 
         return this;
     }
 
-    private double calculateTimeToInitialResponse(double messageStartTime) {
-        return System.currentTimeMillis() - messageStartTime;
+    /**
+     * Convert the initial response time from the middleware (scientific notation, microseconds) to a standard long
+     * in milliseconds and then find the delta between that and the current time.
+     *
+     * @param startTime
+     * @return
+     */
+    private long calculateTimeToInitialResponse(String startTime) {
+        long startTimeInMilliseconds = Long.parseLong(new BigDecimal(startTime).toPlainString().replace(".", "")) / 10000;
+
+        return System.currentTimeMillis() - startTimeInMilliseconds;
     }
 
     private VialerStatistics withBluetoothInformation() {
