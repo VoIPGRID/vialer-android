@@ -75,6 +75,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private boolean mIpChangeInProgress = false;
     private String mMiddlewareKey;
     private String mMessageStartTime;
+    private CallInfo mLastCallInfo;
 
     public static final String CALL_DIRECTION_OUTGOING = "outgoing";
     public static final String CALL_DIRECTION_INCOMING = "incoming";
@@ -304,8 +305,9 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     @Override
     public void onCallState(OnCallStateParam onCallStateParam) {
         try {
-            CallInfo info = getInfo();  // Check to see if we can get CallInfo with this callback.
-            pjsip_inv_state callState = info.getState();
+            mLastCallInfo = getInfo();  // Check to see if we can get CallInfo with this callback.
+
+            pjsip_inv_state callState = mLastCallInfo.getState();
             mRemoteLogger.e("CallState changed!");
             mRemoteLogger.e(callState.toString());
 
@@ -582,12 +584,9 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public String getAsteriskCallId() {
-        try {
-            return getInfo().getCallIdString();
-        } catch (Exception e) {
-            mRemoteLogger.e("Unable to get call id: " + e.getMessage());
-            return null;
-        }
+        CallInfo callInfo = getLastCallInfo();
+
+        return callInfo != null ? callInfo.getCallIdString() : null;
     }
 
     public String getCallDirection() {
@@ -600,15 +599,43 @@ public class SipCall extends org.pjsip.pjsua2.Call {
      */
     public String getTransport() {
         try {
-            String transport = getInfo().getLocalContact();
+            CallInfo callInfo = getLastCallInfo();
 
-            if (transport == null) return null;
+            if (callInfo == null) {
+                return null;
+            }
 
-            if (!transport.contains("transport")) return null;
+            String transport = callInfo.getLocalContact();
+
+            if (transport == null) {
+                return null;
+            }
+
+            if (!transport.contains("transport")) {
+                return null;
+            }
 
             return StringUtil.extractFirstCaptureGroupFromString(transport, "transport=([^;]+);");
         } catch (Exception e) {
             mRemoteLogger.e("Unable to get call id: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Will return the last callinfo recovered during call state change, if no lastCallInfo exists, it will attempt to retrieve it.
+     *
+     * @return
+     */
+    private @Nullable CallInfo getLastCallInfo() {
+        try {
+            if (mLastCallInfo == null) {
+                mLastCallInfo = getInfo();
+            }
+
+            return mLastCallInfo;
+        } catch (Exception e) {
+            mRemoteLogger.e("Unable to get call info");
             return null;
         }
     }
