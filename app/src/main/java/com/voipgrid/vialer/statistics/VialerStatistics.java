@@ -41,6 +41,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants
         .VALUE_FAILED_REASON_ORIGINATOR_CANCELLED;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_REMOTE;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_USER;
+import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_WIFI;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_OS;
 
 import android.content.Context;
@@ -243,7 +244,9 @@ public class VialerStatistics {
         addValue(KEY_APP_VERSION, mDefaultDataProvider.getAppVersion());
         addValue(KEY_APP_STATUS, mDefaultDataProvider.getAppStatus());
         addValue(KEY_NETWORK, mDefaultDataProvider.getNetwork());
-        addValue(KEY_NETWORK_OPERATOR, mDefaultDataProvider.getNetworkOperator());
+        if (!mDefaultDataProvider.getNetwork().equals(VALUE_NETWORK_WIFI)) {
+            addValue(KEY_NETWORK_OPERATOR, mDefaultDataProvider.getNetworkOperator());
+        }
         addValue(KEY_CLIENT_COUNTRY, mDefaultDataProvider.getClientCountry());
         addValue(KEY_SIP_USER_ID, mDefaultDataProvider.getSipUserId());
 
