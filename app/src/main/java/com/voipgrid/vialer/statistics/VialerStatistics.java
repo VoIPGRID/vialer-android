@@ -4,6 +4,7 @@ package com.voipgrid.vialer.statistics;
 import static com.voipgrid.vialer.fcm.FcmMessagingService.ATTEMPT;
 import static com.voipgrid.vialer.fcm.FcmMessagingService.MESSAGE_START_TIME;
 import static com.voipgrid.vialer.fcm.FcmMessagingService.REQUEST_TOKEN;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_ACCOUNT_CONNECTION_TYPE;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_APP_STATUS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_APP_VERSION;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_BLUETOOTH_AUDIO_ENABLED;
@@ -26,6 +27,8 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_OS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_OS_VERSION;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_SIP_USER_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_TIME_TO_INITIAL_RESPONSE;
+import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_ACCOUNT_CONNECTION_TYPE_TCP;
+import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_ACCOUNT_CONNECTION_TYPE_TLS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_BLUETOOTH_AUDIO_ENABLED_TRUE;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_DIRECTION_INCOMING;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_FAILED;
@@ -54,6 +57,7 @@ import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.Registration;
+import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.sip.SipCall;
@@ -289,6 +293,7 @@ public class VialerStatistics {
         addValue(KEY_CALL_ID, call.getAsteriskCallId());
         addValue(KEY_CALL_DIRECTION, call.getCallDirection());
         addValue(KEY_CONNECTION_TYPE, call.getTransport() != null ? call.getTransport().toUpperCase() : "");
+        addValue(KEY_ACCOUNT_CONNECTION_TYPE, SecureCalling.fromContext(VialerApplication.get()).isEnabled() ? VALUE_ACCOUNT_CONNECTION_TYPE_TLS : VALUE_ACCOUNT_CONNECTION_TYPE_TCP);
 
         if (call.getMessageStartTime() != null) {
             addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(call.getMessageStartTime())));
