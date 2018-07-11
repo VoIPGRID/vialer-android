@@ -28,7 +28,6 @@ import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
-import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.UserAgent;
 

@@ -1,9 +1,14 @@
 package com.voipgrid.vialer.sip;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
-import com.voipgrid.vialer.statistics.VialerStatistics;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 
-import java.lang.ref.WeakReference;
+import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.sip.SipLogHandler;
+import com.voipgrid.vialer.statistics.VialerStatistics;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
 
 /**
  * Regularly checks that a call has been setup after receiving a push notification.
@@ -28,11 +33,38 @@ public class CallSetupChecker {
     private long mCheckStartTime;
     private final RemoteLogger mRemoteLogger;
     private SipService mSipService;
+    private BroadcastReceiverManager mBroadcastReceiverManager;
+
+    /**
+     * Controls the call checking loop, if this is ever set to false, checking for the call will stop.
+     *
+     */
+    private boolean continueChecking = true;
+
+    /**
+     * Broadcast receiver that will listen for a sip error code from the logs, if found will send the metrics for call
+     * failed with sip error code.
+     *
+     */
+    private BroadcastReceiver mSipErrorCodeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            continueChecking = false;
+            mBroadcastReceiverManager.unregisterReceiver(this);
+            VialerStatistics.incomingCallFailedDueToSipError(
+                    mRequestToken,
+                    mMessageStartTime,
+                    mAttempt,
+                    intent.getIntExtra(SipLogHandler.EXTRA_SIP_ERROR_CODE, 0)
+            );
+        }
+    };
 
     private CallSetupChecker (String requestToken, String messageStartTime, String attempt) {
         mRequestToken = requestToken;
         mMessageStartTime = messageStartTime;
         mAttempt = attempt;
+        mBroadcastReceiverManager = BroadcastReceiverManager.fromContext(VialerApplication.get());
         mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
     }
 
@@ -65,10 +97,10 @@ public class CallSetupChecker {
      *
      */
     private void loop() {
-        boolean continueChecking = true;
+        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mSipErrorCodeReceiver, SipLogHandler.INVITE_FAILED_WITH_SIP_ERROR_CODE);
 
         while (continueChecking) {
-            continueChecking = check();
+            check();
         }
     }
 
@@ -77,21 +109,19 @@ public class CallSetupChecker {
      *
      * @return Return a boolean depending on whether or not we should continue checking for the call.
      */
-    private boolean check() {
+    private void check() {
         if (isSipServiceHandlingOurCall()){
             mRemoteLogger.i("Confirmed call from fcm message (" + mRequestToken + ") has been setup");
-            return false;
+            continueChecking = false;
         }
 
         if (hasMaximumAllowedTimeExpired()) {
             VialerStatistics.noCallReceivedFromAsteriskAfterOkToMiddleware(mRequestToken, mMessageStartTime, mAttempt);
             mRemoteLogger.e("Unable to confirm call from fcm message (" + mRequestToken + ") was setup correctly");
-            return false;
+            continueChecking = false;
         }
 
         sleep();
-
-        return true;
     }
 
     /**
