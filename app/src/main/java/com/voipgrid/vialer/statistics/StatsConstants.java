@@ -4,6 +4,8 @@ public interface StatsConstants {
     String KEY_OS = "os";
     String KEY_OS_VERSION = "os_version";
     String KEY_APP_VERSION = "app_version";
+    String KEY_DEVICE_MANUFACTURER = "device_manufacturer";
+    String KEY_DEVICE_MODEL = "device_model";
     String KEY_APP_STATUS = "app_status";
     String KEY_MIDDLEWARE_KEY = "middleware_unique_key";
     String KEY_NETWORK = "network";

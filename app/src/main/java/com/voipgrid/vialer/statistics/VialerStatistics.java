@@ -13,6 +13,8 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_SETUP_SUCCESSFUL;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CLIENT_COUNTRY;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CONNECTION_TYPE;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_DEVICE_MANUFACTURER;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_DEVICE_MODEL;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_FAILED_REASON;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_HANGUP_REASON;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_LOG_ID;
@@ -269,7 +271,8 @@ public class VialerStatistics {
         addValue(KEY_NETWORK, mDefaultDataProvider.getNetwork());
         if (!mDefaultDataProvider.getNetwork().equals(VALUE_NETWORK_WIFI)) {
             addValue(KEY_NETWORK_OPERATOR, mDefaultDataProvider.getNetworkOperator());
-        }
+        addValue(KEY_DEVICE_MANUFACTURER, mDefaultDataProvider.getDeviceManufacturer().toLowerCase());
+        addValue(KEY_DEVICE_MODEL, mDefaultDataProvider.getDeviceModel().toLowerCase());
         addValue(KEY_CLIENT_COUNTRY, mDefaultDataProvider.getClientCountry());
         addValue(KEY_SIP_USER_ID, mDefaultDataProvider.getSipUserId());
 
