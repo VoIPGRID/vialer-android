@@ -79,13 +79,13 @@ public class CallSetupChecker {
      */
     private boolean check() {
         if (isSipServiceHandlingOurCall()){
-            mRemoteLogger.i("Confirmed call with middleware key:" + mRequestToken);
+            mRemoteLogger.i("Confirmed call from fcm message (" + mRequestToken + ") has been setup");
             return false;
         }
 
         if (hasMaximumAllowedTimeExpired()) {
             VialerStatistics.noCallReceivedFromAsteriskAfterOkToMiddleware(mRequestToken, mMessageStartTime, mAttempt);
-            mRemoteLogger.e("failed to confirm call with middleware key:" + mRequestToken);
+            mRemoteLogger.e("Unable to confirm call from fcm message (" + mRequestToken + ") was setup correctly");
             return false;
         }
 

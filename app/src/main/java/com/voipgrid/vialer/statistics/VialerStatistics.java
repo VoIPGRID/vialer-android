@@ -263,7 +263,7 @@ public class VialerStatistics {
 
     private VialerStatistics withMiddlewareInformation(String requestToken, String messageStartTime, String attempt) {
         addValue(KEY_MIDDLEWARE_KEY, requestToken);
-        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(Double.valueOf(messageStartTime))));
+        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(messageStartTime)));
         addValue(KEY_MIDDLEWARE_ATTEMPTS,attempt);
 
         return this;
