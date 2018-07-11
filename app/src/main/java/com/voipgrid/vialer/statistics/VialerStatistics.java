@@ -271,6 +271,7 @@ public class VialerStatistics {
         addValue(KEY_NETWORK, mDefaultDataProvider.getNetwork());
         if (!mDefaultDataProvider.getNetwork().equals(VALUE_NETWORK_WIFI)) {
             addValue(KEY_NETWORK_OPERATOR, mDefaultDataProvider.getNetworkOperator());
+        }
         addValue(KEY_DEVICE_MANUFACTURER, mDefaultDataProvider.getDeviceManufacturer().toLowerCase());
         addValue(KEY_DEVICE_MODEL, mDefaultDataProvider.getDeviceModel().toLowerCase());
         addValue(KEY_CLIENT_COUNTRY, mDefaultDataProvider.getClientCountry());
