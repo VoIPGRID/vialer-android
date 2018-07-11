@@ -23,6 +23,8 @@ public interface StatsConstants {
     String KEY_HANGUP_REASON = "hangup_reason";
     String KEY_SIP_USER_ID = "sip_user_id";
     String KEY_CONNECTION_TYPE = "connection_type";
+    String KEY_ACCOUNT_CONNECTION_TYPE = "account_connection_type";
+
 
     String VALUE_OS = "Android";
     String VALUE_APP_STATUS_ALPHA = "Alpha";
@@ -33,7 +35,9 @@ public interface StatsConstants {
     String VALUE_NETWORK_4G = "4G";
     String VALUE_NETWORK_3G = "3G";
     String VALUE_NETWORK_UNKNOWN = "unknown";
-    String VALUE_NETWORK_NO_CONENECTION = "NoConnection";
+    String VALUE_NETWORK_NO_CONNECTION = "NoConnection";
+    String VALUE_ACCOUNT_CONNECTION_TYPE_TLS = "TLS";
+    String VALUE_ACCOUNT_CONNECTION_TYPE_TCP = "TCP";
 
     String VALUE_BLUETOOTH_AUDIO_ENABLED_TRUE = "yes";
     String VALUE_BLUETOOTH_AUDIO_ENABLED_FALSE = "no";

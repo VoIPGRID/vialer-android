@@ -5,7 +5,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_APP_STATUS_BET
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_APP_STATUS_PRODUCTION;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_3G;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_4G;
-import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_NO_CONENECTION;
+import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_NO_CONNECTION;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_UNKNOWN;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_WIFI;
 
@@ -68,7 +68,7 @@ public class DefaultDataProvider {
         }
 
         if (type.equalsIgnoreCase(ConnectivityHelper.Connection.NO_CONNECTION.toString())) {
-            return VALUE_NETWORK_NO_CONENECTION;
+            return VALUE_NETWORK_NO_CONNECTION;
         }
 
         return VALUE_NETWORK_3G;
