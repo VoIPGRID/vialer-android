@@ -146,11 +146,11 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void noCallReceivedFromAsteriskAfterOkToMiddleware(RemoteMessage middlewarePayload) {
+    public static void noCallReceivedFromAsteriskAfterOkToMiddleware(String requestToken, String messageStartTime, String attempt) {
         VialerStatistics
                 .get()
                 .withDefaults()
-                .withMiddlewareInformation(middlewarePayload)
+                .withMiddlewareInformation(requestToken, messageStartTime, attempt)
                 .addValue(KEY_FAILED_REASON, VALUE_FAILED_NO_CALL_RECEIVED_FROM_ASTERISK)
                 .send();
     }
@@ -256,9 +256,15 @@ public class VialerStatistics {
 
     private VialerStatistics withMiddlewareInformation(RemoteMessage middlewarePayload) {
         Map<String, String> data = middlewarePayload.getData();
-        addValue(KEY_MIDDLEWARE_KEY, data.get(REQUEST_TOKEN));
-        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(data.get(MESSAGE_START_TIME))));
-        addValue(KEY_MIDDLEWARE_ATTEMPTS, data.get(ATTEMPT));
+        withMiddlewareInformation(data.get(REQUEST_TOKEN), data.get(MESSAGE_START_TIME), data.get(ATTEMPT));
+
+        return this;
+    }
+
+    private VialerStatistics withMiddlewareInformation(String requestToken, String messageStartTime, String attempt) {
+        addValue(KEY_MIDDLEWARE_KEY, requestToken);
+        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(Double.valueOf(messageStartTime))));
+        addValue(KEY_MIDDLEWARE_ATTEMPTS,attempt);
 
         return this;
     }
@@ -271,6 +277,7 @@ public class VialerStatistics {
         addValue(KEY_NETWORK, mDefaultDataProvider.getNetwork());
         if (!mDefaultDataProvider.getNetwork().equals(VALUE_NETWORK_WIFI)) {
             addValue(KEY_NETWORK_OPERATOR, mDefaultDataProvider.getNetworkOperator());
+        }
         addValue(KEY_DEVICE_MANUFACTURER, mDefaultDataProvider.getDeviceManufacturer().toLowerCase());
         addValue(KEY_DEVICE_MODEL, mDefaultDataProvider.getDeviceModel().toLowerCase());
         addValue(KEY_CLIENT_COUNTRY, mDefaultDataProvider.getClientCountry());
