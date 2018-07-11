@@ -27,7 +27,7 @@ public class CallSetupChecker {
     private final String mAttempt;
     private long mCheckStartTime;
     private final RemoteLogger mRemoteLogger;
-    private WeakReference<SipService> mSipService;
+    private SipService mSipService;
 
     private CallSetupChecker (String requestToken, String messageStartTime, String attempt) {
         mRequestToken = requestToken;
@@ -53,7 +53,7 @@ public class CallSetupChecker {
      *
      */
     public void start(SipService sipService) {
-        mSipService = new WeakReference<>(sipService);
+        mSipService = sipService;
 
         mCheckStartTime = System.currentTimeMillis();
 
@@ -107,8 +107,8 @@ public class CallSetupChecker {
      * Check if the SipService is currently busy with the call we are checking for.
      */
     private boolean isSipServiceHandlingOurCall() {
-        return mSipService != null && mSipService.get().getCurrentCall() != null && mRequestToken.equals(
-                mSipService.get().getCurrentCall().getMiddlewareKey());
+        return mSipService != null && mSipService.getCurrentCall() != null && mRequestToken.equals(
+                mSipService.getCurrentCall().getMiddlewareKey());
     }
 
     /**
