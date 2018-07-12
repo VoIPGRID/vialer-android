@@ -185,7 +185,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
     /**
      * @param phoneNumber the number that tried call in.
-     * @param callerId pretty name of the phonenumber that tied to call in.
+     * @param callerId pretty name of the phonenumber that tried to call in.
      * @param messageStartTime message roundtrip throughput timestamp handled as String for logging
      *                         purposes.
      */

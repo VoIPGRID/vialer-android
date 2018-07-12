@@ -34,7 +34,6 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_DIRECTION
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_FAILED;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_SUCCESSFUL;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_GSM_CALL_IN_PROGRESS;
-import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_VIALER_CALL_IN_PROGRESS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_INSUFFICIENT_NETWORK;
 import static com.voipgrid.vialer.statistics.StatsConstants
         .VALUE_FAILED_NO_CALL_RECEIVED_FROM_ASTERISK;
@@ -45,6 +44,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_NO_AUDIO_SENT;
 import static com.voipgrid.vialer.statistics.StatsConstants
         .VALUE_FAILED_REASON_ORIGINATOR_CANCELLED;
+import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_VIALER_CALL_IN_PROGRESS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_REMOTE;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_USER;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_WIFI;
@@ -118,11 +118,11 @@ public class VialerStatistics {
                 .send();
     }
 
-    private static void incomingCallFailedDueToSipError(SipCall sipCall, int sipErrorCode) {
+    public static void incomingCallFailedDueToSipError(String requestToken, String messageStartTime, String attempt, int sipErrorCode) {
         VialerStatistics
                 .get()
                 .withDefaults()
-                .withCallInformation(sipCall)
+                .withMiddlewareInformation(requestToken, messageStartTime, attempt)
                 .withBluetoothInformation()
                 .addValue(KEY_FAILED_REASON, String.valueOf(sipErrorCode))
                 .send();
@@ -150,11 +150,11 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void noCallReceivedFromAsteriskAfterOkToMiddleware(RemoteMessage middlewarePayload) {
+    public static void noCallReceivedFromAsteriskAfterOkToMiddleware(String requestToken, String messageStartTime, String attempt) {
         VialerStatistics
                 .get()
                 .withDefaults()
-                .withMiddlewareInformation(middlewarePayload)
+                .withMiddlewareInformation(requestToken, messageStartTime, attempt)
                 .addValue(KEY_FAILED_REASON, VALUE_FAILED_NO_CALL_RECEIVED_FROM_ASTERISK)
                 .send();
     }
@@ -260,9 +260,15 @@ public class VialerStatistics {
 
     private VialerStatistics withMiddlewareInformation(RemoteMessage middlewarePayload) {
         Map<String, String> data = middlewarePayload.getData();
-        addValue(KEY_MIDDLEWARE_KEY, data.get(REQUEST_TOKEN));
-        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(data.get(MESSAGE_START_TIME))));
-        addValue(KEY_MIDDLEWARE_ATTEMPTS, data.get(ATTEMPT));
+        withMiddlewareInformation(data.get(REQUEST_TOKEN), data.get(MESSAGE_START_TIME), data.get(ATTEMPT));
+
+        return this;
+    }
+
+    private VialerStatistics withMiddlewareInformation(String requestToken, String messageStartTime, String attempt) {
+        addValue(KEY_MIDDLEWARE_KEY, requestToken);
+        addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(messageStartTime)));
+        addValue(KEY_MIDDLEWARE_ATTEMPTS,attempt);
 
         return this;
     }

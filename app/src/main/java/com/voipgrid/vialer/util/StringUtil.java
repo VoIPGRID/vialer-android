@@ -2,6 +2,7 @@ package com.voipgrid.vialer.util;
 
 import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,15 +16,38 @@ public class StringUtil {
      * @return The captured group or null if not found
      */
     public static @Nullable String extractFirstCaptureGroupFromString(String subject, String pattern) {
+        return extractCaptureGroups(subject, pattern).get(0);
+    }
+
+    public static ArrayList<String> extractCaptureGroups(String subject, String pattern) {
+
         if (subject == null) return null;
 
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(subject);
 
         if (!m.find()) {
-            return null;
+            return new ArrayList<>();
         }
 
-        return m.group(1);
+        ArrayList<String> matches = new ArrayList<>();
+
+        int i = 1;
+
+        while(true) {
+            try {
+                String match = m.group(i);
+
+                if (match == null) {
+                    return matches;
+                }
+
+                matches.add(match);
+
+                i++;
+            } catch (Exception e) {
+                return matches;
+            }
+        }
     }
 }
