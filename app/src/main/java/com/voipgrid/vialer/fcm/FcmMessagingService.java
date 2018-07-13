@@ -51,6 +51,12 @@ public class FcmMessagingService extends FirebaseMessagingService {
     public static final String MESSAGE_START_TIME = "message_start_time";
     private static final int MAX_MIDDLEWARE_PUSH_ATTEMPTS = 8;
 
+    /**
+     * Stores the last call we have SUCCESSFULLY handled and started the SipService
+     * for.
+     */
+    private static String sLastHandledCall;
+
     private RemoteLogger mRemoteLogger;
 
     @Override
@@ -76,6 +82,11 @@ public class FcmMessagingService extends FirebaseMessagingService {
         }
 
         if (requestType.equals(CALL_REQUEST_TYPE)) {
+            String callerId = data.get(CALLER_ID) != null ? data.get(CALLER_ID) : "";
+            String responseUrl = data.get(RESPONSE_URL) != null ? data.get(RESPONSE_URL) : "";
+            String requestToken = data.get(REQUEST_TOKEN) != null ? data.get(REQUEST_TOKEN) : "";
+            String messageStartTime = data.get(MESSAGE_START_TIME) != null ? data.get(MESSAGE_START_TIME) : "";
+
             AnalyticsHelper analyticsHelper = new AnalyticsHelper(
                     ((AnalyticsApplication) getApplication()).getDefaultTracker()
             );
@@ -110,17 +121,14 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
             // Check to see if there is not already a sipServiceActive
             if (!SipService.sipServiceActive) {
+                sLastHandledCall = requestToken;
+
                 String number = data.get(PHONE_NUMBER);
 
                 // Is the current number suppressed.
                 if (number != null && (number.equalsIgnoreCase(SUPPRESSED) || number.toLowerCase().contains("xxxx"))) {
                     number = getString(R.string.supressed_number);
                 }
-
-                String callerId = data.get(CALLER_ID) != null ? data.get(CALLER_ID) : "";
-                String responseUrl = data.get(RESPONSE_URL) != null ? data.get(RESPONSE_URL) : "";
-                String requestToken = data.get(REQUEST_TOKEN) != null ? data.get(REQUEST_TOKEN) : "";
-                String messageStartTime = data.get(MESSAGE_START_TIME) != null ? data.get(MESSAGE_START_TIME) : "";
 
                 mRemoteLogger.d("Payload processed, calling startService method");
 
@@ -150,12 +158,28 @@ public class FcmMessagingService extends FirebaseMessagingService {
                         data.get(MESSAGE_START_TIME) != null ? data.get(MESSAGE_START_TIME) : "",
                         false
                 );
-                VialerStatistics.incomingCallFailedDueToOngoingVialerCall(remoteMessage);
+
+                sendCallFailedDueToOngoingVialerCallMetric(remoteMessage, requestToken);
             }
         } else if (requestType.equals(MESSAGE_REQUEST_TYPE)){
             mRemoteLogger.d("Code not implemented");
             // TODO implement this message.
         }
+    }
+
+    /**
+     * Send the vialer metric for ongoing call if appropriate.
+     *
+     * @param remoteMessage
+     * @param requestToken
+     */
+    private void sendCallFailedDueToOngoingVialerCallMetric(RemoteMessage remoteMessage, String requestToken) {
+        if (sLastHandledCall != null && sLastHandledCall.equals(requestToken)) {
+            mRemoteLogger.i("Push notification ( " + sLastHandledCall + ") is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully");
+            return;
+        }
+
+        VialerStatistics.incomingCallFailedDueToOngoingVialerCall(remoteMessage);
     }
 
     /**
