@@ -175,7 +175,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      */
     private void sendCallFailedDueToOngoingVialerCallMetric(RemoteMessage remoteMessage, String requestToken) {
         if (sLastHandledCall != null && sLastHandledCall.equals(requestToken)) {
-            mRemoteLogger.i("Push notification ( " + sLastHandledCall + ") is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully");
+            mRemoteLogger.i("Push notification (" + sLastHandledCall + ") is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully");
             return;
         }
 

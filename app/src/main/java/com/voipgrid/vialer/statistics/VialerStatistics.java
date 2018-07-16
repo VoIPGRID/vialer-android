@@ -316,6 +316,11 @@ public class VialerStatistics {
      * @return
      */
     private long calculateTimeToInitialResponse(String startTime) {
+        if (startTime == null) {
+            mRemoteLogger.i("Message start time is null");
+            return 0;
+        }
+
         long startTimeInMilliseconds = Long.parseLong(new BigDecimal(startTime).toPlainString().replace(".", "")) / 10000;
 
         return System.currentTimeMillis() - startTimeInMilliseconds;
