@@ -49,7 +49,7 @@ public interface SipConstants {
     String CALL_DISCONNECTED_MESSAGE      = "DISCONNECTED";
 
     /**
-     * CallStatus interface messages for communication with activity when a call is Disconnected.
+     * CallStatus interface messages for communication with activity when a call is Connected.
      */
     String CALL_CONNECTED_MESSAGE         = "CONNECTED";
 

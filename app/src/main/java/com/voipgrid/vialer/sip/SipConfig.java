@@ -464,6 +464,7 @@ public class SipConfig implements AccountStatus {
         String url = incomingCallDetails.getStringExtra(SipConstants.EXTRA_RESPONSE_URL);
         String messageStartTime = incomingCallDetails.getStringExtra(FcmMessagingService.MESSAGE_START_TIME);
         String token = incomingCallDetails.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN);
+        String attempt = incomingCallDetails.getStringExtra(FcmMessagingService.ATTEMPT);
 
         // Set responded as soon as possible to avoid duplicate requests due to multiple
         // onAccountRegistered calls in a row.
@@ -511,6 +512,8 @@ public class SipConfig implements AccountStatus {
                 mSipService.stopSelf();
             }
         });
+
+        CallSetupChecker.withPushMessageInformation(token, messageStartTime, attempt).start(mSipService);
     }
 
     @Override
