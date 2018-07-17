@@ -274,11 +274,6 @@ public class AccountActivity extends LoginRequiredActivity {
     }
 
     private void populate() {
-        if (mSystemUser == null) {
-            mRemoteLogger.e("Attempted to populate AccountActivity but there does not seem to be a SystemUser available");
-            return;
-        }
-
         if (mPreferences.hasSipPermission()) {
             mVoipSwitch.setChecked(mPreferences.hasSipEnabled());
             if (mPhoneAccount != null) {
@@ -287,10 +282,17 @@ public class AccountActivity extends LoginRequiredActivity {
         } else {
             mVoipSwitch.setVisibility(View.GONE);
         }
-        mMobileNumberEditText.setText(mSystemUser.getMobileNumber());
-        mOutgoingNumberEditText.setText(mSystemUser.getOutgoingCli());
+
         mSipIdContainer.setVisibility(mPreferences.hasSipEnabled() ? View.VISIBLE : View.GONE);
         enableProgressBar(false);
+
+        if (mSystemUser == null) {
+            mRemoteLogger.e("Attempted to populate AccountActivity but there does not seem to be a SystemUser available");
+            return;
+        }
+
+        mMobileNumberEditText.setText(mSystemUser.getMobileNumber());
+        mOutgoingNumberEditText.setText(mSystemUser.getOutgoingCli());
     }
 
     @Override
