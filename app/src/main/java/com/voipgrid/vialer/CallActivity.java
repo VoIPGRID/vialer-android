@@ -1047,6 +1047,12 @@ public class CallActivity extends LoginRequiredActivity
     public void onClick(View view) {
         Integer viewId = view.getId();
 
+        // If we have no call we don't want to handle any button clicks from this activity
+        // any more.
+        if (mSipService == null || mSipService.getCurrentCall() == null) {
+            return;
+        }
+
         switch (viewId) {
             case R.id.button_speaker:
                 toggleSpeaker();
