@@ -274,6 +274,11 @@ public class AccountActivity extends LoginRequiredActivity {
     }
 
     private void populate() {
+        if (mSystemUser == null) {
+            mRemoteLogger.e("Attempted to populate AccountActivity but there does not seem to be a SystemUser available");
+            return;
+        }
+
         if (mPreferences.hasSipPermission()) {
             mVoipSwitch.setChecked(mPreferences.hasSipEnabled());
             if (mPhoneAccount != null) {
