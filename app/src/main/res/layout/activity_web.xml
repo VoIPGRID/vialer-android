@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_gravity="top"
         android:theme="@style/ActionBar"
-        android:background="@color/color_primary"
+        android:background="@drawable/background_gradient"
         app:popupTheme="@style/ActionBar_Popup">
 
     </android.support.v7.widget.Toolbar>
