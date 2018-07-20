@@ -162,12 +162,23 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         TimeVal timeVal = new TimeVal();
         try {
             CallInfo callInfo = this.getInfo();
-            timeVal = callInfo.getConnectDuration();
+            return callInfo.getConnectDuration().getSec();
         } catch (Exception e) {
-            e.printStackTrace();
+            return timeVal.getSec();
         }
+    }
 
-        return timeVal.getSec();
+    /**
+     * Get the call duration in milliseconds, this will use the stored callinfo
+     * so should not be used for live duration reporting but only for getting the
+     * duration at the end of the call.
+     *
+     * @return
+     */
+    public int getCallDurationInMilliseconds() {
+        TimeVal timeVal = mLastCallInfo.getConnectDuration();
+
+        return (timeVal.getSec() * 1000) + timeVal.getMsec();
     }
 
     private String getCodec() {
