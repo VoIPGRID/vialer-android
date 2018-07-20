@@ -2,6 +2,9 @@ package com.voipgrid.vialer;
 
 import com.github.anrwatchdog.ANRWatchDog;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.dagger.DaggerVialerComponent;
+import com.voipgrid.vialer.dagger.VialerComponent;
+import com.voipgrid.vialer.dagger.VialerModule;
 
 /**
  * VialerApplication that extends the AnalyticsApplication
@@ -13,6 +16,8 @@ public class VialerApplication extends AnalyticsApplication {
 
     private ActivityLifecycleTracker mActivityLifecycle;
 
+    private VialerComponent mComponent;
+
     public static VialerApplication get() {
         return sApplication;
     }
@@ -20,6 +25,10 @@ public class VialerApplication extends AnalyticsApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        mComponent = DaggerVialerComponent
+                .builder()
+                .vialerModule(new VialerModule(this))
+                .build();
         sApplication = this;
         mActivityLifecycle = new ActivityLifecycleTracker();
         registerActivityLifecycleCallbacks(mActivityLifecycle);
@@ -37,5 +46,14 @@ public class VialerApplication extends AnalyticsApplication {
      */
     public boolean isApplicationVisible() {
         return mActivityLifecycle.isApplicationVisible();
+    }
+
+    /**
+     * Return the main dagger component.
+     *
+     * @return
+     */
+    public VialerComponent component() {
+        return mComponent;
     }
 }
