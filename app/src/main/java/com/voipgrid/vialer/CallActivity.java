@@ -7,21 +7,17 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringDef;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -35,6 +31,8 @@ import com.voipgrid.vialer.call.CallKeyPadFragment;
 import com.voipgrid.vialer.call.CallLockRingFragment;
 import com.voipgrid.vialer.call.CallTransferCompleteFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
+import com.voipgrid.vialer.calling.AbstractCallActivity;
+import com.voipgrid.vialer.calling.SipServiceConnection;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.media.MediaManager;
@@ -46,7 +44,6 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
-import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
@@ -61,10 +58,10 @@ import java.util.Map;
 /**
  * CallActivity for incoming or outgoing call.
  */
-public class CallActivity extends LoginRequiredActivity
+public class CallActivity extends AbstractCallActivity
         implements View.OnClickListener, SipConstants, ProximitySensorInterface,
         CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
-        MediaManager.AudioChangedInterface {
+        MediaManager.AudioChangedInterface, SipServiceConnection.SipServiceConnectionListener {
 
     @StringDef({TYPE_INCOMING_CALL, TYPE_OUTGOING_CALL, TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL, TYPE_CONNECTED_CALL})
     @Retention(RetentionPolicy.SOURCE)
@@ -91,11 +88,6 @@ public class CallActivity extends LoginRequiredActivity
     private static final int DELAYED_FINISH_MS = 3000;
     private static final int DELAYED_FINISH_RETRY_MS = 1000;
 
-    /**
-     * If the sip service has not successfully bound in this amount of time, the call
-     * activity will attempt to finish.
-     */
-    private static final int MAX_ALLOWED_MS_TO_BIND_SIP_SERVICE = 3000;
 
     // Manager for "on speaker" action.
     private ProximitySensorHelper mProximityHelper;
@@ -127,9 +119,6 @@ public class CallActivity extends LoginRequiredActivity
     // Keep track of the start time of a call, so we can keep track of its duration.
     long mCallStartTime = 0;
     private RemoteLogger mRemoteLogger;
-    private SipService mSipService;
-    private boolean mSipServiceBound = false;
-    private boolean mShouldUnbind = false;
 
     private MediaManager mMediaManager;
 
@@ -143,16 +132,16 @@ public class CallActivity extends LoginRequiredActivity
     Runnable mCallDurationRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mSipService != null) {
-                if (mSipService.getCurrentCall() != null && mSipService.getFirstCall() != null) {
-                    String firstCallIdentifier = mSipService.getFirstCall().getIdentifier();
-                    String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
+            if (mSipServiceConnection.isAvailable()) {
+                if (mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
+                    String firstCallIdentifier = mSipServiceConnection.get().getFirstCall().getIdentifier();
+                    String currentCallIdentifier = mSipServiceConnection.get().getCurrentCall().getIdentifier();
                     long seconds;
 
                     if (firstCallIdentifier.equals(currentCallIdentifier)) {
-                        seconds = mSipService.getFirstCall().getCallDuration();
+                        seconds = mSipServiceConnection.get().getFirstCall().getCallDuration();
                     } else {
-                        seconds = mSipService.getCurrentCall().getCallDuration();
+                        seconds = mSipServiceConnection.get().getCurrentCall().getCallDuration();
                     }
                     mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
 
@@ -173,7 +162,7 @@ public class CallActivity extends LoginRequiredActivity
                 if (!intent.getStringExtra(CALL_IDENTIFIER_KEY).equals(mCurrentCallId)) {
                     if (mOnTransfer) {
                         onCallStatusUpdate(status);
-                        if (!mSipService.getFirstCall().getIsCallConnected()) {
+                        if (!mSipServiceConnection.get().getFirstCall().getIsCallConnected()) {
                             swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
                         }
                     }
@@ -235,39 +224,7 @@ public class CallActivity extends LoginRequiredActivity
         }
     };
 
-    private ServiceConnection mSipServiceConnection = new ServiceConnection() {
 
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance.
-            SipService.SipServiceBinder binder = (SipService.SipServiceBinder) service;
-            mSipService = binder.getService();
-            mSipServiceBound = true;
-            if (mSipService.getFirstCall() != null) {
-                mCurrentCallId = mSipService.getFirstCall().getIdentifier();
-            }
-
-            if (mIsIncomingCall) {
-                // Wait one second before setting the callerId and phonenumber
-                // so the SipService can set the currentcall.
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        SipCall firstCall = mSipService.getFirstCall();
-                        if (firstCall != null) {
-                            firstCall.setCallerId(mCallerIdToDisplay);
-                            firstCall.setPhoneNumber(mPhoneNumberToDisplay);
-                        }
-                    }
-                }, 1000);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mSipServiceBound = false;
-        }
-    };
 
     private Runnable delayedFinish = new Runnable() {
 
@@ -275,7 +232,7 @@ public class CallActivity extends LoginRequiredActivity
 
         @Override
         public void run() {
-            if(CallActivity.this.hasActiveCall()) {
+            if(mSipServiceConnection.hasActiveCall()) {
                 mRemoteLogger.i("Call is still active " + DELAYED_FINISH_MS + "ms after finishWithDelay was called, trying again in " + DELAYED_FINISH_RETRY_MS + "ms");
                 this.delayedHandler.removeCallbacks(this);
                 this.delayedHandler.postDelayed(this, DELAYED_FINISH_RETRY_MS);
@@ -293,6 +250,25 @@ public class CallActivity extends LoginRequiredActivity
             finish();  // Close this activity after 3 seconds.
         }
     };
+
+    @Override
+    public void sipServiceHasConnected(SipService sipService) {
+        super.sipServiceHasConnected(sipService);
+        if (mIsIncomingCall) {
+            // Wait one second before setting the callerId and phonenumber
+            // so the SipService can set the currentcall.
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    SipCall firstCall = sipService.getFirstCall();
+                    if (firstCall != null) {
+                        firstCall.setCallerId(mCallerIdToDisplay);
+                        firstCall.setPhoneNumber(mPhoneNumberToDisplay);
+                    }
+                }
+            }, 1000);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -432,16 +408,9 @@ public class CallActivity extends LoginRequiredActivity
 
         mRemoteLogger.d("onResume");
 
-        // Bind the SipService to the activity.
-        if (!mSipServiceBound && mSipService == null) {
-            mRemoteLogger.i("SipService not bound!");
-            if (bindService(new Intent(this, SipService.class), mSipServiceConnection, Context.BIND_AUTO_CREATE)) {
-                mShouldUnbind = true;
-            }
-        }
 
-        if (!mOnTransfer && mSipService != null && mSipService.getCurrentCall() != null) {
-            if (mSipService.getCurrentCall().isOnHold()) {
+        if (!mOnTransfer && mSipServiceConnection.get() != null && mSipServiceConnection.get().getCurrentCall() != null) {
+            if (mSipServiceConnection.get().getCurrentCall().isOnHold()) {
                 mRemoteLogger.d("SipService has call on hold");
                 if (!mOnHold) {
                     mRemoteLogger.i("But the activity DOES not have the call on hold. Match the sip service.");
@@ -455,18 +424,7 @@ public class CallActivity extends LoginRequiredActivity
             }
         }
 
-        // Make sure service is bound before updating status.
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!mSipServiceBound) {
-                    finishWithDelay();
-                } else if (mSipService.getCurrentCall() == null) {
-                    mRemoteLogger.d("runnable in onResume Current Call is null");
-                    onCallStatusUpdate(CALL_DISCONNECTED_MESSAGE);
-                }
-            }
-        }, MAX_ALLOWED_MS_TO_BIND_SIP_SERVICE);
+
     }
 
     @Override
@@ -627,14 +585,14 @@ public class CallActivity extends LoginRequiredActivity
 
                 mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
 
-                if (mOnTransfer && mSipService.getCurrentCall() != null && mSipService.getFirstCall() != null) {
+                if (mOnTransfer && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
                     CallTransferFragment callTransferFragment = (CallTransferFragment)
                             getFragmentManager().findFragmentByTag(TAG_CALL_TRANSFER_FRAGMENT);
                     callTransferFragment.secondCallIsConnected();
                 }
 
-                if (mSipService.getCurrentCall() != null) {
-                    VialerStatistics.callWasSuccessfullySetup(mSipService.getCurrentCall());
+                if (mSipServiceConnection.get().getCurrentCall() != null) {
+                    VialerStatistics.callWasSuccessfullySetup(mSipServiceConnection.get().getCurrentCall());
                 }
 
                 mCallDurationView.setVisibility(View.VISIBLE);
@@ -665,22 +623,22 @@ public class CallActivity extends LoginRequiredActivity
                         toggleVisibilityCallInfo(false);
 
                         Map<String, String> map = new HashMap<>();
-                        map.put(MAP_ORIGINAL_CALLER_ID, mSipService.getFirstCall().getCallerId());
-                        map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipService.getFirstCall().getPhoneNumber());
+                        map.put(MAP_ORIGINAL_CALLER_ID, mSipServiceConnection.get().getFirstCall().getCallerId());
+                        map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipServiceConnection.get().getFirstCall().getPhoneNumber());
                         map.put(MAP_TRANSFERRED_PHONE_NUMBER, mTransferredNumber);
 
                         swapFragment(TAG_CALL_TRANSFER_COMPLETE_FRAGMENT, map);
 
                         mOnTransfer = false;
                         try {
-                            mSipService.getFirstCall().hangup(true);
+                            mSipServiceConnection.get().getFirstCall().hangup(true);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    } else if (mSipService.getCurrentCall() != null) {
+                    } else if (mSipServiceConnection.get().getCurrentCall() != null) {
                         // The "second" call has been disconnected. But there is still a call available.
-                        String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
-                        String initialCallIdentifier = mSipService.getFirstCall().getIdentifier();
+                        String currentCallIdentifier = mSipServiceConnection.get().getCurrentCall().getIdentifier();
+                        String initialCallIdentifier = mSipServiceConnection.get().getFirstCall().getIdentifier();
 
                         mMediaManager.setCallOnSpeaker(false);
 
@@ -690,31 +648,31 @@ public class CallActivity extends LoginRequiredActivity
                         findViewById(R.id.button_transfer).setVisibility(View.VISIBLE);
                         swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
 
-                        newStatus = mSipService.getCurrentCall().getCurrentCallState();
+                        newStatus = mSipServiceConnection.get().getCurrentCall().getCurrentCallState();
 
                         if (!currentCallIdentifier.equals(initialCallIdentifier)) {
-                            mCurrentCallId = mSipService.getCurrentCall().getIdentifier();
-                            mCallerIdToDisplay = mSipService.getCurrentCall().getCallerId();
-                            mPhoneNumberToDisplay = mSipService.getCurrentCall().getPhoneNumber();
+                            mCurrentCallId = mSipServiceConnection.get().getCurrentCall().getIdentifier();
+                            mCallerIdToDisplay = mSipServiceConnection.get().getCurrentCall().getCallerId();
+                            mPhoneNumberToDisplay = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
                         } else {
-                            mCurrentCallId = mSipService.getFirstCall().getIdentifier();
-                            newStatus = mSipService.getFirstCall().getCurrentCallState();
-                            mCallerIdToDisplay = mSipService.getFirstCall().getCallerId();
-                            mPhoneNumberToDisplay = mSipService.getFirstCall().getPhoneNumber();
+                            mCurrentCallId = mSipServiceConnection.get().getFirstCall().getIdentifier();
+                            newStatus = mSipServiceConnection.get().getFirstCall().getCurrentCallState();
+                            mCallerIdToDisplay = mSipServiceConnection.get().getFirstCall().getCallerId();
+                            mPhoneNumberToDisplay = mSipServiceConnection.get().getFirstCall().getPhoneNumber();
                         }
 
                         displayCallInfo();
 
-                        mOnHold = mSipService.getCurrentCall().isOnHold();
+                        mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
                         mOnTransfer = false;
                         updateCallButton(R.id.button_transfer, true);
                         updateCallButton(R.id.button_onhold, true);
                         updateCallButton(R.id.button_keypad, true);
                         updateCallButton(R.id.button_microphone, true);
 
-                        onCallStatusUpdate(mSipService.getCurrentCall().getCurrentCallState());
+                        onCallStatusUpdate(mSipServiceConnection.get().getCurrentCall().getCurrentCallState());
                     } else {
-                        if (mSipService != null && mSipService.getCurrentCall() == null && mSipService.getFirstCall() == null) {
+                        if (mSipServiceConnection.get() != null && mSipServiceConnection.get().getCurrentCall() == null && mSipServiceConnection.get().getFirstCall() == null) {
                             toggleVisibilityCallInfo(true);
                             swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
                             displayCallInfo();
@@ -793,15 +751,15 @@ public class CallActivity extends LoginRequiredActivity
             finishWithDelay();
         } else if (mOnTransfer) {
             // During a transfer.
-            if (mSipService.getCurrentCall() == null || mSipService.getFirstCall() == null) {
+            if (mSipServiceConnection.get().getCurrentCall() == null || mSipServiceConnection.get().getFirstCall() == null) {
                 super.onBackPressed();
             } else {
-                String currentCallIdentifier = mSipService.getCurrentCall().getIdentifier();
-                String firstCallIdentifier = mSipService.getFirstCall().getIdentifier();
+                String currentCallIdentifier = mSipServiceConnection.get().getCurrentCall().getIdentifier();
+                String firstCallIdentifier = mSipServiceConnection.get().getFirstCall().getIdentifier();
 
                 if (!firstCallIdentifier.equals(currentCallIdentifier)) {
                     try {
-                        mSipService.getCurrentCall().hangup(true);
+                        mSipServiceConnection.get().getCurrentCall().hangup(true);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -815,13 +773,13 @@ public class CallActivity extends LoginRequiredActivity
                     updateCallButton(R.id.button_transfer, true);
                 }
             }
-        } else if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE && mSipService.getCurrentCall() != null) {
+        } else if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
             // In call dialog.
             hangup(R.id.button_hangup);
-        } else if (declineButton != null && declineButton.getVisibility() == View.VISIBLE && mSipService.getCurrentCall() != null) {
+        } else if (declineButton != null && declineButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
             // Two button pickup visible.
             decline();
-        } else if (lockRingView != null && lockRingView.getVisibility() == View.VISIBLE && mSipService.getCurrentCall() != null) {
+        } else if (lockRingView != null && lockRingView.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
             // Lock ring visible.
             decline();
         } else {
@@ -856,8 +814,8 @@ public class CallActivity extends LoginRequiredActivity
         } else {
             if (mOnTransfer) {
                 Map<String, String> map = new HashMap<>();
-                map.put(MAP_ORIGINAL_CALLER_ID, mSipService.getFirstCall().getCallerId());
-                map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipService.getFirstCall().getPhoneNumber());
+                map.put(MAP_ORIGINAL_CALLER_ID, mSipServiceConnection.get().getFirstCall().getCallerId());
+                map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipServiceConnection.get().getFirstCall().getPhoneNumber());
                 map.put(MAP_SECOND_CALL_IS_CONNECTED, "" + true);
 
                 swapFragment(TAG_CALL_TRANSFER_FRAGMENT, map);
@@ -871,12 +829,12 @@ public class CallActivity extends LoginRequiredActivity
     private void toggleOnHold() {
         mRemoteLogger.d("toggleOnHold");
         mOnHold = !mOnHold;
-        if (mSipServiceBound) {
+        if (mSipServiceConnection.isAvailable()) {
             try {
                 if (mOnTransfer) {
-                    mSipService.getCurrentCall().toggleHold();
+                    mSipServiceConnection.get().getCurrentCall().toggleHold();
                 } else {
-                    mSipService.getFirstCall().toggleHold();
+                    mSipServiceConnection.get().getFirstCall().toggleHold();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -960,10 +918,10 @@ public class CallActivity extends LoginRequiredActivity
     }
 
     public void hangup(Integer viewId) {
-        if (mSipServiceBound) {
+        if (mSipServiceConnection.isAvailable()) {
             updateCallButton(viewId, false);
             try {
-                mSipService.getCurrentCall().hangup(true);
+                mSipServiceConnection.get().getCurrentCall().hangup(true);
                 mSelfHangup = true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1045,8 +1003,8 @@ public class CallActivity extends LoginRequiredActivity
      */
     void updateMicrophoneVolume(long newVolume) {
         mRemoteLogger.d("updateMicrophoneVolume");
-        if (mSipServiceBound) {
-            mSipService.getCurrentCall().updateMicrophoneVolume(newVolume);
+        if (mSipServiceConnection.isAvailable()) {
+            mSipServiceConnection.get().getCurrentCall().updateMicrophoneVolume(newVolume);
         }
     }
 
@@ -1056,7 +1014,7 @@ public class CallActivity extends LoginRequiredActivity
 
         // If we have no call we don't want to handle any button clicks from this activity
         // any more.
-        if (mSipService == null || mSipService.getCurrentCall() == null) {
+        if (mSipServiceConnection.get() == null || mSipServiceConnection.get().getCurrentCall() == null) {
             return;
         }
 
@@ -1068,7 +1026,7 @@ public class CallActivity extends LoginRequiredActivity
 
             case R.id.button_microphone:
                 if (mOnTransfer) {
-                    if (mSipService.getCurrentCall().getIsCallConnected()) {
+                    if (mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
                         toggleMute();
                         updateCallButton(viewId, true);
                     }
@@ -1081,7 +1039,7 @@ public class CallActivity extends LoginRequiredActivity
                 break;
 
             case R.id.button_keypad:
-                if (mSipService.getCurrentCall().getIsCallConnected()) {
+                if (mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
                     toggleDialPad();
                     updateCallButton(viewId, true);
                 }
@@ -1103,8 +1061,8 @@ public class CallActivity extends LoginRequiredActivity
                 toggleVisibilityCallInfo(false);
 
                 Map<String, String> map = new HashMap<>();
-                map.put(MAP_ORIGINAL_CALLER_ID, mSipService.getFirstCall().getCallerId());
-                map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipService.getFirstCall().getPhoneNumber());
+                map.put(MAP_ORIGINAL_CALLER_ID, mSipServiceConnection.get().getFirstCall().getCallerId());
+                map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipServiceConnection.get().getFirstCall().getPhoneNumber());
                 map.put(MAP_SECOND_CALL_IS_CONNECTED, "" + false);
 
                 swapFragment(TAG_CALL_TRANSFER_FRAGMENT, map);
@@ -1115,7 +1073,7 @@ public class CallActivity extends LoginRequiredActivity
 
             case R.id.button_onhold:
                 if (mOnTransfer) {
-                    if (mSipService.getCurrentCall().getIsCallConnected()) {
+                    if (mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
                         toggleOnHold();
                         updateCallButton(viewId, true);
                     }
@@ -1209,9 +1167,9 @@ public class CallActivity extends LoginRequiredActivity
         }
 
         if (MicrophonePermission.hasPermission(this)) {
-            if (mSipServiceBound) {
+            if (mSipServiceConnection.isAvailable()) {
                 try {
-                    mSipService.getCurrentCall().answer();
+                    mSipServiceConnection.get().getCurrentCall().answer();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1240,9 +1198,9 @@ public class CallActivity extends LoginRequiredActivity
         mRemoteLogger.d("decline");
         mMediaManager.stopIncomingCallRinger();
 
-        if (mSipServiceBound) {
+        if (mSipServiceConnection.isAvailable()) {
             try {
-                mSipService.getCurrentCall().decline();
+                mSipServiceConnection.get().getCurrentCall().decline();
                 mSelfHangup = true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1262,21 +1220,10 @@ public class CallActivity extends LoginRequiredActivity
         new Handler().postDelayed(delayedFinish, DELAYED_FINISH_MS);
     }
 
-    /**
-     *
-     * @return TRUE if the sip service is available and has an active call, otherwise FALSE.
-     */
-    private boolean hasActiveCall() {
-        if (mSipService == null) return false;
 
-        return mSipService.getCurrentCall() != null;
-    }
 
     private void stopService() {
-        if (!hasActiveCall() && mShouldUnbind) {
-            unbindService(mSipServiceConnection);
-            mShouldUnbind = false;
-        }
+
     }
 
     @Override
@@ -1286,8 +1233,8 @@ public class CallActivity extends LoginRequiredActivity
 
     @Override
     public void callKeyPadButtonClicked(String dtmf) {
-        if (mSipServiceBound) {
-            SipCall call = mSipService.getCurrentCall();
+        if (mSipServiceConnection.isAvailable()) {
+            SipCall call = mSipServiceConnection.get().getCurrentCall();
             if (call != null) {
                 try {
                     call.dialDtmf(dtmf);
@@ -1304,22 +1251,22 @@ public class CallActivity extends LoginRequiredActivity
                 getApplicationContext(),
                 PhoneNumberUtils.format(numberToCall)
         );
-        mSipService.makeCall(sipAddressUri, "", numberToCall);
+        mSipServiceConnection.get().makeCall(sipAddressUri, "", numberToCall);
 
         toggleVisibilityCallInfo(true);
         findViewById(R.id.button_transfer).setVisibility(View.GONE);
 
-        mOnHold = mSipService.getCurrentCall().isOnHold();
+        mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
         updateCallButton(R.id.button_onhold, false);
         updateCallButton(R.id.button_keypad, false);
         updateCallButton(R.id.button_microphone, false);
 
-        mCurrentCallId = mSipService.getCurrentCall().getIdentifier();
+        mCurrentCallId = mSipServiceConnection.get().getCurrentCall().getIdentifier();
 
         mStateView.setText(R.string.title_state_calling);
 
-        mCallerIdToDisplay = mSipService.getCurrentCall().getCallerId();
-        mPhoneNumberToDisplay = mSipService.getCurrentCall().getPhoneNumber();
+        mCallerIdToDisplay = mSipServiceConnection.get().getCurrentCall().getCallerId();
+        mPhoneNumberToDisplay = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
 
         displayCallInfo();
     }
@@ -1327,10 +1274,10 @@ public class CallActivity extends LoginRequiredActivity
     @Override
     public void callTransferHangupSecondCall() {
         try {
-            if (mSipService.getFirstCall().isOnHold()) {
-                mSipService.getCurrentCall().hangup(true);
+            if (mSipServiceConnection.get().getFirstCall().isOnHold()) {
+                mSipServiceConnection.get().getCurrentCall().hangup(true);
             } else {
-                mSipService.getFirstCall().hangup(true);
+                mSipServiceConnection.get().getFirstCall().hangup(true);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1340,7 +1287,7 @@ public class CallActivity extends LoginRequiredActivity
     @Override
     public void hangupFromKeypad() {
         try {
-            mSipService.getCurrentCall().hangup(true);
+            mSipServiceConnection.get().getCurrentCall().hangup(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1349,8 +1296,8 @@ public class CallActivity extends LoginRequiredActivity
     @Override
     public void callTransferConnectTheCalls() {
         try {
-            mTransferredNumber = mSipService.getCurrentCall().getPhoneNumber();
-            mSipService.getFirstCall().xFerReplaces(mSipService.getCurrentCall());
+            mTransferredNumber = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
+            mSipServiceConnection.get().getFirstCall().xFerReplaces(mSipServiceConnection.get().getCurrentCall());
             mAnalyticsHelper.sendEvent(
                     getString(R.string.analytics_event_category_call),
                     getString(R.string.analytics_event_action_transfer),
@@ -1394,16 +1341,16 @@ public class CallActivity extends LoginRequiredActivity
         mRemoteLogger.i("AudioLost or Recovered: ");
         mRemoteLogger.i("==> " + lost);
 
-        if (mSipService == null) {
+        if (mSipServiceConnection.get() == null) {
             mRemoteLogger.e("mSipService is null");
         } else {
             if (lost) {
                 // Don't put the call on hold when there is a native call is ringing.
-                if (mConnected && !mSipService.getNativeCallManager().nativeCallIsRinging()) {
+                if (mConnected && !mSipServiceConnection.get().getNativeCallManager().nativeCallIsRinging()) {
                     onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
                 }
             } else {
-                if (mConnected && mSipService.getCurrentCall() != null && mSipService.getCurrentCall().isOnHold()) {
+                if (mConnected && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getCurrentCall().isOnHold()) {
                     onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
                 }
             }
