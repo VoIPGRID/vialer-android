@@ -7,6 +7,7 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Performs various actions based on the result of the pjsip logs.
@@ -20,6 +21,13 @@ public class SipLogHandler {
     public static final String INVITE_FAILED_WITH_SIP_ERROR_CODE = "com.voipgrid.vialer.logging.sip.INVITE_FAILED_WITH_SIP_ERROR_CODE";
 
     public static final String EXTRA_SIP_ERROR_CODE = "com.voipgrid.vialer.logging.sip.EXTRA_SIP_ERROR_CODE";
+
+    /**
+     * Any status codes in this list will not count as failure status codes even if they are 4xx or 5xx as
+     * they are standard messages.
+     *
+     */
+    private static final int[] IGNORED_STATUS_CODES = { 407 };
 
     /**
      * Perform various tasks based on pjsip logs.
@@ -36,7 +44,7 @@ public class SipLogHandler {
         if (isInvite(log)) {
             Integer inviteFailedCode = extractFailedInviteCode(log);
 
-            if (inviteFailedCode != null) {
+            if (inviteFailedCode != null && !Arrays.asList(IGNORED_STATUS_CODES).contains(inviteFailedCode)) {
                 sendInviteFailedBroadcast(inviteFailedCode);
             }
         }
