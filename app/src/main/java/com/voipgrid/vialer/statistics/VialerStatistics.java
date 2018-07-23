@@ -10,6 +10,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_APP_VERSION;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_BLUETOOTH_AUDIO_ENABLED;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_BLUETOOTH_DEVICE_NAME;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_DIRECTION;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_DURATION;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_SETUP_SUCCESSFUL;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CLIENT_COUNTRY;
@@ -51,6 +52,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_WIFI;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_OS;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.GsonBuilder;
@@ -245,6 +247,7 @@ public class VialerStatistics {
                 .withCallInformation(sipCall)
                 .withBluetoothInformation()
                 .addValue(KEY_HANGUP_REASON, VALUE_HANGUP_REASON_USER)
+                .addValue(KEY_CALL_DURATION, String.valueOf(sipCall.getCallDurationInMilliseconds()))
                 .send();
     }
 
@@ -255,6 +258,7 @@ public class VialerStatistics {
                 .withCallInformation(sipCall)
                 .withBluetoothInformation()
                 .addValue(KEY_HANGUP_REASON, VALUE_HANGUP_REASON_REMOTE)
+                .addValue(KEY_CALL_DURATION, String.valueOf(sipCall.getCallDurationInMilliseconds()))
                 .send();
     }
 
@@ -295,7 +299,10 @@ public class VialerStatistics {
     }
 
     private VialerStatistics withCallInformation(SipCall call) {
-        addValue(KEY_MIDDLEWARE_KEY, call.getMiddlewareKey());
+        if (call.getMiddlewareKey() != null && !call.getMiddlewareKey().isEmpty()) {
+            addValue(KEY_MIDDLEWARE_KEY, call.getMiddlewareKey());
+        }
+
         addValue(KEY_CALL_ID, call.getAsteriskCallId());
         addValue(KEY_CALL_DIRECTION, call.getCallDirection());
         addValue(KEY_CONNECTION_TYPE, call.getTransport() != null ? call.getTransport().toUpperCase() : "");
