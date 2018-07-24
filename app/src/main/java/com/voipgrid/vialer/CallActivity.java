@@ -259,16 +259,6 @@ public class CallActivity extends AbstractCallActivity
         mRemoteLogger = new RemoteLogger(CallActivity.class).enableConsoleLogging();
         mRemoteLogger.d("onCreate");
 
-        // Check if we have permission to use the microphone. If not, request it.
-        if (!MicrophonePermission.hasPermission(this)) {
-            MicrophonePermission.askForPermission(this);
-        }
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-
         setContentView(R.layout.activity_call);
 
         mNotificationHelper = NotificationHelper.getInstance(this);
