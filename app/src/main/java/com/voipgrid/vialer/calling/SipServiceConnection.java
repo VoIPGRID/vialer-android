@@ -118,11 +118,13 @@ public class SipServiceConnection implements ServiceConnection {
      *
      */
     public void disconnect() {
-        if (!hasActiveCall() && mShouldUnbind) {
-            mRemoteLogger.i(mActivity.getClass().getSimpleName() + " is attempting to unbind from " + SERVICE.getSimpleName());
-            mActivity.unbindService(this);
-            mShouldUnbind = false;
-        }
+        if (hasActiveCall() || !mShouldUnbind) return;
+
+        mRemoteLogger.i(mActivity.getClass().getSimpleName() + " is attempting to unbind from " + SERVICE.getSimpleName());
+        mActivity.unbindService(this);
+        mShouldUnbind = false;
+        mSipServiceBound = false;
+        mListener.sipServiceHasBeenDisconnected();
     }
 
     /**
@@ -132,7 +134,6 @@ public class SipServiceConnection implements ServiceConnection {
      */
     public boolean hasActiveCall() {
         return mSipService != null && mSipService.getCurrentCall() != null;
-
     }
 
     /**
@@ -154,6 +155,10 @@ public class SipServiceConnection implements ServiceConnection {
         return mSipServiceBound;
     }
 
+    public boolean isAvailableOrIsAvailableSoon() {
+        return mSipServiceBound || mShouldUnbind;
+    }
+
     @Override
     public void onServiceConnected(ComponentName className, IBinder service) {
         mRemoteLogger.i(mActivity.getClass().getSimpleName() + " connected to " + SERVICE.getSimpleName());
@@ -166,8 +171,6 @@ public class SipServiceConnection implements ServiceConnection {
     @Override
     public void onServiceDisconnected(ComponentName arg0) {
         mRemoteLogger.i(mActivity.getClass().getSimpleName() + " disconnected from " + SERVICE.getSimpleName());
-        mSipServiceBound = false;
-        mListener.sipServiceHasBeenDisconnected();
     }
 
     /**

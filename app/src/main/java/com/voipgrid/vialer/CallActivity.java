@@ -9,7 +9,6 @@ import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -126,31 +125,6 @@ public class CallActivity extends AbstractCallActivity
     private int mNotificationId;
 
     private BroadcastReceiverManager mBroadcastReceiverManager;
-
-    // Runs without a timer by re-posting this handler at the end of the runnable.
-    Handler mCallHandler = new Handler();
-    Runnable mCallDurationRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (mSipServiceConnection.isAvailable()) {
-                if (mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
-                    String firstCallIdentifier = mSipServiceConnection.get().getFirstCall().getIdentifier();
-                    String currentCallIdentifier = mSipServiceConnection.get().getCurrentCall().getIdentifier();
-                    long seconds;
-
-                    if (firstCallIdentifier.equals(currentCallIdentifier)) {
-                        seconds = mSipServiceConnection.get().getFirstCall().getCallDuration();
-                    } else {
-                        seconds = mSipServiceConnection.get().getCurrentCall().getCallDuration();
-                    }
-                    mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
-
-                    // Keep timer running for as long as possible.
-                    mCallHandler.postDelayed(mCallDurationRunnable, 1000);
-                }
-            }
-        }
-    };
 
     // Broadcast receiver for presenting changes in call state to user.
     private BroadcastReceiver mCallStatusReceiver = new BroadcastReceiver() {
@@ -271,6 +245,15 @@ public class CallActivity extends AbstractCallActivity
     }
 
     @Override
+    public void onCallDurationUpdate(long seconds) {
+        if (!mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
+            return;
+        }
+
+        mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mRemoteLogger = new RemoteLogger(CallActivity.class).enableConsoleLogging();
@@ -328,7 +311,6 @@ public class CallActivity extends AbstractCallActivity
                 );
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
                 // Keep timer running for as long as possible.
-                mCallHandler.postDelayed(mCallDurationRunnable, 1000);
                 mCallDurationView.setVisibility(View.VISIBLE);
             } else {
                 toggleCallStateButtonVisibility(mType);
@@ -573,7 +555,6 @@ public class CallActivity extends AbstractCallActivity
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
                 mStateView.setText(R.string.call_connected);
                 mCallStartTime = System.currentTimeMillis();
-                mCallHandler.postDelayed(mCallDurationRunnable, 0);
                 mConnected = true;
                 mHasConnected = true;
                 mIncomingCallIsRinging = false;
@@ -604,7 +585,6 @@ public class CallActivity extends AbstractCallActivity
                 }
 
                 // Stop duration timer.
-                mCallHandler.removeCallbacks(mCallDurationRunnable);
                 mConnected = false;
                 mIncomingCallIsRinging = false;
 
@@ -695,7 +675,6 @@ public class CallActivity extends AbstractCallActivity
             case CALL_PUT_ON_HOLD_ACTION:
                 mOnHold = true;
                 // Remove a running timer which shows call duration.
-                mCallHandler.removeCallbacks(mCallDurationRunnable);
                 mCallDurationView.setVisibility(View.GONE);
                 mStateView.setText(R.string.call_on_hold);
                 updateCallButton(R.id.button_onhold, true);
@@ -705,7 +684,6 @@ public class CallActivity extends AbstractCallActivity
             case CALL_UNHOLD_ACTION:
                 mOnHold = false;
                 // Start the running timer which shows call duration.
-                mCallHandler.postDelayed(mCallDurationRunnable, 0);
                 mCallDurationView.setVisibility(View.VISIBLE);
                 mStateView.setText(R.string.call_connected);
                 updateCallButton(R.id.button_onhold, true);

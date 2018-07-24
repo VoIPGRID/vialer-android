@@ -8,21 +8,24 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 
 public abstract class AbstractCallActivity extends LoginRequiredActivity implements
-        SipServiceConnection.SipServiceConnectionListener {
+        SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener {
 
     protected SipServiceConnection mSipServiceConnection;
     protected String mCurrentCallId;
+    protected CallDurationTracker mCallDurationTracker;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSipServiceConnection = new SipServiceConnection(this);
+        mCallDurationTracker = new CallDurationTracker(mSipServiceConnection);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mSipServiceConnection.connect();
+        mCallDurationTracker.start(this);
     }
 
     @Override
@@ -51,4 +54,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Override
     @CallSuper
     public void sipServiceHasBeenDisconnected() {}
+
+    @Override
+    public void onCallDurationUpdate(long duration) {}
 }
