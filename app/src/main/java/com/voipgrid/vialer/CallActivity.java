@@ -372,17 +372,12 @@ public class CallActivity extends AbstractCallActivity
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == this.getResources().getInteger(R.integer.read_external_storage_permission_request_code)) {
-            boolean allPermissionsGranted = true;
-            for (int i = 0; i < permissions.length; i++) {
-                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                    allPermissionsGranted = false;
-                    break;
-                }
-            }
-            if (allPermissionsGranted && mIncomingCallIsRinging) {
-                mMediaManager.startIncomingCallRinger();
-            }
+        if (!allPermissionsGranted(permissions, grantResults)) {
+            return;
+        }
+
+        if (mIncomingCallIsRinging) {
+            mMediaManager.startIncomingCallRinger();
         }
     }
 
