@@ -97,9 +97,6 @@ public class CallActivity extends AbstractCallActivity
     private static final String MAP_TRANSFERRED_PHONE_NUMBER = "transferredNumber";
     private static final String MAP_SECOND_CALL_IS_CONNECTED = "secondCallIsConnected";
 
-    private static final int DELAYED_FINISH_MS = 3000;
-    private static final int DELAYED_FINISH_RETRY_MS = 1000;
-
 
     // Manager for "on speaker" action.
     private ProximitySensorHelper mProximityHelper;
@@ -136,31 +133,6 @@ public class CallActivity extends AbstractCallActivity
 
     private NotificationHelper mNotificationHelper;
     private int mNotificationId;
-
-    private Runnable delayedFinish = new Runnable() {
-
-        private Handler delayedHandler = new Handler();
-
-        @Override
-        public void run() {
-            if(mSipServiceConnection.hasActiveCall()) {
-                mRemoteLogger.i("Call is still active " + DELAYED_FINISH_MS + "ms after finishWithDelay was called, trying again in " + DELAYED_FINISH_RETRY_MS + "ms");
-                this.delayedHandler.removeCallbacks(this);
-                this.delayedHandler.postDelayed(this, DELAYED_FINISH_RETRY_MS);
-                return;
-            }
-
-            // Check to see if the call activity is the last activity.
-            if (isTaskRoot() && VialerApplication.get().isApplicationVisible()) {
-                mRemoteLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
-                Intent intent = new Intent(CallActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-
-            finish();  // Close this activity after 3 seconds.
-        }
-    };
 
     @Override
     public void sipServiceHasConnected(SipService sipService) {
@@ -577,7 +549,7 @@ public class CallActivity extends AbstractCallActivity
                     }
                 } else {
                     mMediaManager.callEnded();
-                    finishWithDelay();
+                    finishAfterDelay();
                 }
 
                 onCallStatesUpdateButtons(newStatus);
@@ -615,7 +587,7 @@ public class CallActivity extends AbstractCallActivity
                 // TODO: This broadcast is not received anymore due to refactor! Solve with transition to fragments.
                 mConnected = false;
                 mIncomingCallIsRinging = false;
-                finishWithDelay();
+                finishAfterDelay();
                 break;
         }
     }
@@ -632,7 +604,7 @@ public class CallActivity extends AbstractCallActivity
         if (count > 0 && mCallIsTransferred) {
             // When transfer is done.
             getFragmentManager().popBackStack();
-            finishWithDelay();
+            finishAfterDelay();
         } else if (mOnTransfer) {
             // During a transfer.
             if (mSipServiceConnection.get().getCurrentCall() == null || mSipServiceConnection.get().getFirstCall() == null) {
@@ -811,7 +783,7 @@ public class CallActivity extends AbstractCallActivity
                 e.printStackTrace();
             }
             mStateView.setText(R.string.call_hangup);
-            finishWithDelay();
+            finishAfterDelay();
             sendBroadcast(new Intent(BluetoothMediaButtonReceiver.HANGUP_BTN));
         }
     }
@@ -1094,14 +1066,9 @@ public class CallActivity extends AbstractCallActivity
                     getString(R.string.analytics_event_action_inbound),
                     getString(R.string.analytics_event_label_declined)
             );
-            finishWithDelay();
+            finishAfterDelay();
             sendBroadcast(new Intent(DECLINE_BTN));
         }
-    }
-
-    private void finishWithDelay() {
-        mSipServiceConnection.disconnect();
-        new Handler().postDelayed(delayedFinish, DELAYED_FINISH_MS);
     }
 
     @Override

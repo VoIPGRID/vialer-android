@@ -5,6 +5,7 @@ import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.view.WindowManager;
@@ -25,6 +26,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected CallDurationTracker mCallDurationTracker;
     protected BluetoothButtonReceiver mBluetoothButtonReceiver;
     protected CallStatusReceiver mCallStatusReceiver;
+    protected DelayedFinish mDelayedFinish;
 
     @Inject BroadcastReceiverManager mBroadcastReceiverManager;
 
@@ -36,6 +38,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mCallDurationTracker = new CallDurationTracker(mSipServiceConnection);
         mBluetoothButtonReceiver = new BluetoothButtonReceiver(this);
         mCallStatusReceiver = new CallStatusReceiver(this);
+        mDelayedFinish = new DelayedFinish(this, new Handler(), mSipServiceConnection);
         requestMicrophonePermissionIfNecessary();
         configureActivityFlags();
     }
@@ -99,4 +102,13 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     }
 
     public void onCallStatusReceived(String status, String callId) {}
+
+    /**
+     * Attempt to shutdown the activity after a few seconds giving the services enough
+     * time to clean up.
+     *
+     */
+    protected void finishAfterDelay() {
+        mDelayedFinish.begin();
+    }
 }
