@@ -19,6 +19,7 @@ import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
+import com.voipgrid.vialer.util.ProximitySensorHelper;
 
 import javax.inject.Inject;
 
@@ -37,6 +38,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected boolean mBluetoothDeviceConnected = false;
     protected boolean mBluetoothAudioActive;
     private RemoteLogger mRemoteLogger;
+    private ProximitySensorHelper mProximityHelper;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,8 +50,11 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mCallStatusReceiver = new CallStatusReceiver(this);
         mDelayedFinish = new DelayedFinish(this, new Handler(), mSipServiceConnection);
         mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mProximityHelper = new ProximitySensorHelper(this, findViewById(R.id.screen_off));
+
         requestMicrophonePermissionIfNecessary();
         configureActivityFlags();
+        mProximityHelper.startSensor();
     }
 
     @Override
@@ -75,6 +80,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mProximityHelper.stopSensor();
         mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver, mBluetoothButtonReceiver);
     }
 

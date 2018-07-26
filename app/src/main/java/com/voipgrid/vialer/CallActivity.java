@@ -57,23 +57,6 @@ public class CallActivity extends AbstractCallActivity
         implements View.OnClickListener,CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
         MediaManager.AudioChangedInterface, SipServiceConnection.SipServiceConnectionListener {
 
-    @Override
-    public void bluetoothCallButtonWasPressed() {
-        mRemoteLogger.i("Pickup call");
-        answer();
-    }
-
-    @Override
-    public void bluetoothDeclineButtonWasPressed() {
-        if (mConnected || !mIncomingCallIsRinging) {
-            mRemoteLogger.i("Hangup the call");
-            hangup(R.id.button_hangup);
-        } else {
-            mRemoteLogger.i("Hangup / Decline the call");
-            decline();
-        }
-    }
-
     @StringDef({TYPE_INCOMING_CALL, TYPE_OUTGOING_CALL, TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL, TYPE_CONNECTED_CALL})
     @Retention(RetentionPolicy.SOURCE)
     public @interface CallTypes {}
@@ -97,8 +80,6 @@ public class CallActivity extends AbstractCallActivity
     private static final String MAP_SECOND_CALL_IS_CONNECTED = "secondCallIsConnected";
 
 
-    // Manager for "on speaker" action.
-    private ProximitySensorHelper mProximityHelper;
     private TextView mCallDurationView;
     private TextView mStateView;
     private boolean mIsIncomingCall;
@@ -173,8 +154,6 @@ public class CallActivity extends AbstractCallActivity
 
         mMediaManager = MediaManager.init(this, this, this);
 
-        mProximityHelper = new ProximitySensorHelper(this, findViewById(R.id.screen_off));
-
         mStateView = (TextView) findViewById(R.id.state_text_view);
         mCallDurationView = (TextView) findViewById(R.id.duration_text_view);
 
@@ -239,8 +218,6 @@ public class CallActivity extends AbstractCallActivity
             }
             mMediaManager.callStarted();
         }
-
-        mProximityHelper.startSensor();
     }
 
     @Override
@@ -321,8 +298,6 @@ public class CallActivity extends AbstractCallActivity
         mRemoteLogger.d("onDestroy");
 
         mNotificationHelper.removeAllNotifications();
-
-        mProximityHelper.stopSensor();
 
         // Reset the audio manage.
         mMediaManager.deInit();
@@ -1203,6 +1178,23 @@ public class CallActivity extends AbstractCallActivity
         onCallStatusUpdate(status);
         if (!status.equals(SipConstants.CALL_DISCONNECTED_MESSAGE)) {
             onCallStatesUpdateButtons(status);
+        }
+    }
+
+    @Override
+    public void bluetoothCallButtonWasPressed() {
+        mRemoteLogger.i("Pickup call");
+        answer();
+    }
+
+    @Override
+    public void bluetoothDeclineButtonWasPressed() {
+        if (mConnected || !mIncomingCallIsRinging) {
+            mRemoteLogger.i("Hangup the call");
+            hangup(R.id.button_hangup);
+        } else {
+            mRemoteLogger.i("Hangup / Decline the call");
+            decline();
         }
     }
 }
