@@ -1,28 +1,50 @@
 package com.voipgrid.vialer.calling;
 
+import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.CALL_BTN;
+import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
+import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
+
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.view.WindowManager;
 
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 
+import javax.inject.Inject;
+
 public abstract class AbstractCallActivity extends LoginRequiredActivity implements
-        SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener {
+        SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, BluetoothButtonReceiver.Listener, CallStatusReceiver.Listener {
 
     protected SipServiceConnection mSipServiceConnection;
     protected String mCurrentCallId;
     protected CallDurationTracker mCallDurationTracker;
+    protected BluetoothButtonReceiver mBluetoothButtonReceiver;
+    protected CallStatusReceiver mCallStatusReceiver;
+
+    @Inject BroadcastReceiverManager mBroadcastReceiverManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        VialerApplication.get().component().inject(this);
         mSipServiceConnection = new SipServiceConnection(this);
         mCallDurationTracker = new CallDurationTracker(mSipServiceConnection);
+        mBluetoothButtonReceiver = new BluetoothButtonReceiver(this);
+        mCallStatusReceiver = new CallStatusReceiver(this);
         requestMicrophonePermissionIfNecessary();
         configureActivityFlags();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mCallStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mBluetoothButtonReceiver, CALL_BTN, DECLINE_BTN);
     }
 
     @Override
@@ -41,6 +63,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver, mBluetoothButtonReceiver);
     }
 
     @Override
@@ -74,4 +97,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
     }
+
+    public void onCallStatusReceived(String status, String callId) {}
 }

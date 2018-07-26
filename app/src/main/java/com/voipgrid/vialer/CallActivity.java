@@ -1,12 +1,10 @@
 package com.voipgrid.vialer;
 
-import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.CALL_BTN;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.KeyguardManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -18,7 +16,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringDef;
 import android.text.format.DateUtils;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +39,6 @@ import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
-import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
@@ -61,6 +57,23 @@ public class CallActivity extends AbstractCallActivity
         implements View.OnClickListener, SipConstants, ProximitySensorInterface,
         CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
         MediaManager.AudioChangedInterface, SipServiceConnection.SipServiceConnectionListener {
+
+    @Override
+    public void bluetoothCallButtonWasPressed() {
+        mRemoteLogger.i("Pickup call");
+        answer();
+    }
+
+    @Override
+    public void bluetoothDeclineButtonWasPressed() {
+        if (mConnected || !mIncomingCallIsRinging) {
+            mRemoteLogger.i("Hangup the call");
+            hangup(R.id.button_hangup);
+        } else {
+            mRemoteLogger.i("Hangup / Decline the call");
+            decline();
+        }
+    }
 
     @StringDef({TYPE_INCOMING_CALL, TYPE_OUTGOING_CALL, TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL, TYPE_CONNECTED_CALL})
     @Retention(RetentionPolicy.SOURCE)
@@ -123,82 +136,6 @@ public class CallActivity extends AbstractCallActivity
 
     private NotificationHelper mNotificationHelper;
     private int mNotificationId;
-
-    private BroadcastReceiverManager mBroadcastReceiverManager;
-
-    // Broadcast receiver for presenting changes in call state to user.
-    private BroadcastReceiver mCallStatusReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String status = intent.getStringExtra(CALL_STATUS_KEY);
-
-            if (mCurrentCallId != null) {
-                if (!intent.getStringExtra(CALL_IDENTIFIER_KEY).equals(mCurrentCallId)) {
-                    if (mOnTransfer) {
-                        onCallStatusUpdate(status);
-                        if (!mSipServiceConnection.get().getFirstCall().getIsCallConnected()) {
-                            swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
-                        }
-                    }
-                    return;
-                }
-            }
-
-            onCallStatusUpdate(status);
-            if (!status.equals(SipConstants.CALL_DISCONNECTED_MESSAGE)) {
-                onCallStatesUpdateButtons(status);
-            }
-
-        }
-    };
-
-    private BroadcastReceiver mCallMissedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            CallMissedReason reason = (CallMissedReason) intent.getSerializableExtra(CALL_MISSED_KEY);
-            String analyticsReason = "";
-
-            if (reason == CallMissedReason.CALL_COMPLETED_ELSEWHERE) {
-                analyticsReason = getString(R.string.analytics_event_label_missed_call_answered_elsewhere);
-            } else if (reason == CallMissedReason.CALL_ORIGINATOR_CANCEL) {
-                analyticsReason = getString(R.string.analytics_event_label_missed_originator_cancelled);
-            }
-
-            if (!analyticsReason.isEmpty()) {
-                mRemoteLogger.i(analyticsReason);
-                mAnalyticsHelper.sendEvent(
-                        getString(R.string.analytics_event_category_call),
-                        getString(R.string.analytics_event_action_inbound),
-                        analyticsReason
-                );
-            }
-        }
-    };
-
-    private BroadcastReceiver mBluetoothButtonReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            mRemoteLogger.i("mBluetoothButtonReceiver: " + action);
-
-            if (action.equals(CALL_BTN)) {
-                mRemoteLogger.i("Pickup call");
-                answer();
-            } else if (action.equals(DECLINE_BTN)) {
-
-                if (mConnected || !mIncomingCallIsRinging) {
-                    mRemoteLogger.i("Hangup the call");
-                    hangup(R.id.button_hangup);
-                } else {
-                    mRemoteLogger.i("Hangup / Decline the call");
-                    decline();
-                }
-            }
-        }
-    };
-
-
 
     private Runnable delayedFinish = new Runnable() {
 
@@ -271,8 +208,6 @@ public class CallActivity extends AbstractCallActivity
         mMediaManager = MediaManager.init(this, this, this);
 
         mProximityHelper = new ProximitySensorHelper(this, this, findViewById(R.id.screen_off));
-
-        mBroadcastReceiverManager = BroadcastReceiverManager.fromContext(this);
 
         mStateView = (TextView) findViewById(R.id.state_text_view);
         mCallDurationView = (TextView) findViewById(R.id.duration_text_view);
@@ -354,16 +289,6 @@ public class CallActivity extends AbstractCallActivity
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        mRemoteLogger.d("onStart");
-
-        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mCallStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
-        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mCallMissedReceiver, ACTION_BROADCAST_CALL_MISSED);
-        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mBluetoothButtonReceiver, CALL_BTN, DECLINE_BTN);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
 
@@ -422,8 +347,6 @@ public class CallActivity extends AbstractCallActivity
             mMediaManager.stopIncomingCallRinger();
             mPausedRinging = true;
         }
-
-        stopService();
     }
 
     @Override
@@ -434,8 +357,6 @@ public class CallActivity extends AbstractCallActivity
         mNotificationHelper.removeAllNotifications();
 
         mProximityHelper.stopSensor();
-
-        mBroadcastReceiverManager.unregisterReceiver(mCallMissedReceiver, mCallStatusReceiver, mBluetoothButtonReceiver);
 
         // Reset the audio manage.
         mMediaManager.deInit();
@@ -1179,14 +1100,8 @@ public class CallActivity extends AbstractCallActivity
     }
 
     private void finishWithDelay() {
-        stopService();
+        mSipServiceConnection.disconnect();
         new Handler().postDelayed(delayedFinish, DELAYED_FINISH_MS);
-    }
-
-
-
-    private void stopService() {
-
     }
 
     @Override
@@ -1317,6 +1232,28 @@ public class CallActivity extends AbstractCallActivity
                     onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
                 }
             }
+        }
+    }
+
+    @Override
+    public void onCallStatusReceived(String status, String callId) {
+        super.onCallStatusReceived(status, callId);
+
+        if (mCurrentCallId != null) {
+            if (!callId.equals(mCurrentCallId)) {
+                if (mOnTransfer) {
+                    onCallStatusUpdate(status);
+                    if (!mSipServiceConnection.get().getFirstCall().getIsCallConnected()) {
+                        swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
+                    }
+                }
+                return;
+            }
+        }
+
+        onCallStatusUpdate(status);
+        if (!status.equals(SipConstants.CALL_DISCONNECTED_MESSAGE)) {
+            onCallStatesUpdateButtons(status);
         }
     }
 }
