@@ -3,6 +3,7 @@ package com.voipgrid.vialer.calling;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.CALL_BTN;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_PUT_ON_HOLD_ACTION;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,7 +11,10 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.view.WindowManager;
 
+import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -19,7 +23,8 @@ import com.voipgrid.vialer.util.LoginRequiredActivity;
 import javax.inject.Inject;
 
 public abstract class AbstractCallActivity extends LoginRequiredActivity implements
-        SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, BluetoothButtonReceiver.Listener, CallStatusReceiver.Listener {
+        SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, BluetoothButtonReceiver.Listener, CallStatusReceiver.Listener,
+        MediaManager.AudioChangedInterface {
 
     protected SipServiceConnection mSipServiceConnection;
     protected String mCurrentCallId;
@@ -29,6 +34,9 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected DelayedFinish mDelayedFinish;
 
     @Inject BroadcastReceiverManager mBroadcastReceiverManager;
+    protected boolean mBluetoothDeviceConnected = false;
+    protected boolean mBluetoothAudioActive;
+    private RemoteLogger mRemoteLogger;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,6 +47,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mBluetoothButtonReceiver = new BluetoothButtonReceiver(this);
         mCallStatusReceiver = new CallStatusReceiver(this);
         mDelayedFinish = new DelayedFinish(this, new Handler(), mSipServiceConnection);
+        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
         requestMicrophonePermissionIfNecessary();
         configureActivityFlags();
     }
@@ -110,5 +119,25 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
      */
     protected void finishAfterDelay() {
         mDelayedFinish.begin();
+    }
+
+    @Override
+    public void bluetoothDeviceConnected(boolean connected) {
+        mRemoteLogger.i("BluetoothDeviceConnected()");
+        mRemoteLogger.i("==>" + connected);
+        mBluetoothDeviceConnected = connected;
+    }
+
+    @Override
+    public void bluetoothAudioAvailable(boolean available) {
+        mRemoteLogger.i("BluetoothAudioAvailable()");
+        mRemoteLogger.i("==> " + available);
+        mBluetoothAudioActive = available;
+    }
+
+    @Override
+    public void audioLost(boolean lost) {
+        mRemoteLogger.i("AudioLost or Recovered: ");
+        mRemoteLogger.i("==> " + lost);
     }
 }

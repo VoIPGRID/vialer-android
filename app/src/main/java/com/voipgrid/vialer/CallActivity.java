@@ -105,14 +105,11 @@ public class CallActivity extends AbstractCallActivity
     private boolean mIncomingCallIsRinging = false;
 
     private boolean mConnected = false;
-    private boolean mHasConnected = false;
     private boolean mMute = false;
     private boolean mOnHold = false;
     private boolean mKeyPadVisible = false;
     private boolean mOnSpeaker = false;
     private boolean mOnTransfer = false;
-    private boolean mBluetoothDeviceConnected = false;
-    private boolean mBluetoothAudioActive = false;
     private boolean mSelfHangup = false;
     private boolean mPausedRinging = false;
     private AnalyticsHelper mAnalyticsHelper;
@@ -124,8 +121,6 @@ public class CallActivity extends AbstractCallActivity
     private String mTransferredNumber;
     private boolean mCallIsTransferred = false;
 
-    // Keep track of the start time of a call, so we can keep track of its duration.
-    long mCallStartTime = 0;
     private RemoteLogger mRemoteLogger;
 
     private MediaManager mMediaManager;
@@ -436,9 +431,7 @@ public class CallActivity extends AbstractCallActivity
             case CALL_CONNECTED_MESSAGE:
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
                 mStateView.setText(R.string.call_connected);
-                mCallStartTime = System.currentTimeMillis();
                 mConnected = true;
-                mHasConnected = true;
                 mIncomingCallIsRinging = false;
 
                 mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
@@ -457,7 +450,7 @@ public class CallActivity extends AbstractCallActivity
                 break;
 
             case CALL_DISCONNECTED_MESSAGE:
-                if (!mHasConnected && !mSelfHangup) {
+                if (!mConnected && !mSelfHangup) {
                     // Call has never been connected. Meaning the dialed number was unreachable.
                     mStateView.setText(R.string.call_unreachable);
                     sendBroadcast(new Intent(DECLINE_BTN));
@@ -1161,24 +1154,19 @@ public class CallActivity extends AbstractCallActivity
 
     @Override
     public void bluetoothDeviceConnected(boolean connected) {
-        mRemoteLogger.i("BluetoothDeviceConnected()");
-        mRemoteLogger.i("==>" + connected);
-        mBluetoothDeviceConnected = connected;
+        super.bluetoothDeviceConnected(connected);
         updateCallButton(R.id.button_bluetooth, mBluetoothDeviceConnected);
     }
 
     @Override
     public void bluetoothAudioAvailable(boolean available) {
-        mRemoteLogger.i("BluetoothAudioAvailable()");
-        mRemoteLogger.i("==> " + available);
-        mBluetoothAudioActive = available;
+        super.bluetoothAudioAvailable(available);
         updateCallButton(R.id.button_bluetooth, mBluetoothDeviceConnected);
     }
 
     @Override
     public void audioLost(boolean lost) {
-        mRemoteLogger.i("AudioLost or Recovered: ");
-        mRemoteLogger.i("==> " + lost);
+        super.audioLost(lost);
 
         if (mSipServiceConnection.get() == null) {
             mRemoteLogger.e("mSipService is null");
