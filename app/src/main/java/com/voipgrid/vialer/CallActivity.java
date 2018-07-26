@@ -1071,11 +1071,6 @@ public class CallActivity extends AbstractCallActivity
     }
 
     @Override
-    public boolean activateProximitySensor() {
-        return !mIncomingCallIsRinging && !mKeyPadVisible;
-    }
-
-    @Override
     public void callKeyPadButtonClicked(String dtmf) {
         if (mSipServiceConnection.isAvailable()) {
             SipCall call = mSipServiceConnection.get().getCurrentCall();
