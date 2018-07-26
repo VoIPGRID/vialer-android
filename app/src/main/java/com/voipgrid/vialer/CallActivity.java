@@ -259,18 +259,10 @@ public class CallActivity extends AbstractCallActivity
         super.onPause();
         mRemoteLogger.d("onPause");
 
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        boolean isScreenInteractive;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            isScreenInteractive = powerManager.isScreenOn();
-        } else {
-            isScreenInteractive = powerManager.isInteractive();
-        }
-
         // Check if the screen is interactive because when the activity becomes active.
         // After the screen turns on onStart and onPause are called again.
         // Hence : onCreate - onStart - onResume - onPause - onStop - onStart - onPause.
-        if (!isScreenInteractive) {
+        if (!isScreenInteractive()) {
             mRemoteLogger.i("We come from an screen that has been off. Don't execute the onPause!");
             return;
         }

@@ -1,7 +1,9 @@
 package com.voipgrid.vialer.logging;
 
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
@@ -34,5 +36,19 @@ public class RemoteLoggingActivity extends AppCompatActivity {
             }
         }
         return allPermissionsGranted;
+    }
+
+    /**
+     * Check whether the user can currently interact with the screen.
+     *
+     * @return TRUE if the user can interact with the screen, otherwise FALSE
+     */
+    protected boolean isScreenInteractive() {
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            return powerManager.isScreenOn();
+        } else {
+            return powerManager.isInteractive();
+        }
     }
 }
