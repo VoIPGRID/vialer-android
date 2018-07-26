@@ -39,6 +39,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected boolean mBluetoothAudioActive;
     private RemoteLogger mRemoteLogger;
     private ProximitySensorHelper mProximityHelper;
+    protected MediaManager mMediaManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,6 +52,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mDelayedFinish = new DelayedFinish(this, new Handler(), mSipServiceConnection);
         mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
         mProximityHelper = new ProximitySensorHelper(this, findViewById(R.id.screen_off));
+        mMediaManager = MediaManager.init(this, this, this);
 
         requestMicrophonePermissionIfNecessary();
         configureActivityFlags();
@@ -82,6 +84,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         super.onDestroy();
         mProximityHelper.stopSensor();
         mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver, mBluetoothButtonReceiver);
+        mMediaManager.deInit();
     }
 
     @Override

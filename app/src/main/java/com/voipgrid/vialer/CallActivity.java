@@ -79,7 +79,6 @@ public class CallActivity extends AbstractCallActivity
     private static final String MAP_TRANSFERRED_PHONE_NUMBER = "transferredNumber";
     private static final String MAP_SECOND_CALL_IS_CONNECTED = "secondCallIsConnected";
 
-
     private TextView mCallDurationView;
     private TextView mStateView;
     private boolean mIsIncomingCall;
@@ -103,8 +102,6 @@ public class CallActivity extends AbstractCallActivity
     private boolean mCallIsTransferred = false;
 
     private RemoteLogger mRemoteLogger;
-
-    private MediaManager mMediaManager;
 
     private NotificationHelper mNotificationHelper;
     private int mNotificationId;
@@ -151,8 +148,6 @@ public class CallActivity extends AbstractCallActivity
         mAnalyticsHelper = new AnalyticsHelper(
                 ((AnalyticsApplication) getApplication()).getDefaultTracker()
         );
-
-        mMediaManager = MediaManager.init(this, this, this);
 
         mStateView = (TextView) findViewById(R.id.state_text_view);
         mCallDurationView = (TextView) findViewById(R.id.duration_text_view);
@@ -243,7 +238,6 @@ public class CallActivity extends AbstractCallActivity
 
         mRemoteLogger.d("onResume");
 
-
         if (!mOnTransfer && mSipServiceConnection.get() != null && mSipServiceConnection.get().getCurrentCall() != null) {
             if (mSipServiceConnection.get().getCurrentCall().isOnHold()) {
                 mRemoteLogger.d("SipService has call on hold");
@@ -258,8 +252,6 @@ public class CallActivity extends AbstractCallActivity
                 }
             }
         }
-
-
     }
 
     @Override
@@ -298,9 +290,6 @@ public class CallActivity extends AbstractCallActivity
         mRemoteLogger.d("onDestroy");
 
         mNotificationHelper.removeAllNotifications();
-
-        // Reset the audio manage.
-        mMediaManager.deInit();
     }
 
     @Override
