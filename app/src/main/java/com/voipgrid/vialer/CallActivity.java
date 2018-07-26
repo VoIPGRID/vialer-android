@@ -1,6 +1,7 @@
 package com.voipgrid.vialer;
 
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
+import static com.voipgrid.vialer.sip.SipConstants.*;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -42,7 +43,6 @@ import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
-import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -54,8 +54,7 @@ import java.util.Map;
  * CallActivity for incoming or outgoing call.
  */
 public class CallActivity extends AbstractCallActivity
-        implements View.OnClickListener, SipConstants, ProximitySensorInterface,
-        CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
+        implements View.OnClickListener,CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
         MediaManager.AudioChangedInterface, SipServiceConnection.SipServiceConnectionListener {
 
     @Override
@@ -179,7 +178,7 @@ public class CallActivity extends AbstractCallActivity
 
         mMediaManager = MediaManager.init(this, this, this);
 
-        mProximityHelper = new ProximitySensorHelper(this, this, findViewById(R.id.screen_off));
+        mProximityHelper = new ProximitySensorHelper(this, findViewById(R.id.screen_off));
 
         mStateView = (TextView) findViewById(R.id.state_text_view);
         mCallDurationView = (TextView) findViewById(R.id.duration_text_view);

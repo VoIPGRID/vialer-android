@@ -21,23 +21,16 @@ import com.voipgrid.vialer.logging.RemoteLogger;
 public class ProximitySensorHelper implements SensorEventListener, View.OnClickListener {
     private Context mContext;
     private PowerManager mPowerManager;
-    private ProximitySensorInterface mProximityInterface;
     private Sensor mProximitySensor;
     private SensorManager mSensorManager;
     private View mLockView;
     private WakeLock mWakeLock;
     private RemoteLogger mRemoteLogger;
 
-
-    public interface ProximitySensorInterface {
-        boolean activateProximitySensor();
-    }
-
     public ProximitySensorHelper(
-            Context context, ProximitySensorInterface proximityInterface, View lockView
+            Context context, View lockView
     ) {
         mContext = context;
-        mProximityInterface = proximityInterface;
         mLockView = lockView;
         mRemoteLogger = new RemoteLogger(ProximitySensorHelper.class).enableConsoleLogging();
         mRemoteLogger.v("ProximitySensorHelper");
