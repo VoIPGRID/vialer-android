@@ -18,6 +18,7 @@ import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
+import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -346,7 +347,7 @@ public class SipService extends Service {
     public void startOutgoingCallActivity(SipCall sipCall, Uri number) {
         startCallActivity(
                 number,
-                CallActivity.TYPE_OUTGOING_CALL,
+                CallingConstants.TYPE_OUTGOING_CALL,
                 sipCall.getCallerId(),
                 sipCall.getPhoneNumber()
         );
@@ -360,19 +361,19 @@ public class SipService extends Service {
     public void startIncomingCallActivity(String number, String callerId) {
         startCallActivity(
                 SipUri.sipAddressUri(this, PhoneNumberUtils.format(number)),
-                CallActivity.TYPE_INCOMING_CALL,
+                CallingConstants.TYPE_INCOMING_CALL,
                 callerId,
                 number
         );
     }
 
-    private void startCallActivity(Uri sipAddressUri, @CallActivity.CallTypes String type, String callerId, String number) {
+    private void startCallActivity(Uri sipAddressUri, @CallingConstants.CallTypes String type, String callerId, String number) {
         mRemoteLogger.d("callVisibleForUser");
         Intent intent = new Intent(this, CallActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setDataAndType(sipAddressUri, type);
-        intent.putExtra(CallActivity.CONTACT_NAME, callerId);
-        intent.putExtra(CallActivity.PHONE_NUMBER, number);
+        intent.putExtra(CallingConstants.CONTACT_NAME, callerId);
+        intent.putExtra(CallingConstants.PHONE_NUMBER, number);
 
         sipServiceActive = true;
         startActivity(intent);

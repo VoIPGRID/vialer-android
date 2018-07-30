@@ -1,7 +1,29 @@
 package com.voipgrid.vialer;
 
+import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
+import static com.voipgrid.vialer.calling.CallingConstants.MAP_ORIGINAL_CALLER_ID;
+import static com.voipgrid.vialer.calling.CallingConstants.MAP_ORIGINAL_CALLER_PHONE_NUMBER;
+import static com.voipgrid.vialer.calling.CallingConstants.MAP_SECOND_CALL_IS_CONNECTED;
+import static com.voipgrid.vialer.calling.CallingConstants.MAP_TRANSFERRED_PHONE_NUMBER;
+import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_CONNECTED_FRAGMENT;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_INCOMING_FRAGMENT;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_KEY_PAD_FRAGMENT;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_LOCK_RING_FRAGMENT;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_TRANSFER_COMPLETE_FRAGMENT;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_TRANSFER_FRAGMENT;
+import static com.voipgrid.vialer.calling.CallingConstants.TYPE_CONNECTED_CALL;
+import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
+import static com.voipgrid.vialer.calling.CallingConstants.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL;
+import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
-import static com.voipgrid.vialer.sip.SipConstants.*;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_CONNECTED_MESSAGE;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_PUT_ON_HOLD_ACTION;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_RINGING_IN_MESSAGE;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_RINGING_OUT_MESSAGE;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_UNHOLD_ACTION;
+import static com.voipgrid.vialer.sip.SipConstants.SERVICE_STOPPED;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -9,12 +31,9 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringDef;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.TextView;
@@ -42,10 +61,7 @@ import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
-import com.voipgrid.vialer.util.ProximitySensorHelper;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,28 +72,6 @@ import java.util.Map;
 public class CallActivity extends AbstractCallActivity
         implements View.OnClickListener,CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
         MediaManager.AudioChangedInterface, SipServiceConnection.SipServiceConnectionListener {
-
-    @StringDef({TYPE_INCOMING_CALL, TYPE_OUTGOING_CALL, TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL, TYPE_CONNECTED_CALL})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CallTypes {}
-
-    public static final String TYPE_OUTGOING_CALL = "type-outgoing-call";
-    public static final String TYPE_INCOMING_CALL = "type-incoming-call";
-    public static final String TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL = "type-incoming-accept-call-notification";
-    public static final String TYPE_CONNECTED_CALL = "type-connected-call";
-    public static final String CONTACT_NAME = "contact-name";
-    public static final String PHONE_NUMBER = "phone-number";
-    private static final String TAG_CALL_CONNECTED_FRAGMENT = "callConnectedFragment";
-    private static final String TAG_CALL_INCOMING_FRAGMENT = "callIncomingFragment";
-    private static final String TAG_CALL_LOCK_RING_FRAGMENT = "callLockRingFragment";
-    private static final String TAG_CALL_KEY_PAD_FRAGMENT = "callKeyPadFragment";
-    private static final String TAG_CALL_TRANSFER_FRAGMENT = "callTransferFragment";
-    private static final String TAG_CALL_TRANSFER_COMPLETE_FRAGMENT = "callTransferCompleteFragment";
-
-    private static final String MAP_ORIGINAL_CALLER_PHONE_NUMBER = "originalCallerPhoneNumber";
-    private static final String MAP_ORIGINAL_CALLER_ID = "originalCallerId";
-    private static final String MAP_TRANSFERRED_PHONE_NUMBER = "transferredNumber";
-    private static final String MAP_SECOND_CALL_IS_CONNECTED = "secondCallIsConnected";
 
     private TextView mCallDurationView;
     private TextView mStateView;
@@ -112,14 +106,11 @@ public class CallActivity extends AbstractCallActivity
         if (mIsIncomingCall) {
             // Wait one second before setting the callerId and phonenumber
             // so the SipService can set the currentcall.
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    SipCall firstCall = sipService.getFirstCall();
-                    if (firstCall != null) {
-                        firstCall.setCallerId(mCallerIdToDisplay);
-                        firstCall.setPhoneNumber(mPhoneNumberToDisplay);
-                    }
+            new Handler().postDelayed(() -> {
+                SipCall firstCall = sipService.getFirstCall();
+                if (firstCall != null) {
+                    firstCall.setCallerId(mCallerIdToDisplay);
+                    firstCall.setPhoneNumber(mPhoneNumberToDisplay);
                 }
             }, 1000);
         }
@@ -149,8 +140,8 @@ public class CallActivity extends AbstractCallActivity
                 ((AnalyticsApplication) getApplication()).getDefaultTracker()
         );
 
-        mStateView = (TextView) findViewById(R.id.state_text_view);
-        mCallDurationView = (TextView) findViewById(R.id.duration_text_view);
+        mStateView = findViewById(R.id.state_text_view);
+        mCallDurationView = findViewById(R.id.duration_text_view);
 
         mConnected = false;
 
@@ -291,7 +282,7 @@ public class CallActivity extends AbstractCallActivity
         String intentType = intent.getType();
 
         if (intentType != null) {
-            if (intentType.equals(CallActivity.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL)) {
+            if (intentType.equals(TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL)) {
                 mPhoneNumberToDisplay = intent.getStringExtra(PHONE_NUMBER);
                 mCallerIdToDisplay = intent.getStringExtra(CONTACT_NAME);
 
@@ -317,8 +308,8 @@ public class CallActivity extends AbstractCallActivity
     }
 
     private void displayCallInfo() {
-        TextView nameTextView = (TextView) findViewById(R.id.name_text_view);
-        TextView numberTextView = (TextView) findViewById(R.id.number_text_view);
+        TextView nameTextView = findViewById(R.id.name_text_view);
+        TextView numberTextView = findViewById(R.id.number_text_view);
 
         if (mCallerIdToDisplay != null && !mCallerIdToDisplay.isEmpty()) {
             nameTextView.setText(mCallerIdToDisplay);

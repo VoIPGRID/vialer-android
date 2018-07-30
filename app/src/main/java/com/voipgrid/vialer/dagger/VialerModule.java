@@ -2,11 +2,13 @@ package com.voipgrid.vialer.dagger;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -59,5 +61,15 @@ public class VialerModule {
     @Provides
     PhoneAccount providePhoneAccount(JsonStorage jsonStorage) {
         return (PhoneAccount) jsonStorage.get(PhoneAccount.class);
+    }
+
+    @Provides
+    LocalBroadcastManager provideLocalBroadcastManager(Context context) {
+        return LocalBroadcastManager.getInstance(context);
+    }
+
+    @Provides
+    BroadcastReceiverManager provideBroadcastReceiverManager(LocalBroadcastManager localBroadcastManager, Context context) {
+        return new BroadcastReceiverManager(localBroadcastManager, context);
     }
 }
