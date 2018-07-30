@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.WindowManager;
 
 import com.voipgrid.vialer.R;
@@ -36,7 +37,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Inject BroadcastReceiverManager mBroadcastReceiverManager;
     protected boolean mBluetoothDeviceConnected = false;
     protected boolean mBluetoothAudioActive;
-    private Logger mLogger;
     private ProximitySensorHelper mProximityHelper;
     protected MediaManager mMediaManager;
 
@@ -49,7 +49,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mBluetoothButtonReceiver = new BluetoothButtonReceiver(this);
         mCallStatusReceiver = new CallStatusReceiver(this);
         mDelayedFinish = new DelayedFinish(this, new Handler(), mSipServiceConnection);
-        mLogger = new Logger(this.getClass());
         mProximityHelper = new ProximitySensorHelper(this);
         mMediaManager = MediaManager.init(this, this, this);
 

@@ -12,11 +12,15 @@ import android.support.v7.app.AppCompatActivity;
  */
 public class RemoteLoggingActivity extends AppCompatActivity {
 
+    protected Logger mLogger;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Thread.setDefaultUncaughtExceptionHandler(new RemoteUncaughtExceptionHandler(this));
+
+        mLogger = new Logger(this.getClass());
     }
 
     /**

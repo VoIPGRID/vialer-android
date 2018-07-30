@@ -101,8 +101,6 @@ public class CallActivity extends AbstractCallActivity
     private String mTransferredNumber;
     private boolean mCallIsTransferred = false;
 
-    private Logger mLogger;
-
     private NotificationHelper mNotificationHelper;
     private int mNotificationId;
 
@@ -113,7 +111,6 @@ public class CallActivity extends AbstractCallActivity
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
 
-        mLogger = new Logger(CallActivity.class);
         mNotificationHelper = NotificationHelper.getInstance(this);
 
         mLogger.d("onCreate");
