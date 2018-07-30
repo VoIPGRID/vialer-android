@@ -48,7 +48,6 @@ import com.voipgrid.vialer.call.CallTransferCompleteFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.SipServiceConnection;
-import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
@@ -112,8 +111,6 @@ public class CallActivity extends AbstractCallActivity
         VialerApplication.get().component().inject(this);
 
         mNotificationHelper = NotificationHelper.getInstance(this);
-
-        mLogger.d("onCreate");
 
         onCallStatesUpdateButtons(SERVICE_STOPPED);
 
@@ -197,8 +194,6 @@ public class CallActivity extends AbstractCallActivity
 
         mPausedRinging = false;
 
-        mLogger.d("onResume");
-
         if (!mOnTransfer && mSipServiceConnection.get() != null && mSipServiceConnection.get().getCurrentCall() != null) {
             if (mSipServiceConnection.get().getCurrentCall().isOnHold()) {
                 mLogger.d("SipService has call on hold");
@@ -218,7 +213,6 @@ public class CallActivity extends AbstractCallActivity
     @Override
     protected void onPause() {
         super.onPause();
-        mLogger.d("onPause");
 
         // Check if the screen is interactive because when the activity becomes active.
         // After the screen turns on onStart and onPause are called again.
@@ -240,7 +234,6 @@ public class CallActivity extends AbstractCallActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mLogger.d("onDestroy");
 
         mNotificationHelper.removeAllNotifications();
     }
