@@ -35,6 +35,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +50,7 @@ import com.voipgrid.vialer.call.CallTransferCompleteFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.SipServiceConnection;
+import com.voipgrid.vialer.dagger.VialerComponent;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.media.MediaManager;
@@ -65,6 +67,11 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 /**
  * CallActivity for incoming or outgoing call.
@@ -73,8 +80,11 @@ public class CallActivity extends AbstractCallActivity
         implements View.OnClickListener,CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
         MediaManager.AudioChangedInterface, SipServiceConnection.SipServiceConnectionListener {
 
-    private TextView mCallDurationView;
-    private TextView mStateView;
+    @BindView(R.id.duration_text_view) TextView mCallDurationView;
+    @BindView(R.id.state_text_view) TextView mStateView;
+
+    @Inject AnalyticsHelper mAnalyticsHelper;
+
     private boolean mIsIncomingCall;
     private boolean mIncomingCallIsRinging = false;
 
@@ -86,7 +96,6 @@ public class CallActivity extends AbstractCallActivity
     private boolean mOnTransfer = false;
     private boolean mSelfHangup = false;
     private boolean mPausedRinging = false;
-    private AnalyticsHelper mAnalyticsHelper;
     private String mCurrentCallId;
 
     public String mPhoneNumberToDisplay;
@@ -101,49 +110,16 @@ public class CallActivity extends AbstractCallActivity
     private int mNotificationId;
 
     @Override
-    public void sipServiceHasConnected(SipService sipService) {
-        super.sipServiceHasConnected(sipService);
-        if (mIsIncomingCall) {
-            // Wait one second before setting the callerId and phonenumber
-            // so the SipService can set the currentcall.
-            new Handler().postDelayed(() -> {
-                SipCall firstCall = sipService.getFirstCall();
-                if (firstCall != null) {
-                    firstCall.setCallerId(mCallerIdToDisplay);
-                    firstCall.setPhoneNumber(mPhoneNumberToDisplay);
-                }
-            }, 1000);
-        }
-    }
-
-    @Override
-    public void onCallDurationUpdate(long seconds) {
-        if (!mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
-            return;
-        }
-
-        mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRemoteLogger = new RemoteLogger(CallActivity.class).enableConsoleLogging();
-        mRemoteLogger.d("onCreate");
-
         setContentView(R.layout.activity_call);
+        ButterKnife.bind(this);
+        VialerApplication.get().component().inject(this);
 
+        mRemoteLogger = new RemoteLogger(CallActivity.class);
         mNotificationHelper = NotificationHelper.getInstance(this);
 
-        // Set the AnalyticsHelper.
-        mAnalyticsHelper = new AnalyticsHelper(
-                ((AnalyticsApplication) getApplication()).getDefaultTracker()
-        );
-
-        mStateView = findViewById(R.id.state_text_view);
-        mCallDurationView = findViewById(R.id.duration_text_view);
-
-        mConnected = false;
+        mRemoteLogger.d("onCreate");
 
         onCallStatesUpdateButtons(SERVICE_STOPPED);
 
@@ -288,12 +264,9 @@ public class CallActivity extends AbstractCallActivity
 
                 // Answer the call with a small delay to allow the activity to catch up.
                 // So the UI will be updated correctly.
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        answer();
-                        displayCallInfo();
-                    }
+                new Handler().postDelayed(() -> {
+                    answer();
+                    displayCallInfo();
                 }, 500);
 
                 mNotificationHelper.removeNotification(mNotificationId);
@@ -1168,5 +1141,30 @@ public class CallActivity extends AbstractCallActivity
             mRemoteLogger.i("Hangup / Decline the call");
             decline();
         }
+    }
+
+    @Override
+    public void sipServiceHasConnected(SipService sipService) {
+        super.sipServiceHasConnected(sipService);
+        if (mIsIncomingCall) {
+            // Wait one second before setting the callerId and phonenumber
+            // so the SipService can set the currentcall.
+            new Handler().postDelayed(() -> {
+                SipCall firstCall = sipService.getFirstCall();
+                if (firstCall != null) {
+                    firstCall.setCallerId(mCallerIdToDisplay);
+                    firstCall.setPhoneNumber(mPhoneNumberToDisplay);
+                }
+            }, 1000);
+        }
+    }
+
+    @Override
+    public void onCallDurationUpdate(long seconds) {
+        if (!mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
+            return;
+        }
+
+        mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
     }
 }

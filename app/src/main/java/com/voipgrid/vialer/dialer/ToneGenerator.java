@@ -54,7 +54,7 @@ public class ToneGenerator {
     public ToneGenerator(int streamType, int volume) {
         mStreamType = streamType;
         mVolume = volume;
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mRemoteLogger = new RemoteLogger(this.getClass());
     }
 
     /**

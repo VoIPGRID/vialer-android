@@ -69,7 +69,7 @@ public class SipServiceConnection implements ServiceConnection {
      * @param activity
      */
     SipServiceConnection(Activity activity) {
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mRemoteLogger = new RemoteLogger(this.getClass());
         mActivity = activity;
 
         if (activity instanceof SipServiceConnectionListener) {

@@ -17,7 +17,7 @@ public class ReachabilityReceiver extends BroadcastReceiver {
 
     public ReachabilityReceiver(Context context) {
         mContext = context;
-        mRemoteLogger = new RemoteLogger(ReachabilityReceiver.class).enableConsoleLogging();
+        mRemoteLogger = new RemoteLogger(ReachabilityReceiver.class);
     }
 
     public void startListening() {

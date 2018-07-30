@@ -55,7 +55,7 @@ public class ApiTokenFetcher {
                 password,
                 ServiceGenerator.createApiService(context, null, null, null),
                 new AccountHelper(context),
-                new RemoteLogger(ApiTokenFetcher.class).enableConsoleLogging()
+                new RemoteLogger(ApiTokenFetcher.class)
         );
     }
 
@@ -71,7 +71,7 @@ public class ApiTokenFetcher {
                 accountHelper.getPassword(),
                 ServiceGenerator.createApiService(context, null, null, null),
                 new AccountHelper(context),
-                new RemoteLogger(ApiTokenFetcher.class).enableConsoleLogging()
+                new RemoteLogger(ApiTokenFetcher.class)
         );
     }
 

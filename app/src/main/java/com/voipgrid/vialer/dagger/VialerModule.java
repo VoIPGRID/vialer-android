@@ -6,6 +6,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -71,5 +73,10 @@ public class VialerModule {
     @Provides
     BroadcastReceiverManager provideBroadcastReceiverManager(LocalBroadcastManager localBroadcastManager, Context context) {
         return new BroadcastReceiverManager(localBroadcastManager, context);
+    }
+
+    @Provides
+    AnalyticsHelper provideAnalyticsHelper() {
+        return new AnalyticsHelper(mVialerApplication.getDefaultTracker());
     }
 }

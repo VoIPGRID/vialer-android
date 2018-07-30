@@ -40,7 +40,7 @@ public class RemoteLogger {
     private LogFileCreator mLogFileCreator;
 
     private boolean mRemoteLoggingEnabled;
-    private boolean mLogToConsole = false;
+    private boolean mLogToConsole = true;
 
     public RemoteLogger(Class thisClass) {
         mContext = VialerApplication.get();
@@ -62,8 +62,8 @@ public class RemoteLogger {
      *
      * @return this To allow method chaining.
      */
-    public RemoteLogger enableConsoleLogging() {
-        mLogToConsole = true;
+    public RemoteLogger disableConsoleLogging() {
+        mLogToConsole = false;
 
         return this;
     }

@@ -49,7 +49,7 @@ public class CallMediaMonitor implements Runnable {
 
     public CallMediaMonitor(SipCall sipCall) {
         mSipCall = sipCall;
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mRemoteLogger = new RemoteLogger(this.getClass());
     }
 
     @Override

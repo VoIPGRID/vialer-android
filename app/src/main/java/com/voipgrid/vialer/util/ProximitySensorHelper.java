@@ -13,6 +13,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.logging.RemoteLogger;
 
 /**
@@ -20,26 +21,22 @@ import com.voipgrid.vialer.logging.RemoteLogger;
  */
 public class ProximitySensorHelper implements SensorEventListener, View.OnClickListener {
     private Context mContext;
-    private PowerManager mPowerManager;
     private Sensor mProximitySensor;
     private SensorManager mSensorManager;
-    private View mLockView;
-    private WakeLock mWakeLock;
     private RemoteLogger mRemoteLogger;
+    private View mLockView;
 
-    public ProximitySensorHelper(
-            Context context, View lockView
-    ) {
+    public ProximitySensorHelper(Context context) {
         mContext = context;
-        mLockView = lockView;
-        mRemoteLogger = new RemoteLogger(ProximitySensorHelper.class).enableConsoleLogging();
+        mRemoteLogger = new RemoteLogger(ProximitySensorHelper.class);
         mRemoteLogger.v("ProximitySensorHelper");
 
         mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
         mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
     }
 
-    public void startSensor() {
+    public void startSensor(View lockView) {
+        mLockView = lockView;
         mRemoteLogger.v("startSensor()");
 
         if (mProximitySensor != null) {

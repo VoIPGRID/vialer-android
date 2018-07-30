@@ -13,7 +13,7 @@ public class FcmInstanceIdListenerService extends FirebaseInstanceIdService {
 
     @Override
     public void onTokenRefresh() {
-        new RemoteLogger(FcmInstanceIdListenerService.class).enableConsoleLogging().d("onTokenRefresh");
+        new RemoteLogger(FcmInstanceIdListenerService.class).d("onTokenRefresh");
         // Make sure the system knows our registration is no longer valid.
         MiddlewareHelper.setRegistrationStatus(this, STATUS_UNREGISTERED);
         MiddlewareHelper.registerAtMiddleware(this);

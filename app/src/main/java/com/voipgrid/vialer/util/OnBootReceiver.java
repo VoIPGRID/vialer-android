@@ -11,7 +11,7 @@ import com.voipgrid.vialer.middleware.MiddlewareHelper;
 public class OnBootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        RemoteLogger remoteLogger = new RemoteLogger(OnBootReceiver.class).enableConsoleLogging();
+        RemoteLogger remoteLogger = new RemoteLogger(OnBootReceiver.class);
         remoteLogger.e("onBootReceiver");
 
         MiddlewareHelper.registerAtMiddleware(context);

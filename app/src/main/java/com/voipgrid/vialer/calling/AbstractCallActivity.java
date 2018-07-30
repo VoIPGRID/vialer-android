@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
+import android.view.View;
 import android.view.WindowManager;
 
 import com.voipgrid.vialer.R;
@@ -50,13 +51,12 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mBluetoothButtonReceiver = new BluetoothButtonReceiver(this);
         mCallStatusReceiver = new CallStatusReceiver(this);
         mDelayedFinish = new DelayedFinish(this, new Handler(), mSipServiceConnection);
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
-        mProximityHelper = new ProximitySensorHelper(this, findViewById(R.id.screen_off));
+        mRemoteLogger = new RemoteLogger(this.getClass());
+        mProximityHelper = new ProximitySensorHelper(this);
         mMediaManager = MediaManager.init(this, this, this);
 
         requestMicrophonePermissionIfNecessary();
         configureActivityFlags();
-        mProximityHelper.startSensor();
     }
 
     @Override
@@ -71,18 +71,19 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         super.onResume();
         mSipServiceConnection.connect();
         mCallDurationTracker.start(this);
+        mProximityHelper.startSensor(findViewById(R.id.screen_off));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mSipServiceConnection.disconnect();
+        mProximityHelper.stopSensor();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mProximityHelper.stopSensor();
         mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver, mBluetoothButtonReceiver);
         mMediaManager.deInit();
     }

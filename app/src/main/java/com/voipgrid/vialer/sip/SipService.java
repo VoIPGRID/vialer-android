@@ -146,7 +146,7 @@ public class SipService extends Service {
         mSipBroadcaster = new SipBroadcaster(this);
 
         mPreferences = new Preferences(this);
-        mRemoteLogger = new RemoteLogger(SipService.class).enableConsoleLogging();
+        mRemoteLogger = new RemoteLogger(SipService.class);
         mNativeCallManager = new NativeCallManager((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE));
 
         mRemoteLogger.d("onCreate");

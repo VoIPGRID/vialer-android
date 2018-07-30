@@ -75,7 +75,7 @@ class AudioRouter {
         mContext = context;
         mAudioManager = audioManager;
 
-        mRemoteLogger = new RemoteLogger(AudioRouter.class).enableConsoleLogging();
+        mRemoteLogger = new RemoteLogger(AudioRouter.class);
         mRemoteLogger.d("AudioRouter()");
 
         registerForBluetoothScoIntentBroadcast();

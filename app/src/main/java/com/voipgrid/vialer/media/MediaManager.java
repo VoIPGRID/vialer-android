@@ -52,7 +52,7 @@ public class MediaManager implements
         mContext = context;
         mAudioChangedInterfaceListener = audioChangedInterface;
 
-        mRemoteLogger = new RemoteLogger(MediaManager.class).enableConsoleLogging();
+        mRemoteLogger = new RemoteLogger(MediaManager.class);
 
         setAudioManager();
 

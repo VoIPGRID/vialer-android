@@ -65,7 +65,7 @@ public class MainActivity extends NavigationDrawerActivity implements
             }
         }
 
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mRemoteLogger = new RemoteLogger(this.getClass());
         JsonStorage jsonStorage = new JsonStorage(this);
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
         Boolean hasSystemUser = jsonStorage.has(SystemUser.class);

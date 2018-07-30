@@ -24,7 +24,7 @@ public class Encrypter implements ErrorListener {
     public Encrypter(Context context) {
         mCrypto = new Crypto(Options.TRANSFORMATION_SYMMETRIC);
         mStore = new Store(context);
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mRemoteLogger = new RemoteLogger(this.getClass());
         mCrypto.setErrorListener(this);
         mStore.setErrorListener(this);
     }

@@ -199,7 +199,7 @@ public class MiddlewareHelper {
      * @param context Context
      */
     public static void registerAtMiddleware(Context context) {
-        RemoteLogger remoteLogger = new RemoteLogger(MiddlewareHelper.class).enableConsoleLogging();
+        RemoteLogger remoteLogger = new RemoteLogger(MiddlewareHelper.class);
 
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         remoteLogger.d("New refresh token: " + refreshedToken);
