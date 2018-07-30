@@ -10,9 +10,11 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.calling.CallNotifications;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.NotificationHelper;
 
 import javax.inject.Singleton;
 
@@ -78,5 +80,15 @@ public class VialerModule {
     @Provides
     AnalyticsHelper provideAnalyticsHelper() {
         return new AnalyticsHelper(mVialerApplication.getDefaultTracker());
+    }
+
+    @Provides
+    NotificationHelper provideNotificationHelper(Context context) {
+        return NotificationHelper.getInstance(context);
+    }
+
+    @Provides
+    CallNotifications provideCallNotifications(NotificationHelper notificationHelper, Context context) {
+        return new CallNotifications(notificationHelper, context);
     }
 }

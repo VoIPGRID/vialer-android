@@ -19,6 +19,7 @@ import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
+import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 
 import javax.inject.Inject;
@@ -34,7 +35,9 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected CallStatusReceiver mCallStatusReceiver;
     protected DelayedFinish mDelayedFinish;
 
-    @Inject BroadcastReceiverManager mBroadcastReceiverManager;
+    @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
+    @Inject protected CallNotifications mCallNotifications;
+
     protected boolean mBluetoothDeviceConnected = false;
     protected boolean mBluetoothAudioActive;
     private ProximitySensorHelper mProximityHelper;

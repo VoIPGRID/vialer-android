@@ -35,6 +35,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +48,7 @@ import com.voipgrid.vialer.call.CallLockRingFragment;
 import com.voipgrid.vialer.call.CallTransferCompleteFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
+import com.voipgrid.vialer.calling.CallNotifications;
 import com.voipgrid.vialer.calling.SipServiceConnection;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.media.MediaManager;
@@ -100,17 +102,12 @@ public class CallActivity extends AbstractCallActivity
     private String mTransferredNumber;
     private boolean mCallIsTransferred = false;
 
-    private NotificationHelper mNotificationHelper;
-    private int mNotificationId;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_call);
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
-
-        mNotificationHelper = NotificationHelper.getInstance(this);
 
         onCallStatesUpdateButtons(SERVICE_STOPPED);
 
@@ -128,12 +125,8 @@ public class CallActivity extends AbstractCallActivity
             mIsIncomingCall = mType.equals(TYPE_INCOMING_CALL);
             Boolean openedFromNotification = intent.getBooleanExtra(NotificationHelper.TAG, false);
             if (openedFromNotification && !mIsIncomingCall) {
-                mNotificationId = mNotificationHelper.displayCallProgressNotification(
-                        getCallerInfo(), getString(R.string.callnotification_active_call), TYPE_CONNECTED_CALL,
-                        mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
-                );
+                mCallNotifications.callWasOpenedFromNotificationButIsNotIncoming(getCallNotificationDetails());
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
-                // Keep timer running for as long as possible.
                 mCallDurationView.setVisibility(View.VISIBLE);
             } else {
                 toggleCallStateButtonVisibility(mType);
@@ -141,11 +134,7 @@ public class CallActivity extends AbstractCallActivity
                 if (mIsIncomingCall) {
                     mLogger.d("inComingCall");
 
-                    mNotificationHelper.removeAllNotifications();
-                    mNotificationId = mNotificationHelper.displayCallProgressNotification(
-                            getCallerInfo(), getString(R.string.callnotification_incoming_call), mType,
-                            mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
-                    );
+                    mCallNotifications.incomingCall(getCallNotificationDetails());
 
                     // Ringing event.
                     mAnalyticsHelper.sendEvent(
@@ -163,10 +152,7 @@ public class CallActivity extends AbstractCallActivity
                     mMediaManager.startIncomingCallRinger();
                 } else {
                     mLogger.d("outgoingCall");
-                    mNotificationId = mNotificationHelper.displayCallProgressNotification(
-                            getCallerInfo(), getString(R.string.callnotification_dialing), mType,
-                            mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
-                    );
+                    mCallNotifications.outgoingCall(getCallNotificationDetails());
                 }
             }
             mMediaManager.callStarted();
@@ -223,9 +209,7 @@ public class CallActivity extends AbstractCallActivity
         }
 
         if (mIncomingCallIsRinging) {
-            mNotificationHelper.removeAllNotifications();
-            mNotificationId = mNotificationHelper.displayNotificationWithCallActions(mCallerIdToDisplay, mPhoneNumberToDisplay);
-
+            mCallNotifications.callScreenIsBeingHiddenOnRingingCall(getCallNotificationDetails());
             mMediaManager.stopIncomingCallRinger();
             mPausedRinging = true;
         }
@@ -234,36 +218,42 @@ public class CallActivity extends AbstractCallActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        mNotificationHelper.removeAllNotifications();
+        mCallNotifications.removeAll();
     }
 
+    /**
+     * This method is called when the user clicks on a notification.
+     *
+     * @param intent
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
         String intentType = intent.getType();
 
-        if (intentType != null) {
-            if (intentType.equals(TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL)) {
-                mPhoneNumberToDisplay = intent.getStringExtra(PHONE_NUMBER);
-                mCallerIdToDisplay = intent.getStringExtra(CONTACT_NAME);
+        if (intentType == null) {
+            return;
+        }
 
-                // Answer the call with a small delay to allow the activity to catch up.
-                // So the UI will be updated correctly.
-                new Handler().postDelayed(() -> {
-                    answer();
-                    displayCallInfo();
-                }, 500);
+        if (intentType.equals(TYPE_INCOMING_CALL)) {
+            mMediaManager.startIncomingCallRinger();
+            return;
+        }
 
-                mNotificationHelper.removeNotification(mNotificationId);
-                mNotificationId = mNotificationHelper.displayCallProgressNotification(
-                        getCallerInfo(), getString(R.string.callnotification_active_call), TYPE_CONNECTED_CALL,
-                        mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
-                );
-            } else if (intent.getType().equals(TYPE_INCOMING_CALL)) {
-                mMediaManager.startIncomingCallRinger();
-            }
+        if (intentType.equals(TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL)) {
+            mPhoneNumberToDisplay = intent.getStringExtra(PHONE_NUMBER);
+            mCallerIdToDisplay = intent.getStringExtra(CONTACT_NAME);
+
+            // Answer the call with a small delay to allow the activity to catch up.
+            // So the UI will be updated correctly.
+            new Handler().postDelayed(() -> {
+                answer();
+                displayCallInfo();
+            }, 500);
+
+            mCallNotifications.acceptedFromNotification(getCallNotificationDetails());
+            return;
         }
     }
 
@@ -278,6 +268,15 @@ public class CallActivity extends AbstractCallActivity
             nameTextView.setText(mPhoneNumberToDisplay);
             numberTextView.setText("");
         }
+    }
+
+    /**
+     * Generate the details needed for the call notifications.
+     *
+     * @return
+     */
+    private CallNotifications.CallNotificationDetail getCallNotificationDetails() {
+        return new CallNotifications.CallNotificationDetail(getCallerInfo(), mCallerIdToDisplay, mPhoneNumberToDisplay, mType);
     }
 
     private String getCallerInfo() {
@@ -341,7 +340,7 @@ public class CallActivity extends AbstractCallActivity
                 mConnected = true;
                 mIncomingCallIsRinging = false;
 
-                mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
+                mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
 
                 if (mOnTransfer && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
                     CallTransferFragment callTransferFragment = (CallTransferFragment)
@@ -460,7 +459,7 @@ public class CallActivity extends AbstractCallActivity
                 mCallDurationView.setVisibility(View.GONE);
                 mStateView.setText(R.string.call_on_hold);
                 updateCallButton(R.id.button_onhold, true);
-                mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_on_hold), NotificationHelper.mCallNotifyId);
+                mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_on_hold);
                 break;
 
             case CALL_UNHOLD_ACTION:
@@ -469,7 +468,7 @@ public class CallActivity extends AbstractCallActivity
                 mCallDurationView.setVisibility(View.VISIBLE);
                 mStateView.setText(R.string.call_connected);
                 updateCallButton(R.id.button_onhold, true);
-                mNotificationHelper.updateNotification(getCallerInfo(), this.getString(R.string.callnotification_active_call), NotificationHelper.mCallNotifyId);
+                mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
                 break;
 
             case CALL_RINGING_OUT_MESSAGE:
@@ -935,11 +934,8 @@ public class CallActivity extends AbstractCallActivity
                 );
                 BluetoothMediaButtonReceiver.setCallAnswered(true);
 
-                mNotificationHelper.removeAllNotifications();
-                mNotificationId = mNotificationHelper.displayCallProgressNotification(
-                        getCallerInfo(), getString(R.string.callnotification_active_call), TYPE_CONNECTED_CALL,
-                        mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
-                );
+                mCallNotifications.activeCall(getCallNotificationDetails());
+
                 mIsIncomingCall = false;
             }
         } else {
