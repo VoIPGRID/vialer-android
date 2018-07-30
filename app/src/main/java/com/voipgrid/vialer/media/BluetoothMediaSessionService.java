@@ -13,7 +13,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.util.NotificationHelper;
 
 public class BluetoothMediaSessionService extends Service {
@@ -23,7 +23,7 @@ public class BluetoothMediaSessionService extends Service {
     private final static String TAG = BluetoothMediaSessionService.class.getSimpleName();
     private MediaSessionCompat mSession;
     private Context mContext;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     @Nullable
     @Override
@@ -34,8 +34,8 @@ public class BluetoothMediaSessionService extends Service {
     @Override
     public void onCreate() {
         mContext = this;
-        mRemoteLogger = new RemoteLogger(BluetoothMediaSessionService.class).enableConsoleLogging();
-        mRemoteLogger.v("onCreate()");
+        mLogger = new Logger(BluetoothMediaSessionService.class);
+        mLogger.v("onCreate()");
         MediaSessionCompat session = new MediaSessionCompat(this, TAG);
         PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder();
         stateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE |
@@ -51,7 +51,7 @@ public class BluetoothMediaSessionService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mRemoteLogger.v("onStartCommand");
+        mLogger.v("onStartCommand");
 
         if (shouldBecomeForegroundService(intent)) {
             startForeground(1, NotificationHelper.getInstance(this).createMediaButtonNotification());
@@ -76,7 +76,7 @@ public class BluetoothMediaSessionService extends Service {
 
     @Override
     public void onDestroy() {
-        mRemoteLogger.v("onDestroy");
+        mLogger.v("onDestroy");
         mSession.setActive(false);
 
         mSession.release();
@@ -88,8 +88,8 @@ public class BluetoothMediaSessionService extends Service {
         @Override
         public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
             KeyEvent keyEvent = mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-            mRemoteLogger.d("SessionCallback.sendAnswerBroadcast");
-            mRemoteLogger.d("==> event = " + keyEvent);
+            mLogger.d("SessionCallback.sendAnswerBroadcast");
+            mLogger.d("==> event = " + keyEvent);
 
             if (keyEvent != null) {
                 if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {

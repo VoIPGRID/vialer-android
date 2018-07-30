@@ -9,7 +9,7 @@ import android.net.Uri;
 import android.os.Vibrator;
 import android.provider.Settings;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ class IncomingRinger {
     private AudioManager mAudioManager;
     private Activity mActivity;
     private Context mContext;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private Vibrator mVibrator;
 
     /**
@@ -32,41 +32,41 @@ class IncomingRinger {
         mActivity = activity;
         mContext = context;
         mAudioManager = audioManager;
-        mRemoteLogger = new RemoteLogger(IncomingRinger.class).enableConsoleLogging();
+        mLogger = new Logger(IncomingRinger.class);
 
-        mRemoteLogger.d("IncomingRinger()");
+        mLogger.d("IncomingRinger()");
 
         setRingtonePlayer();
         setVibrator();
     }
 
     void start() {
-        mRemoteLogger.d("start()");
+        mLogger.d("start()");
 
         if (mMediaPlayer == null) {
-            mRemoteLogger.d("There is no MediaPlayer!");
+            mLogger.d("There is no MediaPlayer!");
             setRingtonePlayer();
         }
         if (mVibrator == null) {
-            mRemoteLogger.d("There is no Vibrator!");
+            mLogger.d("There is no Vibrator!");
             setVibrator();
         }
 
         switch (mAudioManager.getRingerMode()) {
             case AudioManager.RINGER_MODE_NORMAL:
-                mRemoteLogger.i("Play ringtone normal");
+                mLogger.i("Play ringtone normal");
                 playRingtone();
                 break;
             case AudioManager.RINGER_MODE_VIBRATE:
-                mRemoteLogger.i("Vibrate only");
+                mLogger.i("Vibrate only");
                 startVibrator();
                 break;
             case AudioManager.RINGER_MODE_SILENT:
                 if (AudioRouter.CURRENT_ROUTE == Constants.ROUTE_BT) {
-                    mRemoteLogger.i("Bluetooth is connected, play ringtone over bluetooth headset");
+                    mLogger.i("Bluetooth is connected, play ringtone over bluetooth headset");
                     playRingtone();
                 } else {
-                    mRemoteLogger.i("Silent mode so don't play anything");
+                    mLogger.i("Silent mode so don't play anything");
                     stopRingtone();
                     stopVibrator();
                 }
@@ -76,19 +76,19 @@ class IncomingRinger {
     }
 
     void stop() {
-        mRemoteLogger.v("stop()");
+        mLogger.v("stop()");
         stopRingtone();
         stopVibrator();
     }
 
     void pause() {
-        mRemoteLogger.v("pause()");
+        mLogger.v("pause()");
         stopRingtone();
         stopVibrator();
     }
 
     void restart() {
-        mRemoteLogger.v("restart()");
+        mLogger.v("restart()");
         stop();
         setRingtonePlayer();
         setVibrator();
@@ -96,18 +96,18 @@ class IncomingRinger {
     }
 
     private void setRingtonePlayer() {
-        mRemoteLogger.v("setRingtonePlayer()");
+        mLogger.v("setRingtonePlayer()");
         try {
             Uri ringtoneUri = Settings.System.DEFAULT_RINGTONE_URI;
             if (mActivity.getResources().getIdentifier("ringtone", "raw", mActivity.getPackageName()) != 0) {
-                mRemoteLogger.v("Custom ringtone is available");
+                mLogger.v("Custom ringtone is available");
                 String ringtoneLocation = String.format("android.resource://%s/%s/%s", mActivity.getPackageName(), "raw", "ringtone");
                 ringtoneUri = Uri.parse(ringtoneLocation);
             }
 
             // Prevent creating an extra MediaPlayer. So destroy the old one first.
             if (mMediaPlayer != null){
-                mRemoteLogger.e("There was still an old MediaPlayer lingering around remove that first");
+                mLogger.e("There was still an old MediaPlayer lingering around remove that first");
                 if (mMediaPlayer.isPlaying() || mMediaPlayer.isLooping()) {
                     mMediaPlayer.stop();
                 }
@@ -139,9 +139,9 @@ class IncomingRinger {
      * Start to play the ringtone.
      */
     private void playRingtone() {
-        mRemoteLogger.v("playRingtone()");
+        mLogger.v("playRingtone()");
         if (!mMediaPlayer.isPlaying()) {
-            mRemoteLogger.v("Current audio route: " + AudioRouter.CURRENT_ROUTE);
+            mLogger.v("Current audio route: " + AudioRouter.CURRENT_ROUTE);
             if (AudioRouter.CURRENT_ROUTE == 3) {
                 mAudioManager.setMode(Constants.DEFAULT_AUDIO_MODE);
                 mActivity.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
@@ -153,7 +153,7 @@ class IncomingRinger {
         }
 
         boolean vibrateWhenRinging = Settings.System.getInt(mContext.getContentResolver(), "vibrate_when_ringing", 0) == 1;
-        mRemoteLogger.i("Is the option vibrate when ringing on? " + vibrateWhenRinging);
+        mLogger.i("Is the option vibrate when ringing on? " + vibrateWhenRinging);
         if (vibrateWhenRinging) {
             startVibrator();
         }
@@ -163,7 +163,7 @@ class IncomingRinger {
      * Stop playing the ringtone.
      */
     private void stopRingtone() {
-        mRemoteLogger.v("stopRingtone()");
+        mLogger.v("stopRingtone()");
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
             mMediaPlayer.release();
@@ -178,7 +178,7 @@ class IncomingRinger {
      * Start the vibrate for an incoming call
      */
     private void startVibrator() {
-        mRemoteLogger.v("startVibrator()");
+        mLogger.v("startVibrator()");
         if (mVibrator != null) {
             mVibrator.vibrate(VIBRATOR_PATTERN, 0);
         }
@@ -188,7 +188,7 @@ class IncomingRinger {
      * Stop the vibrate for an incoming call
      */
     private void stopVibrator() {
-        mRemoteLogger.v("stopVibrator()");
+        mLogger.v("stopVibrator()");
         if (mVibrator != null) {
             mVibrator.cancel();
             mVibrator = null;

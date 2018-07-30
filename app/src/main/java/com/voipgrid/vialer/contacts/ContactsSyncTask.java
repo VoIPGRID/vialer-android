@@ -7,7 +7,7 @@ import android.os.Build;
 import android.provider.ContactsContract;
 import android.util.Log;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
 import com.voipgrid.vialer.util.NotificationHelper;
@@ -21,7 +21,7 @@ public class ContactsSyncTask {
     private static final boolean DEBUG = false;
 
     private Context mContext;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     /**
      * AsyncTask that adds Data entry in Contacts app with "Call with AppName" action.
@@ -30,9 +30,9 @@ public class ContactsSyncTask {
      */
     public ContactsSyncTask(Context context) {
         mContext = context;
-        mRemoteLogger = new RemoteLogger(ContactsSyncTask.class);
+        mLogger = new Logger(ContactsSyncTask.class);
 
-        mRemoteLogger.d("onCreate");
+        mLogger.d("onCreate");
     }
 
     /**
@@ -75,12 +75,12 @@ public class ContactsSyncTask {
      * Runs the sync for all contacts.
      */
     public void fullSync() {
-        mRemoteLogger.d("fullSync");
+        mLogger.d("fullSync");
 
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(mContext)) {
-            mRemoteLogger.d("fullsync: no contact permission");
+            mLogger.d("fullsync: no contact permission");
             // TODO VIALA-349 Delete sync account.
             return;
         }
@@ -166,12 +166,12 @@ public class ContactsSyncTask {
      * @param cursor The cursor of contact(s) to sync.
      */
     public void sync(Cursor cursor) {
-        mRemoteLogger.d("sync");
+        mLogger.d("sync");
         // Check contacts permission. Do nothing if we don't have it. Since it's a background
         // job we can't really ask the user for permission.
         if (!ContactsPermission.hasPermission(mContext)) {
             // TODO VIALA-349 Delete sync account.
-            mRemoteLogger.d("sync: no contact permission");
+            mLogger.d("sync: no contact permission");
             return;
         }
 

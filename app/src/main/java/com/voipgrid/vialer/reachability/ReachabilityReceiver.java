@@ -6,18 +6,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 
 public class ReachabilityReceiver extends BroadcastReceiver {
 
     private Context mContext;
     private static ReachabilityInterface mReachabilityInterface;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     public ReachabilityReceiver(Context context) {
         mContext = context;
-        mRemoteLogger = new RemoteLogger(ReachabilityReceiver.class);
+        mLogger = new Logger(ReachabilityReceiver.class);
     }
 
     public void startListening() {
@@ -31,7 +31,7 @@ public class ReachabilityReceiver extends BroadcastReceiver {
         try {
             mContext.unregisterReceiver(this);
         } catch(IllegalArgumentException e) {
-            mRemoteLogger.w("Trying to unregister ConnectivityManager.CONNECTIVITY_ACTION not registered.");
+            mLogger.w("Trying to unregister ConnectivityManager.CONNECTIVITY_ACTION not registered.");
         }
     }
 

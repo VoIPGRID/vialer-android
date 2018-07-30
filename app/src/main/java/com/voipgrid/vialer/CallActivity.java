@@ -35,12 +35,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.call.CallConnectedFragment;
 import com.voipgrid.vialer.call.CallIncomingFragment;
@@ -50,8 +48,7 @@ import com.voipgrid.vialer.call.CallTransferCompleteFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.SipServiceConnection;
-import com.voipgrid.vialer.dagger.VialerComponent;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
@@ -104,7 +101,7 @@ public class CallActivity extends AbstractCallActivity
     private String mTransferredNumber;
     private boolean mCallIsTransferred = false;
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     private NotificationHelper mNotificationHelper;
     private int mNotificationId;
@@ -116,10 +113,10 @@ public class CallActivity extends AbstractCallActivity
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
 
-        mRemoteLogger = new RemoteLogger(CallActivity.class);
+        mLogger = new Logger(CallActivity.class);
         mNotificationHelper = NotificationHelper.getInstance(this);
 
-        mRemoteLogger.d("onCreate");
+        mLogger.d("onCreate");
 
         onCallStatesUpdateButtons(SERVICE_STOPPED);
 
@@ -148,7 +145,7 @@ public class CallActivity extends AbstractCallActivity
                 toggleCallStateButtonVisibility(mType);
 
                 if (mIsIncomingCall) {
-                    mRemoteLogger.d("inComingCall");
+                    mLogger.d("inComingCall");
 
                     mNotificationHelper.removeAllNotifications();
                     mNotificationId = mNotificationHelper.displayCallProgressNotification(
@@ -171,7 +168,7 @@ public class CallActivity extends AbstractCallActivity
 
                     mMediaManager.startIncomingCallRinger();
                 } else {
-                    mRemoteLogger.d("outgoingCall");
+                    mLogger.d("outgoingCall");
                     mNotificationId = mNotificationHelper.displayCallProgressNotification(
                             getCallerInfo(), getString(R.string.callnotification_dialing), mType,
                             mCallerIdToDisplay, mPhoneNumberToDisplay, NotificationHelper.mCallNotifyId
@@ -203,18 +200,18 @@ public class CallActivity extends AbstractCallActivity
 
         mPausedRinging = false;
 
-        mRemoteLogger.d("onResume");
+        mLogger.d("onResume");
 
         if (!mOnTransfer && mSipServiceConnection.get() != null && mSipServiceConnection.get().getCurrentCall() != null) {
             if (mSipServiceConnection.get().getCurrentCall().isOnHold()) {
-                mRemoteLogger.d("SipService has call on hold");
+                mLogger.d("SipService has call on hold");
                 if (!mOnHold) {
-                    mRemoteLogger.i("But the activity DOES not have the call on hold. Match the sip service.");
+                    mLogger.i("But the activity DOES not have the call on hold. Match the sip service.");
                     mOnHold = true;
                     updateCallButton(R.id.button_onhold, true);
                     onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
                 } else if (!findViewById(R.id.button_onhold).isActivated()) {
-                    mRemoteLogger.i("Call is on hold but the button is not active. Update the button");
+                    mLogger.i("Call is on hold but the button is not active. Update the button");
                     updateCallButton(R.id.button_onhold, true);
                 }
             }
@@ -224,13 +221,13 @@ public class CallActivity extends AbstractCallActivity
     @Override
     protected void onPause() {
         super.onPause();
-        mRemoteLogger.d("onPause");
+        mLogger.d("onPause");
 
         // Check if the screen is interactive because when the activity becomes active.
         // After the screen turns on onStart and onPause are called again.
         // Hence : onCreate - onStart - onResume - onPause - onStop - onStart - onPause.
         if (!isScreenInteractive()) {
-            mRemoteLogger.i("We come from an screen that has been off. Don't execute the onPause!");
+            mLogger.i("We come from an screen that has been off. Don't execute the onPause!");
             return;
         }
 
@@ -246,7 +243,7 @@ public class CallActivity extends AbstractCallActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mRemoteLogger.d("onDestroy");
+        mLogger.d("onDestroy");
 
         mNotificationHelper.removeAllNotifications();
     }
@@ -345,7 +342,7 @@ public class CallActivity extends AbstractCallActivity
      * @see SipConstants for the possible states.
      */
     private void onCallStatusUpdate(String newStatus) {
-        mRemoteLogger.d("onCallStatusUpdate: " + newStatus);
+        mLogger.d("onCallStatusUpdate: " + newStatus);
 
         switch (newStatus) {
             case CALL_CONNECTED_MESSAGE:
@@ -506,7 +503,7 @@ public class CallActivity extends AbstractCallActivity
 
     @Override
     public void onBackPressed() {
-        mRemoteLogger.d("onBackPressed");
+        mLogger.d("onBackPressed");
         View hangupButton = findViewById(R.id.button_hangup);
         View declineButton = findViewById(R.id.button_decline);
         View lockRingView = findViewById(R.id.lock_ring);
@@ -557,14 +554,14 @@ public class CallActivity extends AbstractCallActivity
 
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
-        mRemoteLogger.d("toggleSpeaker");
+        mLogger.d("toggleSpeaker");
         mOnSpeaker = !mOnSpeaker;
         mMediaManager.setCallOnSpeaker(mOnSpeaker);
     }
 
     // Mute or un-mute a call when the user presses the button.
     private void toggleMute() {
-        mRemoteLogger.d("toggleMute");
+        mLogger.d("toggleMute");
         mMute = !mMute;
         long newVolume = (mMute ?               // get new volume based on selection value
                 getResources().getInteger(R.integer.mute_microphone_volume_value) :   // muted
@@ -574,7 +571,7 @@ public class CallActivity extends AbstractCallActivity
 
     // Show or hide the dialPad when the user presses the button.
     private void toggleDialPad() {
-        mRemoteLogger.d("toggleDialPad");
+        mLogger.d("toggleDialPad");
         mKeyPadVisible = !mKeyPadVisible;
 
         if (mKeyPadVisible) {
@@ -595,7 +592,7 @@ public class CallActivity extends AbstractCallActivity
 
     // Toggle the hold the call when the user presses the button.
     private void toggleOnHold() {
-        mRemoteLogger.d("toggleOnHold");
+        mLogger.d("toggleOnHold");
         mOnHold = !mOnHold;
         if (mSipServiceConnection.isAvailable()) {
             try {
@@ -770,7 +767,7 @@ public class CallActivity extends AbstractCallActivity
      * @param newVolume new volume level for the Rx level of the current media of active call.
      */
     void updateMicrophoneVolume(long newVolume) {
-        mRemoteLogger.d("updateMicrophoneVolume");
+        mLogger.d("updateMicrophoneVolume");
         if (mSipServiceConnection.isAvailable()) {
             mSipServiceConnection.get().getCurrentCall().updateMicrophoneVolume(newVolume);
         }
@@ -926,7 +923,7 @@ public class CallActivity extends AbstractCallActivity
     }
 
     public void answer() {
-        mRemoteLogger.d("answer");
+        mLogger.d("answer");
         mMediaManager.stopIncomingCallRinger();
 
         View callButtonsContainer = findViewById(R.id.call_buttons_container);
@@ -963,7 +960,7 @@ public class CallActivity extends AbstractCallActivity
     }
 
     public void decline() {
-        mRemoteLogger.d("decline");
+        mLogger.d("decline");
         mMediaManager.stopIncomingCallRinger();
 
         if (mSipServiceConnection.isAvailable()) {
@@ -1089,7 +1086,7 @@ public class CallActivity extends AbstractCallActivity
         super.audioLost(lost);
 
         if (mSipServiceConnection.get() == null) {
-            mRemoteLogger.e("mSipService is null");
+            mLogger.e("mSipService is null");
         } else {
             if (lost) {
                 // Don't put the call on hold when there is a native call is ringing.
@@ -1128,17 +1125,17 @@ public class CallActivity extends AbstractCallActivity
 
     @Override
     public void bluetoothCallButtonWasPressed() {
-        mRemoteLogger.i("Pickup call");
+        mLogger.i("Pickup call");
         answer();
     }
 
     @Override
     public void bluetoothDeclineButtonWasPressed() {
         if (mConnected || !mIncomingCallIsRinging) {
-            mRemoteLogger.i("Hangup the call");
+            mLogger.i("Hangup the call");
             hangup(R.id.button_hangup);
         } else {
-            mRemoteLogger.i("Hangup / Decline the call");
+            mLogger.i("Hangup / Decline the call");
             decline();
         }
     }

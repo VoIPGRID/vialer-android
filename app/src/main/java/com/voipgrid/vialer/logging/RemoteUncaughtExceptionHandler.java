@@ -27,32 +27,32 @@ public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionH
     }
 
     private void logStackTrace(Throwable exception) {
-        RemoteLogger remoteLogger = new RemoteLogger(RemoteUncaughtExceptionHandler.class).forceRemoteLogging(true);
+        Logger logger = new Logger(RemoteUncaughtExceptionHandler.class).forceRemoteLogging(true);
         String stackTrace = Log.getStackTraceString(exception);
         String traceID = LogUuidGenerator.generate();
 
-        remoteLogger.e("*************************************");
-        remoteLogger.e("************ BEGIN CRASH ************");
-        remoteLogger.e("************ APP INFO ************");
-        remoteLogger.e("Version number: " + BuildConfig.VERSION_CODE);
-        remoteLogger.e("Version name: " + BuildConfig.VERSION_NAME);
-        remoteLogger.e("************ DEVICE INFORMATION ***********");
-        remoteLogger.e("Brand: " + Build.BRAND);
-        remoteLogger.e("Device: " + Build.DEVICE);
-        remoteLogger.e("Model: " + Build.MODEL);
-        remoteLogger.e("Id: " + Build.ID);
-        remoteLogger.e("Product: " + Build.PRODUCT);
-        remoteLogger.e("************ BUILD INFO ************");
-        remoteLogger.e("SDK: " + Build.VERSION.SDK_INT);
-        remoteLogger.e("Release: " + Build.VERSION.RELEASE);
-        remoteLogger.e("Incremental: " + Build.VERSION.INCREMENTAL);
+        logger.e("*************************************");
+        logger.e("************ BEGIN CRASH ************");
+        logger.e("************ APP INFO ************");
+        logger.e("Version number: " + BuildConfig.VERSION_CODE);
+        logger.e("Version name: " + BuildConfig.VERSION_NAME);
+        logger.e("************ DEVICE INFORMATION ***********");
+        logger.e("Brand: " + Build.BRAND);
+        logger.e("Device: " + Build.DEVICE);
+        logger.e("Model: " + Build.MODEL);
+        logger.e("Id: " + Build.ID);
+        logger.e("Product: " + Build.PRODUCT);
+        logger.e("************ BUILD INFO ************");
+        logger.e("SDK: " + Build.VERSION.SDK_INT);
+        logger.e("Release: " + Build.VERSION.RELEASE);
+        logger.e("Incremental: " + Build.VERSION.INCREMENTAL);
 
-        remoteLogger.e("************ CAUSE OF ERROR ************");
+        logger.e("************ CAUSE OF ERROR ************");
         String[] lines = stackTrace.split(System.getProperty("line.separator"));
         for (String line : lines) {
-            remoteLogger.e(traceID + "> " + line);
+            logger.e(traceID + "> " + line);
         }
-        remoteLogger.e("************ END CRASH **************");
-        remoteLogger.e("*************************************");
+        logger.e("************ END CRASH **************");
+        logger.e("*************************************");
     }
 }

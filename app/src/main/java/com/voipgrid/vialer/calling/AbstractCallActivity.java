@@ -3,18 +3,16 @@ package com.voipgrid.vialer.calling;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.CALL_BTN;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_PUT_ON_HOLD_ACTION;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
-import android.view.View;
 import android.view.WindowManager;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
@@ -38,7 +36,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Inject BroadcastReceiverManager mBroadcastReceiverManager;
     protected boolean mBluetoothDeviceConnected = false;
     protected boolean mBluetoothAudioActive;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private ProximitySensorHelper mProximityHelper;
     protected MediaManager mMediaManager;
 
@@ -51,7 +49,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mBluetoothButtonReceiver = new BluetoothButtonReceiver(this);
         mCallStatusReceiver = new CallStatusReceiver(this);
         mDelayedFinish = new DelayedFinish(this, new Handler(), mSipServiceConnection);
-        mRemoteLogger = new RemoteLogger(this.getClass());
+        mLogger = new Logger(this.getClass());
         mProximityHelper = new ProximitySensorHelper(this);
         mMediaManager = MediaManager.init(this, this, this);
 
@@ -133,21 +131,21 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
     @Override
     public void bluetoothDeviceConnected(boolean connected) {
-        mRemoteLogger.i("BluetoothDeviceConnected()");
-        mRemoteLogger.i("==>" + connected);
+        mLogger.i("BluetoothDeviceConnected()");
+        mLogger.i("==>" + connected);
         mBluetoothDeviceConnected = connected;
     }
 
     @Override
     public void bluetoothAudioAvailable(boolean available) {
-        mRemoteLogger.i("BluetoothAudioAvailable()");
-        mRemoteLogger.i("==> " + available);
+        mLogger.i("BluetoothAudioAvailable()");
+        mLogger.i("==> " + available);
         mBluetoothAudioActive = available;
     }
 
     @Override
     public void audioLost(boolean lost) {
-        mRemoteLogger.i("AudioLost or Recovered: ");
-        mRemoteLogger.i("==> " + lost);
+        mLogger.i("AudioLost or Recovered: ");
+        mLogger.i("==> " + lost);
     }
 }

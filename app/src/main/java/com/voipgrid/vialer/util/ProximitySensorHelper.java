@@ -6,15 +6,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.calling.AbstractCallActivity;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 /**
  * Class to help with the disabling of the screen during a call.
@@ -23,13 +20,13 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
     private Context mContext;
     private Sensor mProximitySensor;
     private SensorManager mSensorManager;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private View mLockView;
 
     public ProximitySensorHelper(Context context) {
         mContext = context;
-        mRemoteLogger = new RemoteLogger(ProximitySensorHelper.class);
-        mRemoteLogger.v("ProximitySensorHelper");
+        mLogger = new Logger(ProximitySensorHelper.class);
+        mLogger.v("ProximitySensorHelper");
 
         mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
         mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
@@ -37,7 +34,7 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
 
     public void startSensor(View lockView) {
         mLockView = lockView;
-        mRemoteLogger.v("startSensor()");
+        mLogger.v("startSensor()");
 
         if (mProximitySensor != null) {
             mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_UI);
@@ -46,7 +43,7 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
     }
 
     public void stopSensor() {
-        mRemoteLogger.v("stopSensor()");
+        mLogger.v("stopSensor()");
 
         if (mProximitySensor != null) {
             mSensorManager.unregisterListener(this);
@@ -55,7 +52,7 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        mRemoteLogger.v("onSensorChanged()");
+        mLogger.v("onSensorChanged()");
         Float distance = event.values[0];
         // Leave the screen on if the measured distance is the max distance.
         if (distance >= event.sensor.getMaximumRange() || distance >= 10.0f) {
@@ -82,7 +79,7 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
      * @param on Whether or not the screen needs to be on or off.
      */
     private void toggleScreen(boolean on) {
-        mRemoteLogger.v("toggleScreen(): " + on);
+        mLogger.v("toggleScreen(): " + on);
 
         Activity activity = (Activity) mContext;
         Window window = activity.getWindow();

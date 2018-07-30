@@ -16,7 +16,7 @@ import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -143,7 +143,7 @@ public class MiddlewareHelper {
      * @param context
      */
     public static void unregister(final Context context) {
-        final RemoteLogger remoteLogger = new RemoteLogger(MiddlewareHelper.class).enableConsoleLogging();
+        final Logger logger = new Logger(MiddlewareHelper.class);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String token = preferences.getString(CURRENT_TOKEN, "");
@@ -162,22 +162,22 @@ public class MiddlewareHelper {
                 @Override
                 public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                     if (response.isSuccessful()) {
-                        remoteLogger.d("unregister successful");
+                        logger.d("unregister successful");
                         setRegistrationStatus(context, STATUS_UNREGISTERED);
                     } else {
-                        remoteLogger.d("unregister failed");
+                        logger.d("unregister failed");
                         setRegistrationStatus(context, STATUS_FAILED);
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                    remoteLogger.d("unregister failed");
+                    logger.d("unregister failed");
                     setRegistrationStatus(context, STATUS_FAILED);
                 }
             });
         } else {
-            remoteLogger.d("No token or phone account so unregister");
+            logger.d("No token or phone account so unregister");
             setRegistrationStatus(context, STATUS_FAILED);
         }
     }
@@ -199,14 +199,14 @@ public class MiddlewareHelper {
      * @param context Context
      */
     public static void registerAtMiddleware(Context context) {
-        RemoteLogger remoteLogger = new RemoteLogger(MiddlewareHelper.class);
+        Logger logger = new Logger(MiddlewareHelper.class);
 
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-        remoteLogger.d("New refresh token: " + refreshedToken);
+        logger.d("New refresh token: " + refreshedToken);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String currentToken = preferences.getString(CURRENT_TOKEN, "");
-        remoteLogger.d("Current token: " + currentToken);
+        logger.d("Current token: " + currentToken);
 
         // If token changed or we are not registered with the middleware register.
         if (refreshedToken != null) {

@@ -7,23 +7,23 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 public class BluetoothButtonReceiver extends BroadcastReceiver {
 
     private final Listener mListener;
-    private final RemoteLogger mRemoteLogger;
+    private final Logger mLogger;
 
     public BluetoothButtonReceiver(Listener listener) {
         mListener = listener;
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mLogger = new Logger(this.getClass());
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
 
-        mRemoteLogger.i("mBluetoothButtonReceiver: " + action);
+        mLogger.i("mBluetoothButtonReceiver: " + action);
 
         if (action.equals(CALL_BTN)) {
             mListener.bluetoothCallButtonWasPressed();

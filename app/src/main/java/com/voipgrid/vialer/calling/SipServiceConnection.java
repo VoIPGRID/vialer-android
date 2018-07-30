@@ -8,7 +8,7 @@ import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipService;
 
 public class SipServiceConnection implements ServiceConnection {
@@ -60,7 +60,7 @@ public class SipServiceConnection implements ServiceConnection {
      */
     private static final int MAX_ALLOWED_MS_TO_BIND_SIP_SERVICE = 3000;
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     /**
      * Create a SipServiceConnection with an activity, if the activity implements
@@ -69,7 +69,7 @@ public class SipServiceConnection implements ServiceConnection {
      * @param activity
      */
     SipServiceConnection(Activity activity) {
-        mRemoteLogger = new RemoteLogger(this.getClass());
+        mLogger = new Logger(this.getClass());
         mActivity = activity;
 
         if (activity instanceof SipServiceConnectionListener) {
@@ -97,7 +97,7 @@ public class SipServiceConnection implements ServiceConnection {
     public void connect() {
         if (mSipServiceBound || mSipService != null) return;
 
-        mRemoteLogger.i(mActivity.getClass().getSimpleName() + " is attempting to bind to SipService");
+        mLogger.i(mActivity.getClass().getSimpleName() + " is attempting to bind to SipService");
 
         if (mActivity.bindService(new Intent(mActivity, SERVICE), this, Context.BIND_AUTO_CREATE)) {
             mShouldUnbind = true;
@@ -106,7 +106,7 @@ public class SipServiceConnection implements ServiceConnection {
         // Make sure service is bound before updating status.
         new Handler().postDelayed(() -> {
             if (!mSipServiceBound) {
-                mRemoteLogger.i(mActivity.getClass().getSimpleName() + " failed to bind to " + SERVICE.getSimpleName() + " after delay");
+                mLogger.i(mActivity.getClass().getSimpleName() + " failed to bind to " + SERVICE.getSimpleName() + " after delay");
                 mListener.sipServiceBindingFailed();
             }
         }, MAX_ALLOWED_MS_TO_BIND_SIP_SERVICE);
@@ -120,7 +120,7 @@ public class SipServiceConnection implements ServiceConnection {
     public void disconnect() {
         if (hasActiveCall() || !mShouldUnbind) return;
 
-        mRemoteLogger.i(mActivity.getClass().getSimpleName() + " is attempting to unbind from " + SERVICE.getSimpleName());
+        mLogger.i(mActivity.getClass().getSimpleName() + " is attempting to unbind from " + SERVICE.getSimpleName());
         mActivity.unbindService(this);
         mShouldUnbind = false;
         mSipServiceBound = false;
@@ -161,7 +161,7 @@ public class SipServiceConnection implements ServiceConnection {
 
     @Override
     public void onServiceConnected(ComponentName className, IBinder service) {
-        mRemoteLogger.i(mActivity.getClass().getSimpleName() + " connected to " + SERVICE.getSimpleName());
+        mLogger.i(mActivity.getClass().getSimpleName() + " connected to " + SERVICE.getSimpleName());
         SipService.SipServiceBinder binder = (SipService.SipServiceBinder) service;
         mSipService = binder.getService();
         mSipServiceBound = true;
@@ -170,7 +170,7 @@ public class SipServiceConnection implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName arg0) {
-        mRemoteLogger.i(mActivity.getClass().getSimpleName() + " disconnected from " + SERVICE.getSimpleName());
+        mLogger.i(mActivity.getClass().getSimpleName() + " disconnected from " + SERVICE.getSimpleName());
     }
 
     /**
