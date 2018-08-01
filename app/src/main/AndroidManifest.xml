@@ -113,6 +113,17 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".bluetooth.AudioStateChangeReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED"/>
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".util.UpdateActivity"
             android:label="@string/title_activity_update"

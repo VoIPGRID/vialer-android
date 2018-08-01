@@ -18,6 +18,7 @@ import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
+import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -39,14 +40,22 @@ public class FcmMessagingService extends FirebaseMessagingService {
     public final static String CALL_REQUEST_TYPE = "call";
     public final static String MESSAGE_REQUEST_TYPE = "message";
 
-    private final static String RESPONSE_URL = "response_api";
-    private final static String REQUEST_TOKEN = "unique_key";
-    private final static String PHONE_NUMBER = "phonenumber";
-    private final static String CALLER_ID = "caller_id";
-    private static final String SUPPRESSED = "supressed";
+    public final static String RESPONSE_URL = "response_api";
+    public final static String REQUEST_TOKEN = "unique_key";
+    public final static String PHONE_NUMBER = "phonenumber";
+    public final static String CALLER_ID = "caller_id";
+    public static final String SUPPRESSED = "supressed";
+    public static final String ATTEMPT = "attempt";
 
     // Extra field for notification throughput logging.
     public static final String MESSAGE_START_TIME = "message_start_time";
+    private static final int MAX_MIDDLEWARE_PUSH_ATTEMPTS = 8;
+
+    /**
+     * Stores the last call we have SUCCESSFULLY handled and started the SipService
+     * for.
+     */
+    private static String sLastHandledCall;
 
     private RemoteLogger mRemoteLogger;
 
@@ -65,6 +74,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         String requestType = data.get(MESSAGE_TYPE);
 
         LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage, requestType);
+        VialerStatistics.pushNotificationWasReceived(remoteMessage);
 
         if (requestType == null) {
             mRemoteLogger.e("No requestType");
@@ -72,6 +82,11 @@ public class FcmMessagingService extends FirebaseMessagingService {
         }
 
         if (requestType.equals(CALL_REQUEST_TYPE)) {
+            String callerId = data.get(CALLER_ID) != null ? data.get(CALLER_ID) : "";
+            String responseUrl = data.get(RESPONSE_URL) != null ? data.get(RESPONSE_URL) : "";
+            String requestToken = data.get(REQUEST_TOKEN) != null ? data.get(REQUEST_TOKEN) : "";
+            String messageStartTime = data.get(MESSAGE_START_TIME) != null ? data.get(MESSAGE_START_TIME) : "";
+
             AnalyticsHelper analyticsHelper = new AnalyticsHelper(
                     ((AnalyticsApplication) getApplication()).getDefaultTracker()
             );
@@ -96,24 +111,24 @@ public class FcmMessagingService extends FirebaseMessagingService {
             }
 
             if (!connectionSufficient) {
+                int attempt = Integer.parseInt(data.get(ATTEMPT));
+                if (attempt >= MAX_MIDDLEWARE_PUSH_ATTEMPTS) {
+                    VialerStatistics.incomingCallFailedDueToInsufficientNetwork(remoteMessage);
+                }
                 mRemoteLogger.e("Connection is insufficient. For now do nothing and wait for next middleware push");
                 return;
             }
 
-            // Check to see if there is not already a sipServiceActive and the current connection is
-            // fast enough to support VoIP call.
+            // Check to see if there is not already a sipServiceActive
             if (!SipService.sipServiceActive) {
+                sLastHandledCall = requestToken;
+
                 String number = data.get(PHONE_NUMBER);
 
                 // Is the current number suppressed.
                 if (number != null && (number.equalsIgnoreCase(SUPPRESSED) || number.toLowerCase().contains("xxxx"))) {
                     number = getString(R.string.supressed_number);
                 }
-
-                String callerId = data.get(CALLER_ID) != null ? data.get(CALLER_ID) : "";
-                String responseUrl = data.get(RESPONSE_URL) != null ? data.get(RESPONSE_URL) : "";
-                String requestToken = data.get(REQUEST_TOKEN) != null ? data.get(REQUEST_TOKEN) : "";
-                String messageStartTime = data.get(MESSAGE_START_TIME) != null ? data.get(MESSAGE_START_TIME) : "";
 
                 mRemoteLogger.d("Payload processed, calling startService method");
 
@@ -143,11 +158,28 @@ public class FcmMessagingService extends FirebaseMessagingService {
                         data.get(MESSAGE_START_TIME) != null ? data.get(MESSAGE_START_TIME) : "",
                         false
                 );
+
+                sendCallFailedDueToOngoingVialerCallMetric(remoteMessage, requestToken);
             }
         } else if (requestType.equals(MESSAGE_REQUEST_TYPE)){
             mRemoteLogger.d("Code not implemented");
             // TODO implement this message.
         }
+    }
+
+    /**
+     * Send the vialer metric for ongoing call if appropriate.
+     *
+     * @param remoteMessage
+     * @param requestToken
+     */
+    private void sendCallFailedDueToOngoingVialerCallMetric(RemoteMessage remoteMessage, String requestToken) {
+        if (sLastHandledCall != null && sLastHandledCall.equals(requestToken)) {
+            mRemoteLogger.i("Push notification (" + sLastHandledCall + ") is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully");
+            return;
+        }
+
+        VialerStatistics.incomingCallFailedDueToOngoingVialerCall(remoteMessage);
     }
 
     /**
@@ -177,7 +209,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
     /**
      * @param phoneNumber the number that tried call in.
-     * @param callerId pretty name of the phonenumber that tied to call in.
+     * @param callerId pretty name of the phonenumber that tried to call in.
      * @param messageStartTime message roundtrip throughput timestamp handled as String for logging
      *                         purposes.
      */

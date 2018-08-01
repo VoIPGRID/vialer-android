@@ -361,18 +361,21 @@ public class SetupActivity extends RemoteLoggingActivity implements
 
                 if (fragment != null) {
                     fragment.onNextStep();
+                    return;
                 }
 
                 // Check if the current fragment is the account fragment.
                 AccountFragment accountFragment = (AccountFragment) getCurrentFragment();
                 if (accountFragment != null) {
                     accountFragment.onNextStep();
+                    return;
                 }
 
                 ForgotPasswordFragment forgotFragment = (ForgotPasswordFragment) fragmentManager
                         .findFragmentByTag(ForgotPasswordFragment.class.getSimpleName());
                 if (forgotFragment != null) {
                     onNextStep(LoginFragment.newInstance());
+                    return;
                 }
             }
         } else {

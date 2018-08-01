@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -15,7 +16,10 @@ import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
 import com.voipgrid.vialer.media.monitoring.PacketStats;
 import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
+import com.voipgrid.vialer.statistics.CallCompletionStatsDispatcher;
+import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.StringUtil;
 
 import org.pjsip.pjsua2.AudDevManager;
 import org.pjsip.pjsua2.AudioMedia;
@@ -36,6 +40,8 @@ import org.pjsip.pjsua2.pjsip_status_code;
 import org.pjsip.pjsua2.pjsua_call_flag;
 import org.pjsip.pjsua2.pjsua_call_media_status;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.UUID;
 
 
@@ -43,6 +49,11 @@ import java.util.UUID;
  * Call class used to interact with a call.
  */
 public class SipCall extends org.pjsip.pjsua2.Call {
+
+    @StringDef({CALL_DIRECTION_OUTGOING, CALL_DIRECTION_INCOMING})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallDirection {}
+
     public static final String TAG = SipCall.class.getSimpleName();
 
     private Uri mPhoneNumberUri;
@@ -53,21 +64,27 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     private boolean mCallIsConnected = false;
     private boolean mIsOnHold;
-    private boolean mOutgoingCall = false;
     private boolean mUserHangup = false;
     private boolean mCallIsTransferred = false;
     private boolean mRingbackStarted = false;
+    @CallDirection private String mCallDirection;
     private String mCallerId;
     private String mIdentifier;
     private String mPhoneNumber;
     private String mCurrentCallState = SipConstants.CALL_INVALID_STATE;
     private boolean mIpChangeInProgress = false;
+    private String mMiddlewareKey;
+    private String mMessageStartTime;
+    private CallInfo mLastCallInfo;
+
+    public static final String CALL_DIRECTION_OUTGOING = "outgoing";
+    public static final String CALL_DIRECTION_INCOMING = "incoming";
 
     @Override
     public void onCallTsxState(OnCallTsxStateParam prm) {
         super.onCallTsxState(prm);
 
-         // Check if the call is an ringing incoming call.
+        // Check if the call is an ringing incoming call.
         if (mCurrentCallState.equals(SipConstants.CALL_INCOMING_RINGING)) {
             // Early state. Is where a call is being cancelled or completed elsewhere.
             String packet = prm.getE().getBody().getTsxState().getSrc().getRdata().getWholeMsg();
@@ -75,8 +92,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 CallMissedReason reason = CallMissedReason.UNKNOWN;
                 if (packet.contains(CallMissedReason.CALL_ORIGINATOR_CANCEL.toString())) {
                     reason = CallMissedReason.CALL_ORIGINATOR_CANCEL;
+                    VialerStatistics.incomingCallWasCancelledByOriginator(this);
                 } else if (packet.contains(CallMissedReason.CALL_COMPLETED_ELSEWHERE.toString())) {
                     reason = CallMissedReason.CALL_COMPLETED_ELSEWHERE;
+                    VialerStatistics.incomingCallWasCompletedElsewhere(this);
                 }
 
                 if (reason != CallMissedReason.UNKNOWN) {
@@ -143,12 +162,23 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         TimeVal timeVal = new TimeVal();
         try {
             CallInfo callInfo = this.getInfo();
-            timeVal = callInfo.getConnectDuration();
+            return callInfo.getConnectDuration().getSec();
         } catch (Exception e) {
-            e.printStackTrace();
+            return timeVal.getSec();
         }
+    }
 
-        return timeVal.getSec();
+    /**
+     * Get the call duration in milliseconds, this will use the stored callinfo
+     * so should not be used for live duration reporting but only for getting the
+     * duration at the end of the call.
+     *
+     * @return
+     */
+    public int getCallDurationInMilliseconds() {
+        TimeVal timeVal = mLastCallInfo.getConnectDuration();
+
+        return (timeVal.getSec() * 1000) + timeVal.getMsec();
     }
 
     private String getCodec() {
@@ -199,11 +229,13 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public void decline() throws Exception {
         hangupWithStatusCode(pjsip_status_code.PJSIP_SC_BUSY_HERE);
+        VialerStatistics.userDeclinedIncomingCall(this);
     }
 
     public void hangup(boolean userHangup) throws Exception {
         mUserHangup = userHangup;
         hangupWithStatusCode(pjsip_status_code.PJSIP_SC_DECLINE);
+        VialerStatistics.userDidHangUpCall(this);
     }
 
     public void toggleHold() throws Exception {
@@ -284,14 +316,13 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     @Override
     public void onCallState(OnCallStateParam onCallStateParam) {
         try {
-            CallInfo info = getInfo();  // Check to see if we can get CallInfo with this callback.
-            pjsip_inv_state callState = info.getState();
+            mLastCallInfo = getInfo();  // Check to see if we can get CallInfo with this callback.
+
+            pjsip_inv_state callState = mLastCallInfo.getState();
             mRemoteLogger.e("CallState changed!");
             mRemoteLogger.e(callState.toString());
 
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
-                // We are handling a outgoing call.
-                mOutgoingCall = true;
                 onCallStartRingback();
             }  else if (callState == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) {
                 // Call has been setup, stop ringback.
@@ -380,12 +411,21 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public void onCallIncoming() {
         mRemoteLogger.d("onCallIncoming");
+        mCallDirection = CALL_DIRECTION_INCOMING;
 
         // Determine whether we can accept the incoming call.
         pjsip_status_code code = pjsip_status_code.PJSIP_SC_RINGING;
         if (mSipService.getCurrentCall() != null || mSipService.getNativeCallManager().isBusyWithNativeCall()) {
             code = pjsip_status_code.PJSIP_SC_BUSY_HERE;
             LogHelper.using(mRemoteLogger).logBusyReason(mSipService);
+        }
+
+        if (mSipService.getCurrentCall() != null) {
+            VialerStatistics.incomingCallFailedDueToOngoingVialerCall(this);
+        }
+
+        if (mSipService.getNativeCallManager().isBusyWithNativeCall()) {
+            VialerStatistics.incomingCallFailedDueToOngoingGsmCall(this);
         }
 
         mCurrentCallState = SipConstants.CALL_INCOMING_RINGING;
@@ -420,6 +460,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public void onCallOutgoing(Uri phoneNumber, boolean startActivity) {
         mRemoteLogger.d("onCallOutgoing");
+        mCallDirection = CALL_DIRECTION_OUTGOING;
+
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_RINGING);
         try {
@@ -461,12 +503,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         // Play end of call beep only when the remote party hangs up and the call was connected.
         if (!mUserHangup && mCallIsConnected && !mCallIsTransferred) {
             mSipService.playBusyTone();
+            VialerStatistics.remoteDidHangUpCall(this);
         }
         mCallIsConnected = false;
         // Remove this call from the service.
         mSipService.removeCallFromList(this);
         mCurrentCallState = SipConstants.CALL_DISCONNECTED_MESSAGE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_DISCONNECTED_MESSAGE);
+        new CallCompletionStatsDispatcher().callDidComplete(this);
     }
 
     private void onCallInvalidState(Throwable fault) {
@@ -532,5 +576,78 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     boolean isIpChangeInProgress() {
         return mIpChangeInProgress;
+    }
+
+    public void setMiddlewareKey(String middlewareKey) {
+        mMiddlewareKey = middlewareKey;
+    }
+
+    public void setMessageStartTime(String messageStartTime) {
+        mMessageStartTime = messageStartTime;
+    }
+
+    public String getMiddlewareKey() {
+        return mMiddlewareKey;
+    }
+
+    public String getMessageStartTime() {
+        return mMessageStartTime;
+    }
+
+    public String getAsteriskCallId() {
+        CallInfo callInfo = getLastCallInfo();
+
+        return callInfo != null ? callInfo.getCallIdString() : null;
+    }
+
+    public String getCallDirection() {
+        return mCallDirection;
+    }
+
+    /**
+     * Extracts the call transport (e.g. TLS/TCP/UDP) from the local contact string.
+     *
+     */
+    public String getTransport() {
+        try {
+            CallInfo callInfo = getLastCallInfo();
+
+            if (callInfo == null) {
+                return null;
+            }
+
+            String transport = callInfo.getLocalContact();
+
+            if (transport == null) {
+                return null;
+            }
+
+            if (!transport.contains("transport")) {
+                return null;
+            }
+
+            return StringUtil.extractFirstCaptureGroupFromString(transport, "transport=([^;]+);");
+        } catch (Exception e) {
+            mRemoteLogger.e("Unable to get call id: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Will return the last callinfo recovered during call state change, if no lastCallInfo exists, it will attempt to retrieve it.
+     *
+     * @return
+     */
+    private @Nullable CallInfo getLastCallInfo() {
+        try {
+            if (mLastCallInfo == null) {
+                mLastCallInfo = getInfo();
+            }
+
+            return mLastCallInfo;
+        } catch (Exception e) {
+            mRemoteLogger.e("Unable to get call info");
+            return null;
+        }
     }
 }

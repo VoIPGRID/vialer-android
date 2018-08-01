@@ -16,6 +16,7 @@ import android.telephony.TelephonyManager;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.RemoteLogger;
@@ -132,6 +133,8 @@ public class SipService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        AudioStateChangeReceiver.fetch();
 
         mHandler = new Handler();
 
