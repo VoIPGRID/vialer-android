@@ -19,6 +19,7 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.calling.CallingConstants;
+import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -349,7 +350,8 @@ public class SipService extends Service {
                 number,
                 CallingConstants.TYPE_OUTGOING_CALL,
                 sipCall.getCallerId(),
-                sipCall.getPhoneNumber()
+                sipCall.getPhoneNumber(),
+                 CallActivity.class
         );
     }
 
@@ -363,13 +365,14 @@ public class SipService extends Service {
                 SipUri.sipAddressUri(this, PhoneNumberUtils.format(number)),
                 CallingConstants.TYPE_INCOMING_CALL,
                 callerId,
-                number
+                number,
+                IncomingCallActivity.class
         );
     }
 
-    private void startCallActivity(Uri sipAddressUri, @CallingConstants.CallTypes String type, String callerId, String number) {
+    private void startCallActivity(Uri sipAddressUri, @CallingConstants.CallTypes String type, String callerId, String number, Class activity) {
         mLogger.d("callVisibleForUser");
-        Intent intent = new Intent(this, CallActivity.class);
+        Intent intent = new Intent(this, activity);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setDataAndType(sipAddressUri, type);
         intent.putExtra(CallingConstants.CONTACT_NAME, callerId);

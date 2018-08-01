@@ -145,6 +145,8 @@ dependencies {
     annotationProcessor "com.google.dagger:dagger-android-processor:${daggerVersion}"
     implementation "com.google.dagger:dagger-android-support:${daggerVersion}"
 
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
+
     // Required -- JUnit 4 framework.
     testImplementation "junit:junit:${jUnitVersion}"
 

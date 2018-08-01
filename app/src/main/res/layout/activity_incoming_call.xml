@@ -1,0 +1,99 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="@drawable/background_gradient"
+             tools:context="com.voipgrid.vialer.CallActivity">
+
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:layout_marginTop="20dp">
+
+            <TextView style="@style/CallTextViewStyle"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginBottom="5dp"
+                      android:gravity="center"
+                      android:text="@string/callnotification_incoming_call"
+                      android:textSize="20sp"/>
+            <TextView android:id="@+id/incoming_caller_title"
+                      style="@style/CallTextViewStyle"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginBottom="0dp"
+                      android:gravity="center"
+                      android:text="Ghostbusters"
+                      android:textSize="40sp"/>
+            <TextView android:id="@+id/incoming_caller_subtitle"
+                      style="@style/CallTextViewStyle"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:gravity="center"
+                      android:text="+31 50 446 7828"
+                      android:textSize="20sp"/>
+
+        </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="127dp"
+                  android:layout_alignParentBottom="true"
+                  android:layout_alignParentLeft="true"
+
+                  android:layout_alignParentStart="true" android:layout_marginBottom="40dp"
+                  android:gravity="center" android:orientation="horizontal">
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content" android:layout_marginRight="70dp"
+                      android:gravity="center" android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/button_decline"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/call_decline_button"
+                android:backgroundTint="@color/call_fab_hangup_color"
+                android:padding="15dp"
+                android:src="@drawable/ic_call_end_white"
+            />
+            <TextView style="@style/CallTextViewStyle" android:layout_width="wrap_content"
+                      android:layout_height="wrap_content" android:gravity="center"
+                      android:text="Ignore" android:textSize="18sp"  android:layout_marginTop="5dp"/>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content" android:layout_marginLeft="70dp"
+                      android:gravity="center" android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/button_pickup"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/call_pickup_button"
+                android:backgroundTint="@color/call_fab_pickup_color"
+                android:padding="15dp"
+                android:src="@drawable/ic_call_white"
+            />
+            <TextView style="@style/CallTextViewStyle" android:layout_width="wrap_content"
+                      android:layout_height="wrap_content" android:gravity="center"
+                      android:text="Answer" android:textSize="18sp"
+            android:layout_marginTop="5dp"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:id="@+id/screen_off"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:orientation="horizontal"
+        android:visibility="gone"
+    />
+
+</RelativeLayout>
