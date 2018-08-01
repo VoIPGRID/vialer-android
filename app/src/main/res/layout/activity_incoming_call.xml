@@ -1,41 +1,60 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:background="@drawable/background_gradient"
-             tools:context="com.voipgrid.vialer.CallActivity">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/background_gradient"
+                tools:context="com.voipgrid.vialer.CallActivity">
 
 
-        <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="vertical"
-                      android:layout_marginTop="20dp">
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentStart="true"
+                  android:layout_alignParentTop="true" android:layout_marginTop="40dp"
+                  android:orientation="vertical">
 
-            <TextView style="@style/CallTextViewStyle"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_marginBottom="5dp"
-                      android:gravity="center"
-                      android:text="@string/callnotification_incoming_call"
-                      android:textSize="20sp"/>
-            <TextView android:id="@+id/incoming_caller_title"
-                      style="@style/CallTextViewStyle"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_marginBottom="0dp"
-                      android:gravity="center"
-                      android:text="Ghostbusters"
-                      android:textSize="40sp"/>
-            <TextView android:id="@+id/incoming_caller_subtitle"
-                      style="@style/CallTextViewStyle"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:gravity="center"
-                      android:text="+31 50 446 7828"
-                      android:textSize="20sp"/>
+        <TextView style="@style/CallTextViewStyle"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="5dp"
+                  android:gravity="center"
+                  android:text="@string/callnotification_incoming_call"
+                  android:textSize="20sp"/>
+        <TextView android:id="@+id/incoming_caller_title"
+                  style="@style/CallTextViewStyle"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="0dp"
+                  android:gravity="center"
+                  android:text="Ghostbusters"
+                  android:textSize="40sp"/>
+        <TextView android:id="@+id/incoming_caller_subtitle"
+                  style="@style/CallTextViewStyle"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:gravity="center"
+                  android:text="+31 50 446 7828"
+                  android:textSize="20sp"/>
 
-        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentStart="true"
+                  android:layout_centerVertical="true"
+                  android:gravity="center" android:orientation="vertical"
+                  android:layout_alignParentLeft="true">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/profile_image"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:src="@drawable/no_user"
+            app:civ_border_color="#ffffff"
+            app:civ_border_width="2dp"/>
+
+    </LinearLayout>
 
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="127dp"
@@ -59,8 +78,8 @@
                 android:src="@drawable/ic_call_end_white"
             />
             <TextView style="@style/CallTextViewStyle" android:layout_width="wrap_content"
-                      android:layout_height="wrap_content" android:gravity="center"
-                      android:text="Ignore" android:textSize="18sp"  android:layout_marginTop="5dp"/>
+                      android:layout_height="wrap_content" android:layout_marginTop="5dp"
+                      android:gravity="center" android:text="Ignore" android:textSize="18sp"/>
         </LinearLayout>
 
         <LinearLayout android:layout_width="wrap_content"
@@ -77,14 +96,13 @@
                 android:src="@drawable/ic_call_white"
             />
             <TextView style="@style/CallTextViewStyle" android:layout_width="wrap_content"
-                      android:layout_height="wrap_content" android:gravity="center"
-                      android:text="Answer" android:textSize="18sp"
-            android:layout_marginTop="5dp"/>
+                      android:layout_height="wrap_content" android:layout_marginTop="5dp"
+                      android:gravity="center" android:text="Answer"
+                      android:textSize="18sp"/>
         </LinearLayout>
 
 
     </LinearLayout>
-
 
 
     <LinearLayout
