@@ -2,16 +2,22 @@ package com.voipgrid.vialer.calling;
 
 import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_INCOMING_FRAGMENT;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_LOCK_RING_FRAGMENT;
+import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_CONNECTED_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
 
+import android.app.KeyguardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -20,6 +26,9 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
+import com.wearespindle.spindlelockring.library.LockRing;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,11 +37,16 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class IncomingCallActivity extends AbstractCallActivity {
 
+    @Inject KeyguardManager mKeyguardManager;
+
     @BindView(R.id.incoming_caller_title) TextView mIncomingCallerTitle;
     @BindView(R.id.incoming_caller_subtitle) TextView mIncomingCallerSubtitle;
     @BindView(R.id.profile_image) CircleImageView mProfileImage;
     @BindView(R.id.button_decline) ImageButton mButtonDecline;
     @BindView(R.id.button_pickup) ImageButton mButtonPickup;
+    @BindView(R.id.lock_ring_container) View mLockRingContainer;
+    @BindView(R.id.lock_ring) LockRing mLockRing;
+    @BindView(R.id.call_buttons) View mCallButtons;
 
     private boolean ringingIsPaused = false;
 
@@ -45,6 +59,10 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
         mMediaManager.startIncomingCallRinger();
         updateViewBasedOnIntent();
+    }
+
+    private boolean currentlyOnLockScreen() {
+        return mKeyguardManager.inKeyguardRestrictedInputMode();
     }
 
     /**
@@ -90,6 +108,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
             e.printStackTrace();
         }
 
+        mCallNotifications.removeAll();
         sendBroadcast(new Intent(DECLINE_BTN));
         endRinging();
     }
@@ -126,8 +145,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         }
 
         if (status.equals(CALL_CONNECTED_MESSAGE)) {
-            Log.e("TEST123", "Hash cde: " +this.hashCode());
-            Log.e("TEST123", status);
             mSipServiceConnection.disconnect(true);
             mMediaManager.stopIncomingCallRinger();
             startCallActivity();
@@ -176,7 +193,9 @@ public class IncomingCallActivity extends AbstractCallActivity {
             return;
         }
 
-        mCallNotifications.callScreenIsBeingHiddenOnRingingCall(getCallNotificationDetails());
+        if (mSipServiceConnection.isAvailable() && mSipServiceConnection.get().getCurrentCall() != null) {
+            mCallNotifications.callScreenIsBeingHiddenOnRingingCall(getCallNotificationDetails());
+        }
         mMediaManager.stopIncomingCallRinger();
         ringingIsPaused = true;
     }
@@ -186,6 +205,15 @@ public class IncomingCallActivity extends AbstractCallActivity {
         super.onResume();
 
         mCallNotifications.removeAll();
+
+        if (currentlyOnLockScreen()) {
+            mLockRing.setOnTriggerListener(new LockRingListener(mLockRing, this));
+            mLockRingContainer.setVisibility(View.VISIBLE);
+            mCallButtons.setVisibility(View.GONE);
+        } else {
+            mLockRingContainer.setVisibility(View.GONE);
+            mCallButtons.setVisibility(View.VISIBLE);
+        }
 
         if (ringingIsPaused) {
             mMediaManager.startIncomingCallRinger();

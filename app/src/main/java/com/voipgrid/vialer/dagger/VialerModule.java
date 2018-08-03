@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.dagger;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -90,5 +91,10 @@ public class VialerModule {
     @Provides
     CallNotifications provideCallNotifications(NotificationHelper notificationHelper, Context context) {
         return new CallNotifications(notificationHelper, context);
+    }
+
+    @Provides
+    KeyguardManager provideKeyguardManager(Context context) {
+        return (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
     }
 }

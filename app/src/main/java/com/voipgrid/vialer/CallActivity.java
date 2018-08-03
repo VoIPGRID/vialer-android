@@ -43,7 +43,6 @@ import android.widget.Toast;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.call.CallConnectedFragment;
 import com.voipgrid.vialer.call.CallKeyPadFragment;
-import com.voipgrid.vialer.call.CallLockRingFragment;
 import com.voipgrid.vialer.call.CallTransferCompleteFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
@@ -217,19 +216,6 @@ public class CallActivity extends AbstractCallActivity
             }
 
 
-        } else if (type.equals(TYPE_INCOMING_CALL)) {
-            // Hide the connected view.
-
-            KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-            // Depended on if the user has the screen locked show the slide to answer view or
-            // the two buttons to accept / decline a call.
-            if (keyguardManager.inKeyguardRestrictedInputMode()) {
-                findViewById(R.id.call_buttons_container).setVisibility(View.INVISIBLE);
-
-                swapFragment(TAG_CALL_LOCK_RING_FRAGMENT, null);
-            } else {
-                swapFragment(TAG_CALL_INCOMING_FRAGMENT, null);
-            }
         }
     }
 
@@ -759,10 +745,6 @@ public class CallActivity extends AbstractCallActivity
         switch (tag) {
             case TAG_CALL_KEY_PAD_FRAGMENT:
                 newFragment = new CallKeyPadFragment();
-                break;
-
-            case TAG_CALL_LOCK_RING_FRAGMENT:
-                newFragment = new CallLockRingFragment();
                 break;
 
             case TAG_CALL_TRANSFER_FRAGMENT:
