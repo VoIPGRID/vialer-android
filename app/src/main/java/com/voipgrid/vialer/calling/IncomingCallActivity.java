@@ -1,10 +1,16 @@
 package com.voipgrid.vialer.calling;
 
+import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
+import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
+import static com.voipgrid.vialer.calling.CallingConstants.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_CONNECTED_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -27,6 +33,8 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @BindView(R.id.profile_image) CircleImageView mProfileImage;
     @BindView(R.id.button_decline) ImageButton mButtonDecline;
     @BindView(R.id.button_pickup) ImageButton mButtonPickup;
+
+    private boolean ringingIsPaused = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +74,8 @@ public class IncomingCallActivity extends AbstractCallActivity {
     public void onDeclineButtonClicked() {
         mLogger.d("decline");
 
+        disableAllButtons();
+
         if (!mSipServiceConnection.isAvailable()) {
             return;
         }
@@ -90,27 +100,50 @@ public class IncomingCallActivity extends AbstractCallActivity {
             finish();
             return;
         }
+
+        disableAllButtons();
+
         try {
             mSipServiceConnection.get().getCurrentCall().answer();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
-        Intent intent = getIntent();
-        intent.setClass(this, CallActivity.class);
-        startActivity(intent);
-        mLogger.d("callVisibleForUser");
+    private void disableAllButtons() {
+        mButtonPickup.setEnabled(false);
+        mButtonDecline.setEnabled(false);
     }
 
     @Override
     public void onCallStatusReceived(String status, String callId) {
         super.onCallStatusReceived(status, callId);
 
-        if (!status.equals(CALL_DISCONNECTED_MESSAGE)) {
+        if (status.equals(CALL_DISCONNECTED_MESSAGE)) {
+            mSipServiceConnection.disconnect(true);
+            endRinging();
             return;
         }
 
-        endRinging();
+        if (status.equals(CALL_CONNECTED_MESSAGE)) {
+            Log.e("TEST123", "Hash cde: " +this.hashCode());
+            Log.e("TEST123", status);
+            mSipServiceConnection.disconnect(true);
+            mMediaManager.stopIncomingCallRinger();
+            startCallActivity();
+            return;
+        }
+    }
+
+    /**
+     * Start the call activity.
+     *
+     */
+    private void startCallActivity() {
+        Intent intent = getIntent();
+        intent.setClass(this, CallActivity.class);
+        startActivity(intent);
+        mLogger.d("callVisibleForUser");
     }
 
     /**
@@ -119,7 +152,65 @@ public class IncomingCallActivity extends AbstractCallActivity {
      */
     private void endRinging() {
         mMediaManager.stopIncomingCallRinger();
-        mButtonDecline.setEnabled(false);
         finish();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (!allPermissionsGranted(permissions, grantResults)) {
+            return;
+        }
+
+        mMediaManager.startIncomingCallRinger();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Check if the screen is interactive because when the activity becomes active.
+        // After the screen turns on onStart and onPause are called again.
+        // Hence : onCreate - onStart - onResume - onPause - onStop - onStart - onPause.
+        if (!isScreenInteractive()) {
+            mLogger.i("We come from an screen that has been off. Don't execute the onPause!");
+            return;
+        }
+
+        mCallNotifications.callScreenIsBeingHiddenOnRingingCall(getCallNotificationDetails());
+        mMediaManager.stopIncomingCallRinger();
+        ringingIsPaused = true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mCallNotifications.removeAll();
+
+        if (ringingIsPaused) {
+            mMediaManager.startIncomingCallRinger();
+            ringingIsPaused = false;
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (userPressedAcceptFromNotification(intent)) {
+            new Handler().postDelayed(this::onPickupButtonClicked, 500);
+            mCallNotifications.acceptedFromNotification(getCallNotificationDetails());
+            return;
+        }
+    }
+
+    /**
+     * Check if the received intent is from the user pressing the accept button on the notification.
+     *
+     * @param intent
+     * @return
+     */
+    private boolean userPressedAcceptFromNotification(Intent intent) {
+        return TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL.equals(intent.getType());
     }
 }

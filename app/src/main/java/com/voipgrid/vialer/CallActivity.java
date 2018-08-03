@@ -42,7 +42,6 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.call.CallConnectedFragment;
-import com.voipgrid.vialer.call.CallIncomingFragment;
 import com.voipgrid.vialer.call.CallKeyPadFragment;
 import com.voipgrid.vialer.call.CallLockRingFragment;
 import com.voipgrid.vialer.call.CallTransferCompleteFragment;
@@ -76,7 +75,7 @@ import butterknife.ButterKnife;
  */
 public class CallActivity extends AbstractCallActivity
         implements View.OnClickListener,CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
-        MediaManager.AudioChangedInterface, SipServiceConnection.SipServiceConnectionListener {
+        MediaManager.AudioChangedInterface {
 
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
     @BindView(R.id.state_text_view) TextView mStateView;
@@ -84,7 +83,6 @@ public class CallActivity extends AbstractCallActivity
     @Inject AnalyticsHelper mAnalyticsHelper;
 
     private boolean mIsIncomingCall;
-    private boolean mIncomingCallIsRinging = false;
 
     private boolean mConnected = false;
     private boolean mMute = false;
@@ -115,6 +113,9 @@ public class CallActivity extends AbstractCallActivity
 
         // Get the intent to see if it's an outgoing or an incoming call.
         mType = intent.getType();
+
+        toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
+
         if (mType.equals(TYPE_INCOMING_CALL) || mType.equals(TYPE_OUTGOING_CALL)) {
             // Update the textView with a number URI.
             mPhoneNumberToDisplay = intent.getStringExtra(PHONE_NUMBER);
@@ -147,9 +148,6 @@ public class CallActivity extends AbstractCallActivity
                         ReadExternalStoragePermission.askForPermission(this);
                     }
 
-                    mIncomingCallIsRinging = true;
-
-
                 } else {
                     mLogger.d("outgoingCall");
                     mCallNotifications.outgoingCall(getCallNotificationDetails());
@@ -160,25 +158,8 @@ public class CallActivity extends AbstractCallActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (!allPermissionsGranted(permissions, grantResults)) {
-            return;
-        }
-
-        if (mIncomingCallIsRinging) {
-            mMediaManager.startIncomingCallRinger();
-        }
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
-
-        if (mIncomingCallIsRinging && mPausedRinging) {
-            mMediaManager.startIncomingCallRinger();
-        }
-
-        mPausedRinging = false;
 
         if (!mOnTransfer && mSipServiceConnection.get() != null && mSipServiceConnection.get().getCurrentCall() != null) {
             if (mSipServiceConnection.get().getCurrentCall().isOnHold()) {
@@ -197,64 +178,9 @@ public class CallActivity extends AbstractCallActivity
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
-        // Check if the screen is interactive because when the activity becomes active.
-        // After the screen turns on onStart and onPause are called again.
-        // Hence : onCreate - onStart - onResume - onPause - onStop - onStart - onPause.
-        if (!isScreenInteractive()) {
-            mLogger.i("We come from an screen that has been off. Don't execute the onPause!");
-            return;
-        }
-
-        if (mIncomingCallIsRinging) {
-            mCallNotifications.callScreenIsBeingHiddenOnRingingCall(getCallNotificationDetails());
-            mMediaManager.stopIncomingCallRinger();
-            mPausedRinging = true;
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         mCallNotifications.removeAll();
-    }
-
-    /**
-     * This method is called when the user clicks on a notification.
-     *
-     * @param intent
-     */
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        String intentType = intent.getType();
-
-        if (intentType == null) {
-            return;
-        }
-
-        if (intentType.equals(TYPE_INCOMING_CALL)) {
-            mMediaManager.startIncomingCallRinger();
-            return;
-        }
-
-        if (intentType.equals(TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL)) {
-            mPhoneNumberToDisplay = intent.getStringExtra(PHONE_NUMBER);
-            mCallerIdToDisplay = intent.getStringExtra(CONTACT_NAME);
-
-            // Answer the call with a small delay to allow the activity to catch up.
-            // So the UI will be updated correctly.
-            new Handler().postDelayed(() -> {
-                answer();
-                displayCallInfo();
-            }, 500);
-
-            mCallNotifications.acceptedFromNotification(getCallNotificationDetails());
-            return;
-        }
     }
 
     private void displayCallInfo() {
@@ -268,22 +194,6 @@ public class CallActivity extends AbstractCallActivity
             nameTextView.setText(mPhoneNumberToDisplay);
             numberTextView.setText("");
         }
-    }
-
-    /**
-     * Generate the details needed for the call notifications.
-     *
-     * @return
-     */
-    private CallNotifications.CallNotificationDetail getCallNotificationDetails() {
-        return new CallNotifications.CallNotificationDetail(getCallerInfo(), mCallerIdToDisplay, mPhoneNumberToDisplay, mType);
-    }
-
-    private String getCallerInfo() {
-        if (mCallerIdToDisplay != null && !mCallerIdToDisplay.isEmpty()) {
-            return mCallerIdToDisplay;
-        }
-        return mPhoneNumberToDisplay;
     }
 
     /**
@@ -338,7 +248,6 @@ public class CallActivity extends AbstractCallActivity
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
                 mStateView.setText(R.string.call_connected);
                 mConnected = true;
-                mIncomingCallIsRinging = false;
 
                 mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
 
@@ -367,7 +276,6 @@ public class CallActivity extends AbstractCallActivity
 
                 // Stop duration timer.
                 mConnected = false;
-                mIncomingCallIsRinging = false;
 
                 // Stop the ringtone and vibrator when the call has been disconnected.
                 mMediaManager.stopIncomingCallRinger();
@@ -484,7 +392,6 @@ public class CallActivity extends AbstractCallActivity
             case SERVICE_STOPPED:
                 // TODO: This broadcast is not received anymore due to refactor! Solve with transition to fragments.
                 mConnected = false;
-                mIncomingCallIsRinging = false;
                 finishAfterDelay();
                 break;
         }
@@ -850,10 +757,6 @@ public class CallActivity extends AbstractCallActivity
         Fragment newFragment = null;
 
         switch (tag) {
-            case TAG_CALL_INCOMING_FRAGMENT:
-                newFragment = new CallIncomingFragment();
-                break;
-
             case TAG_CALL_KEY_PAD_FRAGMENT:
                 newFragment = new CallKeyPadFragment();
                 break;
@@ -1092,7 +995,7 @@ public class CallActivity extends AbstractCallActivity
 
     @Override
     protected void onDeclineButtonClicked() {
-        if (mConnected || !mIncomingCallIsRinging) {
+        if (mConnected) {
             mLogger.i("Hangup the call");
             hangup(R.id.button_hangup);
         }

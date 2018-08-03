@@ -19,6 +19,7 @@ import android.support.v4.app.TaskStackBuilder;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 
@@ -84,7 +85,7 @@ public class NotificationHelper {
         PendingIntent declinePendingIntent = PendingIntent.getService(mContext, 0, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Accept button intent.
-        Intent acceptIntent = new Intent(mContext, CallActivity.class);
+        Intent acceptIntent = new Intent(mContext, IncomingCallActivity.class);
         acceptIntent.setAction(mContext.getString(R.string.call_incoming_accept));
         acceptIntent.setType(TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL);
         acceptIntent.putExtra(CONTACT_NAME, callerId);

@@ -116,15 +116,20 @@ public class SipServiceConnection implements ServiceConnection {
      * Disconnect from the SipService, this disconnection will only happen if the SipService has been
      * properly shutdown and therefore has no active call.
      *
+     * @param force If TRUE is passed, this will attempt to disconnect the service even if an active call exists.
      */
-    public void disconnect() {
-        if (hasActiveCall() || !mShouldUnbind) return;
+    public void disconnect(boolean force) {
+        if ((hasActiveCall() && !force)|| !mShouldUnbind) return;
 
         mLogger.i(mActivity.getClass().getSimpleName() + " is attempting to unbind from " + SERVICE.getSimpleName());
         mActivity.unbindService(this);
         mShouldUnbind = false;
         mSipServiceBound = false;
         mListener.sipServiceHasBeenDisconnected();
+    }
+
+    public void disconnect() {
+        disconnect(false);
     }
 
     /**

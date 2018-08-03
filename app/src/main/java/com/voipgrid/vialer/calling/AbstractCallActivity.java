@@ -189,4 +189,20 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected String getCallerIdFromIntent() {
         return getIntent().getStringExtra(CONTACT_NAME);
     }
+
+    /**
+     * Generate the details needed for the call notifications.
+     *
+     * @return
+     */
+    protected CallNotifications.CallNotificationDetail getCallNotificationDetails() {
+        return new CallNotifications.CallNotificationDetail(getCallerInfo(), getCallerIdFromIntent(), getPhoneNumberFromIntent(), getIntent().getType());
+    }
+
+    private String getCallerInfo() {
+        if (getCallerIdFromIntent() != null && !getCallerIdFromIntent().isEmpty()) {
+            return getCallerIdFromIntent();
+        }
+        return getPhoneNumberFromIntent();
+    }
 }
