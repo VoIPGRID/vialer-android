@@ -193,7 +193,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
             return;
         }
 
-        if (mSipServiceConnection.isAvailable() && mSipServiceConnection.get().getCurrentCall() != null) {
+        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             mCallNotifications.callScreenIsBeingHiddenOnRingingCall(getCallNotificationDetails());
         }
         mMediaManager.stopIncomingCallRinger();

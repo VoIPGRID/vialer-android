@@ -141,6 +141,10 @@ public class SipServiceConnection implements ServiceConnection {
         return mSipService != null && mSipService.getCurrentCall() != null;
     }
 
+    public boolean isAvailableAndHasActiveCall() {
+        return isAvailable() && hasActiveCall();
+    }
+
     /**
      * Get the connected SipService, this should not be called until the connection has
      * been bound properly.
