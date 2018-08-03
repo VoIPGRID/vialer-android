@@ -984,22 +984,6 @@ public class CallActivity extends AbstractCallActivity
     }
 
     @Override
-    public void sipServiceHasConnected(SipService sipService) {
-        super.sipServiceHasConnected(sipService);
-        if (mIsIncomingCall) {
-            // Wait one second before setting the callerId and phonenumber
-            // so the SipService can set the currentcall.
-            new Handler().postDelayed(() -> {
-                SipCall firstCall = sipService.getFirstCall();
-                if (firstCall != null) {
-                    firstCall.setCallerId(mCallerIdToDisplay);
-                    firstCall.setPhoneNumber(mPhoneNumberToDisplay);
-                }
-            }, 1000);
-        }
-    }
-
-    @Override
     public void onCallDurationUpdate(long seconds) {
         if (!mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
             return;
