@@ -149,7 +149,7 @@ public class CallActivity extends AbstractCallActivity
 
                     mIncomingCallIsRinging = true;
 
-                    mMediaManager.startIncomingCallRinger();
+
                 } else {
                     mLogger.d("outgoingCall");
                     mCallNotifications.outgoingCall(getCallNotificationDetails());
@@ -531,11 +531,7 @@ public class CallActivity extends AbstractCallActivity
             // In call dialog.
             hangup(R.id.button_hangup);
         } else if (declineButton != null && declineButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
-            // Two button pickup visible.
-            decline();
         } else if (lockRingView != null && lockRingView.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
-            // Lock ring visible.
-            decline();
         } else {
             super.onBackPressed();
         }
@@ -945,27 +941,6 @@ public class CallActivity extends AbstractCallActivity
         }
     }
 
-    public void decline() {
-        mLogger.d("decline");
-        mMediaManager.stopIncomingCallRinger();
-
-        if (mSipServiceConnection.isAvailable()) {
-            try {
-                mSipServiceConnection.get().getCurrentCall().decline();
-                mSelfHangup = true;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_inbound),
-                    getString(R.string.analytics_event_label_declined)
-            );
-            finishAfterDelay();
-            sendBroadcast(new Intent(DECLINE_BTN));
-        }
-    }
-
     @Override
     public void callKeyPadButtonClicked(String dtmf) {
         if (mSipServiceConnection.isAvailable()) {
@@ -1110,19 +1085,16 @@ public class CallActivity extends AbstractCallActivity
     }
 
     @Override
-    public void bluetoothCallButtonWasPressed() {
+    protected void onPickupButtonClicked() {
         mLogger.i("Pickup call");
         answer();
     }
 
     @Override
-    public void bluetoothDeclineButtonWasPressed() {
+    protected void onDeclineButtonClicked() {
         if (mConnected || !mIncomingCallIsRinging) {
             mLogger.i("Hangup the call");
             hangup(R.id.button_hangup);
-        } else {
-            mLogger.i("Hangup / Decline the call");
-            decline();
         }
     }
 

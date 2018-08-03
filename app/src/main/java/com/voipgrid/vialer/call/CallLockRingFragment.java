@@ -49,7 +49,7 @@ public class CallLockRingFragment extends Fragment implements OnTriggerListener 
                 ((CallActivity) getActivity()).answer();
                 break;
             case R.drawable.ic_lock_ring_decline:
-                ((CallActivity) getActivity()).decline();
+//                ((CallActivity) getActivity()).decline();
                 break;
         }
         mLockRing.reset(true);

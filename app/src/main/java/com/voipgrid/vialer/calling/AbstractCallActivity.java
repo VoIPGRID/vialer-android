@@ -1,9 +1,13 @@
 package com.voipgrid.vialer.calling;
 
+import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
+import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.CALL_BTN;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
+import static com.voipgrid.vialer.sip.SipConstants.EXTRA_PHONE_NUMBER;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.CallSuper;
@@ -11,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.logging.Logger;
@@ -149,5 +154,39 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     public void audioLost(boolean lost) {
         mLogger.i("AudioLost or Recovered: ");
         mLogger.i("==> " + lost);
+    }
+
+    @Override
+    public void bluetoothCallButtonWasPressed() {
+        onPickupButtonClicked();
+    }
+
+    @Override
+    public void bluetoothDeclineButtonWasPressed() {
+        onDeclineButtonClicked();
+    }
+
+    protected abstract void onPickupButtonClicked();
+
+    protected abstract void onDeclineButtonClicked();
+
+    @Override
+    public void finish() {
+        if (isTaskRoot() && VialerApplication.get().isApplicationVisible()) {
+            mLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+
+        super.finish();
+    }
+
+    protected String getPhoneNumberFromIntent() {
+        return getIntent().getStringExtra(PHONE_NUMBER);
+    }
+
+    protected String getCallerIdFromIntent() {
+        return getIntent().getStringExtra(CONTACT_NAME);
     }
 }

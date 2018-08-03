@@ -36,7 +36,7 @@ public class CallIncomingFragment extends Fragment implements View.OnClickListen
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_decline:
-                ((CallActivity) getActivity()).decline();
+//                ((CallActivity) getActivity()).decline();
                 break;
 
             case R.id.button_pickup:

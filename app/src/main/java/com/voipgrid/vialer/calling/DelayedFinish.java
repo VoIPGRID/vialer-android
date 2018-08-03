@@ -39,14 +39,6 @@ public class DelayedFinish implements Runnable {
             return;
         }
 
-        // Check to see if the call activity is the last activity.
-        if (mActivity.isTaskRoot() && VialerApplication.get().isApplicationVisible()) {
-            mLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
-            Intent intent = new Intent(mActivity, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            mActivity.startActivity(intent);
-        }
-
         mActivity.finish();
     }
 }
