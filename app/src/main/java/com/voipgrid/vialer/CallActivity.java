@@ -214,8 +214,6 @@ public class CallActivity extends AbstractCallActivity
                     mMediaManager.callOutgoing();
                 }
             }
-
-
         }
     }
 
