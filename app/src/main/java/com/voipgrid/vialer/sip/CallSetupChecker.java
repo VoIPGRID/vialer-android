@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -31,7 +31,7 @@ public class CallSetupChecker {
     private final String mMessageStartTime;
     private final String mAttempt;
     private long mCheckStartTime;
-    private final RemoteLogger mRemoteLogger;
+    private final Logger mLogger;
     private SipService mSipService;
     private BroadcastReceiverManager mBroadcastReceiverManager;
 
@@ -65,7 +65,7 @@ public class CallSetupChecker {
         mMessageStartTime = messageStartTime;
         mAttempt = attempt;
         mBroadcastReceiverManager = BroadcastReceiverManager.fromContext(VialerApplication.get());
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mLogger = new Logger(this.getClass());
     }
 
     /**
@@ -111,13 +111,13 @@ public class CallSetupChecker {
      */
     private void check() {
         if (isSipServiceHandlingOurCall()){
-            mRemoteLogger.i("Confirmed call from fcm message (" + mRequestToken + ") has been setup");
+            mLogger.i("Confirmed call from fcm message (" + mRequestToken + ") has been setup");
             continueChecking = false;
         }
 
         if (hasMaximumAllowedTimeExpired()) {
             VialerStatistics.noCallReceivedFromAsteriskAfterOkToMiddleware(mRequestToken, mMessageStartTime, mAttempt);
-            mRemoteLogger.e("Unable to confirm call from fcm message (" + mRequestToken + ") was setup correctly");
+            mLogger.e("Unable to confirm call from fcm message (" + mRequestToken + ") was setup correctly");
             continueChecking = false;
         }
 

@@ -49,5 +49,4 @@
         <item name="android:textColor">@color/color_text</item>
         <item name="android:textSize">@dimen/call_state_text_size</item>
     </style>
-
 </resources>

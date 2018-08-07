@@ -20,7 +20,7 @@ import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -297,7 +297,7 @@ public class CallRecordFragment extends ListFragment implements
 
     private void failedFeedback(Response response) {
         if (getActivity() == null) {
-            new RemoteLogger(CallRecordFragment.class).enableConsoleLogging().e("CallRecordFragment is no longer attached to an activity");
+            new Logger(CallRecordFragment.class).e("CallRecordFragment is no longer attached to an activity");
             return;
         }
 

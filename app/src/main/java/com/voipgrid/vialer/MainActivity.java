@@ -17,14 +17,13 @@ import android.view.View;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.contacts.UpdateChangedContactsService;
 import com.voipgrid.vialer.dialer.DialerActivity;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.onboarding.AccountFragment;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
@@ -47,7 +46,7 @@ public class MainActivity extends NavigationDrawerActivity implements
     private View mView;
     private boolean mAskForPermission = true;
     private int requestCounter = -1;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private DialHelper mDialHelper;
 
     private ReachabilityReceiver mReachabilityReceiver;
@@ -65,7 +64,7 @@ public class MainActivity extends NavigationDrawerActivity implements
             }
         }
 
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mLogger = new Logger(this.getClass());
         JsonStorage jsonStorage = new JsonStorage(this);
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
         Boolean hasSystemUser = jsonStorage.has(SystemUser.class);
@@ -137,7 +136,7 @@ public class MainActivity extends NavigationDrawerActivity implements
     private void fetchApiTokenIfDoesNotExist() {
         if (hasApiToken()) return;
 
-        mRemoteLogger.i("There is no api-key currently stored, will attempt to fetch one");
+        mLogger.i("There is no api-key currently stored, will attempt to fetch one");
 
         ApiTokenFetcher.usingSavedCredentials(this).setListener(new ApiTokenListener()).fetch();
     }
@@ -340,7 +339,7 @@ public class MainActivity extends NavigationDrawerActivity implements
                 return;
             }
 
-            mRemoteLogger.i("Prompting the user to enter a two-factor code");
+            mLogger.i("Prompting the user to enter a two-factor code");
 
             TwoFactorAuthenticationDialogFragment twoFactorAuthenticationDialogFragment = new TwoFactorAuthenticationDialogFragment();
             twoFactorAuthenticationDialogFragment.show(getFragmentManager(), "");

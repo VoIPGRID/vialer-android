@@ -1,23 +1,23 @@
 package com.voipgrid.vialer.sip;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
 
 import org.pjsip.pjsua2.LogEntry;
 import org.pjsip.pjsua2.LogWriter;
 
 public class SipLogWriter extends LogWriter {
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     private SipLogHandler mSipLogHandler = new SipLogHandler();
 
-    void enabledRemoteLogging(RemoteLogger logger) {
-        mRemoteLogger = logger;
+    void enabledRemoteLogging(Logger logger) {
+        mLogger = logger;
     }
 
     void disableRemoteLogging() {
-        mRemoteLogger.i("Prematurely disable the remote logger");
-        mRemoteLogger = null;
+        mLogger.i("Prematurely disable the remote logger");
+        mLogger = null;
     }
 
     @Override
@@ -27,25 +27,25 @@ public class SipLogWriter extends LogWriter {
 
         mSipLogHandler.handle(logString);
 
-        if (mRemoteLogger == null) {
+        if (mLogger == null) {
             return;
         }
 
         switch (pjsipLogLevel){
             case 1:
-                mRemoteLogger.e(logString);
+                mLogger.e(logString);
                 break;
             case 2:
-                mRemoteLogger.w(logString);
+                mLogger.w(logString);
                 break;
             case 3:
-                mRemoteLogger.i(logString);
+                mLogger.i(logString);
                 break;
             case 4:
-                mRemoteLogger.d(logString);
+                mLogger.d(logString);
                 break;
             default:
-                mRemoteLogger.v(logString);
+                mLogger.v(logString);
                 break;
         }
     }

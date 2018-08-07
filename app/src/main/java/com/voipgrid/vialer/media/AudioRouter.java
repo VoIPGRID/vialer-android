@@ -14,7 +14,7 @@ import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.view.KeyEvent;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 /**
  * Class is responsible for in call where the audio will be routed to.
@@ -23,7 +23,7 @@ import com.voipgrid.vialer.logging.RemoteLogger;
 class AudioRouter {
     private Context mContext;
     private AudioManager mAudioManager;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     // Bluetooth audio SCO states. Example of valid state sequence:
     // SCO_INVALID -> SCO_TURNING_ON -> SCO_ON -> SCO_TURNING_OFF -> SCO_OFF.
@@ -75,8 +75,8 @@ class AudioRouter {
         mContext = context;
         mAudioManager = audioManager;
 
-        mRemoteLogger = new RemoteLogger(AudioRouter.class).enableConsoleLogging();
-        mRemoteLogger.d("AudioRouter()");
+        mLogger = new Logger(AudioRouter.class);
+        mLogger.d("AudioRouter()");
 
         registerForBluetoothScoIntentBroadcast();
         registerForBluetoothHeadsetIntentBroadcast();
@@ -88,7 +88,7 @@ class AudioRouter {
     }
 
     void deInit() {
-        mRemoteLogger.v("deInit()");
+        mLogger.v("deInit()");
         stopBluetoothSco();
         unregisterForBluetoothHeadsetIntentBroadcast();
         unregisterForBluetoothScoIntentBroadcast();
@@ -97,8 +97,8 @@ class AudioRouter {
     }
 
     int enableSpeaker(boolean on) {
-        mRemoteLogger.d("enableSpeaker()");
-        mRemoteLogger.d("==> " + on);
+        mLogger.d("enableSpeaker()");
+        mLogger.d("==> " + on);
 
         int route = getAudioRoute();
         if (route == Constants.ROUTE_BT) {
@@ -110,21 +110,21 @@ class AudioRouter {
     }
 
     int enableHeadset() {
-        mRemoteLogger.v("enableHeadset()");
+        mLogger.v("enableHeadset()");
         if (!hasEarpiece()) {
-            mRemoteLogger.v("==> There is no earpiece..");
+            mLogger.v("==> There is no earpiece..");
             return STATE_WIRED_HS_INVALID;
         }
 
         int curRoute = getAudioRoute();
         if (curRoute == Constants.ROUTE_HEADSET) {
-            mRemoteLogger.v("==> Can't use earpiece when there is an headset connected");
+            mLogger.v("==> Can't use earpiece when there is an headset connected");
             // Cannot use earpiece when a headset is plugged in.
             return STATE_WIRED_HS_INVALID;
         }
 
         if (curRoute == Constants.ROUTE_BT) {
-            mRemoteLogger.v("==> There is a bluetooth connection so disconnect this");
+            mLogger.v("==> There is a bluetooth connection so disconnect this");
             stopBluetoothSco();
         }
 
@@ -133,7 +133,7 @@ class AudioRouter {
     }
 
     void reconnectBluetoothSco() {
-        mRemoteLogger.v("reconnectBluetoothSco()");
+        mLogger.v("reconnectBluetoothSco()");
         if (hasBluetoothHeadset() && !mSelfDisabledBluetooth) {
             mBluetoothScoState = mAudioManager.isBluetoothScoOn() ? STATE_BLUETOOTH_SCO_ON : STATE_BLUETOOTH_SCO_INVALID;
             startBluetoothSco();
@@ -141,7 +141,7 @@ class AudioRouter {
     }
 
     int enableBTSco() {
-        mRemoteLogger.v("enableBSco()");
+        mLogger.v("enableBSco()");
 
         mSelfDisabledBluetooth = !mSelfDisabledBluetooth;
         if (hasBluetoothHeadset()) {
@@ -153,22 +153,22 @@ class AudioRouter {
     }
 
     int enableEarpiece() {
-        mRemoteLogger.v("enableEarpiece()");
+        mLogger.v("enableEarpiece()");
 
         if (!hasEarpiece()) {
-            mRemoteLogger.v("===> no earpiece");
+            mLogger.v("===> no earpiece");
             return STATE_EARPIECE_INVALID;
         }
 
         int route = getAudioRoute();
         if (route == Constants.ROUTE_HEADSET) {
-            mRemoteLogger.v("===> ROUTE_HEADSET");
+            mLogger.v("===> ROUTE_HEADSET");
             // Cannot use earpiece when a headset is plugged in.
             return STATE_EARPIECE_INVALID;
         }
 
         if (route == Constants.ROUTE_BT) {
-            mRemoteLogger.v("===> ROUTE_BT");
+            mLogger.v("===> ROUTE_BT");
             stopBluetoothSco();
         }
 
@@ -178,22 +178,22 @@ class AudioRouter {
     }
 
     private int getAudioRoute() {
-        mRemoteLogger.i("getAudioRoute()");
+        mLogger.i("getAudioRoute()");
         int route = Constants.ROUTE_INVALID;
         if (mBluetoothScoState == STATE_BLUETOOTH_SCO_ON) {
             route = Constants.ROUTE_BT;
-            mRemoteLogger.i("==> ROUTE_BT");
+            mLogger.i("==> ROUTE_BT");
             mAudioRouterInterface.btAudioConnected(true);
         } else if (mAudioManager.isSpeakerphoneOn()) {
             route = Constants.ROUTE_SPEAKER;
-            mRemoteLogger.i("==> ROUTE_SPEAKER");
+            mLogger.i("==> ROUTE_SPEAKER");
         } else if (mWiredHsState == STATE_WIRED_HS_PLUGGED) {
             route = Constants.ROUTE_HEADSET;
-            mRemoteLogger.i("==> ROUTE_HEADSET");
+            mLogger.i("==> ROUTE_HEADSET");
         } else {
             if (hasEarpiece()) {
                 route = Constants.ROUTE_EARPIECE;
-                mRemoteLogger.i("==> ROUTE_EARPIECE");
+                mLogger.i("==> ROUTE_EARPIECE");
             }
         }
         CURRENT_ROUTE = route;
@@ -201,14 +201,14 @@ class AudioRouter {
     }
 
     private void updateRoute() {
-        mRemoteLogger.v("updateRoute()");
+        mLogger.v("updateRoute()");
         int route = getAudioRoute();
         mAudioRouterInterface.audioRouteUpdate(route);
     }
 
     void onStartingCall() {
-        mRemoteLogger.d("onStartingCall()");
-        mRemoteLogger.d("==> Current Call State: " + MediaManager.CURRENT_CALL_STATE);
+        mLogger.d("onStartingCall()");
+        mLogger.d("==> Current Call State: " + MediaManager.CURRENT_CALL_STATE);
 
         if (MediaManager.CURRENT_CALL_STATE == Constants.CALL_INVALID) {
             MediaManager.CURRENT_CALL_STATE = Constants.CALL_RINGING;
@@ -226,13 +226,13 @@ class AudioRouter {
     }
 
     void onAnsweredCall() {
-        mRemoteLogger.v("onAnsweredCall()");
+        mLogger.v("onAnsweredCall()");
         MediaManager.CURRENT_CALL_STATE = Constants.CALL_ANSWERED;
     }
 
     void onOutgoingCall() {
-        mRemoteLogger.v("onOutgoingCall()");
-        mRemoteLogger.v("==> Current Call State: " + MediaManager.CURRENT_CALL_STATE);
+        mLogger.v("onOutgoingCall()");
+        mLogger.v("==> Current Call State: " + MediaManager.CURRENT_CALL_STATE);
         if (MediaManager.CURRENT_CALL_STATE == Constants.CALL_INVALID) {
             MediaManager.CURRENT_CALL_STATE = Constants.CALL_OUTGOING;
 
@@ -250,16 +250,16 @@ class AudioRouter {
     }
 
     void onEndedCall() {
-        mRemoteLogger.v("onEndedCall()");
+        mLogger.v("onEndedCall()");
         MediaManager.CURRENT_CALL_STATE = Constants.CALL_INVALID;
         if (getAudioRoute() == Constants.ROUTE_BT) {
-            mRemoteLogger.v("Route is BT so try to stop the connection");
+            mLogger.v("Route is BT so try to stop the connection");
             stopBluetoothSco();
         }
     }
 
     private void registerForWiredHeadsetIntentBroadcast() {
-        mRemoteLogger.v("registerForWiredHeadsetIntentBroadcast()");
+        mLogger.v("registerForWiredHeadsetIntentBroadcast()");
 
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
 
@@ -271,12 +271,12 @@ class AudioRouter {
 
             @Override
             public void onReceive(Context context, Intent intent) {
-                mRemoteLogger.v("onReceive()");
+                mLogger.v("onReceive()");
                 int state = intent.getIntExtra("state", STATE_UNPLUGGED);
                 int microphone = intent.getIntExtra("microphone", HAS_NO_MIC);
 
                 String name = intent.getStringExtra("name");
-                mRemoteLogger.v("==> action: " + intent.getAction()
+                mLogger.v("==> action: " + intent.getAction()
                         + "\n state: " + state
                         + "\n microphone: " + microphone
                         + "\n name: " + name
@@ -285,15 +285,15 @@ class AudioRouter {
 
                 switch (state) {
                     case STATE_UNPLUGGED:
-                        mRemoteLogger.v("==> Headset unplugged");
+                        mLogger.v("==> Headset unplugged");
                         mWiredHsState = STATE_WIRED_HS_UNPLUGGED;
                         break;
                     case STATE_PLUGGED:
-                        mRemoteLogger.v("==> Headset plugged");
+                        mLogger.v("==> Headset plugged");
                         mWiredHsState = STATE_WIRED_HS_PLUGGED;
                         break;
                     default:
-                        mRemoteLogger.v("==> Headset invalid state");
+                        mLogger.v("==> Headset invalid state");
                         mWiredHsState = STATE_WIRED_HS_INVALID;
                         break;
                 }
@@ -305,17 +305,17 @@ class AudioRouter {
     }
 
     private void unregisterForWiredHeadsetIntentBroadcast() {
-        mRemoteLogger.v("unregisterForWiredHeadsetIntentBroadcast()");
+        mLogger.v("unregisterForWiredHeadsetIntentBroadcast()");
         try {
             mContext.unregisterReceiver(mWiredHeadsetReceiver);
         } catch(IllegalArgumentException e) {
-            mRemoteLogger.w("Trying to unregister mWiredHeadsetReceiver not registered.");
+            mLogger.w("Trying to unregister mWiredHeadsetReceiver not registered.");
         }
         mWiredHeadsetReceiver = null;
     }
 
     private void registerForBluetoothHeadsetIntentBroadcast() {
-        mRemoteLogger.v("registerForBluetoothHeadsetIntentBroadcast()");
+        mLogger.v("registerForBluetoothHeadsetIntentBroadcast()");
 
         IntentFilter intentFilter = new IntentFilter(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
 
@@ -323,28 +323,28 @@ class AudioRouter {
             @Override
             public void onReceive(Context context, Intent intent) {
                 int profileState = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED);
-                mRemoteLogger.v("onReceive: ==> action: " + intent.getAction()
+                mLogger.v("onReceive: ==> action: " + intent.getAction()
                         + "\n state: " + profileState
                         + "\n stickyBroadcast: " + isInitialStickyBroadcast()
                 );
 
                 switch (profileState) {
                     case BluetoothProfile.STATE_DISCONNECTED:
-                        mRemoteLogger.v("==> Bluetooth disconnected");
+                        mLogger.v("==> Bluetooth disconnected");
                         mAudioRouterInterface.btDeviceConnected(false);
                         break;
                     case BluetoothProfile.STATE_CONNECTED:
-                        mRemoteLogger.v("==> Bluetooth connected");
+                        mLogger.v("==> Bluetooth connected");
                         mAudioRouterInterface.btDeviceConnected(true);
                         break;
                     case BluetoothProfile.STATE_CONNECTING:
-                        mRemoteLogger.v("==> Bluetooth connecting");
+                        mLogger.v("==> Bluetooth connecting");
                         break;
                     case BluetoothProfile.STATE_DISCONNECTING:
-                        mRemoteLogger.v("==> Bluetooth disconnecting");
+                        mLogger.v("==> Bluetooth disconnecting");
                         break;
                     default:
-                        mRemoteLogger.v("==> Bluetooth invalid state");
+                        mLogger.v("==> Bluetooth invalid state");
                         break;
                 }
             }
@@ -354,18 +354,18 @@ class AudioRouter {
     }
 
     private void unregisterForBluetoothHeadsetIntentBroadcast() {
-        mRemoteLogger.v("unregisterForBluetoothHeadsetIntentBroadcast()");
+        mLogger.v("unregisterForBluetoothHeadsetIntentBroadcast()");
         try {
             mContext.unregisterReceiver(mBluetoothHeadsetReceiver);
         } catch(IllegalArgumentException e) {
-            mRemoteLogger.w("Trying to unregister mBluetoothHeadsetReceiver not registered.");
+            mLogger.w("Trying to unregister mBluetoothHeadsetReceiver not registered.");
         }
 
         mBluetoothHeadsetReceiver = null;
     }
 
     private void registerForBluetoothScoIntentBroadcast() {
-        mRemoteLogger.v("registerForBluetoothScoIntentBroadcast()");
+        mLogger.v("registerForBluetoothScoIntentBroadcast()");
 
         IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED);
 
@@ -374,7 +374,7 @@ class AudioRouter {
             public void onReceive(Context context, Intent intent) {
                 int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
 
-                mRemoteLogger.v("==> onReceive() action: " + intent.getAction()
+                mLogger.v("==> onReceive() action: " + intent.getAction()
                         + "\n state: " + state
                         + "\n stickyBroadcast: " + isInitialStickyBroadcast()
                         + "\n isBluetoothScoOn: " + mAudioManager.isBluetoothScoOn()
@@ -383,15 +383,15 @@ class AudioRouter {
                 // Little hack to catch a single click on the headset. This will sent an KeyEvent to the BluetoothMediaButtonReceiver.
                 if (getAudioRoute() == Constants.ROUTE_BT && !mAudioIsLost) {
                     if (state == AudioManager.SCO_AUDIO_STATE_DISCONNECTED && hasBluetoothHeadset() && MediaManager.CURRENT_CALL_STATE != Constants.CALL_INVALID && !mSelfDisabledBluetooth) {
-                        mRemoteLogger.i("SCO wants to disconnect but the device is still connected, maybe trigger button click?");
+                        mLogger.i("SCO wants to disconnect but the device is still connected, maybe trigger button click?");
                         if (MediaManager.CURRENT_CALL_STATE == Constants.CALL_ANSWERED) {
-                            mRemoteLogger.i("Call already in progress end call");
+                            mLogger.i("Call already in progress end call");
                             KeyEvent hangupKeyEvent = new KeyEvent(
                                     KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENDCALL
                             );
                             BluetoothMediaButtonReceiver.handleKeyEvent(mContext, hangupKeyEvent);
                         } else {
-                            mRemoteLogger.i("Call still ringing pick up call / answered hangup call");
+                            mLogger.i("Call still ringing pick up call / answered hangup call");
                             KeyEvent pickupKeyEvent = new KeyEvent(
                                     KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_CALL
                             );
@@ -409,13 +409,13 @@ class AudioRouter {
 
                 switch (state) {
                     case AudioManager.SCO_AUDIO_STATE_CONNECTED:
-                        mRemoteLogger.v("==> Bluetooth sco audio connected");
+                        mLogger.v("==> Bluetooth sco audio connected");
 
                         mBluetoothScoState = STATE_BLUETOOTH_SCO_ON;
                         mAudioRouterInterface.btAudioConnected(true);
                         break;
                     case AudioManager.SCO_AUDIO_STATE_DISCONNECTED:
-                        mRemoteLogger.v("==> Bluetooth sco audio disconnected");
+                        mLogger.v("==> Bluetooth sco audio disconnected");
                         mBluetoothScoState = STATE_BLUETOOTH_SCO_OFF;
                         mAudioRouterInterface.btAudioConnected(false);
                         break;
@@ -423,11 +423,11 @@ class AudioRouter {
                         if (mAudioManager.isBluetoothScoOn()) {
                             mBluetoothScoState = STATE_BLUETOOTH_SCO_ON;
                         }
-                        mRemoteLogger.v("==> Bluetooth sco audio connecting");
+                        mLogger.v("==> Bluetooth sco audio connecting");
                         break;
                     default:
                         mBluetoothScoState = STATE_BLUETOOTH_SCO_INVALID;
-                        mRemoteLogger.v("==> Bluetooth sco invalid state");
+                        mLogger.v("==> Bluetooth sco invalid state");
                         break;
                 }
 
@@ -439,19 +439,19 @@ class AudioRouter {
     }
 
     private void unregisterForBluetoothScoIntentBroadcast() {
-        mRemoteLogger.v("unregisterForBluetoothScoIntentBroadcast()");
+        mLogger.v("unregisterForBluetoothScoIntentBroadcast()");
         try {
             mContext.unregisterReceiver(mBluetoothScoReceiver);
         } catch(IllegalArgumentException e) {
-            mRemoteLogger.w("Trying to unregister mBluetoothScoReceiver not registered.");
+            mLogger.w("Trying to unregister mBluetoothScoReceiver not registered.");
         }
         mBluetoothScoReceiver = null;
     }
 
     private boolean hasBluetoothHeadset() {
-        mRemoteLogger.v("hasBluetoothHeadset()");
+        mLogger.v("hasBluetoothHeadset()");
         if (!mHasBluetoothPermission) {
-            mRemoteLogger.e("No bluetooth permission!?");
+            mLogger.e("No bluetooth permission!?");
             return false;
         }
 
@@ -459,12 +459,12 @@ class AudioRouter {
         try {
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         } catch (Exception e) {
-            mRemoteLogger.e("BluetoothAdapter.getDefaultAdapter() exception: " + e.getMessage());
+            mLogger.e("BluetoothAdapter.getDefaultAdapter() exception: " + e.getMessage());
             return false;
         }
 
         if (bluetoothAdapter == null) {
-            mRemoteLogger.e("There is no bluetoothAdapter!?");
+            mLogger.e("There is no bluetoothAdapter!?");
             return false;
         }
 
@@ -472,32 +472,32 @@ class AudioRouter {
         try {
             profileConnectionState = bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET);
         } catch (Exception e) {
-            mRemoteLogger.e("BluetoothAdapter.getProfileConnectionState() exception: " + e.getMessage());
+            mLogger.e("BluetoothAdapter.getProfileConnectionState() exception: " + e.getMessage());
             profileConnectionState = BluetoothProfile.STATE_DISCONNECTED;
         }
-        mRemoteLogger.i("Bluetooth profile connection state: " + profileConnectionState);
+        mLogger.i("Bluetooth profile connection state: " + profileConnectionState);
         return bluetoothAdapter.isEnabled() && profileConnectionState == BluetoothProfile.STATE_CONNECTED;
     }
 
     private void startBluetoothSco() {
-        mRemoteLogger.v("startBluetoothSco()");
+        mLogger.v("startBluetoothSco()");
         if (!mHasBluetoothPermission) {
-            mRemoteLogger.e("No bluetooth permission?");
+            mLogger.e("No bluetooth permission?");
             return;
         }
 
         if (mBluetoothScoState == STATE_BLUETOOTH_SCO_ON || mBluetoothScoState == STATE_BLUETOOTH_SCO_TURNING_ON) {
-            mRemoteLogger.i("==> Bluetooth already turned on or turning on!");
+            mLogger.i("==> Bluetooth already turned on or turning on!");
             return;
         }
 
         if (mAudioManager.isBluetoothScoOn()) {
             mBluetoothScoState = STATE_BLUETOOTH_SCO_ON;
-            mRemoteLogger.i("==> Bluetooth already on!");
+            mLogger.i("==> Bluetooth already on!");
             return;
         }
 
-        mRemoteLogger.i("Bluetooth is turning on.");
+        mLogger.i("Bluetooth is turning on.");
 
         mBluetoothScoState = STATE_BLUETOOTH_SCO_TURNING_ON;
         mAudioManager.setBluetoothScoOn(true);
@@ -505,25 +505,25 @@ class AudioRouter {
     }
 
     private void stopBluetoothSco() {
-        mRemoteLogger.v("stopBluetoothSco()");
+        mLogger.v("stopBluetoothSco()");
         if (!mHasBluetoothPermission) {
-            mRemoteLogger.e("==> No bluetooth permission!?");
+            mLogger.e("==> No bluetooth permission!?");
             return;
         }
 
-        mRemoteLogger.d("BluetoothState: " + mBluetoothScoState);
-        mRemoteLogger.d("Statecheck: " + (!((mBluetoothScoState == STATE_BLUETOOTH_SCO_ON) || (mBluetoothScoState == STATE_BLUETOOTH_SCO_TURNING_ON))));
+        mLogger.d("BluetoothState: " + mBluetoothScoState);
+        mLogger.d("Statecheck: " + (!((mBluetoothScoState == STATE_BLUETOOTH_SCO_ON) || (mBluetoothScoState == STATE_BLUETOOTH_SCO_TURNING_ON))));
         if (!((mBluetoothScoState == STATE_BLUETOOTH_SCO_ON) || (mBluetoothScoState == STATE_BLUETOOTH_SCO_TURNING_ON))) {
-            mRemoteLogger.i("==> No need to turn off Bluetooth in this state");
+            mLogger.i("==> No need to turn off Bluetooth in this state");
             return;
         }
 
         if (!mAudioManager.isBluetoothScoOn()) {
-            mRemoteLogger.i("==> Unable to stop Bluetooth sco since it is already disabled!");
+            mLogger.i("==> Unable to stop Bluetooth sco since it is already disabled!");
             return;
         }
 
-        mRemoteLogger.d("==> turning Bluetooth sco off");
+        mLogger.d("==> turning Bluetooth sco off");
         mBluetoothScoState = STATE_BLUETOOTH_SCO_TURNING_OFF;
         mAudioManager.stopBluetoothSco();
         mAudioManager.setBluetoothScoOn(false);
@@ -533,7 +533,7 @@ class AudioRouter {
             mAudioManager.setBluetoothScoOn(false);
             mAudioManager.stopBluetoothSco();
 
-            mRemoteLogger.i("Retry of stopping bluetooth sco: " + retries);
+            mLogger.i("Retry of stopping bluetooth sco: " + retries);
 
             try {
                 Thread.sleep(200);

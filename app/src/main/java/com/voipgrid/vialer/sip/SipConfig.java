@@ -26,7 +26,7 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.LogHelper;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.UserAgent;
@@ -67,7 +67,7 @@ public class SipConfig implements AccountStatus {
 
     private Endpoint mEndpoint;
     private PhoneAccount mPhoneAccount;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private SipAccount mSipAccount;
     private SipLogWriter mSipLogWriter;
     private SipService mSipService;
@@ -92,7 +92,7 @@ public class SipConfig implements AccountStatus {
     public SipConfig(SipService sipService, PhoneAccount phoneAccount) {
         mSipService = sipService;
         mPhoneAccount = phoneAccount;
-        mRemoteLogger = mSipService.getRemoteLogger();
+        mLogger = mSipService.getLogger();
         mPreferences = new Preferences(VialerApplication.get());
     }
 
@@ -124,10 +124,10 @@ public class SipConfig implements AccountStatus {
         public void onReceive(Context context, Intent intent) {
             if(isChangingNetwork) return;
 
-            mRemoteLogger.d("Received a network change: " + intent.getAction());
+            mLogger.d("Received a network change: " + intent.getAction());
 
             if(isInitialStickyBroadcast()) {
-                mRemoteLogger.i("Ignoring network change as broadcast is old (sticky).");
+                mLogger.i("Ignoring network change as broadcast is old (sticky).");
                 return;
             }
 
@@ -135,7 +135,7 @@ public class SipConfig implements AccountStatus {
 
             final Handler handler = new Handler();
             handler.postDelayed(() -> {
-                mRemoteLogger.d("Wait " + NETWORK_SWITCH_DELAY_MS + "ms before doing the network switch");
+                mLogger.d("Wait " + NETWORK_SWITCH_DELAY_MS + "ms before doing the network switch");
                 doIpSwitch();
                 isChangingNetwork = false;
             }, NETWORK_SWITCH_DELAY_MS);
@@ -147,7 +147,7 @@ public class SipConfig implements AccountStatus {
      * functionality to handle the change in the network.
      */
     private void doIpSwitch() {
-        mRemoteLogger.v("doIpSwitch()");
+        mLogger.v("doIpSwitch()");
         IpChangeParam ipChangeParam = new IpChangeParam();
         ipChangeParam.setRestartListener(false);
 
@@ -163,11 +163,11 @@ public class SipConfig implements AccountStatus {
             return;
         }
 
-        mRemoteLogger.i("Make PJSIP handle the ip address change.");
+        mLogger.i("Make PJSIP handle the ip address change.");
         try {
             mEndpoint.handleIpChange(ipChangeParam);
         } catch (Exception e) {
-            mRemoteLogger.w("PJSIP failed to change the ip address");
+            mLogger.w("PJSIP failed to change the ip address");
             e.printStackTrace();
         }
     }
@@ -186,7 +186,7 @@ public class SipConfig implements AccountStatus {
         try {
             mSipService.unregisterReceiver(mNetworkStateReceiver);
         } catch(IllegalArgumentException e) {
-            mRemoteLogger.w("Trying to unregister mNetworkStateReceiver not registered.");
+            mLogger.w("Trying to unregister mNetworkStateReceiver not registered.");
         }
     }
 
@@ -195,11 +195,11 @@ public class SipConfig implements AccountStatus {
      * @throws LibraryInitFailedException
      */
     private void loadPjsip() throws LibraryInitFailedException {
-        mRemoteLogger.d("Loading PJSIP");
+        mLogger.d("Loading PJSIP");
         try {
             System.loadLibrary("pjsua2");
         } catch (UnsatisfiedLinkError error) { /* Can not load PJSIP library */
-            mRemoteLogger.e("" + Log.getStackTraceString(error));
+            mLogger.e("" + Log.getStackTraceString(error));
             throw new LibraryInitFailedException();
         }
     }
@@ -258,7 +258,7 @@ public class SipConfig implements AccountStatus {
         endpointConfig.getLogConfig().setConsoleLevel(SipConstants.SIP_CONSOLE_LOG_LEVEL);
         LogConfig logConfig = endpointConfig.getLogConfig();
         mSipLogWriter = new SipLogWriter();
-        mSipLogWriter.enabledRemoteLogging(mRemoteLogger);
+        mSipLogWriter.enabledRemoteLogging(mLogger);
         logConfig.setWriter(mSipLogWriter);
         logConfig.setDecor(logConfig.getDecor() &
                 ~(pj_log_decoration.PJ_LOG_HAS_CR.swigValue() |
@@ -272,7 +272,7 @@ public class SipConfig implements AccountStatus {
      * @throws LibraryInitFailedException
      */
     private Endpoint createEndpoint() throws LibraryInitFailedException {
-        mRemoteLogger.d("createEndpoint");
+        mLogger.d("createEndpoint");
         Endpoint endpoint = new Endpoint();
         EpConfig endpointConfig = new EpConfig();
 
@@ -283,7 +283,7 @@ public class SipConfig implements AccountStatus {
             endpoint.libCreate();
         } catch (Exception e) {
             Log.e(TAG, "Unable to create the PJSIP library");
-            mRemoteLogger.e("" + Log.getStackTraceString(e));
+            mLogger.e("" + Log.getStackTraceString(e));
             e.printStackTrace();
             throw new LibraryInitFailedException();
         }
@@ -301,7 +301,7 @@ public class SipConfig implements AccountStatus {
             endpoint.libInit(endpointConfig);
         } catch (Exception e) {
             Log.e(TAG, "Unable to init the PJSIP library");
-            mRemoteLogger.e("" + Log.getStackTraceString(e));
+            mLogger.e("" + Log.getStackTraceString(e));
             e.printStackTrace();
             throw new LibraryInitFailedException();
         }
@@ -312,7 +312,7 @@ public class SipConfig implements AccountStatus {
             endpoint.libStart();
         } catch (Exception exception) {
             Log.e(TAG, "Unable to start the PJSIP library");
-            mRemoteLogger.e("" + Log.getStackTraceString(exception));
+            mLogger.e("" + Log.getStackTraceString(exception));
             throw new LibraryInitFailedException();
         }
 
@@ -363,7 +363,7 @@ public class SipConfig implements AccountStatus {
     @NonNull
     private String getSipTransportType() {
         if (!shouldUseTls()) {
-            LogHelper.using(mRemoteLogger).logNoTlsReason();
+            LogHelper.using(mLogger).logNoTlsReason();
 
             return TRANSPORT_TYPE_STANDARD;
         }
@@ -376,13 +376,13 @@ public class SipConfig implements AccountStatus {
      * @return
      */
     private SipAccount createSipAccount() {
-        mRemoteLogger.d("createSipAccount");
+        mLogger.d("createSipAccount");
         AccountConfig accountConfig = createAccountConfig();
         SipAccount sipAccount = null;
         try {
             sipAccount = new SipAccount(mSipService, accountConfig, this);
         } catch (Exception e) {
-            mRemoteLogger.e("" + Log.getStackTraceString(e));
+            mLogger.e("" + Log.getStackTraceString(e));
             e.printStackTrace();
         }
         return sipAccount;
@@ -457,7 +457,7 @@ public class SipConfig implements AccountStatus {
         Intent incomingCallDetails = mSipService.getIncomingCallDetails();
 
         if (incomingCallDetails == null) {
-            mRemoteLogger.w("Trying to respond to middleware with no details");
+            mLogger.w("Trying to respond to middleware with no details");
             return;
         }
 
@@ -500,7 +500,7 @@ public class SipConfig implements AccountStatus {
             @Override
             public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (!response.isSuccessful()) {
-                    mRemoteLogger.w(
+                    mLogger.w(
                             "Unsuccessful response to middleware: " + Integer.toString(response.code()));
                     mSipService.stopSelf();
                 }
@@ -508,7 +508,7 @@ public class SipConfig implements AccountStatus {
 
             @Override
             public void onFailure(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Throwable t) {
-                mRemoteLogger.w("Failed sending response to middleware");
+                mLogger.w("Failed sending response to middleware");
                 mSipService.stopSelf();
             }
         });
@@ -518,7 +518,7 @@ public class SipConfig implements AccountStatus {
 
     @Override
     public void onAccountRegistered(Account account, OnRegStateParam param) {
-        mRemoteLogger.d("onAccountRegistered");
+        mLogger.d("onAccountRegistered");
 
         if (mSipService.getCurrentCall() != null) {
             SipCall sipCall = mSipService.getCurrentCall();
@@ -541,12 +541,12 @@ public class SipConfig implements AccountStatus {
 
     @Override
     public void onAccountUnregistered(Account account, OnRegStateParam param) {
-        mRemoteLogger.d("onAccountUnRegistered");
+        mLogger.d("onAccountUnRegistered");
     }
 
     @Override
     public void onAccountInvalidState(Account account, Throwable fault) {
-        mRemoteLogger.d("onAccountInvalidState");
+        mLogger.d("onAccountInvalidState");
     }
 
     /**
@@ -563,7 +563,7 @@ public class SipConfig implements AccountStatus {
      */
     private void configureStunServer(UaConfig uaConfig) {
         if (!mPreferences.hasStunEnabled()) {
-            mRemoteLogger.i("User has disabled using STUN via settings menu");
+            mLogger.i("User has disabled using STUN via settings menu");
             return;
         }
 
@@ -574,7 +574,7 @@ public class SipConfig implements AccountStatus {
         StringVector stun = new StringVector();
 
         for(String stunHost : stunHosts) {
-            mRemoteLogger.i("Configuring STUN server: " + stunHost);
+            mLogger.i("Configuring STUN server: " + stunHost);
             stun.add(stunHost);
         }
 

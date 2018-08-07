@@ -17,18 +17,18 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Class used for sending logs to a remote service.
  */
-public class RemoteLogger {
+public class Logger {
 
     @Retention(RetentionPolicy.CLASS)
     @StringDef({VERBOSE_TAG, DEBUG_TAG, INFO_TAG, WARNING_TAG, EXCEPTION_TAG})
-    public @interface LogLevels {
+    @interface LogLevels {
     }
 
-    public static final String VERBOSE_TAG = "VERBOSE";
-    public static final String DEBUG_TAG = "DEBUG";
-    public static final String INFO_TAG = "INFO";
-    public static final String WARNING_TAG = "WARNING";
-    public static final String EXCEPTION_TAG = "EXCEPTION";
+    static final String VERBOSE_TAG = "VERBOSE";
+    static final String DEBUG_TAG = "DEBUG";
+    static final String INFO_TAG = "INFO";
+    static final String WARNING_TAG = "WARNING";
+    static final String EXCEPTION_TAG = "EXCEPTION";
 
     private final String tag;
 
@@ -40,9 +40,9 @@ public class RemoteLogger {
     private LogFileCreator mLogFileCreator;
 
     private boolean mRemoteLoggingEnabled;
-    private boolean mLogToConsole = false;
+    private boolean mLogToConsole = true;
 
-    public RemoteLogger(Class thisClass) {
+    public Logger(Class thisClass) {
         mContext = VialerApplication.get();
         mLogFileCreator = new LogFileCreator(mContext);
         createLogger();
@@ -62,8 +62,8 @@ public class RemoteLogger {
      *
      * @return this To allow method chaining.
      */
-    public RemoteLogger enableConsoleLogging() {
-        mLogToConsole = true;
+    public Logger disableConsoleLogging() {
+        mLogToConsole = false;
 
         return this;
     }
@@ -73,7 +73,7 @@ public class RemoteLogger {
      *
      * @return this To allow method chaining.
      */
-    public RemoteLogger forceRemoteLogging(boolean forced) {
+    public Logger forceRemoteLogging(boolean forced) {
         mRemoteLoggingEnabled = forced;
 
         return this;

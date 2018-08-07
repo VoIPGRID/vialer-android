@@ -14,7 +14,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.LogHelper;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -57,27 +57,27 @@ public class FcmMessagingService extends FirebaseMessagingService {
      */
     private static String sLastHandledCall;
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mRemoteLogger = new RemoteLogger(FcmMessagingService.class).enableConsoleLogging();
-        mRemoteLogger.d("onCreate");
+        mLogger = new Logger(FcmMessagingService.class);
+        mLogger.d("onCreate");
     }
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        mRemoteLogger.d("onMessageReceived");
+        mLogger.d("onMessageReceived");
         Map<String, String> data = remoteMessage.getData();
         String requestType = data.get(MESSAGE_TYPE);
 
-        LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage, requestType);
+        LogHelper.using(mLogger).logMiddlewareMessageReceived(remoteMessage, requestType);
         VialerStatistics.pushNotificationWasReceived(remoteMessage);
 
         if (requestType == null) {
-            mRemoteLogger.e("No requestType");
+            mLogger.e("No requestType");
             return;
         }
 
@@ -92,9 +92,9 @@ public class FcmMessagingService extends FirebaseMessagingService {
             );
             ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
 
-            mRemoteLogger.d("SipService Active: " + SipService.sipServiceActive);
-            mRemoteLogger.d("CurrentConnection: " + connectivityHelper.getConnectionTypeString());
-            mRemoteLogger.d("Payload: " + data.toString());
+            mLogger.d("SipService Active: " + SipService.sipServiceActive);
+            mLogger.d("CurrentConnection: " + connectivityHelper.getConnectionTypeString());
+            mLogger.d("Payload: " + data.toString());
 
             boolean connectionSufficient = connectivityHelper.hasNetworkConnection() && connectivityHelper.hasFastData();
             // Device can ben in Idle mode when it's been idling to long. This means that network connectivity
@@ -103,9 +103,9 @@ public class FcmMessagingService extends FirebaseMessagingService {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
                 boolean isDeviceIdleMode = powerManager.isDeviceIdleMode();
-                mRemoteLogger.d("is device in idle mode: " + isDeviceIdleMode);
+                mLogger.d("is device in idle mode: " + isDeviceIdleMode);
                 if (isDeviceIdleMode && !connectionSufficient) {
-                    mRemoteLogger.e("Device in idle mode and connection insufficient. For now do nothing wait for next middleware push.");
+                    mLogger.e("Device in idle mode and connection insufficient. For now do nothing wait for next middleware push.");
                     return;
                 }
             }
@@ -115,7 +115,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
                 if (attempt >= MAX_MIDDLEWARE_PUSH_ATTEMPTS) {
                     VialerStatistics.incomingCallFailedDueToInsufficientNetwork(remoteMessage);
                 }
-                mRemoteLogger.e("Connection is insufficient. For now do nothing and wait for next middleware push");
+                mLogger.e("Connection is insufficient. For now do nothing and wait for next middleware push");
                 return;
             }
 
@@ -130,7 +130,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
                     number = getString(R.string.supressed_number);
                 }
 
-                mRemoteLogger.d("Payload processed, calling startService method");
+                mLogger.d("Payload processed, calling startService method");
 
                 // First start the SIP service with an incoming call.
                 startSipService(
@@ -141,7 +141,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
                         messageStartTime
                 );
             } else {
-                mRemoteLogger.d("Reject due to lack of connection");
+                mLogger.d("Reject due to lack of connection");
                 // Inform the middleware the incoming call is received but the app can not handle
                 // the sip call because there is no LTE or Wifi connection available at this
                 // point.
@@ -162,7 +162,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
                 sendCallFailedDueToOngoingVialerCallMetric(remoteMessage, requestToken);
             }
         } else if (requestType.equals(MESSAGE_REQUEST_TYPE)){
-            mRemoteLogger.d("Code not implemented");
+            mLogger.d("Code not implemented");
             // TODO implement this message.
         }
     }
@@ -175,7 +175,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      */
     private void sendCallFailedDueToOngoingVialerCallMetric(RemoteMessage remoteMessage, String requestToken) {
         if (sLastHandledCall != null && sLastHandledCall.equals(requestToken)) {
-            mRemoteLogger.i("Push notification (" + sLastHandledCall + ") is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully");
+            mLogger.i("Push notification (" + sLastHandledCall + ") is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully");
             return;
         }
 
@@ -190,7 +190,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      */
     private void replyServer(String responseUrl, String requestToken, String messageStartTime,
                              boolean isAvailable) {
-        mRemoteLogger.d("replyServer");
+        mLogger.d("replyServer");
         Registration registrationApi = ServiceGenerator.createRegistrationService(this);
 
         Call<ResponseBody> call = registrationApi.reply(requestToken, isAvailable, messageStartTime);
@@ -215,7 +215,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      */
     private void startSipService(String phoneNumber, String callerId, String url, String token,
                                  String messageStartTime) {
-        mRemoteLogger.d("startSipService");
+        mLogger.d("startSipService");
         Intent intent = new Intent(this, SipService.class);
         intent.setAction(SipConstants.ACTION_CALL_INCOMING);
 
@@ -238,6 +238,6 @@ public class FcmMessagingService extends FirebaseMessagingService {
     @Override
     public void onDeletedMessages() {
         super.onDeletedMessages();
-        mRemoteLogger.d("Message deleted on the FCM server.");
+        mLogger.d("Message deleted on the FCM server.");
     }
 }
