@@ -27,4 +27,6 @@ public interface CallingConstants {
     String MAP_ORIGINAL_CALLER_ID = "originalCallerId";
     String MAP_TRANSFERRED_PHONE_NUMBER = "transferredNumber";
     String MAP_SECOND_CALL_IS_CONNECTED = "secondCallIsConnected";
+
+    String CALL_IS_CONNECTED = "callIsConnected";
 }

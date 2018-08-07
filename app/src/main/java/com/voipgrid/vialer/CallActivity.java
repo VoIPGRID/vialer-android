@@ -1,5 +1,6 @@
 package com.voipgrid.vialer;
 
+import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
 import static com.voipgrid.vialer.calling.CallingConstants.MAP_ORIGINAL_CALLER_ID;
 import static com.voipgrid.vialer.calling.CallingConstants.MAP_ORIGINAL_CALLER_PHONE_NUMBER;
@@ -90,7 +91,6 @@ public class CallActivity extends AbstractCallActivity
     private boolean mOnSpeaker = false;
     private boolean mOnTransfer = false;
     private boolean mSelfHangup = false;
-    private boolean mPausedRinging = false;
     private String mCurrentCallId;
 
     public String mPhoneNumberToDisplay;
@@ -114,6 +114,8 @@ public class CallActivity extends AbstractCallActivity
         mType = intent.getType();
 
         toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
+
+        mConnected = getIntent().getBooleanExtra(CALL_IS_CONNECTED, false);
 
         if (mType.equals(TYPE_INCOMING_CALL) || mType.equals(TYPE_OUTGOING_CALL)) {
             // Update the textView with a number URI.
@@ -152,7 +154,7 @@ public class CallActivity extends AbstractCallActivity
                     mCallNotifications.outgoingCall(getCallNotificationDetails());
                 }
             }
-            mMediaManager.callStarted();
+            getMediaManager().callStarted();
         }
     }
 
@@ -208,10 +210,10 @@ public class CallActivity extends AbstractCallActivity
                 swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
 
                 if (type.equals(TYPE_CONNECTED_CALL) && !mConnected) {
-                    mMediaManager.callAnswered();
+                    getMediaManager().callAnswered();
                 }
                 if (type.equals(TYPE_OUTGOING_CALL) && !mConnected) {
-                    mMediaManager.callOutgoing();
+                    getMediaManager().callOutgoing();
                 }
             }
         }
@@ -262,7 +264,7 @@ public class CallActivity extends AbstractCallActivity
                 mConnected = false;
 
                 // Stop the ringtone and vibrator when the call has been disconnected.
-                mMediaManager.stopIncomingCallRinger();
+                getMediaManager().stopIncomingCallRinger();
 
                 // When the user is transferring a call.
                 if (mOnTransfer) {
@@ -288,7 +290,7 @@ public class CallActivity extends AbstractCallActivity
                         String currentCallIdentifier = mSipServiceConnection.get().getCurrentCall().getIdentifier();
                         String initialCallIdentifier = mSipServiceConnection.get().getFirstCall().getIdentifier();
 
-                        mMediaManager.setCallOnSpeaker(false);
+                        getMediaManager().setCallOnSpeaker(false);
 
                         mConnected = true;
                         toggleVisibilityCallInfo(true);
@@ -338,7 +340,7 @@ public class CallActivity extends AbstractCallActivity
                         }
                     }
                 } else {
-                    mMediaManager.callEnded();
+                    getMediaManager().callEnded();
                     finishAfterDelay();
                 }
 
@@ -432,7 +434,7 @@ public class CallActivity extends AbstractCallActivity
     private void toggleSpeaker() {
         mLogger.d("toggleSpeaker");
         mOnSpeaker = !mOnSpeaker;
-        mMediaManager.setCallOnSpeaker(mOnSpeaker);
+        getMediaManager().setCallOnSpeaker(mOnSpeaker);
     }
 
     // Mute or un-mute a call when the user presses the button.
@@ -731,7 +733,7 @@ public class CallActivity extends AbstractCallActivity
                 // When the button is active and the user presses the button don't use the
                 // bluetooth audio.
                 // When the button is in active turn the bluetooth audio on.
-                mMediaManager.useBluetoothAudio(mBluetoothAudioActive);
+                getMediaManager().useBluetoothAudio(mBluetoothAudioActive);
                 updateCallButton(viewId, true);
                 break;
         }
@@ -792,7 +794,7 @@ public class CallActivity extends AbstractCallActivity
 
     public void answer() {
         mLogger.d("answer");
-        mMediaManager.stopIncomingCallRinger();
+        getMediaManager().stopIncomingCallRinger();
 
         View callButtonsContainer = findViewById(R.id.call_buttons_container);
         if (callButtonsContainer.getVisibility() == View.INVISIBLE) {

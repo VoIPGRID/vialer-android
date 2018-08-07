@@ -5,7 +5,6 @@ import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.CALL_BTN;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
-import static com.voipgrid.vialer.sip.SipConstants.EXTRA_PHONE_NUMBER;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,13 +17,11 @@ import android.view.WindowManager;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 
 import javax.inject.Inject;
@@ -46,7 +43,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected boolean mBluetoothDeviceConnected = false;
     protected boolean mBluetoothAudioActive;
     private ProximitySensorHelper mProximityHelper;
-    protected MediaManager mMediaManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,7 +54,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mCallStatusReceiver = new CallStatusReceiver(this);
         mDelayedFinish = new DelayedFinish(this, new Handler(), mSipServiceConnection);
         mProximityHelper = new ProximitySensorHelper(this);
-        mMediaManager = MediaManager.init(this, this, this);
 
         requestMicrophonePermissionIfNecessary();
         configureActivityFlags();
@@ -90,7 +85,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected void onDestroy() {
         super.onDestroy();
         mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver, mBluetoothButtonReceiver);
-        mMediaManager.deInit();
+        getMediaManager().deInit();
     }
 
     @Override
@@ -204,5 +199,9 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
             return getCallerIdFromIntent();
         }
         return getPhoneNumberFromIntent();
+    }
+
+    protected MediaManager getMediaManager() {
+        return MediaManager.init(this, this, this);
     }
 }

@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.calling;
 
+import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
 import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_INCOMING_FRAGMENT;
@@ -57,7 +58,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
 
-        mMediaManager.startIncomingCallRinger();
+        getMediaManager().startIncomingCallRinger();
         updateViewBasedOnIntent();
     }
 
@@ -146,7 +147,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
         if (status.equals(CALL_CONNECTED_MESSAGE)) {
             mSipServiceConnection.disconnect(true);
-            mMediaManager.stopIncomingCallRinger();
+            getMediaManager().stopIncomingCallRinger();
             startCallActivity();
             return;
         }
@@ -159,6 +160,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
     private void startCallActivity() {
         Intent intent = getIntent();
         intent.setClass(this, CallActivity.class);
+        intent.putExtra(CALL_IS_CONNECTED, true);
         startActivity(intent);
         mLogger.d("callVisibleForUser");
     }
@@ -168,7 +170,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
      *
      */
     private void endRinging() {
-        mMediaManager.stopIncomingCallRinger();
+        getMediaManager().stopIncomingCallRinger();
         finish();
     }
 
@@ -178,7 +180,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
             return;
         }
 
-        mMediaManager.startIncomingCallRinger();
+        getMediaManager().startIncomingCallRinger();
     }
 
     @Override
@@ -196,7 +198,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
         if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             mCallNotifications.callScreenIsBeingHiddenOnRingingCall(getCallNotificationDetails());
         }
-        mMediaManager.stopIncomingCallRinger();
+        getMediaManager().stopIncomingCallRinger();
         ringingIsPaused = true;
     }
 
@@ -216,7 +218,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
         }
 
         if (ringingIsPaused) {
-            mMediaManager.startIncomingCallRinger();
+            getMediaManager().startIncomingCallRinger();
             ringingIsPaused = false;
         }
     }
