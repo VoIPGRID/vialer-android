@@ -16,7 +16,7 @@
     <color name="key_pad_background_color">#ffffff</color>
     <color name="key_pad_divider_color">#E2E2E2</color>
 
-    <color name="dialpad_fab_call_color">#75C25E</color>
+    <color name="dialpad_fab_call_color">#75c25e</color>
 
     <color name="tint_color_backspace">#B9B9B9</color>
 
