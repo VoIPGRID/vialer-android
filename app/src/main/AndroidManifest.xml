@@ -222,7 +222,9 @@
         <activity
             android:name=".twostepcall.TwoStepCallActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".calling.IncomingCallActivity" android:screenOrientation="portrait" android:exported="true"
+        <activity android:name=".calling.IncomingCallActivity"
+                  android:screenOrientation="portrait"
+                  android:exported="true"
                   android:launchMode="singleTop"/>
     </application>
 
