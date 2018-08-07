@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.wearespindle.spindlelockring.library.LockRing;
@@ -242,5 +243,13 @@ public class IncomingCallActivity extends AbstractCallActivity {
      */
     private boolean userPressedAcceptFromNotification(Intent intent) {
         return TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL.equals(intent.getType());
+    }
+
+    @Override
+    public void sipServiceHasConnected(SipService sipService) {
+        super.sipServiceHasConnected(sipService);
+        SipCall call = sipService.getFirstCall();
+        call.setCallerId(getCallerIdFromIntent());
+        call.setPhoneNumber(getPhoneNumberFromIntent());
     }
 }
