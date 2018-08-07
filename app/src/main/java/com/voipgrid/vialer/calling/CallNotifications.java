@@ -2,9 +2,7 @@ package com.voipgrid.vialer.calling;
 
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_CONNECTED_CALL;
 
-import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.IdRes;
 import android.support.annotation.StringRes;
 
 import com.voipgrid.vialer.R;

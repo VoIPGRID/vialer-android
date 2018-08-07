@@ -1,11 +1,8 @@
 package com.voipgrid.vialer.calling;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Handler;
 
-import com.voipgrid.vialer.MainActivity;
-import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.logging.Logger;
 
 public class DelayedFinish implements Runnable {

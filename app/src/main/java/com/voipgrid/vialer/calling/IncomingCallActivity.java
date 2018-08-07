@@ -1,23 +1,16 @@
 package com.voipgrid.vialer.calling;
 
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
-import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
-import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
-import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_INCOMING_FRAGMENT;
-import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_LOCK_RING_FRAGMENT;
-import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_CONNECTED_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
 
 import android.app.KeyguardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -27,7 +20,6 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
-import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.wearespindle.spindlelockring.library.LockRing;
 
 import javax.inject.Inject;

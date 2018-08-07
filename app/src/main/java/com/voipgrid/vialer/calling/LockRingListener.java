@@ -1,6 +1,5 @@
 package com.voipgrid.vialer.calling;
 
-import android.app.Activity;
 import android.view.View;
 
 import com.voipgrid.vialer.R;
