@@ -15,6 +15,7 @@ import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
@@ -28,6 +29,8 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -46,7 +49,6 @@ public class SipService extends Service {
     private SipBroadcaster mSipBroadcaster;
     private SipCall mCurrentCall;
     private SipCall mInitialCall;
-    private SipConfig mSipConfig;
     private NativeCallManager mNativeCallManager;
 
     private List<SipCall> mCallList = new ArrayList<>();
@@ -55,6 +57,8 @@ public class SipService extends Service {
     private int mCheckServiceUsedTimer = 10000;
     private Handler mCheckServiceHandler;
     private Runnable mCheckServiceRunnable;
+
+    @Inject SipConfig mSipConfig;
 
     /**
      * This will track whether this instance of SipService has ever handled a call,
@@ -135,7 +139,7 @@ public class SipService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        VialerApplication.get().component().inject(this);
         AudioStateChangeReceiver.fetch();
 
         mHandler = new Handler();
@@ -173,7 +177,7 @@ public class SipService extends Service {
         PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
         if (phoneAccount != null) {
             // Try to load PJSIP library.
-            mSipConfig = new SipConfig(this, phoneAccount);
+            mSipConfig = mSipConfig.init(this, phoneAccount);
             try {
                 mSipConfig.initLibrary();
             } catch (SipConfig.LibraryInitFailedException e) {
