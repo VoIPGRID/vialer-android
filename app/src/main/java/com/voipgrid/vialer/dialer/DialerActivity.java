@@ -30,6 +30,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
@@ -377,6 +378,9 @@ public class DialerActivity extends LoginRequiredActivity implements
         String phoneNumber = mNumberInputView.getNumber();
         if (phoneNumber != null && !phoneNumber.isEmpty()) {
             onCallNumber(PhoneNumberUtils.format(phoneNumber), null);
+            Intent intent = new Intent(this, PendingCallActivity.class);
+            intent.putExtra(PendingCallActivity.EXTRA_DIALLED_NUMBER, phoneNumber);
+            startActivity(intent);
         } else {
             // Set last dialed number on call button clicked when number is empty.
             String last_dialed = mSharedPreferences.getString(LAST_DIALED, "");
