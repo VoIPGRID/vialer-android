@@ -78,16 +78,8 @@ public class SipConfig implements AccountStatus {
 
     private IpSwitchMonitor mIpSwitchMonitor;
 
-    private static final short CODEC_DISABLED = (short) 0;
-    private static final short CODEC_PRIORITY_MAX = (short) 255;
-
     private static final String TRANSPORT_TYPE_SECURE = "tls";
     private static final String TRANSPORT_TYPE_STANDARD = "tcp";
-
-    static {
-        sCodecPrioMapping = new HashMap<>();
-        sCodecPrioMapping.put("ilbc/8000", CODEC_PRIORITY_MAX);
-    }
 
     public SipConfig(Preferences preferences, IpSwitchMonitor ipSwitchMonitor,
             BroadcastReceiverManager broadcastReceiverManager) {
@@ -123,13 +115,19 @@ public class SipConfig implements AccountStatus {
      * Function to init the PJSIP library and setup all credentials.
      * @throws LibraryInitFailedException
      */
-    public void initLibrary() throws LibraryInitFailedException {
-        loadPjsip();
-        mEndpoint = createEndpoint();
-        setCodecPrio();
-        mSipAccount = createSipAccount();
-        // Start listening for network changes after everything is setup.
-        startNetworkingListener();
+    public void initLibrary(Listener listener) {
+        new Thread(() -> {
+            try {
+                loadPjsip();
+                mEndpoint = createEndpoint();
+                setCodecPrio();
+                mSipAccount = createSipAccount();
+                startNetworkingListener();
+                listener.pjSipDidLoad();
+            } catch (Exception e) {
+                listener.pjSipFailedToLoad(e);
+            }
+        }).start();
     }
 
     private void startNetworkingListener() {
@@ -248,7 +246,7 @@ public class SipConfig implements AccountStatus {
 
         UaConfig uaConfig = endpointConfig.getUaConfig();
         uaConfig.setUserAgent(new UserAgent(mSipService).generate());
-
+        uaConfig.setMainThreadOnly(true);
         configureStunServer(uaConfig);
 
         try {
@@ -347,6 +345,7 @@ public class SipConfig implements AccountStatus {
      */
     private void setCodecPrio() {
         try {
+            CodecPriorityMap codecPriorityMap = CodecPriorityMap.get();
             CodecInfoVector codecList = mEndpoint.codecEnum();
             String codecId;
             CodecInfo info;
@@ -355,28 +354,12 @@ public class SipConfig implements AccountStatus {
             for (int i = 0; i < codecList.size(); i++) {
                 info = codecList.get(i);
                 codecId = info.getCodecId();
-                prio = findCodecPriority(codecId);
-                mEndpoint.codecSetPriority(codecId, prio != null ? prio : CODEC_DISABLED);
+                prio = codecPriorityMap.findCodecPriority(codecId);
+                mEndpoint.codecSetPriority(codecId, prio != null ? prio : CodecPriorityMap.CODEC_DISABLED);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Searches and normalizes the codec priority mapping and attempts to find the mapped priority.
-     *
-     * @param codecId
-     * @return Short The codec's priority.
-     */
-    private Short findCodecPriority(String codecId) {
-        for(String codec : sCodecPrioMapping.keySet()) {
-            if(codecId.toLowerCase().contains(codec.toLowerCase())) {
-                return sCodecPrioMapping.get(codec);
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -552,5 +535,10 @@ public class SipConfig implements AccountStatus {
      */
     public static boolean shouldUseTls() {
         return SecureCalling.fromContext(VialerApplication.get()).isEnabled();
+    }
+
+    interface Listener {
+        void pjSipDidLoad();
+        void pjSipFailedToLoad(Exception e);
     }
 }

@@ -12,6 +12,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
@@ -37,7 +38,7 @@ import javax.inject.Inject;
  * provides a persistent interface to SIP services throughout the app.
  *
  */
-public class SipService extends Service {
+public class SipService extends Service implements SipConfig.Listener {
     private final IBinder mBinder = new SipServiceBinder();
 
     private Handler mHandler;
@@ -54,9 +55,10 @@ public class SipService extends Service {
     private List<SipCall> mCallList = new ArrayList<>();
     private String mInitialCallType;
 
-    private int mCheckServiceUsedTimer = 10000;
+    private static final int CHECK_SERVICE_USER_INTERVAL_MS = 20000;
     private Handler mCheckServiceHandler;
     private Runnable mCheckServiceRunnable;
+    private Intent mIntent;
 
     @Inject SipConfig mSipConfig;
 
@@ -105,7 +107,6 @@ public class SipService extends Service {
      * Set when the SipService is active. This is used to respond to the middleware.
      */
     public static boolean sipServiceActive = false;
-
 
     /**
      * Class the be able to bind a activity to this service.
@@ -169,20 +170,16 @@ public class SipService extends Service {
                 // Check if the service is being used after 10 seconds and shutdown the service
                 // if required.
                 checkServiceBeingUsed();
-                mCheckServiceHandler.postDelayed(this, mCheckServiceUsedTimer);
+                mCheckServiceHandler.postDelayed(this, CHECK_SERVICE_USER_INTERVAL_MS);
             }
         };
-        mCheckServiceHandler.postDelayed(mCheckServiceRunnable, mCheckServiceUsedTimer);
+        mCheckServiceHandler.postDelayed(mCheckServiceRunnable, CHECK_SERVICE_USER_INTERVAL_MS);
 
         PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
         if (phoneAccount != null) {
             // Try to load PJSIP library.
             mSipConfig = mSipConfig.init(this, phoneAccount);
-            try {
-                mSipConfig.initLibrary();
-            } catch (SipConfig.LibraryInitFailedException e) {
-                stopSelf();
-            }
+            mSipConfig.initLibrary(this);
         } else {
             // User has no sip account so destroy the service.
             mLogger.w("No sip account when trying to create service");
@@ -256,20 +253,27 @@ public class SipService extends Service {
             return START_NOT_STICKY;
         }
 
-        mInitialCallType = intent.getAction();
-        Uri number = intent.getData();
+        mIntent = intent;
+
+        return START_NOT_STICKY;
+    }
+
+    @Override
+    public void pjSipDidLoad() {
+        mInitialCallType = mIntent.getAction();
+        Uri number = mIntent.getData();
 
         switch (mInitialCallType) {
             case SipConstants.ACTION_CALL_INCOMING:
                 mLogger.d("incomingCall");
-                mIncomingCallDetails = intent;
+                mIncomingCallDetails = mIntent;
                 break;
             case SipConstants.ACTION_CALL_OUTGOING:
                 mLogger.d("outgoingCall");
                 makeCall(
                         number,
-                        intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
-                        intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
+                        mIntent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
+                        mIntent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
                         true
                 );
                 break;
@@ -277,8 +281,8 @@ public class SipService extends Service {
                 stopSelf();
         }
 
-        if (intent.getType() != null) {
-            if (intent.getType().equals(SipConstants.CALL_DECLINE_INCOMING_CALL)) {
+        if (mIntent.getType() != null) {
+            if (mIntent.getType().equals(SipConstants.CALL_DECLINE_INCOMING_CALL)) {
                 try {
                     mCurrentCall.decline();
                     NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -289,7 +293,12 @@ public class SipService extends Service {
                 }
             }
         }
-        return START_NOT_STICKY;
+    }
+
+    @Override
+    public void pjSipFailedToLoad(Exception e) {
+        mLogger.e("Unable to load pjsip: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+        stopSelf();
     }
 
     public SipBroadcaster getSipBroadcaster() {
