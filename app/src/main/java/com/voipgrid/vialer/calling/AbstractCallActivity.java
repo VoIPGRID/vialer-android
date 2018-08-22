@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.WindowManager;
 
 import com.voipgrid.vialer.MainActivity;
@@ -76,6 +77,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Override
     protected void onPause() {
         super.onPause();
+        Log.e("TEST123", "Trying to disconnect");
         mSipServiceConnection.disconnect();
         mProximityHelper.stopSensor();
     }

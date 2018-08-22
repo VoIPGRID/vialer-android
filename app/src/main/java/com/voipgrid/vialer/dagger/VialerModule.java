@@ -6,12 +6,14 @@ import android.net.ConnectivityManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
+import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.calling.CallNotifications;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.SipConfig;
@@ -114,5 +116,10 @@ public class VialerModule {
     @Provides
     SipConfig provideSipConfig(Preferences preferences, BroadcastReceiverManager broadcastReceiverManager, IpSwitchMonitor ipSwitchMonitor) {
         return new SipConfig(preferences, ipSwitchMonitor, broadcastReceiverManager);
+    }
+
+    @Provides
+    CallActivityHelper provideCallActivityHelper() {
+        return new CallActivityHelper();
     }
 }

@@ -12,7 +12,7 @@
                   android:layout_height="wrap_content"
                   android:layout_alignParentStart="true"
                   android:layout_alignParentTop="true" android:layout_marginTop="40dp"
-                  android:orientation="vertical">
+                  android:orientation="vertical" android:layout_alignParentLeft="true">
 
         <TextView style="@style/CallTextViewStyle"
                   android:layout_width="match_parent"
@@ -20,14 +20,14 @@
                   android:layout_marginBottom="5dp"
                   android:gravity="center"
                   android:text="@string/callnotification_incoming_call"
-                  android:textSize="20sp"/>
+                  android:textSize="20sp"
+        android:id="@+id/call_state"/>
         <TextView android:id="@+id/incoming_caller_title"
                   style="@style/CallTextViewStyle"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_marginBottom="0dp"
                   android:gravity="center"
-                  android:text="Ghostbusters"
                   android:textSize="40sp"/>
         <TextView android:id="@+id/incoming_caller_subtitle"
                   style="@style/CallTextViewStyle"
@@ -67,6 +67,26 @@
 
 
     </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/establishing_text_container"
+                  android:layout_alignParentBottom="true"
+                  android:layout_alignParentLeft="true"
+                  android:layout_alignParentStart="true"
+                  android:layout_marginBottom="40dp"
+                  android:gravity="center"
+                  android:orientation="horizontal"
+                  android:visibility="gone">
+        <TextView style="@style/CallTextViewStyle"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="5dp"
+                  android:gravity="center"
+                  android:id="@+id/establishing_text"
+                  android:textSize="20sp"/>
+    </LinearLayout>
+
 
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="127dp"

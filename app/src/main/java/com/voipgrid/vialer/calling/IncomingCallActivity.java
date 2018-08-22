@@ -32,6 +32,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class IncomingCallActivity extends AbstractCallActivity {
 
     @Inject KeyguardManager mKeyguardManager;
+    @Inject CallActivityHelper mCallActivityHelper;
 
     @BindView(R.id.incoming_caller_title) TextView mIncomingCallerTitle;
     @BindView(R.id.incoming_caller_subtitle) TextView mIncomingCallerSubtitle;
@@ -52,34 +53,11 @@ public class IncomingCallActivity extends AbstractCallActivity {
         VialerApplication.get().component().inject(this);
 
         getMediaManager().startIncomingCallRinger();
-        updateViewBasedOnIntent();
+        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent());
     }
 
     private boolean currentlyOnLockScreen() {
         return mKeyguardManager.inKeyguardRestrictedInputMode();
-    }
-
-    /**
-     * Update the labels on the view based on the information from the
-     * intent.
-     */
-    private void updateViewBasedOnIntent() {
-        String contactName = null; // TODO this should use the method to lookup the name from the contacts
-        String callerId = getCallerIdFromIntent();
-        String number = getPhoneNumberFromIntent();
-
-        if (contactName == null) {
-            contactName = callerId;
-        }
-
-        if (contactName != null) {
-            mIncomingCallerTitle.setText(contactName);
-            mIncomingCallerSubtitle.setText(number);
-            return;
-        }
-
-        mIncomingCallerTitle.setText(number);
-        mIncomingCallerSubtitle.setText("");
     }
 
     @OnClick(R.id.button_decline)
