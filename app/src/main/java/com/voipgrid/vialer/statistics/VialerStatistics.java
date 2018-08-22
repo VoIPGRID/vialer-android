@@ -71,6 +71,7 @@ import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
 import com.voipgrid.vialer.util.JsonStorage;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -366,6 +367,18 @@ public class VialerStatistics {
     }
 
     private void log() {
+        String[] fieldsToAnonymize = {KEY_SIP_USER_ID, KEY_CALL_ID};
+
+        Map<String, String> payload = new HashMap<>(this.payload);
+
+        for (String field : fieldsToAnonymize) {
+            if (!payload.containsKey(field)) {
+                continue;
+            }
+
+            payload.put(field, "<ANONYMIZED>");
+        }
+
         mRemoteLogger.i(
                 new GsonBuilder()
                 .disableHtmlEscaping()
