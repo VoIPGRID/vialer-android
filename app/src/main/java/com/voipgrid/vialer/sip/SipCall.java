@@ -76,6 +76,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mMiddlewareKey;
     private String mMessageStartTime;
     private CallInfo mLastCallInfo;
+    private CallMediaMonitor mCallMediaMonitor;
 
     public static final String CALL_DIRECTION_OUTGOING = "outgoing";
     public static final String CALL_DIRECTION_INCOMING = "incoming";
@@ -482,7 +483,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mCallIsConnected = true;
         mCurrentCallState = SipConstants.CALL_CONNECTED_MESSAGE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_CONNECTED_MESSAGE);
-        new Thread(new CallMediaMonitor(this)).start();
+        mCallMediaMonitor = new CallMediaMonitor(this);
+        new Thread(mCallMediaMonitor).start();
     }
 
     /**
@@ -490,9 +492,16 @@ public class SipCall extends org.pjsip.pjsua2.Call {
      *
      * @return
      */
-    public @Nullable
-    PacketStats getMediaPacketStats() {
+    public @Nullable PacketStats getMediaPacketStats() {
         return PacketStats.Builder.fromSipCall(this);
+    }
+
+    public @Nullable PacketStats getLastMediaPacketStats() {
+        if (mCallMediaMonitor == null) {
+            return null;
+        }
+
+        return mCallMediaMonitor.getMostRecentPacketStats();
     }
 
     private void onCallDisconnected() {
