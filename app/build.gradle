@@ -144,7 +144,7 @@ dependencies {
     implementation "com.google.dagger:dagger-android:${daggerVersion}"
     annotationProcessor "com.google.dagger:dagger-android-processor:${daggerVersion}"
     implementation "com.google.dagger:dagger-android-support:${daggerVersion}"
-
+    implementation 'com.github.tamir7.contacts:contacts:1.1.7'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
 
     // Required -- JUnit 4 framework.

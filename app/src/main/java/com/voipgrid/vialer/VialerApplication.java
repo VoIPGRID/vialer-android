@@ -1,6 +1,7 @@
 package com.voipgrid.vialer;
 
 import com.github.anrwatchdog.ANRWatchDog;
+import com.github.tamir7.contacts.Contacts;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.dagger.DaggerVialerComponent;
 import com.voipgrid.vialer.dagger.VialerComponent;
@@ -33,6 +34,7 @@ public class VialerApplication extends AnalyticsApplication {
         mActivityLifecycle = new ActivityLifecycleTracker();
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         new ANRWatchDog().start();
+        Contacts.initialize(this);
     }
 
     public static String getAppVersion() {
