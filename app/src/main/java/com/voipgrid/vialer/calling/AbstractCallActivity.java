@@ -77,7 +77,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Override
     protected void onPause() {
         super.onPause();
-        Log.e("TEST123", "Trying to disconnect");
         mSipServiceConnection.disconnect();
         mProximityHelper.stopSensor();
     }

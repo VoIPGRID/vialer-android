@@ -97,7 +97,7 @@ public class SipServiceConnection implements ServiceConnection {
      */
     public void connect() {
         if (mSipServiceBound || mSipService != null) return;
-Log.e("TEST123", "mShouldUnbind:" + mShouldUnbind);
+
         mLogger.i(mActivity.getClass().getSimpleName() + " is attempting to bind to SipService");
 
         if (mActivity.bindService(new Intent(mActivity, SERVICE), this, Context.BIND_AUTO_CREATE)) {
