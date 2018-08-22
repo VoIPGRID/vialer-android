@@ -8,9 +8,12 @@ import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
 
 import android.app.KeyguardManager;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -18,6 +21,7 @@ import android.widget.TextView;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.wearespindle.spindlelockring.library.LockRing;
@@ -32,6 +36,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class IncomingCallActivity extends AbstractCallActivity {
 
     @Inject KeyguardManager mKeyguardManager;
+    @Inject Contacts mContacts;
 
     @BindView(R.id.incoming_caller_title) TextView mIncomingCallerTitle;
     @BindView(R.id.incoming_caller_subtitle) TextView mIncomingCallerSubtitle;
@@ -64,9 +69,14 @@ public class IncomingCallActivity extends AbstractCallActivity {
      * intent.
      */
     private void updateViewBasedOnIntent() {
-        String contactName = null; // TODO this should use the method to lookup the name from the contacts
-        String callerId = getCallerIdFromIntent();
         String number = getPhoneNumberFromIntent();
+        String contactName = mContacts.getContactNameByPhoneNumber(number);
+        String callerId = getCallerIdFromIntent();
+        Bitmap image = mContacts.getContactImageByPhoneNumber(number);
+
+        if (image != null) {
+            mProfileImage.setImageBitmap(image);
+        }
 
         if (contactName == null) {
             contactName = callerId;

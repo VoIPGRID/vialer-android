@@ -12,6 +12,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.calling.CallNotifications;
+import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -96,5 +97,10 @@ public class VialerModule {
     @Provides
     KeyguardManager provideKeyguardManager(Context context) {
         return (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+    }
+
+    @Provides
+    Contacts provideContacts() {
+        return new Contacts();
     }
 }
