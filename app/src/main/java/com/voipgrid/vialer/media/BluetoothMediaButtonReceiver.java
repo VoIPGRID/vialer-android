@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.view.KeyEvent;
 
 import com.voipgrid.vialer.bluetooth.BluetoothKeyNormalizer;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 
 public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
@@ -16,7 +16,7 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
 
     private static boolean mAnswer = false;
 
-    private static RemoteLogger mRemoteLogger;
+    private static Logger sMLogger;
     private static Context mContext;
 
     private static final BluetoothKeyNormalizer sBluetoothKeyNormalizer = BluetoothKeyNormalizer.defaultAliases();
@@ -25,7 +25,7 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
 
-        mRemoteLogger.d("onReceive : " + action);
+        sMLogger.d("onReceive : " + action);
 
         if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
             KeyEvent keyEvent = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
@@ -38,8 +38,8 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
     public static void handleKeyEvent(Context context, KeyEvent keyEvent) {
         mContext = context;
 
-        if (mRemoteLogger == null) {
-            mRemoteLogger = new RemoteLogger(BluetoothMediaButtonReceiver.class).enableConsoleLogging();
+        if (sMLogger == null) {
+            sMLogger = new Logger(BluetoothMediaButtonReceiver.class);
         }
 
         if (keyEvent.getAction() != KeyEvent.ACTION_DOWN) return;
@@ -47,12 +47,12 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
         Integer keyCode = sBluetoothKeyNormalizer.normalize(keyEvent.getKeyCode());
 
         if(keyCode == null) {
-            mRemoteLogger.i("Unable to handle KeyEvent: " + keyEvent.getKeyCode());
+            sMLogger.i("Unable to handle KeyEvent: " + keyEvent.getKeyCode());
             return;
         }
 
-        mRemoteLogger.d("handleKeyEvent()");
-        mRemoteLogger.d("===> " + keyEvent);
+        sMLogger.d("handleKeyEvent()");
+        sMLogger.d("===> " + keyEvent);
 
         if(keyCode == KeyEvent.KEYCODE_CALL) {
             if (!mAnswer) {
@@ -71,8 +71,8 @@ public class BluetoothMediaButtonReceiver extends BroadcastReceiver {
     }
 
     static void sendAnswerBroadcast() {
-        mRemoteLogger.i("sendAnswerBroadcast()");
-        mRemoteLogger.i("==> answer: " + mAnswer);
+        sMLogger.i("sendAnswerBroadcast()");
+        sMLogger.i("==> answer: " + mAnswer);
         mContext.sendBroadcast(new Intent(mAnswer ? CALL_BTN : DECLINE_BTN));
     }
 

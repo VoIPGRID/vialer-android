@@ -8,7 +8,7 @@ import android.preference.PreferenceManager;
 import com.voipgrid.vialer.cryptography.Encrypter;
 import com.voipgrid.vialer.cryptography.LegacyAsymmetricEncrypter;
 import com.voipgrid.vialer.cryptography.LegacyAsymmetricToSymmetricPorter;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 /**
  * Class used in handling account information for a user. Encrypt/decrypt credentials that
@@ -19,20 +19,20 @@ public class AccountHelper {
     public static final String PASSWORD_KEY = "PASSWORD_KEY";
     public static final String API_TOKEN_KEY = "TOKEN_KEY";
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private SharedPreferences mPrefs;
     private Encrypter mEncrypter;
     private LegacyAsymmetricToSymmetricPorter mEncryptionPorter;
 
     public AccountHelper(Context context) {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-        mRemoteLogger = new RemoteLogger(AccountHelper.class).enableConsoleLogging();
+        mLogger = new Logger(AccountHelper.class);
         mEncrypter = new Encrypter(context);
         mEncryptionPorter = new LegacyAsymmetricToSymmetricPorter(
                 mEncrypter,
-                new LegacyAsymmetricEncrypter(mRemoteLogger, Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2),
+                new LegacyAsymmetricEncrypter(mLogger, Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2),
                 mPrefs,
-                mRemoteLogger
+                mLogger
         );
     }
 
@@ -141,7 +141,7 @@ public class AccountHelper {
         try {
             return mEncrypter.decrypt(mPrefs.getString(key, null));
         } catch (Exception e) {
-            mRemoteLogger.e("Unable to decrypt " + key + " due to: " + e.getMessage());
+            mLogger.e("Unable to decrypt " + key + " due to: " + e.getMessage());
             return null;
         }
     }

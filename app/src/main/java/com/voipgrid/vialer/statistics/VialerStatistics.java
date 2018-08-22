@@ -61,7 +61,7 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
 import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
@@ -79,7 +79,7 @@ public class VialerStatistics {
 
     private final DefaultDataProvider mDefaultDataProvider;
     private final BluetoothDataProvider mBluetoothDataProvider;
-    private final RemoteLogger mRemoteLogger;
+    private final Logger mLogger;
     private final Registration mRegistration;
 
     private Map<String, String> payload;
@@ -96,7 +96,7 @@ public class VialerStatistics {
 
     private VialerStatistics(Preferences preferences, JsonStorage jsonStorage, Registration registration) {
         mRegistration = registration;
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mLogger = new Logger(this.getClass());
         mDefaultDataProvider = new DefaultDataProvider(preferences, jsonStorage);
         mBluetoothDataProvider = new BluetoothDataProvider();
         resetPayload();
@@ -324,7 +324,7 @@ public class VialerStatistics {
      */
     private long calculateTimeToInitialResponse(String startTime) {
         if (startTime == null) {
-            mRemoteLogger.i("Message start time is null");
+            mLogger.i("Message start time is null");
             return 0;
         }
 
@@ -350,13 +350,13 @@ public class VialerStatistics {
     }
 
     private void send() {
-        mRegistration.metrics(payload).enqueue(new VialerStatisticsRequestCallback(mRemoteLogger));
+        mRegistration.metrics(payload).enqueue(new VialerStatisticsRequestCallback(mLogger));
         log();
         resetPayload();
     }
 
     private void log() {
-        mRemoteLogger.i(
+        mLogger.i(
                 new GsonBuilder()
                 .disableHtmlEscaping()
                 .setPrettyPrinting()
@@ -375,22 +375,22 @@ public class VialerStatistics {
 
     private static class VialerStatisticsRequestCallback implements Callback<Void> {
 
-        private final RemoteLogger mRemoteLogger;
+        private final Logger mLogger;
 
-        private VialerStatisticsRequestCallback(RemoteLogger remoteLogger) {
-            mRemoteLogger = remoteLogger;
+        private VialerStatisticsRequestCallback(Logger logger) {
+            mLogger = logger;
         }
 
         @Override
         public void onResponse(Call<Void> call, Response<Void> response) {
             if (!response.isSuccessful()) {
-                mRemoteLogger.e("Failed to upload vialer statistics, with status code: " + response.code());
+                mLogger.e("Failed to upload vialer statistics, with status code: " + response.code());
             }
         }
 
         @Override
         public void onFailure(Call<Void> call, Throwable t) {
-            mRemoteLogger.e("Failed to upload vialer statistics with exception: " + t.getMessage());
+            mLogger.e("Failed to upload vialer statistics with exception: " + t.getMessage());
         }
     }
 }

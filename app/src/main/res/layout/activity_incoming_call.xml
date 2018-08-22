@@ -1,0 +1,185 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                xmlns:lockring="http://schemas.android.com/apk/res-auto"
+                android:background="@drawable/background_gradient"
+                tools:context="com.voipgrid.vialer.CallActivity">
+
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentStart="true"
+                  android:layout_alignParentTop="true" android:layout_marginTop="40dp"
+                  android:orientation="vertical" android:layout_alignParentLeft="true">
+
+        <TextView style="@style/CallTextViewStyle"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="5dp"
+                  android:gravity="center"
+                  android:text="@string/callnotification_incoming_call"
+                  android:textSize="20sp"
+        android:id="@+id/call_state"/>
+        <TextView android:id="@+id/incoming_caller_title"
+                  style="@style/CallTextViewStyle"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="0dp"
+                  android:gravity="center"
+                  android:textSize="40sp"/>
+        <TextView android:id="@+id/incoming_caller_subtitle"
+                  style="@style/CallTextViewStyle"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:gravity="center"
+                  android:text="+31 50 446 7828"
+                  android:textSize="20sp"/>
+
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentStart="true"
+                  android:layout_centerVertical="true"
+                  android:gravity="center" android:orientation="vertical"
+                  android:layout_alignParentLeft="true">
+
+            <FrameLayout android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:background="@drawable/contact_picture_circle"
+                         android:foregroundGravity="center"
+                         android:padding="40dp"
+            >
+
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/profile_image"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:src="@drawable/no_user"
+                app:civ_border_color="#ffffff"
+                app:civ_border_width="2dp"/>
+
+        </FrameLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/establishing_text_container"
+                  android:layout_alignParentBottom="true"
+                  android:layout_alignParentLeft="true"
+                  android:layout_alignParentStart="true"
+                  android:layout_marginBottom="40dp"
+                  android:gravity="center"
+                  android:orientation="horizontal"
+                  android:visibility="gone">
+        <TextView style="@style/CallTextViewStyle"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="5dp"
+                  android:gravity="center"
+                  android:id="@+id/establishing_text"
+                  android:textSize="20sp"/>
+    </LinearLayout>
+
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="127dp"
+                  android:layout_alignParentBottom="true"
+                  android:layout_alignParentLeft="true"
+                  android:layout_alignParentStart="true"
+                  android:layout_marginBottom="40dp"
+                  android:gravity="center"
+                  android:orientation="horizontal"
+                  android:id="@+id/call_buttons"
+                  android:visibility="gone">
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content" android:layout_marginRight="70dp"
+                      android:gravity="center" android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/button_decline"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/call_decline_button"
+                android:backgroundTint="@color/call_fab_hangup_color"
+                android:padding="15dp"
+                android:src="@drawable/ic_call_end_white"
+            />
+            <TextView style="@style/CallTextViewStyle"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="5dp"
+                      android:gravity="center"
+                      android:text="Ignore"
+                      android:textSize="18sp"/>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content" android:layout_marginLeft="70dp"
+                      android:gravity="center" android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/button_pickup"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/call_pickup_button"
+                android:backgroundTint="@color/call_fab_pickup_color"
+                android:padding="15dp"
+                android:src="@drawable/ic_call_white"
+            />
+            <TextView style="@style/CallTextViewStyle" android:layout_width="wrap_content"
+                      android:layout_height="wrap_content" android:layout_marginTop="5dp"
+                      android:gravity="center" android:text="Answer"
+                      android:textSize="18sp"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="127dp"
+                  android:layout_alignParentBottom="true"
+                  android:layout_alignParentLeft="true"
+                  android:layout_alignParentStart="true"
+                  android:layout_marginBottom="40dp"
+                  android:gravity="center"
+                  android:orientation="horizontal"
+                  android:id="@+id/lock_ring_container"
+                  android:visibility="visible">
+                <com.wearespindle.spindlelockring.library.LockRing
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:id="@+id/lock_ring"
+                    android:focusable="true"
+                    android:gravity="center"
+                    lockring:glowRadius="@dimen/lock_ring_glow_radius"
+                    lockring:handleDrawable="@drawable/ic_lock_ring_handle"
+                    lockring:innerRadius="@dimen/lock_ring_inner_radius"
+                    lockring:outerRadius="@dimen/lock_ring_target_placement_radius"
+                    lockring:outerRingDrawable="@drawable/ic_lock_ring_outer_ring"
+                    lockring:pointDrawable="@drawable/ic_lock_screen_glow_dot"
+                    lockring:snapMargin="@dimen/lock_ring_snap_margin"
+                    lockring:targetDescriptions="@array/lock_ring_descriptions"
+                    lockring:targetDrawables="@array/lock_ring_drawables"
+                    lockring:directionDescriptions="@array/lock_ring_direction_descriptions"
+                />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/screen_off"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:orientation="horizontal"
+        android:visibility="gone"
+    />
+
+</RelativeLayout>

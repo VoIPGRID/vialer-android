@@ -9,7 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UseEncryption;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.util.JsonStorage;
 
 import retrofit2.Call;
@@ -37,7 +37,7 @@ public class SecureCalling {
 
     private SharedPreferences mSharedPreferences;
     private Api mApi;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private Preferences mPreferences;
     private String mIdentifier;
     private LocalBroadcastManager mLocalBroadcastManager;
@@ -48,13 +48,13 @@ public class SecureCalling {
      *                   be updated when the VoIP account is switched.
      */
     public SecureCalling(SharedPreferences sharedPreferences, Api api, Preferences preferences,
-            String identifier, LocalBroadcastManager localBroadcastManager, RemoteLogger remoteLogger) {
+            String identifier, LocalBroadcastManager localBroadcastManager, Logger logger) {
         mSharedPreferences = sharedPreferences;
         mApi = api;
         mIdentifier = identifier;
         mPreferences = preferences;
         mLocalBroadcastManager = localBroadcastManager;
-        mRemoteLogger = remoteLogger;
+        mLogger = logger;
     }
 
     /**
@@ -65,12 +65,12 @@ public class SecureCalling {
     public static SecureCalling fromContext(Context context) {
         SystemUser systemUser = null;
         JsonStorage jsonStorage = new JsonStorage(context);
-        RemoteLogger remoteLogger = new RemoteLogger(SecureCalling.class).enableConsoleLogging();
+        Logger logger = new Logger(SecureCalling.class);
 
         if (jsonStorage.has(SystemUser.class)) {
             systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
         } else {
-            remoteLogger.e("Attempted to use SecureCalling with no SystemUser available");
+            logger.e("Attempted to use SecureCalling with no SystemUser available");
         }
 
         return new SecureCalling(
@@ -79,7 +79,7 @@ public class SecureCalling {
                 new Preferences(context),
                 systemUser != null ? systemUser.getPhoneAccountId() : "",
                 LocalBroadcastManager.getInstance(context),
-                remoteLogger
+                logger
         );
     }
 
@@ -117,7 +117,7 @@ public class SecureCalling {
     }
 
     private Call<UseEncryption> createCall(boolean enable) {
-        mRemoteLogger.i("Sending an API request to set secure calling to: " + enable);
+        mLogger.i("Sending an API request to set secure calling to: " + enable);
 
         return mApi.useEncryption(new UseEncryption(enable));
     }
@@ -203,7 +203,7 @@ public class SecureCalling {
             if (response.isSuccessful()) {
                 handleSuccessfulApiCall(mEnable);
 
-                mRemoteLogger.i("Secure calling API call successfully set to: " + mEnable);
+                mLogger.i("Secure calling API call successfully set to: " + mEnable);
 
                 if (mCallback != null) {
                     mCallback.onSuccess();
@@ -212,7 +212,7 @@ public class SecureCalling {
                 return;
             }
 
-            mRemoteLogger.e("Secure calling API call failed with code: " + response.code());
+            mLogger.e("Secure calling API call failed with code: " + response.code());
 
             handleFailedApiCall(mEnable);
 
@@ -223,7 +223,7 @@ public class SecureCalling {
 
         @Override
         public void onFailure(Call<UseEncryption> call, Throwable t) {
-            mRemoteLogger.e("Secure calling API call failed with error: " + t.getMessage());
+            mLogger.e("Secure calling API call failed with error: " + t.getMessage());
 
             handleFailedApiCall(mEnable);
 

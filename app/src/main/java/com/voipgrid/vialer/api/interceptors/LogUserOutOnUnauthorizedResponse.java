@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -19,11 +19,11 @@ public class LogUserOutOnUnauthorizedResponse implements Interceptor {
     private static final int UNAUTHORIZED_HTTP_CODE = 401;
 
     private Context mContext;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     public LogUserOutOnUnauthorizedResponse(Context context) {
         mContext = context;
-        mRemoteLogger = new RemoteLogger(this.getClass());
+        mLogger = new Logger(this.getClass());
     }
 
     @Override
@@ -34,7 +34,7 @@ public class LogUserOutOnUnauthorizedResponse implements Interceptor {
 
         if (userIsCurrentlyOnboarding()) return response;
 
-        mRemoteLogger.w("Logged out on 401 API response");
+        mLogger.w("Logged out on 401 API response");
 
         clearAllCredentials();
 

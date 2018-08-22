@@ -7,7 +7,7 @@ import android.provider.ContactsContract;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Base64;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 import java.util.List;
 
@@ -76,7 +76,7 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
                         } catch (Exception e) {
                             // TODO: Remove this piece of code if we find the bug. Until then
                             // force remote logging.
-                            RemoteLogger logger = new RemoteLogger(ContactCursorLoader.class).forceRemoteLogging(true);
+                            Logger logger = new Logger(ContactCursorLoader.class).forceRemoteLogging(true);
                             logger.e(e.getClass().getSimpleName());
                             logger.e("QUERY: " + mT9Query);
                             logger.e("DISPLAYNAME: " + displayName);

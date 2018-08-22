@@ -2,7 +2,7 @@ package com.voipgrid.vialer.dialer;
 
 import android.os.Handler;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 /**
  * This is a wrapper around Android's ToneGenerator class with the purpose of improving the stability of
@@ -47,14 +47,14 @@ public class ToneGenerator {
         }
     };
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     private static Handler sHandler = new Handler();
 
     public ToneGenerator(int streamType, int volume) {
         mStreamType = streamType;
         mVolume = volume;
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mLogger = new Logger(this.getClass());
     }
 
     /**
@@ -70,7 +70,7 @@ public class ToneGenerator {
         android.media.ToneGenerator androidToneGenerator = getAndroidToneGenerator();
 
         if(androidToneGenerator == null) {
-            mRemoteLogger.e("Attempted to play tone (" + toneType + ") with duration: " + durationMs + " but ToneGenerator could not be initialized, this tone was not played.");
+            mLogger.e("Attempted to play tone (" + toneType + ") with duration: " + durationMs + " but ToneGenerator could not be initialized, this tone was not played.");
             return false;
         }
 
@@ -90,7 +90,7 @@ public class ToneGenerator {
         try {
             return mAndroidToneGenerator = new android.media.ToneGenerator(mStreamType, mVolume);
         } catch (RuntimeException e) {
-            mRemoteLogger.e("Failed to initialize Android ToneGenerator");
+            mLogger.e("Failed to initialize Android ToneGenerator");
             return null;
         }
     }
