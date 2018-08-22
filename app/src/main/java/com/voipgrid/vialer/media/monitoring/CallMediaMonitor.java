@@ -16,6 +16,12 @@ public class CallMediaMonitor implements Runnable {
     private final RemoteLogger mRemoteLogger;
 
     /**
+     * Simply holds the last packet stats that have been fetched.
+     *
+     */
+    private PacketStats mMostRecentPacketStats;
+
+    /**
      * Track the packet stats at select intervals so we can send
      * reinvites if the audio appears to have stopped during a
      * call.
@@ -55,11 +61,11 @@ public class CallMediaMonitor implements Runnable {
     @Override
     public void run() {
         while (shouldBeMonitoringMedia()) {
-            PacketStats packetStats = mSipCall.getMediaPacketStats();
+            mMostRecentPacketStats = mSipCall.getMediaPacketStats();
 
-            if (packetStats == null) break;
+            if (mMostRecentPacketStats == null) break;
 
-            handleMediaPacketStats(packetStats);
+            handleMediaPacketStats(mMostRecentPacketStats);
 
             sleep(QUERY_PACKET_STATS_INTERVAL_S * 1000);
         }
@@ -180,5 +186,9 @@ public class CallMediaMonitor implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public PacketStats getMostRecentPacketStats() {
+        return mMostRecentPacketStats;
     }
 }

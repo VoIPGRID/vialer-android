@@ -26,8 +26,10 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_NETWORK;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_NETWORK_OPERATOR;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_OS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_OS_VERSION;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_RX_PACKETS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_SIP_USER_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_TIME_TO_INITIAL_RESPONSE;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_TX_PACKETS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_ACCOUNT_CONNECTION_TYPE_TCP;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_ACCOUNT_CONNECTION_TYPE_TLS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_BLUETOOTH_AUDIO_ENABLED_TRUE;
@@ -62,12 +64,14 @@ import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.media.monitoring.PacketStats;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
 import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
 import com.voipgrid.vialer.util.JsonStorage;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -312,6 +316,13 @@ public class VialerStatistics {
             addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(call.getMessageStartTime())));
         }
 
+        PacketStats packetStats = call.getLastMediaPacketStats();
+
+        if (packetStats != null) {
+            addValue(KEY_RX_PACKETS, String.valueOf(packetStats.getReceived()));
+            addValue(KEY_TX_PACKETS, String.valueOf(packetStats.getSent()));
+        }
+
         return this;
     }
 
@@ -356,6 +367,18 @@ public class VialerStatistics {
     }
 
     private void log() {
+        String[] fieldsToAnonymize = {KEY_SIP_USER_ID, KEY_CALL_ID};
+
+        Map<String, String> payload = new HashMap<>(this.payload);
+
+        for (String field : fieldsToAnonymize) {
+            if (!payload.containsKey(field)) {
+                continue;
+            }
+
+            payload.put(field, "<ANONYMIZED>");
+        }
+
         mRemoteLogger.i(
                 new GsonBuilder()
                 .disableHtmlEscaping()
