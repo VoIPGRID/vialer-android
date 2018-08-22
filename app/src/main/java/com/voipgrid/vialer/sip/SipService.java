@@ -346,11 +346,18 @@ public class SipService extends Service implements SipConfig.Listener {
      * @param startActivity
      */
     public void makeCall(Uri number, String contactName, String phoneNumber, boolean startActivity) {
-        SipCall call = new SipCall(this, getSipConfig().getSipAccount());
-        call.setPhoneNumberUri(number);
-        call.setCallerId(contactName);
-        call.setPhoneNumber(phoneNumber);
-        call.onCallOutgoing(number, startActivity);
+        new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            SipCall call = new SipCall(this, getSipConfig().getSipAccount());
+            call.setPhoneNumberUri(number);
+            call.setCallerId(contactName);
+            call.setPhoneNumber(phoneNumber);
+            call.onCallOutgoing(number, startActivity);
+        }).start();
     }
 
     /**
