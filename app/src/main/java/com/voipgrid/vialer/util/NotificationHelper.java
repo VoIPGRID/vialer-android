@@ -1,6 +1,8 @@
 package com.voipgrid.vialer.util;
 
 
+import static android.app.Notification.PRIORITY_MAX;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,6 +13,7 @@ import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
+import com.voipgrid.vialer.AccountActivity;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
@@ -40,7 +43,10 @@ public class NotificationHelper {
 
     private static final String MEDIA_BUTTON_NOTIFICATION_CHANNEL_ID = "vialer_media_button";
 
+    private static final String VOIP_DISABLED_NOTIFICATION_CHANNEL_ID = "vialer_voip_disabled";
+
     private static final int CONTACT_SYNC_NOTIFICATION_ID = 1;
+    private static final int VOIP_DISABLED_NOTIFICATION_ID = 2;
 
     private NotificationHelper(Context context) {
         mContext = context;
@@ -232,11 +238,58 @@ public class NotificationHelper {
         mNotificationManager.createNotificationChannel(notificationChannel);
     }
 
+    private void createVoipDisabledNotificationChannel() {
+        if (androidVersionDoesNotRequireNotificationChannel()) {
+            return;
+        }
+
+        NotificationChannel notificationChannel = new NotificationChannel(
+                VOIP_DISABLED_NOTIFICATION_CHANNEL_ID,
+                mContext.getString(R.string.notification_channel_voip_disabled),
+                NotificationManager.IMPORTANCE_HIGH
+        );
+
+        mNotificationManager.createNotificationChannel(notificationChannel);
+    }
+
     private static boolean androidVersionDoesNotRequireNotificationChannel() {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.O;
     }
 
     private int getNotifyId() {
         return new Random().nextInt();
+    }
+
+    public void displayVoipDisabledNotification() {
+        createVoipDisabledNotificationChannel();
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext, VOIP_DISABLED_NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_logo)
+                .setContentText(mContext.getString(R.string.notification_channel_voip_disabled))
+                .setAutoCancel(true)
+                .setPriority(PRIORITY_MAX)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(mContext.getString(R.string.notification_channel_voip_disabled)));
+
+        // Create stack for the app to use when clicking the notification.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(new Intent(mContext, AccountActivity.class));
+
+        mBuilder.setContentIntent(stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT));
+
+        // For SDK version greater than 21 we will set the vibration.
+        if (Build.VERSION.SDK_INT >= 21) {
+            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
+        }
+
+        NotificationManager mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (mNotificationManager != null) {
+            mNotificationManager.notify(VOIP_DISABLED_NOTIFICATION_ID, mBuilder.build());
+        }
+    }
+
+    public void removeVoipDisabledNotification() {
+        removeNotification(VOIP_DISABLED_NOTIFICATION_ID);
     }
 }
