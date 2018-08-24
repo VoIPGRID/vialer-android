@@ -133,8 +133,13 @@ public class FcmMessagingService extends FirebaseMessagingService {
             return;
         }
 
+        Preferences preferences = new Preferences(this);
+
+        if (preferences.hasSipEnabled()) {
+            NotificationHelper.getInstance(this).displayVoipDisabledNotification();
+        }
+
         new Preferences(this).setSipEnabled(false);
-        NotificationHelper.getInstance(this).displayVoipDisabledNotification();
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(VOIP_HAS_BEEN_DISABLED));
     }
 
