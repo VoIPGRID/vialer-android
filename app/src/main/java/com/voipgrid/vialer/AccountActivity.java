@@ -3,6 +3,8 @@ package com.voipgrid.vialer;
 import static com.voipgrid.vialer.util.ConnectivityHelper.converseFromPreference;
 import static com.voipgrid.vialer.util.ConnectivityHelper.converseToPreference;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,14 +29,17 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
+import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -78,9 +83,16 @@ public class AccountActivity extends LoginRequiredActivity {
     private Api mApi;
     private RemoteLogger mRemoteLogger;
     private ClipboardHelper mClipboardHelper;
+    private BroadcastReceiverManager mBroadcastReceiverManager;
 
     private boolean mEditMode = false;
     private boolean mIsSetupComplete = false;
+    private BroadcastReceiver mVoipDisabledReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateAndPopulate();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +106,7 @@ public class AccountActivity extends LoginRequiredActivity {
         mApi = ServiceGenerator.createApiService(this);
         mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
         mClipboardHelper =  ClipboardHelper.fromContext(this);
+        mBroadcastReceiverManager = BroadcastReceiverManager.fromContext(this);
 
         setupActionBar();
 
@@ -112,6 +125,14 @@ public class AccountActivity extends LoginRequiredActivity {
         updateSystemUserAndPhoneAccount();
 
         initializeAdvancedSettings();
+
+        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mVoipDisabledReceiver, FcmMessagingService.VOIP_HAS_BEEN_DISABLED);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mBroadcastReceiverManager.unregisterReceiver(mVoipDisabledReceiver);
     }
 
     private void setupActionBar() {
@@ -204,6 +225,8 @@ public class AccountActivity extends LoginRequiredActivity {
                         // on a change in the check of the switch.
                         SetupActivity.launchToSetVoIPAccount(AccountActivity.this);
                     }
+
+                    NotificationHelper.getInstance(AccountActivity.this).removeVoipDisabledNotification();
                 }
             }.execute();
         }
