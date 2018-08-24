@@ -174,6 +174,7 @@ public class SipService extends Service {
             mSipConfig = new SipConfig(this, phoneAccount);
             try {
                 mSipConfig.initLibrary();
+                mSipConfig.getEndpoint().setSipService(this);
             } catch (SipConfig.LibraryInitFailedException e) {
                 stopSelf();
             }

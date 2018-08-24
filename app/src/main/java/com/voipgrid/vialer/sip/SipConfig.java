@@ -66,7 +66,7 @@ public class SipConfig implements AccountStatus {
 
     private static final String TAG = SipConfig.class.getSimpleName();
 
-    private Endpoint mEndpoint;
+    private VialerEndpoint mEndpoint;
     private PhoneAccount mPhoneAccount;
     private RemoteLogger mRemoteLogger;
     private SipAccount mSipAccount;
@@ -97,7 +97,7 @@ public class SipConfig implements AccountStatus {
         mPreferences = new Preferences(VialerApplication.get());
     }
 
-    public Endpoint getEndpoint() {
+    public VialerEndpoint getEndpoint() {
         return mEndpoint;
     }
 
@@ -272,9 +272,9 @@ public class SipConfig implements AccountStatus {
      * @return
      * @throws LibraryInitFailedException
      */
-    private Endpoint createEndpoint() throws LibraryInitFailedException {
+    private VialerEndpoint createEndpoint() throws LibraryInitFailedException {
         mRemoteLogger.d("createEndpoint");
-        Endpoint endpoint = new Endpoint();
+        VialerEndpoint endpoint = new VialerEndpoint();
         EpConfig endpointConfig = new EpConfig();
 
         // Set echo cancellation options for endpoint.
