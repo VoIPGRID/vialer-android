@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.logging;
 
-import static com.voipgrid.vialer.fcm.FcmMessagingService.CALL_REQUEST_TYPE;
+
+import static com.voipgrid.vialer.fcm.RemoteMessageData.CALL_REQUEST_TYPE;
 
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;

@@ -25,6 +25,7 @@ import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
+import com.voipgrid.vialer.fcm.RemoteMessageData;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
@@ -462,9 +463,9 @@ public class SipConfig implements AccountStatus {
         }
 
         String url = incomingCallDetails.getStringExtra(SipConstants.EXTRA_RESPONSE_URL);
-        String messageStartTime = incomingCallDetails.getStringExtra(FcmMessagingService.MESSAGE_START_TIME);
+        String messageStartTime = incomingCallDetails.getStringExtra(RemoteMessageData.MESSAGE_START_TIME);
         String token = incomingCallDetails.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN);
-        String attempt = incomingCallDetails.getStringExtra(FcmMessagingService.ATTEMPT);
+        String attempt = incomingCallDetails.getStringExtra(RemoteMessageData.ATTEMPT);
 
         // Set responded as soon as possible to avoid duplicate requests due to multiple
         // onAccountRegistered calls in a row.
