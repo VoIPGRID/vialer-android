@@ -5,9 +5,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
@@ -20,6 +22,7 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import okhttp3.ResponseBody;
@@ -45,6 +48,8 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * for.
      */
     private static String sLastHandledCall;
+
+    public static final String VOIP_HAS_BEEN_DISABLED = "com.voipgrid.vialer.voip_disabled";
 
     private RemoteLogger mRemoteLogger;
     private AnalyticsHelper mAnalyticsHelper;
@@ -124,7 +129,13 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * @param remoteMessageData
      */
     private void handleMessage(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
-        mRemoteLogger.d("Code not implemented");
+        if (!remoteMessageData.isRegisteredOnOtherDeviceMessage()) {
+            return;
+        }
+
+        new Preferences(this).setSipEnabled(false);
+        NotificationHelper.getInstance(this).displayVoipDisabledNotification();
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(VOIP_HAS_BEEN_DISABLED));
     }
 
     /**

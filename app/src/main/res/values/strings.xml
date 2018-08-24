@@ -231,4 +231,5 @@
     <string name="t9helper_text">You can search for %1$s by keying the numbers on the dialpad below.</string>
     <string name="t9helper_joining_character" translatable="false">+</string>
     <string name="call_not_encrypted_warning_bar_text">Call not encrypted</string>
+    <string name="notification_channel_voip_disabled">Your VoIP account has been registered on another device. You can re-enable VoIP in Settings</string>
 </resources>

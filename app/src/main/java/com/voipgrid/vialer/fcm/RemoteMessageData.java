@@ -78,4 +78,13 @@ public class RemoteMessageData {
     public boolean isNumberSuppressed() {
         return mData.get(PHONE_NUMBER) != null && (getPhoneNumber().equalsIgnoreCase(SUPPRESSED) || getPhoneNumber().toLowerCase().contains("xxxx"));
     }
+
+    /**
+     * Is a message that is letting us know that the device has been registered on another device.
+     *
+     * @return
+     */
+    public boolean isRegisteredOnOtherDeviceMessage() {
+        return isMessageRequest() && !mData.get(MESSAGE_REQUEST_TYPE).isEmpty();
+    }
 }
