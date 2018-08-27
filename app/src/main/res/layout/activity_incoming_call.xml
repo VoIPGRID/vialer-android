@@ -11,7 +11,8 @@
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_alignParentStart="true"
-                  android:layout_alignParentTop="true" android:layout_marginTop="40dp"
+                  android:layout_alignParentTop="true"
+                  android:layout_marginTop="40dp"
                   android:orientation="vertical">
 
         <TextView style="@style/CallTextViewStyle"
@@ -20,15 +21,16 @@
                   android:layout_marginBottom="5dp"
                   android:gravity="center"
                   android:text="@string/callnotification_incoming_call"
-                  android:textSize="20sp"/>
+                  android:textSize="20sp"
+        android:id="@+id/call_state"/>
         <TextView android:id="@+id/incoming_caller_title"
                   style="@style/CallTextViewStyle"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_marginBottom="0dp"
                   android:gravity="center"
-                  android:text="Ghostbusters"
                   android:textSize="40sp"/>
+
         <TextView android:id="@+id/incoming_caller_subtitle"
                   style="@style/CallTextViewStyle"
                   android:layout_width="match_parent"
@@ -43,15 +45,16 @@
                   android:layout_height="wrap_content"
                   android:layout_alignParentStart="true"
                   android:layout_centerVertical="true"
-                  android:gravity="center" android:orientation="vertical"
+                  android:gravity="center"
+                  android:orientation="vertical"
                   android:layout_alignParentLeft="true">
 
-        <FrameLayout android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:background="@drawable/contact_picture_circle"
-                     android:foregroundGravity="center"
-                     android:padding="40dp"
-        >
+            <FrameLayout android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:background="@drawable/contact_picture_circle"
+                         android:foregroundGravity="center"
+                         android:padding="40dp"
+            >
 
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -69,6 +72,26 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/establishing_text_container"
+                  android:layout_alignParentBottom="true"
+                  android:layout_alignParentLeft="true"
+                  android:layout_alignParentStart="true"
+                  android:layout_marginBottom="40dp"
+                  android:gravity="center"
+                  android:orientation="horizontal"
+                  android:visibility="gone">
+        <TextView style="@style/CallTextViewStyle"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="5dp"
+                  android:gravity="center"
+                  android:id="@+id/establishing_text"
+                  android:textSize="20sp"/>
+    </LinearLayout>
+
+
+    <LinearLayout android:layout_width="match_parent"
                   android:layout_height="127dp"
                   android:layout_alignParentBottom="true"
                   android:layout_alignParentLeft="true"
@@ -76,12 +99,14 @@
                   android:layout_marginBottom="40dp"
                   android:gravity="center"
                   android:orientation="horizontal"
-    android:id="@+id/call_buttons"
-    android:visibility="gone">
+                  android:id="@+id/call_buttons"
+                  android:visibility="gone">
 
         <LinearLayout android:layout_width="wrap_content"
-                      android:layout_height="wrap_content" android:layout_marginRight="70dp"
-                      android:gravity="center" android:orientation="vertical">
+                      android:layout_height="wrap_content"
+                      android:layout_marginRight="70dp"
+                      android:gravity="center"
+                      android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/button_decline"
@@ -90,8 +115,8 @@
                 android:background="@drawable/call_decline_button"
                 android:backgroundTint="@color/call_fab_hangup_color"
                 android:padding="15dp"
-                android:src="@drawable/ic_call_end_white"
-            />
+                android:src="@drawable/ic_call_end_white"/>
+
             <TextView style="@style/CallTextViewStyle"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
@@ -102,8 +127,10 @@
         </LinearLayout>
 
         <LinearLayout android:layout_width="wrap_content"
-                      android:layout_height="wrap_content" android:layout_marginLeft="70dp"
-                      android:gravity="center" android:orientation="vertical">
+                      android:layout_height="wrap_content"
+                      android:layout_marginLeft="70dp"
+                      android:gravity="center"
+                      android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/button_pickup"
@@ -112,11 +139,14 @@
                 android:background="@drawable/call_pickup_button"
                 android:backgroundTint="@color/call_fab_pickup_color"
                 android:padding="15dp"
-                android:src="@drawable/ic_call_white"
-            />
-            <TextView style="@style/CallTextViewStyle" android:layout_width="wrap_content"
-                      android:layout_height="wrap_content" android:layout_marginTop="5dp"
-                      android:gravity="center" android:text="Answer"
+                android:src="@drawable/ic_call_white"/>
+
+            <TextView style="@style/CallTextViewStyle"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="5dp"
+                      android:gravity="center"
+                      android:text="Answer"
                       android:textSize="18sp"/>
         </LinearLayout>
 
