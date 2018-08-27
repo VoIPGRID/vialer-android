@@ -25,6 +25,7 @@ import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
+import com.voipgrid.vialer.fcm.RemoteMessageData;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
@@ -65,7 +66,7 @@ public class SipConfig implements AccountStatus {
 
     private static final String TAG = SipConfig.class.getSimpleName();
 
-    private Endpoint mEndpoint;
+    private VialerEndpoint mEndpoint;
     private PhoneAccount mPhoneAccount;
     private RemoteLogger mRemoteLogger;
     private SipAccount mSipAccount;
@@ -96,7 +97,7 @@ public class SipConfig implements AccountStatus {
         mPreferences = new Preferences(VialerApplication.get());
     }
 
-    public Endpoint getEndpoint() {
+    public VialerEndpoint getEndpoint() {
         return mEndpoint;
     }
 
@@ -262,7 +263,7 @@ public class SipConfig implements AccountStatus {
         logConfig.setWriter(mSipLogWriter);
         logConfig.setDecor(logConfig.getDecor() &
                 ~(pj_log_decoration.PJ_LOG_HAS_CR.swigValue() |
-                  pj_log_decoration.PJ_LOG_HAS_NEWLINE.swigValue())
+                        pj_log_decoration.PJ_LOG_HAS_NEWLINE.swigValue())
         );
     }
 
@@ -271,9 +272,9 @@ public class SipConfig implements AccountStatus {
      * @return
      * @throws LibraryInitFailedException
      */
-    private Endpoint createEndpoint() throws LibraryInitFailedException {
+    private VialerEndpoint createEndpoint() throws LibraryInitFailedException {
         mRemoteLogger.d("createEndpoint");
-        Endpoint endpoint = new Endpoint();
+        VialerEndpoint endpoint = new VialerEndpoint();
         EpConfig endpointConfig = new EpConfig();
 
         // Set echo cancellation options for endpoint.
@@ -462,9 +463,9 @@ public class SipConfig implements AccountStatus {
         }
 
         String url = incomingCallDetails.getStringExtra(SipConstants.EXTRA_RESPONSE_URL);
-        String messageStartTime = incomingCallDetails.getStringExtra(FcmMessagingService.MESSAGE_START_TIME);
+        String messageStartTime = incomingCallDetails.getStringExtra(RemoteMessageData.MESSAGE_START_TIME);
         String token = incomingCallDetails.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN);
-        String attempt = incomingCallDetails.getStringExtra(FcmMessagingService.ATTEMPT);
+        String attempt = incomingCallDetails.getStringExtra(RemoteMessageData.ATTEMPT);
 
         // Set responded as soon as possible to avoid duplicate requests due to multiple
         // onAccountRegistered calls in a row.
