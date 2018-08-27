@@ -20,6 +20,7 @@ public class LogFileCreator {
      *
      * @return File The log file.
      */
+    @SuppressWarnings("UnusedReturnValue")
     public File createIfDoesNotExist() {
         File logFile = new File(mContext.getFilesDir(), LOG_FILE_NAME);
         if(!logFile.exists()) {

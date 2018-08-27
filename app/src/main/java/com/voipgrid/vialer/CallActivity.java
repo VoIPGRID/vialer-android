@@ -50,7 +50,6 @@ import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
-import com.voipgrid.vialer.util.ProximitySensorHelper.ProximitySensorInterface;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -62,8 +61,7 @@ import java.util.Map;
  * CallActivity for incoming or outgoing call.
  */
 public class CallActivity extends LoginRequiredActivity
-        implements View.OnClickListener, SipConstants, ProximitySensorInterface,
-        CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
+        implements View.OnClickListener, SipConstants, CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
         MediaManager.AudioChangedInterface {
 
     @StringDef({TYPE_INCOMING_CALL, TYPE_OUTGOING_CALL, TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL, TYPE_CONNECTED_CALL})
@@ -124,8 +122,6 @@ public class CallActivity extends LoginRequiredActivity
     private String mTransferredNumber;
     private boolean mCallIsTransferred = false;
 
-    // Keep track of the start time of a call, so we can keep track of its duration.
-    long mCallStartTime = 0;
     private RemoteLogger mRemoteLogger;
     private SipService mSipService;
     private boolean mSipServiceBound = false;
@@ -321,7 +317,7 @@ public class CallActivity extends LoginRequiredActivity
 
         mMediaManager = MediaManager.init(this, this, this);
 
-        mProximityHelper = new ProximitySensorHelper(this, this, findViewById(R.id.screen_off));
+        mProximityHelper = new ProximitySensorHelper(this, findViewById(R.id.screen_off));
 
         mBroadcastReceiverManager = BroadcastReceiverManager.fromContext(this);
 
@@ -619,7 +615,6 @@ public class CallActivity extends LoginRequiredActivity
             case CALL_CONNECTED_MESSAGE:
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
                 mStateView.setText(R.string.call_connected);
-                mCallStartTime = System.currentTimeMillis();
                 mCallHandler.postDelayed(mCallDurationRunnable, 0);
                 mConnected = true;
                 mHasConnected = true;
@@ -1277,11 +1272,6 @@ public class CallActivity extends LoginRequiredActivity
             unbindService(mSipServiceConnection);
             mShouldUnbind = false;
         }
-    }
-
-    @Override
-    public boolean activateProximitySensor() {
-        return !mIncomingCallIsRinging && !mKeyPadVisible;
     }
 
     @Override

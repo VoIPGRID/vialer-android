@@ -1,13 +1,10 @@
 package com.voipgrid.vialer.logging;
 
-import com.voipgrid.vialer.logging.tracing.CallerLocator;
-
 public class LogComposer {
 
     private DeviceInformation mDeviceInformation;
     private String mIdentifier;
     private String mAppVersion;
-    private CallerLocator mCallerLocator;
 
     public LogComposer(DeviceInformation deviceInformation, String identifier, String appVersion) {
         mDeviceInformation = deviceInformation;

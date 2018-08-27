@@ -14,7 +14,7 @@ public class RemoteLoggingActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Thread.setDefaultUncaughtExceptionHandler(new RemoteUncaughtExceptionHandler(this));
+        Thread.setDefaultUncaughtExceptionHandler(new RemoteUncaughtExceptionHandler());
     }
 
     /**

@@ -3,6 +3,7 @@ package com.voipgrid.vialer.api.models;
 /**
  * Created by eltjo on 17/09/15.
  */
+@SuppressWarnings("unused")
 public interface Destination {
 
     String getId();

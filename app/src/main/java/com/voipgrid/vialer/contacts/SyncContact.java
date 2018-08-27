@@ -70,14 +70,4 @@ public class SyncContact {
     public List<SyncContactNumber> getNumbers() {
         return mNumbers;
     }
-
-    public List<String> getNumbersAsStringList() {
-        List<String> stringList = new ArrayList<>();
-        SyncContactNumber number;
-        for (int i = 0; i < mNumbers.size(); i++) {
-            number = mNumbers.get(i);
-            stringList.add(number.getNumber());
-        }
-        return stringList;
-    }
 }

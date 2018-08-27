@@ -22,7 +22,7 @@ public class LogComposerTest {
     private LogComposer classUnderTest;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         when(deviceInformation.getDeviceName()).thenReturn("dummydevice");
         when(deviceInformation.getConnectionType()).thenReturn("dummyconnectiontype");
         classUnderTest = new LogComposer(deviceInformation, dummyIdentifier, dummyAppVersion);

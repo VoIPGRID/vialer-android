@@ -200,15 +200,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         }
     }
 
-    /**
-     * Returns the Activities Toolbar
-     *
-     * @return Toolbar
-     */
-    protected Toolbar getToolbar() {
-        return mToolbar;
-    }
-
     @Override
     public boolean onNavigationItemSelected(MenuItem menuItem) {
         int itemId = menuItem.getItemId();

@@ -7,7 +7,6 @@ import com.voipgrid.vialer.onboarding.SetupActivity;
 
 public class OnBoardingLogoTest extends ActivityInstrumentationTestCase2<SetupActivity> {
 
-    private SetupActivity mActivity;
     private TestActions mActions;
 
     public OnBoardingLogoTest() {
@@ -18,7 +17,6 @@ public class OnBoardingLogoTest extends ActivityInstrumentationTestCase2<SetupAc
     protected void setUp() throws Exception {
         super.setUp();
         injectInstrumentation(InstrumentationRegistry.getInstrumentation());
-        mActivity = getActivity();
         mActions = new TestActions();
     }
 

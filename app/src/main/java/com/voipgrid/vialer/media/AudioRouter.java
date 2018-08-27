@@ -38,10 +38,6 @@ class AudioRouter {
     private static final int STATE_WIRED_HS_UNPLUGGED = 0;
     private static final int STATE_WIRED_HS_PLUGGED = 1;
 
-    private static final int STATE_EARPIECE_INVALID = -1;
-    private static final int STATE_EARPIECE_OFF = 0;
-    private static final int STATE_EARPIECE_ON = 1;
-
     // The current route the audio is flowing through
     static int CURRENT_ROUTE;
 
@@ -96,7 +92,7 @@ class AudioRouter {
         mContext.stopService(new Intent(mContext, BluetoothMediaSessionService.class));
     }
 
-    int enableSpeaker(boolean on) {
+    void enableSpeaker(boolean on) {
         mRemoteLogger.d("enableSpeaker()");
         mRemoteLogger.d("==> " + on);
 
@@ -105,31 +101,6 @@ class AudioRouter {
             stopBluetoothSco();
         }
         mAudioManager.setSpeakerphoneOn(on);
-
-        return 0;
-    }
-
-    int enableHeadset() {
-        mRemoteLogger.v("enableHeadset()");
-        if (!hasEarpiece()) {
-            mRemoteLogger.v("==> There is no earpiece..");
-            return STATE_WIRED_HS_INVALID;
-        }
-
-        int curRoute = getAudioRoute();
-        if (curRoute == Constants.ROUTE_HEADSET) {
-            mRemoteLogger.v("==> Can't use earpiece when there is an headset connected");
-            // Cannot use earpiece when a headset is plugged in.
-            return STATE_WIRED_HS_INVALID;
-        }
-
-        if (curRoute == Constants.ROUTE_BT) {
-            mRemoteLogger.v("==> There is a bluetooth connection so disconnect this");
-            stopBluetoothSco();
-        }
-
-        mAudioManager.setSpeakerphoneOn(false);
-        return STATE_WIRED_HS_UNPLUGGED;
     }
 
     void reconnectBluetoothSco() {
@@ -140,31 +111,29 @@ class AudioRouter {
         }
     }
 
-    int enableBTSco() {
+    void enableBTSco() {
         mRemoteLogger.v("enableBSco()");
 
         mSelfDisabledBluetooth = !mSelfDisabledBluetooth;
         if (hasBluetoothHeadset()) {
             startBluetoothSco();
-            return 0;
         } else {
-            return -1;
         }
     }
 
-    int enableEarpiece() {
+    void enableEarpiece() {
         mRemoteLogger.v("enableEarpiece()");
 
         if (!hasEarpiece()) {
             mRemoteLogger.v("===> no earpiece");
-            return STATE_EARPIECE_INVALID;
+            return;
         }
 
         int route = getAudioRoute();
         if (route == Constants.ROUTE_HEADSET) {
             mRemoteLogger.v("===> ROUTE_HEADSET");
             // Cannot use earpiece when a headset is plugged in.
-            return STATE_EARPIECE_INVALID;
+            return;
         }
 
         if (route == Constants.ROUTE_BT) {
@@ -174,7 +143,6 @@ class AudioRouter {
 
         mSelfDisabledBluetooth = true;
         mAudioManager.setSpeakerphoneOn(false);
-        return STATE_EARPIECE_ON;
     }
 
     private int getAudioRoute() {

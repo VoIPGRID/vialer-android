@@ -20,31 +20,20 @@ public class AuthenticationService extends Service {
      * Class for authenticating a vialer account for android contact sync.
      */
     private static class Authenticator extends AbstractAccountAuthenticator {
-        private final Context context;
 
-        public Authenticator(Context context) {
+        Authenticator(Context context) {
             super(context);
-            this.context = context;
         }
 
         @Override
         public Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
-                                 String authTokenType, String[] requiredFeatures, Bundle options)
-                throws NetworkErrorException {
+                                 String authTokenType, String[] requiredFeatures, Bundle options) {
             return null;
         }
 
         @Override
-        public Bundle getAccountRemovalAllowed(AccountAuthenticatorResponse response,
-                                               Account account)
-                throws NetworkErrorException {
-            return super.getAccountRemovalAllowed(response, account);
-        }
-
-        @Override
         public Bundle confirmCredentials(AccountAuthenticatorResponse response, Account account,
-                                         Bundle options)
-                throws NetworkErrorException {
+                                         Bundle options) {
             return null;
         }
 
@@ -55,8 +44,7 @@ public class AuthenticationService extends Service {
 
         @Override
         public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account,
-                                   String authTokenType, Bundle options)
-                throws NetworkErrorException {
+                                   String authTokenType, Bundle options) {
             return null;
         }
 
@@ -67,15 +55,13 @@ public class AuthenticationService extends Service {
 
         @Override
         public Bundle hasFeatures(AccountAuthenticatorResponse response,
-                                  Account account, String[] features)
-                throws NetworkErrorException {
+                                  Account account, String[] features) {
             return null;
         }
 
         @Override
         public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account,
-                                        String authTokenType, Bundle options)
-                throws NetworkErrorException {
+                                        String authTokenType, Bundle options) {
             return null;
         }
 

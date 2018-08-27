@@ -14,7 +14,6 @@ import com.voipgrid.vialer.logging.RemoteLogger;
 import java.io.IOException;
 
 class IncomingRinger {
-    private final static String TAG = IncomingRinger.class.getSimpleName();
 
     private MediaPlayer mMediaPlayer;
     private AudioManager mAudioManager;

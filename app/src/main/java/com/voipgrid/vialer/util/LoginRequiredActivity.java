@@ -27,7 +27,7 @@ public class LoginRequiredActivity extends RemoteLoggingActivity {
         super.onResume();
 
         Preferences prefs = new Preferences(this);
-        if (!prefs.isLoggedIn() && prefs.finishedOnboarding()) {
+        if (!prefs.isLoggedIn()) {
             new RemoteLogger(LoginRequiredActivity.class).w("Not logged in anymore! Redirecting to onboarding");
             // Go to onboarding.
             Intent intent = new Intent(new Intent(this, SetupActivity.class));

@@ -66,15 +66,6 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
     }
 
     /**
-     * Add call records to the adapter
-     * @param callRecords
-     */
-    public void addCallRecords(List<CallRecord> callRecords) {
-        mCallRecords.addAll(callRecords);
-        notifyDataSetChanged();
-    }
-
-    /**
      * getContactNameForNumber return the name of the contact that matches the number or null.
      * @param number The number to find a contact for.
      * @return The name or null.

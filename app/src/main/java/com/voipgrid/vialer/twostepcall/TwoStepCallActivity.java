@@ -26,7 +26,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class TwoStepCallActivity extends LoginRequiredActivity implements View.OnClickListener, Callback<Object> {
-    private final static String TAG = TwoStepCallActivity.class.getSimpleName();
+
     public static final String NUMBER_TO_CALL = "number-to-call";
     private boolean cancelCall = false;
 
@@ -60,9 +60,9 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
         mTwoStepCallTask = new TwoStepCallTask(mApi, mSystemUser.getMobileNumber(), numberToCall);
         mTwoStepCallTask.execute();
 
-        mStatusTextView = ((TextView) findViewById(R.id.status_text_view));
+        mStatusTextView = findViewById(R.id.status_text_view);
 
-        mTwoStepCallView = (TwoStepCallView) findViewById(R.id.two_step_call_view);
+        mTwoStepCallView = findViewById(R.id.two_step_call_view);
         mTwoStepCallView.setOutgoingNumber(mSystemUser.getOutgoingCli());
         mTwoStepCallView.setNumberA(mSystemUser.getMobileNumber());
         mTwoStepCallView.setNumberB(numberToCall);
@@ -127,12 +127,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
      * Finish the current activity with a delay.
      */
     private void finishWithDelay() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                finish();
-            }
-        }, 3000);
+        new Handler().postDelayed(() -> finish(), 3000);
     }
 
     @Override

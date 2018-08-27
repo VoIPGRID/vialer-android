@@ -27,7 +27,6 @@ import retrofit2.Response;
 public class SetUpVoipAccountFragment extends OnboardingFragment implements
         View.OnClickListener, Callback {
 
-    private AccountHelper mAccountHelper;
     private Api mApi;
     private Context mContext;
     private FragmentInteractionListener mListener;
@@ -61,15 +60,14 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
         mContext = getActivity().getApplicationContext();
 
         mJsonStorage = new JsonStorage(mContext);
-        mAccountHelper = new AccountHelper(mContext);
 
         mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         mApi = ServiceGenerator.createApiService(getActivity());
 
-        mVoipAccountButton = (Button) view.findViewById(R.id.set_voip_account_button);
+        mVoipAccountButton = view.findViewById(R.id.set_voip_account_button);
         mVoipAccountButton.setOnClickListener(this);
 
-        mCancelButton = (Button) view.findViewById(R.id.cancel_set_voip_account_button);
+        mCancelButton = view.findViewById(R.id.cancel_set_voip_account_button);
         mCancelButton.setOnClickListener(this);
     }
 
@@ -111,11 +109,6 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
     public void onResume() {
         refreshObjects();
         super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
     }
 
     @Override

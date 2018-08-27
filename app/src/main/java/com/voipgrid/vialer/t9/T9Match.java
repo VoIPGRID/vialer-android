@@ -34,10 +34,6 @@ public class T9Match {
         this.mContactId = contactId;
     }
 
-    public String getLookupKey() {
-        return mLookupKey;
-    }
-
     private void setLookupKey(String lookupKey) {
         this.mLookupKey = lookupKey;
     }
@@ -64,10 +60,6 @@ public class T9Match {
 
     private void setThumbnailUri(String thumbnailUri) {
         this.mThumbnailUri = thumbnailUri;
-    }
-
-    public String getT9Query() {
-        return mT9Query;
     }
 
     private void setT9Query(String t9Query) {

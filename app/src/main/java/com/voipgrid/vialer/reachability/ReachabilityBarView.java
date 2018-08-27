@@ -25,7 +25,6 @@ import com.voipgrid.vialer.util.JsonStorage;
 public class ReachabilityBarView extends RelativeLayout implements View.OnClickListener, ReachabilityInterface {
     private Context mContext;
     private ConnectivityHelper mConnectivityHelper;
-    private JsonStorage mJsonStorage;
     private Preferences mPreferences;
     private TextView mReachabilityBarTextView;
     private ImageView mReachabilityInfoImageView;

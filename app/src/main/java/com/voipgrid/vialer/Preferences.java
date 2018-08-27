@@ -19,7 +19,6 @@ public class Preferences {
     public static final String PREF_HAS_SIP_PERMISSION = "PREF_HAS_SIP_PERMISSION";
     public static final String PREF_REMOTE_LOGGING = "PREF_REMOTE_LOGGING";
     public static final String PREF_REMOTE_LOGGING_ID = "PREF_REMOTE_LOGGING_ID";
-    public static final String PREF_FINISHED_ONBOARDING = "PREF_FINISHED_ONBOARDING";
     public static final String PREF_HAS_3G_ENABLED = "PREF_HAS_3G_ENABLED";
     public static final String PREF_HAS_TLS_ENABLED = "PREF_HAS_TLS_ENABLED";
     public static final String PREF_HAS_STUN_ENABLED = "PREF_HAS_STUN_ENABLED";
@@ -80,21 +79,6 @@ public class Preferences {
     public boolean isLoggedIn() {
         JsonStorage storage = new JsonStorage(mContext);
         return storage.has(SystemUser.class);
-    }
-
-    /**
-     * Function to check if a user passed onboarding.
-     * @return If a system user finished onboarding.
-     */
-    public boolean finishedOnboarding() {
-        return mPreferences.getBoolean(PREF_FINISHED_ONBOARDING, false);
-    }
-
-    /**
-     * Function to set if a user passed onboarding.
-     */
-    public void setFinishedOnboarding(boolean passed) {
-        mPreferences.edit().putBoolean(PREF_FINISHED_ONBOARDING, passed).apply();
     }
 
     /**

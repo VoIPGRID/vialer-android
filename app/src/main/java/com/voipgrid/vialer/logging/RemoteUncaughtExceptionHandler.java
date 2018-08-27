@@ -12,11 +12,9 @@ import com.voipgrid.vialer.BuildConfig;
  */
 public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-    private Context mContext;
     private Thread.UncaughtExceptionHandler mDefaultHandler;
 
-    public RemoteUncaughtExceptionHandler(Context context) {
-        mContext = context;
+    RemoteUncaughtExceptionHandler() {
         mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
     }
 

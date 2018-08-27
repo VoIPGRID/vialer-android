@@ -30,7 +30,7 @@ public class VialerLoggerTest {
     private VialerLogger classUnderTest;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         classUnderTest = new VialerLogger(context, logEntriesFactory);
     }
 

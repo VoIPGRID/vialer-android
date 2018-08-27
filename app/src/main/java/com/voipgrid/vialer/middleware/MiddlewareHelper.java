@@ -90,7 +90,6 @@ public class MiddlewareHelper {
         editor.putLong(LAST_REGISTRATION, System.currentTimeMillis());
 
         JsonStorage jsonStorage = new JsonStorage(context);
-        AccountHelper accountHelper = new AccountHelper(context);
         Preferences preferences = new Preferences(context);
 
         if (!jsonStorage.has(PhoneAccount.class) || !jsonStorage.has(SystemUser.class)) {
@@ -151,7 +150,6 @@ public class MiddlewareHelper {
         // Check if we have a phone account and a push token.
         if (new Preferences(context).hasPhoneAccount() && !token.equals("")) {
             JsonStorage jsonStorage = new JsonStorage(context);
-            AccountHelper accountHelper = new AccountHelper(context);
 
             Registration api = ServiceGenerator.createRegistrationService(context);
             String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
@@ -180,17 +178,6 @@ public class MiddlewareHelper {
             remoteLogger.d("No token or phone account so unregister");
             setRegistrationStatus(context, STATUS_FAILED);
         }
-    }
-
-    /**
-     * Function to get the URL needed for api calls.
-     *
-     * @param context Context
-     *
-     * @return String the base API url.
-     */
-    public static String getBaseApiUrl(Context context) {
-        return context.getString(R.string.registration_url);
     }
 
     /**

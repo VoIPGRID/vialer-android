@@ -64,6 +64,7 @@ public class ToneGenerator {
      * @see android.media.ToneGenerator#startTone(int, int)
      * @return boolean TRUE if the tone was played successfully, otherwise FALSE.
      */
+    @SuppressWarnings("UnusedReturnValue")
     public boolean startTone(int toneType, int durationMs) {
         sHandler.removeCallbacks(mToneGeneratorDestroyer);
 

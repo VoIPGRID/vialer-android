@@ -11,7 +11,7 @@ package com.voipgrid.vialer.api.models;
  */
 public class AutoLoginToken {
 
-    String token;
+    @SuppressWarnings("unused") String token;
 
     public String toString() {
         return token;

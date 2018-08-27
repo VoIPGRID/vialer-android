@@ -54,8 +54,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CallDirection {}
 
-    public static final String TAG = SipCall.class.getSimpleName();
-
     private Uri mPhoneNumberUri;
 
     private RemoteLogger mRemoteLogger;

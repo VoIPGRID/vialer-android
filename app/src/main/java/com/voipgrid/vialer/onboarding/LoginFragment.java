@@ -40,7 +40,6 @@ public class LoginFragment extends OnboardingFragment implements
     private Button mLoginButton;
     private Button mForgotPasswordButton;
     private Button mInfoButton;
-    private ConnectivityHelper mConnectivityHelper;
 
     /**
      * Use this factory method to create a new instance of
@@ -64,33 +63,24 @@ public class LoginFragment extends OnboardingFragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Activity activity = getActivity();
-        mConnectivityHelper = new ConnectivityHelper(
-                (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE),
-                (TelephonyManager) activity.getSystemService(Context.TELEPHONY_SERVICE)
-        );
-
-        mEmailEdittext = (EditText) view.findViewById(R.id.emailTextDialog);
+        mEmailEdittext = view.findViewById(R.id.emailTextDialog);
         mEmailEdittext.addTextChangedListener(this);
 
-        mPasswordEdittext = (EditText) view.findViewById(R.id.passwordTextDialog);
+        mPasswordEdittext = view.findViewById(R.id.passwordTextDialog);
         mPasswordEdittext.addTextChangedListener(this);
-        mPasswordEdittext.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                // Add an EditorAction when clicking done which override selection of
-                // forgot password and initiates a login.
-                return actionId == EditorInfo.IME_ACTION_DONE && mLoginButton.performClick();
-            }
+        mPasswordEdittext.setOnEditorActionListener((v, actionId, event) -> {
+            // Add an EditorAction when clicking done which override selection of
+            // forgot password and initiates a login.
+            return actionId == EditorInfo.IME_ACTION_DONE && mLoginButton.performClick();
         });
 
-        mLoginButton = (Button) view.findViewById(R.id.button_login);
+        mLoginButton = view.findViewById(R.id.button_login);
         mLoginButton.setOnClickListener(this);
 
-        mForgotPasswordButton = (Button) view.findViewById(R.id.button_forgot_password);
+        mForgotPasswordButton = view.findViewById(R.id.button_forgot_password);
         mForgotPasswordButton.setOnClickListener(this);
 
-        mInfoButton = (Button) view.findViewById(R.id.button_info);
+        mInfoButton = view.findViewById(R.id.button_info);
         mInfoButton.setOnClickListener(this);
     }
 
@@ -153,10 +143,6 @@ public class LoginFragment extends OnboardingFragment implements
         } else {
             mLoginButton.setEnabled(false);
         }
-    }
-
-    public void onSucces() {
-        mListener.onNextStep(this);
     }
 
     public void onError(String error) {

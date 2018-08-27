@@ -1,6 +1,5 @@
 package com.voipgrid.vialer.callrecord;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,8 +13,6 @@ import android.widget.ListView;
 
 import com.voipgrid.vialer.EmptyView;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.CallRecord;
@@ -42,12 +39,10 @@ public class CallRecordFragment extends ListFragment implements
     private static final String ARG_FILTER = "filter";
     public static final String FILTER_MISSED_RECORDS = "missed-records";
 
-    private OnFragmentInteractionListener mListener;
     private CallRecordAdapter mAdapter;
     private List<CallRecord> mCallRecords = new ArrayList<>();
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
-    private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private JsonStorage mJsonStorage;
 
@@ -109,10 +104,6 @@ public class CallRecordFragment extends ListFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /* set the AnalyticsHelper */
-        mAnalyticsHelper = new AnalyticsHelper(
-                ((AnalyticsApplication) getActivity().getApplication()).getDefaultTracker()
-        );
 
         mConnectivityHelper = ConnectivityHelper.get(getActivity());
 
@@ -134,15 +125,10 @@ public class CallRecordFragment extends ListFragment implements
         mAdapter = new CallRecordAdapter(getActivity(), mCallRecords);
 
         /* setup swipe refresh layout */
-        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        mSwipeRefreshLayout = view.findViewById(R.id.swipe_container);
         mSwipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.color_refresh));
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-            }
-        });
+        mSwipeRefreshLayout.post(() -> mSwipeRefreshLayout.setRefreshing(true));
 
         loadCallRecordsFromApi();
         loadCallRecordsFromCache();
@@ -162,26 +148,8 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(
-                    activity.toString() + " must implement OnFragmentInteractionListener"
-            );
-        }
-    }
-
-    @Override
     public void onStop() {
         super.onStop();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
 
     @Override
@@ -319,7 +287,7 @@ public class CallRecordFragment extends ListFragment implements
 
     private void setEmptyView(EmptyView emptyView, boolean visible) {
         if(getView() != null) {
-            ViewGroup view = (ViewGroup) getView().findViewById(R.id.empty_view);
+            ViewGroup view = getView().findViewById(R.id.empty_view);
             if (view.getChildCount() > 0) {
                 view.removeAllViews();
             }
@@ -329,19 +297,4 @@ public class CallRecordFragment extends ListFragment implements
             view.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(String id);
-    }
-
 }

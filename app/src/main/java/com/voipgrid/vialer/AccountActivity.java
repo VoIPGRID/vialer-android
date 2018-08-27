@@ -191,7 +191,7 @@ public class AccountActivity extends LoginRequiredActivity {
     }
 
     @OnCheckedChanged(R.id.account_sip_switch)
-    public void onSipCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+    public void onSipCheckedChanged(@SuppressWarnings("unused") CompoundButton buttonView, boolean isChecked) {
         if (mPreferences.hasSipEnabled() == isChecked) return;
 
         mPreferences.setSipEnabled(isChecked);
@@ -233,7 +233,7 @@ public class AccountActivity extends LoginRequiredActivity {
     }
 
     @OnCheckedChanged(R.id.use_3g_switch)
-    void on3GCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+    void on3GCheckedChanged(@SuppressWarnings("unused") CompoundButton compoundButton, boolean isChecked) {
         if (mPreferences.has3GEnabled() == isChecked) {
             return;
         }
@@ -241,13 +241,13 @@ public class AccountActivity extends LoginRequiredActivity {
     }
 
     @OnItemSelected(R.id.call_connection_spinner)
-    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+    public void onItemSelected(AdapterView<?> parent, @SuppressWarnings("unused") View view, int pos, @SuppressWarnings("unused") long id) {
         String selected = parent.getItemAtPosition(pos).toString();
         mPreferences.setConnectionPreference(converseToPreference(selected, this));
     }
 
     @OnCheckedChanged(R.id.remote_logging_switch)
-    void onRemoteLoggingCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+    void onRemoteLoggingCheckedChanged(@SuppressWarnings("unused") CompoundButton compoundButton, boolean isChecked) {
         if (mPreferences.remoteLoggingIsActive() == isChecked) {
             return;
         }
@@ -265,7 +265,7 @@ public class AccountActivity extends LoginRequiredActivity {
     }
 
     @OnCheckedChanged(R.id.tls_switch)
-    void tlsSwitchChanged(CompoundButton compoundButton, final boolean b) {
+    void tlsSwitchChanged(@SuppressWarnings("unused") CompoundButton compoundButton, final boolean b) {
         if (!mIsSetupComplete) return;
 
         SecureCalling secureCalling = SecureCalling.fromContext(this);
@@ -282,7 +282,7 @@ public class AccountActivity extends LoginRequiredActivity {
     }
 
     @OnCheckedChanged(R.id.stun_switch)
-    void stunSwitchChanged(CompoundButton compoundButton, boolean b) {
+    void stunSwitchChanged(@SuppressWarnings("unused") CompoundButton compoundButton, boolean b) {
         if (!mIsSetupComplete) return;
         mPreferences.setStunEnabled(b);
         mRemoteLogger.i("STUN has been set to: " + b);

@@ -122,14 +122,14 @@ public class T9HelperFragment extends Fragment {
             char digit = t9QueryForName.charAt(i);
 
             digitView.setText(String.valueOf(digit));
-            digitLetterView.setText(highlightRelevantLetter(digit, name, name.charAt(i)));
+            digitLetterView.setText(highlightRelevantLetter(digit, name.charAt(i)));
         }
     }
 
     /**
      * Formats the digit letter text, coloring the correct letters based on the digit being displayed.
      */
-    private Spanned highlightRelevantLetter(char digitBeingDisplayed, String name, char letterToHighlight) {
+    private Spanned highlightRelevantLetter(char digitBeingDisplayed, char letterToHighlight) {
         String letters = T9Query.getLettersForDigitAsString(digitBeingDisplayed);
 
         int positionOfLetterToHighlight = letters.indexOf(String.valueOf(letterToHighlight).toUpperCase());

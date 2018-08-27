@@ -51,7 +51,6 @@ public class SetupActivity extends RemoteLoggingActivity implements
         TwoFactorAuthenticationFragment.FragmentInteractionListener,
         Callback {
 
-    private final static String TAG = SetupActivity.class.getSimpleName();
     private String mPassword;
     private String mActivityToReturnToName = "";
 
@@ -59,7 +58,6 @@ public class SetupActivity extends RemoteLoggingActivity implements
     private JsonStorage mJsonStorage;
     private Preferences mPreferences;
     private RemoteLogger mRemoteLogger;
-    private ServiceGenerator mServiceGen;
     private AlertDialog mAlertDialog;
     private String mUsername;
 

@@ -75,7 +75,6 @@ public class SipConfig implements AccountStatus {
     private Preferences mPreferences;
 
     private boolean mHasRespondedToMiddleware = false;
-    private int mCurrentTransportId;
     private static Map<String, Short> sCodecPrioMapping;
     private boolean isChangingNetwork = false;
 
@@ -309,7 +308,7 @@ public class SipConfig implements AccountStatus {
 
         TransportConfig transportConfig = createTransportConfig();
         try {
-            mCurrentTransportId = endpoint.transportCreate(getTransportType(), transportConfig);
+            endpoint.transportCreate(getTransportType(), transportConfig);
             endpoint.libStart();
         } catch (Exception exception) {
             Log.e(TAG, "Unable to start the PJSIP library");

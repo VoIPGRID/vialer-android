@@ -16,10 +16,6 @@ public class WebActivityHelper {
         mContext = context;
     }
 
-    public void startWebActivity(String title, String page) {
-        startWebActivity(title, page, null);
-    }
-
     /**
      * Start a new WebActivity to display the page.
      * @param title

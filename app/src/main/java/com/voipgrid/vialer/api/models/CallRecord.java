@@ -43,47 +43,23 @@ public class CallRecord {
         return amount;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
-    }
-
     public int getDuration() {
         return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
     }
 
     public String getCallDate() {
         return callDate;
     }
 
-    public void setCallDate(String callDate) {
-        this.callDate = callDate;
-    }
-
     public String getDialedNumber() {
         return dialedNumber;
-    }
-
-    public void setDialedNumber(String dialedNumber) {
-        this.dialedNumber = dialedNumber;
     }
 
     public String getCaller() {
         return caller;
     }
 
-    public void setCaller(String caller) {
-        this.caller = caller;
-    }
-
     public String getDirection() {
         return direction;
-    }
-
-    public void setDirection(String direction) {
-        this.direction = direction;
     }
 }

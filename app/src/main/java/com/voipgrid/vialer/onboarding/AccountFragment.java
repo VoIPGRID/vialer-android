@@ -28,7 +28,7 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 public class AccountFragment extends OnboardingFragment implements
         View.OnClickListener,
         TextWatcher {
-    private final static String TAG = AccountFragment.class.getSimpleName();
+
     public static final String ARG_MOBILE = "mobile";
     public static final String ARG_OUTGOING = "outgoing";
 
@@ -58,11 +58,6 @@ public class AccountFragment extends OnboardingFragment implements
         args.putString(ARG_OUTGOING, outgoingNumberString);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override

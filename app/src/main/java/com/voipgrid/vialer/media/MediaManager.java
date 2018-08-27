@@ -12,7 +12,6 @@ import com.voipgrid.vialer.statistics.AppState;
  */
 public class MediaManager implements
         AudioManager.OnAudioFocusChangeListener, AudioRouter.AudioRouterInterface {
-    private static String TAG = MediaManager.class.getSimpleName();
 
     private static MediaManager mMediaManager;
 
@@ -61,15 +60,6 @@ public class MediaManager implements
 
         mAudioRouter = new AudioRouter(context, this, mAudioManager);
         mIncomingRinger = new IncomingRinger(activity, context, mAudioManager);
-    }
-
-    /**
-     * Get an instance reference to this class.
-     *
-     * @return this MediaManager class.
-     */
-    public MediaManager getInstance() {
-        return mMediaManager;
     }
 
     /**

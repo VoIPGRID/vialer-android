@@ -64,7 +64,6 @@ public class DialerActivity extends LoginRequiredActivity implements
     private SharedPreferences mSharedPreferences;
     private SimpleCursorAdapter mContactsAdapter = null;
 
-    private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private JsonStorage mJsonStorage;
     private ReachabilityReceiver mReachabilityReceiver;
@@ -87,11 +86,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dialer);
         ButterKnife.bind(this);
-
-        // Set the AnalyticsHelper
-        mAnalyticsHelper = new AnalyticsHelper(
-                ((AnalyticsApplication) getApplication()).getDefaultTracker()
-        );
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
