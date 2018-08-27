@@ -1,7 +1,5 @@
 package com.voipgrid.vialer.logging.tracing;
 
-import java.lang.reflect.Method;
-
 public class Caller {
 
     private String callingClass;

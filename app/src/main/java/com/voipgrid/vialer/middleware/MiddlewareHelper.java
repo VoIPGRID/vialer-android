@@ -1,5 +1,13 @@
 package com.voipgrid.vialer.middleware;
 
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.CURRENT_TOKEN;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.LAST_REGISTRATION;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.REGISTRATION_STATUS;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_FAILED;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_REGISTERED;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UPDATE_NEEDED;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -17,21 +25,12 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.logging.RemoteLogger;
-import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.CURRENT_TOKEN;
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.LAST_REGISTRATION;
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.REGISTRATION_STATUS;
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_FAILED;
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_REGISTERED;
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UPDATE_NEEDED;
 
 /**
  * Handle (un)registration from the middleware in a centralised place.

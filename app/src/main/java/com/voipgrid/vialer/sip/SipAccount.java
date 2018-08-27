@@ -4,8 +4,6 @@ import static com.voipgrid.vialer.fcm.RemoteMessageData.MESSAGE_START_TIME;
 
 import android.content.Intent;
 
-import com.voipgrid.vialer.fcm.FcmMessagingService;
-
 import org.pjsip.pjsua2.AccountConfig;
 import org.pjsip.pjsua2.AccountInfo;
 import org.pjsip.pjsua2.OnIncomingCallParam;

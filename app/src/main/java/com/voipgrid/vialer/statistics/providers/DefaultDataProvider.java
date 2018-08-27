@@ -17,7 +17,6 @@ import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.statistics.AppState;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 

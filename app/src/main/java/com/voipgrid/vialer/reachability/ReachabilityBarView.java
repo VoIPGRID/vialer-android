@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 
 /**
  * Class that handles the network state view and allows the updating of the view

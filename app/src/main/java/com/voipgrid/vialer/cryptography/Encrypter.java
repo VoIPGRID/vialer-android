@@ -9,8 +9,6 @@ import com.yakivmospan.scytale.ErrorListener;
 import com.yakivmospan.scytale.Options;
 import com.yakivmospan.scytale.Store;
 
-import java.security.KeyStore;
-
 import javax.crypto.SecretKey;
 
 public class Encrypter implements ErrorListener {

@@ -1,14 +1,14 @@
 package com.voipgrid.vialer.sip;
 
 
-import org.pjsip.pjsua2.RtcpStat;
-import org.pjsip.pjsua2.RtcpStreamStat;
-import org.pjsip.pjsua2.StreamStat;
-
 import static java.lang.Math.exp;
 import static java.lang.Math.log10;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
+
+import org.pjsip.pjsua2.RtcpStat;
+import org.pjsip.pjsua2.RtcpStreamStat;
+import org.pjsip.pjsua2.StreamStat;
 
 /**
  * Class to get the statics from the current call.

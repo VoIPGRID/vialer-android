@@ -21,7 +21,6 @@ import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringDef;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;

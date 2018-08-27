@@ -2,25 +2,19 @@ package com.voipgrid.vialer.onboarding;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.WebActivity;
-import com.voipgrid.vialer.util.ConnectivityHelper;
 
 /**
  * A simple {@link Fragment} subclass.

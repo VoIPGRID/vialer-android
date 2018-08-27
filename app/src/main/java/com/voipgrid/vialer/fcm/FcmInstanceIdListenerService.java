@@ -1,10 +1,10 @@
 package com.voipgrid.vialer.fcm;
 
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
+
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.voipgrid.vialer.logging.RemoteLogger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
-
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
 
 /**
  * Listen for updates in FCM instance id, and delegate them to the registration service.

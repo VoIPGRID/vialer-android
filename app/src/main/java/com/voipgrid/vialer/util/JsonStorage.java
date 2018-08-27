@@ -1,5 +1,8 @@
 package com.voipgrid.vialer.util;
 
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.REGISTRATION_STATUS;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UPDATE_NEEDED;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -11,9 +14,6 @@ import com.voipgrid.vialer.api.models.SystemUser;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.REGISTRATION_STATUS;
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UPDATE_NEEDED;
 
 /**
  * Class that handles the storage of json objects.

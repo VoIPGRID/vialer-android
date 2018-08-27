@@ -54,7 +54,6 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_WIFI;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_OS;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.GsonBuilder;

@@ -17,15 +17,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.CallRecord;
-import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.dialer.DialerActivity;
-import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.IconHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import java.text.ParseException;
