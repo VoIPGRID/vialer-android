@@ -1,9 +1,9 @@
 package com.voipgrid.vialer.statistics;
 
 
-import static com.voipgrid.vialer.fcm.FcmMessagingService.ATTEMPT;
-import static com.voipgrid.vialer.fcm.FcmMessagingService.MESSAGE_START_TIME;
-import static com.voipgrid.vialer.fcm.FcmMessagingService.REQUEST_TOKEN;
+import static com.voipgrid.vialer.fcm.RemoteMessageData.ATTEMPT;
+import static com.voipgrid.vialer.fcm.RemoteMessageData.MESSAGE_START_TIME;
+import static com.voipgrid.vialer.fcm.RemoteMessageData.REQUEST_TOKEN;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_ACCOUNT_CONNECTION_TYPE;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_APP_STATUS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_APP_VERSION;
