@@ -57,7 +57,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
         VialerApplication.get().component().inject(this);
 
         getMediaManager().startIncomingCallRinger();
-        updateViewBasedOnIntent();
+        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent());
     }
 
     private boolean currentlyOnLockScreen() {
