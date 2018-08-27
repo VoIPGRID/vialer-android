@@ -28,6 +28,7 @@ import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.UserAgent;
 
@@ -63,8 +64,7 @@ import retrofit2.Response;
  */
 public class SipConfig implements AccountStatus {
 
-    private static final String TAG = SipConfig.class.getSimpleName();
-
+    private final BroadcastReceiverManager mBroadcastReceiverManager;
     private Endpoint mEndpoint;
     private PhoneAccount mPhoneAccount;
     private Logger mLogger;
@@ -74,26 +74,33 @@ public class SipConfig implements AccountStatus {
     private Preferences mPreferences;
 
     private boolean mHasRespondedToMiddleware = false;
-    private int mCurrentTransportId;
     private static Map<String, Short> sCodecPrioMapping;
-    private boolean isChangingNetwork = false;
 
-    public static final short CODEC_DISABLED = (short) 0;
-    public static final short CODEC_PRIORITY_MAX = (short) 255;
+    private IpSwitchMonitor mIpSwitchMonitor;
 
-    public static final String TRANSPORT_TYPE_SECURE = "tls";
-    public static final String TRANSPORT_TYPE_STANDARD = "tcp";
+    private static final String TRANSPORT_TYPE_SECURE = "tls";
+    private static final String TRANSPORT_TYPE_STANDARD = "tcp";
 
-    static {
-        sCodecPrioMapping = new HashMap<>();
-        sCodecPrioMapping.put("ilbc/8000", CODEC_PRIORITY_MAX);
+    public SipConfig(Preferences preferences, IpSwitchMonitor ipSwitchMonitor,
+            BroadcastReceiverManager broadcastReceiverManager) {
+        mBroadcastReceiverManager = broadcastReceiverManager;
+        mLogger = new Logger(this);
+        mPreferences = preferences;
+        mIpSwitchMonitor = ipSwitchMonitor;
     }
 
-    public SipConfig(SipService sipService, PhoneAccount phoneAccount) {
+    /**
+     * Initialise the sip service with the relevant details.
+     *
+     * @param sipService
+     * @param phoneAccount
+     * @return
+     */
+    public SipConfig init(SipService sipService, PhoneAccount phoneAccount) {
         mSipService = sipService;
         mPhoneAccount = phoneAccount;
-        mLogger = mSipService.getLogger();
-        mPreferences = new Preferences(VialerApplication.get());
+
+        return this;
     }
 
     public Endpoint getEndpoint() {
@@ -108,86 +115,31 @@ public class SipConfig implements AccountStatus {
      * Function to init the PJSIP library and setup all credentials.
      * @throws LibraryInitFailedException
      */
-    public void initLibrary() throws LibraryInitFailedException {
-        loadPjsip();
-        mEndpoint = createEndpoint();
-        setCodecPrio();
-        mSipAccount = createSipAccount();
-        // Start listening for network changes after everything is setup.
-        startNetworkingListener();
-    }
-
-    private static final int NETWORK_SWITCH_DELAY_MS = 500;
-
-    private BroadcastReceiver mNetworkStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if(isChangingNetwork) return;
-
-            mLogger.d("Received a network change: " + intent.getAction());
-
-            if(isInitialStickyBroadcast()) {
-                mLogger.i("Ignoring network change as broadcast is old (sticky).");
-                return;
+    public void initLibrary(Listener listener) {
+        new Thread(() -> {
+            try {
+                loadPjsip();
+                mEndpoint = createEndpoint();
+                setCodecPrio();
+                mSipAccount = createSipAccount();
+                startNetworkingListener();
+                listener.pjSipDidLoad();
+            } catch (Exception e) {
+                listener.pjSipFailedToLoad(e);
             }
-
-            isChangingNetwork = true;
-
-            final Handler handler = new Handler();
-            handler.postDelayed(() -> {
-                mLogger.d("Wait " + NETWORK_SWITCH_DELAY_MS + "ms before doing the network switch");
-                doIpSwitch();
-                isChangingNetwork = false;
-            }, NETWORK_SWITCH_DELAY_MS);
-        }
-    };
-
-    /**
-     * When there is a change in the network make use of the PJSIP handleIpChange
-     * functionality to handle the change in the network.
-     */
-    private void doIpSwitch() {
-        mLogger.v("doIpSwitch()");
-        IpChangeParam ipChangeParam = new IpChangeParam();
-        ipChangeParam.setRestartListener(false);
-
-        SipCall sipCall = null;
-        String currentCallState = "";
-        if (mSipService != null && mSipService.getCurrentCall() != null) {
-            sipCall = mSipService.getCurrentCall();
-            sipCall.setIsIPChangeInProgress(true);
-            currentCallState = sipCall.getCurrentCallState();
-        }
-
-        if (sipCall == null) {
-            return;
-        }
-
-        mLogger.i("Make PJSIP handle the ip address change.");
-        try {
-            mEndpoint.handleIpChange(ipChangeParam);
-        } catch (Exception e) {
-            mLogger.w("PJSIP failed to change the ip address");
-            e.printStackTrace();
-        }
+        }).start();
     }
 
     private void startNetworkingListener() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        filter.addAction(SipLogHandler.NETWORK_UNAVAILABLE_BROADCAST);
-        mSipService.registerReceiver(
-                mNetworkStateReceiver,
-                filter
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
+                mIpSwitchMonitor.init(mSipService, mEndpoint),
+                ConnectivityManager.CONNECTIVITY_ACTION,
+                SipLogHandler.NETWORK_UNAVAILABLE_BROADCAST
         );
     }
 
     private void stopNetworkingListener() {
-        try {
-            mSipService.unregisterReceiver(mNetworkStateReceiver);
-        } catch(IllegalArgumentException e) {
-            mLogger.w("Trying to unregister mNetworkStateReceiver not registered.");
-        }
+        mBroadcastReceiverManager.unregisterReceiver(mIpSwitchMonitor);
     }
 
     /**
@@ -282,7 +234,7 @@ public class SipConfig implements AccountStatus {
         try {
             endpoint.libCreate();
         } catch (Exception e) {
-            Log.e(TAG, "Unable to create the PJSIP library");
+            mLogger.e("Unable to create the PJSIP library");
             mLogger.e("" + Log.getStackTraceString(e));
             e.printStackTrace();
             throw new LibraryInitFailedException();
@@ -294,13 +246,13 @@ public class SipConfig implements AccountStatus {
 
         UaConfig uaConfig = endpointConfig.getUaConfig();
         uaConfig.setUserAgent(new UserAgent(mSipService).generate());
-
+        uaConfig.setMainThreadOnly(true);
         configureStunServer(uaConfig);
 
         try {
             endpoint.libInit(endpointConfig);
         } catch (Exception e) {
-            Log.e(TAG, "Unable to init the PJSIP library");
+            mLogger.e("Unable to init the PJSIP library");
             mLogger.e("" + Log.getStackTraceString(e));
             e.printStackTrace();
             throw new LibraryInitFailedException();
@@ -308,10 +260,10 @@ public class SipConfig implements AccountStatus {
 
         TransportConfig transportConfig = createTransportConfig();
         try {
-            mCurrentTransportId = endpoint.transportCreate(getTransportType(), transportConfig);
+            endpoint.transportCreate(getTransportType(), transportConfig);
             endpoint.libStart();
         } catch (Exception exception) {
-            Log.e(TAG, "Unable to start the PJSIP library");
+            mLogger.e("Unable to start the PJSIP library");
             mLogger.e("" + Log.getStackTraceString(exception));
             throw new LibraryInitFailedException();
         }
@@ -393,6 +345,7 @@ public class SipConfig implements AccountStatus {
      */
     private void setCodecPrio() {
         try {
+            CodecPriorityMap codecPriorityMap = CodecPriorityMap.get();
             CodecInfoVector codecList = mEndpoint.codecEnum();
             String codecId;
             CodecInfo info;
@@ -401,28 +354,12 @@ public class SipConfig implements AccountStatus {
             for (int i = 0; i < codecList.size(); i++) {
                 info = codecList.get(i);
                 codecId = info.getCodecId();
-                prio = findCodecPriority(codecId);
-                mEndpoint.codecSetPriority(codecId, prio != null ? prio : CODEC_DISABLED);
+                prio = codecPriorityMap.findCodecPriority(codecId);
+                mEndpoint.codecSetPriority(codecId, prio != null ? prio : CodecPriorityMap.CODEC_DISABLED);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Searches and normalizes the codec priority mapping and attempts to find the mapped priority.
-     *
-     * @param codecId
-     * @return Short The codec's priority.
-     */
-    private Short findCodecPriority(String codecId) {
-        for(String codec : sCodecPrioMapping.keySet()) {
-            if(codecId.toLowerCase().contains(codec.toLowerCase())) {
-                return sCodecPrioMapping.get(codec);
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -598,5 +535,10 @@ public class SipConfig implements AccountStatus {
      */
     public static boolean shouldUseTls() {
         return SecureCalling.fromContext(VialerApplication.get()).isEnabled();
+    }
+
+    interface Listener {
+        void pjSipDidLoad();
+        void pjSipFailedToLoad(Exception e);
     }
 }

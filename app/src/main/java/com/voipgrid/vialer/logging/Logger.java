@@ -57,6 +57,10 @@ public class Logger {
         tag = thisClass.getSimpleName();
     }
 
+    public Logger(Object object) {
+        this(object.getClass());
+    }
+
     /**
      * Also logs all messages to the console.
      *
