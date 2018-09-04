@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/audio_source_option_phone"
+          android:title="@string/audio_source_option_phone"
+          android:icon="@drawable/ic_phone"/>
+
+    <item android:id="@+id/audio_source_option_speaker"
+          android:title="@string/audio_source_option_speaker"
+          android:icon="@drawable/ic_volume_on_enabled"/>
+
+    <item android:id="@+id/audio_source_option_bluetooth"
+          android:title="@string/audio_source_option_bluetooth"
+          android:icon="@drawable/ic_bluetooth"/>
+</menu>
