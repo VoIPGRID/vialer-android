@@ -1,0 +1,10 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_phone"
+          android:right="50dp"
+          android:width="140dp"/>
+
+    <item android:height="150dp"
+          android:drawable="@drawable/ic_arrow_drop_down"
+          android:left="100dp"
+          android:width="130dp"/>
+</layer-list>

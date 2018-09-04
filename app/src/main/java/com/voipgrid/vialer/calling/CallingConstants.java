@@ -29,4 +29,6 @@ public interface CallingConstants {
     String MAP_SECOND_CALL_IS_CONNECTED = "secondCallIsConnected";
 
     String CALL_IS_CONNECTED = "callIsConnected";
+    String CALL_BLUETOOTH_ACTIVE = "bluetoothAvailable";
+    String CALL_BLUETOOTH_CONNECTED = "bluetoothConnected";
 }

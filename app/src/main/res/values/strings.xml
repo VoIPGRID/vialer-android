@@ -233,4 +233,7 @@
     <string name="call_not_encrypted_warning_bar_text">Call not encrypted</string>
     <string name="pending_call_description">Setting up call with</string>
     <string name="pending_call_status">Establishing VoIP connection…</string>
+    <string name="audio_source_option_phone">Phone</string>
+    <string name="audio_source_option_speaker">Speaker</string>
+    <string name="audio_source_option_bluetooth">Bluetooth</string>
 </resources>
