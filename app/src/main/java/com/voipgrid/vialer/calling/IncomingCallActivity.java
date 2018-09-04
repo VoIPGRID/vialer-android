@@ -37,6 +37,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
     @Inject KeyguardManager mKeyguardManager;
     @Inject Contacts mContacts;
+    @Inject CallActivityHelper mCallActivityHelper;
 
     @BindView(R.id.incoming_caller_title) TextView mIncomingCallerTitle;
     @BindView(R.id.incoming_caller_subtitle) TextView mIncomingCallerSubtitle;

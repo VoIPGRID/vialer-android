@@ -16,6 +16,8 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.calling.CallNotifications;
 import com.voipgrid.vialer.contacts.Contacts;
+import com.voipgrid.vialer.sip.IpSwitchMonitor;
+import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -105,5 +107,25 @@ public class VialerModule {
     @Provides
     Contacts provideContacts() {
         return new Contacts();
+    }
+
+    @Provides
+    Preferences providePreferences(Context context) {
+        return new Preferences(context);
+    }
+
+    @Provides
+    CallActivityHelper provideCallActivityHelper() {
+        return new CallActivityHelper();
+    }
+
+    @Provides
+    IpSwitchMonitor provideIpSwitchMonitor() {
+        return new IpSwitchMonitor();
+    }
+
+    @Provides
+    SipConfig provideSipConfig(Preferences preferences, IpSwitchMonitor ipSwitchMonitor, BroadcastReceiverManager broadcastReceiverManager) {
+        return new SipConfig(preferences, ipSwitchMonitor, broadcastReceiverManager);
     }
 }
