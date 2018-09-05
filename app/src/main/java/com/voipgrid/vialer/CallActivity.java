@@ -28,8 +28,13 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.text.format.DateUtils;
+import android.util.Log;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,6 +62,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 /**
@@ -64,10 +70,11 @@ import butterknife.ButterKnife;
  */
 public class CallActivity extends AbstractCallActivity
         implements View.OnClickListener,CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
-        MediaManager.AudioChangedInterface {
+        MediaManager.AudioChangedInterface, PopupMenu.OnMenuItemClickListener {
 
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
     @BindView(R.id.state_text_view) TextView mStateView;
+    @BindView(R.id.button_speaker) FloatingActionButton mSpeakerButton;
 
     @Inject AnalyticsHelper mAnalyticsHelper;
 
@@ -165,6 +172,13 @@ public class CallActivity extends AbstractCallActivity
                 }
             }
         }
+
+        updateAudioSourceButton();
+    }
+
+    private void updateAudioSourceButton() {
+
+
     }
 
     @Override
@@ -481,7 +495,6 @@ public class CallActivity extends AbstractCallActivity
      * @param buttonEnabled Boolean Whether the button needs to be enabled or disabled.
      */
     private void updateCallButton(Integer viewId, boolean buttonEnabled) {
-        View speakerButton;
         View microphoneButton;
         View keypadButton;
         View onHoldButton;
@@ -490,14 +503,6 @@ public class CallActivity extends AbstractCallActivity
         View transferButton;
 
         switch (viewId) {
-            case R.id.button_speaker:
-                speakerButton = findViewById(viewId);
-                speakerButton.setActivated(mOnSpeaker);
-                speakerButton.setAlpha(
-                        buttonEnabled ? mOnSpeaker ? 1.0f : 0.5f : 1.0f
-                );
-                break;
-
             case R.id.button_microphone:
                 microphoneButton = findViewById(viewId);
                 microphoneButton.setActivated(mMute);
@@ -651,11 +656,6 @@ public class CallActivity extends AbstractCallActivity
         }
 
         switch (viewId) {
-            case R.id.button_speaker:
-                toggleSpeaker();
-                updateCallButton(viewId, true);
-                break;
-
             case R.id.button_microphone:
                 if (mOnTransfer) {
                     if (mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
@@ -979,5 +979,42 @@ public class CallActivity extends AbstractCallActivity
         }
 
         mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
+    }
+
+    @OnClick(R.id.button_speaker)
+    public void audioSourceButtonPressed(View view) {
+        Log.e("TEST123", "mBluetoothConnected: " + mBluetoothDeviceConnected + " : mBluetoothActive:" + mBluetoothAudioActive);
+        if (!mBluetoothDeviceConnected) {
+            boolean buttonEnabled = true;
+            toggleSpeaker();
+            mSpeakerButton.setActivated(mOnSpeaker);
+            mSpeakerButton.setAlpha(buttonEnabled ? mOnSpeaker ? 1.0f : 0.5f : 1.0f);
+            return;
+        }
+
+        PopupMenu popup = new PopupMenu(this, view);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.menu_audio_source, popup.getMenu());
+        popup.setOnMenuItemClickListener(this);
+        popup.show();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.phone:
+                getMediaManager().useBluetoothAudio(false);
+                getMediaManager().setCallOnSpeaker(false);
+                break;
+            case R.id.speaker:
+                getMediaManager().useBluetoothAudio(false);
+                getMediaManager().setCallOnSpeaker(true);
+                break;
+            case R.id.bluetooth:
+                getMediaManager().useBluetoothAudio(true);
+                break;
+        }
+        return false;
     }
 }
