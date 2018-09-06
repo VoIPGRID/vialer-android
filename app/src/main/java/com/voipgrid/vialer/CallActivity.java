@@ -1,5 +1,7 @@
 package com.voipgrid.vialer;
 
+import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_ACTIVE;
+import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
 import static com.voipgrid.vialer.calling.CallingConstants.MAP_ORIGINAL_CALLER_ID;
@@ -113,6 +115,14 @@ public class CallActivity extends AbstractCallActivity
 
         mConnected = getIntent().getBooleanExtra(CALL_IS_CONNECTED, false);
 
+        if (!mBluetoothAudioActive) {
+            mBluetoothAudioActive = getIntent().getBooleanExtra(CALL_BLUETOOTH_ACTIVE, false);
+        }
+
+        if (!mBluetoothDeviceConnected) {
+            mBluetoothDeviceConnected = getIntent().getBooleanExtra(CALL_BLUETOOTH_CONNECTED, false);
+        }
+
         if (mType.equals(TYPE_INCOMING_CALL) || mType.equals(TYPE_OUTGOING_CALL)) {
             // Update the textView with a number URI.
             mPhoneNumberToDisplay = intent.getStringExtra(PHONE_NUMBER);
@@ -150,7 +160,6 @@ public class CallActivity extends AbstractCallActivity
                     mCallNotifications.outgoingCall(getCallNotificationDetails());
                 }
             }
-            getMediaManager().callStarted();
         }
     }
 
@@ -498,7 +507,6 @@ public class CallActivity extends AbstractCallActivity
         View microphoneButton;
         View keypadButton;
         View onHoldButton;
-        View bluetoothButton;
         View hangupButton;
         View transferButton;
 
@@ -531,14 +539,6 @@ public class CallActivity extends AbstractCallActivity
                 transferButton.setActivated(mOnTransfer);
                 transferButton.setAlpha(
                         buttonEnabled ? mOnTransfer ? 1.0f : 0.5f : 1.0f
-                );
-                break;
-            case R.id.button_bluetooth:
-                bluetoothButton = findViewById(viewId);
-                bluetoothButton.setActivated(mBluetoothAudioActive);
-                bluetoothButton.setVisibility(mBluetoothDeviceConnected ? View.VISIBLE : View.GONE);
-                bluetoothButton.setAlpha(
-                        buttonEnabled ? mBluetoothAudioActive ? 1.0f : 0.5f : 0.5f
                 );
                 break;
             case R.id.button_hangup:
@@ -587,7 +587,6 @@ public class CallActivity extends AbstractCallActivity
                 updateCallButton(keypadButtonId, true);
                 updateCallButton(onHoldButtonId, true);
                 updateCallButton(transferButtonId, true);
-                updateCallButton(bluetoothButtonId, true);
                 break;
 
             case CALL_DISCONNECTED_MESSAGE:
@@ -1003,15 +1002,15 @@ public class CallActivity extends AbstractCallActivity
     public boolean onMenuItemClick(MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.phone:
+            case R.id.audio_source_option_phone:
                 getMediaManager().useBluetoothAudio(false);
                 getMediaManager().setCallOnSpeaker(false);
                 break;
-            case R.id.speaker:
+            case R.id.audio_source_option_speaker:
                 getMediaManager().useBluetoothAudio(false);
                 getMediaManager().setCallOnSpeaker(true);
                 break;
-            case R.id.bluetooth:
+            case R.id.audio_source_option_bluetooth:
                 getMediaManager().useBluetoothAudio(true);
                 break;
         }

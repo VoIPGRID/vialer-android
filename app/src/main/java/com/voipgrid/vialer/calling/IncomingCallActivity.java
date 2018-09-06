@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.calling;
 
+import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_ACTIVE;
+import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
@@ -165,6 +167,8 @@ public class IncomingCallActivity extends AbstractCallActivity {
         Intent intent = getIntent();
         intent.setClass(this, CallActivity.class);
         intent.putExtra(CALL_IS_CONNECTED, true);
+        intent.putExtra(CALL_BLUETOOTH_ACTIVE, mBluetoothAudioActive);
+        intent.putExtra(CALL_BLUETOOTH_CONNECTED, mBluetoothDeviceConnected);
         startActivity(intent);
         mLogger.d("callVisibleForUser");
     }

@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import com.voipgrid.vialer.logging.Logger;
