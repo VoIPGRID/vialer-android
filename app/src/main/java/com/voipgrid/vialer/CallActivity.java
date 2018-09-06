@@ -575,7 +575,6 @@ public class CallActivity extends AbstractCallActivity
         Integer keypadButtonId = R.id.button_keypad;
         Integer onHoldButtonId = R.id.button_onhold;
         Integer transferButtonId = R.id.button_transfer;
-        Integer bluetoothButtonId = R.id.button_bluetooth;
 
         View declineButton = findViewById(R.id.button_decline);
         View acceptButton = findViewById(R.id.button_pickup);
@@ -610,7 +609,6 @@ public class CallActivity extends AbstractCallActivity
                 updateCallButton(keypadButtonId, false);
                 updateCallButton(onHoldButtonId, false);
                 updateCallButton(transferButtonId, false);
-                updateCallButton(bluetoothButtonId, false);
 
                 if (mKeyPadVisible) {
                     toggleDialPad();
@@ -624,7 +622,6 @@ public class CallActivity extends AbstractCallActivity
                 updateCallButton(keypadButtonId, false);
                 updateCallButton(onHoldButtonId, false);
                 updateCallButton(transferButtonId, false);
-                updateCallButton(bluetoothButtonId, false);
                 break;
         }
     }
@@ -714,15 +711,6 @@ public class CallActivity extends AbstractCallActivity
                         updateCallButton(viewId, true);
                     }
                 }
-                break;
-
-            case R.id.button_bluetooth:
-                mBluetoothAudioActive = !mBluetoothAudioActive;
-                // When the button is active and the user presses the button don't use the
-                // bluetooth audio.
-                // When the button is in active turn the bluetooth audio on.
-                getMediaManager().useBluetoothAudio(mBluetoothAudioActive);
-                updateCallButton(viewId, true);
                 break;
         }
     }
@@ -901,18 +889,6 @@ public class CallActivity extends AbstractCallActivity
     private void toggleVisibilityCallInfo(Boolean visible) {
         findViewById(R.id.call_info).setVisibility(visible ? View.VISIBLE : View.GONE);
         findViewById(R.id.call_buttons_container).setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void bluetoothDeviceConnected(boolean connected) {
-        super.bluetoothDeviceConnected(connected);
-        updateCallButton(R.id.button_bluetooth, mBluetoothDeviceConnected);
-    }
-
-    @Override
-    public void bluetoothAudioAvailable(boolean available) {
-        super.bluetoothAudioAvailable(available);
-        updateCallButton(R.id.button_bluetooth, mBluetoothDeviceConnected);
     }
 
     @Override
