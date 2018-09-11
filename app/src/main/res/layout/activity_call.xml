@@ -62,12 +62,11 @@
                 android:id="@+id/button_speaker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_volume_on_enabled"
-                android:onClick="onClick"
+                android:src="@drawable/audio_source_dropdown_speaker"
                 app:backgroundTint="@color/call_buttons"
-                app:elevation="0dp"
                 app:borderWidth="0dp"
-                />
+                app:elevation="0dp"
+            />
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/button_microphone"
@@ -120,19 +119,6 @@
                 app:elevation="0dp"
                 app:borderWidth="0dp"
                 />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/button_bluetooth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/button_transfer"
-                android:layout_toRightOf="@id/button_transfer"
-                android:onClick="onClick"
-                android:src="@drawable/ic_bluetooth"
-                android:visibility="visible"
-                app:backgroundTint="@color/call_buttons"
-                app:borderWidth="0dp"
-                app:elevation="0dp" />
 
         </RelativeLayout>
 

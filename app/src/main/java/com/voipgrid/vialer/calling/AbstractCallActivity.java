@@ -57,6 +57,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
         requestMicrophonePermissionIfNecessary();
         configureActivityFlags();
+        getMediaManager().callStarted();
     }
 
     @Override
