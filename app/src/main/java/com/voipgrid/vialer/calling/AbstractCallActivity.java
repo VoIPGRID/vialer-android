@@ -134,7 +134,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
     @Override
     public void bluetoothDeviceConnected(boolean connected) {
-        Log.e("TEST123", "mBluetoothDeviceConnected in AbstractCallActivity: " + connected);
         mLogger.i("BluetoothDeviceConnected()");
         mLogger.i("==>" + connected);
         mBluetoothDeviceConnected = connected;
