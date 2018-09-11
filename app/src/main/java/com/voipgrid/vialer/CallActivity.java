@@ -86,7 +86,6 @@ public class CallActivity extends AbstractCallActivity
     private boolean mMute = false;
     private boolean mOnHold = false;
     private boolean mKeyPadVisible = false;
-    private boolean mOnSpeaker = false;
     private boolean mOnTransfer = false;
     private boolean mSelfHangup = false;
     private String mCurrentCallId;
@@ -182,12 +181,7 @@ public class CallActivity extends AbstractCallActivity
             }
         }
 
-        updateAudioSourceButton();
-    }
-
-    private void updateAudioSourceButton() {
-
-
+        refreshAudioSourceButton();
     }
 
     @Override
@@ -442,11 +436,23 @@ public class CallActivity extends AbstractCallActivity
         }
     }
 
+    @Override
+    public void bluetoothAudioAvailable(boolean available) {
+        super.bluetoothAudioAvailable(available);
+        refreshAudioSourceButton();
+    }
+
+    @Override
+    public void bluetoothDeviceConnected(boolean connected) {
+        super.bluetoothDeviceConnected(connected);
+        refreshAudioSourceButton();
+    }
+
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
         mLogger.d("toggleSpeaker");
-        mOnSpeaker = !mOnSpeaker;
-        getMediaManager().setCallOnSpeaker(mOnSpeaker);
+        getMediaManager().setCallOnSpeaker(!getMediaManager().isCallOnSpeaker());
+        refreshAudioSourceButton();
     }
 
     // Mute or un-mute a call when the user presses the button.
@@ -956,14 +962,28 @@ public class CallActivity extends AbstractCallActivity
         mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
     }
 
+    private void refreshAudioSourceButton() {
+        if (mBluetoothDeviceConnected) {
+            if (getMediaManager().isCallOnSpeaker()) {
+                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_speaker);
+            }
+            else if (mBluetoothAudioActive) {
+                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_bluetooth);
+            }
+            else {
+                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_phone);
+            }
+        }
+        else {
+            mSpeakerButton.setImageResource(R.drawable.ic_volume_on_enabled);
+            mSpeakerButton.setAlpha(getMediaManager().isCallOnSpeaker() ? 1.0f : 0.5f);
+        }
+    }
+
     @OnClick(R.id.button_speaker)
     public void audioSourceButtonPressed(View view) {
-        Log.e("TEST123", "mBluetoothConnected: " + mBluetoothDeviceConnected + " : mBluetoothActive:" + mBluetoothAudioActive);
         if (!mBluetoothDeviceConnected) {
-            boolean buttonEnabled = true;
             toggleSpeaker();
-            mSpeakerButton.setActivated(mOnSpeaker);
-            mSpeakerButton.setAlpha(buttonEnabled ? mOnSpeaker ? 1.0f : 0.5f : 1.0f);
             return;
         }
 
@@ -976,7 +996,6 @@ public class CallActivity extends AbstractCallActivity
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.audio_source_option_phone:
                 getMediaManager().useBluetoothAudio(false);
@@ -990,6 +1009,9 @@ public class CallActivity extends AbstractCallActivity
                 getMediaManager().useBluetoothAudio(true);
                 break;
         }
+
+        refreshAudioSourceButton();
+
         return false;
     }
 }

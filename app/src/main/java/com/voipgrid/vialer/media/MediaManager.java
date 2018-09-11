@@ -206,6 +206,16 @@ public class MediaManager implements
     }
 
     /**
+     * Check if the audio is currently being played through the speaker.
+     *
+     * @return TRUE if audio is being played through speaker, otherwise FALSE.
+     */
+    public boolean isCallOnSpeaker() {
+        return mAudioManager != null && mAudioManager.isSpeakerphoneOn();
+
+    }
+
+    /**
      * Reset the AudioManger back to default.
      * and release the audio focus for the app.
      */
