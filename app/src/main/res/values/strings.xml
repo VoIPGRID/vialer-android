@@ -243,4 +243,6 @@
     <string name="audio_source_option_phone">Phone</string>
     <string name="audio_source_option_speaker">Speaker</string>
     <string name="audio_source_option_bluetooth">Bluetooth</string>
+    <string name="incoming_call_answer">Answer</string>
+    <string name="incoming_call_decline">Ignore</string>
 </resources>
