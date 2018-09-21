@@ -193,6 +193,13 @@
     <string name="two_step_call_state_setup_failed">Failed to setup call</string>
     <string name="two_step_call_state_invalid_number">Phone number incorrect</string>
 
+    <!-- Call layout values -->
+    <string name="dialpad_label">keypad</string>
+    <string name="mute_label">mute</string>
+    <string name="speaker_label">speaker</string>
+    <string name="transfer_label">transfer</string>
+    <string name="onhold_label">hold</string>
+
     <!-- Permission strings -->
     <string name="permission_microphone_dialog_title">Microphone permission</string>
     <string name="permission_microphone_dialog_message">Permission is needed to call</string>

@@ -7,9 +7,6 @@ import static com.voipgrid.vialer.calling.CallingConstants.MAP_ORIGINAL_CALLER_P
 import static com.voipgrid.vialer.calling.CallingConstants.MAP_SECOND_CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.MAP_TRANSFERRED_PHONE_NUMBER;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
-import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_CONNECTED_FRAGMENT;
-import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_KEY_PAD_FRAGMENT;
-import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_TRANSFER_COMPLETE_FRAGMENT;
 import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_TRANSFER_FRAGMENT;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_CONNECTED_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
@@ -23,20 +20,23 @@ import static com.voipgrid.vialer.sip.SipConstants.CALL_RINGING_OUT_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_UNHOLD_ACTION;
 import static com.voipgrid.vialer.sip.SipConstants.SERVICE_STOPPED;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.format.DateUtils;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.call.CallConnectedFragment;
 import com.voipgrid.vialer.call.CallKeyPadFragment;
-import com.voipgrid.vialer.call.CallTransferCompleteFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
@@ -57,6 +57,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 /**
@@ -67,7 +68,8 @@ public class CallActivity extends AbstractCallActivity
         MediaManager.AudioChangedInterface {
 
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
-    @BindView(R.id.state_text_view) TextView mStateView;
+    @BindView(R.id.button_mute) ImageView mMuteButton;
+    @BindView(R.id.button_onhold) ImageView mOnHoldButton;
 
     @Inject AnalyticsHelper mAnalyticsHelper;
 
@@ -81,7 +83,6 @@ public class CallActivity extends AbstractCallActivity
     private boolean mOnTransfer = false;
     private boolean mSelfHangup = false;
     private String mCurrentCallId;
-
     public String mPhoneNumberToDisplay;
     public String mType;
     public String mCallerIdToDisplay;
@@ -175,8 +176,11 @@ public class CallActivity extends AbstractCallActivity
 
     private void displayCallInfo() {
         TextView nameTextView = findViewById(R.id.name_text_view);
-        TextView numberTextView = findViewById(R.id.number_text_view);
+        TextView numberTextView = findViewById(R.id.incoming_caller_subtitle);
 
+        if(nameTextView == null || numberTextView == null){
+            return;
+        }
         if (mCallerIdToDisplay != null && !mCallerIdToDisplay.isEmpty()) {
             nameTextView.setText(mCallerIdToDisplay);
             numberTextView.setText(mPhoneNumberToDisplay);
@@ -196,7 +200,7 @@ public class CallActivity extends AbstractCallActivity
             // Hide answer, decline = decline.
 
             if (!mOnTransfer) {
-                swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
+                //TODO When redesigning dialpad
 
                 if (type.equals(TYPE_CONNECTED_CALL) && !mConnected) {
                     getMediaManager().callAnswered();
@@ -221,7 +225,6 @@ public class CallActivity extends AbstractCallActivity
         switch (newStatus) {
             case CALL_CONNECTED_MESSAGE:
                 toggleCallStateButtonVisibility(TYPE_CONNECTED_CALL);
-                mStateView.setText(R.string.call_connected);
                 mConnected = true;
 
                 mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
@@ -242,11 +245,9 @@ public class CallActivity extends AbstractCallActivity
             case CALL_DISCONNECTED_MESSAGE:
                 if (!mConnected && !mSelfHangup) {
                     // Call has never been connected. Meaning the dialed number was unreachable.
-                    mStateView.setText(R.string.call_unreachable);
                     sendBroadcast(new Intent(DECLINE_BTN));
                 } else {
                     // Normal hangup.
-                    mStateView.setText(R.string.call_ended);
                 }
 
                 // Stop duration timer.
@@ -259,14 +260,13 @@ public class CallActivity extends AbstractCallActivity
                 if (mOnTransfer) {
                     // Transferring is successful done.
                     if (mCallIsTransferred) {
-                        toggleVisibilityCallInfo(false);
 
                         Map<String, String> map = new HashMap<>();
                         map.put(MAP_ORIGINAL_CALLER_ID, mSipServiceConnection.get().getFirstCall().getCallerId());
                         map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipServiceConnection.get().getFirstCall().getPhoneNumber());
                         map.put(MAP_TRANSFERRED_PHONE_NUMBER, mTransferredNumber);
 
-                        swapFragment(TAG_CALL_TRANSFER_COMPLETE_FRAGMENT, map);
+                        //TODO When redesigning dialpad
 
                         mOnTransfer = false;
                         try {
@@ -282,10 +282,9 @@ public class CallActivity extends AbstractCallActivity
                         getMediaManager().setCallOnSpeaker(false);
 
                         mConnected = true;
-                        toggleVisibilityCallInfo(true);
 
                         findViewById(R.id.button_transfer).setVisibility(View.VISIBLE);
-                        swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
+                        //TODO When redesigning dialpad
 
                         newStatus = mSipServiceConnection.get().getCurrentCall().getCurrentCallState();
 
@@ -306,14 +305,13 @@ public class CallActivity extends AbstractCallActivity
                         mOnTransfer = false;
                         updateCallButton(R.id.button_transfer, true);
                         updateCallButton(R.id.button_onhold, true);
-                        updateCallButton(R.id.button_keypad, true);
-                        updateCallButton(R.id.button_microphone, true);
+                        updateCallButton(R.id.button_dialpad, true);
+                        updateCallButton(R.id.button_mute, true);
 
                         onCallStatusUpdate(mSipServiceConnection.get().getCurrentCall().getCurrentCallState());
                     } else {
                         if (mSipServiceConnection.get() != null && mSipServiceConnection.get().getCurrentCall() == null && mSipServiceConnection.get().getFirstCall() == null) {
-                            toggleVisibilityCallInfo(true);
-                            swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
+                            //TODO When redesigning dialpad
                             displayCallInfo();
 
                             mOnTransfer = false;
@@ -321,8 +319,8 @@ public class CallActivity extends AbstractCallActivity
 
                             updateCallButton(R.id.button_transfer, false);
                             updateCallButton(R.id.button_onhold, false);
-                            updateCallButton(R.id.button_keypad, false);
-                            updateCallButton(R.id.button_microphone, false);
+                            updateCallButton(R.id.button_dialpad, false);
+                            updateCallButton(R.id.button_mute, false);
                             updateCallButton(R.id.button_hangup, false);
 
                             onCallStatusUpdate(CALL_DISCONNECTED_MESSAGE);
@@ -340,7 +338,6 @@ public class CallActivity extends AbstractCallActivity
                 mOnHold = true;
                 // Remove a running timer which shows call duration.
                 mCallDurationView.setVisibility(View.GONE);
-                mStateView.setText(R.string.call_on_hold);
                 updateCallButton(R.id.button_onhold, true);
                 mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_on_hold);
                 break;
@@ -349,19 +346,16 @@ public class CallActivity extends AbstractCallActivity
                 mOnHold = false;
                 // Start the running timer which shows call duration.
                 mCallDurationView.setVisibility(View.VISIBLE);
-                mStateView.setText(R.string.call_connected);
                 updateCallButton(R.id.button_onhold, true);
                 mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
                 break;
 
             case CALL_RINGING_OUT_MESSAGE:
-                mStateView.setText(R.string.call_outgoing);
                 findViewById(R.id.button_speaker).setEnabled(false);
-                findViewById(R.id.button_microphone).setEnabled(false);
+                findViewById(R.id.button_mute).setEnabled(false);
                 break;
 
             case CALL_RINGING_IN_MESSAGE:
-                mStateView.setText(R.string.call_incoming);
                 break;
 
             case SERVICE_STOPPED:
@@ -402,8 +396,7 @@ public class CallActivity extends AbstractCallActivity
                 } else {
                     mOnTransfer = false;
 
-                    toggleVisibilityCallInfo(true);
-                    swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
+                    //TODO When redesigning dialpad
 
                     updateCallButton(R.id.button_onhold, true);
                     updateCallButton(R.id.button_transfer, true);
@@ -430,10 +423,23 @@ public class CallActivity extends AbstractCallActivity
     private void toggleMute() {
         mLogger.d("toggleMute");
         mMute = !mMute;
-        long newVolume = (mMute ?               // get new volume based on selection value
-                getResources().getInteger(R.integer.mute_microphone_volume_value) :   // muted
-                getResources().getInteger(R.integer.unmute_microphone_volume_value)); // un-muted
-        updateMicrophoneVolume(newVolume);
+        int newVolume = 0;
+
+         if(mMute) {
+             newVolume=getResources().getInteger(R.integer.mute_microphone_volume_value);
+             mMuteButton.setColorFilter(ResourcesCompat.getColor(getResources(), R.color.color_primary, null));
+             Drawable newDrawableMute = mMuteButton.getBackground();
+             DrawableCompat.setTint(newDrawableMute,Color.WHITE );
+             mMuteButton.setBackground(newDrawableMute);
+
+         } else {
+             newVolume=getResources().getInteger(R.integer.unmute_microphone_volume_value);
+             mMuteButton.clearColorFilter();
+             Drawable newDrawableMute = mMuteButton.getBackground();
+             DrawableCompat.setTintList(newDrawableMute, null );
+             mMuteButton.setBackground(newDrawableMute);
+         }
+             updateMicrophoneVolume(newVolume);
     }
 
     // Show or hide the dialPad when the user presses the button.
@@ -442,7 +448,7 @@ public class CallActivity extends AbstractCallActivity
         mKeyPadVisible = !mKeyPadVisible;
 
         if (mKeyPadVisible) {
-            swapFragment(TAG_CALL_KEY_PAD_FRAGMENT, null);
+            //TODO When redesigning dialpad
         } else {
             if (mOnTransfer) {
                 Map<String, String> map = new HashMap<>();
@@ -450,9 +456,9 @@ public class CallActivity extends AbstractCallActivity
                 map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipServiceConnection.get().getFirstCall().getPhoneNumber());
                 map.put(MAP_SECOND_CALL_IS_CONNECTED, "" + true);
 
-                swapFragment(TAG_CALL_TRANSFER_FRAGMENT, map);
+                //TODO When redesigning dialpad
             } else {
-                swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
+                //TODO When redesigning dialpad
             }
         }
     }
@@ -471,9 +477,19 @@ public class CallActivity extends AbstractCallActivity
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            if (mSipServiceConnection.get().getCurrentCall().isOnHold()) {
+                mOnHoldButton.setColorFilter(ResourcesCompat.getColor(getResources(), R.color.color_primary, null));
+                Drawable newDrawableOnHold = mOnHoldButton.getBackground();
+                DrawableCompat.setTint(newDrawableOnHold,Color.WHITE );
+                mOnHoldButton.setBackground(newDrawableOnHold);
+            } else {
+                mOnHoldButton.clearColorFilter();
+                Drawable newDrawableOnHold = mOnHoldButton.getBackground();
+                DrawableCompat.setTintList(newDrawableOnHold,null );
+                mOnHoldButton.setBackground(newDrawableOnHold);
+            }
         }
     }
-
     /**
      * Update the state of a single call button.
      *
@@ -482,10 +498,9 @@ public class CallActivity extends AbstractCallActivity
      */
     private void updateCallButton(Integer viewId, boolean buttonEnabled) {
         View speakerButton;
-        View microphoneButton;
-        View keypadButton;
+        View muteButton;
+        View dialpadButton;
         View onHoldButton;
-        View bluetoothButton;
         View hangupButton;
         View transferButton;
 
@@ -498,18 +513,15 @@ public class CallActivity extends AbstractCallActivity
                 );
                 break;
 
-            case R.id.button_microphone:
-                microphoneButton = findViewById(viewId);
-                microphoneButton.setActivated(mMute);
-                microphoneButton.setAlpha(
-                        buttonEnabled ? mMute ? 1.0f : 0.5f : 1.0f
-                );
+            case R.id.button_mute:
+                muteButton = findViewById(viewId);
+                muteButton.setActivated(mMute);
                 break;
 
-            case R.id.button_keypad:
-                keypadButton = findViewById(viewId);
-                keypadButton.setActivated(mKeyPadVisible);
-                keypadButton.setAlpha(
+            case R.id.button_dialpad:
+                dialpadButton = findViewById(viewId);
+                dialpadButton.setActivated(mKeyPadVisible);
+                dialpadButton.setAlpha(
                         buttonEnabled ? mKeyPadVisible ? 1.0f : 0.5f : 1.0f
                 );
                 break;
@@ -517,23 +529,13 @@ public class CallActivity extends AbstractCallActivity
             case R.id.button_onhold:
                 onHoldButton = findViewById(viewId);
                 onHoldButton.setActivated(mOnHold);
-                onHoldButton.setAlpha(
-                        buttonEnabled ? mOnHold ? 1.0f : 0.5f : 1.0f
-                );
                 break;
+
             case R.id.button_transfer:
                 transferButton = findViewById(viewId);
                 transferButton.setActivated(mOnTransfer);
                 transferButton.setAlpha(
                         buttonEnabled ? mOnTransfer ? 1.0f : 0.5f : 1.0f
-                );
-                break;
-            case R.id.button_bluetooth:
-                bluetoothButton = findViewById(viewId);
-                bluetoothButton.setActivated(mBluetoothAudioActive);
-                bluetoothButton.setVisibility(mBluetoothDeviceConnected ? View.VISIBLE : View.GONE);
-                bluetoothButton.setAlpha(
-                        buttonEnabled ? mBluetoothAudioActive ? 1.0f : 0.5f : 0.5f
                 );
                 break;
             case R.id.button_hangup:
@@ -558,7 +560,6 @@ public class CallActivity extends AbstractCallActivity
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            mStateView.setText(R.string.call_hangup);
             finishAfterDelay();
             sendBroadcast(new Intent(BluetoothMediaButtonReceiver.HANGUP_BTN));
         }
@@ -566,11 +567,10 @@ public class CallActivity extends AbstractCallActivity
 
     private void onCallStatesUpdateButtons(String callState) {
         Integer speakerButtonId = R.id.button_speaker;
-        Integer microphoneButtonId = R.id.button_microphone;
-        Integer keypadButtonId = R.id.button_keypad;
+        Integer microphoneButtonId = R.id.button_mute;
+        Integer keypadButtonId = R.id.button_dialpad;
         Integer onHoldButtonId = R.id.button_onhold;
         Integer transferButtonId = R.id.button_transfer;
-        Integer bluetoothButtonId = R.id.button_bluetooth;
 
         View declineButton = findViewById(R.id.button_decline);
         View acceptButton = findViewById(R.id.button_pickup);
@@ -582,7 +582,6 @@ public class CallActivity extends AbstractCallActivity
                 updateCallButton(keypadButtonId, true);
                 updateCallButton(onHoldButtonId, true);
                 updateCallButton(transferButtonId, true);
-                updateCallButton(bluetoothButtonId, true);
                 break;
 
             case CALL_DISCONNECTED_MESSAGE:
@@ -606,7 +605,6 @@ public class CallActivity extends AbstractCallActivity
                 updateCallButton(keypadButtonId, false);
                 updateCallButton(onHoldButtonId, false);
                 updateCallButton(transferButtonId, false);
-                updateCallButton(bluetoothButtonId, false);
 
                 if (mKeyPadVisible) {
                     toggleDialPad();
@@ -620,7 +618,6 @@ public class CallActivity extends AbstractCallActivity
                 updateCallButton(keypadButtonId, false);
                 updateCallButton(onHoldButtonId, false);
                 updateCallButton(transferButtonId, false);
-                updateCallButton(bluetoothButtonId, false);
                 break;
         }
     }
@@ -640,6 +637,7 @@ public class CallActivity extends AbstractCallActivity
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onClick(View view) {
         Integer viewId = view.getId();
@@ -656,7 +654,7 @@ public class CallActivity extends AbstractCallActivity
                 updateCallButton(viewId, true);
                 break;
 
-            case R.id.button_microphone:
+            case R.id.button_mute:
                 if (mOnTransfer) {
                     if (mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
                         toggleMute();
@@ -670,7 +668,7 @@ public class CallActivity extends AbstractCallActivity
                 }
                 break;
 
-            case R.id.button_keypad:
+            case R.id.button_dialpad:
                 if (mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
                     toggleDialPad();
                     updateCallButton(viewId, true);
@@ -690,14 +688,12 @@ public class CallActivity extends AbstractCallActivity
                     mOnTransfer = false;
                 }
 
-                toggleVisibilityCallInfo(false);
-
                 Map<String, String> map = new HashMap<>();
                 map.put(MAP_ORIGINAL_CALLER_ID, mSipServiceConnection.get().getFirstCall().getCallerId());
                 map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipServiceConnection.get().getFirstCall().getPhoneNumber());
                 map.put(MAP_SECOND_CALL_IS_CONNECTED, "" + false);
 
-                swapFragment(TAG_CALL_TRANSFER_FRAGMENT, map);
+                //TODO When redesigning dialpad
                 mCallDurationView.setVisibility(View.GONE);
                 updateCallButton(viewId, true);
 
@@ -716,79 +712,12 @@ public class CallActivity extends AbstractCallActivity
                     }
                 }
                 break;
-
-            case R.id.button_bluetooth:
-                mBluetoothAudioActive = !mBluetoothAudioActive;
-                // When the button is active and the user presses the button don't use the
-                // bluetooth audio.
-                // When the button is in active turn the bluetooth audio on.
-                getMediaManager().useBluetoothAudio(mBluetoothAudioActive);
-                updateCallButton(viewId, true);
-                break;
-        }
-    }
-
-    private void swapFragment(String tag, Map extraInfo) {
-        Fragment newFragment = null;
-
-        switch (tag) {
-            case TAG_CALL_KEY_PAD_FRAGMENT:
-                newFragment = new CallKeyPadFragment();
-                break;
-
-            case TAG_CALL_TRANSFER_FRAGMENT:
-                String originalCallerId;
-                if (extraInfo.get(MAP_ORIGINAL_CALLER_ID) != null) {
-                    originalCallerId = extraInfo.get(MAP_ORIGINAL_CALLER_ID).toString();
-                } else {
-                    originalCallerId = "";
-                }
-
-                Bundle callTransferFragmentBundle = new Bundle();
-                callTransferFragmentBundle.putString(CallTransferFragment.ORIGINAL_CALLER_ID, originalCallerId);
-                callTransferFragmentBundle.putString(CallTransferFragment.ORIGINAL_CALLER_PHONE_NUMBER, extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString());
-                callTransferFragmentBundle.putString(CallTransferFragment.SECOND_CALL_IS_CONNECTED, extraInfo.get(MAP_SECOND_CALL_IS_CONNECTED).toString());
-
-                newFragment = new CallTransferFragment();
-                newFragment.setArguments(callTransferFragmentBundle);
-                break;
-
-            case TAG_CALL_TRANSFER_COMPLETE_FRAGMENT:
-                if (extraInfo.get(MAP_ORIGINAL_CALLER_ID) != null) {
-                    originalCallerId = extraInfo.get(MAP_ORIGINAL_CALLER_ID).toString();
-                } else {
-                    originalCallerId = "";
-                }
-                Bundle callTransferCompleteFragment = new Bundle();
-                callTransferCompleteFragment.putString(CallTransferCompleteFragment.ORIGINAL_CALLER_ID, originalCallerId);
-                callTransferCompleteFragment.putString(CallTransferCompleteFragment.ORIGINAL_CALLER_PHONE_NUMBER, extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString());
-                callTransferCompleteFragment.putString(CallTransferCompleteFragment.TRANSFERRED_PHONE_NUMBER, extraInfo.get(MAP_TRANSFERRED_PHONE_NUMBER).toString());
-
-                newFragment = new CallTransferCompleteFragment();
-                newFragment.setArguments(callTransferCompleteFragment);
-                break;
-
-            case TAG_CALL_CONNECTED_FRAGMENT:
-                newFragment = new CallConnectedFragment();
-                break;
-        }
-
-        if (newFragment != null) {
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.addToBackStack(null);
-
-            transaction.replace(R.id.fragment_container, newFragment, tag).commitAllowingStateLoss();
         }
     }
 
     public void answer() {
         mLogger.d("answer");
         getMediaManager().stopIncomingCallRinger();
-
-        View callButtonsContainer = findViewById(R.id.call_buttons_container);
-        if (callButtonsContainer.getVisibility() == View.INVISIBLE) {
-            callButtonsContainer.setVisibility(View.VISIBLE);
-        }
 
         if (MicrophonePermission.hasPermission(this)) {
             if (mSipServiceConnection.isAvailable()) {
@@ -837,17 +766,15 @@ public class CallActivity extends AbstractCallActivity
         );
         mSipServiceConnection.get().makeCall(sipAddressUri, "", numberToCall);
 
-        toggleVisibilityCallInfo(true);
         findViewById(R.id.button_transfer).setVisibility(View.GONE);
 
         mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
         updateCallButton(R.id.button_onhold, false);
-        updateCallButton(R.id.button_keypad, false);
-        updateCallButton(R.id.button_microphone, false);
+        updateCallButton(R.id.button_dialpad, false);
+        updateCallButton(R.id.button_mute, false);
 
         mCurrentCallId = mSipServiceConnection.get().getCurrentCall().getIdentifier();
 
-        mStateView.setText(R.string.title_state_calling);
 
         mCallerIdToDisplay = mSipServiceConnection.get().getCurrentCall().getCallerId();
         mPhoneNumberToDisplay = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
@@ -899,23 +826,6 @@ public class CallActivity extends AbstractCallActivity
         mCallIsTransferred = true;
     }
 
-    private void toggleVisibilityCallInfo(Boolean visible) {
-        findViewById(R.id.call_info).setVisibility(visible ? View.VISIBLE : View.GONE);
-        findViewById(R.id.call_buttons_container).setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void bluetoothDeviceConnected(boolean connected) {
-        super.bluetoothDeviceConnected(connected);
-        updateCallButton(R.id.button_bluetooth, mBluetoothDeviceConnected);
-    }
-
-    @Override
-    public void bluetoothAudioAvailable(boolean available) {
-        super.bluetoothAudioAvailable(available);
-        updateCallButton(R.id.button_bluetooth, mBluetoothDeviceConnected);
-    }
-
     @Override
     public void audioLost(boolean lost) {
         super.audioLost(lost);
@@ -945,7 +855,7 @@ public class CallActivity extends AbstractCallActivity
                 if (mOnTransfer) {
                     onCallStatusUpdate(status);
                     if (!mSipServiceConnection.get().getFirstCall().getIsCallConnected()) {
-                        swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
+                        //TODO When redesigning dialpad
                     }
                 }
                 return;
@@ -965,6 +875,7 @@ public class CallActivity extends AbstractCallActivity
     }
 
     @Override
+    @OnClick(R.id.button_hangup)
     protected void onDeclineButtonClicked() {
         if (mConnected) {
             mLogger.i("Hangup the call");
