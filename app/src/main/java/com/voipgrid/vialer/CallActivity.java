@@ -31,6 +31,7 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.format.DateUtils;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,8 +69,14 @@ public class CallActivity extends AbstractCallActivity
         MediaManager.AudioChangedInterface {
 
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
+    @BindView(R.id.incoming_caller_subtitle) TextView mNumber;
     @BindView(R.id.button_mute) ImageView mMuteButton;
+    @BindView(R.id.button_dialpad) ImageView mDialpadButton;
+    @BindView(R.id.button_speaker) ImageView mSpeakerButton;
+    @BindView(R.id.button_transfer) ImageView mTransferButton;
     @BindView(R.id.button_onhold) ImageView mOnHoldButton;
+    @BindView(R.id.button_hangup) ImageButton mHangupButton;
+
 
     @Inject AnalyticsHelper mAnalyticsHelper;
 
@@ -160,7 +167,7 @@ public class CallActivity extends AbstractCallActivity
                     mOnHold = true;
                     updateCallButton(R.id.button_onhold, true);
                     onCallStatusUpdate(CALL_PUT_ON_HOLD_ACTION);
-                } else if (!findViewById(R.id.button_onhold).isActivated()) {
+                } else if (!mOnHoldButton.isActivated()) {
                     mLogger.i("Call is on hold but the button is not active. Update the button");
                     updateCallButton(R.id.button_onhold, true);
                 }
@@ -176,17 +183,16 @@ public class CallActivity extends AbstractCallActivity
 
     private void displayCallInfo() {
         TextView nameTextView = findViewById(R.id.name_text_view);
-        TextView numberTextView = findViewById(R.id.incoming_caller_subtitle);
 
-        if(nameTextView == null || numberTextView == null){
+        if(nameTextView == null || mNumber == null){
             return;
         }
         if (mCallerIdToDisplay != null && !mCallerIdToDisplay.isEmpty()) {
             nameTextView.setText(mCallerIdToDisplay);
-            numberTextView.setText(mPhoneNumberToDisplay);
+            mNumber.setText(mPhoneNumberToDisplay);
         } else {
             nameTextView.setText(mPhoneNumberToDisplay);
-            numberTextView.setText("");
+            mNumber.setText("");
         }
     }
 
@@ -283,7 +289,7 @@ public class CallActivity extends AbstractCallActivity
 
                         mConnected = true;
 
-                        findViewById(R.id.button_transfer).setVisibility(View.VISIBLE);
+                        mTransferButton.setVisibility(View.VISIBLE);
                         //TODO When redesigning dialpad
 
                         newStatus = mSipServiceConnection.get().getCurrentCall().getCurrentCallState();
@@ -351,8 +357,8 @@ public class CallActivity extends AbstractCallActivity
                 break;
 
             case CALL_RINGING_OUT_MESSAGE:
-                findViewById(R.id.button_speaker).setEnabled(false);
-                findViewById(R.id.button_mute).setEnabled(false);
+                mSpeakerButton.setEnabled(false);
+                mMuteButton.setEnabled(false);
                 break;
 
             case CALL_RINGING_IN_MESSAGE:
@@ -369,7 +375,6 @@ public class CallActivity extends AbstractCallActivity
     @Override
     public void onBackPressed() {
         mLogger.d("onBackPressed");
-        View hangupButton = findViewById(R.id.button_hangup);
         View declineButton = findViewById(R.id.button_decline);
         View lockRingView = findViewById(R.id.lock_ring);
 
@@ -402,7 +407,7 @@ public class CallActivity extends AbstractCallActivity
                     updateCallButton(R.id.button_transfer, true);
                 }
             }
-        } else if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
+        } else if (mHangupButton != null && mHangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
             // In call dialog.
             hangup(R.id.button_hangup);
         } else if (declineButton != null && declineButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
@@ -766,7 +771,7 @@ public class CallActivity extends AbstractCallActivity
         );
         mSipServiceConnection.get().makeCall(sipAddressUri, "", numberToCall);
 
-        findViewById(R.id.button_transfer).setVisibility(View.GONE);
+        mTransferButton.setVisibility(View.GONE);
 
         mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
         updateCallButton(R.id.button_onhold, false);
