@@ -1,18 +1,27 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                xmlns:lockring="http://schemas.android.com/apk/res-auto"
-                android:background="@drawable/background_gradient"
-                tools:context="com.voipgrid.vialer.CallActivity">
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:lockring="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_gradient">
 
-
-    <LinearLayout android:layout_width="match_parent"
+    <LinearLayout android:id="@+id/linearLayout"
+                  android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:layout_alignParentStart="true"
                   android:layout_alignParentTop="true"
-                  android:orientation="vertical" android:layout_alignParentLeft="true">
+                  android:layout_marginBottom="8dp"
+                  android:layout_marginEnd="8dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginRight="8dp"
+                  android:layout_marginStart="8dp"
+                  android:orientation="vertical"
+                  app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
+                  app:layout_constraintEnd_toEndOf="parent"
+                  app:layout_constraintStart_toStartOf="parent"
+                  app:layout_constraintTop_toTopOf="parent"
+                  app:layout_constraintVertical_bias="0.22000003">
 
         <TextView style="@style/CallTextViewStyle"
                   android:layout_width="match_parent"
@@ -20,8 +29,7 @@
                   android:layout_marginBottom="5dp"
                   android:gravity="center"
                   android:text="@string/callnotification_incoming_call"
-                  android:textSize="20sp"
-        android:id="@+id/call_state"/>
+                  android:textSize="20sp"/>
         <TextView android:id="@+id/incoming_caller_title"
                   style="@style/CallTextViewStyle"
                   android:layout_width="match_parent"
@@ -29,32 +37,40 @@
                   android:layout_marginBottom="0dp"
                   android:gravity="center"
                   android:textSize="40sp"/>
-
         <TextView android:id="@+id/incoming_caller_subtitle"
                   style="@style/CallTextViewStyle"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:gravity="center"
-                  android:text="+31 50 446 7828"
                   android:textSize="20sp"/>
 
     </LinearLayout>
 
-    <LinearLayout android:layout_width="match_parent"
+    <LinearLayout android:id="@+id/linearLayout2"
+                  android:layout_width="match_parent"
                   android:layout_height="wrap_content"
+                  android:layout_alignParentLeft="true"
                   android:layout_alignParentStart="true"
                   android:layout_centerVertical="true"
+                  android:layout_marginBottom="8dp"
+                  android:layout_marginEnd="8dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginRight="8dp"
+                  android:layout_marginStart="8dp"
+                  android:layout_marginTop="8dp"
                   android:gravity="center"
                   android:orientation="vertical"
-                  android:layout_alignParentLeft="true">
+                  app:layout_constraintBottom_toBottomOf="parent"
+                  app:layout_constraintEnd_toEndOf="parent"
+                  app:layout_constraintStart_toStartOf="parent"
+                  app:layout_constraintTop_toTopOf="parent">
 
-            <FrameLayout android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
-                         android:background="@drawable/contact_picture_circle"
-                         android:foregroundGravity="center"
-                         android:padding="40dp"
-            >
-
+        <FrameLayout android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:background="@drawable/contact_picture_circle"
+                     android:foregroundGravity="center"
+                     android:padding="40dp"
+        >
 
             <de.hdodenhof.circleimageview.CircleImageView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -70,36 +86,25 @@
 
     </LinearLayout>
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:id="@+id/establishing_text_container"
-                  android:layout_alignParentBottom="true"
-                  android:layout_alignParentLeft="true"
-                  android:layout_alignParentStart="true"
-                  android:layout_marginBottom="40dp"
-                  android:gravity="center"
-                  android:orientation="horizontal"
-                  android:visibility="gone">
-        <TextView style="@style/CallTextViewStyle"
+    <LinearLayout android:id="@+id/call_buttons"
                   android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginBottom="5dp"
-                  android:gravity="center"
-                  android:id="@+id/establishing_text"
-                  android:textSize="20sp"/>
-    </LinearLayout>
-
-
-    <LinearLayout android:layout_width="match_parent"
                   android:layout_height="127dp"
                   android:layout_alignParentBottom="true"
                   android:layout_alignParentLeft="true"
                   android:layout_alignParentStart="true"
-                  android:layout_marginBottom="40dp"
+                  android:layout_marginBottom="8dp"
+                  android:layout_marginEnd="8dp"
+                  android:layout_marginLeft="8dp" android:layout_marginRight="8dp"
+                  android:layout_marginStart="8dp"
+                  android:layout_marginTop="8dp"
                   android:gravity="center"
                   android:orientation="horizontal"
-                  android:id="@+id/call_buttons"
-                  android:visibility="gone">
+                  android:visibility="visible"
+                  app:layout_constraintBottom_toBottomOf="parent"
+                  app:layout_constraintEnd_toEndOf="parent"
+                  app:layout_constraintStart_toStartOf="parent"
+                  app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+                  app:layout_constraintVertical_bias="0.7">
 
         <LinearLayout android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
@@ -114,14 +119,14 @@
                 android:background="@drawable/call_decline_button"
                 android:backgroundTint="@color/call_fab_hangup_color"
                 android:padding="15dp"
-                android:src="@drawable/ic_call_end_white"/>
-
+                android:src="@drawable/ic_call_end_white"
+            />
             <TextView style="@style/CallTextViewStyle"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_marginTop="5dp"
                       android:gravity="center"
-                      android:text="Ignore"
+                      android:text="@string/incoming_call_decline"
                       android:textSize="18sp"/>
         </LinearLayout>
 
@@ -138,48 +143,56 @@
                 android:background="@drawable/call_pickup_button"
                 android:backgroundTint="@color/call_fab_pickup_color"
                 android:padding="15dp"
-                android:src="@drawable/ic_call_white"/>
-
+                android:src="@drawable/ic_call_white"
+            />
             <TextView style="@style/CallTextViewStyle"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_marginTop="5dp"
                       android:gravity="center"
-                      android:text="Answer"
+                      android:text="@string/incoming_call_answer"
                       android:textSize="18sp"/>
         </LinearLayout>
 
-
     </LinearLayout>
 
-    <LinearLayout android:layout_width="match_parent"
+    <LinearLayout android:id="@+id/lock_ring_container"
+                  android:layout_width="match_parent"
                   android:layout_height="127dp"
                   android:layout_alignParentBottom="true"
                   android:layout_alignParentLeft="true"
                   android:layout_alignParentStart="true"
                   android:layout_marginBottom="40dp"
+                  android:layout_marginEnd="8dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginRight="8dp"
+                  android:layout_marginStart="8dp"
                   android:gravity="center"
                   android:orientation="horizontal"
-                  android:id="@+id/lock_ring_container"
-                  android:visibility="visible">
-                <com.wearespindle.spindlelockring.library.LockRing
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:id="@+id/lock_ring"
-                    android:focusable="true"
-                    android:gravity="center"
-                    lockring:glowRadius="@dimen/lock_ring_glow_radius"
-                    lockring:handleDrawable="@drawable/ic_lock_ring_handle"
-                    lockring:innerRadius="@dimen/lock_ring_inner_radius"
-                    lockring:outerRadius="@dimen/lock_ring_target_placement_radius"
-                    lockring:outerRingDrawable="@drawable/ic_lock_ring_outer_ring"
-                    lockring:pointDrawable="@drawable/ic_lock_screen_glow_dot"
-                    lockring:snapMargin="@dimen/lock_ring_snap_margin"
-                    lockring:targetDescriptions="@array/lock_ring_descriptions"
-                    lockring:targetDrawables="@array/lock_ring_drawables"
-                    lockring:directionDescriptions="@array/lock_ring_direction_descriptions"
-                />
+                  android:visibility="invisible"
+                  app:layout_constraintBottom_toBottomOf="parent"
+                  app:layout_constraintEnd_toEndOf="parent"
+                  app:layout_constraintStart_toStartOf="parent"
+                  app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+                  app:layout_constraintVertical_bias="0.7">
+        <com.wearespindle.spindlelockring.library.LockRing
+            android:id="@+id/lock_ring"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:focusable="true"
+            android:gravity="center"
+            lockring:directionDescriptions="@array/lock_ring_direction_descriptions"
+            lockring:glowRadius="@dimen/lock_ring_glow_radius"
+            lockring:handleDrawable="@drawable/ic_lock_ring_handle"
+            lockring:innerRadius="@dimen/lock_ring_inner_radius"
+            lockring:outerRadius="@dimen/lock_ring_target_placement_radius"
+            lockring:outerRingDrawable="@drawable/ic_lock_ring_outer_ring"
+            lockring:pointDrawable="@drawable/ic_lock_screen_glow_dot"
+            lockring:snapMargin="@dimen/lock_ring_snap_margin"
+            lockring:targetDescriptions="@array/lock_ring_descriptions"
+            lockring:targetDrawables="@array/lock_ring_drawables"
+        />
     </LinearLayout>
 
     <LinearLayout
@@ -191,4 +204,5 @@
         android:visibility="gone"
     />
 
-</RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>

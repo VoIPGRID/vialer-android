@@ -148,6 +148,8 @@ dependencies {
     implementation 'com.github.tamir7.contacts:contacts:1.1.7'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
 
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+
     // Required -- JUnit 4 framework.
     testImplementation "junit:junit:${jUnitVersion}"
 
