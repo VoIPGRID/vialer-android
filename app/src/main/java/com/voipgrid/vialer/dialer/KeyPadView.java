@@ -2,7 +2,9 @@ package com.voipgrid.vialer.dialer;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,18 +54,36 @@ public class KeyPadView extends LinearLayout
                 Context.LAYOUT_INFLATER_SERVICE
         );
         inflater.inflate(R.layout.view_key_pad, this);
-        ViewGroup view = (ViewGroup) findViewById(R.id.grid_layout);
 
-        for(int i = 0, size = view.getChildCount(); i < size; i++) {
-            View child = view.getChildAt(i);
-            if(child instanceof DialpadButton) {
-                String digit = ((DialpadButton) child).getDigit();
-                if (digit.equals("0")) {
-                    child.setOnLongClickListener(this);
-                }
-                child.setOnClickListener(this);
+        setUpButtonListeners(findViewById(R.id.dialpad_container));
+    }
+
+    /**
+     * Recursively set up button listeners for all child DialpadButtons.
+     *
+     * @param container
+     */
+    private void setUpButtonListeners(ViewGroup container) {
+        for (int i = 0; i < container.getChildCount(); i++) {
+
+            View child = container.getChildAt(i);
+
+            if (!(child instanceof ViewGroup)) {
+                continue;
             }
+
+            if (child instanceof DialpadButton) {
+                DialpadButton dialpadButton = (DialpadButton) child;
+                if (dialpadButton.getDigit().equals("0")) {
+                    dialpadButton.setOnLongClickListener(this);
+                }
+                dialpadButton.setOnClickListener(this);
+                continue;
+            }
+
+            setUpButtonListeners((ViewGroup) child);
         }
+
     }
 
     public void setOnKeyPadClickListener(OnKeyPadClickListener listener) {

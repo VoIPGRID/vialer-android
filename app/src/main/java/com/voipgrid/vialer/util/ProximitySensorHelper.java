@@ -102,7 +102,9 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
             // Set screen brightness to 0.
             params.screenBrightness = 0;
 
-            mLockView.setVisibility(View.VISIBLE);
+            if (mLockView != null) {
+                mLockView.setVisibility(View.VISIBLE);
+            }
 
             // Disable the touch
             params.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;

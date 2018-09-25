@@ -5,6 +5,7 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.calling.PendingCallActivity;
+import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.sip.SipService;
 
 import javax.inject.Singleton;
@@ -25,4 +26,6 @@ public interface VialerComponent {
     void inject(SipService sipService);
 
     void inject(PendingCallActivity pendingCallActivity);
+
+    void inject(DialerActivity dialerActivity);
 }

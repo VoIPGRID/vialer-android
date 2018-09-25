@@ -36,7 +36,7 @@
     <color name="call_fab_hangup_color">#DB4437</color>
     <color name="call_fab_pickup_color">@color/dialpad_fab_call_color</color>
 
-    <color name="dialpad_input_background_color">#FFFFFF</color>
+    <color name="dialpad_input_background_color">#ffa3a3a3</color>
 
     <color name="contact_name_text_color">#4D4D4D</color>
     <color name="contact_information_text_color">#8a000000</color>

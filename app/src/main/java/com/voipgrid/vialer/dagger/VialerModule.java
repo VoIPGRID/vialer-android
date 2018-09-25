@@ -2,7 +2,9 @@ package com.voipgrid.vialer.dagger;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
@@ -16,6 +18,7 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.calling.CallNotifications;
 import com.voipgrid.vialer.contacts.Contacts;
+import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -127,5 +130,15 @@ public class VialerModule {
     @Provides
     SipConfig provideSipConfig(Preferences preferences, IpSwitchMonitor ipSwitchMonitor, BroadcastReceiverManager broadcastReceiverManager) {
         return new SipConfig(preferences, ipSwitchMonitor, broadcastReceiverManager);
+    }
+
+    @Provides
+    SharedPreferences provideSharedPreferences(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    @Provides
+    ReachabilityReceiver provideReachabilityReceiver(Context context) {
+        return new ReachabilityReceiver(context);
     }
 }

@@ -49,6 +49,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.call.CallKeyPadFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
+import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
@@ -709,13 +710,9 @@ public class CallActivity extends AbstractCallActivity
                     mOnTransfer = false;
                 }
 
-                Map<String, String> map = new HashMap<>();
-                map.put(MAP_ORIGINAL_CALLER_ID, mSipServiceConnection.get().getFirstCall().getCallerId());
-                map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipServiceConnection.get().getFirstCall().getPhoneNumber());
-                map.put(MAP_SECOND_CALL_IS_CONNECTED, "" + false);
-
-                mCallDurationView.setVisibility(View.GONE);
-                updateCallButton(viewId, true);
+                Intent intent = new Intent(this, DialerActivity.class);
+                intent.putExtra(DialerActivity.EXTRA_RETURN_AS_RESULT, true);
+                startActivityForResult(intent, DialerActivity.RESULT_DIALED_NUMBER);
 
                 break;
 
@@ -961,5 +958,11 @@ public class CallActivity extends AbstractCallActivity
         refreshAudioSourceButton();
 
         return false;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callTransferMakeSecondCall(data.getStringExtra("DIALED_NUMBER"));
     }
 }
