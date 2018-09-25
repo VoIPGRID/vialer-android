@@ -30,12 +30,17 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,9 +85,6 @@ public class CallActivity extends AbstractCallActivity
     @BindView(R.id.button_transfer) ImageView mTransferButton;
     @BindView(R.id.button_onhold) ImageView mOnHoldButton;
     @BindView(R.id.button_hangup) ImageButton mHangupButton;
-    @BindView(R.id.state_text_view) TextView mStateView;
-    @BindView(R.id.button_speaker) FloatingActionButton mSpeakerButton;
-
 
     @Inject AnalyticsHelper mAnalyticsHelper;
 
@@ -591,8 +593,8 @@ public class CallActivity extends AbstractCallActivity
 
     private void onCallStatesUpdateButtons(String callState) {
         Integer speakerButtonId = R.id.button_speaker;
-        Integer microphoneButtonId = R.id.button_microphone;
-        Integer keypadButtonId = R.id.button_keypad;
+        Integer microphoneButtonId = R.id.button_mute;
+        Integer keypadButtonId = R.id.button_dialpad;
         Integer onHoldButtonId = R.id.button_onhold;
         Integer transferButtonId = R.id.button_transfer;
 
@@ -673,7 +675,7 @@ public class CallActivity extends AbstractCallActivity
         }
 
         switch (viewId) {
-            case R.id.button_microphone:
+            case R.id.button_mute:
                 if (mOnTransfer) {
                     if (mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
                         toggleMute();
@@ -706,8 +708,6 @@ public class CallActivity extends AbstractCallActivity
                 } else {
                     mOnTransfer = false;
                 }
-
-                toggleVisibilityCallInfo(false);
 
                 Map<String, String> map = new HashMap<>();
                 map.put(MAP_ORIGINAL_CALLER_ID, mSipServiceConnection.get().getFirstCall().getCallerId());
@@ -912,18 +912,18 @@ public class CallActivity extends AbstractCallActivity
     }
 
     private void refreshAudioSourceButton() {
-        if (mBluetoothDeviceConnected) {
-            if (getMediaManager().isCallOnSpeaker()) {
-                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_speaker);
-            } else if (mBluetoothAudioActive) {
-                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_bluetooth);
-            } else {
-                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_phone);
-            }
-        } else {
-            mSpeakerButton.setImageResource(R.drawable.ic_volume_on_enabled);
-            mSpeakerButton.setAlpha(getMediaManager().isCallOnSpeaker() ? 1.0f : 0.5f);
-        }
+//        if (mBluetoothDeviceConnected) {
+//            if (getMediaManager().isCallOnSpeaker()) {
+//                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_speaker);
+//            } else if (mBluetoothAudioActive) {
+//                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_bluetooth);
+//            } else {
+//                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_phone);
+//            }
+//        } else {
+//            mSpeakerButton.setImageResource(R.drawable.ic_volume_on_enabled);
+//            mSpeakerButton.setAlpha(getMediaManager().isCallOnSpeaker() ? 1.0f : 0.5f);
+//        }
     }
 
     @OnClick(R.id.button_speaker)

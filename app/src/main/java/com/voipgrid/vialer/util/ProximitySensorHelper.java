@@ -86,7 +86,9 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
         WindowManager.LayoutParams params = activity.getWindow().getAttributes();
 
         if (on) {
-            mLockView.setVisibility(View.GONE);
+            if (mLockView != null) {
+                mLockView.setVisibility(View.GONE);
+            }
 
             // Reset screen brightness.
             params.screenBrightness = -1;
