@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.support.constraint.Group;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -87,6 +88,7 @@ public class CallActivity extends AbstractCallActivity
     @BindView(R.id.button_transfer) ImageView mTransferButton;
     @BindView(R.id.button_onhold) ImageView mOnHoldButton;
     @BindView(R.id.button_hangup) ImageButton mHangupButton;
+    @BindView(R.id.call_actions) Group mCallActions;
 
     @Inject AnalyticsHelper mAnalyticsHelper;
 
@@ -971,6 +973,11 @@ public class CallActivity extends AbstractCallActivity
         refreshAudioSourceButton();
 
         return false;
+    }
+
+    @OnClick(R.id.button_dialpad)
+    void onDialpadButtonClick(View view) {
+        Log.e("TEST123", "CLICKITY CLACK");
     }
 
     @Override
