@@ -83,6 +83,7 @@ public class CallActivity extends AbstractCallActivity
     @BindView(R.id.button_mute) ImageView mMuteButton;
     @BindView(R.id.button_dialpad) ImageView mDialpadButton;
     @BindView(R.id.button_speaker) ImageView mSpeakerButton;
+    @BindView(R.id.speaker_label) TextView mSpeakerLabel;
     @BindView(R.id.button_transfer) ImageView mTransferButton;
     @BindView(R.id.button_onhold) ImageView mOnHoldButton;
     @BindView(R.id.button_hangup) ImageButton mHangupButton;
@@ -909,18 +910,30 @@ public class CallActivity extends AbstractCallActivity
     }
 
     private void refreshAudioSourceButton() {
-//        if (mBluetoothDeviceConnected) {
-//            if (getMediaManager().isCallOnSpeaker()) {
-//                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_speaker);
-//            } else if (mBluetoothAudioActive) {
-//                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_bluetooth);
-//            } else {
-//                mSpeakerButton.setImageResource(R.drawable.audio_source_dropdown_phone);
-//            }
-//        } else {
-//            mSpeakerButton.setImageResource(R.drawable.ic_volume_on_enabled);
-//            mSpeakerButton.setAlpha(getMediaManager().isCallOnSpeaker() ? 1.0f : 0.5f);
-//        }
+        if (mSpeakerButton == null) {
+            return;
+        }
+
+        int image = R.drawable.ic_volume_on_enabled;
+        int text = R.string.speaker_label;
+
+        if (mBluetoothDeviceConnected) {
+            if (getMediaManager().isCallOnSpeaker()) {
+                image = R.drawable.audio_source_dropdown_speaker;
+                text = R.string.speaker_label;
+            } else if (mBluetoothAudioActive) {
+                image = R.drawable.audio_source_dropdown_bluetooth;
+                text = R.string.audio_source_option_bluetooth;
+            } else {
+                image = R.drawable.audio_source_dropdown_phone;
+                text = R.string.audio_source_option_phone;
+            }
+        } else {
+            mSpeakerButton.setAlpha(getMediaManager().isCallOnSpeaker() ? 1.0f : 0.5f);
+        }
+
+        mSpeakerLabel.setText(getString(text).toLowerCase());
+        mSpeakerButton.setImageResource(image);
     }
 
     @OnClick(R.id.button_speaker)

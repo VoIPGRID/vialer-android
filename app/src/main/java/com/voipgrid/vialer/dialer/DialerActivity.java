@@ -357,7 +357,6 @@ public class DialerActivity extends LoginRequiredActivity implements
      */
     public void onCallNumber(String number, String contactName) {
         if (isForTransfer()) {
-            Log.e("TEST123", "click click");
             Intent intent = new Intent();
             intent.putExtra("DIALED_NUMBER", number);
             setResult(RESULT_DIALED_NUMBER, intent);
