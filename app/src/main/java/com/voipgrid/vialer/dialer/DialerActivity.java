@@ -184,6 +184,15 @@ public class DialerActivity extends LoginRequiredActivity implements
         }
     }
 
+    @Override
+    public void digitWasPressed(String digit) {
+
+    }
+
+    @Override
+    public void exitButtonWasPressed() {
+    }
+
     /**
      * Function to clear the contact list in the dialer.
      */

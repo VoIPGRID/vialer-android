@@ -297,5 +297,15 @@
         android:layout_height="wrap_content"
         app:constraint_referenced_ids="linearLayout_transfer,linearLayout_dialpad,linearLayout_speaker,linearLayout_onhold,linearLayout_mute,button_hangup" />
 
+    <dialer.Dialer
+        android:id="@+id/dialer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/incoming_caller_title"
+        app:layout_constraintVertical_bias="1.0"
+        android:visibility="gone"
+        app:show_exit_button="true" />
 
 </android.support.constraint.ConstraintLayout>

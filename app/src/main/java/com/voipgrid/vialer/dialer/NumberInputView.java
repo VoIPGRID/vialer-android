@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ public class NumberInputView extends RelativeLayout implements
     private EditText mNumberInputEditText;
     private ImageButton mRemoveButton;
     private OnInputChangedListener mListener;
+    private ImageButton mExitButton;
 
     public NumberInputView(Context context) {
         super(context);
@@ -57,6 +59,11 @@ public class NumberInputView extends RelativeLayout implements
         mRemoveButton.setOnLongClickListener(this);
 
         mNumberInputEditText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.dialpad_number_input_text_size));
+        mExitButton = findViewById(R.id.exit_button);
+
+        mExitButton.setOnClickListener(v -> {
+            mListener.exitButtonWasPressed();
+        });
     }
 
     public void setOnInputChangedListener(OnInputChangedListener listener) {
@@ -215,12 +222,20 @@ public class NumberInputView extends RelativeLayout implements
         return mNumberInputEditText.getText().toString();
     }
 
+    public void enableRemoveButton() {
+        mRemoveButton.setVisibility(VISIBLE);
+    }
+
     public interface OnInputChangedListener {
         void onInputChanged(String number);
+        void exitButtonWasPressed();
     }
 
     public boolean isEmpty() {
         return mNumberInputEditText.length() == 0;
     }
 
+    public void enableExitButton() {
+        mExitButton.setVisibility(View.VISIBLE);
+    }
 }
