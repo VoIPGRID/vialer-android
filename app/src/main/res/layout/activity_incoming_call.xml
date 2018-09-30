@@ -141,7 +141,7 @@
                 android:background="@drawable/call_decline_button"
                 android:backgroundTint="@color/call_fab_hangup_color"
                 android:padding="15dp"
-                android:src="@drawable/ic_call_end_white"
+                app:srcCompat="@drawable/ic_call_end_white"
             />
             <TextView style="@style/CallTextViewStyle"
                       android:layout_width="wrap_content"
@@ -165,7 +165,7 @@
                 android:background="@drawable/call_pickup_button"
                 android:backgroundTint="@color/call_fab_pickup_color"
                 android:padding="15dp"
-                android:src="@drawable/ic_call_white"
+                app:srcCompat="@drawable/ic_call_white"
             />
             <TextView style="@style/CallTextViewStyle"
                       android:layout_width="wrap_content"

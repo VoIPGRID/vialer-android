@@ -1,12 +1,19 @@
 package dialer;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.voipgrid.vialer.R;
@@ -19,13 +26,16 @@ import butterknife.Unbinder;
 
 public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickListener, NumberInputView.OnInputChangedListener {
 
-    private final boolean showRemoveButton;
     private Listener listener;
 
     @BindView(R.id.number_input_edit_text) NumberInputView mNumberInput;
     @BindView(R.id.key_pad_view) KeyPadView mKeypad;
+    @BindView(R.id.button_call) ImageButton mCallButton;
+
     private Unbinder unbinder;
-    private boolean showExitButton;
+    private final boolean showExitButton;
+    private final boolean showCallButton;
+    private final boolean showRemoveButton;
 
     public Dialer(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -33,6 +43,7 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.Dialer);
         showExitButton = a.getBoolean(R.styleable.Dialer_show_exit_button, false);
         showRemoveButton = a.getBoolean(R.styleable.Dialer_show_remove_button, false);
+        showCallButton = a.getBoolean(R.styleable.Dialer_show_call_button, true);
     }
 
     @Override
@@ -46,6 +57,9 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
         }
         if (showRemoveButton) {
             mNumberInput.enableRemoveButton();
+        }
+        if (!showCallButton) {
+            mCallButton.setVisibility(INVISIBLE);
         }
     }
 

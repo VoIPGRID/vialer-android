@@ -26,6 +26,7 @@ public class NumberInputView extends RelativeLayout implements
     private ImageButton mRemoveButton;
     private OnInputChangedListener mListener;
     private ImageButton mExitButton;
+    private boolean showRemoveButton = true;
 
     public NumberInputView(Context context) {
         super(context);
@@ -48,13 +49,13 @@ public class NumberInputView extends RelativeLayout implements
         inflater.inflate(R.layout.view_number_input, this);
 
         // Find the number input field and add a TextChangedListener to handle text changes.
-        mNumberInputEditText = (EditText) findViewById(R.id.edit_text);
+        mNumberInputEditText = findViewById(R.id.edit_text);
         mNumberInputEditText.addTextChangedListener(this);
         mNumberInputEditText.setOnClickListener(this);
         mNumberInputEditText.setOnLongClickListener(this);
 
         // Find the remove button and add an OnClickListener.
-        mRemoveButton = (ImageButton) findViewById(R.id.remove_button);
+        mRemoveButton = findViewById(R.id.remove_button);
         mRemoveButton.setOnClickListener(this);
         mRemoveButton.setOnLongClickListener(this);
 
@@ -112,9 +113,6 @@ public class NumberInputView extends RelativeLayout implements
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         if (s.length() >= 0 && mListener != null) {
             mListener.onInputChanged(s.toString());
-            mRemoveButton.setVisibility(View.VISIBLE);
-        } else {
-            mRemoveButton.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -223,6 +221,7 @@ public class NumberInputView extends RelativeLayout implements
     }
 
     public void enableRemoveButton() {
+        showRemoveButton = true;
         mRemoveButton.setVisibility(VISIBLE);
     }
 

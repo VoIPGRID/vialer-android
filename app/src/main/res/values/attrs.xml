@@ -15,5 +15,6 @@
     <declare-styleable name="Dialer">
         <attr name="show_exit_button" format="boolean" />
         <attr name="show_remove_button" format="boolean" />
+        <attr name="show_call_button" format="boolean" />
     </declare-styleable>
 </resources>
