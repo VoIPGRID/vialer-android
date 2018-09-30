@@ -330,7 +330,6 @@ public class CallActivity extends AbstractCallActivity
                         mOnTransfer = false;
                         updateCallButton(R.id.button_transfer, true);
                         updateCallButton(R.id.button_onhold, true);
-                        updateCallButton(R.id.button_dialpad, true);
                         updateCallButton(R.id.button_mute, true);
 
                         onCallStatusUpdate(mSipServiceConnection.get().getCurrentCall().getCurrentCallState());
@@ -344,7 +343,6 @@ public class CallActivity extends AbstractCallActivity
 
                             updateCallButton(R.id.button_transfer, false);
                             updateCallButton(R.id.button_onhold, false);
-                            updateCallButton(R.id.button_dialpad, false);
                             updateCallButton(R.id.button_mute, false);
                             updateCallButton(R.id.button_hangup, false);
 
@@ -543,14 +541,6 @@ public class CallActivity extends AbstractCallActivity
             case R.id.button_mute:
                 muteButton = findViewById(viewId);
                 muteButton.setActivated(mMute);
-                break;
-
-            case R.id.button_dialpad:
-                dialpadButton = findViewById(viewId);
-                dialpadButton.setActivated(mKeyPadVisible);
-                dialpadButton.setAlpha(
-                        buttonEnabled ? mKeyPadVisible ? 1.0f : 0.5f : 1.0f
-                );
                 break;
 
             case R.id.button_onhold:
