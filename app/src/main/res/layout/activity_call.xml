@@ -297,7 +297,7 @@
         android:layout_height="wrap_content"
         app:constraint_referenced_ids="linearLayout_transfer,linearLayout_dialpad,linearLayout_speaker,linearLayout_onhold,linearLayout_mute,button_hangup" />
 
-    <dialer.Dialer
+    <com.voipgrid.vialer.calling.Dialer
         android:id="@+id/dialer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
