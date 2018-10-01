@@ -14,6 +14,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -349,6 +350,7 @@ public class DialerActivity extends LoginRequiredActivity implements
      */
     public void onCallNumber(String number, String contactName) {
         if (isForTransfer()) {
+            Log.e("TEST123", "this is for transfer...");
             Intent intent = new Intent();
             intent.putExtra("DIALED_NUMBER", number);
             setResult(RESULT_DIALED_NUMBER, intent);
@@ -362,6 +364,9 @@ public class DialerActivity extends LoginRequiredActivity implements
         } else {
             mDialHelper.callNumber(phoneNumberToCall, contactName);
             mSharedPreferences.edit().putString(LAST_DIALED, number).apply();
+            Intent intent = new Intent(this, PendingCallActivity.class);
+            intent.putExtra(PendingCallActivity.EXTRA_DIALLED_NUMBER, phoneNumberToCall);
+            startActivity(intent);
         }
     }
 
@@ -379,9 +384,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         String phoneNumber = mDialer.getNumber();
         if (phoneNumber != null && !phoneNumber.isEmpty()) {
             onCallNumber(PhoneNumberUtils.format(phoneNumber), null);
-            Intent intent = new Intent(this, PendingCallActivity.class);
-            intent.putExtra(PendingCallActivity.EXTRA_DIALLED_NUMBER, phoneNumber);
-            startActivity(intent);
         } else {
             // Set last dialed number on call button clicked when number is empty.
             String last_dialed = mSharedPreferences.getString(LAST_DIALED, "");
