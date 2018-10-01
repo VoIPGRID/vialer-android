@@ -163,6 +163,8 @@ dependencies {
     androidTestImplementation "com.android.support.test.espresso:espresso-core:${espressoVersion}"
     androidTestImplementation "com.android.support:support-annotations:${supportLibVersion}"
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    compile 'javax.inject:javax.inject:1@jar'
+
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

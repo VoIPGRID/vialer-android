@@ -9,22 +9,17 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -32,7 +27,6 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.calling.PendingCallActivity;
@@ -57,18 +51,17 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.Optional;
 import de.hdodenhof.circleimageview.CircleImageView;
+import com.voipgrid.vialer.calling.Dialer;
 
 /**
  * DialerActivity with a numpad view and functionality to perform a T9 contacts search
  */
 public class DialerActivity extends LoginRequiredActivity implements
         View.OnClickListener,
-        KeyPadView.OnKeyPadClickListener,
         AbsListView.OnScrollListener,
         AdapterView.OnItemClickListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>, Dialer.Listener {
     public static final String LAST_DIALED = "last_dialed";
 
     @Inject SharedPreferences mSharedPreferences;
@@ -89,11 +82,9 @@ public class DialerActivity extends LoginRequiredActivity implements
     @BindView(R.id.list_view) ListView mContactsListView;
     @BindView(R.id.t9helper) View mT9HelperFragment;
     @BindView(R.id.message) TextView mEmptyView;
-    @BindView(R.id.key_pad_container) ViewGroup mKeyPadViewContainer;
-    @BindView(R.id.number_input_edit_text) NumberInputView mNumberInputView;
     @BindView(R.id.button_call) ImageButton mFloatingActionButton;
 
-    @BindView(R.id.bottom) ViewGroup mBottom;
+    @BindView(R.id.bottom) Dialer mDialer;
     @BindView(R.id.top) ViewGroup mTop;
 
     public static final int RESULT_DIALED_NUMBER = 1;
@@ -108,9 +99,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         VialerApplication.get().component().inject(this);
 
         mDialHelper = DialHelper.fromActivity(this);
-
-        // This should be called before setupContactParts.
-        setupKeypad();
 
         Intent intent = getIntent();
         String type = intent.getType();
@@ -144,7 +132,7 @@ public class DialerActivity extends LoginRequiredActivity implements
                         ContactsContract.Data.DATA3}, null, null, null);
                 cursor.moveToFirst();
                 String number = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA3));
-                mNumberInputView.setNumber(number);
+                mDialer.setNumber(number);
                 cursor.close();
             }
         } else {
@@ -168,14 +156,6 @@ public class DialerActivity extends LoginRequiredActivity implements
     }
 
     /**
-     * Setup the keypad and add a empty onInputChanged listener.
-     */
-    private void setupKeypad() {
-        KeyPadView keyPadView = findViewById(R.id.key_pad_view);
-        keyPadView.setOnKeyPadClickListener(this);
-    }
-
-    /**
      * Setup the ContactsList, filter the list on the given number and add a onInputChanged
      * listener for the T9 contact search.
      */
@@ -183,16 +163,28 @@ public class DialerActivity extends LoginRequiredActivity implements
         // Setup the list view.
         setupContactsListView();
         // Replace the empty listener set in setupKeypad with the T9 search function.
-        mNumberInputView.setOnInputChangedListener(phoneNumber -> {
-            t9Query = phoneNumber;
-            // Input field is cleared so clear contact list.
-            if (phoneNumber.length() == 0) {
-                clearContactList();
-            } else {
-                // Load contacts matching t9Query.
-                getSupportLoaderManager().restartLoader(1, null, DialerActivity.this).forceLoad();
-            }
-        });
+        mDialer.setListener(this);
+    }
+
+    public void numberWasChanged(String phoneNumber) {
+        t9Query = phoneNumber;
+        // Input field is cleared so clear contact list.
+        if (phoneNumber.length() == 0) {
+            clearContactList();
+        } else {
+            // Load contacts matching t9Query.
+            getSupportLoaderManager().restartLoader(1, null, DialerActivity.this).forceLoad();
+        }
+    }
+
+    @Override
+    public void digitWasPressed(String digit) {
+
+    }
+
+    @Override
+    public void exitButtonWasPressed() {
+
     }
 
     /**
@@ -384,7 +376,7 @@ public class DialerActivity extends LoginRequiredActivity implements
 
     @OnClick(R.id.button_call)
     void onCallButtonClicked() {
-        String phoneNumber = mNumberInputView.getNumber();
+        String phoneNumber = mDialer.getNumber();
         if (phoneNumber != null && !phoneNumber.isEmpty()) {
             onCallNumber(PhoneNumberUtils.format(phoneNumber), null);
             Intent intent = new Intent(this, PendingCallActivity.class);
@@ -393,7 +385,7 @@ public class DialerActivity extends LoginRequiredActivity implements
         } else {
             // Set last dialed number on call button clicked when number is empty.
             String last_dialed = mSharedPreferences.getString(LAST_DIALED, "");
-            mNumberInputView.setNumber(last_dialed);
+            mDialer.setNumber(last_dialed);
         }
     }
 
@@ -406,25 +398,18 @@ public class DialerActivity extends LoginRequiredActivity implements
         onCallNumber(number, name);
     }
 
-    @Override
-    public void onKeyPadButtonClick(String digit, String chars) {
-        mNumberInputView.add(digit);
-        mNumberInputView.setCorrectFontSize();
-    }
-
     private void showDialpad() {
-        mBottom.setVisibility(View.VISIBLE);
+        mDialer.setVisibility(View.VISIBLE);
         findViewById(R.id.button_dialpad).setVisibility(View.INVISIBLE);
         findViewById(R.id.button_call).setVisibility(View.VISIBLE);
     }
-
 
     /**
      * Expand the contacts scroller to full screen and add a button to return to the dialpad.
      *
      */
     private void expandContactsScroller() {
-        mBottom.setVisibility(View.GONE);
+        mDialer.setVisibility(View.GONE);
         findViewById(R.id.button_dialpad).setVisibility(View.VISIBLE);
         findViewById(R.id.button_call).setVisibility(View.GONE);
     }
@@ -432,7 +417,7 @@ public class DialerActivity extends LoginRequiredActivity implements
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         if (scrollState == SCROLL_STATE_TOUCH_SCROLL &&
-                mKeyPadViewContainer.getVisibility() == View.VISIBLE) {
+                mDialer.getVisibility() == View.VISIBLE) {
             expandContactsScroller();
         }
     }
@@ -454,7 +439,7 @@ public class DialerActivity extends LoginRequiredActivity implements
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         // If the number has been emptied while a query was still in progress, clear all the results.
-        if (mNumberInputView.getNumber().isEmpty()) {
+        if (mDialer.getNumber().isEmpty()) {
             clearContactList();
             return;
         }
@@ -485,6 +470,6 @@ public class DialerActivity extends LoginRequiredActivity implements
     }
 
     private boolean isContactsExpanded() {
-        return mBottom.getVisibility() != View.VISIBLE;
+        return mDialer.getVisibility() != View.VISIBLE;
     }
 }

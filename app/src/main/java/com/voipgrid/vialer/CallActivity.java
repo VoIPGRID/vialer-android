@@ -9,7 +9,6 @@ import static com.voipgrid.vialer.calling.CallingConstants.MAP_ORIGINAL_CALLER_P
 import static com.voipgrid.vialer.calling.CallingConstants.MAP_SECOND_CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.MAP_TRANSFERRED_PHONE_NUMBER;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
-import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_TRANSFER_FRAGMENT;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_CONNECTED_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
@@ -22,8 +21,6 @@ import static com.voipgrid.vialer.sip.SipConstants.CALL_RINGING_OUT_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_UNHOLD_ACTION;
 import static com.voipgrid.vialer.sip.SipConstants.SERVICE_STOPPED;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -31,11 +28,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.FloatingActionButton;
+import android.support.constraint.Group;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,8 +42,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.call.CallKeyPadFragment;
-import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
@@ -69,14 +63,15 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.voipgrid.vialer.calling.Dialer;
 
 
 /**
  * CallActivity for incoming or outgoing call.
  */
 public class CallActivity extends AbstractCallActivity
-        implements View.OnClickListener,CallKeyPadFragment.CallKeyPadFragmentListener, CallTransferFragment.CallTransferFragmentListener,
-        MediaManager.AudioChangedInterface, PopupMenu.OnMenuItemClickListener {
+        implements View.OnClickListener,
+        MediaManager.AudioChangedInterface, PopupMenu.OnMenuItemClickListener, Dialer.Listener {
 
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
     @BindView(R.id.incoming_caller_subtitle) TextView mNumber;
@@ -87,6 +82,8 @@ public class CallActivity extends AbstractCallActivity
     @BindView(R.id.button_transfer) ImageView mTransferButton;
     @BindView(R.id.button_onhold) ImageView mOnHoldButton;
     @BindView(R.id.button_hangup) ImageButton mHangupButton;
+    @BindView(R.id.call_actions) Group mCallActions;
+    @BindView(R.id.dialer) Dialer mDialer;
 
     @Inject AnalyticsHelper mAnalyticsHelper;
 
@@ -255,12 +252,6 @@ public class CallActivity extends AbstractCallActivity
 
                 mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
 
-                if (mOnTransfer && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
-                    CallTransferFragment callTransferFragment = (CallTransferFragment)
-                            getFragmentManager().findFragmentByTag(TAG_CALL_TRANSFER_FRAGMENT);
-                    callTransferFragment.secondCallIsConnected();
-                }
-
                 if (mSipServiceConnection.get().getCurrentCall() != null) {
                     VialerStatistics.callWasSuccessfullySetup(mSipServiceConnection.get().getCurrentCall());
                 }
@@ -331,7 +322,6 @@ public class CallActivity extends AbstractCallActivity
                         mOnTransfer = false;
                         updateCallButton(R.id.button_transfer, true);
                         updateCallButton(R.id.button_onhold, true);
-                        updateCallButton(R.id.button_dialpad, true);
                         updateCallButton(R.id.button_mute, true);
 
                         onCallStatusUpdate(mSipServiceConnection.get().getCurrentCall().getCurrentCallState());
@@ -345,7 +335,6 @@ public class CallActivity extends AbstractCallActivity
 
                             updateCallButton(R.id.button_transfer, false);
                             updateCallButton(R.id.button_onhold, false);
-                            updateCallButton(R.id.button_dialpad, false);
                             updateCallButton(R.id.button_mute, false);
                             updateCallButton(R.id.button_hangup, false);
 
@@ -544,14 +533,6 @@ public class CallActivity extends AbstractCallActivity
             case R.id.button_mute:
                 muteButton = findViewById(viewId);
                 muteButton.setActivated(mMute);
-                break;
-
-            case R.id.button_dialpad:
-                dialpadButton = findViewById(viewId);
-                dialpadButton.setActivated(mKeyPadVisible);
-                dialpadButton.setAlpha(
-                        buttonEnabled ? mKeyPadVisible ? 1.0f : 0.5f : 1.0f
-                );
                 break;
 
             case R.id.button_onhold:
@@ -763,7 +744,7 @@ public class CallActivity extends AbstractCallActivity
     }
 
     @Override
-    public void callKeyPadButtonClicked(String dtmf) {
+    public void digitWasPressed(String dtmf) {
         if (mSipServiceConnection.isAvailable()) {
             SipCall call = mSipServiceConnection.get().getCurrentCall();
             if (call != null) {
@@ -776,7 +757,6 @@ public class CallActivity extends AbstractCallActivity
         }
     }
 
-    @Override
     public void callTransferMakeSecondCall(String numberToCall) {
         Uri sipAddressUri = SipUri.sipAddressUri(
                 getApplicationContext(),
@@ -800,7 +780,6 @@ public class CallActivity extends AbstractCallActivity
         displayCallInfo();
     }
 
-    @Override
     public void callTransferHangupSecondCall() {
         try {
             if (mSipServiceConnection.get().getFirstCall().isOnHold()) {
@@ -813,7 +792,6 @@ public class CallActivity extends AbstractCallActivity
         }
     }
 
-    @Override
     public void hangupFromKeypad() {
         try {
             mSipServiceConnection.get().getCurrentCall().hangup(true);
@@ -822,7 +800,6 @@ public class CallActivity extends AbstractCallActivity
         }
     }
 
-    @Override
     public void callTransferConnectTheCalls() {
         try {
             mTransferredNumber = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
@@ -973,9 +950,27 @@ public class CallActivity extends AbstractCallActivity
         return false;
     }
 
+    @OnClick(R.id.button_dialpad)
+    void onDialpadButtonClick(View view) {
+        mCallActions.setVisibility(View.GONE);
+        mDialer.setListener(this);
+        mDialer.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void exitButtonWasPressed() {
+        mCallActions.setVisibility(View.VISIBLE);
+        mDialer.setVisibility(View.GONE);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callTransferMakeSecondCall(data.getStringExtra("DIALED_NUMBER"));
+    }
+
+    @Override
+    public void numberWasChanged(String number) {
+
     }
 }
