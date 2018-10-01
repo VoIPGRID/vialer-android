@@ -184,6 +184,7 @@ public class DialerActivity extends LoginRequiredActivity implements
 
     @Override
     public void exitButtonWasPressed() {
+
     }
 
     /**

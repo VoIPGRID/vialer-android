@@ -252,12 +252,6 @@ public class CallActivity extends AbstractCallActivity
 
                 mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
 
-//                if (mOnTransfer && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
-//                    CallTransferFragment callTransferFragment = (CallTransferFragment)
-//                            getFragmentManager().findFragmentByTag(TAG_CALL_TRANSFER_FRAGMENT);
-//                    callTransferFragment.secondCallIsConnected();
-//                }
-
                 if (mSipServiceConnection.get().getCurrentCall() != null) {
                     VialerStatistics.callWasSuccessfullySetup(mSipServiceConnection.get().getCurrentCall());
                 }
