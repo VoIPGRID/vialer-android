@@ -22,8 +22,8 @@ public class DelayedFinish implements Runnable {
         mLogger = new Logger(this.getClass());
     }
 
-    public void begin() {
-        this.delayedHandler.removeCallbacks(this);
+    void begin() {
+        this.delayedHandler.removeCallbacksAndMessages(null);
         this.delayedHandler.postDelayed(this, DELAYED_FINISH_RETRY_MS);
     }
 
@@ -31,7 +31,7 @@ public class DelayedFinish implements Runnable {
     public void run() {
         if(mSipServiceConnection.hasActiveCall()) {
             mLogger.i("Call is still active " + DELAYED_FINISH_MS + "ms after finishWithDelay was called, trying again in " + DELAYED_FINISH_RETRY_MS + "ms");
-            this.delayedHandler.removeCallbacks(this);
+            this.delayedHandler.removeCallbacksAndMessages(null);
             this.delayedHandler.postDelayed(this, DELAYED_FINISH_RETRY_MS);
             return;
         }

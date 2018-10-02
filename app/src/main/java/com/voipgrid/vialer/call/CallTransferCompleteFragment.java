@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,8 @@ public class CallTransferCompleteFragment extends Fragment {
             public void run() {
                 getActivity().finish();  // Close this activity after 3 seconds.
             }
+
+
         }, 3000);
     }
 

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_primary"
-    android:paddingTop="35dp"
-    android:paddingLeft="50dp"
-    android:paddingRight="50dp"
-    android:paddingBottom="25dp"
-    android:id="@+id/fragment_call_transfer_complete">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:orientation="vertical" android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/color_primary"
+                android:paddingTop="35dp"
+                android:paddingLeft="50dp"
+                android:paddingRight="50dp"
+                android:paddingBottom="25dp"
+                android:id="@+id/fragment_call_transfer_complete">
 
     <TextView
         android:layout_width="wrap_content"
@@ -41,7 +42,7 @@
         android:layout_height="fill_parent"
         android:id="@+id/transfer_image"
         android:layout_below="@id/transfer_caller"
-        android:src="@drawable/ic_call_transfer"
+        app:srcCompat="@drawable/ic_call_transfer"
         android:alpha="0.2"
         android:layout_centerHorizontal="true"
         android:scaleType="fitCenter"

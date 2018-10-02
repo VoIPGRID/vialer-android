@@ -199,6 +199,7 @@
     <string name="speaker_label">speaker</string>
     <string name="transfer_label">transfer</string>
     <string name="onhold_label">hold</string>
+    <string name="transfer_connect">Connect</string>
 
     <!-- Permission strings -->
     <string name="permission_microphone_dialog_title">Microphone permission</string>

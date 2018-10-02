@@ -51,6 +51,10 @@ public class CallDurationTracker implements Runnable {
     private long findCallDuration() {
         String firstCallIdentifier = mSipServiceConnection.get().getFirstCall().getIdentifier();
 
+        if (mSipServiceConnection.get().getCurrentCall() == null) {
+            return mSipServiceConnection.get().getFirstCall().getCallDuration();
+        }
+
         String currentCallIdentifier = mSipServiceConnection.get().getCurrentCall().getIdentifier();
 
         if (firstCallIdentifier.equals(currentCallIdentifier)) {

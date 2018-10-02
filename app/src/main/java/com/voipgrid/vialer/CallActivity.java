@@ -352,6 +352,7 @@ public class CallActivity extends AbstractCallActivity
                     }
                 } else {
                     getMediaManager().callEnded();
+                    Log.e("TEST123", "361");
                     finishAfterDelay();
                 }
 
@@ -383,6 +384,8 @@ public class CallActivity extends AbstractCallActivity
                 break;
 
             case SERVICE_STOPPED:
+                Log.e("TEST123", "393");
+
                 mConnected = false;
                 finishAfterDelay();
                 break;
@@ -400,6 +403,8 @@ public class CallActivity extends AbstractCallActivity
         if (count > 0 && mCallIsTransferred) {
             // When transfer is done.
             getFragmentManager().popBackStack();
+            Log.e("TEST123", "412");
+
             finishAfterDelay();
         } else if (mOnTransfer) {
             // During a transfer.
@@ -559,6 +564,8 @@ public class CallActivity extends AbstractCallActivity
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            Log.e("TEST123", "570");
+
             finishAfterDelay();
             sendBroadcast(new Intent(BluetoothMediaButtonReceiver.HANGUP_BTN));
         }
@@ -755,7 +762,6 @@ public class CallActivity extends AbstractCallActivity
 
         mCurrentCallId = mSipServiceConnection.get().getCurrentCall().getIdentifier();
 
-
         mCallerIdToDisplay = mSipServiceConnection.get().getCurrentCall().getCallerId();
         mPhoneNumberToDisplay = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
 
@@ -830,7 +836,7 @@ public class CallActivity extends AbstractCallActivity
             if (!callId.equals(mCurrentCallId)) {
                 if (mOnTransfer) {
                     onCallStatusUpdate(status);
-                    if (!mSipServiceConnection.get().getFirstCall().getIsCallConnected()) {
+                    if (mSipServiceConnection.get().getFirstCall() != null && !mSipServiceConnection.get().getFirstCall().getIsCallConnected()) {
                         swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
                     }
                 }
@@ -952,7 +958,18 @@ public class CallActivity extends AbstractCallActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        callTransferMakeSecondCall(data.getStringExtra("DIALED_NUMBER"));
+
+        if (data == null) {
+            return;
+        }
+
+        String dialedNumber = data.getStringExtra("DIALED_NUMBER");
+
+        if (dialedNumber == null || dialedNumber.isEmpty()) {
+            return;
+        }
+
+        callTransferMakeSecondCall(dialedNumber);
 
         Map<String, String> map = new HashMap<>();
         map.put(MAP_ORIGINAL_CALLER_ID, mSipServiceConnection.get().getFirstCall().getCallerId());
@@ -968,7 +985,7 @@ public class CallActivity extends AbstractCallActivity
 
     private void swapFragment(String tag, Map extraInfo) {
         Fragment newFragment = null;
-Log.e("TEST123", "swappin fraggy");
+
         switch (tag) {
             case TAG_CALL_TRANSFER_FRAGMENT:
                 String originalCallerId;
@@ -1002,16 +1019,13 @@ Log.e("TEST123", "swappin fraggy");
                 newFragment.setArguments(callTransferCompleteFragment);
                 break;
         }
-        Log.e("TEST123", "tag====" + tag);
 
         if (newFragment != null) {
-            Log.e("TEST123", "new frag: " + newFragment.toString() + " to " + tag);
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.addToBackStack(null);
 
             mFragmentContainer.setVisibility(View.VISIBLE);
             mCallActions.setVisibility(View.GONE);
-Log.e("TEST123", "bottom should be gone" + newFragment.getClass().getName());
             transaction.replace(R.id.fragment_container, newFragment, tag).commitAllowingStateLoss();
         }
     }
