@@ -352,7 +352,6 @@ public class CallActivity extends AbstractCallActivity
                     }
                 } else {
                     getMediaManager().callEnded();
-                    Log.e("TEST123", "361");
                     finishAfterDelay();
                 }
 
@@ -384,8 +383,6 @@ public class CallActivity extends AbstractCallActivity
                 break;
 
             case SERVICE_STOPPED:
-                Log.e("TEST123", "393");
-
                 mConnected = false;
                 finishAfterDelay();
                 break;
@@ -403,8 +400,6 @@ public class CallActivity extends AbstractCallActivity
         if (count > 0 && mCallIsTransferred) {
             // When transfer is done.
             getFragmentManager().popBackStack();
-            Log.e("TEST123", "412");
-
             finishAfterDelay();
         } else if (mOnTransfer) {
             // During a transfer.
@@ -564,7 +559,6 @@ public class CallActivity extends AbstractCallActivity
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Log.e("TEST123", "570");
 
             finishAfterDelay();
             sendBroadcast(new Intent(BluetoothMediaButtonReceiver.HANGUP_BTN));
