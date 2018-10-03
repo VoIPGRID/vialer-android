@@ -1027,6 +1027,9 @@ public class CallActivity extends AbstractCallActivity
             mFragmentContainer.setVisibility(View.VISIBLE);
             mCallActions.setVisibility(View.GONE);
             transaction.replace(R.id.fragment_container, newFragment, tag).commitAllowingStateLoss();
+        } else {
+            mFragmentContainer.setVisibility(View.GONE);
+            mCallActions.setVisibility(View.VISIBLE);
         }
     }
 
