@@ -36,7 +36,6 @@ public class CallTransferFragment extends Fragment {
     @BindView(R.id.call_transfer_buttons) View mCallTransferButtonsContainer;
     @BindView(R.id.button_transfer_call) View mTransferCallButton;
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_call_transfer, container, false);
