@@ -384,7 +384,7 @@ public class CallActivity extends AbstractCallActivity
     @Override
     public void onBackPressed() {
         mLogger.d("onBackPressed");
-        View declineButton = findViewById(R.id.button_decline);
+        View hangupButton = findViewById(R.id.button_hangup);
         View lockRingView = findViewById(R.id.lock_ring);
 
         int count = getFragmentManager().getBackStackEntryCount();
@@ -419,7 +419,7 @@ public class CallActivity extends AbstractCallActivity
         } else if (mHangupButton != null && mHangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
             // In call dialog.
             hangup(R.id.button_hangup);
-        } else if (declineButton != null && declineButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
+        } else if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
         } else if (lockRingView != null && lockRingView.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
         } else {
             super.onBackPressed();
@@ -524,10 +524,11 @@ public class CallActivity extends AbstractCallActivity
      */
     private void updateCallButton(Integer viewId, boolean buttonEnabled) {
         View muteButton;
-        View dialpadButton;
+        View speakerButton;
+        View transferButton;
         View onHoldButton;
         View hangupButton;
-        View transferButton;
+
 
         switch (viewId) {
             case R.id.button_mute:
@@ -535,18 +536,20 @@ public class CallActivity extends AbstractCallActivity
                 muteButton.setActivated(mMute);
                 break;
 
+            case R.id.button_speaker:
+                speakerButton = findViewById(viewId);
+                speakerButton.setActivated(mOnSpeaker);
+
+            case R.id.button_transfer:
+                transferButton = findViewById(viewId);
+                transferButton.setActivated(mOnTransfer);
+                break;
+
             case R.id.button_onhold:
                 onHoldButton = findViewById(viewId);
                 onHoldButton.setActivated(mOnHold);
                 break;
 
-            case R.id.button_transfer:
-                transferButton = findViewById(viewId);
-                transferButton.setActivated(mOnTransfer);
-                transferButton.setAlpha(
-                        buttonEnabled ? mOnTransfer ? 1.0f : 0.5f : 1.0f
-                );
-                break;
             case R.id.button_hangup:
                 hangupButton = findViewById(viewId);
                 if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
@@ -581,7 +584,7 @@ public class CallActivity extends AbstractCallActivity
         Integer onHoldButtonId = R.id.button_onhold;
         Integer transferButtonId = R.id.button_transfer;
 
-        View declineButton = findViewById(R.id.button_decline);
+        View hangupButton = findViewById(R.id.button_hangup);
         View acceptButton = findViewById(R.id.button_pickup);
 
         switch (callState) {
@@ -595,10 +598,10 @@ public class CallActivity extends AbstractCallActivity
 
             case CALL_DISCONNECTED_MESSAGE:
                 if (mIsIncomingCall) {
-                    if (declineButton != null && declineButton.getVisibility() == View.VISIBLE) {
-                        declineButton.setEnabled(false);
-                        declineButton.setClickable(false);
-                        declineButton.setAlpha(0.5f);
+                    if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE) {
+                        hangupButton.setEnabled(false);
+                        hangupButton.setClickable(false);
+                        hangupButton.setAlpha(0.5f);
                     }
 
                     if (acceptButton != null && acceptButton.getVisibility() == View.VISIBLE) {
@@ -871,10 +874,8 @@ public class CallActivity extends AbstractCallActivity
     @Override
     @OnClick(R.id.button_hangup)
     protected void onDeclineButtonClicked() {
-        if (mConnected) {
             mLogger.i("Hangup the call");
             hangup(R.id.button_hangup);
-        }
     }
 
     @Override
@@ -905,8 +906,17 @@ public class CallActivity extends AbstractCallActivity
                 image = R.drawable.audio_source_dropdown_phone;
                 text = R.string.audio_source_option_phone;
             }
+        }
+        if(getMediaManager().isCallOnSpeaker()) {
+            mSpeakerButton.setColorFilter(ResourcesCompat.getColor(getResources(), R.color.color_primary, null));
+            Drawable newDrawableSpeaker = mSpeakerButton.getBackground();
+            DrawableCompat.setTint(newDrawableSpeaker,Color.WHITE );
+            mSpeakerButton.setBackground(newDrawableSpeaker);
         } else {
-            mSpeakerButton.setAlpha(getMediaManager().isCallOnSpeaker() ? 1.0f : 0.5f);
+            mSpeakerButton.clearColorFilter();
+            Drawable newDrawableSpeaker = mSpeakerButton.getBackground();
+            DrawableCompat.setTintList(newDrawableSpeaker,null );
+            mSpeakerButton.setBackground(newDrawableSpeaker);
         }
 
         mSpeakerLabel.setText(getString(text).toLowerCase());

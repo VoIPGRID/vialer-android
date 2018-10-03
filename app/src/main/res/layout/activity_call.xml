@@ -41,8 +41,7 @@
         app:layout_constraintStart_toStartOf="@+id/profile_image"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
-        app:srcCompat="@drawable/ic_blue_phone_icon"
-        tools:ignore="MissingConstraints" />
+        app:srcCompat="@drawable/ic_blue_phone_icon" />
 
     <TextView
         android:id="@+id/incoming_caller_title"
@@ -80,8 +79,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/incoming_caller_subtitle"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintTop_toBottomOf="@+id/incoming_caller_subtitle" />
 
     <LinearLayout
         android:id="@+id/linearLayout_mute"
@@ -98,8 +96,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.461"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintVertical_bias="0.461" >
 
         <ImageView
             android:id="@+id/button_mute"
@@ -134,8 +131,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/linearLayout_mute"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.461"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintVertical_bias="0.461" >
 
         <ImageView
             android:id="@+id/button_dialpad"
@@ -172,8 +168,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/linearLayout_dialpad"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.461"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintVertical_bias="0.461" >
 
         <ImageView
             android:id="@+id/button_speaker"
@@ -210,8 +205,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.74"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintVertical_bias="0.74" >
 
         <ImageView
             android:id="@+id/button_transfer"
@@ -240,6 +234,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="70dp"
         android:layout_marginBottom="8dp"
+        android:layout_marginRight="70dp"
         android:gravity="center"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -247,8 +242,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/linearLayout_transfer"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.74"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintVertical_bias="0.74" >
 
         <ImageView
             android:id="@+id/button_onhold"
@@ -288,8 +282,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.983"
-        app:srcCompat="@drawable/ic_call_end_white"
-        tools:ignore="MissingConstraints" />
+        app:srcCompat="@drawable/ic_call_end_white" />
 
     <android.support.constraint.Group
         android:id="@+id/call_actions"
