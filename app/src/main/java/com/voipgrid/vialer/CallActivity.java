@@ -52,6 +52,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.call.CallTransferCompleteFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
+import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.media.MediaManager;
@@ -83,7 +84,8 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
         CallTransferFragment.CallTransferFragmentListener {
 
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
-    @BindView(R.id.incoming_caller_subtitle) TextView mNumber;
+    @BindView(R.id.incoming_caller_title) TextView mTitle;
+    @BindView(R.id.incoming_caller_subtitle) TextView mSubtitle;
     @BindView(R.id.button_mute) ImageView mMuteButton;
     @BindView(R.id.button_dialpad) ImageView mDialpadButton;
     @BindView(R.id.button_speaker) ImageView mSpeakerButton;
@@ -94,8 +96,10 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
     @BindView(R.id.call_actions) Group mCallActions;
     @BindView(R.id.dialer) Dialer mDialer;
     @BindView(R.id.fragment_container) ViewGroup mFragmentContainer;
+    @BindView(R.id.profile_image) ImageView mContactImage;
 
     @Inject AnalyticsHelper mAnalyticsHelper;
+    @Inject CallActivityHelper mCallActivityHelper;
 
     private boolean mIsIncomingCall;
 
@@ -209,18 +213,7 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
     }
 
     private void displayCallInfo() {
-        TextView nameTextView = findViewById(R.id.name_text_view);
-
-        if(nameTextView == null || mNumber == null){
-            return;
-        }
-        if (mCallerIdToDisplay != null && !mCallerIdToDisplay.isEmpty()) {
-            nameTextView.setText(mCallerIdToDisplay);
-            mNumber.setText(mPhoneNumberToDisplay);
-        } else {
-            nameTextView.setText(mPhoneNumberToDisplay);
-            mNumber.setText("");
-        }
+        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mTitle, mSubtitle, mPhoneNumberToDisplay, mCallerIdToDisplay, mContactImage);
     }
 
     /**
