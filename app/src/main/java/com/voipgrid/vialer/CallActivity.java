@@ -9,6 +9,9 @@ import static com.voipgrid.vialer.calling.CallingConstants.MAP_ORIGINAL_CALLER_P
 import static com.voipgrid.vialer.calling.CallingConstants.MAP_SECOND_CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.MAP_TRANSFERRED_PHONE_NUMBER;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_CONNECTED_FRAGMENT;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_TRANSFER_COMPLETE_FRAGMENT;
+import static com.voipgrid.vialer.calling.CallingConstants.TAG_CALL_TRANSFER_FRAGMENT;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_CONNECTED_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
@@ -21,6 +24,8 @@ import static com.voipgrid.vialer.sip.SipConstants.CALL_RINGING_OUT_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_UNHOLD_ACTION;
 import static com.voipgrid.vialer.sip.SipConstants.SERVICE_STOPPED;
 
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -32,9 +37,11 @@ import android.support.constraint.Group;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -42,6 +49,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
+import com.voipgrid.vialer.call.CallTransferCompleteFragment;
+import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
@@ -69,9 +78,9 @@ import com.voipgrid.vialer.calling.Dialer;
 /**
  * CallActivity for incoming or outgoing call.
  */
-public class CallActivity extends AbstractCallActivity
-        implements View.OnClickListener,
-        MediaManager.AudioChangedInterface, PopupMenu.OnMenuItemClickListener, Dialer.Listener {
+public class CallActivity extends AbstractCallActivity implements View.OnClickListener,
+        MediaManager.AudioChangedInterface, PopupMenu.OnMenuItemClickListener, Dialer.Listener,
+        CallTransferFragment.CallTransferFragmentListener {
 
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
     @BindView(R.id.incoming_caller_subtitle) TextView mNumber;
@@ -84,6 +93,7 @@ public class CallActivity extends AbstractCallActivity
     @BindView(R.id.button_hangup) ImageButton mHangupButton;
     @BindView(R.id.call_actions) Group mCallActions;
     @BindView(R.id.dialer) Dialer mDialer;
+    @BindView(R.id.fragment_container) ViewGroup mFragmentContainer;
 
     @Inject AnalyticsHelper mAnalyticsHelper;
 
@@ -223,7 +233,6 @@ public class CallActivity extends AbstractCallActivity
             // Hide answer, decline = decline.
 
             if (!mOnTransfer) {
-                //TODO When redesigning dialpad
 
                 if (type.equals(TYPE_CONNECTED_CALL) && !mConnected) {
                     getMediaManager().callAnswered();
@@ -251,6 +260,12 @@ public class CallActivity extends AbstractCallActivity
                 mConnected = true;
 
                 mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
+
+                if (mOnTransfer && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
+                    CallTransferFragment callTransferFragment = (CallTransferFragment)
+                            getFragmentManager().findFragmentByTag(TAG_CALL_TRANSFER_FRAGMENT);
+                    callTransferFragment.secondCallIsConnected();
+                }
 
                 if (mSipServiceConnection.get().getCurrentCall() != null) {
                     VialerStatistics.callWasSuccessfullySetup(mSipServiceConnection.get().getCurrentCall());
@@ -283,7 +298,7 @@ public class CallActivity extends AbstractCallActivity
                         map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipServiceConnection.get().getFirstCall().getPhoneNumber());
                         map.put(MAP_TRANSFERRED_PHONE_NUMBER, mTransferredNumber);
 
-                        //TODO When redesigning dialpad
+                        swapFragment(TAG_CALL_TRANSFER_COMPLETE_FRAGMENT, map);
 
                         mOnTransfer = false;
                         try {
@@ -301,7 +316,7 @@ public class CallActivity extends AbstractCallActivity
                         mConnected = true;
 
                         mTransferButton.setVisibility(View.VISIBLE);
-                        //TODO When redesigning dialpad
+                        swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
 
                         newStatus = mSipServiceConnection.get().getCurrentCall().getCurrentCallState();
 
@@ -327,7 +342,7 @@ public class CallActivity extends AbstractCallActivity
                         onCallStatusUpdate(mSipServiceConnection.get().getCurrentCall().getCurrentCallState());
                     } else {
                         if (mSipServiceConnection.get() != null && mSipServiceConnection.get().getCurrentCall() == null && mSipServiceConnection.get().getFirstCall() == null) {
-                            //TODO When redesigning dialpad
+                            swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
                             displayCallInfo();
 
                             mOnTransfer = false;
@@ -374,7 +389,6 @@ public class CallActivity extends AbstractCallActivity
                 break;
 
             case SERVICE_STOPPED:
-                // TODO: This broadcast is not received anymore due to refactor! Solve with transition to fragments.
                 mConnected = false;
                 finishAfterDelay();
                 break;
@@ -410,7 +424,7 @@ public class CallActivity extends AbstractCallActivity
                 } else {
                     mOnTransfer = false;
 
-                    //TODO When redesigning dialpad
+                    swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
 
                     updateCallButton(R.id.button_onhold, true);
                     updateCallButton(R.id.button_transfer, true);
@@ -466,27 +480,6 @@ public class CallActivity extends AbstractCallActivity
              mMuteButton.setBackground(newDrawableMute);
          }
              updateMicrophoneVolume(newVolume);
-    }
-
-    // Show or hide the dialPad when the user presses the button.
-    private void toggleDialPad() {
-        mLogger.d("toggleDialPad");
-        mKeyPadVisible = !mKeyPadVisible;
-
-        if (mKeyPadVisible) {
-            //TODO When redesigning dialpad
-        } else {
-            if (mOnTransfer) {
-                Map<String, String> map = new HashMap<>();
-                map.put(MAP_ORIGINAL_CALLER_ID, mSipServiceConnection.get().getFirstCall().getCallerId());
-                map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipServiceConnection.get().getFirstCall().getPhoneNumber());
-                map.put(MAP_SECOND_CALL_IS_CONNECTED, "" + true);
-
-                //TODO When redesigning dialpad
-            } else {
-                //TODO When redesigning dialpad
-            }
-        }
     }
 
     // Toggle the hold the call when the user presses the button.
@@ -572,6 +565,7 @@ public class CallActivity extends AbstractCallActivity
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             finishAfterDelay();
             sendBroadcast(new Intent(BluetoothMediaButtonReceiver.HANGUP_BTN));
         }
@@ -619,7 +613,6 @@ public class CallActivity extends AbstractCallActivity
                 updateCallButton(transferButtonId, false);
 
                 if (mKeyPadVisible) {
-                    toggleDialPad();
                     updateCallButton(keypadButtonId, false);
                 }
 
@@ -672,13 +665,6 @@ public class CallActivity extends AbstractCallActivity
                         toggleMute();
                         updateCallButton(viewId, true);
                     }
-                }
-                break;
-
-            case R.id.button_dialpad:
-                if (mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
-                    toggleDialPad();
-                    updateCallButton(viewId, true);
                 }
                 break;
 
@@ -776,52 +762,10 @@ public class CallActivity extends AbstractCallActivity
 
         mCurrentCallId = mSipServiceConnection.get().getCurrentCall().getIdentifier();
 
-
         mCallerIdToDisplay = mSipServiceConnection.get().getCurrentCall().getCallerId();
         mPhoneNumberToDisplay = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
 
         displayCallInfo();
-    }
-
-    public void callTransferHangupSecondCall() {
-        try {
-            if (mSipServiceConnection.get().getFirstCall().isOnHold()) {
-                mSipServiceConnection.get().getCurrentCall().hangup(true);
-            } else {
-                mSipServiceConnection.get().getFirstCall().hangup(true);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void hangupFromKeypad() {
-        try {
-            mSipServiceConnection.get().getCurrentCall().hangup(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void callTransferConnectTheCalls() {
-        try {
-            mTransferredNumber = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
-            mSipServiceConnection.get().getFirstCall().xFerReplaces(mSipServiceConnection.get().getCurrentCall());
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_transfer),
-                    getString(R.string.analytics_event_label_success)
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_transfer),
-                    getString(R.string.analytics_event_label_fail)
-            );
-        }
-
-        mCallIsTransferred = true;
     }
 
     public void audioLost(boolean lost) {
@@ -851,8 +795,8 @@ public class CallActivity extends AbstractCallActivity
             if (!callId.equals(mCurrentCallId)) {
                 if (mOnTransfer) {
                     onCallStatusUpdate(status);
-                    if (!mSipServiceConnection.get().getFirstCall().getIsCallConnected()) {
-                        //TODO When redesigning dialpad
+                    if (mSipServiceConnection.get().getFirstCall() != null && !mSipServiceConnection.get().getFirstCall().getIsCallConnected()) {
+                        swapFragment(TAG_CALL_CONNECTED_FRAGMENT, null);
                     }
                 }
                 return;
@@ -913,10 +857,7 @@ public class CallActivity extends AbstractCallActivity
             DrawableCompat.setTint(newDrawableSpeaker,Color.WHITE );
             mSpeakerButton.setBackground(newDrawableSpeaker);
         } else {
-            mSpeakerButton.clearColorFilter();
-            Drawable newDrawableSpeaker = mSpeakerButton.getBackground();
-            DrawableCompat.setTintList(newDrawableSpeaker,null );
-            mSpeakerButton.setBackground(newDrawableSpeaker);
+            mSpeakerButton.setAlpha(getMediaManager().isCallOnSpeaker() ? 1.0f : 0.5f);
         }
 
         mSpeakerLabel.setText(getString(text).toLowerCase());
@@ -976,11 +917,113 @@ public class CallActivity extends AbstractCallActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        callTransferMakeSecondCall(data.getStringExtra("DIALED_NUMBER"));
+
+        if (data == null) {
+            return;
+        }
+
+        String dialedNumber = data.getStringExtra("DIALED_NUMBER");
+
+        if (dialedNumber == null || dialedNumber.isEmpty()) {
+            return;
+        }
+
+        callTransferMakeSecondCall(dialedNumber);
+
+        Map<String, String> map = new HashMap<>();
+        map.put(MAP_ORIGINAL_CALLER_ID, mSipServiceConnection.get().getFirstCall().getCallerId());
+        map.put(MAP_ORIGINAL_CALLER_PHONE_NUMBER, mSipServiceConnection.get().getFirstCall().getPhoneNumber());
+        map.put(MAP_SECOND_CALL_IS_CONNECTED, "" + false);
+        swapFragment(TAG_CALL_TRANSFER_FRAGMENT, map);
     }
 
     @Override
     public void numberWasChanged(String number) {
 
+    }
+
+    private void swapFragment(String tag, Map extraInfo) {
+        Fragment newFragment = null;
+
+        switch (tag) {
+            case TAG_CALL_TRANSFER_FRAGMENT:
+                String originalCallerId;
+                if (extraInfo.get(MAP_ORIGINAL_CALLER_ID) != null) {
+                    originalCallerId = extraInfo.get(MAP_ORIGINAL_CALLER_ID).toString();
+                } else {
+                    originalCallerId = "";
+                }
+
+                Bundle callTransferFragmentBundle = new Bundle();
+                callTransferFragmentBundle.putString(CallTransferFragment.ORIGINAL_CALLER_ID, originalCallerId);
+                callTransferFragmentBundle.putString(CallTransferFragment.ORIGINAL_CALLER_PHONE_NUMBER, extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString());
+                callTransferFragmentBundle.putString(CallTransferFragment.SECOND_CALL_IS_CONNECTED, extraInfo.get(MAP_SECOND_CALL_IS_CONNECTED).toString());
+
+                newFragment = new CallTransferFragment();
+                newFragment.setArguments(callTransferFragmentBundle);
+                break;
+
+            case TAG_CALL_TRANSFER_COMPLETE_FRAGMENT:
+                if (extraInfo.get(MAP_ORIGINAL_CALLER_ID) != null) {
+                    originalCallerId = extraInfo.get(MAP_ORIGINAL_CALLER_ID).toString();
+                } else {
+                    originalCallerId = "";
+                }
+                Bundle callTransferCompleteFragment = new Bundle();
+                callTransferCompleteFragment.putString(CallTransferCompleteFragment.ORIGINAL_CALLER_ID, originalCallerId);
+                callTransferCompleteFragment.putString(CallTransferCompleteFragment.ORIGINAL_CALLER_PHONE_NUMBER, extraInfo.get(MAP_ORIGINAL_CALLER_PHONE_NUMBER).toString());
+                callTransferCompleteFragment.putString(CallTransferCompleteFragment.TRANSFERRED_PHONE_NUMBER, extraInfo.get(MAP_TRANSFERRED_PHONE_NUMBER).toString());
+
+                newFragment = new CallTransferCompleteFragment();
+                newFragment.setArguments(callTransferCompleteFragment);
+                break;
+        }
+
+        if (newFragment != null) {
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.addToBackStack(null);
+
+            mFragmentContainer.setVisibility(View.VISIBLE);
+            mCallActions.setVisibility(View.GONE);
+            transaction.replace(R.id.fragment_container, newFragment, tag).commitAllowingStateLoss();
+        } else {
+            mFragmentContainer.setVisibility(View.GONE);
+            mCallActions.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void callTransferHangupSecondCall() {
+        try {
+            if (mSipServiceConnection.get().getFirstCall().isOnHold()) {
+                mSipServiceConnection.get().getCurrentCall().hangup(true);
+            } else {
+                mSipServiceConnection.get().getFirstCall().hangup(true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void callTransferConnectTheCalls() {
+        try {
+            mTransferredNumber = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
+            mSipServiceConnection.get().getFirstCall().xFerReplaces(mSipServiceConnection.get().getCurrentCall());
+            mAnalyticsHelper.sendEvent(
+                    getString(R.string.analytics_event_category_call),
+                    getString(R.string.analytics_event_action_transfer),
+                    getString(R.string.analytics_event_label_success)
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            mAnalyticsHelper.sendEvent(
+                    getString(R.string.analytics_event_category_call),
+                    getString(R.string.analytics_event_action_transfer),
+                    getString(R.string.analytics_event_label_fail)
+            );
+        }
+
+        mCallIsTransferred = true;
     }
 }

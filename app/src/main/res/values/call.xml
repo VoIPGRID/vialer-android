@@ -46,7 +46,7 @@
     </style>
 
     <style name="CallTransferStatusStyle" parent="@style/CallTextViewStyle">
-        <item name="android:textColor">@color/color_text</item>
+        <item name="android:textColor">@color/call_text_color</item>
         <item name="android:textSize">@dimen/call_state_text_size</item>
     </style>
 </resources>

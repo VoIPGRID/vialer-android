@@ -362,6 +362,9 @@ public class DialerActivity extends LoginRequiredActivity implements
         } else {
             mDialHelper.callNumber(phoneNumberToCall, contactName);
             mSharedPreferences.edit().putString(LAST_DIALED, number).apply();
+            Intent intent = new Intent(this, PendingCallActivity.class);
+            intent.putExtra(PendingCallActivity.EXTRA_DIALLED_NUMBER, phoneNumberToCall);
+            startActivity(intent);
         }
     }
 
@@ -379,9 +382,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         String phoneNumber = mDialer.getNumber();
         if (phoneNumber != null && !phoneNumber.isEmpty()) {
             onCallNumber(PhoneNumberUtils.format(phoneNumber), null);
-            Intent intent = new Intent(this, PendingCallActivity.class);
-            intent.putExtra(PendingCallActivity.EXTRA_DIALLED_NUMBER, phoneNumber);
-            startActivity(intent);
         } else {
             // Set last dialed number on call button clicked when number is empty.
             String last_dialed = mSharedPreferences.getString(LAST_DIALED, "");
