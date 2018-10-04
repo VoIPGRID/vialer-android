@@ -527,26 +527,31 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
                 muteButton = findViewById(viewId);
                 muteButton.setActivated(mMute);
                 muteButton.setAlpha(
-                buttonEnabled ? 1.0f : 0.5f
+                        buttonEnabled ? 1.0f : 0.5f
                 );
                 break;
 
             case R.id.button_speaker:
                 speakerButton = findViewById(viewId);
                 speakerButton.setActivated(mOnSpeaker);
-                onHoldButton.setAlpha(
-                buttonEnabled ? 1.0f : 0.5f
+                speakerButton.setAlpha(
+                        buttonEnabled ? 1.0f : 0.5f
                 );
 
             case R.id.button_transfer:
                 transferButton = findViewById(viewId);
                 transferButton.setActivated(mOnTransfer);
+                transferButton.setAlpha(
                         buttonEnabled ? 1.0f : 0.5f
+                );
                 break;
 
             case R.id.button_onhold:
                 onHoldButton = findViewById(viewId);
                 onHoldButton.setActivated(mOnHold);
+                onHoldButton.setAlpha(
+                        buttonEnabled ? 1.0f : 0.5f
+                );
                 break;
 
             case R.id.button_hangup:
