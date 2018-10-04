@@ -78,9 +78,9 @@ import com.voipgrid.vialer.calling.Dialer;
 /**
  * CallActivity for incoming or outgoing call.
  */
-public class CallActivity extends AbstractCallActivity
-        implements View.OnClickListener,
-        MediaManager.AudioChangedInterface, PopupMenu.OnMenuItemClickListener, Dialer.Listener {
+public class CallActivity extends AbstractCallActivity implements View.OnClickListener,
+        MediaManager.AudioChangedInterface, PopupMenu.OnMenuItemClickListener, Dialer.Listener,
+        CallTransferFragment.CallTransferFragmentListener {
 
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
     @BindView(R.id.incoming_caller_subtitle) TextView mNumber;
@@ -260,6 +260,12 @@ public class CallActivity extends AbstractCallActivity
                 mConnected = true;
 
                 mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
+
+                if (mOnTransfer && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
+                    CallTransferFragment callTransferFragment = (CallTransferFragment)
+                            getFragmentManager().findFragmentByTag(TAG_CALL_TRANSFER_FRAGMENT);
+                    callTransferFragment.secondCallIsConnected();
+                }
 
                 if (mSipServiceConnection.get().getCurrentCall() != null) {
                     VialerStatistics.callWasSuccessfullySetup(mSipServiceConnection.get().getCurrentCall());
@@ -760,47 +766,6 @@ public class CallActivity extends AbstractCallActivity
         mPhoneNumberToDisplay = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
 
         displayCallInfo();
-    }
-
-    public void callTransferHangupSecondCall() {
-        try {
-            if (mSipServiceConnection.get().getFirstCall().isOnHold()) {
-                mSipServiceConnection.get().getCurrentCall().hangup(true);
-            } else {
-                mSipServiceConnection.get().getFirstCall().hangup(true);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void hangupFromKeypad() {
-        try {
-            mSipServiceConnection.get().getCurrentCall().hangup(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void callTransferConnectTheCalls() {
-        try {
-            mTransferredNumber = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
-            mSipServiceConnection.get().getFirstCall().xFerReplaces(mSipServiceConnection.get().getCurrentCall());
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_transfer),
-                    getString(R.string.analytics_event_label_success)
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_transfer),
-                    getString(R.string.analytics_event_label_fail)
-            );
-        }
-
-        mCallIsTransferred = true;
     }
 
     public void audioLost(boolean lost) {
