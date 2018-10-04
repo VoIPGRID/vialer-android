@@ -1,11 +1,26 @@
 package com.voipgrid.vialer.calling;
 
+import android.graphics.Bitmap;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.voipgrid.vialer.contacts.Contacts;
 
 public class CallActivityHelper {
 
-    public void updateLabelsBasedOnPhoneNumber(TextView title, TextView subtitle, String number, String callerId) {
-        String contactName = null; // TODO this should use the method to lookup the name from the contacts
+    private final Contacts mContacts;
+
+    public CallActivityHelper(Contacts contacts) {
+        mContacts = contacts;
+    }
+
+    public void updateLabelsBasedOnPhoneNumber(TextView title, TextView subtitle, String number, String callerId, ImageView imageView) {
+        String contactName = mContacts.getContactNameByPhoneNumber(number);
+        Bitmap bitmap = mContacts.getContactImageByPhoneNumber(number);
+
+        if (bitmap != null) {
+            imageView.setImageBitmap(bitmap);
+        }
 
         if (contactName == null) {
             contactName = callerId;

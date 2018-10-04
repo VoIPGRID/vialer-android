@@ -2,6 +2,7 @@ package com.voipgrid.vialer.calling;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
@@ -26,6 +27,7 @@ public class PendingCallActivity extends LoginRequiredActivity {
     @BindView(R.id.incoming_caller_title) TextView mCallerTitle;
     @BindView(R.id.incoming_caller_subtitle) TextView mCallerSubtitle;
     @BindView(R.id.call_buttons) View mCallButtons;
+    @BindView(R.id.profile_image) ImageView mContactImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,6 @@ public class PendingCallActivity extends LoginRequiredActivity {
         mCallState.setText(R.string.pending_call_description);
         mEstablishingText.setText(R.string.pending_call_status);
         String number = getIntent().getStringExtra(EXTRA_DIALLED_NUMBER);
-        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mCallerTitle, mCallerSubtitle, number, null);
+        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mCallerTitle, mCallerSubtitle, number, null, mContactImage);
     }
 }

@@ -118,8 +118,8 @@ public class VialerModule {
     }
 
     @Provides
-    CallActivityHelper provideCallActivityHelper() {
-        return new CallActivityHelper();
+    CallActivityHelper provideCallActivityHelper(Contacts contacts) {
+        return new CallActivityHelper(contacts);
     }
 
     @Provides

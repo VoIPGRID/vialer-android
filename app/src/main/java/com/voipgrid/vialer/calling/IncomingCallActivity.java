@@ -43,7 +43,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
     @BindView(R.id.incoming_caller_title) TextView mIncomingCallerTitle;
     @BindView(R.id.incoming_caller_subtitle) TextView mIncomingCallerSubtitle;
-    @BindView(R.id.profile_image) CircleImageView mProfileImage;
+    @BindView(R.id.profile_image) CircleImageView mContactImage;
     @BindView(R.id.button_decline) ImageButton mButtonDecline;
     @BindView(R.id.button_pickup) ImageButton mButtonPickup;
     @BindView(R.id.lock_ring_container) View mLockRingContainer;
@@ -60,39 +60,11 @@ public class IncomingCallActivity extends AbstractCallActivity {
         VialerApplication.get().component().inject(this);
 
         getMediaManager().startIncomingCallRinger();
-        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent());
+        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent(), mContactImage);
     }
 
     private boolean currentlyOnLockScreen() {
         return mKeyguardManager.inKeyguardRestrictedInputMode();
-    }
-
-    /**
-     * Update the labels on the view based on the information from the
-     * intent.
-     */
-    private void updateViewBasedOnIntent() {
-        String number = getPhoneNumberFromIntent();
-        String contactName = mContacts.getContactNameByPhoneNumber(number);
-        String callerId = getCallerIdFromIntent();
-        Bitmap image = mContacts.getContactImageByPhoneNumber(number);
-
-        if (image != null) {
-            mProfileImage.setImageBitmap(image);
-        }
-
-        if (contactName == null) {
-            contactName = callerId;
-        }
-
-        if (contactName != null) {
-            mIncomingCallerTitle.setText(contactName);
-            mIncomingCallerSubtitle.setText(number);
-            return;
-        }
-
-        mIncomingCallerTitle.setText(number);
-        mIncomingCallerSubtitle.setText("");
     }
 
     @OnClick(R.id.button_decline)
