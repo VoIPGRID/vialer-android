@@ -362,9 +362,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         } else {
             mDialHelper.callNumber(phoneNumberToCall, contactName);
             mSharedPreferences.edit().putString(LAST_DIALED, number).apply();
-            Intent intent = new Intent(this, PendingCallActivity.class);
-            intent.putExtra(PendingCallActivity.EXTRA_DIALLED_NUMBER, phoneNumberToCall);
-            startActivity(intent);
         }
     }
 
