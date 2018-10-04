@@ -43,4 +43,10 @@ public class PendingCallActivity extends LoginRequiredActivity {
         String number = getIntent().getStringExtra(EXTRA_DIALLED_NUMBER);
         mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mCallerTitle, mCallerSubtitle, number, null, mContactImage);
     }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(0,0);
+    }
 }
