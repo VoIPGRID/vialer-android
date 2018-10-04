@@ -861,7 +861,10 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
             DrawableCompat.setTint(newDrawableSpeaker,Color.WHITE );
             mSpeakerButton.setBackground(newDrawableSpeaker);
         } else {
-            mSpeakerButton.setAlpha(getMediaManager().isCallOnSpeaker() ? 1.0f : 0.5f);
+            mSpeakerButton.clearColorFilter();
+            Drawable newDrawableSpeaker = mSpeakerButton.getBackground();
+            DrawableCompat.setTintList(newDrawableSpeaker,null );
+            mSpeakerButton.setBackground(newDrawableSpeaker);
         }
 
         mSpeakerLabel.setText(getString(text).toLowerCase());
