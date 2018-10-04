@@ -37,7 +37,6 @@ import android.support.constraint.Group;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -160,7 +159,7 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
                     mLogger.d("inComingCall");
 
                     mCallNotifications.incomingCall(getCallNotificationDetails());
-
+                    onCallStatesUpdateButtons(CALL_CONNECTED_MESSAGE);
                     // Ringing event.
                     mAnalyticsHelper.sendEvent(
                             getString(R.string.analytics_event_category_call),
@@ -527,15 +526,22 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
             case R.id.button_mute:
                 muteButton = findViewById(viewId);
                 muteButton.setActivated(mMute);
+                muteButton.setAlpha(
+                buttonEnabled ? 1.0f : 0.5f
+                );
                 break;
 
             case R.id.button_speaker:
                 speakerButton = findViewById(viewId);
                 speakerButton.setActivated(mOnSpeaker);
+                onHoldButton.setAlpha(
+                buttonEnabled ? 1.0f : 0.5f
+                );
 
             case R.id.button_transfer:
                 transferButton = findViewById(viewId);
                 transferButton.setActivated(mOnTransfer);
+                        buttonEnabled ? 1.0f : 0.5f
                 break;
 
             case R.id.button_onhold:
