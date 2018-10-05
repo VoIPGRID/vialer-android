@@ -268,7 +268,7 @@ public class DialerActivity extends LoginRequiredActivity implements
 
                     if (!hasThumbnail) {
                         String firstLetter = cursor.getString(1).replaceAll("\\<.*?>", "").substring(0, 1);
-                        Bitmap bitmapImage = IconHelper.getCallerIconBitmap(firstLetter, Color.BLUE);
+                        Bitmap bitmapImage = IconHelper.getCallerIconBitmap(firstLetter, getResources().getColor(R.color.color_primary));
                         ((CircleImageView) view).setImageBitmap(bitmapImage);
                     }
                     return true;

@@ -10,19 +10,15 @@
     <LinearLayout android:id="@+id/top"
                   android:layout_width="match_parent"
                   android:layout_height="0dp"
-                  android:layout_marginBottom="16dp"
-                  android:layout_marginEnd="8dp"
-                  android:layout_marginLeft="8dp"
-                  android:layout_marginRight="8dp"
-                  android:layout_marginStart="8dp"
                   android:layout_marginTop="4dp"
+                  android:layout_marginBottom="16dp"
                   android:orientation="vertical"
                   app:layout_constraintBottom_toTopOf="@+id/bottom"
                   app:layout_constraintEnd_toEndOf="parent"
+                  app:layout_constraintHeight_percent="1"
                   app:layout_constraintHorizontal_bias="0.2"
                   app:layout_constraintStart_toStartOf="parent"
-                  app:layout_constraintTop_toTopOf="parent"
-                  app:layout_constraintHeight_percent="1">
+                  app:layout_constraintTop_toTopOf="parent">
 
         <ListView
             android:id="@+id/list_view"
@@ -35,12 +31,12 @@
                   android:name="com.voipgrid.vialer.t9.T9HelperFragment"
                   android:layout_width="match_parent"
                   android:layout_height="0dp"
-                  android:layout_marginBottom="8dp"
-                  android:layout_marginEnd="8dp"
-                  android:layout_marginLeft="8dp"
-                  android:layout_marginRight="8dp"
                   android:layout_marginStart="8dp"
+                  android:layout_marginLeft="8dp"
                   android:layout_marginTop="8dp"
+                  android:layout_marginEnd="8dp"
+                  android:layout_marginRight="8dp"
+                  android:layout_marginBottom="8dp"
                   android:layout_weight="1"
                   tools:layout="@layout/fragment_t9_helper"/>
 
