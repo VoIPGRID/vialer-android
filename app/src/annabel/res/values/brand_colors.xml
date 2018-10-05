@@ -7,7 +7,7 @@
     <color name="background_gradient_start">#7F72A4</color>
     <color name="background_gradient_end">#6E5394</color>
 
-    <color name="dial_button_digit_color">#8272b0</color>
+    <color name="dial_button_digit_color">#fff</color>
     <color name="dial_button_chars_color">#fff</color>
     <color name="dial_button_pressed">#7765a9</color>
 
