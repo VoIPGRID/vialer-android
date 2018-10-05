@@ -52,6 +52,7 @@ import com.voipgrid.vialer.call.CallTransferCompleteFragment;
 import com.voipgrid.vialer.call.CallTransferFragment;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallActivityHelper;
+import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.media.MediaManager;
@@ -72,7 +73,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import com.voipgrid.vialer.calling.Dialer;
 
 
 /**
@@ -105,7 +105,6 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
     private boolean mConnected = false;
     private boolean mMute = false;
     private boolean mOnHold = false;
-    private boolean mKeyPadVisible = false;
     private boolean mOnSpeaker = false;
     private boolean mOnTransfer = false;
     private boolean mSelfHangup = false;
@@ -423,12 +422,11 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
                 }
             }
         } else if (mHangupButton != null && mHangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
-            // In call dialog.
             hangup(R.id.button_hangup);
         } else if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
         } else if (lockRingView != null && lockRingView.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
-        } else {
-            super.onBackPressed();
+        } else if (isDialpadVisible()) {
+            hideDialpad();
         }
     }
 
@@ -615,10 +613,6 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
                 updateCallButton(keypadButtonId, false);
                 updateCallButton(onHoldButtonId, false);
                 updateCallButton(transferButtonId, false);
-
-                if (mKeyPadVisible) {
-                    updateCallButton(keypadButtonId, false);
-                }
 
                 break;
 
@@ -915,10 +909,18 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
         mDialer.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public void exitButtonWasPressed() {
+    /**
+     * Hide the dialpad and make the call actions visible again.
+     *
+     */
+    private void hideDialpad() {
         mCallActions.setVisibility(View.VISIBLE);
         mDialer.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void exitButtonWasPressed() {
+        hideDialpad();
     }
 
     @Override
@@ -1032,5 +1034,14 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
         }
 
         mCallIsTransferred = true;
+    }
+
+    /**
+     * Check whether the keypad is currently being presented to the user.
+     *
+     * @return TRUE if the keypad is on the screen.
+     */
+    private boolean isDialpadVisible() {
+        return mDialer.getVisibility() == View.VISIBLE;
     }
 }
