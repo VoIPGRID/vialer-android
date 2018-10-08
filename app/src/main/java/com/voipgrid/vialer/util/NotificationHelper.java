@@ -2,6 +2,13 @@ package com.voipgrid.vialer.util;
 
 
 
+import static android.app.Notification.PRIORITY_MAX;
+
+import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
+import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
+import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
+import static com.voipgrid.vialer.calling.CallingConstants.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
