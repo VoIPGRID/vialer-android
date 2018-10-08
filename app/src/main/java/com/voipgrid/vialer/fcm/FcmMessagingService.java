@@ -16,7 +16,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.LogHelper;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -51,7 +51,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
     public static final String VOIP_HAS_BEEN_DISABLED = "com.voipgrid.vialer.voip_disabled";
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private PowerManager mPowerManager;
@@ -59,23 +59,15 @@ public class FcmMessagingService extends FirebaseMessagingService {
     @Override
     public void onCreate() {
         super.onCreate();
-        mRemoteLogger = new RemoteLogger(FcmMessagingService.class).enableConsoleLogging();
-        mAnalyticsHelper = new AnalyticsHelper(((AnalyticsApplication) getApplication()).getDefaultTracker());
-        mConnectivityHelper = ConnectivityHelper.get(this);
-        mPowerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        mRemoteLogger.d("onCreate");
     }
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        mRemoteLogger.d("onMessageReceived");
-        RemoteMessageData remoteMessageData = new RemoteMessageData(remoteMessage.getData());
-        LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage, remoteMessageData.getRequestType());
         VialerStatistics.pushNotificationWasReceived(remoteMessage);
 
         if (!remoteMessageData.hasRequestType()) {
-            mRemoteLogger.e("No requestType");
+            mLogger.e("No requestType");
             return;
         }
 
@@ -90,25 +82,8 @@ public class FcmMessagingService extends FirebaseMessagingService {
         }
     }
 
-    @Override
-    public void onDeletedMessages() {
-        super.onDeletedMessages();
-        mRemoteLogger.d("Message deleted on the FCM server.");
-    }
 
-    /**
-     * Handle a push message with a call request type.
-     *
-     * @param remoteMessage
-     * @param remoteMessageData
-     */
-    private void handleCall(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
-        logCurrentState(remoteMessageData);
 
-        if (!isConnectionSufficient()) {
-            handleInsufficientConnection(remoteMessage, remoteMessageData);
-            return;
-        }
 
         if (isAVialerCallAlreadyInProgress()) {
             rejectDueToVialerCallAlreadyInProgress(remoteMessage, remoteMessageData);
@@ -119,24 +94,10 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
         mRemoteLogger.d("Payload processed, calling startService method");
 
-        startSipService(remoteMessageData);
-    }
 
-    /**
-     * Handle a push message with a message request type.
-     *
-     * @param remoteMessage
-     * @param remoteMessageData
-     */
-    private void handleMessage(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
-        if (!remoteMessageData.isRegisteredOnOtherDeviceMessage()) {
-            return;
-        }
 
         Preferences preferences = new Preferences(this);
 
-        if (preferences.hasSipEnabled()) {
-            NotificationHelper.getInstance(this).displayVoipDisabledNotification();
         }
 
         new Preferences(this).setSipEnabled(false);
@@ -224,7 +185,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      */
     private void sendCallFailedDueToOngoingVialerCallMetric(RemoteMessage remoteMessage, String requestToken) {
         if (sLastHandledCall != null && sLastHandledCall.equals(requestToken)) {
-            mRemoteLogger.i("Push notification (" + sLastHandledCall + ") is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully");
+            mLogger.i("Push notification (" + sLastHandledCall + ") is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully");
             return;
         }
 
@@ -238,7 +199,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * @param isAvailable TRUE if the phone is ready to accept the incoming call, FALSE if it is not available.
      */
     private void replyServer(RemoteMessageData remoteMessageData, boolean isAvailable) {
-        mRemoteLogger.d("replyServer");
+        mLogger.d("replyServer");
         Registration registrationApi = ServiceGenerator.createRegistrationService(this);
 
         Call<ResponseBody> call = registrationApi.reply(remoteMessageData.getRequestToken(), isAvailable, remoteMessageData.getMessageStartTime());
@@ -262,7 +223,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * @param remoteMessageData
      */
     private void startSipService(RemoteMessageData remoteMessageData) {
-        mRemoteLogger.d("startSipService");
+        mLogger.d("startSipService");
         Intent intent = new Intent(this, SipService.class);
         intent.setAction(SipConstants.ACTION_CALL_INCOMING);
 
@@ -283,26 +244,5 @@ public class FcmMessagingService extends FirebaseMessagingService {
         startService(intent);
     }
 
-    /**
-     * Device can ben in Idle mode when it's been idling to long. This means that network connectivity
-     * is reduced. So we check if we are in that mode and the connection is insufficient.
-     * just return and don't reply to the middleware for now.
-     *
-     * @return
-     */
-    private boolean isDeviceInIdleMode() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && mPowerManager.isDeviceIdleMode();
-    }
-
-    /**
-     * Log some information about our current state to help determine what state the phone is in when
-     * a push notification is incoming.
-     *
-     * @param remoteMessageData
-     */
-    private void logCurrentState(RemoteMessageData remoteMessageData) {
-        mRemoteLogger.d("SipService Active: " + SipService.sipServiceActive);
-        mRemoteLogger.d("CurrentConnection: " + mConnectivityHelper.getConnectionTypeString());
-        mRemoteLogger.d("Payload: " + remoteMessageData.getRawData().toString());
     }
 }

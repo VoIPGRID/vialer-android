@@ -16,16 +16,16 @@ import java.util.TreeMap;
 
 public class LogHelper {
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private Gson mGson;
 
-    private LogHelper(RemoteLogger remoteLogger) {
-        mRemoteLogger = remoteLogger;
+    private LogHelper(Logger logger) {
+        mLogger = logger;
         mGson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
     }
 
-    public static LogHelper using(RemoteLogger remoteLogger) {
-        return new LogHelper(remoteLogger);
+    public static LogHelper using(Logger logger) {
+        return new LogHelper(logger);
     }
 
     /**
@@ -48,7 +48,7 @@ public class LogHelper {
             message += "there is a native call ringing";
         }
 
-        mRemoteLogger.d(message);
+        mLogger.d(message);
     }
 
     /**
@@ -65,7 +65,7 @@ public class LogHelper {
         message.put("caller_id", "<CALLER_ID>");
         message.put("phonenumber", "<PHONE_NUMBER>");
 
-        mRemoteLogger.getVialerLogger().logToEnvironment(
+        mLogger.getVialerLogger().logToEnvironment(
                 VialerApplication.get().getString(R.string.push_log_entries_token),
                 "ANDROID : " + mGson.toJson(message)
         );
@@ -80,9 +80,9 @@ public class LogHelper {
 
         if (!secureCalling.isEnabled()) {
             if (secureCalling.isSetCorrectly()) {
-                mRemoteLogger.i("TLS will not be used for this call because the user has disabled it in advanced settings");
+                mLogger.i("TLS will not be used for this call because the user has disabled it in advanced settings");
             } else {
-                mRemoteLogger.w("TLS will not be used for this call because we have been unable to update the VoIP account");
+                mLogger.w("TLS will not be used for this call because we have been unable to update the VoIP account");
             }
         }
     }

@@ -5,10 +5,13 @@
     <color name="color_primary_dark">#DE531B</color>
     <color name="color_highlight">#3E50B4</color>
 
+    <color name="background_gradient_start">#FF8D07</color>
+    <color name="background_gradient_end">#FF742F</color>
+
     <!-- Dial buttons colors -->
-    <color name="dial_button_digit_color">@color/color_primary</color>
-    <color name="dial_button_chars_color">#737373</color>
-    <color name="dial_button_pressed">#CCFFE4B2</color>
+    <color name="dial_button_digit_color">#fff</color>
+    <color name="dial_button_chars_color">#fff</color>
+    <color name="dial_button_pressed">#b1b1b1</color>
 
     <color name="progress_bar_color">@color/color_highlight</color>
 

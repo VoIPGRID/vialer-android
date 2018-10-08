@@ -182,6 +182,13 @@
     <string name="two_step_call_state_setup_failed">Opzetten van gesprek mislukt</string>
     <string name="two_step_call_state_invalid_number">Telefoonnummer incorrect</string>
 
+    <!-- Call layout values -->
+    <string name="dialpad_label">toetsen</string>
+    <string name="mute_label">geluid uit</string>
+    <string name="speaker_label">luidspreker</string>
+    <string name="transfer_label">doorverbinden</string>
+    <string name="onhold_label">wacht</string>
+
     <!-- Permission strings -->
     <string name="permission_microphone_dialog_title">Microfoon permissie</string>
     <string name="permission_microphone_dialog_message">Permissie is nodig om te kunnen bellen.</string>

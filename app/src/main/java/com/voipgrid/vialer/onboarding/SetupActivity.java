@@ -25,7 +25,7 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.RemoteLoggingActivity;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.models.PasswordResetParams;
@@ -58,7 +58,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
     private Api mApi;
     private JsonStorage mJsonStorage;
     private Preferences mPreferences;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private ServiceGenerator mServiceGen;
     private AlertDialog mAlertDialog;
     private String mUsername;
@@ -72,7 +72,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
         mPreferences = new Preferences(this);
 
         // Forced logging due to user not being able to set/unset it at this point.
-        mRemoteLogger = new RemoteLogger(SetupActivity.class).forceRemoteLogging(true);
+        mLogger = new Logger(SetupActivity.class).forceRemoteLogging(true);
 
         Fragment gotoFragment = null;
         Integer fragmentId = null;
@@ -329,7 +329,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
                     });
                 } else {
                     if (systemUser.getOutgoingCli() == null || systemUser.getOutgoingCli().isEmpty()) {
-                        mRemoteLogger.d("onResponse getOutgoingCli is null");
+                        mLogger.d("onResponse getOutgoingCli is null");
                     }
                     mPreferences.setSipPermission(true);
 

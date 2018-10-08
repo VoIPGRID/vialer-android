@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,8 @@ public class NumberInputView extends RelativeLayout implements
     private EditText mNumberInputEditText;
     private ImageButton mRemoveButton;
     private OnInputChangedListener mListener;
+    private ImageButton mExitButton;
+    private boolean showRemoveButton = true;
 
     public NumberInputView(Context context) {
         super(context);
@@ -46,17 +49,22 @@ public class NumberInputView extends RelativeLayout implements
         inflater.inflate(R.layout.view_number_input, this);
 
         // Find the number input field and add a TextChangedListener to handle text changes.
-        mNumberInputEditText = (EditText) findViewById(R.id.edit_text);
+        mNumberInputEditText = findViewById(R.id.edit_text);
         mNumberInputEditText.addTextChangedListener(this);
         mNumberInputEditText.setOnClickListener(this);
         mNumberInputEditText.setOnLongClickListener(this);
 
         // Find the remove button and add an OnClickListener.
-        mRemoveButton = (ImageButton) findViewById(R.id.remove_button);
+        mRemoveButton = findViewById(R.id.remove_button);
         mRemoveButton.setOnClickListener(this);
         mRemoveButton.setOnLongClickListener(this);
 
         mNumberInputEditText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.dialpad_number_input_text_size));
+        mExitButton = findViewById(R.id.exit_button);
+
+        mExitButton.setOnClickListener(v -> {
+            mListener.exitButtonWasPressed();
+        });
     }
 
     public void setOnInputChangedListener(OnInputChangedListener listener) {
@@ -105,9 +113,6 @@ public class NumberInputView extends RelativeLayout implements
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         if (s.length() >= 0 && mListener != null) {
             mListener.onInputChanged(s.toString());
-            mRemoveButton.setVisibility(View.VISIBLE);
-        } else {
-            mRemoveButton.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -215,12 +220,21 @@ public class NumberInputView extends RelativeLayout implements
         return mNumberInputEditText.getText().toString();
     }
 
+    public void enableRemoveButton() {
+        showRemoveButton = true;
+        mRemoveButton.setVisibility(VISIBLE);
+    }
+
     public interface OnInputChangedListener {
         void onInputChanged(String number);
+        void exitButtonWasPressed();
     }
 
     public boolean isEmpty() {
         return mNumberInputEditText.length() == 0;
     }
 
+    public void enableExitButton() {
+        mExitButton.setVisibility(View.VISIBLE);
+    }
 }

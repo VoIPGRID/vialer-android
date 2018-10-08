@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.voipgrid.vialer.api.models.ApiTokenRequest;
 import com.voipgrid.vialer.api.models.ApiTokenResponse;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.util.AccountHelper;
 
 import java.io.IOException;
@@ -19,16 +19,16 @@ public class ApiTokenFetcher {
     private final String mPassword;
     private final Api mApi;
     private final AccountHelper mAccountHelper;
-    private final RemoteLogger mRemoteLogger;
+    private final Logger mLogger;
 
     private ApiTokenListener mListener;
 
-    private ApiTokenFetcher(String username, String password, Api api, AccountHelper accountHelper, RemoteLogger remoteLogger) {
+    private ApiTokenFetcher(String username, String password, Api api, AccountHelper accountHelper, Logger logger) {
         mUsername = username;
         mPassword = password;
         mApi = api;
         mAccountHelper = accountHelper;
-        mRemoteLogger = remoteLogger;
+        mLogger = logger;
     }
 
     /**
@@ -55,7 +55,7 @@ public class ApiTokenFetcher {
                 password,
                 ServiceGenerator.createApiService(context, null, null, null),
                 new AccountHelper(context),
-                new RemoteLogger(ApiTokenFetcher.class).enableConsoleLogging()
+                new Logger(ApiTokenFetcher.class)
         );
     }
 
@@ -71,7 +71,7 @@ public class ApiTokenFetcher {
                 accountHelper.getPassword(),
                 ServiceGenerator.createApiService(context, null, null, null),
                 new AccountHelper(context),
-                new RemoteLogger(ApiTokenFetcher.class).enableConsoleLogging()
+                new Logger(ApiTokenFetcher.class)
         );
     }
 
@@ -155,7 +155,7 @@ public class ApiTokenFetcher {
         @Override
         public void onResponse(Call<ApiTokenResponse> call, Response<ApiTokenResponse> response) {
             if (response.isSuccessful()) {
-                mRemoteLogger.i("Successfully retrieved an api-key");
+                mLogger.i("Successfully retrieved an api-key");
                 ApiTokenResponse apiTokenResponse = response.body();
                 mAccountHelper.setApiToken(apiTokenResponse.getApiToken());
                 mListener.onSuccess(apiTokenResponse.getApiToken());
@@ -165,12 +165,12 @@ public class ApiTokenFetcher {
             String errorString = errorString(response);
 
             if (!mDidSupplyTwoFactorCode && responseIndicatesThat2faIsRequired(errorString)) {
-                mRemoteLogger.i("Attempt to retrieve an api-key failed because a two-factor code is required");
+                mLogger.i("Attempt to retrieve an api-key failed because a two-factor code is required");
                 mListener.twoFactorCodeRequired();
                 return;
             }
 
-            mRemoteLogger.e("Failed to retrieve an api-key with code: " + response.code() + ". Request included a two-factor code: " + mDidSupplyTwoFactorCode);
+            mLogger.e("Failed to retrieve an api-key with code: " + response.code() + ". Request included a two-factor code: " + mDidSupplyTwoFactorCode);
 
             mListener.onFailure();
         }

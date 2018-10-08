@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.statistics.AppState;
 
 /**
@@ -21,7 +21,7 @@ public class MediaManager implements
     private Context mContext;
     private AudioManager mAudioManager;
     private AudioChangedInterface mAudioChangedInterfaceListener;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private IncomingRinger mIncomingRinger;
 
     static int CURRENT_CALL_STATE = Constants.CALL_INVALID;
@@ -52,7 +52,7 @@ public class MediaManager implements
         mContext = context;
         mAudioChangedInterfaceListener = audioChangedInterface;
 
-        mRemoteLogger = new RemoteLogger(MediaManager.class).enableConsoleLogging();
+        mLogger = new Logger(MediaManager.class);
 
         setAudioManager();
 
@@ -88,7 +88,7 @@ public class MediaManager implements
     }
 
     public void deInit() {
-        mRemoteLogger.v("deInit()");
+        mLogger.v("deInit()");
 
         if(mAudioRouter != null) {
             mAudioRouter.deInit();
@@ -106,7 +106,7 @@ public class MediaManager implements
     }
 
     public void callStarted() {
-        mRemoteLogger.v("callStarted()");
+        mLogger.v("callStarted()");
         mAudioRouter.onStartingCall();
     }
 
@@ -114,7 +114,7 @@ public class MediaManager implements
      * Function for the call activity when a call has been answered
      */
     public void callAnswered() {
-        mRemoteLogger.v("callAnswered()");
+        mLogger.v("callAnswered()");
         if(mAudioRouter == null) {
             mAudioRouter = new AudioRouter(mContext, this, mAudioManager);
             mAudioRouter.onAnsweredCall();
@@ -128,7 +128,7 @@ public class MediaManager implements
      * Function for the call activity when a call has been ended.
      */
     public void callEnded() {
-        mRemoteLogger.v("callEnded()");
+        mLogger.v("callEnded()");
         if (mAudioRouter != null) {
             mAudioRouter.onEndedCall();
         }
@@ -139,7 +139,7 @@ public class MediaManager implements
      *
      */
     public void callOutgoing() {
-        mRemoteLogger.v("callOutgoing");
+        mLogger.v("callOutgoing");
         mAudioRouter.onOutgoingCall();
     }
 
@@ -149,8 +149,8 @@ public class MediaManager implements
      * @param activate boolean true will activate bluetooth; false will deactivate bluetooth
      */
     public void useBluetoothAudio(boolean activate) {
-        mRemoteLogger.i("userBluetoothAudio()");
-        mRemoteLogger.i("==> " + activate);
+        mLogger.i("userBluetoothAudio()");
+        mLogger.i("==> " + activate);
 
         if (activate) {
             mAudioRouter.enableBTSco();
@@ -176,7 +176,7 @@ public class MediaManager implements
      * Get the ringer mode for when there is an incoming call.
      */
     public void startIncomingCallRinger() {
-        mRemoteLogger.d("startIncomingCallRinger()");
+        mLogger.d("startIncomingCallRinger()");
         if (mIncomingRinger != null) {
             mIncomingRinger.start();
         }
@@ -186,7 +186,7 @@ public class MediaManager implements
      * Stop the incoming call ringer.
      */
     public void stopIncomingCallRinger() {
-        mRemoteLogger.d("stopIncomingCallRinger");
+        mLogger.d("stopIncomingCallRinger");
         if (mIncomingRinger != null) {
             mIncomingRinger.stop();
         }
@@ -198,11 +198,21 @@ public class MediaManager implements
      * @param onSpeaker Whether to turn the speaker mode on or off.
      */
     public void setCallOnSpeaker(boolean onSpeaker) {
-        mRemoteLogger.i("setCallOnSpeaker()");
-        mRemoteLogger.i("==> " + onSpeaker);
+        mLogger.i("setCallOnSpeaker()");
+        mLogger.i("==> " + onSpeaker);
 
         mCallIsOnSpeaker = onSpeaker;
         mAudioRouter.enableSpeaker(onSpeaker);
+    }
+
+    /**
+     * Check if the audio is currently being played through the speaker.
+     *
+     * @return TRUE if audio is being played through speaker, otherwise FALSE.
+     */
+    public boolean isCallOnSpeaker() {
+        return mAudioManager != null && mAudioManager.isSpeakerphoneOn();
+
     }
 
     /**
@@ -210,7 +220,7 @@ public class MediaManager implements
      * and release the audio focus for the app.
      */
     private void resetAudioManager() {
-        mRemoteLogger.v("resetAudioManager()...");
+        mLogger.v("resetAudioManager()...");
 
         if(mAudioManager == null) return;
 
@@ -225,21 +235,21 @@ public class MediaManager implements
      */
     @Override
     public void onAudioFocusChange(int focusChange) {
-        mRemoteLogger.v("onAudioFocusChange()...");
-        mRemoteLogger.v("====> " + focusChange);
+        mLogger.v("onAudioFocusChange()...");
+        mLogger.v("====> " + focusChange);
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                mRemoteLogger.i("We gained audio focus!");
+                mLogger.i("We gained audio focus!");
                 if (mPreviousVolume != -1) {
                     mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, mPreviousVolume, 0);
                     mPreviousVolume = -1;
                 }
 
-                mRemoteLogger.i("Was the audio lost: " + mAudioIsLost);
+                mLogger.i("Was the audio lost: " + mAudioIsLost);
                 if (mAudioIsLost) {
                     mAudioIsLost = false;
                     mAudioRouter.setAudioIsLost(false);
-                    mRemoteLogger.e("CURRENT_ROUTE: " + AudioRouter.CURRENT_ROUTE);
+                    mLogger.e("CURRENT_ROUTE: " + AudioRouter.CURRENT_ROUTE);
 //                    if (AudioRouter.CURRENT_ROUTE == Constants.ROUTE_BT) {
                         mAudioRouter.reconnectBluetoothSco();
 //                    }
@@ -252,7 +262,7 @@ public class MediaManager implements
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
             case AudioManager.AUDIOFOCUS_LOSS:
-                mRemoteLogger.i("Lost audio focus! Probably incoming native audio call.");
+                mLogger.i("Lost audio focus! Probably incoming native audio call.");
                 mAudioIsLost = true;
                 mAudioChangedInterfaceListener.audioLost(true);
                 mIncomingRinger.pause();
@@ -260,7 +270,7 @@ public class MediaManager implements
                 break;
             case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                mRemoteLogger.i("We must lower our audio volume! Probably incoming notification / driving directions.");
+                mLogger.i("We must lower our audio volume! Probably incoming notification / driving directions.");
                 mPreviousVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
                 mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, 1, 0);
                 if (CURRENT_CALL_STATE == Constants.CALL_RINGING) {
@@ -274,8 +284,8 @@ public class MediaManager implements
 
     @Override
     public void audioRouteUpdate(int newRoute) {
-        mRemoteLogger.d("audioRouteUpdate()");
-        mRemoteLogger.d("==> newRoute: " + newRoute + " oldRoute: " + mCurrentAudioRoute);
+        mLogger.d("audioRouteUpdate()");
+        mLogger.d("==> newRoute: " + newRoute + " oldRoute: " + mCurrentAudioRoute);
         if (newRoute != mCurrentAudioRoute) {
             mCurrentAudioRoute = newRoute;
             if (mCurrentAudioRoute == Constants.ROUTE_BT) {
@@ -290,16 +300,16 @@ public class MediaManager implements
 
     @Override
     public void btDeviceConnected(boolean connected) {
-        mRemoteLogger.d("btDeviceConnected()");
-        mRemoteLogger.d("==> " + connected);
+        mLogger.d("btDeviceConnected()");
+        mLogger.d("==> " + connected);
         AppState.isUsingBluetoothAudio = connected;
         mAudioChangedInterfaceListener.bluetoothDeviceConnected(connected);
     }
 
     @Override
     public void btAudioConnected(boolean connected) {
-        mRemoteLogger.d("btAudioConnected()");
-        mRemoteLogger.d("==> " + connected);
+        mLogger.d("btAudioConnected()");
+        mLogger.d("==> " + connected);
 
         if (!connected) {
             mAudioManager.setSpeakerphoneOn(mCallIsOnSpeaker);
