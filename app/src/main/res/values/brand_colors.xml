@@ -9,8 +9,8 @@
     <color name="background_gradient_end">#FF742F</color>
 
     <!-- Dial buttons colors -->
-    <color name="dial_button_digit_color">#fff</color>
-    <color name="dial_button_chars_color">#fff</color>
+    <color name="dial_button_digit_color">#ffffff</color>
+    <color name="dial_button_chars_color">#aaffffff</color>
     <color name="dial_button_pressed">#b1b1b1</color>
 
     <color name="progress_bar_color">@color/color_highlight</color>

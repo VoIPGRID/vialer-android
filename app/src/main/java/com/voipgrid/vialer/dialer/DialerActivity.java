@@ -6,7 +6,6 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -29,7 +28,8 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.calling.PendingCallActivity;
+import com.voipgrid.vialer.calling.Dialer;
+import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
@@ -52,7 +52,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
-import com.voipgrid.vialer.calling.Dialer;
 
 /**
  * DialerActivity with a numpad view and functionality to perform a T9 contacts search
@@ -72,6 +71,8 @@ public class DialerActivity extends LoginRequiredActivity implements
     @Inject ConnectivityHelper mConnectivityHelper;
     @Inject JsonStorage mJsonStorage;
     @Inject ReachabilityReceiver mReachabilityReceiver;
+    @Inject Contacts mContacts;
+
     DialHelper mDialHelper;
 
     private String t9Query;
@@ -268,7 +269,7 @@ public class DialerActivity extends LoginRequiredActivity implements
 
                     if (!hasThumbnail) {
                         String firstLetter = cursor.getString(1).replaceAll("\\<.*?>", "").substring(0, 1);
-                        Bitmap bitmapImage = IconHelper.getCallerIconBitmap(firstLetter, getResources().getColor(R.color.color_primary));
+                        Bitmap bitmapImage = IconHelper.getCallerIconBitmap(firstLetter, cursor.getString(0), 0);
                         ((CircleImageView) view).setImageBitmap(bitmapImage);
                     }
                     return true;

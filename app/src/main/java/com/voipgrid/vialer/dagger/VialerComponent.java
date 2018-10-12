@@ -5,6 +5,7 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.calling.PendingCallActivity;
+import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.sip.SipService;
 
@@ -28,4 +29,6 @@ public interface VialerComponent {
     void inject(PendingCallActivity pendingCallActivity);
 
     void inject(DialerActivity dialerActivity);
+
+    void inject(CallRecordAdapter callRecordAdapter);
 }
