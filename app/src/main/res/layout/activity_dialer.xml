@@ -26,7 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:divider="@null"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:fadeScrollbars="false"/>
 
         <fragment android:id="@+id/t9helper"
                   android:name="com.voipgrid.vialer.t9.T9HelperFragment"
