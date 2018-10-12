@@ -61,8 +61,6 @@ public class IconHelper {
 
         Canvas circleCanvas = new Canvas(circle);
 
-
-
         iconDrawable.setBounds(0, 0, iconCanvas.getWidth(), iconCanvas.getHeight());
         iconDrawable.draw(iconCanvas);
         circleCanvas.drawBitmap(iconBitmap, (circle.getWidth() - iconBitmap.getWidth()) / 2, (circle.getHeight() - iconBitmap.getHeight()) / 2, null);
