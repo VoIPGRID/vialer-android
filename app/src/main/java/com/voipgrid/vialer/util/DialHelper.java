@@ -126,7 +126,6 @@ public class DialHelper {
                 startPendingCallActivity(number);
             } else {
                 callWithApi(number, contactName);
-                startPendingCallActivity(number);
             }
         }
     }
