@@ -11,8 +11,8 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
@@ -58,7 +58,7 @@ public class SipService extends Service implements SipConfig.Listener {
     private static final int CHECK_SERVICE_USER_INTERVAL_MS = 20000;
     private Handler mCheckServiceHandler;
     private Runnable mCheckServiceRunnable;
-    private Intent mIntent;
+    @Nullable private Intent mIntent;
 
     @Inject SipConfig mSipConfig;
 
@@ -260,6 +260,10 @@ public class SipService extends Service implements SipConfig.Listener {
 
     @Override
     public void pjSipDidLoad() {
+        if (mIntent == null) {
+            return;
+        }
+
         mInitialCallType = mIntent.getAction();
         Uri number = mIntent.getData();
 

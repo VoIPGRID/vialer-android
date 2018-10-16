@@ -5,12 +5,8 @@ import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_REINIT_MEDIA;
 import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT;
 import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_VIA;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -24,7 +20,6 @@ import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.fcm.RemoteMessageData;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
@@ -39,9 +34,7 @@ import org.pjsip.pjsua2.AuthCredInfo;
 import org.pjsip.pjsua2.CallOpParam;
 import org.pjsip.pjsua2.CodecInfo;
 import org.pjsip.pjsua2.CodecInfoVector;
-import org.pjsip.pjsua2.Endpoint;
 import org.pjsip.pjsua2.EpConfig;
-import org.pjsip.pjsua2.IpChangeParam;
 import org.pjsip.pjsua2.LogConfig;
 import org.pjsip.pjsua2.MediaConfig;
 import org.pjsip.pjsua2.OnRegStateParam;
@@ -53,7 +46,6 @@ import org.pjsip.pjsua2.pjmedia_srtp_use;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
 import org.pjsip.pjsua2.pjsua_call_flag;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -124,10 +116,11 @@ public class SipConfig implements AccountStatus {
                 setCodecPrio();
                 mSipAccount = createSipAccount();
                 startNetworkingListener();
-                listener.pjSipDidLoad();
             } catch (Exception e) {
                 listener.pjSipFailedToLoad(e);
             }
+
+            listener.pjSipDidLoad();
         }).start();
     }
 

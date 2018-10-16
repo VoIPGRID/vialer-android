@@ -26,7 +26,7 @@ public class CallActivityHelper {
             contactName = callerId;
         }
 
-        if (contactName != null) {
+        if (contactName != null && !contactName.isEmpty()) {
             title.setText(contactName);
             subtitle.setText(number);
             return;
