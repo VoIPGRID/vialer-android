@@ -82,7 +82,7 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:hint="@string/account_mobile_number_edit_text_hint"
-                        android:inputType="number" />
+                        android:inputType="phone" />
 
                 </android.support.design.widget.TextInputLayout>
 
