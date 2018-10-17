@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.test;
+package com.voipgrid.vialer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -1,10 +1,7 @@
-package com.voipgrid.vialer.test.logging;
+package com.voipgrid.vialer.logging;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
-
-import com.voipgrid.vialer.logging.DeviceInformation;
-import com.voipgrid.vialer.logging.LogComposer;
 
 import org.junit.Before;
 import org.junit.Test;
