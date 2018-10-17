@@ -258,7 +258,7 @@ public class CallActivity extends AbstractCallActivity implements View.OnClickLi
                     callTransferFragment.secondCallIsConnected();
                 }
 
-                if (mSipServiceConnection.get().getCurrentCall() != null) {
+                if (mSipServiceConnection.hasActiveCall()) {
                     VialerStatistics.callWasSuccessfullySetup(mSipServiceConnection.get().getCurrentCall());
                 }
 
