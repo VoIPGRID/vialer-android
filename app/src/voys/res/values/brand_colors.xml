@@ -7,8 +7,6 @@
     <color name="background_gradient_start">#2E3192</color>
     <color name="background_gradient_end">#2A2DA9</color>
 
-    <color name="dial_button_digit_color">#fff</color>
-    <color name="dial_button_chars_color">#fff</color>
     <color name="dial_button_pressed">#E0FFFF</color>
 
     <color name="progress_bar_color">@color/color_highlight</color>
