@@ -3,7 +3,7 @@ package com.voipgrid.vialer.util;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /**
  * This is a single class that provides convenient methods to register/unregister receivers.

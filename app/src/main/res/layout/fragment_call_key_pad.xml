@@ -78,7 +78,7 @@
                     android:background="@android:color/white"
                     android:gravity="center_vertical">
 
-                    <android.support.design.widget.FloatingActionButton
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/button_keypad_call_hangup"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

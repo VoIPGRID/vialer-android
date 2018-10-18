@@ -1,6 +1,6 @@
 package com.voipgrid.vialer.bluetooth;
 
-import android.support.annotation.IntDef;
+import androidx.annotation.IntDef;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 

@@ -58,7 +58,7 @@
             android:orientation="horizontal"
             android:gravity="center_horizontal|bottom"
             >
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/two_step_button_hangup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

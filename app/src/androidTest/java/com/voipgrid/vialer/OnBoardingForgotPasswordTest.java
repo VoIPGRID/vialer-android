@@ -1,28 +1,30 @@
 package com.voipgrid.vialer;
 
-import android.support.test.InstrumentationRegistry;
-import android.test.ActivityInstrumentationTestCase2;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.voipgrid.vialer.onboarding.SetupActivity;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.runner.RunWith;
 
-public class OnBoardingForgotPasswordTest extends ActivityInstrumentationTestCase2<SetupActivity> {
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
+
+@RunWith(AndroidJUnit4.class)
+public class OnBoardingForgotPasswordTest {
+
+    @Rule
+    public ActivityTestRule<SetupActivity> mActivityTestRule = new ActivityTestRule<>(SetupActivity.class);
 
     private SetupActivity mActivity;
     private TestActions mActions;
 
-    public OnBoardingForgotPasswordTest() {
-        super(SetupActivity.class);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        injectInstrumentation(InstrumentationRegistry.getInstrumentation());
-        mActivity = getActivity();
+    @Before
+    public void setUp() {
+        mActivity = mActivityTestRule.getActivity();
 
         mActions = new TestActions();
         mActions.logoWaitProceed();

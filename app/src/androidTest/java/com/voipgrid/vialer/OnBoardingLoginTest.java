@@ -1,17 +1,25 @@
 package com.voipgrid.vialer;
 
-import android.support.test.InstrumentationRegistry;
-import android.test.ActivityInstrumentationTestCase2;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.voipgrid.vialer.onboarding.SetupActivity;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.runner.RunWith;
+
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.core.AllOf.allOf;
 
-public class OnBoardingLoginTest extends ActivityInstrumentationTestCase2<SetupActivity> {
+@RunWith(AndroidJUnit4.class)
+public class OnBoardingLoginTest {
+
+    @Rule
+    public ActivityTestRule<SetupActivity> mActivityTestRule = new ActivityTestRule<>(SetupActivity.class);
 
     private SetupActivity mActivity;
     private TestActions mActions;
@@ -25,15 +33,9 @@ public class OnBoardingLoginTest extends ActivityInstrumentationTestCase2<SetupA
     public static final String VALID_BUT_UNKNOWN_PASSWORD_VALUE = "somepassword";
     public static final String VALID_AND_KNOWN_PASSWORD_VALUE = "Peperzaken7";
 
-    public OnBoardingLoginTest() {
-        super(SetupActivity.class);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        injectInstrumentation(InstrumentationRegistry.getInstrumentation());
-        mActivity = getActivity();
+    @Before
+    public void setUp() {
+        mActivity = mActivityTestRule.getActivity();
 
         mActions = new TestActions();
         mActions.logoWaitProceed();

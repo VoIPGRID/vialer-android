@@ -10,3 +10,30 @@
 dialer2/build
 config.xml
 google-services.json
+keystore.properties
+
+
+# Local user specific env vars for fastlane
+fastlane/.env*
+!fastlane/.env.EXAMPLE
+
+# Ignoring own private constant files
+**/Screenshot-Constants.java
+
+fastlane/**/*.json
+
+####
+# fastlane specific as recommended at:
+# https://github.com/fastlane/fastlane/blob/master/docs/Gitignore.md
+fastlane/report.xml
+
+# deliver temporary files
+fastlane/Preview.html
+Preview.html
+
+# fastlane temporary build directory
+fastlane/**/builds/
+
+# snapshot generated screenshots
+fastlane/**/screenshots/**/*.png
+fastlane/**/screenshots/screenshots.html

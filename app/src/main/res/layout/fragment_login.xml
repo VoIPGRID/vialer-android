@@ -29,7 +29,7 @@
         android:text="@string/login_header_label_subtext"
         />
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/email_field"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,9 +46,9 @@
             style="@style/OnboardingEditTextStyle"
             />
 
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/password_field"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -66,7 +66,7 @@
             style="@style/OnboardingEditTextStyle"
             />
 
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/button_login"

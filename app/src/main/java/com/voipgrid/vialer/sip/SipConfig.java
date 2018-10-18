@@ -7,7 +7,7 @@ import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_VIA;
 
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;

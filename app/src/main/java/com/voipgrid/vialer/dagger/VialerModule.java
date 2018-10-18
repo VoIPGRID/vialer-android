@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
-import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;

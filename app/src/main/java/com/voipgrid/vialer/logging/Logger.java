@@ -1,7 +1,7 @@
 package com.voipgrid.vialer.logging;
 
 import android.content.Context;
-import android.support.annotation.StringDef;
+import androidx.annotation.StringDef;
 import android.util.Log;
 
 import com.voipgrid.vialer.Preferences;
