@@ -201,6 +201,11 @@ public class MediaManager implements
         mLogger.i("setCallOnSpeaker()");
         mLogger.i("==> " + onSpeaker);
 
+        if (mAudioRouter == null) {
+            mLogger.w("Attempted to change speaker setting after audio router has been deinited");
+            return;
+        }
+
         mCallIsOnSpeaker = onSpeaker;
         mAudioRouter.enableSpeaker(onSpeaker);
     }
