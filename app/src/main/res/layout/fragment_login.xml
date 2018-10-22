@@ -43,6 +43,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/email_edittext_hint"
             android:inputType="textEmailAddress"
+            style="@style/OnboardingEditTextStyle"
             />
 
     </android.support.design.widget.TextInputLayout>
@@ -62,6 +63,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/password_edittext_hint"
             android:inputType="textPassword"
+            style="@style/OnboardingEditTextStyle"
             />
 
     </android.support.design.widget.TextInputLayout>
