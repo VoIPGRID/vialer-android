@@ -16,7 +16,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.LogHelper;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -51,7 +51,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
     public static final String VOIP_HAS_BEEN_DISABLED = "com.voipgrid.vialer.voip_disabled";
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mRemoteLogger;
     private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private PowerManager mPowerManager;
@@ -59,7 +59,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     @Override
     public void onCreate() {
         super.onCreate();
-        mRemoteLogger = new RemoteLogger(FcmMessagingService.class).enableConsoleLogging();
+        mRemoteLogger = new Logger(FcmMessagingService.class);
         mAnalyticsHelper = new AnalyticsHelper(((AnalyticsApplication) getApplication()).getDefaultTracker());
         mConnectivityHelper = ConnectivityHelper.get(this);
         mPowerManager = (PowerManager) getSystemService(POWER_SERVICE);

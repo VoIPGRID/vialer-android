@@ -5,7 +5,7 @@ import static com.voipgrid.vialer.util.AccountHelper.PASSWORD_KEY;
 
 import android.content.SharedPreferences;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 /**
  * This class exists to port values in shared preferences that that have been encrypted
@@ -21,20 +21,20 @@ public class LegacyAsymmetricToSymmetricPorter {
     private final Encrypter mEncrypter;
     private final LegacyAsymmetricEncrypter mLegacyAsymmetricEncryptor;
     private final SharedPreferences mSharedPreferences;
-    private final RemoteLogger mRemoteLogger;
+    private final Logger mLogger;
 
-    public LegacyAsymmetricToSymmetricPorter(Encrypter encrypter, LegacyAsymmetricEncrypter legacyAsymmetricEncryptor, SharedPreferences sharedPreferences, RemoteLogger remoteLogger) {
+    public LegacyAsymmetricToSymmetricPorter(Encrypter encrypter, LegacyAsymmetricEncrypter legacyAsymmetricEncryptor, SharedPreferences sharedPreferences, Logger logger) {
         mEncrypter = encrypter;
         mLegacyAsymmetricEncryptor = legacyAsymmetricEncryptor;
         mSharedPreferences = sharedPreferences;
-        mRemoteLogger = remoteLogger;
+        mLogger = logger;
     }
 
     /**
      * Exports data stored in the old preferences to the new preferences.
      */
     public void port() {
-        mRemoteLogger.i("Beginning porting of encrypted keys from legacy method to current method");
+        mLogger.i("Beginning porting of encrypted keys from legacy method to current method");
 
         for (String key : valuesToPort) {
             String unencrypted = mLegacyAsymmetricEncryptor.decrypt(mSharedPreferences.getString(key, null));
@@ -43,11 +43,11 @@ public class LegacyAsymmetricToSymmetricPorter {
                 continue;
             }
 
-            mRemoteLogger.i("Porting " + key);
+            mLogger.i("Porting " + key);
 
             mSharedPreferences.edit().putString(key, mEncrypter.encrypt(unencrypted)).apply();
         }
 
-        mRemoteLogger.i("Finished porting, removing legacy keystore alias.");
+        mLogger.i("Finished porting, removing legacy keystore alias.");
     }
 }

@@ -1,76 +1,239 @@
-<android.support.v7.widget.GridLayout
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="@dimen/key_pad_width"
-    android:layout_height="wrap_content"
-    android:id="@+id/grid_layout"
-    android:gravity="center_horizontal"
-    app:columnCount="@integer/dialpad_column_count"
-    app:rowCount="@integer/dialpad_row_count">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dialpad_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    app:layout_gravity="center"
+>
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        android:onClick="onClick"
-        app:digit="1"
-        style="@style/DialpadButton"/>
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/row1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginStart="24dp"
+        app:layout_constraintBottom_toTopOf="@+id/row2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        android:onClick="onClick"
-        app:digit="2"
-        app:chars="abc"
-        style="@style/DialpadButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButton1"
+            style="@style/DialpadButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:onClick="onClick"
+            app:digit="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/dialpadButton2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        android:onClick="onClick"
-        app:digit="3"
-        app:chars="def"
-        style="@style/DialpadButton"/>
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButton2"
+            style="@style/DialpadButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:onClick="onClick"
+            app:chars="abc"
+            app:digit="2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/dialpadButton3"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/dialpadButton1"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        android:onClick="onClick"
-        app:digit="4"
-        app:chars="ghi"
-        style="@style/DialpadButton"/>
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButton3"
+            style="@style/DialpadButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:onClick="onClick"
+            app:chars="def"
+            app:digit="3"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/dialpadButton2"
+            app:layout_constraintTop_toTopOf="parent"/>
+    </android.support.constraint.ConstraintLayout>
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        android:onClick="onClick"
-        app:digit="5"
-        app:chars="jkl"
-        style="@style/DialpadButton"/>
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        app:digit="6"
-        app:chars="mno"
-        style="@style/DialpadButton"/>
+    <android.support.constraint.ConstraintLayout android:id="@+id/row2"
+                                                 android:layout_width="0dp"
+                                                 android:layout_height="0dp"
+                                                 android:layout_marginEnd="24dp"
+                                                 android:layout_marginLeft="24dp"
+                                                 android:layout_marginRight="24dp"
+                                                 android:layout_marginStart="24dp"
+                                                 app:layout_constraintBottom_toTopOf="@+id/row3"
+                                                 app:layout_constraintEnd_toEndOf="parent"
+                                                 app:layout_constraintHorizontal_bias="0.5"
+                                                 app:layout_constraintStart_toStartOf="parent"
+                                                 app:layout_constraintTop_toBottomOf="@+id/row1">
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButton4"
+            style="@style/DialpadButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:onClick="onClick"
+            app:chars="ghi"
+            app:digit="4"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/dialpadButton5"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        app:digit="7"
-        app:chars="pqrs"
-        style="@style/DialpadButton"/>
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButton5"
+            style="@style/DialpadButton"
+            android:layout_width="0dp" android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:onClick="onClick"
+            app:chars="jkl"
+            app:digit="5"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/dialpadButton6"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/dialpadButton4"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        app:digit="8"
-        app:chars="tuv"
-        style="@style/DialpadButton"/>
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButton6"
+            style="@style/DialpadButton"
+            android:layout_width="0dp" android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            app:chars="mno"
+            app:digit="6"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/dialpadButton5"
+            app:layout_constraintTop_toTopOf="parent"/>
+    </android.support.constraint.ConstraintLayout>
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        app:digit="9"
-        app:chars="wxyz"
-        style="@style/DialpadButton"/>
+    <android.support.constraint.ConstraintLayout android:id="@+id/row3"
+                                                 android:layout_width="0dp"
+                                                 android:layout_height="0dp"
+                                                 android:layout_marginEnd="24dp"
+                                                 android:layout_marginLeft="24dp"
+                                                 android:layout_marginRight="24dp"
+                                                 android:layout_marginStart="24dp"
+                                                 app:layout_constraintBottom_toTopOf="@+id/row4"
+                                                 app:layout_constraintEnd_toEndOf="parent"
+                                                 app:layout_constraintHorizontal_bias="0.0"
+                                                 app:layout_constraintStart_toStartOf="parent"
+                                                 app:layout_constraintTop_toBottomOf="@+id/row2">
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        app:digit="*"
-        style="@style/DialpadButton"
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButton7"
+            style="@style/DialpadButton"
+            android:layout_width="0dp" android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            app:chars="pqrs"
+            app:digit="7"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/dialpadButton8"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButton8"
+            style="@style/DialpadButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            app:chars="tuv"
+            app:digit="8"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/dialpadButton9"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/dialpadButton7"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButton9"
+            style="@style/DialpadButton"
+            android:layout_width="0dp" android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            app:chars="wxyz"
+            app:digit="9"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/dialpadButton8"
+            app:layout_constraintTop_toTopOf="parent"/>
+    </android.support.constraint.ConstraintLayout>
+
+
+    <android.support.constraint.ConstraintLayout android:id="@+id/row4"
+                                                 android:layout_width="0dp"
+                                                 android:layout_height="0dp"
+                                                 android:layout_marginEnd="24dp"
+                                                 android:layout_marginLeft="24dp"
+                                                 android:layout_marginRight="24dp"
+                                                 android:layout_marginStart="24dp"
+                                                 app:layout_constraintBottom_toBottomOf="parent"
+                                                 app:layout_constraintEnd_toEndOf="parent"
+                                                 app:layout_constraintHorizontal_bias="0.5"
+                                                 app:layout_constraintStart_toStartOf="parent"
+                                                 app:layout_constraintTop_toBottomOf="@+id/row3"
+                                                 app:layout_constraintVertical_bias="0.0">
+
+
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButtonAsterisk"
+            style="@style/DialpadButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            app:digit="*"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/dialpadButton0"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
         />
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        app:digit="0"
-        app:chars="+"
-        style="@style/DialpadButton"/>
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButton0"
+            style="@style/DialpadButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            app:chars="+"
+            app:digit="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/dialpadButtonHash"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/dialpadButtonAsterisk"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-    <com.voipgrid.vialer.dialer.DialpadButton
-        app:digit="#"
-        style="@style/DialpadButton"/>
+        <com.voipgrid.vialer.dialer.DialpadButton
+            android:id="@+id/dialpadButtonHash"
+            style="@style/DialpadButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_vertical|center_horizontal"
+            app:digit="#"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/dialpadButton0"
+            app:layout_constraintTop_toTopOf="parent"
+        />
+    </android.support.constraint.ConstraintLayout>
 
-</android.support.v7.widget.GridLayout>
+
+</android.support.constraint.ConstraintLayout>

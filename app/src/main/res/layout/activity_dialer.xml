@@ -1,127 +1,84 @@
-<LinearLayout
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    android:layout_height="match_parent">
 
-    <com.voipgrid.vialer.reachability.ReachabilityBarView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <LinearLayout android:id="@+id/top"
+                  android:layout_width="match_parent"
+                  android:layout_height="0dp"
+                  android:layout_marginTop="4dp"
+                  android:layout_marginBottom="16dp"
+                  android:orientation="vertical"
+                  app:layout_constraintBottom_toTopOf="@+id/bottom"
+                  app:layout_constraintEnd_toEndOf="parent"
+                  app:layout_constraintHeight_percent="1"
+                  app:layout_constraintHorizontal_bias="0.2"
+                  app:layout_constraintStart_toStartOf="parent"
+                  app:layout_constraintTop_toTopOf="parent">
 
         <ListView
             android:id="@+id/list_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:divider="@null" />
+            android:divider="@null"
+            android:visibility="gone"
+            android:fadeScrollbars="false"/>
 
-        <fragment android:name="com.voipgrid.vialer.t9.T9HelperFragment"
-                  android:id="@+id/t9helper"
-                  android:layout_weight="1"
+        <fragment android:id="@+id/t9helper"
+                  android:name="com.voipgrid.vialer.t9.T9HelperFragment"
                   android:layout_width="match_parent"
-                  android:layout_height="match_parent" />
+                  android:layout_height="0dp"
+                  android:layout_marginStart="8dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginTop="8dp"
+                  android:layout_marginEnd="8dp"
+                  android:layout_marginRight="8dp"
+                  android:layout_marginBottom="8dp"
+                  android:layout_weight="1"
+                  tools:layout="@layout/fragment_t9_helper"/>
 
         <TextView
             android:id="@+id/message"
             style="@style/EmptyViewMessageTextStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:padding="@dimen/activity_horizontal_margin" />
+            android:visibility="gone"/>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_gravity="bottom"
-            android:background="@android:color/white"
-            android:gravity="bottom">
+    </LinearLayout>
 
-            <RelativeLayout
-                android:id="@+id/key_pad_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="14dp"
-                    android:background="@drawable/top_shadow" />
+    <com.voipgrid.vialer.calling.Dialer
+        android:id="@+id/bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.75"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top"
+        app:show_remove_button="true"/>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/key_pad_background_color"
-                    android:orientation="vertical">
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/button_dialpad"
+        style="@style/FloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:onClick="onClick"
+        android:src="@drawable/ic_fab_dialer"
+        android:visibility="gone"
+        app:backgroundTint="@color/dialer_button"
+        app:borderWidth="@dimen/fab_border_width"
+        app:elevation="@dimen/fab_elevation"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
 
-                    <com.voipgrid.vialer.dialer.NumberInputView
-                        android:id="@+id/number_input_edit_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/key_pad_divider_color" />
-
-                    <com.voipgrid.vialer.dialer.KeyPadView
-                        android:id="@+id/key_pad_view"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_horizontal">
-
-                    </com.voipgrid.vialer.dialer.KeyPadView>
-
-                </LinearLayout>
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/call_button_layout"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/call_button_layout_height"
-                android:layout_alignParentBottom="false"
-                android:layout_below="@+id/key_pad_container"
-                android:gravity="center_vertical">
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/button_call"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="false"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerInParent="false"
-                    android:layout_centerVertical="true"
-                    android:layout_gravity="bottom|center_vertical"
-                    android:layout_margin="0dp"
-                    android:onClick="onClick"
-                    android:src="@drawable/ic_call_white"
-                    android:transitionName="floating_action_button_transition_name"
-                    app:backgroundTint="@color/dialpad_fab_call_color"
-                    app:borderWidth="@dimen/fab_border_width"
-                    app:elevation="@dimen/fab_elevation" />
-            </RelativeLayout>
-
-        </RelativeLayout>
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/button_dialpad"
-            style="@style/FloatingActionButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:onClick="onClick"
-            android:src="@drawable/ic_fab_dialer"
-            android:visibility="gone"
-            app:backgroundTint="@color/dialer_button"
-            app:borderWidth="@dimen/fab_border_width"
-            app:elevation="@dimen/fab_elevation" />
-
-    </RelativeLayout>
-
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

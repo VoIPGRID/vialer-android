@@ -1,6 +1,6 @@
 package com.voipgrid.vialer.media.monitoring;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipCall;
 
 import org.pjsip.pjsua2.CallOpParam;
@@ -13,7 +13,7 @@ import org.pjsip.pjsua2.CallOpParam;
 public class CallMediaMonitor implements Runnable {
 
     private final SipCall mSipCall;
-    private final RemoteLogger mRemoteLogger;
+    private final Logger mLogger;
 
     /**
      * Simply holds the last packet stats that have been fetched.
@@ -55,7 +55,7 @@ public class CallMediaMonitor implements Runnable {
 
     public CallMediaMonitor(SipCall sipCall) {
         mSipCall = sipCall;
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mLogger = new Logger(this.getClass());
     }
 
     @Override
@@ -78,7 +78,7 @@ public class CallMediaMonitor implements Runnable {
     private void handleMediaPacketStats(PacketStats packetStats) {
         // If all audio is missing from a call then send a re-invite
         if (packetStats.getCollectionTime() != 0 && packetStats.isEitherSideMissingAudio()) {
-            mRemoteLogger.w("There is NO audio " + mSipCall.getCallDuration()
+            mLogger.w("There is NO audio " + mSipCall.getCallDuration()
                     + " sec into the call. Trying a reinvite");
             attemptCallReinvite(packetStats);
             return;
@@ -90,7 +90,7 @@ public class CallMediaMonitor implements Runnable {
             // If there has been no audio since our last interval this means that audio may have
             // dropped and we should send a reinvite.
             if (mLastTrackedStats != null && packetStatsForLastInterval.isMissingAllAudio()) {
-                mRemoteLogger.w("There has been NO audio between "
+                mLogger.w("There has been NO audio between "
                         + mLastTrackedStats.getCollectionTime() + "s and "
                         + packetStats.getCollectionTime() + "s. Trying a reinvite");
                 attemptCallReinvite(packetStats);
@@ -104,13 +104,13 @@ public class CallMediaMonitor implements Runnable {
         if (mPacketStatsWhenAttemptingReinvite != null) {
             PacketStats packetStatsSinceLastInvite = packetStats.difference(mPacketStatsWhenAttemptingReinvite);
             if (packetStatsSinceLastInvite.hasAudio()) {
-                mRemoteLogger.i(packetStatsSinceLastInvite.getReceived() + "rx, " + packetStatsSinceLastInvite.getSent() + "tx packets have been detected after reinvite between " + mPacketStatsWhenAttemptingReinvite.getCollectionTime() + "s " + packetStats.getCollectionTime() + "s");
+                mLogger.i(packetStatsSinceLastInvite.getReceived() + "rx, " + packetStatsSinceLastInvite.getSent() + "tx packets have been detected after reinvite between " + mPacketStatsWhenAttemptingReinvite.getCollectionTime() + "s " + packetStats.getCollectionTime() + "s");
             }
             mPacketStatsWhenAttemptingReinvite = null;
         }
 
         if (packetStats.hasAudio() && isTimeToReportAudioStats()) {
-            mRemoteLogger.i(
+            mLogger.i(
                     "There is audio in the last " + REPORT_PACKET_STATS_EVERY_S + " seconds rxPkt: "
                             + packetStats.getReceived() + " and txPkt: " + packetStats.getSent());
         }
@@ -126,7 +126,7 @@ public class CallMediaMonitor implements Runnable {
             mSipCall.reinvite(new CallOpParam(true));
             mPacketStatsWhenAttemptingReinvite = packetStats;
         } catch (Exception e) {
-            mRemoteLogger.e("Unable to reinvite call: " + e.getMessage());
+            mLogger.e("Unable to reinvite call: " + e.getMessage());
         }
     }
 

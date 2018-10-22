@@ -1,6 +1,6 @@
 package com.voipgrid.vialer.sip;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 import org.pjsip.pjsua2.CallOpParam;
 import org.pjsip.pjsua2.Endpoint;
@@ -9,12 +9,12 @@ import org.pjsip.pjsua2.pjsip_transport_state;
 
 public class VialerEndpoint extends Endpoint {
 
-    private final RemoteLogger mLogger;
+    private final Logger mLogger;
     private SipService mSipService;
 
     VialerEndpoint() {
         super();
-        mLogger = new RemoteLogger(this.getClass());
+        mLogger = new Logger(this.getClass());
     }
 
     @Override

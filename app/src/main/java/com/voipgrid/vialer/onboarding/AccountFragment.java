@@ -15,7 +15,7 @@ import android.widget.EditText;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -40,7 +40,7 @@ public class AccountFragment extends OnboardingFragment implements
     private EditText mOutgoingEditText;
     private Button mConfigureButton;
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
 
     /**
      * Use this factory method to create a new instance of
@@ -104,8 +104,8 @@ public class AccountFragment extends OnboardingFragment implements
             // TODO Find a better solution for this (VIALA-575) in future.
             if (outGoingNumber == null || outGoingNumber.isEmpty()) {
                 // Forced logging due to user not being able to set/unset it at this point.
-                mRemoteLogger = new RemoteLogger(AccountFragment.class).forceRemoteLogging(true);
-                mRemoteLogger.d("no outGoingNumber");
+                mLogger = new Logger(AccountFragment.class).forceRemoteLogging(true);
+                mLogger.d("no outGoingNumber");
                 SystemUser systemUser = (SystemUser) new JsonStorage(getActivity()).get(SystemUser.class);
                 outGoingNumber = systemUser.getOutgoingCli();
             }
