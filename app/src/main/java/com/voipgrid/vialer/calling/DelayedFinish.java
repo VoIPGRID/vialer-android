@@ -24,7 +24,7 @@ public class DelayedFinish implements Runnable {
 
     void begin() {
         this.delayedHandler.removeCallbacksAndMessages(null);
-        this.delayedHandler.postDelayed(this, DELAYED_FINISH_RETRY_MS);
+        this.delayedHandler.postDelayed(this, DELAYED_FINISH_MS);
     }
 
     @Override
