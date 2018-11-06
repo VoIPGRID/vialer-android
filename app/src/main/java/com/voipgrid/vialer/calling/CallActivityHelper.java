@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.contacts.Contacts;
 
 public class CallActivityHelper {
@@ -20,6 +21,8 @@ public class CallActivityHelper {
 
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
+        } else {
+            imageView.setImageResource(R.drawable.no_user);
         }
 
         if (contactName == null) {

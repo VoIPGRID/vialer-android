@@ -18,7 +18,7 @@
     <string name="call_incoming">Inkomend gesprek</string>
     <string name="call_outgoing">Uitgaand gesprek</string>
     <string name="call_ended">Gesprek beëindigd</string>
-    <string name="call_on_hold">In de wacht</string>
+    <string name="call_on_hold">In de wacht: %1$s</string>
     <string name="call_hangup">Ophangen</string>
     <string name="call_connected">Verbonden</string>
     <string name="call_unreachable">Onbereikbaar</string>

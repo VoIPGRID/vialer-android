@@ -8,20 +8,12 @@ import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_CONNECTED_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
-import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_CONNECTED_MESSAGE;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_INVALID_STATE;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_PUT_ON_HOLD_ACTION;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_UNHOLD_ACTION;
-import static com.voipgrid.vialer.sip.SipConstants.SERVICE_STOPPED;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.constraint.Group;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,28 +24,23 @@ import android.widget.TextView;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.call.CallActionButton;
 import com.voipgrid.vialer.call.CallDetail;
+import com.voipgrid.vialer.call.DisplayCallDetail;
 import com.voipgrid.vialer.call.HangupButton;
+import com.voipgrid.vialer.call.TransferCompleteDialog;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
-import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.dialer.DialerActivity;
-import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.sip.SipCall;
-import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import butterknife.BindView;
-import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -74,9 +61,9 @@ public class CallActivity extends AbstractCallActivity implements
     @BindView(R.id.dialer) Dialer mDialer;
     @BindView(R.id.profile_image) ImageView mContactImage;
     @BindView(R.id.transfer_label) TextView mTransferLabel;
+    @BindView(R.id.call_status) TextView mCallStatusTv;
 
     @Inject AnalyticsHelper mAnalyticsHelper;
-    @Inject CallActivityHelper mCallActivityHelper;
 
     @BindView(R.id.button_transfer) CallActionButton mTransferButton;
     @BindView(R.id.button_onhold) CallActionButton mOnHoldButton;
@@ -85,20 +72,26 @@ public class CallActivity extends AbstractCallActivity implements
     @BindView(R.id.button_speaker) CallActionButton mSpeakerButton;
 
     private CallPresenter mCallPresenter;
+    private SweetAlertDialog mTransferCompleteDialog;
 
     private boolean mConnected = false;
     private boolean mMute = false;
     private boolean mOnHold = false;
     private boolean mOnTransfer = false;
-    private boolean mSelfHangup = false;
-
-    public String mPhoneNumberToDisplay;
-    public String mType;
-    public String mCallerIdToDisplay;
+    private String mType;
     private boolean mCallIsTransferred = false;
 
     private CallDetail mInitialCallDetail;
     private CallDetail mTransferCallDetail;
+
+    /**
+     * The call details stored in this property will always be displayed
+     * on the screen, this is only used before the appropriate call has been
+     * setup correctly, when set to null the information will be pulled from
+     * the SipCall object directly.
+     *
+     */
+    private DisplayCallDetail mForceDisplayedCallDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,13 +122,11 @@ public class CallActivity extends AbstractCallActivity implements
             return;
         }
 
-        mPhoneNumberToDisplay = getIntent().getStringExtra(PHONE_NUMBER);
-        mCallerIdToDisplay = getIntent().getStringExtra(CONTACT_NAME);
-        displayCallInfo();
+        mForceDisplayedCallDetails = new DisplayCallDetail(getIntent().getStringExtra(PHONE_NUMBER), getIntent().getStringExtra(CONTACT_NAME));
+        updateUi();
 
         if (wasOpenedViaNotification() && !isIncomingCall()) {
-            mCallNotifications.callWasOpenedFromNotificationButIsNotIncoming(
-                    getCallNotificationDetails());
+            mCallNotifications.callWasOpenedFromNotificationButIsNotIncoming(getCallNotificationDetails());
             updateMediaManager(TYPE_CONNECTED_CALL);
             updateUi();
             return;
@@ -175,10 +166,99 @@ public class CallActivity extends AbstractCallActivity implements
     protected void onDestroy() {
         super.onDestroy();
         mCallNotifications.removeAll();
+        if (mTransferCompleteDialog != null) {
+            mTransferCompleteDialog.dismiss();
+        }
     }
 
-    private void displayCallInfo() {
-        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mTitle, mSubtitle, mPhoneNumberToDisplay, mCallerIdToDisplay, mContactImage);
+    @Override
+    public void onCallStatusChanged(String status, String callId) {
+        updateUi();
+    }
+
+    @Override
+    public void onCallConnected() {
+        updateMediaManager(TYPE_CONNECTED_CALL);
+        mConnected = true;
+
+        mForceDisplayedCallDetails = null;
+
+        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
+
+        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
+            mInitialCallDetail = CallDetail.fromSipCall(mSipServiceConnection.get().getFirstCall());
+        }
+
+        if (mOnTransfer && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
+            mTransferCallDetail = CallDetail.fromSipCall(mSipServiceConnection.get().getCurrentCall());
+        }
+
+        if (mSipServiceConnection.get().getCurrentCall() != null) {
+            VialerStatistics.callWasSuccessfullySetup(mSipServiceConnection.get().getCurrentCall());
+        }
+
+        updateUi();
+    }
+
+    @Override
+    public void onCallDisconnected() {
+        mOnTransfer = false;
+
+        if (mCallIsTransferred) {
+            showCallTransferCompletedDialog();
+        }
+
+        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
+            mForceDisplayedCallDetails = null;
+            getMediaManager().setCallOnSpeaker(false);
+            mConnected = true;
+            mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
+            updateUi();
+        } else {
+            mOnHold = false;
+            mConnected = false;
+            getMediaManager().callEnded();
+            finishAfterDelay();
+        }
+    }
+
+    @Override
+    public void onCallHold() {
+        mOnHold = true;
+        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_on_hold);
+    }
+
+    @Override
+    public void onCallUnhold() {
+        mOnHold = false;
+        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
+    }
+
+    @Override
+    public void onCallRingingOut() {
+    }
+
+    @Override
+    public void onCallRingingIn() {
+
+    }
+
+    @Override
+    public void onServiceStopped() {
+        mConnected = false;
+        finishAfterDelay();
+    }
+
+    /**
+     * Update the UI with the latest call information, this includes buttons and labels.
+     *
+     */
+    private void updateUi() {
+        if (mCallPresenter == null) {
+            return;
+        }
+
+        mCallPresenter.update();
     }
 
     /**
@@ -202,11 +282,8 @@ public class CallActivity extends AbstractCallActivity implements
     @Override
     public void onBackPressed() {
         mLogger.d("onBackPressed");
-        View hangupButton = findViewById(R.id.button_hangup);
-        View lockRingView = findViewById(R.id.lock_ring);
 
         if (mOnTransfer) {
-            // During a transfer
             if (mSipServiceConnection.get().getCurrentCall() == null || mSipServiceConnection.get().getFirstCall() == null) {
                 super.onBackPressed();
             } else {
@@ -214,8 +291,6 @@ public class CallActivity extends AbstractCallActivity implements
             }
         } else if (mHangupButton != null && mHangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
             hangup();
-        } else if (hangupButton != null && hangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
-        } else if (lockRingView != null && lockRingView.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
         } else if (isDialpadVisible()) {
             hideDialpad();
         }
@@ -251,20 +326,23 @@ public class CallActivity extends AbstractCallActivity implements
     // Toggle the hold the call when the user presses the button.
     private void toggleOnHold() {
         mLogger.d("toggleOnHold");
-        mOnHold = !mOnHold;
-        if (mSipServiceConnection.isAvailable()) {
-            try {
-                if (mOnTransfer) {
-                    mSipServiceConnection.get().getCurrentCall().toggleHold();
-                } else {
-                    mSipServiceConnection.get().getFirstCall().toggleHold();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
+            return;
+        }
+
+        try {
+            SipCall call = mOnTransfer ? mSipServiceConnection.get().getCurrentCall() : mSipServiceConnection.get().getFirstCall();
+            call.toggleHold();
+            mOnHold = call.isOnHold();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
+    /**
+     * Hang-up the call, this will only hang-up the current call, not any call on-hold in the background.
+     *
+     */
     public void hangup() {
         if (!mSipServiceConnection.isAvailable()) {
             return;
@@ -279,13 +357,11 @@ public class CallActivity extends AbstractCallActivity implements
         try {
             mSipServiceConnection.get().getCurrentCall().hangup(true);
             updateUi();
-            mSelfHangup = true;
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         finishAfterDelay();
-        sendBroadcast(new Intent(BluetoothMediaButtonReceiver.HANGUP_BTN));
     }
 
     /**
@@ -298,7 +374,7 @@ public class CallActivity extends AbstractCallActivity implements
      */
     void updateMicrophoneVolume(long newVolume) {
         mLogger.d("updateMicrophoneVolume");
-        if (mSipServiceConnection.isAvailable()) {
+        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             mSipServiceConnection.get().getCurrentCall().updateMicrophoneVolume(newVolume);
         }
     }
@@ -486,7 +562,7 @@ public class CallActivity extends AbstractCallActivity implements
         mOnTransfer = true;
         callTransferMakeSecondCall(number);
         mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
-        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mTitle, mSubtitle, number, null, mContactImage);
+        mForceDisplayedCallDetails = new DisplayCallDetail(number, null);
         updateUi();
     }
 
@@ -496,6 +572,7 @@ public class CallActivity extends AbstractCallActivity implements
     }
 
     public void callTransferHangupSecondCall() {
+        mForceDisplayedCallDetails = null;
         try {
             if (mSipServiceConnection.get().getFirstCall().isOnHold()) {
                 mSipServiceConnection.get().getCurrentCall().hangup(true);
@@ -507,9 +584,14 @@ public class CallActivity extends AbstractCallActivity implements
         }
     }
 
+    /**
+     * This method will connect the two calls that we have setup and send the appropriate analytics events.
+     *
+     */
     public void callTransferConnectTheCalls() {
         try {
             mSipServiceConnection.get().getFirstCall().xFerReplaces(mSipServiceConnection.get().getCurrentCall());
+            mCallIsTransferred = true;
             mAnalyticsHelper.sendEvent(
                     getString(R.string.analytics_event_category_call),
                     getString(R.string.analytics_event_action_transfer),
@@ -523,8 +605,6 @@ public class CallActivity extends AbstractCallActivity implements
                     getString(R.string.analytics_event_label_fail)
             );
         }
-
-        mCallIsTransferred = true;
     }
 
     /**
@@ -536,6 +616,12 @@ public class CallActivity extends AbstractCallActivity implements
         return mDialer.getVisibility() == View.VISIBLE;
     }
 
+    /**
+     * Returns TRUE if the call that started this activity is an incoming
+     * call.
+     *
+     * @return TRUE if incoming
+     */
     private boolean isIncomingCall() {
         return mType.equals(TYPE_INCOMING_CALL);
     }
@@ -549,130 +635,33 @@ public class CallActivity extends AbstractCallActivity implements
         }
     }
 
-    @Override
-    public void onCallStatusChanged(String status, String callId) {
-        updateUi();
-    }
-
+    /**
+     * Determine if there are currently two calls, this would suggest a transfer
+     * is in progress.
+     *
+     * @return TRUE if there is a second call, otherwise FALSE
+     */
     public boolean hasSecondCall() {
         if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
             return false;
         }
 
-        SipCall intialCall = mSipServiceConnection.get().getFirstCall();
+        SipCall initialCall = mSipServiceConnection.get().getFirstCall();
         SipCall transferCall = mSipServiceConnection.get().getCurrentCall();
 
-        return intialCall.getIdentifier().equals(transferCall.getIdentifier());
+        return !initialCall.getIdentifier().equals(transferCall.getIdentifier());
     }
 
-    @Override
-    public void onCallConnected() {
-        updateMediaManager(TYPE_CONNECTED_CALL);
-        mConnected = true;
-
-        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
-
-        if (mOnTransfer && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
-            mInitialCallDetail = CallDetail.fromSipCall(mSipServiceConnection.get().getFirstCall());
-            mTransferCallDetail = CallDetail.fromSipCall(mSipServiceConnection.get().getCurrentCall());
+    /**
+     * Display an alert informing the user that the call merge has occurred successfully.
+     *
+     */
+    private void showCallTransferCompletedDialog() {
+        if (isFinishing()) {
+            return;
         }
 
-        if (mSipServiceConnection.get().getCurrentCall() != null) {
-            VialerStatistics.callWasSuccessfullySetup(mSipServiceConnection.get().getCurrentCall());
-        }
-    }
-
-    @Override
-    public void onCallDisconnected() {
-        if (!mConnected && !mSelfHangup) {
-            // Call has never been connected. Meaning the dialed number was unreachable.
-            sendBroadcast(new Intent(DECLINE_BTN));
-        }
-
-        // Stop duration timer.
-        mConnected = false;
-
-        // Stop the ringtone and vibrator when the call has been disconnected.
-        getMediaManager().stopIncomingCallRinger();
-
-        // When the user is transferring a call.
-        if (mOnTransfer) {
-            // Transferring is successful done.
-            if (mCallIsTransferred) {
-                new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                        .setContentText(getString(R.string.call_transfer_complete_success, mInitialCallDetail.getPhoneNumber(), mTransferCallDetail.getPhoneNumber()))
-                        .show();
-
-                mOnTransfer = false;
-                try {
-                    mSipServiceConnection.get().getFirstCall().hangup(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else if (mSipServiceConnection.get().getCurrentCall() != null) {
-                // The "second" call has been disconnected. But there is still a call available.
-                String currentCallIdentifier = mSipServiceConnection.get().getCurrentCall().getIdentifier();
-                String initialCallIdentifier = mSipServiceConnection.get().getFirstCall().getIdentifier();
-
-                getMediaManager().setCallOnSpeaker(false);
-
-                mConnected = true;
-
-                mTransferButton.setVisibility(View.VISIBLE);
-
-                if (!currentCallIdentifier.equals(initialCallIdentifier)) {
-                    mCurrentCallId = mSipServiceConnection.get().getCurrentCall().getIdentifier();
-                    mCallerIdToDisplay = mSipServiceConnection.get().getCurrentCall().getCallerId();
-                    mPhoneNumberToDisplay = mSipServiceConnection.get().getCurrentCall().getPhoneNumber();
-                } else {
-                    mCurrentCallId = mSipServiceConnection.get().getFirstCall().getIdentifier();
-                    mCallerIdToDisplay = mSipServiceConnection.get().getFirstCall().getCallerId();
-                    mPhoneNumberToDisplay = mSipServiceConnection.get().getFirstCall().getPhoneNumber();
-                }
-
-                displayCallInfo();
-
-                mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
-                mOnTransfer = false;
-            } else {
-                if (mSipServiceConnection.get() != null && mSipServiceConnection.get().getCurrentCall() == null && mSipServiceConnection.get().getFirstCall() == null) {
-                    displayCallInfo();
-
-                    mOnTransfer = false;
-                    mOnHold = false;
-                }
-            }
-        } else {
-            getMediaManager().callEnded();
-            finishAfterDelay();
-        }
-    }
-
-    @Override
-    public void onCallHold() {
-        mOnHold = true;
-        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_on_hold);
-    }
-
-    @Override
-    public void onCallUnhold() {
-        mOnHold = false;
-        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
-    }
-
-    @Override
-    public void onCallRingingOut() {
-    }
-
-    @Override
-    public void onCallRingingIn() {
-
-    }
-
-    @Override
-    public void onServiceStopped() {
-        mConnected = false;
-        finishAfterDelay();
+        mTransferCompleteDialog = TransferCompleteDialog.createAndShow(this, mInitialCallDetail.getPhoneNumber(), mTransferCallDetail.getPhoneNumber());
     }
 
     public boolean isOnTransfer() {
@@ -695,11 +684,15 @@ public class CallActivity extends AbstractCallActivity implements
         return mBluetoothAudioActive;
     }
 
-    private void updateUi() {
-        if (mCallPresenter == null) {
-            return;
-        }
+    public CallDetail getInitialCallDetail() {
+        return mInitialCallDetail;
+    }
 
-        mCallPresenter.update();
+    public CallDetail getTransferCallDetail() {
+        return mTransferCallDetail;
+    }
+
+    public DisplayCallDetail getForceDisplayedCallDetails() {
+        return mForceDisplayedCallDetails;
     }
 }

@@ -3,18 +3,23 @@ package com.voipgrid.vialer;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_CONNECTED_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_INVALID_STATE;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_PUT_ON_HOLD_ACTION;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_UNHOLD_ACTION;
 
 import android.view.View;
 
+import com.voipgrid.vialer.calling.CallActivityHelper;
+import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.sip.SipCall;
 
 public class CallPresenter {
 
     private final CallActivity mActivity;
+    private CallActivityHelper mCallActivityHelper;
 
     CallPresenter(CallActivity activity) {
         mActivity = activity;
+        mCallActivityHelper = new CallActivityHelper(new Contacts());
     }
 
     /**
@@ -26,28 +31,31 @@ public class CallPresenter {
             return;
         }
 
-        if (!mActivity.mSipServiceConnection.isAvailable()) {
+        updateCallLabels();
+
+        if (!mActivity.getSipServiceConnection().isAvailable()) {
             enableOrDisableCallActionButtons(true, false, true, true, false);
             hideCallDuration();
             return;
         }
-        else if (!mActivity.mSipServiceConnection.isAvailableAndHasActiveCall()) {
+        else if (!mActivity.getSipServiceConnection().isAvailableAndHasActiveCall()) {
             disableAllButtons();
             mActivity.mHangupButton.disable();
             return;
         }
 
-        SipCall call = mActivity.mSipServiceConnection.get().getCurrentCall();
+        SipCall call = mActivity.getSipServiceConnection().get().getCurrentCall();
         String state = call.getCurrentCallState();
 
         updateTransferButton(state);
 
         switch (state) {
             case CALL_INVALID_STATE:
-                enableOrDisableButtons(true, false, true, true, false, false);
+                enableOrDisableButtons(true, false, true, true, false, true);
                 break;
             case CALL_CONNECTED_MESSAGE:
             case CALL_UNHOLD_ACTION:
+            case CALL_PUT_ON_HOLD_ACTION:
                 enableOrDisableButtons(true, true, true, true, true, true);
                 break;
             case CALL_DISCONNECTED_MESSAGE:
@@ -68,6 +76,22 @@ public class CallPresenter {
     }
 
     /**
+     * Update the call labels with the information about the current, relevant call.
+     *
+     */
+    private void updateCallLabels() {
+        if (mActivity.getForceDisplayedCallDetails() != null) {
+            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.mTitle, mActivity.mSubtitle, mActivity.getForceDisplayedCallDetails().getNumber(), mActivity.getForceDisplayedCallDetails().getCallerId(), mActivity.mContactImage);
+            return;
+        }
+
+        if (mActivity.getSipServiceConnection().isAvailableAndHasActiveCall()) {
+            SipCall call = mActivity.hasSecondCall() ? mActivity.getSipServiceConnection().get().getCurrentCall() : mActivity.getSipServiceConnection().get().getFirstCall();
+            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.mTitle, mActivity.mSubtitle, call.getPhoneNumber(), call.getCallerId(), mActivity.mContactImage);
+        }
+    }
+
+    /**
      * Update the call transfer button to change the text/icon depending on the state of the
      * transfer.
      *
@@ -75,10 +99,14 @@ public class CallPresenter {
      */
     private void updateTransferButton(String state) {
         if (mActivity.isOnTransfer()) {
+            mActivity.mCallStatusTv.setText(mActivity.getString(R.string.call_on_hold, mActivity.getInitialCallDetail().getDisplayLabel()));
+            mActivity.mCallStatusTv.setVisibility(View.VISIBLE);
+
             mActivity.mTransferButton.setImageResource(R.drawable.ic_call_merge);
             mActivity.mTransferLabel.setText(R.string.transfer_connect);
 
             if (mActivity.hasSecondCall()) {
+
                 if (state.equals(CALL_CONNECTED_MESSAGE)) {
                     mActivity.mTransferButton.enable();
                 } else {
@@ -89,6 +117,7 @@ public class CallPresenter {
             mActivity.mTransferButton.setImageResource(R.drawable.ic_call_transfer);
             mActivity.mTransferLabel.setText(R.string.transfer_label);
             mActivity.mTransferButton.enable(state.equals(CALL_CONNECTED_MESSAGE));
+            mActivity.mCallStatusTv.setVisibility(View.INVISIBLE);
         }
     }
 

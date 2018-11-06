@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.WindowManager;
 
 import com.voipgrid.vialer.MainActivity;
@@ -31,7 +30,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, BluetoothButtonReceiver.Listener, CallStatusReceiver.Listener,
         MediaManager.AudioChangedInterface {
 
-    public SipServiceConnection mSipServiceConnection;
+    protected SipServiceConnection mSipServiceConnection;
     protected String mCurrentCallId;
     protected CallDurationTracker mCallDurationTracker;
     protected BluetoothButtonReceiver mBluetoothButtonReceiver;
@@ -217,5 +216,13 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         }
 
         return getIntent().getBooleanExtra(NotificationHelper.TAG, false);
+    }
+
+    public SipServiceConnection getSipServiceConnection() {
+        return mSipServiceConnection;
+    }
+
+    public String getCurrentCallId() {
+        return mCurrentCallId;
     }
 }
