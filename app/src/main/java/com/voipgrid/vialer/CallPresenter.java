@@ -12,6 +12,12 @@ import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.sip.SipCall;
 
+/**
+ * Responsible for handling all the UI elements of the CallActivity, the update
+ * method of this presenter can be called at any point and it will present the call to
+ * the user (labels, buttons etc.) correctly.
+ *
+ */
 public class CallPresenter {
 
     private final CallActivity mActivity;
