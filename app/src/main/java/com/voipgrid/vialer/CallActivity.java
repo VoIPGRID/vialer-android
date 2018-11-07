@@ -193,7 +193,7 @@ public class CallActivity extends AbstractCallActivity implements
             mTransferCallDetail = CallDetail.fromSipCall(mSipServiceConnection.get().getCurrentCall());
         }
 
-        if (mSipServiceConnection.get().getCurrentCall() != null) {
+        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             VialerStatistics.callWasSuccessfullySetup(mSipServiceConnection.get().getCurrentCall());
         }
 
