@@ -108,31 +108,39 @@
                   android:textSize="20sp"/>
     </LinearLayout>
 
-    <LinearLayout android:id="@+id/call_buttons"
-                  android:layout_width="match_parent"
-                  android:layout_height="127dp"
-                  android:layout_alignParentBottom="true"
-                  android:layout_alignParentLeft="true"
-                  android:layout_alignParentStart="true"
-                  android:layout_marginBottom="8dp"
-                  android:layout_marginEnd="8dp"
-                  android:layout_marginLeft="8dp" android:layout_marginRight="8dp"
-                  android:layout_marginStart="8dp"
-                  android:layout_marginTop="8dp"
-                  android:gravity="center"
-                  android:orientation="horizontal"
-                  android:visibility="visible"
-                  app:layout_constraintBottom_toBottomOf="parent"
-                  app:layout_constraintEnd_toEndOf="parent"
-                  app:layout_constraintStart_toStartOf="parent"
-                  app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
-                  app:layout_constraintVertical_bias="0.7">
+    <android.support.constraint.ConstraintLayout android:id="@+id/call_buttons"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="127dp"
+                                                 android:layout_alignParentStart="true"
+                                                 android:layout_alignParentLeft="true"
+                                                 android:layout_alignParentBottom="true"
+                                                 android:layout_marginStart="8dp"
+                                                 android:layout_marginLeft="8dp"
+                                                 android:layout_marginTop="8dp"
+                                                 android:layout_marginEnd="8dp"
+                                                 android:layout_marginRight="8dp"
+                                                 android:layout_marginBottom="8dp"
+                                                 android:gravity="center"
+                                                 android:orientation="horizontal"
+                                                 android:visibility="visible"
+                                                 app:layout_constraintBottom_toBottomOf="parent"
+                                                 app:layout_constraintEnd_toEndOf="parent"
+                                                 app:layout_constraintStart_toStartOf="parent"
+                                                 app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+                                                 app:layout_constraintVertical_bias="0.7">
 
-        <LinearLayout android:layout_width="wrap_content"
+        <LinearLayout android:id="@+id/linearLayout7"
+                      android:layout_width="0dp"
                       android:layout_height="wrap_content"
-                      android:layout_marginRight="70dp"
+                      android:layout_marginStart="24dp"
+                      android:layout_marginLeft="24dp"
+                      android:layout_marginTop="8dp"
+                      android:layout_marginBottom="8dp"
                       android:gravity="center"
-                      android:orientation="vertical">
+                      android:orientation="vertical"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintEnd_toStartOf="@+id/linearLayout6" app:layout_constraintStart_toStartOf="parent"
+                      app:layout_constraintTop_toTopOf="parent">
 
             <ImageButton
                 android:id="@+id/button_decline"
@@ -152,11 +160,18 @@
                       android:textSize="18sp"/>
         </LinearLayout>
 
-        <LinearLayout android:layout_width="wrap_content"
+        <LinearLayout android:id="@+id/linearLayout6"
+                      android:layout_width="0dp"
                       android:layout_height="wrap_content"
-                      android:layout_marginLeft="70dp"
+                      android:layout_marginTop="8dp"
+                      android:layout_marginEnd="24dp" android:layout_marginRight="24dp"
+                      android:layout_marginBottom="8dp"
                       android:gravity="center"
-                      android:orientation="vertical">
+                      android:orientation="vertical"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintEnd_toEndOf="parent"
+                      app:layout_constraintHorizontal_bias="0.5" app:layout_constraintStart_toEndOf="@+id/linearLayout7"
+                      app:layout_constraintTop_toTopOf="parent">
 
             <ImageButton
                 android:id="@+id/button_pickup"
@@ -176,7 +191,7 @@
                       android:textSize="18sp"/>
         </LinearLayout>
 
-    </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
 
     <LinearLayout android:id="@+id/lock_ring_container"
                   android:layout_width="match_parent"
@@ -197,6 +212,7 @@
                   app:layout_constraintStart_toStartOf="parent"
                   app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
                   app:layout_constraintVertical_bias="0.7">
+
         <com.wearespindle.spindlelockring.library.LockRing
             android:id="@+id/lock_ring"
             android:layout_width="wrap_content"
