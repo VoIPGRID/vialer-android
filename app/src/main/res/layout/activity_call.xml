@@ -6,12 +6,12 @@
     android:background="@drawable/background_gradient"
     tools:context="com.voipgrid.vialer.CallActivity">
 
-    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+    <de.hdodenhof.circleimageview.CircleImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/profile_image"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:src="@drawable/no_user"
@@ -22,7 +22,7 @@
         app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.056" />
+        app:layout_constraintVertical_bias="0.056"/>
 
     <ImageButton
         android:id="@+id/button_pickup"
@@ -81,6 +81,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/incoming_caller_subtitle" />
 
+    <TextView
+        android:id="@+id/call_status"
+        style="@style/CallTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:ellipsize="none"
+        android:gravity="center"
+        android:text=""
+        android:textSize="15sp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout_dialpad"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/duration_text_view"/>
+
     <LinearLayout
         android:id="@+id/linearLayout_mute"
         android:layout_width="100dp"
@@ -98,12 +118,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.461" >
 
-        <ImageView
+        <com.voipgrid.vialer.call.CallActionButton
             android:id="@+id/button_mute"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:background="@drawable/layer_circular_shape"
-            android:onClick="onClick"
             android:padding="15dp"
             app:srcCompat="@drawable/ic_mic_off_enabled" />
 
@@ -133,12 +152,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.461" >
 
-        <ImageView
+        <com.voipgrid.vialer.call.CallActionButton
             android:id="@+id/button_dialpad"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:background="@drawable/layer_circular_shape"
-            android:onClick="onClick"
             android:padding="15dp"
             app:srcCompat="@drawable/ic_dialer_enabled" />
 
@@ -170,12 +188,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.461" >
 
-        <ImageView
+        <com.voipgrid.vialer.call.CallActionButton
             android:id="@+id/button_speaker"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:background="@drawable/layer_circular_shape"
-            android:onClick="onClick"
             android:padding="15dp"
             app:srcCompat="@drawable/ic_volume_on_enabled" />
 
@@ -207,12 +224,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.74" >
 
-        <ImageView
+        <com.voipgrid.vialer.call.CallActionButton
             android:id="@+id/button_transfer"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:background="@drawable/layer_circular_shape"
-            android:onClick="onClick"
             android:padding="17dp"
             app:srcCompat="@drawable/ic_call_transfer" />
 
@@ -244,12 +260,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.74" >
 
-        <ImageView
+        <com.voipgrid.vialer.call.CallActionButton
             android:id="@+id/button_onhold"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:background="@drawable/layer_circular_shape"
-            android:onClick="onClick"
             android:padding="17dp"
             app:srcCompat="@drawable/ic_pause_enabled" />
 
@@ -265,7 +280,7 @@
     </LinearLayout>
 
 
-    <ImageButton
+    <com.voipgrid.vialer.call.HangupButton
         android:id="@+id/button_hangup"
         android:layout_width="70dp"
         android:layout_height="70dp"
@@ -275,7 +290,6 @@
         android:layout_marginBottom="8dp"
         android:background="@drawable/call_decline_button"
         android:backgroundTint="@color/call_fab_hangup_color"
-        android:onClick="onClick"
         android:padding="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -301,21 +315,4 @@
         app:layout_constraintVertical_bias="1.0"
         app:show_call_button="false"
         app:show_exit_button="true" />
-
-    <LinearLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/duration_text_view"
-        android:visibility="gone">
-    </LinearLayout>
 </android.support.constraint.ConstraintLayout>

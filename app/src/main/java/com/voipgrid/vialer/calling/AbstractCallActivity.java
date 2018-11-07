@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.WindowManager;
 
 import com.voipgrid.vialer.MainActivity;
@@ -22,6 +21,7 @@ import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
+import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 
 import javax.inject.Inject;
@@ -162,9 +162,13 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         onDeclineButtonClicked();
     }
 
-    protected abstract void onPickupButtonClicked();
+    protected void onPickupButtonClicked() {
 
-    protected abstract void onDeclineButtonClicked();
+    }
+
+    protected void onDeclineButtonClicked() {
+
+    }
 
     @Override
     public void finish() {
@@ -204,5 +208,21 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
     protected MediaManager getMediaManager() {
         return MediaManager.init(this, this, this);
+    }
+
+    protected boolean wasOpenedViaNotification() {
+        if (getIntent() == null) {
+            return false;
+        }
+
+        return getIntent().getBooleanExtra(NotificationHelper.TAG, false);
+    }
+
+    public SipServiceConnection getSipServiceConnection() {
+        return mSipServiceConnection;
+    }
+
+    public String getCurrentCallId() {
+        return mCurrentCallId;
     }
 }

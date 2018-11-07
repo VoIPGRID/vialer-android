@@ -27,6 +27,10 @@ public class Contacts {
      * @return first contact matching the phone number
      */
     public Contact getContactByPhoneNumber(String number) {
+        if (number == null) {
+            return null;
+        }
+
         Query q = com.github.tamir7.contacts.Contacts.getQuery();
         q.whereEqualTo(Contact.Field.PhoneNumber, number);
         List<Contact> contacts = q.find();

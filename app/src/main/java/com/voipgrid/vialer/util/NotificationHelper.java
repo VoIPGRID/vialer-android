@@ -191,6 +191,10 @@ public class NotificationHelper {
     }
 
     public void updateNotification(String title, String message, int notifyID) {
+        if (mBuilder == null) {
+            return;
+        }
+
         mBuilder.setContentTitle(title);
         mBuilder.setContentText(message);
         mNotificationManager.notify(
