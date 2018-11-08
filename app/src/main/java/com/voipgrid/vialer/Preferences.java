@@ -34,7 +34,7 @@ public class Preferences {
     public static final boolean DEFAULT_VALUE_HAS_SIP_PERMISSION = false;
     public static final boolean DEFAULT_VALUE_HAS_3G_ENABLED = true;
     public static final boolean DEFAULT_VALUE_HAS_TLS_ENABLED = true;
-    public static final boolean DEFAULT_VALUE_HAS_STUN_ENABLED = true;
+    public static final boolean DEFAULT_VALUE_HAS_STUN_ENABLED = false;
 
     private Context mContext;
     private SharedPreferences mPreferences;
