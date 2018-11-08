@@ -18,7 +18,7 @@
     <string name="call_incoming">Inkomend gesprek</string>
     <string name="call_outgoing">Uitgaand gesprek</string>
     <string name="call_ended">Gesprek beëindigd</string>
-    <string name="call_on_hold">In de wacht</string>
+    <string name="call_on_hold">In de wacht: %1$s</string>
     <string name="call_hangup">Ophangen</string>
     <string name="call_connected">Verbonden</string>
     <string name="call_unreachable">Onbereikbaar</string>
@@ -216,8 +216,7 @@
     <string name="remote_logging_id_copied">Logging id gekopieerd</string>
     <string name="remote_logging_send_crash_log">Zou u ons willen helpen met het verbeteren van onze diensten door het foutenrapport te versturen?</string>
 
-    <string name="call_transfer_complete_and">en</string>
-    <string name="call_transfer_complete_success"> Succesvol doorverbonden</string>
+    <string name="call_transfer_complete_success"> Succesvol doorverbonden %1$s en %2$s</string>
     <string name="call_incoming_expanded">Inkomend gesprek van:</string>
     <string name="call_incoming_accept">Antwoord</string>
     <string name="call_incoming_decline">Weigeren</string>

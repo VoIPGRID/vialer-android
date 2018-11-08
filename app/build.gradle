@@ -151,6 +151,8 @@ dependencies {
     implementation 'javax.inject:javax.inject:1@jar'
     implementation 'com.github.lzyzsd.randomcolor:library:1.0.0'
 
+    implementation 'com.github.f0ris.sweetalert:library:1.5.1'
+
     // Required -- JUnit 4 framework.
     testImplementation "junit:junit:${jUnitVersion}"
 

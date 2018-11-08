@@ -172,7 +172,7 @@ public class CallMediaMonitor implements Runnable {
      * @return TRUE if we should be monitoring the call media, otherwise false.
      */
     private boolean shouldBeMonitoringMedia() {
-        return mSipCall != null && mSipCall.getIsCallConnected();
+        return mSipCall != null && mSipCall.isConnected();
     }
 
     /**

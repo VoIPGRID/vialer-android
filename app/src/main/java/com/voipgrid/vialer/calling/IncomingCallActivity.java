@@ -24,6 +24,7 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.contacts.Contacts;
+import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.wearespindle.spindlelockring.library.LockRing;
@@ -111,24 +112,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
     private void disableAllButtons() {
         mButtonPickup.setEnabled(false);
         mButtonDecline.setEnabled(false);
-    }
-
-    @Override
-    public void onCallStatusReceived(String status, String callId) {
-        super.onCallStatusReceived(status, callId);
-
-        if (status.equals(CALL_DISCONNECTED_MESSAGE)) {
-            mSipServiceConnection.disconnect(true);
-            endRinging();
-            return;
-        }
-
-        if (status.equals(CALL_CONNECTED_MESSAGE)) {
-            mSipServiceConnection.disconnect(true);
-            getMediaManager().stopIncomingCallRinger();
-            startCallActivity();
-            return;
-        }
     }
 
     /**
@@ -230,5 +213,48 @@ public class IncomingCallActivity extends AbstractCallActivity {
         SipCall call = sipService.getFirstCall();
         call.setCallerId(getCallerIdFromIntent());
         call.setPhoneNumber(getPhoneNumberFromIntent());
+    }
+
+    @Override
+    public void onCallStatusChanged(String status, String callId) {
+
+    }
+
+    @Override
+    public void onCallConnected() {
+        mSipServiceConnection.disconnect(true);
+        getMediaManager().stopIncomingCallRinger();
+        startCallActivity();
+    }
+
+    @Override
+    public void onCallDisconnected() {
+        mSipServiceConnection.disconnect(true);
+        endRinging();
+    }
+
+    @Override
+    public void onCallHold() {
+
+    }
+
+    @Override
+    public void onCallUnhold() {
+
+    }
+
+    @Override
+    public void onCallRingingOut() {
+
+    }
+
+    @Override
+    public void onCallRingingIn() {
+
+    }
+
+    @Override
+    public void onServiceStopped() {
+
     }
 }

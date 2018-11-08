@@ -51,6 +51,7 @@
                 android:inputType="number"
                 android:gravity="center"
                 android:textSize="30dp"
+                style="@style/OnboardingEditTextStyle"
             />
 
         </android.support.design.widget.TextInputLayout>

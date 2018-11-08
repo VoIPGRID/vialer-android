@@ -19,7 +19,7 @@
     <string name="call_incoming_expanded">Incoming call from:</string>
     <string name="call_outgoing">Outgoing call</string>
     <string name="call_ended">Call ended</string>
-    <string name="call_on_hold">On hold</string>
+    <string name="call_on_hold">On hold: %1$s</string>
     <string name="call_hangup">Hang up</string>
     <string name="call_connected">Connected</string>
     <string name="call_unreachable">Unreachable</string>
@@ -233,8 +233,7 @@
     <string name="remote_logging_id_copied">Logging id copied</string>
     <string name="remote_logging_send_crash_log">Would you like to help improve our services and send the crash log to us?</string>
 
-    <string name="call_transfer_complete_and">and</string>
-    <string name="call_transfer_complete_success"> Successfully transferred</string>
+    <string name="call_transfer_complete_success">Successfully transferred %1$s and %2$s</string>
 
     <string name="t9helper_title">Tips</string>
     <string name="t9helper_text">You can search for %1$s by keying the numbers on the dialpad below.</string>
