@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.test.logging.formatting;
+package com.voipgrid.vialer.logging.formatting;
 
 import static org.junit.Assert.assertFalse;
 

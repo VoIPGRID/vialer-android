@@ -1,8 +1,6 @@
-package com.voipgrid.vialer.test.util;
+package com.voipgrid.vialer.util;
 
 import static org.junit.Assert.*;
-
-import com.voipgrid.vialer.util.HtmlHelper;
 
 import org.junit.Test;
 

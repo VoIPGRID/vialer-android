@@ -1,6 +1,5 @@
 package com.voipgrid.vialer.logging;
 
-import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
@@ -12,11 +11,9 @@ import com.voipgrid.vialer.BuildConfig;
  */
 public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-    private Context mContext;
     private Thread.UncaughtExceptionHandler mDefaultHandler;
 
-    public RemoteUncaughtExceptionHandler(Context context) {
-        mContext = context;
+    RemoteUncaughtExceptionHandler() {
         mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
     }
 
@@ -28,6 +25,7 @@ public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionH
 
     private void logStackTrace(Throwable exception) {
         Logger logger = new Logger(RemoteUncaughtExceptionHandler.class).forceRemoteLogging(true);
+        logger.logBufferToRemote();
         String stackTrace = Log.getStackTraceString(exception);
         String traceID = LogUuidGenerator.generate();
 

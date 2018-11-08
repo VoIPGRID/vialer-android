@@ -1,10 +1,8 @@
-package com.voipgrid.vialer.test.t9;
+package com.voipgrid.vialer.t9;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import com.voipgrid.vialer.t9.T9NameMatcher;
 
 import org.junit.Test;
 

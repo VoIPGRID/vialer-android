@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.test.logging;
+package com.voipgrid.vialer.logging;
 
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -9,8 +9,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 
 import com.logentries.logger.AsyncLoggingWorker;
-import com.voipgrid.vialer.logging.LogEntriesFactory;
-import com.voipgrid.vialer.logging.VialerLogger;
 
 import org.junit.Before;
 import org.junit.Test;

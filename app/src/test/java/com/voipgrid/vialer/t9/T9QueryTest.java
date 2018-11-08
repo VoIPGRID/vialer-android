@@ -1,8 +1,6 @@
-package com.voipgrid.vialer.test.t9;
+package com.voipgrid.vialer.t9;
 
 import static org.junit.Assert.assertEquals;
-
-import com.voipgrid.vialer.t9.T9Query;
 
 import org.junit.Test;
 
