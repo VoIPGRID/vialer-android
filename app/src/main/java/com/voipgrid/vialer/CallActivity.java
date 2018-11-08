@@ -382,7 +382,7 @@ public class CallActivity extends AbstractCallActivity implements
     @OnClick(R.id.button_mute)
     public void onMuteButtonClick(View view) {
         if (mOnTransfer) {
-            if (mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
+            if (mSipServiceConnection.get().getCurrentCall().isConnected()) {
                 toggleMute();
             }
         } else {
@@ -415,7 +415,7 @@ public class CallActivity extends AbstractCallActivity implements
     @OnClick(R.id.button_onhold)
     public void onHoldButtonClick(View view) {
         if (mOnTransfer) {
-            if (mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
+            if (mSipServiceConnection.get().getCurrentCall().isConnected()) {
                 toggleOnHold();
             }
         } else {

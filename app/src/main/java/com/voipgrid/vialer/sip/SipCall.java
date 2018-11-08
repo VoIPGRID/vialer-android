@@ -382,8 +382,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         return mCurrentCallState;
     }
 
-    public Boolean getIsCallConnected() {
+    public Boolean isConnected() {
         return mCallIsConnected;
+    }
+
+    /**
+     * Check if the call is currently in a ringing state.
+     *
+     * @return TRUE if in a ringing state, otherwise false.
+     */
+    public boolean isCallRinging() {
+        return getCurrentCallState().equals(SipConstants.CALL_INCOMING_RINGING);
     }
 
     public Uri getPhoneNumberUri() {
