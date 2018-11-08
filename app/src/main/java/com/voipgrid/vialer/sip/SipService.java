@@ -75,27 +75,30 @@ public class SipService extends Service implements SipConfig.Listener {
             try {
                 String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
 
+                if (!phoneState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                    return;
+                }
+
                 // When the native call has been picked up and there is a current call in the ringing state
                 // Then decline the current call.
-                if (phoneState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
-                    mLogger.e("Native call is picked up.");
-                    mLogger.e("Is there an active call: " + (mCurrentCall != null));
-                    if (mCurrentCall != null) {
-                        mLogger.e("Current call state: " + mCurrentCall.getCurrentCallState());
-                        switch (mCurrentCall.getCurrentCallState()) {
-                            case SipConstants.CALL_INCOMING_RINGING:
-                                mLogger.e("Our call is still ringing. So decline it.");
-                                mCurrentCall.decline();
-                                break;
-                            case SipConstants.CALL_CONNECTED_MESSAGE:
-                                mLogger.e("Our call is connected.");
-                                if (!mCurrentCall.isOnHold()) {
-                                    mLogger.e("Call was not on hold already. So put call on hold.");
-                                    mCurrentCall.toggleHold();
-                                }
-                                break;
-                        }
-                    }
+                mLogger.e("Native call is picked up.");
+                mLogger.e("Is there an active call: " + (mCurrentCall != null));
+
+                if (mCurrentCall == null) {
+                    return;
+                }
+
+                mLogger.e("Current call state: " + mCurrentCall.getCurrentCallState());
+
+                if (mCurrentCall.isCallRinging() || mCurrentCall.getCurrentCallState().equals(SipConstants.CALL_INVALID_STATE)) {
+                    mLogger.e("Our call is still ringing. So decline it.");
+                    mCurrentCall.decline();
+                    return;
+                }
+
+                if (mCurrentCall.isConnected() && !mCurrentCall.isOnHold()) {
+                    mLogger.e("Call was not on hold already. So put call on hold.");
+                    mCurrentCall.toggleHold();
                 }
             } catch(Exception e) {
                 e.printStackTrace();
