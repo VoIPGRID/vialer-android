@@ -10,12 +10,10 @@ import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
 
 import android.app.KeyguardManager;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.util.Log;
+
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;

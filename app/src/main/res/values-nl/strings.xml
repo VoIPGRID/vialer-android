@@ -243,6 +243,9 @@
     <string name="incoming_call_answer">Beantwoorden</string>
     <string name="incoming_call_decline">Weigeren</string>
     <string name="pending_call_status">Gesprek wordt opgezet</string>
+    <string name="network_call_message">Gesprek onderbroken met</string>
+    <string name="network_call_status">Geen netwerk gevonden</string>
+    <string name="network_call_suggestion">Zorg ervoor dat u verbonden bent met een WiFi \nof mobiel netwerk</string>
     <string name="transfer_connect">voeg samen</string>
     <string name="transfer_hangup">ophangen</string>
 </resources>

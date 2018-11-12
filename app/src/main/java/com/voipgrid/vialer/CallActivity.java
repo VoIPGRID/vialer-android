@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.constraint.Group;
-import android.text.format.DateUtils;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +28,7 @@ import com.voipgrid.vialer.call.HangupButton;
 import com.voipgrid.vialer.call.TransferCompleteDialog;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.Dialer;
+import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
@@ -36,6 +36,7 @@ import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
+import com.voipgrid.vialer.util.NetworkUtil;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import javax.inject.Inject;
@@ -64,6 +65,8 @@ public class CallActivity extends AbstractCallActivity implements
     @BindView(R.id.call_status) TextView mCallStatusTv;
 
     @Inject AnalyticsHelper mAnalyticsHelper;
+    @Inject NetworkUtil mNetworkUtil;
+
 
     @BindView(R.id.button_transfer) CallActionButton mTransferButton;
     @BindView(R.id.button_onhold) CallActionButton mOnHoldButton;
@@ -160,6 +163,10 @@ public class CallActivity extends AbstractCallActivity implements
     protected void onResume() {
         super.onResume();
         updateUi();
+
+        if(!mNetworkUtil.isOnline()) {
+          NetworkAvailabilityActivity.start();
+        }
     }
 
     @Override
@@ -495,14 +502,6 @@ public class CallActivity extends AbstractCallActivity implements
     }
 
     @Override
-    public void onCallDurationUpdate(long seconds) {
-        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
-            return;
-        }
-
-        mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
-    }
-
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
