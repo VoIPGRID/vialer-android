@@ -24,6 +24,7 @@ import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.NetworkUtil;
 import com.voipgrid.vialer.util.NotificationHelper;
 
 import javax.inject.Singleton;
@@ -140,5 +141,10 @@ public class VialerModule {
     @Provides
     ReachabilityReceiver provideReachabilityReceiver(Context context) {
         return new ReachabilityReceiver(context);
+    }
+
+    @Provides
+    NetworkUtil provideNetworkUtil(Context context) {
+        return new NetworkUtil(context);
     }
 }

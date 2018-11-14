@@ -242,6 +242,9 @@
     <string name="notification_channel_voip_disabled">Your VoIP account has been registered on another device. You can re-enable VoIP in Settings</string>
     <string name="pending_call_description">Setting up call with</string>
     <string name="pending_call_status">Establishing VoIP connection…</string>
+    <string name="network_call_message">Call interrupted with</string>
+    <string name="network_call_status">No network detected</string>
+    <string name="network_call_suggestion">Make sure you are connected to a WiFi or mobile network</string>
     <string name="audio_source_option_phone">Phone</string>
     <string name="audio_source_option_speaker">Speaker</string>
     <string name="audio_source_option_bluetooth">Bluetooth</string>

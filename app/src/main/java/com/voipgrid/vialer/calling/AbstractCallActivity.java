@@ -11,7 +11,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
+import android.text.format.DateUtils;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
@@ -26,6 +28,9 @@ import com.voipgrid.vialer.util.ProximitySensorHelper;
 
 import javax.inject.Inject;
 
+import butterknife.BindView;
+import butterknife.Optional;
+
 public abstract class AbstractCallActivity extends LoginRequiredActivity implements
         SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, BluetoothButtonReceiver.Listener, CallStatusReceiver.Listener,
         MediaManager.AudioChangedInterface {
@@ -36,6 +41,8 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected BluetoothButtonReceiver mBluetoothButtonReceiver;
     protected CallStatusReceiver mCallStatusReceiver;
     protected DelayedFinish mDelayedFinish;
+
+    @Nullable @BindView(R.id.duration_text_view) TextView mCallDurationView;
 
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
     @Inject protected CallNotifications mCallNotifications;
@@ -104,9 +111,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Override
     @CallSuper
     public void sipServiceHasBeenDisconnected() {}
-
-    @Override
-    public void onCallDurationUpdate(long duration) {}
 
     private void requestMicrophonePermissionIfNecessary() {
         if (!MicrophonePermission.hasPermission(this)) {
@@ -188,6 +192,19 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
     protected String getCallerIdFromIntent() {
         return getIntent().getStringExtra(CONTACT_NAME);
+    }
+
+    @Optional
+    public void onCallDurationUpdate(long seconds) {
+        if (!mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
+            return;
+        }
+
+        if (mCallDurationView == null) {
+            return;
+        }
+
+        mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
     }
 
     /**
