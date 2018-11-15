@@ -2,10 +2,9 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:lockring="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient">
+    android:background="@android:color/transparent">
 
     <LinearLayout android:id="@+id/linearLayout"
                   android:layout_width="match_parent"
@@ -193,46 +192,6 @@
         </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>
-
-    <LinearLayout android:id="@+id/lock_ring_container"
-                  android:layout_width="match_parent"
-                  android:layout_height="127dp"
-                  android:layout_alignParentBottom="true"
-                  android:layout_alignParentLeft="true"
-                  android:layout_alignParentStart="true"
-                  android:layout_marginBottom="40dp"
-                  android:layout_marginEnd="8dp"
-                  android:layout_marginLeft="8dp"
-                  android:layout_marginRight="8dp"
-                  android:layout_marginStart="8dp"
-                  android:gravity="center"
-                  android:orientation="horizontal"
-                  android:visibility="invisible"
-                  app:layout_constraintBottom_toBottomOf="parent"
-                  app:layout_constraintEnd_toEndOf="parent"
-                  app:layout_constraintStart_toStartOf="parent"
-                  app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
-                  app:layout_constraintVertical_bias="0.7">
-
-        <com.wearespindle.spindlelockring.library.LockRing
-            android:id="@+id/lock_ring"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:focusable="true"
-            android:gravity="center"
-            lockring:directionDescriptions="@array/lock_ring_direction_descriptions"
-            lockring:glowRadius="@dimen/lock_ring_glow_radius"
-            lockring:handleDrawable="@drawable/ic_lock_ring_handle"
-            lockring:innerRadius="@dimen/lock_ring_inner_radius"
-            lockring:outerRadius="@dimen/lock_ring_target_placement_radius"
-            lockring:outerRingDrawable="@drawable/ic_lock_ring_outer_ring"
-            lockring:pointDrawable="@drawable/ic_lock_screen_glow_dot"
-            lockring:snapMargin="@dimen/lock_ring_snap_margin"
-            lockring:targetDescriptions="@array/lock_ring_descriptions"
-            lockring:targetDrawables="@array/lock_ring_drawables"
-        />
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/screen_off"

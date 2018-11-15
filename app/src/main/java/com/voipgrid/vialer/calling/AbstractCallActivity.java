@@ -196,7 +196,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
     @Optional
     public void onCallDurationUpdate(long seconds) {
-        if (!mSipServiceConnection.get().getCurrentCall().getIsCallConnected()) {
+        if (!mSipServiceConnection.get().getCurrentCall().isConnected()) {
             return;
         }
 
