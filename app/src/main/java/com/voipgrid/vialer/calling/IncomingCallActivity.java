@@ -5,8 +5,6 @@ import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_CONNEC
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_CONNECTED_MESSAGE;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
 
 import android.app.KeyguardManager;
 import android.content.Intent;
@@ -22,7 +20,6 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.contacts.Contacts;
-import com.voipgrid.vialer.media.BluetoothMediaButtonReceiver;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.wearespindle.spindlelockring.library.LockRing;
@@ -45,8 +42,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @BindView(R.id.profile_image) CircleImageView mContactImage;
     @BindView(R.id.button_decline) ImageButton mButtonDecline;
     @BindView(R.id.button_pickup) ImageButton mButtonPickup;
-    @BindView(R.id.lock_ring_container) View mLockRingContainer;
-    @BindView(R.id.lock_ring) LockRing mLockRing;
     @BindView(R.id.call_buttons) View mCallButtons;
 
     private boolean ringingIsPaused = false;
@@ -170,11 +165,8 @@ public class IncomingCallActivity extends AbstractCallActivity {
         mCallNotifications.removeAll();
 
         if (currentlyOnLockScreen()) {
-            mLockRing.setOnTriggerListener(new LockRingListener(mLockRing, this));
-            mLockRingContainer.setVisibility(View.VISIBLE);
-            mCallButtons.setVisibility(View.GONE);
+            mCallButtons.setVisibility(View.VISIBLE);
         } else {
-            mLockRingContainer.setVisibility(View.GONE);
             mCallButtons.setVisibility(View.VISIBLE);
         }
 

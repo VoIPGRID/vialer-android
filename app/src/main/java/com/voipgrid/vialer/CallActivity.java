@@ -502,7 +502,6 @@ public class CallActivity extends AbstractCallActivity implements
     }
 
     @Override
-    @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.audio_source_option_phone:

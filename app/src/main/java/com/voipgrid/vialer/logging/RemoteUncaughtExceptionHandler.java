@@ -17,6 +17,10 @@ public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionH
         mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
     }
 
+    public RemoteUncaughtExceptionHandler(RemoteLoggingActivity remoteLoggingActivity) {
+
+    }
+
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
         logStackTrace(throwable);
