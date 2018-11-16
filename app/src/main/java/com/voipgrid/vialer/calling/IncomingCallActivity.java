@@ -22,7 +22,6 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
-import com.wearespindle.spindlelockring.library.LockRing;
 
 import javax.inject.Inject;
 

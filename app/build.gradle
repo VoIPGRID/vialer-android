@@ -108,7 +108,6 @@ dependencies {
 
     // Modules.
     implementation files('libs/logentries-android.jar')
-    implementation(name: 'spindle-lock-ring', ext: 'aar')
     implementation(name: 'pjsip', ext: 'aar')
 
     // Support libs.

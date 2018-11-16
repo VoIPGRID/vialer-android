@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipService;
