@@ -1,12 +1,17 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+apply plugin: 'com.google.firebase.firebase-perf'
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 115
         versionName "6.0"
         multiDexEnabled true
@@ -15,7 +20,40 @@ android {
         ndk {
             moduleName "pjsua2"
         }
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // The following argument makes the Android Test Orchestrator run its
+        // "pm clear" command after each test invocation. This command ensures
+        // that the app's state is completely cleared between tests.
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+    }
+    signingConfigs {
+        vialer {
+            keyAlias keystoreProperties['vialerKeyAlias']
+            keyPassword keystoreProperties['vialerKeyPassword']
+            storeFile file(keystoreProperties['vialerStoreFile'])
+            storePassword keystoreProperties['vialerStorePassword']
+        }
+        voys {
+            keyAlias keystoreProperties['voysKeyAlias']
+            keyPassword keystoreProperties['voysKeyPassword']
+            storeFile file(keystoreProperties['voysStoreFile'])
+            storePassword keystoreProperties['voysStorePassword']
+        }
+        verbonden {
+            keyAlias keystoreProperties['verondenKeyAlias']
+            keyPassword keystoreProperties['verbondenKeyPassword']
+            storeFile file(keystoreProperties['verbondenStoreFile'])
+            storePassword keystoreProperties['verbondenStorePassword']
+        }
+        annabel {
+            keyAlias keystoreProperties['annabelKeyAlias']
+            keyPassword keystoreProperties['annabelKeyPassword']
+            storeFile file(keystoreProperties['annabelStoreFile'])
+            storePassword keystoreProperties['annabelStorePassword']
+        }
+    }
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
     dexOptions {
         // Prevent OutOfMemory with MultiDex during the build phase
@@ -68,6 +106,11 @@ android {
     }
     buildTypes {
         release {
+            productFlavors.vialer.signingConfig signingConfigs.vialer
+            productFlavors.voys.signingConfig signingConfigs.voys
+            productFlavors.verbonden.signingConfig signingConfigs.verbonden
+            productFlavors.annabel.signingConfig signingConfigs.annabel
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -90,17 +133,18 @@ repositories {
 }
 
 ext {
-    supportLibVersion = "27.0.2"
+    supportLibVersion = "1.0.2"
     espressoVersion = "2.2"
-    androidTestVersion = "0.5"
-    firebaseVersion = "11.6.2"
-    jUnitVersion = "4.12"
-    okHttpVersion = "3.9.0"
-    retroFitVersion = "2.3.0"
-    roboElectricVersion = "3.4.2"
-    mockitoCoreVersion = '2.13.0'
-    butterKnifeVersion = '8.8.1'
-    daggerVersion = '2.16'
+    androidTestVersion = "1.1.0-beta02"
+    firebaseCoreVersion = "16.0.5"
+    firebaseMessagingVersion = "17.3.4"
+    googleAnalyticsVersion = "16.0.5"
+    okHttpVersion = "3.11.0"
+    retroFitVersion = "2.4.0"
+    roboElectricVersion = "3.6.2"
+    mockitoCoreVersion = "2.23.0"
+    butterKnifeVersion = "9.0.0-rc1"
+    daggerVersion = "2.18"
 }
 
 dependencies {
@@ -111,31 +155,36 @@ dependencies {
     implementation(name: 'pjsip', ext: 'aar')
 
     // Support libs.
-    implementation 'com.android.support:multidex:1.0.2'
-    implementation "com.android.support:appcompat-v7:${supportLibVersion}"
-    implementation "com.android.support:design:${supportLibVersion}"
-    implementation "com.android.support:support-annotations:${supportLibVersion}"
-    implementation "com.android.support:gridlayout-v7:${supportLibVersion}"
-    implementation "com.android.support:cardview-v7:${supportLibVersion}"
-    implementation "com.android.support:support-v4:${supportLibVersion}"
+    implementation "androidx.multidex:multidex:2.0.0"
+    implementation "androidx.appcompat:appcompat:${supportLibVersion}"
+    implementation "com.google.android.material:material:1.0.0"
+    implementation "androidx.annotation:annotation:1.0.0"
+    implementation "androidx.gridlayout:gridlayout:1.0.0"
+    implementation "androidx.cardview:cardview:1.0.0"
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.0.0-alpha2"
 
     // Firebase setup.
-    implementation "com.google.firebase:firebase-messaging:${firebaseVersion}"
-    implementation "com.google.android.gms:play-services-analytics:${firebaseVersion}"
+    implementation "com.google.firebase:firebase-core:${firebaseCoreVersion}"
+    implementation "com.google.firebase:firebase-messaging:${firebaseMessagingVersion}"
+    // Crashlytics.
+    implementation "com.crashlytics.sdk.android:crashlytics:2.9.6"
+    // Firebase Performance Measurement.
+    implementation 'com.google.firebase:firebase-perf:16.2.0'
 
+    // Google Analytics setup.
+    implementation "com.google.android.gms:play-services-analytics:${googleAnalyticsVersion}"
+
+    // Circular image view
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
 
-    // Retrofit and OkHttp
+    // Retrofit and OkHttp - Api calls
     implementation "com.squareup.retrofit2:retrofit:${retroFitVersion}"
     implementation "com.squareup.retrofit2:converter-gson:${retroFitVersion}"
     implementation "com.squareup.okhttp3:okhttp:${okHttpVersion}"
 
     implementation 'com.github.anrwatchdog:anrwatchdog:1.3.0'
-
-    implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
-    annotationProcessor "com.jakewharton:butterknife-compiler:${butterKnifeVersion}"
-
-    implementation 'com.yakivmospan:scytale:1.0.1'
 
     implementation "com.google.dagger:dagger:${daggerVersion}"
     annotationProcessor "com.google.dagger:dagger-compiler:${daggerVersion}"
@@ -143,28 +192,32 @@ dependencies {
     annotationProcessor "com.google.dagger:dagger-android-processor:${daggerVersion}"
     implementation "com.google.dagger:dagger-android-support:${daggerVersion}"
     implementation 'com.github.tamir7.contacts:contacts:1.1.7'
-    implementation 'de.hdodenhof:circleimageview:2.2.0'
-
-    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 
     implementation 'javax.inject:javax.inject:1@jar'
     implementation 'com.github.lzyzsd.randomcolor:library:1.0.0'
 
     implementation 'com.github.f0ris.sweetalert:library:1.5.1'
+    // Butter knife - Field and method binding for views
+    implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
+    annotationProcessor "com.jakewharton:butterknife-compiler:${butterKnifeVersion}"
 
-    // Required -- JUnit 4 framework.
-    testImplementation "junit:junit:${jUnitVersion}"
+    // Scytale -  Manage key generation
+    implementation 'com.yakivmospan:scytale:1.0.1'
 
     // Testing below are supported api level because SNAPSHOT version is to unstable.
     testImplementation "org.robolectric:robolectric:${roboElectricVersion}"
     testImplementation "org.mockito:mockito-core:${mockitoCoreVersion}"
 
     // Setup for instrumented tests.
-    androidTestImplementation "com.android.support.test:runner:${androidTestVersion}"
-    androidTestImplementation "com.android.support.test:rules:${androidTestVersion}"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:${espressoVersion}"
-    androidTestImplementation "com.android.support:support-annotations:${supportLibVersion}"
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    androidTestImplementation "androidx.test:runner:${androidTestVersion}"
+    androidTestUtil "androidx.test:orchestrator:${androidTestVersion}"
+    androidTestImplementation "androidx.test:rules:${androidTestVersion}"
+    androidTestImplementation "androidx.test.ext:junit:1.0.0"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.1.0"
+    androidTestImplementation 'androidx.annotation:annotation:1.0.0'
+
+    // Automated screenshots for instrumented tests.
+    androidTestImplementation 'tools.fastlane:screengrab:1.1.0'
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

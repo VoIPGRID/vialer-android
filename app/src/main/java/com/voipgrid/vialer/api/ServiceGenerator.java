@@ -1,7 +1,7 @@
 package com.voipgrid.vialer.api;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;

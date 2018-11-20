@@ -1,4 +1,4 @@
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -298,7 +298,7 @@
         app:layout_constraintVertical_bias="0.983"
         app:srcCompat="@drawable/ic_call_end_white" />
 
-    <android.support.constraint.Group
+    <androidx.constraintlayout.widget.Group
         android:id="@+id/call_actions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -315,4 +315,4 @@
         app:layout_constraintVertical_bias="1.0"
         app:show_call_button="false"
         app:show_exit_button="true" />
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

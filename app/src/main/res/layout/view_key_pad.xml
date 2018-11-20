@@ -1,4 +1,4 @@
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,7 +9,7 @@
     app:layout_gravity="center"
 >
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/row1"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -66,10 +66,10 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/dialpadButton2"
             app:layout_constraintTop_toTopOf="parent"/>
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <android.support.constraint.ConstraintLayout android:id="@+id/row2"
+    <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/row2"
                                                  android:layout_width="0dp"
                                                  android:layout_height="0dp"
                                                  android:layout_marginEnd="24dp"
@@ -122,9 +122,9 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/dialpadButton5"
             app:layout_constraintTop_toTopOf="parent"/>
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <android.support.constraint.ConstraintLayout android:id="@+id/row3"
+    <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/row3"
                                                  android:layout_width="0dp"
                                                  android:layout_height="0dp"
                                                  android:layout_marginEnd="24dp"
@@ -176,10 +176,10 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/dialpadButton8"
             app:layout_constraintTop_toTopOf="parent"/>
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <android.support.constraint.ConstraintLayout android:id="@+id/row4"
+    <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/row4"
                                                  android:layout_width="0dp"
                                                  android:layout_height="0dp"
                                                  android:layout_marginEnd="24dp"
@@ -233,7 +233,7 @@
             app:layout_constraintStart_toEndOf="@+id/dialpadButton0"
             app:layout_constraintTop_toTopOf="parent"
         />
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

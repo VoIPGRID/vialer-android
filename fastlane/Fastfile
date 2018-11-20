@@ -1,0 +1,103 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  before_all do
+    gradle(task: 'clean')
+  end
+
+  desc 'Runs all the tests'
+  lane :test do
+    gradle(
+      task: 'test',
+      flavor: ENV['APP_NAME'],
+      build_type: 'Debug'
+    )
+  end
+
+  desc 'Do a screenshot run'
+  lane :screenshot do
+    gradle(
+      task: 'assemble',
+      flavor: ENV['APP_NAME'],
+      build_type: 'Debug'
+    )
+    gradle(
+      task: 'assemble',
+      flavor: ENV['APP_NAME'],
+      build_type: 'DebugAndroidTest'
+    )
+
+    # automated_test_emulator_run(
+    #   AVD_setup_path: './fastlane/avd/phone.json'
+    # )
+
+    screengrab(
+      clear_previous_screenshots: true,
+      use_tests_in_packages: 'com.voipgrid.vialer.screenshots',
+      # reinstall_app: true,
+      app_apk_path: "app/build/outputs/apk/#{ENV['APP_NAME']}/debug/app-#{ENV['APP_NAME']}-debug.apk",
+      tests_apk_path: "app/build/outputs/apk/androidTest/#{ENV['APP_NAME']}/debug/app-#{ENV['APP_NAME']}-debug-androidTest.apk",
+      test_instrumentation_runner: 'androidx.test.runner.AndroidJUnitRunner'
+    )
+  end
+
+  desc 'Generate a signed APK'
+  lane :apk do
+    gradle(
+      task: 'assemble',
+      flavor: ENV['APP_NAME'],
+      build_type: 'Release'
+    )
+    puts "APK for #{ENV['APP_NAME']} has been generated to app/build/outputs/apk/#{ENV['APP_NAME']}/release/app-#{ENV['APP_NAME']}-release.apk"
+  end
+
+  desc 'Submit a new Beta version to the Google Play Store'
+  lane :beta do
+    apk
+    upload(track: 'beta')
+  end
+
+  desc 'Submit a new Production version to the Google Play Store'
+  lane :release do
+    apk
+    upload(track: 'release')
+  end
+
+  desc 'Submit a new Alpha version to the Google Play Store'
+  lane :alpha do
+    apk
+    upload(track: 'alpha')
+  end
+
+  desc 'Upload to the play store give either alfa, beta or release as parameter'
+  private_lane :upload do |options|
+#     upload_to_play_store(
+#       track: options[:track],
+#       package_name: ENV['PACKAGE_NAME'],
+#       apk: "app/build/outputs/apk/#{ENV['APP_NAME']}/release/app-#{ENV['APP_NAME']}-release.apk",
+#       skip_upload_metadata: true,
+#       skip_upload_images: true,
+#       skip_upload_screenshots: true,
+#       json_key: ENV['JSON_SECRET_LOCATION']
+#     )
+
+    slack(
+      message: ENV['APP_NAME'] + ' ' + options[:track] + ' has been uploaded to Google Play Store',
+    )
+  end
+end

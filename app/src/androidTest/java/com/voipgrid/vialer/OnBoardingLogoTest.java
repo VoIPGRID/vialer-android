@@ -1,31 +1,35 @@
 package com.voipgrid.vialer;
 
-import android.support.test.InstrumentationRegistry;
-import android.test.ActivityInstrumentationTestCase2;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.voipgrid.vialer.onboarding.SetupActivity;
 
-public class OnBoardingLogoTest extends ActivityInstrumentationTestCase2<SetupActivity> {
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-    private SetupActivity mActivity;
+@RunWith(AndroidJUnit4.class)
+public class OnBoardingLogoTest {
+
+    @Rule
+    public ActivityTestRule<SetupActivity> mActivityTestRule = new ActivityTestRule<>(SetupActivity.class);
+
     private TestActions mActions;
 
-    public OnBoardingLogoTest() {
-        super(SetupActivity.class);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        injectInstrumentation(InstrumentationRegistry.getInstrumentation());
-        mActivity = getActivity();
+    @Before
+    public void setUp() {
         mActions = new TestActions();
     }
 
+    @Test
     public void testClickProceedFromLogo_sameActivity() {
         mActions.logoClickProceed();
     }
 
+    @Test
     public void testAutoProceedFromLogo_sameActivity() {
         mActions.logoWaitProceed();
     }

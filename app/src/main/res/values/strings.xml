@@ -19,7 +19,7 @@
     <string name="call_incoming_expanded">Incoming call from:</string>
     <string name="call_outgoing">Outgoing call</string>
     <string name="call_ended">Call ended</string>
-    <string name="call_on_hold">On hold: %1$s</string>
+    <string name="call_on_hold">On hold: %s</string>
     <string name="call_hangup">Hang up</string>
     <string name="call_connected">Connected</string>
     <string name="call_unreachable">Unreachable</string>
@@ -30,8 +30,8 @@
     <string name="dialer_warning_a_b_connect">Poor connection, Two step calling enabled</string>
     <string name="dialer_warning_no_connection">No connection, cannot call</string>
     <string name="dialer_warning_voip_disabled">VoIP disabled, enable in settings</string>
-    <string name="version_info">Version: %1$s</string>
-    <string name="version_info_beta">Version: %1$s Build: %2$s</string>
+    <string name="version_info">Version: %s</string>
+    <string name="version_info_beta">Version: %s Build: %s</string>
 
     <!-- UpdateHelper -->
     <string name="title_activity_update">Updating</string>
@@ -116,8 +116,8 @@
     <string name="title_activity_click_to_dial">ClickToDialActivity</string>
     <string name="title_activity_warning">Warning</string>
 
-    <string name="dialer_warning_no_connection_message">This app needs a data connection to setup phonecalls. Please connect to a cellular data connection or Wifi to start calling using the app.</string>
-    <string name="dialer_warning_a_b_connect_connectivity_message">Your internet connection isn\'t fast enough to enable calling using VoIP. Two-step calling is therefore enabled. When you start a phonecall, we first call you on your mobile phone and when you pickup, we connect you to the person you want to call. It is possible that your telephony provider can charge you double rates for setting up two connections.</string>
+    <string name="dialer_warning_no_connection_message">This app needs a data connection to setup phone calls. Please connect to a cellular data connection or Wifi to start calling using the app.</string>
+    <string name="dialer_warning_a_b_connect_connectivity_message">Your internet connection isn\'t fast enough to enable calling using VoIP. Two-step calling is therefore enabled. When you start a phone call, we first call you on your mobile phone and when you pickup, we connect you to the person you want to call. It is possible that your telephony provider can charge you double rates for setting up two connections.</string>
     <string name="dialer_warning_a_b_connect_account_message">You dont\' have a VoIP account configured for this account. Please configure a VoIP account in the portal for use with this user. After configuring, you can call using VoIP from the app.</string>
     <string name="dialer_no_contacts_found_message">No contacts found</string>
     <string name="dialer_invalid_number">Phone number incorrect</string>
@@ -233,10 +233,10 @@
     <string name="remote_logging_id_copied">Logging id copied</string>
     <string name="remote_logging_send_crash_log">Would you like to help improve our services and send the crash log to us?</string>
 
-    <string name="call_transfer_complete_success">Successfully transferred %1$s and %2$s</string>
+    <string name="call_transfer_complete_success">Successfully transferred %s and %s</string>
 
     <string name="t9helper_title">Tips</string>
-    <string name="t9helper_text">You can search for %1$s by keying the numbers on the dialpad below.</string>
+    <string name="t9helper_text">You can search for %s by keying the numbers on the dialpad below.</string>
     <string name="t9helper_joining_character" translatable="false">+</string>
     <string name="call_not_encrypted_warning_bar_text">Call not encrypted</string>
     <string name="notification_channel_voip_disabled">Your VoIP account has been registered on another device. You can re-enable VoIP in Settings</string>
