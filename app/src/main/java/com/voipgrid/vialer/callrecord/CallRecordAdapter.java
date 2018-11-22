@@ -1,12 +1,8 @@
 package com.voipgrid.vialer.callrecord;
 
 import android.app.Activity;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,22 +12,25 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.tamir7.contacts.Contact;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.CallRecord;
-import com.voipgrid.vialer.permissions.ContactsPermission;
+import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.dialer.DialerActivity;
-import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.IconHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -46,77 +45,30 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
 
     public boolean mCallAlreadySetup = false;
 
+    private Map<String, Contact> mCachedContacts = new HashMap<>();
+    private Map<String, Bitmap> mCachedContactImages = new HashMap<>();
+
+    @Inject Contacts mContacts;
+
     /**
      * Construct a new CallRecordAdapter
      * @param activity
      * @param callRecords
      */
-    public CallRecordAdapter(Activity activity, List<CallRecord> callRecords) {
+    CallRecordAdapter(Activity activity, List<CallRecord> callRecords) {
         mActivity = activity;
         mCallRecords = callRecords;
+        VialerApplication.get().component().inject(this);
     }
 
     /**
      * Set call records to the adapter
      * @param callRecords
      */
-    public void setCallRecords(List<CallRecord> callRecords) {
+    void setCallRecords(List<CallRecord> callRecords) {
         mCallRecords = callRecords;
         notifyDataSetChanged();
     }
-
-    /**
-     * Add call records to the adapter
-     * @param callRecords
-     */
-    public void addCallRecords(List<CallRecord> callRecords) {
-        mCallRecords.addAll(callRecords);
-        notifyDataSetChanged();
-    }
-
-    /**
-     * getContactNameForNumber return the name of the contact that matches the number or null.
-     * @param number The number to find a contact for.
-     * @return The name or null.
-     */
-    private String getContactNameForNumber(String number) {
-        String name = null;
-        // Uri for getting contact info.
-        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI.buildUpon()
-                .appendQueryParameter(ContactsContract.DIRECTORY_PARAM_KEY,
-                        String.valueOf(ContactsContract.Directory.DEFAULT))
-                .build();
-        // Query selection.
-        String selection = ContactsContract.CommonDataKinds.Phone.NUMBER + " = ? " +
-                "OR " + ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER + " = ?";
-
-        // Query the database.
-        Cursor contactCursor = mActivity.getContentResolver().query(
-                uri,
-                new String[] {
-                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY,
-                },
-                selection,
-                new String[] {
-                        number,
-                        number
-                },
-                null
-        );
-
-        // Check if cursor not null.
-        if (contactCursor != null) {
-            // Check if we have a item.
-            if (contactCursor.moveToFirst()) {
-                // Get the name of the first match.
-                name = contactCursor.getString(0);  // display name primary
-            }
-            // Always close cursor.
-            contactCursor.close();
-        }
-        return name;
-    }
-
 
     @Override
     public int getCount() {
@@ -138,7 +90,7 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
         ViewHolder viewHolder;
         // Get the call record.
         CallRecord callRecord = getItem(position);
-        String name = null;
+        Contact contact = null;
         String number = "";
         // Default resource for direction.
         int resource = 0;
@@ -162,7 +114,10 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
 
             // Get possible name or null.
             if (ContactsPermission.hasPermission(mActivity)) {
-                name = getContactNameForNumber(number);
+                if (!mCachedContacts.containsKey(number)) {
+                    mCachedContacts.put(number, mContacts.getContactByPhoneNumber(number));
+                }
+                contact = mCachedContacts.get(number);
             }
         }
 
@@ -172,9 +127,22 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
             convertView = inflater.inflate(R.layout.list_item_call_record, parent, false);
         }
 
-        String firstLetterOfName = name != null ? name.substring(0, 1) : "";
+        Bitmap bitmapImage = null;
 
-        Bitmap bitmapImage = IconHelper.getCallerIconBitmap(firstLetterOfName, Color.BLUE);
+        if (contact != null) {
+
+            if (!mCachedContactImages.containsKey(number)) {
+                mCachedContactImages.put(number, mContacts.getContactImageByPhoneNumber(number));
+            }
+
+            bitmapImage = mCachedContactImages.get(number);
+
+            if (bitmapImage == null) {
+                bitmapImage = IconHelper.getCallerIconBitmap(contact.getDisplayName().substring(0, 1), number, 0);
+            }
+        } else {
+            bitmapImage = IconHelper.getCallerIconBitmap("", number, 0);
+        }
 
         View photoView = convertView.findViewById(R.id.text_view_contact_icon);
 
@@ -197,8 +165,8 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
                 viewHolder.title.setText(convertView.getContext().getString(R.string.supressed_number));
                 // Make call button invisible.
                 callButton.setVisibility(View.GONE);
-            } else if (name != null) {
-                viewHolder.title.setText(name);
+            } else if (contact != null) {
+                viewHolder.title.setText(contact.getDisplayName());
                 callButton.setOnClickListener(this);
                 callButton.setVisibility(View.VISIBLE);
             } else {

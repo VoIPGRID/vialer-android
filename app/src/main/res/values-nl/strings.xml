@@ -18,7 +18,7 @@
     <string name="call_incoming">Inkomend gesprek</string>
     <string name="call_outgoing">Uitgaand gesprek</string>
     <string name="call_ended">Gesprek beëindigd</string>
-    <string name="call_on_hold">In de wacht</string>
+    <string name="call_on_hold">In de wacht: %1$s</string>
     <string name="call_hangup">Ophangen</string>
     <string name="call_connected">Verbonden</string>
     <string name="call_unreachable">Onbereikbaar</string>
@@ -182,6 +182,13 @@
     <string name="two_step_call_state_setup_failed">Opzetten van gesprek mislukt</string>
     <string name="two_step_call_state_invalid_number">Telefoonnummer incorrect</string>
 
+    <!-- Call layout values -->
+    <string name="dialpad_label">toetsen</string>
+    <string name="mute_label">geluid uit</string>
+    <string name="speaker_label">luidspreker</string>
+    <string name="transfer_label">doorverbinden</string>
+    <string name="onhold_label">wacht</string>
+
     <!-- Permission strings -->
     <string name="permission_microphone_dialog_title">Microfoon permissie</string>
     <string name="permission_microphone_dialog_message">Permissie is nodig om te kunnen bellen.</string>
@@ -209,8 +216,7 @@
     <string name="remote_logging_id_copied">Logging id gekopieerd</string>
     <string name="remote_logging_send_crash_log">Zou u ons willen helpen met het verbeteren van onze diensten door het foutenrapport te versturen?</string>
 
-    <string name="call_transfer_complete_and">en</string>
-    <string name="call_transfer_complete_success"> Succesvol doorverbonden</string>
+    <string name="call_transfer_complete_success"> Succesvol doorverbonden %1$s en %2$s</string>
     <string name="call_incoming_expanded">Inkomend gesprek van:</string>
     <string name="call_incoming_accept">Antwoord</string>
     <string name="call_incoming_decline">Weigeren</string>
@@ -227,4 +233,16 @@
 
     <string name="t9helper_title">Tip</string>
     <string name="t9helper_text">Je kunt zoeken op %1$s door de volgende nummers op het toetsenbord in te drukken.</string>
+    <string name="notification_channel_voip_disabled">Je VoIP account is geregistreerd op een ander
+        apparaat. Je kunt VoIP weer activeren bij instellingen
+    </string>
+    <string name="audio_source_option_bluetooth">Bluetooth</string>
+    <string name="audio_source_option_speaker">Luidspreker</string>
+    <string name="pending_call_description">Bellen</string>
+    <string name="audio_source_option_phone">Telefoon</string>
+    <string name="incoming_call_answer">Beantwoorden</string>
+    <string name="incoming_call_decline">Weigeren</string>
+    <string name="pending_call_status">Gesprek wordt opgezet</string>
+    <string name="transfer_connect">voeg samen</string>
+    <string name="transfer_hangup">ophangen</string>
 </resources>

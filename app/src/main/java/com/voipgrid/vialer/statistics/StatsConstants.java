@@ -25,6 +25,8 @@ public interface StatsConstants {
     String KEY_CONNECTION_TYPE = "connection_type";
     String KEY_ACCOUNT_CONNECTION_TYPE = "account_connection_type";
     String KEY_CALL_DURATION = "call_duration";
+    String KEY_RX_PACKETS = "rx_packets";
+    String KEY_TX_PACKETS = "tx_packets";
 
     String VALUE_OS = "Android";
     String VALUE_APP_STATUS_ALPHA = "Alpha";

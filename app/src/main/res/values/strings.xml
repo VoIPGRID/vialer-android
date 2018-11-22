@@ -19,7 +19,7 @@
     <string name="call_incoming_expanded">Incoming call from:</string>
     <string name="call_outgoing">Outgoing call</string>
     <string name="call_ended">Call ended</string>
-    <string name="call_on_hold">On hold</string>
+    <string name="call_on_hold">On hold: %1$s</string>
     <string name="call_hangup">Hang up</string>
     <string name="call_connected">Connected</string>
     <string name="call_unreachable">Unreachable</string>
@@ -193,6 +193,15 @@
     <string name="two_step_call_state_setup_failed">Failed to setup call</string>
     <string name="two_step_call_state_invalid_number">Phone number incorrect</string>
 
+    <!-- Call layout values -->
+    <string name="dialpad_label">keypad</string>
+    <string name="mute_label">mute</string>
+    <string name="speaker_label">speaker</string>
+    <string name="transfer_label">transfer</string>
+    <string name="onhold_label">hold</string>
+    <string name="transfer_connect">merge calls</string>
+    <string name="transfer_hangup">hang up</string>
+
     <!-- Permission strings -->
     <string name="permission_microphone_dialog_title">Microphone permission</string>
     <string name="permission_microphone_dialog_message">Permission is needed to call</string>
@@ -224,11 +233,18 @@
     <string name="remote_logging_id_copied">Logging id copied</string>
     <string name="remote_logging_send_crash_log">Would you like to help improve our services and send the crash log to us?</string>
 
-    <string name="call_transfer_complete_and">and</string>
-    <string name="call_transfer_complete_success"> Successfully transferred</string>
+    <string name="call_transfer_complete_success">Successfully transferred %1$s and %2$s</string>
 
     <string name="t9helper_title">Tips</string>
     <string name="t9helper_text">You can search for %1$s by keying the numbers on the dialpad below.</string>
     <string name="t9helper_joining_character" translatable="false">+</string>
     <string name="call_not_encrypted_warning_bar_text">Call not encrypted</string>
+    <string name="notification_channel_voip_disabled">Your VoIP account has been registered on another device. You can re-enable VoIP in Settings</string>
+    <string name="pending_call_description">Setting up call with</string>
+    <string name="pending_call_status">Establishing VoIP connection…</string>
+    <string name="audio_source_option_phone">Phone</string>
+    <string name="audio_source_option_speaker">Speaker</string>
+    <string name="audio_source_option_bluetooth">Bluetooth</string>
+    <string name="incoming_call_answer">Answer</string>
+    <string name="incoming_call_decline">Ignore</string>
 </resources>

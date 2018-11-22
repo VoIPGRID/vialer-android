@@ -3,13 +3,11 @@ package com.voipgrid.vialer.cryptography;
 import android.content.Context;
 import android.util.Log;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.yakivmospan.scytale.Crypto;
 import com.yakivmospan.scytale.ErrorListener;
 import com.yakivmospan.scytale.Options;
 import com.yakivmospan.scytale.Store;
-
-import java.security.KeyStore;
 
 import javax.crypto.SecretKey;
 
@@ -17,14 +15,14 @@ public class Encrypter implements ErrorListener {
 
     private static final String KEY_ALIAS = "PASS_ALIAS_SYMMETRIC";
 
-    private final RemoteLogger mRemoteLogger;
+    private final Logger mLogger;
     private final Crypto mCrypto;
     private final Store mStore;
 
     public Encrypter(Context context) {
         mCrypto = new Crypto(Options.TRANSFORMATION_SYMMETRIC);
         mStore = new Store(context);
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mLogger = new Logger(this.getClass());
         mCrypto.setErrorListener(this);
         mStore.setErrorListener(this);
     }
@@ -63,6 +61,6 @@ public class Encrypter implements ErrorListener {
 
     @Override
     public void onError(Exception e) {
-        mRemoteLogger.e("Crypto failed with exception: " + Log.getStackTraceString(e));
+        mLogger.e("Crypto failed with exception: " + Log.getStackTraceString(e));
     }
 }

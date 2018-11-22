@@ -12,7 +12,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.logging.LogHelper;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
 import com.voipgrid.vialer.media.monitoring.PacketStats;
 import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
@@ -58,7 +58,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     private Uri mPhoneNumberUri;
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private SipBroadcaster mSipBroadcaster;
     private SipService mSipService;
 
@@ -76,6 +76,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mMiddlewareKey;
     private String mMessageStartTime;
     private CallInfo mLastCallInfo;
+    private CallMediaMonitor mCallMediaMonitor;
 
     public static final String CALL_DIRECTION_OUTGOING = "outgoing";
     public static final String CALL_DIRECTION_INCOMING = "incoming";
@@ -114,7 +115,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                     mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
                     (int) (100 * (long) mos)
             );
-            mRemoteLogger.e("MOS for CONNECTION: " + ConnectivityHelper.get(mSipService).getConnectionTypeString() + " with value: " + mos);
+            mLogger.e("MOS for CONNECTION: " + ConnectivityHelper.get(mSipService).getConnectionTypeString() + " with value: " + mos);
         }
     }
 
@@ -141,7 +142,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     public SipCall(SipService sipService, SipAccount sipAccount) {
         super(sipAccount);
         mSipService = sipService;
-        mRemoteLogger = mSipService.getRemoteLogger();
+        mLogger = mSipService.getLogger();
         mSipBroadcaster = mSipService.getSipBroadcaster();
     }
 
@@ -154,7 +155,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     public SipCall(SipService sipService, SipAccount sipAccount, int callId) {
         super(sipAccount, callId);
         mSipService = sipService;
-        mRemoteLogger = mSipService.getRemoteLogger();
+        mLogger = mSipService.getLogger();
         mSipBroadcaster = mSipService.getSipBroadcaster();
     }
 
@@ -319,8 +320,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             mLastCallInfo = getInfo();  // Check to see if we can get CallInfo with this callback.
 
             pjsip_inv_state callState = mLastCallInfo.getState();
-            mRemoteLogger.e("CallState changed!");
-            mRemoteLogger.e(callState.toString());
+            mLogger.e("CallState changed!");
+            mLogger.e(callState.toString());
 
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                 onCallStartRingback();
@@ -330,7 +331,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 onCallConnected();
             } else if (callState == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED) {
                 if (mIpChangeInProgress && mCurrentCallState.equals(SipConstants.CALL_INCOMING_RINGING)) {
-                    mRemoteLogger.d("Network switch during ringing phase.");
+                    mLogger.d("Network switch during ringing phase.");
                 }
 
                 onCallStopRingback();
@@ -381,8 +382,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         return mCurrentCallState;
     }
 
-    public Boolean getIsCallConnected() {
+    public Boolean isConnected() {
         return mCallIsConnected;
+    }
+
+    /**
+     * Check if the call is currently in a ringing state.
+     *
+     * @return TRUE if in a ringing state, otherwise false.
+     */
+    public boolean isCallRinging() {
+        return getCurrentCallState().equals(SipConstants.CALL_INCOMING_RINGING);
     }
 
     public Uri getPhoneNumberUri() {
@@ -410,14 +420,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public void onCallIncoming() {
-        mRemoteLogger.d("onCallIncoming");
+        mLogger.d("onCallIncoming");
         mCallDirection = CALL_DIRECTION_INCOMING;
 
         // Determine whether we can accept the incoming call.
         pjsip_status_code code = pjsip_status_code.PJSIP_SC_RINGING;
         if (mSipService.getCurrentCall() != null || mSipService.getNativeCallManager().isBusyWithNativeCall()) {
             code = pjsip_status_code.PJSIP_SC_BUSY_HERE;
-            LogHelper.using(mRemoteLogger).logBusyReason(mSipService);
+            LogHelper.using(mLogger).logBusyReason(mSipService);
         }
 
         if (mSipService.getCurrentCall() != null) {
@@ -459,7 +469,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public void onCallOutgoing(Uri phoneNumber, boolean startActivity) {
-        mRemoteLogger.d("onCallOutgoing");
+        mLogger.d("onCallOutgoing");
         mCallDirection = CALL_DIRECTION_OUTGOING;
 
         CallOpParam callOpParam = new CallOpParam();
@@ -478,11 +488,12 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     private void onCallConnected() {
-        mRemoteLogger.d("onCallConnected");
+        mLogger.d("onCallConnected");
         mCallIsConnected = true;
         mCurrentCallState = SipConstants.CALL_CONNECTED_MESSAGE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_CONNECTED_MESSAGE);
-        new Thread(new CallMediaMonitor(this)).start();
+        mCallMediaMonitor = new CallMediaMonitor(this);
+        new Thread(mCallMediaMonitor).start();
     }
 
     /**
@@ -490,13 +501,20 @@ public class SipCall extends org.pjsip.pjsua2.Call {
      *
      * @return
      */
-    public @Nullable
-    PacketStats getMediaPacketStats() {
+    public @Nullable PacketStats getMediaPacketStats() {
         return PacketStats.Builder.fromSipCall(this);
     }
 
+    public @Nullable PacketStats getLastMediaPacketStats() {
+        if (mCallMediaMonitor == null) {
+            return null;
+        }
+
+        return mCallMediaMonitor.getMostRecentPacketStats();
+    }
+
     private void onCallDisconnected() {
-        mRemoteLogger.d("onCallDisconnected");
+        mLogger.d("onCallDisconnected");
         sendMos();
         sendBandwidth();
 
@@ -514,8 +532,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     private void onCallInvalidState(Throwable fault) {
-        mRemoteLogger.d("onCallInvalidState");
-        mRemoteLogger.d("" + Log.getStackTraceString(fault));
+        mLogger.d("onCallInvalidState");
+        mLogger.d("" + Log.getStackTraceString(fault));
         mSipService.removeCallFromList(this);
         mCurrentCallState = SipConstants.CALL_INVALID_STATE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_INVALID_STATE);
@@ -523,7 +541,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     private void onCallMediaAvailable(AudioMedia media) {
-        mRemoteLogger.d("onCallMediaAvailable");
+        mLogger.d("onCallMediaAvailable");
         try {
             // There is media available so stop the ringback.
             onCallStopRingback();
@@ -542,20 +560,20 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     private void onCallMediaUnavailable() {
-        mRemoteLogger.d("onCallMediaUnavailable");
+        mLogger.d("onCallMediaUnavailable");
     }
 
     private void onCallStartRingback() {
-        mRemoteLogger.d("onCallStartRingback: " + mRingbackStarted);
+        mLogger.d("onCallStartRingback: " + mRingbackStarted);
         if (!mRingbackStarted) {
-            mRemoteLogger.d("Ringback not started. Start it.");
+            mLogger.d("Ringback not started. Start it.");
             mRingbackStarted = true;
             mSipService.startRingback();
         }
     }
 
     private void onCallStopRingback() {
-        mRemoteLogger.d("onCallStopRingback");
+        mLogger.d("onCallStopRingback");
         mSipService.stopRingback();
     }
 
@@ -628,7 +646,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
             return StringUtil.extractFirstCaptureGroupFromString(transport, "transport=([^;]+);");
         } catch (Exception e) {
-            mRemoteLogger.e("Unable to get call id: " + e.getMessage());
+            mLogger.e("Unable to get call id: " + e.getMessage());
             return null;
         }
     }
@@ -646,7 +664,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
             return mLastCallInfo;
         } catch (Exception e) {
-            mRemoteLogger.e("Unable to get call info");
+            mLogger.e("Unable to get call info");
             return null;
         }
     }

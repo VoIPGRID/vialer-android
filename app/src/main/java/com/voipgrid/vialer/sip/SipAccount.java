@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.sip;
 
+import static com.voipgrid.vialer.fcm.RemoteMessageData.MESSAGE_START_TIME;
+
 import android.content.Intent;
 
 import com.voipgrid.vialer.fcm.FcmMessagingService;
@@ -46,7 +48,7 @@ class SipAccount extends org.pjsip.pjsua2.Account {
         if (mSipService != null && mSipService.getIncomingCallDetails() != null) {
             Intent incomingCallDetails = mSipService.getIncomingCallDetails();
             sipCall.setMiddlewareKey(incomingCallDetails.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN));
-            sipCall.setMessageStartTime(incomingCallDetails.getStringExtra(FcmMessagingService.MESSAGE_START_TIME));
+            sipCall.setMessageStartTime(incomingCallDetails.getStringExtra(MESSAGE_START_TIME));
         }
     }
 

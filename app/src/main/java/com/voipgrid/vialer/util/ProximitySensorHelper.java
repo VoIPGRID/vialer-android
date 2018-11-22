@@ -6,48 +6,35 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 /**
  * Class to help with the disabling of the screen during a call.
  */
 public class ProximitySensorHelper implements SensorEventListener, View.OnClickListener {
     private Context mContext;
-    private PowerManager mPowerManager;
-    private ProximitySensorInterface mProximityInterface;
     private Sensor mProximitySensor;
     private SensorManager mSensorManager;
+    private Logger mLogger;
     private View mLockView;
-    private WakeLock mWakeLock;
-    private RemoteLogger mRemoteLogger;
 
-
-    public interface ProximitySensorInterface {
-        boolean activateProximitySensor();
-    }
-
-    public ProximitySensorHelper(
-            Context context, ProximitySensorInterface proximityInterface, View lockView
-    ) {
+    public ProximitySensorHelper(Context context) {
         mContext = context;
-        mProximityInterface = proximityInterface;
-        mLockView = lockView;
-        mRemoteLogger = new RemoteLogger(ProximitySensorHelper.class).enableConsoleLogging();
-        mRemoteLogger.v("ProximitySensorHelper");
+        mLogger = new Logger(ProximitySensorHelper.class);
+        mLogger.v("ProximitySensorHelper");
 
         mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
         mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
     }
 
-    public void startSensor() {
-        mRemoteLogger.v("startSensor()");
+    public void startSensor(View lockView) {
+        mLockView = lockView;
+        mLogger.v("startSensor()");
 
         if (mProximitySensor != null) {
             mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_UI);
@@ -56,7 +43,7 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
     }
 
     public void stopSensor() {
-        mRemoteLogger.v("stopSensor()");
+        mLogger.v("stopSensor()");
 
         if (mProximitySensor != null) {
             mSensorManager.unregisterListener(this);
@@ -65,7 +52,7 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        mRemoteLogger.v("onSensorChanged()");
+        mLogger.v("onSensorChanged()");
         Float distance = event.values[0];
         // Leave the screen on if the measured distance is the max distance.
         if (distance >= event.sensor.getMaximumRange() || distance >= 10.0f) {
@@ -92,14 +79,16 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
      * @param on Whether or not the screen needs to be on or off.
      */
     private void toggleScreen(boolean on) {
-        mRemoteLogger.v("toggleScreen(): " + on);
+        mLogger.v("toggleScreen(): " + on);
 
         Activity activity = (Activity) mContext;
         Window window = activity.getWindow();
         WindowManager.LayoutParams params = activity.getWindow().getAttributes();
 
         if (on) {
-            mLockView.setVisibility(View.GONE);
+            if (mLockView != null) {
+                mLockView.setVisibility(View.GONE);
+            }
 
             // Reset screen brightness.
             params.screenBrightness = -1;
@@ -113,7 +102,9 @@ public class ProximitySensorHelper implements SensorEventListener, View.OnClickL
             // Set screen brightness to 0.
             params.screenBrightness = 0;
 
-            mLockView.setVisibility(View.VISIBLE);
+            if (mLockView != null) {
+                mLockView.setVisibility(View.VISIBLE);
+            }
 
             // Disable the touch
             params.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;

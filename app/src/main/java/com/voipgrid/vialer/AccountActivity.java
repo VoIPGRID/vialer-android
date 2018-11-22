@@ -3,6 +3,8 @@ package com.voipgrid.vialer;
 import static com.voipgrid.vialer.util.ConnectivityHelper.converseFromPreference;
 import static com.voipgrid.vialer.util.ConnectivityHelper.converseToPreference;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,14 +29,17 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.fcm.FcmMessagingService;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
+import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -76,11 +81,18 @@ public class AccountActivity extends LoginRequiredActivity {
     private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
     private Api mApi;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private ClipboardHelper mClipboardHelper;
+    private BroadcastReceiverManager mBroadcastReceiverManager;
 
     private boolean mEditMode = false;
     private boolean mIsSetupComplete = false;
+    private BroadcastReceiver mVoipDisabledReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateAndPopulate();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +104,9 @@ public class AccountActivity extends LoginRequiredActivity {
         mPhoneAccountHelper = new PhoneAccountHelper(this);
         mPreferences = new Preferences(this);
         mApi = ServiceGenerator.createApiService(this);
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mLogger = new Logger(this.getClass());
         mClipboardHelper =  ClipboardHelper.fromContext(this);
+        mBroadcastReceiverManager = BroadcastReceiverManager.fromContext(this);
 
         setupActionBar();
 
@@ -112,6 +125,14 @@ public class AccountActivity extends LoginRequiredActivity {
         updateSystemUserAndPhoneAccount();
 
         initializeAdvancedSettings();
+
+        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mVoipDisabledReceiver, FcmMessagingService.VOIP_HAS_BEEN_DISABLED);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mBroadcastReceiverManager.unregisterReceiver(mVoipDisabledReceiver);
     }
 
     private void setupActionBar() {
@@ -204,6 +225,8 @@ public class AccountActivity extends LoginRequiredActivity {
                         // on a change in the check of the switch.
                         SetupActivity.launchToSetVoIPAccount(AccountActivity.this);
                     }
+
+                    NotificationHelper.getInstance(AccountActivity.this).removeVoipDisabledNotification();
                 }
             }.execute();
         }
@@ -262,7 +285,7 @@ public class AccountActivity extends LoginRequiredActivity {
     void stunSwitchChanged(CompoundButton compoundButton, boolean b) {
         if (!mIsSetupComplete) return;
         mPreferences.setStunEnabled(b);
-        mRemoteLogger.i("STUN has been set to: " + b);
+        mLogger.i("STUN has been set to: " + b);
         initializeAdvancedSettings();
     }
 
@@ -287,7 +310,7 @@ public class AccountActivity extends LoginRequiredActivity {
         enableProgressBar(false);
 
         if (mSystemUser == null) {
-            mRemoteLogger.e("Attempted to populate AccountActivity but there does not seem to be a SystemUser available");
+            mLogger.e("Attempted to populate AccountActivity but there does not seem to be a SystemUser available");
             return;
         }
 
@@ -478,7 +501,7 @@ public class AccountActivity extends LoginRequiredActivity {
         @Override
         public void onSuccess() {
             mPreferences.setTlsEnabled(mSwitchEnabled);
-            mRemoteLogger.i("TLS switch has been set to: " + mSwitchEnabled);
+            mLogger.i("TLS switch has been set to: " + mSwitchEnabled);
             initializeAdvancedSettings();
         }
 

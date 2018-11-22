@@ -1,9 +1,9 @@
 package com.voipgrid.vialer.statistics;
 
 
-import static com.voipgrid.vialer.fcm.FcmMessagingService.ATTEMPT;
-import static com.voipgrid.vialer.fcm.FcmMessagingService.MESSAGE_START_TIME;
-import static com.voipgrid.vialer.fcm.FcmMessagingService.REQUEST_TOKEN;
+import static com.voipgrid.vialer.fcm.RemoteMessageData.ATTEMPT;
+import static com.voipgrid.vialer.fcm.RemoteMessageData.MESSAGE_START_TIME;
+import static com.voipgrid.vialer.fcm.RemoteMessageData.REQUEST_TOKEN;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_ACCOUNT_CONNECTION_TYPE;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_APP_STATUS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_APP_VERSION;
@@ -26,8 +26,10 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_NETWORK;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_NETWORK_OPERATOR;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_OS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_OS_VERSION;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_RX_PACKETS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_SIP_USER_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_TIME_TO_INITIAL_RESPONSE;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_TX_PACKETS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_ACCOUNT_CONNECTION_TYPE_TCP;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_ACCOUNT_CONNECTION_TYPE_TLS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_BLUETOOTH_AUDIO_ENABLED_TRUE;
@@ -61,13 +63,15 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.Registration;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.media.monitoring.PacketStats;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
 import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
 import com.voipgrid.vialer.util.JsonStorage;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -79,7 +83,7 @@ public class VialerStatistics {
 
     private final DefaultDataProvider mDefaultDataProvider;
     private final BluetoothDataProvider mBluetoothDataProvider;
-    private final RemoteLogger mRemoteLogger;
+    private final Logger mLogger;
     private final Registration mRegistration;
 
     private Map<String, String> payload;
@@ -96,7 +100,7 @@ public class VialerStatistics {
 
     private VialerStatistics(Preferences preferences, JsonStorage jsonStorage, Registration registration) {
         mRegistration = registration;
-        mRemoteLogger = new RemoteLogger(this.getClass()).enableConsoleLogging();
+        mLogger = new Logger(this.getClass());
         mDefaultDataProvider = new DefaultDataProvider(preferences, jsonStorage);
         mBluetoothDataProvider = new BluetoothDataProvider();
         resetPayload();
@@ -312,6 +316,13 @@ public class VialerStatistics {
             addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(call.getMessageStartTime())));
         }
 
+        PacketStats packetStats = call.getLastMediaPacketStats();
+
+        if (packetStats != null) {
+            addValue(KEY_RX_PACKETS, String.valueOf(packetStats.getReceived()));
+            addValue(KEY_TX_PACKETS, String.valueOf(packetStats.getSent()));
+        }
+
         return this;
     }
 
@@ -324,7 +335,7 @@ public class VialerStatistics {
      */
     private long calculateTimeToInitialResponse(String startTime) {
         if (startTime == null) {
-            mRemoteLogger.i("Message start time is null");
+            mLogger.i("Message start time is null");
             return 0;
         }
 
@@ -350,13 +361,25 @@ public class VialerStatistics {
     }
 
     private void send() {
-        mRegistration.metrics(payload).enqueue(new VialerStatisticsRequestCallback(mRemoteLogger));
+        mRegistration.metrics(payload).enqueue(new VialerStatisticsRequestCallback(mLogger));
         log();
         resetPayload();
     }
 
     private void log() {
-        mRemoteLogger.i(
+        String[] fieldsToAnonymize = {KEY_SIP_USER_ID, KEY_CALL_ID};
+
+        Map<String, String> payload = new HashMap<>(this.payload);
+
+        for (String field : fieldsToAnonymize) {
+            if (!payload.containsKey(field)) {
+                continue;
+            }
+
+            payload.put(field, "<ANONYMIZED>");
+        }
+
+        mLogger.i(
                 new GsonBuilder()
                 .disableHtmlEscaping()
                 .setPrettyPrinting()
@@ -375,22 +398,22 @@ public class VialerStatistics {
 
     private static class VialerStatisticsRequestCallback implements Callback<Void> {
 
-        private final RemoteLogger mRemoteLogger;
+        private final Logger mLogger;
 
-        private VialerStatisticsRequestCallback(RemoteLogger remoteLogger) {
-            mRemoteLogger = remoteLogger;
+        private VialerStatisticsRequestCallback(Logger logger) {
+            mLogger = logger;
         }
 
         @Override
         public void onResponse(Call<Void> call, Response<Void> response) {
             if (!response.isSuccessful()) {
-                mRemoteLogger.e("Failed to upload vialer statistics, with status code: " + response.code());
+                mLogger.e("Failed to upload vialer statistics, with status code: " + response.code());
             }
         }
 
         @Override
         public void onFailure(Call<Void> call, Throwable t) {
-            mRemoteLogger.e("Failed to upload vialer statistics with exception: " + t.getMessage());
+            mLogger.e("Failed to upload vialer statistics with exception: " + t.getMessage());
         }
     }
 }

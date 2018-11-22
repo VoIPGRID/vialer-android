@@ -3,7 +3,7 @@ package com.voipgrid.vialer.cryptography;
 import android.util.Base64;
 import android.util.Log;
 
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -24,11 +24,11 @@ public class LegacyAsymmetricEncrypter {
     public static final String KEYSTORE_TYPE = "AndroidKeyStore";
     private static final String ENCRYPTION_METHOD = "RSA/ECB/PKCS1Padding";
 
-    private final RemoteLogger mRemoteLogger;
+    private final Logger mLogger;
     private static KeyStore sKeyStore;
 
-    public LegacyAsymmetricEncrypter(RemoteLogger remoteLogger, boolean useAndroidKeystore) {
-        mRemoteLogger = remoteLogger;
+    public LegacyAsymmetricEncrypter(Logger logger, boolean useAndroidKeystore) {
+        mLogger = logger;
         if (useAndroidKeystore) {
             createKeyStore();
         }
@@ -53,8 +53,8 @@ public class LegacyAsymmetricEncrypter {
             return new String(encodedBytes);
         } catch (Exception e) {
             e.printStackTrace();
-            mRemoteLogger.e("Decryption failed!");
-            mRemoteLogger.e(Log.getStackTraceString(e));
+            mLogger.e("Decryption failed!");
+            mLogger.e(Log.getStackTraceString(e));
             return value;
         }
     }
@@ -81,7 +81,7 @@ public class LegacyAsymmetricEncrypter {
             sKeyStore = KeyStore.getInstance(KEYSTORE_TYPE);
             sKeyStore.load(null);
         } catch (Exception e) {
-            mRemoteLogger.e("Unable to create key store: " + e.getMessage());
+            mLogger.e("Unable to create key store: " + e.getMessage());
         }
     }
 

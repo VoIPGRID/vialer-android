@@ -14,7 +14,7 @@ import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.models.ClickToDialParams;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
@@ -34,7 +34,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
 
     private AnalyticsHelper mAnalyticsHelper;
     private Api mApi;
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private SystemUser mSystemUser;
     private TwoStepCallTask mTwoStepCallTask;
     private TwoStepCallView mTwoStepCallView;
@@ -53,7 +53,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
 
         mApi = ServiceGenerator.createApiService(this);
 
-        mRemoteLogger = new RemoteLogger(TwoStepCallActivity.class);
+        mLogger = new Logger(TwoStepCallActivity.class);
 
         String numberToCall = getIntent().getStringExtra(NUMBER_TO_CALL);
 
@@ -253,13 +253,13 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
                                 if (status.getStatus() != null){
                                     handleMessage(status.getStatus());
                                 } else {
-                                    mRemoteLogger.d("status.getStatus() is null");
+                                    mLogger.d("status.getStatus() is null");
                                 }
                             }
                         } catch (IOException e) {
 
                         } catch (StackOverflowError e) {
-                            mRemoteLogger.d("StackOverflowError");
+                            mLogger.d("StackOverflowError");
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();

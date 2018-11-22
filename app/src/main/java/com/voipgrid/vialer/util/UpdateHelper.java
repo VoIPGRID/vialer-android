@@ -13,7 +13,7 @@ import com.voipgrid.vialer.OnUpdateCompleted;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.logging.RemoteLogger;
+import com.voipgrid.vialer.logging.Logger;
 
 /**
  * Class to setup the app to work with the newest code.
@@ -21,7 +21,7 @@ import com.voipgrid.vialer.logging.RemoteLogger;
  */
 public class UpdateHelper extends AsyncTask<Void, Void, Void> {
 
-    private RemoteLogger mRemoteLogger;
+    private Logger mLogger;
     private Context mContext;
     private Preferences mPreferences;
     private JsonStorage mJsonStorage;
@@ -45,7 +45,7 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> {
         mPreferences = new Preferences(mContext);
         this.mListener = listener;
 
-        mRemoteLogger = new RemoteLogger(UpdateHelper.class);
+        mLogger = new Logger(UpdateHelper.class);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class UpdateHelper extends AsyncTask<Void, Void, Void> {
         // If the app has updated to a newer version from a older version we will check for upgrades.
         if (currentVersion > lastVersion) {
             if (BuildConfig.DEBUG) {
-                mRemoteLogger.d("Updating to " + BuildConfig.VERSION_NAME + " - " + currentVersion);
+                mLogger.d("Updating to " + BuildConfig.VERSION_NAME + " - " + currentVersion);
             }
             // Run all required methods.
             for (int i = lastVersion; i <= currentVersion; i++) {

@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageButton
+        android:id="@+id/exit_button"
+        style="@style/DialpadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:contentDescription="@null"
+        android:padding="10dp"
+        android:tint="@color/color_primary"
+        app:srcCompat="@drawable/ic_close"
+        android:visibility="gone"/>
 
     <com.voipgrid.vialer.dialer.DialerEditText
         android:id="@+id/edit_text"
         style="@style/DialpadNumberInput"
+        android:background="@android:color/transparent"
         android:layout_marginEnd="@dimen/remove_button_width"
         android:layout_marginLeft="@dimen/remove_button_width"
         android:layout_marginRight="@dimen/remove_button_width"
@@ -24,8 +38,8 @@
         android:background="@android:color/transparent"
         android:contentDescription="@null"
         android:padding="10dp"
-        android:src="@drawable/ic_backspace"
-        android:tint="@color/tint_color_backspace"
-        android:visibility="invisible" />
+        app:srcCompat="@drawable/ic_backspace"
+        android:tint="@color/color_primary"
+        android:visibility="gone"/>
 
 </RelativeLayout>
