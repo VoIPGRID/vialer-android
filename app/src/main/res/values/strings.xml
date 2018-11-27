@@ -31,7 +31,7 @@
     <string name="dialer_warning_no_connection">No connection, cannot call</string>
     <string name="dialer_warning_voip_disabled">VoIP disabled, enable in settings</string>
     <string name="version_info">Version: %s</string>
-    <string name="version_info_beta">Version: %s Build: %s</string>
+    <string name="version_info_beta">Version: %1$s Build: %2$s</string>
 
     <!-- UpdateHelper -->
     <string name="title_activity_update">Updating</string>
@@ -233,7 +233,7 @@
     <string name="remote_logging_id_copied">Logging id copied</string>
     <string name="remote_logging_send_crash_log">Would you like to help improve our services and send the crash log to us?</string>
 
-    <string name="call_transfer_complete_success">Successfully transferred %s and %s</string>
+    <string name="call_transfer_complete_success">Successfully transferred %1$s and %2$s</string>
 
     <string name="t9helper_title">Tips</string>
     <string name="t9helper_text">You can search for %s by keying the numbers on the dialpad below.</string>

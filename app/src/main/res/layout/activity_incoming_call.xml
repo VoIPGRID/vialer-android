@@ -108,7 +108,7 @@
                   android:textSize="20sp"/>
     </LinearLayout>
 
-    <androidx.constraintlayout.ConstraintLayout
+    <androidx.widget.constraintlayout.ConstraintLayout
         android:id="@+id/call_buttons"
         android:layout_width="match_parent"
         android:layout_height="127dp"
@@ -194,7 +194,7 @@
                       android:textSize="18sp"/>
         </LinearLayout>
 
-    </androidx.constraintlayout.ConstraintLayout>
+    </androidx.widget.constraintlayout.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/screen_off"
