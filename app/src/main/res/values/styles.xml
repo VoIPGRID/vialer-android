@@ -33,6 +33,7 @@
         <item name="android:padding">@dimen/dialpad_button_padding</item>
         <item name="android:orientation">vertical</item>
         <item name="android:clickable">true</item>
+        <item name="android:includeFontPadding">false</item>
     </style>
 
     <style name="DialpadNumberInput" parent="@android:style/Widget.EditText">
@@ -103,4 +104,12 @@
         <item name="android:background">?android:attr/listDivider</item>
     </style>
 
+    <style name="PermissionButton">
+        <item name="android:background">#fff</item>
+        <item name="android:textColor">#212121</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:paddingBottom">5dp</item>
+    </style>
 </resources>

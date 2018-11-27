@@ -209,7 +209,6 @@
 
     <string name="permission_contact_dialog_title">Contact permission</string>
     <string name="permission_contact_dialog_message">Permission is needed to start calling from contact list</string>
-    <string name="permission_contact_dialer_list_message">Unable to show contacts, permission is required</string>
 
     <string name="permission_phone_dialog_title">Phone permission</string>
     <string name="permission_phone_dialog_message">This permission is needed to handle regular calls during a VoIP call</string>
@@ -247,4 +246,7 @@
     <string name="audio_source_option_bluetooth">Bluetooth</string>
     <string name="incoming_call_answer">Answer</string>
     <string name="incoming_call_decline">Ignore</string>
+    <string name="permission_contact_title">No contacts found</string>
+    <string name="permission_contact_description">%1$s needs permission to access your contacts</string>
+    <string name="permission_contact_button">Give Permission</string>
 </resources>
