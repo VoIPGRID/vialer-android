@@ -13,10 +13,10 @@
     <dimen name="dialpad_calling_button_bottom_margin">2dp</dimen>
 
     <dimen name="dialpad_button_digit_text_size">16dp</dimen>
-    <dimen name="dialpad_button_chars_text_size">5dp</dimen>
+    <dimen name="dialpad_button_chars_text_size">5sp</dimen>
     <dimen name="dialpad_button_star_text_size">9dp</dimen>
 
-    <dimen name="dialpad_button_padding">1dp</dimen>
+    <dimen name="dialpad_button_padding">1sp</dimen>
 
     <dimen name="dialpad_bottom_padding">100dp</dimen>
 

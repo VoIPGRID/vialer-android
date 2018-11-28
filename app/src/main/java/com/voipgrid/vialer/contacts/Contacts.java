@@ -33,13 +33,14 @@ public class Contacts {
 
         Query q = com.github.tamir7.contacts.Contacts.getQuery();
         q.whereEqualTo(Contact.Field.PhoneNumber, number);
-        List<Contact> contacts = q.find();
 
-        if (contacts == null || contacts.isEmpty()) {
+        try {
+            List<Contact> contacts = q.find();
+
+            return !contacts.isEmpty() ? contacts.get(0) : null;
+        } catch (Exception e) {
             return null;
         }
-
-        return contacts.get(0);
     }
 
     /**

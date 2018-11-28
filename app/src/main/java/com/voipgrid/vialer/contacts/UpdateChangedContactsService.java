@@ -16,6 +16,8 @@ import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.permissions.ContactsPermission;
 
 /**
  * UpdateChangedContactsService listens for changed contacts and syncs them for t9 search.
@@ -25,12 +27,19 @@ public class UpdateChangedContactsService extends Service {
 
     private static final String LOG_TAG = UpdateChangedContactsService.class.getName();
 
+    private final Logger mLogger = new Logger(this);
+
     @Override
     public void onCreate() {
         super.onCreate();
 
         if (BuildConfig.DEBUG){
             Log.d(LOG_TAG, "Starting update changed contacts service");
+        }
+
+        if (!ContactsPermission.hasPermission(this)) {
+            mLogger.i("Not running contacts service as we do not have the contacts permission");
+            return;
         }
 
         // Create observer.

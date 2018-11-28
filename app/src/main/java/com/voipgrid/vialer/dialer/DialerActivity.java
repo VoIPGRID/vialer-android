@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Html;
@@ -84,9 +85,10 @@ public class DialerActivity extends LoginRequiredActivity implements
     @BindView(R.id.t9helper) View mT9HelperFragment;
     @BindView(R.id.message) TextView mEmptyView;
     @BindView(R.id.button_call) ImageButton mFloatingActionButton;
-
     @BindView(R.id.bottom) Dialer mDialer;
     @BindView(R.id.top) ViewGroup mTop;
+    @BindView(R.id.no_contact_permission_warning) View mNoContactPermissionWarning;
+    @BindView(R.id.permission_contact_description) TextView mPermissionContactDescription;
 
     public static final int RESULT_DIALED_NUMBER = 1;
 
@@ -98,8 +100,9 @@ public class DialerActivity extends LoginRequiredActivity implements
         setContentView(R.layout.activity_dialer);
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
-
         mDialHelper = DialHelper.fromActivity(this);
+        mDialer.setListener(this);
+        mPermissionContactDescription.setText(getString(R.string.permission_contact_description, getString(R.string.app_name)));
 
         Intent intent = getIntent();
         String type = intent.getType();
@@ -110,9 +113,8 @@ public class DialerActivity extends LoginRequiredActivity implements
         mHasPermission = ContactsPermission.hasPermission(this);
         mAskForPermission = true;
         // Check for contact permissions before doing contact related work.
-        if (mHasPermission) { // Handling this intent is only needed when we have contact permissions.
-            // This should be called after setupKeyPad.
-            setupContactParts();
+        if (mHasPermission) {
+            setupContactsListView();
 
             /**
              * The app added a "Vialer call <number>" to the native contacts app. clicking this
@@ -137,10 +139,9 @@ public class DialerActivity extends LoginRequiredActivity implements
                 cursor.close();
             }
         } else {
-            // Set the empty view for the contact list to inform the user this functionality will
-            // not work.
-            mEmptyView.setText(getString(R.string.permission_contact_dialer_list_message));
-            mContactsListView.setEmptyView(mEmptyView);
+            mNoContactPermissionWarning.setVisibility(View.VISIBLE);
+            mT9HelperFragment.setVisibility(View.GONE);
+            mContactsListView.setVisibility(View.GONE);
         }
 
         // Make sure there is no keyboard popping up when pasting in the dialer input field.
@@ -156,20 +157,9 @@ public class DialerActivity extends LoginRequiredActivity implements
         return getIntent().getBooleanExtra(EXTRA_RETURN_AS_RESULT, false);
     }
 
-    /**
-     * Setup the ContactsList, filter the list on the given number and add a onInputChanged
-     * listener for the T9 contact search.
-     */
-    private void setupContactParts() {
-        // Setup the list view.
-        setupContactsListView();
-        // Replace the empty listener set in setupKeypad with the T9 search function.
-        mDialer.setListener(this);
-    }
-
     public void numberWasChanged(String phoneNumber) {
         t9Query = phoneNumber;
-        // Input field is cleared so clear contact list.
+
         if (phoneNumber.length() == 0) {
             clearContactList();
         } else {
@@ -188,15 +178,33 @@ public class DialerActivity extends LoginRequiredActivity implements
 
     }
 
+    @OnClick(R.id.give_contact_permission_button)
+    void openAndroidApplicationDetails() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivityForResult(intent, 1);
+    }
+
     /**
      * Function to clear the contact list in the dialer.
      */
     private void clearContactList() {
-        mContactsAdapter.swapCursor(null);
-        mContactsAdapter.notifyDataSetChanged();
+        if (!ContactsPermission.hasPermission(this)) {
+            mNoContactPermissionWarning.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        if (mContactsAdapter != null) {
+            mContactsAdapter.swapCursor(null);
+            mContactsAdapter.notifyDataSetChanged();
+        }
+
         mT9HelperFragment.setVisibility(View.VISIBLE);
         mContactsListView.setVisibility(View.GONE);
         mEmptyView.setVisibility(View.GONE);
+        mNoContactPermissionWarning.setVisibility(View.GONE);
         mEmptyView.setText("");
     }
 
@@ -436,7 +444,10 @@ public class DialerActivity extends LoginRequiredActivity implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // If the number has been emptied while a query was still in progress, clear all the results.
+        if (mContactsAdapter == null) {
+            return;
+        }
+
         if (mDialer.getNumber().isEmpty()) {
             clearContactList();
             return;
