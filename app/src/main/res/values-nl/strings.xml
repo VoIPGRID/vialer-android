@@ -196,7 +196,6 @@
 
     <string name="permission_contact_dialog_title">Contact permissie</string>
     <string name="permission_contact_dialog_message">Permissie is nodig om vanuit de contacten te kunnen bellen</string>
-    <string name="permission_contact_dialer_list_message">Kan geen contacten laden, permissie tot contacten is noodzakelijk</string>
 
     <string name="permission_phone_dialog_title">Telefoon permissie</string>
     <string name="permission_phone_dialog_message">Deze permissie is nodig om reguliere telefoontjes af te handelen tijdens een VoIP gesprek.</string>
@@ -245,4 +244,7 @@
     <string name="pending_call_status">Gesprek wordt opgezet</string>
     <string name="transfer_connect">voeg samen</string>
     <string name="transfer_hangup">ophangen</string>
+    <string name="permission_contact_title">Geen overeenkomende contacten</string>
+    <string name="permission_contact_description">Vialer heeft toestemming nodig om toegang te krijgen tot je contacten</string>
+    <string name="permission_contact_button">Geef toestemming</string>
 </resources>
