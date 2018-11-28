@@ -245,6 +245,6 @@
     <string name="transfer_connect">voeg samen</string>
     <string name="transfer_hangup">ophangen</string>
     <string name="permission_contact_title">Geen overeenkomende contacten</string>
-    <string name="permission_contact_description">Vialer heeft toestemming nodig om toegang te krijgen tot je contacten</string>
+    <string name="permission_contact_description">%1$s heeft toestemming nodig om toegang te krijgen tot je contacten</string>
     <string name="permission_contact_button">Geef toestemming</string>
 </resources>
