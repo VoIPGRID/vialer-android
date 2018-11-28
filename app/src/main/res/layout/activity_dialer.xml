@@ -50,6 +50,35 @@
             android:gravity="center"
             android:visibility="gone"/>
 
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:orientation="vertical"
+                      android:gravity="center"
+                      android:id="@+id/no_contact_permission_warning"
+                      android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/permission_contact_title"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/permission_contact_description"
+                android:gravity="center"/>
+
+            <Button
+                android:id="@+id/give_contact_permission_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/permission_contact_button"
+                style="@style/PermissionButton"
+                android:layout_marginTop="20dp"/>
+        </LinearLayout>
+
+
     </LinearLayout>
 
 
