@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+
+import android.provider.Settings;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;

@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.media.monitoring;
 
+import com.voipgrid.vialer.logging.InternetConnectionDiagnosticsLogger;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipCall;
 
@@ -14,6 +15,7 @@ public class CallMediaMonitor implements Runnable {
 
     private final SipCall mSipCall;
     private final Logger mLogger;
+    private InternetConnectionDiagnosticsLogger mInternetConnectionDiagnosticsLogger;
 
     /**
      * Simply holds the last packet stats that have been fetched.
@@ -56,6 +58,7 @@ public class CallMediaMonitor implements Runnable {
     public CallMediaMonitor(SipCall sipCall) {
         mSipCall = sipCall;
         mLogger = new Logger(this.getClass());
+        mInternetConnectionDiagnosticsLogger = new InternetConnectionDiagnosticsLogger();
     }
 
     @Override
@@ -90,10 +93,7 @@ public class CallMediaMonitor implements Runnable {
             // If there has been no audio since our last interval this means that audio may have
             // dropped and we should send a reinvite.
             if (mLastTrackedStats != null && packetStatsForLastInterval.isMissingAllAudio()) {
-                mLogger.w("There has been NO audio between "
-                        + mLastTrackedStats.getCollectionTime() + "s and "
-                        + packetStats.getCollectionTime() + "s. Trying a reinvite");
-                attemptCallReinvite(packetStats);
+                handleNoAudioDetected(packetStats);
             }
 
             mLastTrackedStats = packetStats;
@@ -114,6 +114,16 @@ public class CallMediaMonitor implements Runnable {
                     "There is audio in the last " + REPORT_PACKET_STATS_EVERY_S + " seconds rxPkt: "
                             + packetStats.getReceived() + " and txPkt: " + packetStats.getSent());
         }
+    }
+
+    private void handleNoAudioDetected(PacketStats packetStats) {
+        mLogger.w("There has been NO audio between "
+                + mLastTrackedStats.getCollectionTime() + "s and "
+                + packetStats.getCollectionTime() + "s. Trying a reinvite");
+
+        mInternetConnectionDiagnosticsLogger.log();
+
+        attemptCallReinvite(packetStats);
     }
 
     /**
