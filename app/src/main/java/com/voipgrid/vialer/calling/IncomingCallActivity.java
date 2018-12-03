@@ -200,6 +200,12 @@ public class IncomingCallActivity extends AbstractCallActivity {
     public void sipServiceHasConnected(SipService sipService) {
         super.sipServiceHasConnected(sipService);
         SipCall call = sipService.getFirstCall();
+
+        if (call == null) {
+            finish();
+            return;
+        }
+
         call.setCallerId(getCallerIdFromIntent());
         call.setPhoneNumber(getPhoneNumberFromIntent());
     }
