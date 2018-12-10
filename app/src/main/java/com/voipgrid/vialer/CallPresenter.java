@@ -40,7 +40,7 @@ public class CallPresenter {
         updateCallLabels();
 
         if (!mActivity.getSipServiceConnection().isAvailable()) {
-            enableOrDisableCallActionButtons(true, false, true, true, false);
+            enableOrDisableCallActionButtons(false, false, true, true, false);
             hideCallDuration();
             return;
         }
@@ -57,7 +57,7 @@ public class CallPresenter {
 
         switch (state) {
             case CALL_INVALID_STATE:
-                enableOrDisableButtons(true, false, true, true, false, true);
+                enableOrDisableButtons(false, false, true, true, false, true);
                 break;
             case CALL_CONNECTED_MESSAGE:
             case CALL_UNHOLD_ACTION:
