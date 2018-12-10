@@ -26,6 +26,11 @@ Runs all the tests
 fastlane android screenshot
 ```
 Do a screenshot run
+### android apks
+```
+fastlane android apks
+```
+Generate a signed APK for each flavor
 ### android apk
 ```
 fastlane android apk

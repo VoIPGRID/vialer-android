@@ -11,9 +11,10 @@
 #
 
 # Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
+update_fastlane
 
 default_platform(:android)
+flavors = ["vialer", "voys", "verbonden", "annabel"]
 
 platform :android do
   before_all do
@@ -56,6 +57,20 @@ platform :android do
     )
   end
 
+  desc 'Generate a signed APK for each flavor'
+  lane :apks do
+     flavors.each do |flavor|
+        gradle(
+            task: 'assemble',
+            flavor: flavor,
+            build_type: 'Release'
+         )
+     end
+     flavors.each do |flavor|
+        puts create_apk_path_string(flavor)
+     end
+  end
+
   desc 'Generate a signed APK'
   lane :apk do
     gradle(
@@ -63,7 +78,7 @@ platform :android do
       flavor: ENV['APP_NAME'],
       build_type: 'Release'
     )
-    puts "APK for #{ENV['APP_NAME']} has been generated to app/build/outputs/apk/#{ENV['APP_NAME']}/release/app-#{ENV['APP_NAME']}-release.apk"
+    puts create_apk_path_string(ENV['APP_NAME'])
   end
 
   desc 'Submit a new Beta version to the Google Play Store'
@@ -100,4 +115,8 @@ platform :android do
       message: ENV['APP_NAME'] + ' ' + options[:track] + ' has been uploaded to Google Play Store',
     )
   end
+end
+
+def create_apk_path_string(flavor)
+    return "APK for #{flavor} has been generated to app/build/outputs/apk/#{flavor}/release/app-#{flavor}-release.apk"
 end
