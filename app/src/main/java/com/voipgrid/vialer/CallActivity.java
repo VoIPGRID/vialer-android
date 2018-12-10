@@ -330,7 +330,8 @@ public class CallActivity extends AbstractCallActivity implements
     private void toggleMute() {
         mLogger.d("toggleMute");
         mMute = !mMute;
-        updateMicrophoneVolume(mMute ? R.integer.mute_microphone_volume_value : R.integer.unmute_microphone_volume_value);
+        int volume = getResources().getInteger(mMute ? R.integer.mute_microphone_volume_value : R.integer.unmute_microphone_volume_value);
+        updateMicrophoneVolume(volume);
         updateUi();
     }
 
@@ -384,7 +385,7 @@ public class CallActivity extends AbstractCallActivity implements
      * @param newVolume new volume level for the Rx level of the current media of active call.
      */
     void updateMicrophoneVolume(long newVolume) {
-        mLogger.d("updateMicrophoneVolume");
+        mLogger.d("updateMicrophoneVolume setting volume to: " + newVolume);
         if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             mSipServiceConnection.get().getCurrentCall().updateMicrophoneVolume(newVolume);
         }
