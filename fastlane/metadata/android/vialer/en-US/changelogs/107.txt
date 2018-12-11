@@ -1,0 +1,6 @@
+Improvement:
+- Improved performance during onboarding.
+
+Bugfix:
+- Resolved crash that would occasionally occur when using the keypad.
+- Resolved crash that would occasionally occur when updating account information.

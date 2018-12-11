@@ -1,0 +1,9 @@
+Improvement:
+- The screen displaying an incoming call while the phone is locked has been improved
+- A new screen will be displayed if internet connectivity is lost during a call
+- STUN is now disabled by default
+
+Bugfix:
+- Fixed an issue that prevented the use of '+' when editing the mobile number
+- Fixed a number of very rare crashes that could occur during a call
+- Fixed a bug that would cause a Vialer call to not always be put on hold when receiving a GSM call..

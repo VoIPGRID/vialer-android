@@ -1,0 +1,8 @@
+Met de Vialer app bel je op je mobiele toestel eenvoudig uit met je zakelijke telefoonnummer. Ook vind je de gevoerde en ontvangen gesprekken snel en eenvoudig terug in de recente gesprekkenlijst. Je kunt bovendien op elk moment je statistieken, belplan en bereikbaarheid inzien en aanpassen.
+
+Bellen via 4G en WiFi
+Met de Vialer app bel je via 4G of WiFi. Hiervoor heb je een VoIP-account nodig die gekoppeld is aan je gebruikersaccount. Hierna kun je direct beginnen met VoIP bellen. De gebelde klant ziet je zakelijke nummer in zijn scherm staan. 
+
+Heb je geen 4G-verbinding, dan maakt de Vialer app gebruik van het twee-staps-gesprek: eerst wordt je mobiele telefoon gebeld, daarna het nummer dat je gekozen hebt.
+
+Let op: om gebruik te maken van deze app heb je een gebruikersaccount van je hosted telefonieprovider nodig. Meer weten over de werking van de app? Ga naar https://vialerapp.com

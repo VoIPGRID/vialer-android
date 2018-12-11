@@ -1,0 +1,10 @@
+Verbeteringen:
+- Diverse prestatieverbeteringen
+- Je remote logging code is nu eenvoudig te kopiëren
+- Gesprekken blijven goed verlopen nadat de microfoon toestemming is geaccepteerd
+
+Bugfix:
+- Crash die kon ontstaan tijdens het instellen van de app
+- Crash die kon ontstaan direct na het beëindigen van een gesprek
+- Oplossing voor probleem dat kon ontstaan bij het afleveren van inkomende gesprekken
+- Diverse bugfixes

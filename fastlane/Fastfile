@@ -101,15 +101,16 @@ platform :android do
 
   desc 'Upload to the play store give either alfa, beta or release as parameter'
   private_lane :upload do |options|
-#     upload_to_play_store(
-#       track: options[:track],
-#       package_name: ENV['PACKAGE_NAME'],
-#       apk: "app/build/outputs/apk/#{ENV['APP_NAME']}/release/app-#{ENV['APP_NAME']}-release.apk",
-#       skip_upload_metadata: true,
-#       skip_upload_images: true,
-#       skip_upload_screenshots: true,
-#       json_key: ENV['JSON_SECRET_LOCATION']
-#     )
+     upload_to_play_store(
+       track: options[:track],
+       package_name: ENV['PACKAGE_NAME'],
+       apk: create_apk_path(ENV['APP_NAME']),
+       skip_upload_metadata: false,
+       skip_upload_images: true,
+       skip_upload_screenshots: true,
+       json_key: ENV['JSON_SECRET_LOCATION'],
+       metadata_path: ENV['METADATA_PATH']
+     )
 
     slack(
       message: ENV['APP_NAME'] + ' ' + options[:track] + ' has been uploaded to Google Play Store',
@@ -118,5 +119,9 @@ platform :android do
 end
 
 def create_apk_path_string(flavor)
-    return "APK for #{flavor} has been generated to app/build/outputs/apk/#{flavor}/release/app-#{flavor}-release.apk"
+    return "APK for #{flavor} has been generated to " + create_apk_path(flavor)
+end
+
+def create_apk_path(flavor)
+    return "app/build/outputs/apk/#{flavor}/release/app-#{flavor}-release.apk"
 end

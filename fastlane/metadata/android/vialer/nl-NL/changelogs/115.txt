@@ -1,0 +1,10 @@
+Nieuwe feature:
+- De gespreksschermen zijn voorzien van een nieuw design
+- Gespreksopnames tonen nu de bijbehorende contactfoto als deze beschikbaar is
+
+Verbeteringen:
+- Er zijn diverse verbeteringen doorgevoerd in de stabiliteit en de responsiveness van de app
+- Als er op een ander apparaat wordt ingelogd, wordt VoIP uitgeschakeld en een melding weergegeven
+
+Bugfix:
+- Zeer lange namen van contacten worden niet langer afgebroken

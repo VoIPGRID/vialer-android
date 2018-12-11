@@ -1,0 +1,10 @@
+Improvement:
+- Various performance improvements have been made 
+- It is now possible to copy the remote logging id to your clipboard
+- Calls will now continue properly when accepting the microphone permission
+
+Bugfix:
+- Resolved a crash that would occasionally occur during on-boarding
+- Resolved a crash that would occasionally occur shortly after ending a call
+- Resolved an issue that was sometimes responsible for an incoming call not being received
+- A number of other bugfixes have been applied

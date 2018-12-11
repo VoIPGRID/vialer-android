@@ -1,0 +1,2 @@
+Bugfix:
+- The app will no longer crash when the user has denied Vialer permission to access contacts.
