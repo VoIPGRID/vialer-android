@@ -6,4 +6,4 @@ Improvement:
 Bugfix:
 - Fixed an issue that prevented the use of '+' when editing the mobile number
 - Fixed a number of very rare crashes that could occur during a call
-- Fixed a bug that would cause a Vialer call to not always be put on hold when receiving a GSM call..
+- Fixed a bug that would cause a Vialer call to not always be put on hold when receiving a GSM call
