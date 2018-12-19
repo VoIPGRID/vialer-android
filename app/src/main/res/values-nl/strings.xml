@@ -138,7 +138,7 @@
     <string name="connection_preference_switch_toast">Controleren of het mobiele netwerk beschikbaar is</string>
     <string name="switch_use_3g">Gebruik 3G+ om te bellen</string>
 
-    <string name="url_app_info">http://vialerapp.com/nl/app-info/</string>
+    <string name="url_app_info">https://vialerapp.com/nl/app-info/</string>
 
     <string name="add_destination_title">Bestemmingen</string>
     <string name="info_menu_item_title">Info</string>

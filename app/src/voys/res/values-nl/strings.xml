@@ -4,7 +4,7 @@
     <string name="app_name">Voys</string>
     <string name="configure_header_label_text">Voys stelt</string>
 
-    <string name="url_app_info">http://voys.nl/app-info/</string>
+    <string name="url_app_info">https://voys.nl/app-info/</string>
 
     <string name="info_button_title">Hoe werkt bellen via Voys?</string>
 
