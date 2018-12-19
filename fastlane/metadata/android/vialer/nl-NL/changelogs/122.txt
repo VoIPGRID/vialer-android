@@ -1,0 +1,9 @@
+Verbeteringen:
+⁃ De weergave van een inkomend gesprek bij een gelocked scherm is verbeterd
+⁃ Wanneer de internetverbinding tijdens een gesprek wordt verbroken, wordt een nieuw scherm getoond
+⁃ STUN staat nu standaard uitgeschakeld 
+
+Bugfix:
+⁃ De '+' kan weer volop gebruikt worden bij het wijzigen van een mobiel nummer
+⁃ Diverse (mogelijke) crashes tijdens een gesprek zijn verholpen
+⁃ Vialer gesprekken werden bij een inkomend GSM gesprek niet altijd in de wacht gezet. Dit is nu verholpen
