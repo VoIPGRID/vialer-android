@@ -41,9 +41,9 @@ Generate a signed APK
 fastlane android beta
 ```
 Submit a new Beta version to the Google Play Store
-### android release
+### android production
 ```
-fastlane android release
+fastlane android production
 ```
 Submit a new Production version to the Google Play Store
 ### android alpha

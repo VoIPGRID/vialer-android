@@ -88,9 +88,9 @@ platform :android do
   end
 
   desc 'Submit a new Production version to the Google Play Store'
-  lane :release do
+  lane :production do
     apk
-    upload(track: 'release')
+    upload(track: 'production')
   end
 
   desc 'Submit a new Alpha version to the Google Play Store'
@@ -99,7 +99,7 @@ platform :android do
     upload(track: 'alpha')
   end
 
-  desc 'Upload to the play store give either alfa, beta or release as parameter'
+  desc 'Upload to the play store give either alpha, beta or release as parameter'
   private_lane :upload do |options|
      upload_to_play_store(
        track: options[:track],
