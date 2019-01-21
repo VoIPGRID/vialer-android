@@ -348,6 +348,7 @@ public class SipConfig implements AccountStatus {
             for (int i = 0; i < codecList.size(); i++) {
                 info = codecList.get(i);
                 codecId = info.getCodecId();
+                Log.e("TEST123", "Codex " + info.getCodecId() + " desc " + info.getDesc());
                 prio = codecPriorityMap.findCodecPriority(codecId);
                 mEndpoint.codecSetPriority(codecId, prio != null ? prio : CodecPriorityMap.CODEC_DISABLED);
             }
