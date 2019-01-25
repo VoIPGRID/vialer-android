@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
@@ -243,6 +244,8 @@ public class SipService extends Service implements SipConfig.Listener {
         super.onDestroy();
     }
 
+    boolean pjSipLoaded = false;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mLogger.d("onStartCommand");
@@ -259,11 +262,17 @@ public class SipService extends Service implements SipConfig.Listener {
 
         mIntent = intent;
 
+        if (pjSipLoaded) {
+            pjSipDidLoad();
+        }
+
         return START_NOT_STICKY;
     }
 
     @Override
     public void pjSipDidLoad() {
+        pjSipLoaded = true;
+
         if (mIntent == null) {
             return;
         }
@@ -354,13 +363,11 @@ public class SipService extends Service implements SipConfig.Listener {
      * @param startActivity
      */
     public void makeCall(Uri number, String contactName, String phoneNumber, boolean startActivity) {
-        new Thread(() -> {
-            SipCall call = new SipCall(this, getSipConfig().getSipAccount());
-            call.setPhoneNumberUri(number);
-            call.setCallerId(contactName);
-            call.setPhoneNumber(phoneNumber);
-            call.onCallOutgoing(number, startActivity);
-        }).start();
+        SipCall call = new SipCall(this, getSipConfig().getSipAccount());
+        call.setPhoneNumberUri(number);
+        call.setCallerId(contactName);
+        call.setPhoneNumber(phoneNumber);
+        call.onCallOutgoing(number, startActivity);
     }
 
     /**

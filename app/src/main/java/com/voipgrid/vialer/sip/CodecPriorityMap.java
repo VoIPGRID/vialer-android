@@ -4,8 +4,8 @@ import java.util.HashMap;
 
 public class CodecPriorityMap extends HashMap<String, Short> {
 
-    public static final short CODEC_DISABLED = (short) 0;
-    public static final short CODEC_PRIORITY_MAX = (short) 255;
+    private static final short CODEC_DISABLED = (short) 0;
+    private static final short CODEC_PRIORITY_MAX = (short) 255;
 
     private CodecPriorityMap() {
     }
@@ -17,7 +17,7 @@ public class CodecPriorityMap extends HashMap<String, Short> {
      */
     public static CodecPriorityMap get() {
         CodecPriorityMap codecPriorityMap = new CodecPriorityMap();
-        codecPriorityMap.put("ilbc/8000", CODEC_PRIORITY_MAX);
+        codecPriorityMap.put("opus/48000", CODEC_PRIORITY_MAX);
         return codecPriorityMap;
     }
 
