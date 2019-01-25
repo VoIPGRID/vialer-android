@@ -1,5 +1,8 @@
 package com.voipgrid.vialer.sip;
 
+import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.VialerApplication;
+
 import java.util.HashMap;
 
 public class CodecPriorityMap extends HashMap<String, Short> {
@@ -16,8 +19,10 @@ public class CodecPriorityMap extends HashMap<String, Short> {
      * @return
      */
     public static CodecPriorityMap get() {
+        Preferences preferences = VialerApplication.get().component().getPreferences();
         CodecPriorityMap codecPriorityMap = new CodecPriorityMap();
-        codecPriorityMap.put("opus/48000", CODEC_PRIORITY_MAX);
+        codecPriorityMap.put("opus/48000", preferences.getAudioCodec() == Preferences.AUDIO_CODEC_OPUS ? CODEC_PRIORITY_MAX : CODEC_DISABLED);
+        codecPriorityMap.put("ilbc/8000", preferences.getAudioCodec() == Preferences.AUDIO_CODEC_ILBC ? CODEC_PRIORITY_MAX : CODEC_DISABLED);
         return codecPriorityMap;
     }
 
