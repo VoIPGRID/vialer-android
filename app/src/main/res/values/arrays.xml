@@ -23,4 +23,8 @@
         <item>@string/call_connection_use_wifi_cellular</item>
         <item>@string/call_connection_optional</item>
     </string-array>
+    <string-array name="codec_array">
+        <item>@string/call_codec_standard_quality</item>
+        <item>@string/call_codec_high_quality</item>
+    </string-array>
 </resources>

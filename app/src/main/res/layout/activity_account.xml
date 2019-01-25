@@ -100,6 +100,29 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
+
+                    <TextView
+                        android:id="@+id/codec"
+                        style="@style/AccountTextInputLayoutStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="4dp"
+                        android:paddingStart="4dp"
+                        android:text="@string/choose_codec_text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Spinner
+                    android:id="@+id/codec_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin" />
+
+
                 <Switch
                     android:id="@+id/use_3g_switch"
                     style="@style/AccountTextInputLayoutStyle"

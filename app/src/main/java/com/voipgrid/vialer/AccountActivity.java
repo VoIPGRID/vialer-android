@@ -66,6 +66,7 @@ public class AccountActivity extends LoginRequiredActivity {
     @BindView(R.id.use_3g_switch) CompoundButton mUse3GSwitch;
 
     @BindView(R.id.call_connection_spinner) Spinner mConnectionSpinner;
+    @BindView(R.id.codec_spinner) Spinner mCodecSpinner;
 
     @BindView(R.id.remote_logging_switch) CompoundButton mRemoteLoggingSwitch;
     @BindView(R.id.remote_logging_id_container) View mRemoteLogIdContainer;
@@ -111,6 +112,7 @@ public class AccountActivity extends LoginRequiredActivity {
         setupActionBar();
 
         initConnectionSpinner();
+        initCodecSpinner();
         initRemoteLoggingSwitch();
         initUse3GSwitch();
     }
@@ -152,6 +154,14 @@ public class AccountActivity extends LoginRequiredActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mConnectionSpinner.setAdapter(adapter);
         mConnectionSpinner.setSelection(adapter.getPosition(converseFromPreference((mPreferences.getConnectionPreference()), this)));
+    }
+
+    private void initCodecSpinner() {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.codec_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mCodecSpinner.setAdapter(adapter);
+        mCodecSpinner.setSelection(mPreferences.getAudioCodec() - 1);
     }
 
     private void initRemoteLoggingSwitch() {
@@ -244,6 +254,11 @@ public class AccountActivity extends LoginRequiredActivity {
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         String selected = parent.getItemAtPosition(pos).toString();
         mPreferences.setConnectionPreference(converseToPreference(selected, this));
+    }
+
+    @OnItemSelected(R.id.codec_spinner)
+    public void onCodecSelected(AdapterView<?> parent, View view, int pos, long id) {
+        mPreferences.setAudioCodec(pos + 1);
     }
 
     @OnCheckedChanged(R.id.remote_logging_switch)
