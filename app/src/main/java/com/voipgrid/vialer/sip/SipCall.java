@@ -107,7 +107,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     private void sendMos() {
-        if (getCallDuration() > 10) {
+        if (getCallDuration() > 1) {
             float mos = this.calculateMos();
             new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
                     mSipService.getString(R.string.analytics_event_category_metrics),
