@@ -89,7 +89,17 @@ public class MosCalculator {
      *
      * @throws Exception when the StreamStat can't be found.
      */
-    public double calculate(SipCall sipCall) throws Exception {
+    public Double calculate(SipCall sipCall) {
+        try {
+            double mos = performCalculation(sipCall);
+
+            return mos != 0.0 ? mos : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private double performCalculation(SipCall sipCall) throws Exception {
         StreamStat streamStat = sipCall.getStreamStat(0);
 
         CodecValues.CodecValue codecValue = CodecValues.getCodecValue(sipCall.getStreamInfo(0));
