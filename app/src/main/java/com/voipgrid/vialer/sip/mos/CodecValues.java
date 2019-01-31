@@ -28,7 +28,7 @@ class CodecValues extends ArrayList<CodecValues.CodecValue> {
      * @param streamInfo
      * @return
      */
-    public static CodecValue getCodecValue(StreamInfo streamInfo) {
+    static CodecValue getCodecValue(StreamInfo streamInfo) {
         for (CodecValue entry : get()) {
             String codecName = entry.getName();
 
