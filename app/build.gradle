@@ -209,6 +209,7 @@ dependencies {
     // Testing below are supported api level because SNAPSHOT version is to unstable.
     testImplementation "org.robolectric:robolectric:${roboElectricVersion}"
     testImplementation "org.mockito:mockito-core:${mockitoCoreVersion}"
+    testImplementation "androidx.test.ext:junit:1.0.0"
 
     // Setup for instrumented tests.
     androidTestImplementation "androidx.test:runner:1.1.0"

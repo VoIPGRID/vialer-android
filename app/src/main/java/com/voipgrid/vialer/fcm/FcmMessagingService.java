@@ -209,7 +209,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * @param remoteMessageData The remote message data that we are handling.
      */
     private void rejectDueToVialerCallAlreadyInProgress(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
-        mRemoteLogger.d("Reject due to lack of connection");
+        mRemoteLogger.d("Reject due to call already in progress");
 
         replyServer(remoteMessageData, false);
 
