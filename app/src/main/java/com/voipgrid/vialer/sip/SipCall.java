@@ -80,6 +80,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private CallMediaMonitor mCallMediaMonitor;
 
     private Double mos;
+    private String codec;
 
     public static final String CALL_DIRECTION_OUTGOING = "outgoing";
     public static final String CALL_DIRECTION_INCOMING = "incoming";
@@ -189,7 +190,13 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public String getCodec() {
+        if (codec != null && !codec.isEmpty()) {
+            return codec;
+        }
+
         try {
+            if (!isConnected()) return "";
+
             StreamInfo streaminfo = this.getStreamInfo(0);
             return streaminfo.getCodecName();
         } catch (Exception e) {
