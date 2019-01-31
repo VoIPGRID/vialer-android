@@ -67,7 +67,6 @@ public class SipConfig implements AccountStatus {
     private Preferences mPreferences;
 
     private boolean mHasRespondedToMiddleware = false;
-    private static Map<String, Short> sCodecPrioMapping;
 
     private IpSwitchMonitor mIpSwitchMonitor;
 
@@ -96,11 +95,11 @@ public class SipConfig implements AccountStatus {
         return this;
     }
 
-    public VialerEndpoint getEndpoint() {
+    VialerEndpoint getEndpoint() {
         return mEndpoint;
     }
 
-    public SipAccount getSipAccount() {
+    SipAccount getSipAccount() {
         return mSipAccount;
     }
 
@@ -108,20 +107,18 @@ public class SipConfig implements AccountStatus {
      * Function to init the PJSIP library and setup all credentials.
      * @throws LibraryInitFailedException
      */
-    public void initLibrary(Listener listener) {
-        new Thread(() -> {
-            try {
-                loadPjsip();
-                mEndpoint = createEndpoint();
-                setCodecPrio();
-                mSipAccount = createSipAccount();
-                startNetworkingListener();
-            } catch (Exception e) {
-                listener.pjSipFailedToLoad(e);
-            }
+    void initLibrary(Listener listener) {
+        try {
+            loadPjsip();
+            mEndpoint = createEndpoint();
+            setCodecPrio();
+            mSipAccount = createSipAccount();
+            startNetworkingListener();
+        } catch (Exception e) {
+            listener.pjSipFailedToLoad(e);
+        }
 
-            listener.pjSipDidLoad();
-        }).start();
+        listener.pjSipDidLoad();
     }
 
     private void startNetworkingListener() {

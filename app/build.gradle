@@ -215,11 +215,14 @@ dependencies {
     androidTestImplementation "androidx.test:runner:1.1.0"
     androidTestUtil "androidx.test:orchestrator:1.1.0"
     androidTestImplementation "androidx.test:rules:${androidTestVersion}"
+    implementation "androidx.test.ext:junit:1.0.0"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.1.0"
     androidTestImplementation 'androidx.annotation:annotation:1.0.0'
 
     // Automated screenshots for instrumented tests.
     androidTestImplementation 'tools.fastlane:screengrab:1.1.0'
+
+    implementation 'com.afollestad.material-dialogs:core:2.0.0-rc8'
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

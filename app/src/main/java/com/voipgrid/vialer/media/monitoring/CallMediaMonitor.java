@@ -3,6 +3,7 @@ package com.voipgrid.vialer.media.monitoring;
 import com.voipgrid.vialer.logging.InternetConnectionDiagnosticsLogger;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipCall;
+import com.voipgrid.vialer.sip.mos.MosCalculator;
 
 import org.pjsip.pjsua2.CallOpParam;
 
@@ -15,6 +16,7 @@ public class CallMediaMonitor implements Runnable {
 
     private final SipCall mSipCall;
     private final Logger mLogger;
+    private final MosCalculator mMosCalculator;
     private InternetConnectionDiagnosticsLogger mInternetConnectionDiagnosticsLogger;
 
     /**
@@ -59,11 +61,14 @@ public class CallMediaMonitor implements Runnable {
         mSipCall = sipCall;
         mLogger = new Logger(this.getClass());
         mInternetConnectionDiagnosticsLogger = new InternetConnectionDiagnosticsLogger();
+        mMosCalculator = new MosCalculator();
     }
 
     @Override
     public void run() {
         while (shouldBeMonitoringMedia()) {
+            calculateMos();
+
             mMostRecentPacketStats = mSipCall.getMediaPacketStats();
 
             if (mMostRecentPacketStats == null) break;
@@ -71,6 +76,20 @@ public class CallMediaMonitor implements Runnable {
             handleMediaPacketStats(mMostRecentPacketStats);
 
             sleep(QUERY_PACKET_STATS_INTERVAL_S * 1000);
+        }
+    }
+
+    /**
+     * Calculate the MOS and update it on the call object.
+     *
+     */
+    private void calculateMos() {
+        if (!mSipCall.hasCalculatedMos()) {
+            Double mos = mMosCalculator.calculate(mSipCall);
+
+            if (mos != null) {
+                mSipCall.setMos(mos);
+            }
         }
     }
 

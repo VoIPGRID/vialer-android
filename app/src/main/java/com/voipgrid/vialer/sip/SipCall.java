@@ -53,7 +53,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     @StringDef({CALL_DIRECTION_OUTGOING, CALL_DIRECTION_INCOMING})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface CallDirection {}
+    @interface CallDirection {}
 
     public static final String TAG = SipCall.class.getSimpleName();
 
@@ -79,6 +79,9 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private CallInfo mLastCallInfo;
     private CallMediaMonitor mCallMediaMonitor;
 
+    private Double mos;
+    private String codec;
+  
     /**
      * An object that represents the original invite received.
      */
@@ -113,27 +116,30 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     private void sendMos() {
-        if (getCallDuration() > 10) {
-            float mos = this.calculateMos();
-            new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
-                    mSipService.getString(R.string.analytics_event_category_metrics),
-                    mSipService.getString(R.string.analytics_event_action_callmetrics),
-                    mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
-                    (int) (100 * (long) mos)
-            );
-            mLogger.e("MOS for CONNECTION: " + ConnectivityHelper.get(mSipService).getConnectionTypeString() + " with value: " + mos);
-        }
+        if (!hasCalculatedMos()) return;
+
+        getAnalyticsHelper().sendEvent(
+                mSipService.getString(R.string.analytics_event_category_metrics),
+                mSipService.getString(R.string.analytics_event_action_callmetrics),
+                mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
+                (int) (100 * mos)
+        );
+        mLogger.e("MOS for CONNECTION: " + ConnectivityHelper.get(mSipService).getConnectionTypeString() + " with value: " + mos);
     }
 
     private void sendBandwidth() {
         if (getCallDuration() > 10) {
-            new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
+            getAnalyticsHelper().sendEvent(
                     mSipService.getString(R.string.analytics_event_category_metrics),
                     mSipService.getString(R.string.analytics_event_action_callmetrics),
                     mSipService.getString(R.string.analytics_event_label_bandwidth, getCodec()),
                     (int) this.getBandwidthUsage() * 1024
             );
         }
+    }
+
+    private AnalyticsHelper getAnalyticsHelper() {
+        return new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker());
     }
 
     void setIsIPChangeInProgress(boolean inProgress){
@@ -193,8 +199,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         return (timeVal.getSec() * 1000) + timeVal.getMsec();
     }
 
-    private String getCodec() {
+    public String getCodec() {
+        if (codec != null && !codec.isEmpty()) {
+            return codec;
+        }
+
         try {
+            if (!isConnected()) return "";
+
             StreamInfo streaminfo = this.getStreamInfo(0);
             return streaminfo.getCodecName();
         } catch (Exception e) {
@@ -212,17 +224,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
 
         return bandwidth;
-    }
-
-    private float calculateMos() {
-        float MOS = 0;
-        try {
-            MOS = (float) SipCallStats.calculateMOS(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return MOS;
     }
 
     public String getIdentifier() {
@@ -702,5 +703,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             mLogger.e("Unable to get call info");
             return null;
         }
+    }
+
+    public boolean hasCalculatedMos() {
+        return mos != null;
+    }
+
+    public void setMos(double mos) {
+        this.mos = mos;
+    }
+
+    public double getMos() {
+        return mos;
     }
 }

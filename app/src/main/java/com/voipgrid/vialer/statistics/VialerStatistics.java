@@ -14,6 +14,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_DURATION;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_SETUP_SUCCESSFUL;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CLIENT_COUNTRY;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CODEC;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CONNECTION_TYPE;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_DEVICE_MANUFACTURER;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_DEVICE_MODEL;
@@ -22,6 +23,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_HANGUP_REASON;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_LOG_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_MIDDLEWARE_ATTEMPTS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_MIDDLEWARE_KEY;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_MOS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_NETWORK;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_NETWORK_OPERATOR;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_OS;
@@ -311,6 +313,7 @@ public class VialerStatistics {
         addValue(KEY_CALL_DIRECTION, call.getCallDirection());
         addValue(KEY_CONNECTION_TYPE, call.getTransport() != null ? call.getTransport().toUpperCase() : "");
         addValue(KEY_ACCOUNT_CONNECTION_TYPE, SecureCalling.fromContext(VialerApplication.get()).isEnabled() ? VALUE_ACCOUNT_CONNECTION_TYPE_TLS : VALUE_ACCOUNT_CONNECTION_TYPE_TCP);
+        addValue(KEY_CODEC, call.getCodec());
 
         if (call.getMessageStartTime() != null) {
             addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(call.getMessageStartTime())));
@@ -321,6 +324,10 @@ public class VialerStatistics {
         if (packetStats != null) {
             addValue(KEY_RX_PACKETS, String.valueOf(packetStats.getReceived()));
             addValue(KEY_TX_PACKETS, String.valueOf(packetStats.getSent()));
+        }
+
+        if (call.hasCalculatedMos()) {
+            addValue(KEY_MOS, String.valueOf(call.getMos()));
         }
 
         return this;
