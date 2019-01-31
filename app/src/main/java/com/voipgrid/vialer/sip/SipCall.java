@@ -3,8 +3,6 @@ package com.voipgrid.vialer.sip;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -44,6 +42,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.UUID;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
+
 
 /**
  * Call class used to interact with a call.
@@ -77,6 +78,11 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mMessageStartTime;
     private CallInfo mLastCallInfo;
     private CallMediaMonitor mCallMediaMonitor;
+
+    /**
+     * An object that represents the original invite received.
+     */
+    private SipInvite invite;
 
     public static final String CALL_DIRECTION_OUTGOING = "outgoing";
     public static final String CALL_DIRECTION_INCOMING = "incoming";
@@ -157,6 +163,11 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipService = sipService;
         mLogger = mSipService.getLogger();
         mSipBroadcaster = mSipService.getSipBroadcaster();
+    }
+
+    public SipCall(SipService sipService, SipAccount sipAccount, int callId, SipInvite invite) {
+        this(sipService, sipAccount, callId);
+        this.invite = invite;
     }
 
     public int getCallDuration() {
@@ -404,7 +415,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public String getPhoneNumber() {
-        return mPhoneNumber;
+        return getAppropriateCallerInformationHeader().number;
     }
 
     public void setPhoneNumber(String phoneNumber) {
@@ -412,7 +423,31 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public String getCallerId() {
-        return mCallerId;
+        return getAppropriateCallerInformationHeader().name;
+    }
+
+    /**
+     * This will select the correct header from the INVITE based on the priority that we should
+     * be displaying the various caller information headers.
+     *
+     * @return
+     */
+    private SipInvite.CallerInformationHeader getAppropriateCallerInformationHeader() {
+        SipInvite.CallerInformationHeader defaultCallerInformation = new SipInvite.CallerInformationHeader(mCallerId, mPhoneNumber);
+
+        if (this.invite == null) {
+            return defaultCallerInformation;
+        }
+
+        if (this.invite.hasPAssertedIdentity()) {
+            return this.invite.getPAssertedIdentity();
+        }
+
+        if (this.invite.hasRemotePartyId()) {
+            return this.invite.getRemotePartyId();
+        }
+
+        return defaultCallerInformation;
     }
 
     public void setCallerId(String callerId) {
