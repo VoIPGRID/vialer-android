@@ -61,6 +61,10 @@ public class PersistentSipService extends Service {
         VialerApplication.get().component().inject(this);
     }
 
+    public static void start() {
+        VialerApplication.get().startService(new Intent(VialerApplication.get(), PersistentSipService.class));
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -75,22 +79,10 @@ public class PersistentSipService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-
         loadPjsip();
         mEndpoint = createEndpoint();
         setCodecPrio();
         mSipAccount = createSipAccount();
-
-        new Thread(() -> {
-            while(true) {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                        e.printStackTrace();
-                }
-            }
-        });
         return START_STICKY;
     }
 

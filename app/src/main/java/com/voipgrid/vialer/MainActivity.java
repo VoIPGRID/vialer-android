@@ -66,7 +66,7 @@ public class MainActivity extends NavigationDrawerActivity implements
         }
 
 
-        startService(new Intent(this, PersistentSipService.class));
+        PersistentSipService.start();
 
         mLogger = new Logger(this.getClass());
         JsonStorage jsonStorage = new JsonStorage(this);
