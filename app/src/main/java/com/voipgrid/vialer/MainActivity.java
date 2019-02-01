@@ -30,6 +30,7 @@ import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
 import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
+import com.voipgrid.vialer.sip.persistent.PersistentSipService;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -63,6 +64,9 @@ public class MainActivity extends NavigationDrawerActivity implements
                 return;
             }
         }
+
+
+        startService(new Intent(this, PersistentSipService.class));
 
         mLogger = new Logger(this.getClass());
         JsonStorage jsonStorage = new JsonStorage(this);

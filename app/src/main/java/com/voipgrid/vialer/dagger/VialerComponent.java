@@ -9,8 +9,8 @@ import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.dialer.DialerActivity;
-import com.voipgrid.vialer.sip.CodecPriorityMap;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
+import com.voipgrid.vialer.sip.persistent.PersistentSipService;
 import com.voipgrid.vialer.sip.SipService;
 
 import javax.inject.Singleton;
@@ -41,4 +41,6 @@ public interface VialerComponent {
     void inject(NetworkConnectivity networkConnectivity);
 
     Preferences getPreferences();
+
+    void inject(PersistentSipService persistentSipService);
 }

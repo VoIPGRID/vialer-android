@@ -7,7 +7,7 @@ import java.util.ArrayList;
 /**
  * This object represents the original invite that initiated the call.
  */
-class SipInvite {
+public class SipInvite {
 
     /**
      * The names of headers that will be extracted from the invite packet.
@@ -20,16 +20,18 @@ class SipInvite {
 
     private CallerInformationHeader pAssertedIdentity;
     private CallerInformationHeader remotePartyId;
+    private CallerInformationHeader from;
 
     /**
      * Initialise the SipInvite.
      *
      * @param packet The whole INVITE that was received with the incoming call.
      */
-    SipInvite(String packet) {
+    public SipInvite(String packet) {
         this.packet = packet;
         this.pAssertedIdentity = extractFromLikeHeader(P_ASSERTED_IDENTITY_HEADER_NAME);
         this.remotePartyId = extractFromLikeHeader(REMOTE_PARTY_ID_HEADER_NAME);
+        this.from = extractFromLikeHeader("From");
     }
 
     private CallerInformationHeader extractFromLikeHeader(String header) {
@@ -48,19 +50,23 @@ class SipInvite {
         return new CallerInformationHeader(data.get(0), data.get(1));
     }
 
-    boolean hasPAssertedIdentity() {
+    public CallerInformationHeader getFrom() {
+        return from;
+    }
+
+    public boolean hasPAssertedIdentity() {
         return pAssertedIdentity != null;
     }
 
-    boolean hasRemotePartyId() {
+    public boolean hasRemotePartyId() {
         return remotePartyId != null;
     }
 
-    CallerInformationHeader getPAssertedIdentity() {
+    public CallerInformationHeader getPAssertedIdentity() {
         return pAssertedIdentity;
     }
 
-    CallerInformationHeader getRemotePartyId() {
+    public CallerInformationHeader getRemotePartyId() {
         return remotePartyId;
     }
 

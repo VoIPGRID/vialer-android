@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.sip;
 
+import android.util.Log;
+
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
 
@@ -24,7 +26,7 @@ public class SipLogWriter extends LogWriter {
     public void write(LogEntry entry) {
         Integer pjsipLogLevel = entry.getLevel();
         String logString = entry.getMsg().substring(13);
-
+Log.e("TEST123 SIPLOG", logString);
         mSipLogHandler.handle(logString);
 
         if (mLogger == null) {

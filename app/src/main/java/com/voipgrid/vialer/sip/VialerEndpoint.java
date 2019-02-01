@@ -12,7 +12,7 @@ public class VialerEndpoint extends Endpoint {
     private final Logger mLogger;
     private SipService mSipService;
 
-    VialerEndpoint() {
+    public VialerEndpoint() {
         super();
         mLogger = new Logger(this.getClass());
     }

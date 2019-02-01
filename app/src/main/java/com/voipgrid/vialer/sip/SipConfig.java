@@ -70,8 +70,8 @@ public class SipConfig implements AccountStatus {
 
     private IpSwitchMonitor mIpSwitchMonitor;
 
-    private static final String TRANSPORT_TYPE_SECURE = "tls";
-    private static final String TRANSPORT_TYPE_STANDARD = "tcp";
+    public static final String TRANSPORT_TYPE_SECURE = "tls";
+    public static final String TRANSPORT_TYPE_STANDARD = "tcp";
 
     public SipConfig(Preferences preferences, IpSwitchMonitor ipSwitchMonitor,
             BroadcastReceiverManager broadcastReceiverManager) {

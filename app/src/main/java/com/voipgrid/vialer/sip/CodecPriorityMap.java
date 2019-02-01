@@ -7,7 +7,8 @@ import java.util.HashMap;
 
 public class CodecPriorityMap extends HashMap<String, Short> {
 
-    static final short CODEC_DISABLED = (short) 0, CODEC_PRIORITY_MAX = (short) 255;
+    public static final short CODEC_DISABLED = (short) 0;
+    static final short CODEC_PRIORITY_MAX = (short) 255;
 
     private CodecPriorityMap() {
     }

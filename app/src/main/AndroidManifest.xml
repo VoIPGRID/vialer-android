@@ -49,7 +49,7 @@
         android:theme="@style/AppTheme">
 
         <!-- Service that handles (incoming) SIPCall management -->
-        <service android:name=".sip.SipService" />
+        <!--<service android:name=".sip.SipService" />-->
 
         <!-- Main activity that presents all main features of the app -->
         <activity
@@ -90,12 +90,12 @@
             android:screenOrientation="portrait" >
         </activity>
 
-        <service
-            android:name=".fcm.FcmMessagingService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-            </intent-filter>
-        </service>
+        <!--<service-->
+            <!--android:name=".fcm.FcmMessagingService">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="com.google.firebase.MESSAGING_EVENT"/>-->
+            <!--</intent-filter>-->
+        <!--</service>-->
 
         <service
             android:name=".fcm.FcmInstanceIdListenerService"
@@ -215,6 +215,9 @@
                 android:resource="@xml/authenticator" />
         </service>
         <service android:name=".contacts.UpdateChangedContactsService" />
+        <service android:name=".sip.persistent.PersistentSipService"
+                 android:permission="android.permission.BIND_JOB_SERVICE"
+                 android:exported="true"/>
 
         <activity
             android:name=".AccountActivity"
