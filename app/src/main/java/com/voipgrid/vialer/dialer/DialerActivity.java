@@ -459,9 +459,14 @@ public class DialerActivity extends LoginRequiredActivity implements
         mContactsAdapter.notifyDataSetChanged();
         mT9HelperFragment.setVisibility(View.GONE);
 
+        if (SyncUtils.requiresFullContactSync(this)) {
+            mEmptyView.setText(R.string.dialer_contacts_not_processed);
+            return;
+        }
+
         // Set empty to no contacts found when result is empty.
         if (data != null && data.getCount() == 0) {
-            mEmptyView.setText(getString(R.string.dialer_no_contacts_found_message));
+            mEmptyView.setText(R.string.dialer_no_contacts_found_message);
         }
     }
 

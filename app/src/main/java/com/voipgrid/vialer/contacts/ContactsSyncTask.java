@@ -85,19 +85,11 @@ public class ContactsSyncTask {
             return;
         }
 
-        boolean requireFullContactSync = SyncUtils.requiresFullContactSync(mContext);
-
-        // Gives you the list of contacts who have phone numbers.
         Cursor cursor = queryAllContacts();
         SyncUtils.setFullSyncInProgress(mContext, true);
         sync(cursor);
         SyncUtils.setFullSyncInProgress(mContext, false);
         SyncUtils.setRequiresFullContactSync(mContext, false);
-
-        // When there was a full contact sync required inform the user.
-        if (requireFullContactSync) {
-            NotificationHelper.getInstance(mContext).displayContactsSyncNotification();
-        }
     }
 
     /**
