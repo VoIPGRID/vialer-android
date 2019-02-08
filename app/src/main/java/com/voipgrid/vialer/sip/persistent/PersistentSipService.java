@@ -8,9 +8,14 @@ import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_REINIT_MEDIA;
 import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT;
 import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_VIA;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
@@ -41,6 +46,7 @@ import org.pjsip.pjsua2.UaConfig;
 import org.pjsip.pjsua2.pj_log_decoration;
 import org.pjsip.pjsua2.pjmedia_srtp_use;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
+import org.pjsip.pjsua2.pjsua_state;
 
 import javax.inject.Inject;
 
@@ -79,18 +85,32 @@ public class PersistentSipService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.e("TEST123", "onStartCommand onStartCommand");
         loadPjsip();
-        mEndpoint = createEndpoint();
+
+        if (!endpointExists()) {
+            mEndpoint = createEndpoint();
+        }
+
         setCodecPrio();
         mSipAccount = createSipAccount();
+        RestartPersistentSipServiceReceiver.scheduleAlarm();
         return START_STICKY;
+    }
+
+    private boolean endpointExists() {
+        try {
+           pjsua_state state = mEndpoint.libGetState();
+           return true;
+        } catch (Throwable e) {
+            return false;
+        }
     }
 
     private void loadPjsip() {
         try {
             System.loadLibrary("pjsua2");
         } catch (UnsatisfiedLinkError e) {
-            Log.e("TEST123", "failed", e);
         }
     }
 
@@ -104,7 +124,6 @@ public class PersistentSipService extends Service {
         try {
             endpoint.libCreate();
         } catch (Exception e) {
-            Log.e("TEST123", "e", e);
         }
 
         if (BuildConfig.DEBUG || mPreferences.remoteLoggingIsActive()) {
@@ -120,7 +139,6 @@ public class PersistentSipService extends Service {
             endpoint.libInit(endpointConfig);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("TEST123", "e", e);
         }
 
         TransportConfig transportConfig = createTransportConfig();
@@ -128,7 +146,6 @@ public class PersistentSipService extends Service {
             endpoint.transportCreate(getTransportType(), transportConfig);
             endpoint.libStart();
         } catch (Exception e) {
-            Log.e("TEST123", "e", e);
         }
 
         return endpoint;
