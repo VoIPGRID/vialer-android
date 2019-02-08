@@ -2,6 +2,7 @@ package com.voipgrid.vialer;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -12,6 +13,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
+
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.view.View;
 
 import com.google.android.gms.analytics.HitBuilders;
@@ -65,6 +69,7 @@ public class MainActivity extends NavigationDrawerActivity implements
             }
         }
 
+        promptUserToWhitelist();
 
         PersistentSipService.start();
 
@@ -131,6 +136,17 @@ public class MainActivity extends NavigationDrawerActivity implements
 
         requestCounter = 0;
         mReachabilityReceiver = new ReachabilityReceiver(this);
+    }
+
+    private void promptUserToWhitelist() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
+        Intent intent = new Intent();
+        String packageName = getPackageName();
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+        if (pm.isIgnoringBatteryOptimizations(packageName)) return;
+        intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+        intent.setData(Uri.parse("package:" + packageName));
+        startActivity(intent);
     }
 
     /**

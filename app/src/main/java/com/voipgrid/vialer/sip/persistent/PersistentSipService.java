@@ -8,14 +8,9 @@ import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_REINIT_MEDIA;
 import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT;
 import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_UPDATE_VIA;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
@@ -24,7 +19,6 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.sip.CodecPriorityMap;
 import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
@@ -151,6 +145,9 @@ public class PersistentSipService extends Service {
         return endpoint;
     }
 
+    private static final String VOIP_ACCOUNT = "169710098";
+    private static final String VOIP_PASSWORD = "";
+
     /**
      * Create the AccountConfig with the PhoneAccount credentials.
      * @return
@@ -159,13 +156,13 @@ public class PersistentSipService extends Service {
         AuthCredInfo credInfo = new AuthCredInfo(
                 getString(R.string.sip_auth_scheme),
                 getString(R.string.sip_auth_realm),
-                "169710098",
+                VOIP_ACCOUNT,
                 0,
-                "KBGVRmRYcrG7wtS"
+                VOIP_PASSWORD
         );
 
         String transportString = getTransportString();
-        String sipAccountRegId = SipUri.sipAddress(this, "169710098") + transportString;
+        String sipAccountRegId = SipUri.sipAddress(this, VOIP_PASSWORD) + transportString;
         String sipRegistrarUri = SipUri.prependSIPUri(this, getSipHost()) + transportString;
 
         AccountConfig config = new AccountConfig();
