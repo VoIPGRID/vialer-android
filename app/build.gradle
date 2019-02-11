@@ -68,11 +68,16 @@ android {
                 into '.'
             }
         }
-        acceptatie {
+        staging {
             applicationId "com.voipgrid.vialer"
             copy {
-                from 'src/acceptatie/'
+                from 'src/staging/'
                 include '*.json'
+                into '.'
+            }
+            copy {
+                from 'src/vialer/'
+                include 'google-services.json'
                 into '.'
             }
         }
