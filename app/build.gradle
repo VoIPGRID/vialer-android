@@ -75,6 +75,11 @@ android {
                 include '*.json'
                 into '.'
             }
+            copy {
+                from 'src/vialer/'
+                include 'google-services.json'
+                into '.'
+            }
         }
         voys {
             applicationId "com.voys.app"
@@ -174,6 +179,9 @@ dependencies {
 
     // Google Analytics setup.
     implementation "com.google.android.gms:play-services-analytics:${googleAnalyticsVersion}"
+
+    // Pushy setup
+    implementation 'me.pushy:sdk:1.0.43'
 
     // Circular image view
     implementation 'de.hdodenhof:circleimageview:2.2.0'
