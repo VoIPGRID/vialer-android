@@ -116,7 +116,7 @@
     <string name="dialer_warning_a_b_connect_connectivity_message">Internetverbinding is niet snel genoeg om te bellen via VoIP. Bellen in twee stappen is ingeschakeld. Wanneer je iemand belt via de app bellen wij jou eerst op je GSM waarmee we je daarna verbinden met degene die je wilt bellen. Het kan zijn dat je telefonieleverancier voor het opzetten van twee verbindingen dubbele kosten in rekening brengt.</string>
     <string name="dialer_warning_a_b_connect_account_message">Je hebt nog geen VoIP account geconfigureerd voor dit gebruikersaccount. Je kan in de beheeromgeving een VoIP account selecteren welke zal worden gebruikt door de app. Zodra je dit hebt gedaan zal je ook via VoIP kunnen bellen in de app.</string>
     <string name="dialer_no_contacts_found_message">Geen contacten gevonden</string>
-    <string name="dialer_contacts_not_processed"></string>
+    <string name="dialer_contacts_not_processed">%1$d van de %2$d contacten verwerkt</string>
     <string name="dialer_invalid_number">Telefoonnummer incorrect</string>
 
     <string name="user_is_partner_error_title">Login mislukt</string>
