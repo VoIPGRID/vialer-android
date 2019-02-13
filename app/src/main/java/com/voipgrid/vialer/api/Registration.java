@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.api;
 
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
+
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -32,7 +34,7 @@ public interface Registration {
     @POST("api/android-device/")
     Call<ResponseBody> register(@Field("name") String name, @Field("token") String token,
                     @Field("sip_user_id") String sipUserId, @Field("os_version") String osVersion,
-                    @Field("client_version") String clientVersion, @Field("app") String app, @Field("remote_logging_id") String remoteLoggingId);
+                    @Field("client_version") String clientVersion, @Field("app") String app, @Field("remote_logging_id") String remoteLoggingId, @Field("pushy_token") String pushyToken);
 
     @POST("api/log-metrics/")
     Call<Void> metrics(@Body Map<String, String> metrics);

@@ -109,7 +109,8 @@ public class MiddlewareHelper {
                 Build.VERSION.CODENAME,
                 Build.VERSION.RELEASE,
                 appName,
-                (preferences.remoteLoggingIsActive() ? preferences.getLoggerIdentifier() : null)
+                (preferences.remoteLoggingIsActive() ? preferences.getLoggerIdentifier() : null),
+                //add pushy token
         );
         editor.putString(CURRENT_TOKEN, token);
 

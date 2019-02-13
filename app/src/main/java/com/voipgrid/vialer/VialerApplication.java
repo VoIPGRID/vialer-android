@@ -7,6 +7,9 @@ import com.voipgrid.vialer.dagger.DaggerVialerComponent;
 import com.voipgrid.vialer.dagger.VialerComponent;
 import com.voipgrid.vialer.dagger.VialerModule;
 
+import me.pushy.sdk.Pushy;
+import me.pushy.sdk.util.exceptions.PushyException;
+
 /**
  * VialerApplication that extends the AnalyticsApplication
  * so the Analytics are all setup.
@@ -39,6 +42,12 @@ public class VialerApplication extends AnalyticsApplication {
 
     public static String getAppVersion() {
         return BuildConfig.VERSION_NAME;
+    }
+
+    public void getDeviceToken() {
+        if (!Pushy.isRegistered(getApplicationContext())) {
+            new RegisterForPushNotificationsAsync(this).execute();
+        }
     }
 
     /**
