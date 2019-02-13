@@ -43,14 +43,39 @@
                   tools:layout="@layout/fragment_t9_helper"/>
 
         <TextView
-            android:id="@+id/message"
-            style="@style/EmptyViewMessageTextStyle"
+        android:id="@+id/message"
+        style="@style/EmptyViewMessageTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"/>
+
+        <LinearLayout
+            android:id="@+id/contact_processing_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:visibility="gone"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"/>
+            android:orientation="vertical"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/progress_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialer_contacts_not_processed"
+                android:paddingTop="10dp"/>
+        </LinearLayout>
+
 
         <LinearLayout android:layout_width="match_parent"
                       android:layout_height="match_parent"
@@ -93,7 +118,6 @@
         app:layout_constraintHeight_percent="0.75"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top"
         app:show_remove_button="true"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

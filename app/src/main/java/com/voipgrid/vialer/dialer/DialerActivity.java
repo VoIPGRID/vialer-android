@@ -6,12 +6,10 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.Loader;
-
 import android.provider.Settings;
 import android.text.Html;
 import android.text.TextUtils;
@@ -22,6 +20,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +31,7 @@ import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.contacts.Contacts;
+import com.voipgrid.vialer.contacts.ContactsSyncTask;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
@@ -50,6 +50,9 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
+import androidx.core.content.ContextCompat;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -90,6 +93,11 @@ public class DialerActivity extends LoginRequiredActivity implements
     @BindView(R.id.top) ViewGroup mTop;
     @BindView(R.id.no_contact_permission_warning) View mNoContactPermissionWarning;
     @BindView(R.id.permission_contact_description) TextView mPermissionContactDescription;
+    @BindView(R.id.progress_bar) ProgressBar mProgressBar;
+    @BindView(R.id.progress_text) TextView mProgressText;
+    @BindView(R.id.contact_processing_container) View mContactsProcessingContainer;
+
+    private Thread mContactsProcessingThread;
 
     public static final int RESULT_DIALED_NUMBER = 1;
 
@@ -100,6 +108,7 @@ public class DialerActivity extends LoginRequiredActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dialer);
         ButterKnife.bind(this);
+        mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, R.color.color_primary), PorterDuff.Mode.SRC_ATOP);
         VialerApplication.get().component().inject(this);
         mDialHelper = DialHelper.fromActivity(this);
         mDialer.setListener(this);
@@ -325,12 +334,28 @@ public class DialerActivity extends LoginRequiredActivity implements
         }
         mReachabilityReceiver.startListening();
         clearContactList();
+
+        if (mContactsProcessingThread == null || !mContactsProcessingThread.isAlive()) {
+            mContactsProcessingThread = new Thread(new ProgressUpdater(this));
+            mContactsProcessingThread.start();
+        }
+
+        refreshUi();
     }
 
     @Override
     public void onStop() {
         super.onStop();
         mReachabilityReceiver.stopListening();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mContactsProcessingThread != null && mContactsProcessingThread.isAlive()) {
+            mContactsProcessingThread.interrupt();
+        }
     }
 
     @Override
@@ -454,19 +479,32 @@ public class DialerActivity extends LoginRequiredActivity implements
             return;
         }
 
+        if (!ContactsSyncTask.getProgress().isComplete()) {
+            refreshUi();
+            return;
+        }
+
         // Set new data on adapter and notify data changed.
         mContactsAdapter.swapCursor(data);
         mContactsAdapter.notifyDataSetChanged();
         mT9HelperFragment.setVisibility(View.GONE);
 
-        if (SyncUtils.requiresFullContactSync(this)) {
-            mEmptyView.setText(R.string.dialer_contacts_not_processed);
-            return;
-        }
-
         // Set empty to no contacts found when result is empty.
         if (data != null && data.getCount() == 0) {
             mEmptyView.setText(R.string.dialer_no_contacts_found_message);
+        }
+
+        refreshUi();
+        mT9HelperFragment.setVisibility(View.GONE);
+    }
+
+    private void refreshUi() {
+        if (ContactsSyncTask.getProgress().isComplete()) {
+            mContactsProcessingContainer.setVisibility(View.GONE);
+            mT9HelperFragment.setVisibility(View.VISIBLE);
+        } else {
+            mContactsProcessingContainer.setVisibility(View.VISIBLE);
+            mT9HelperFragment.setVisibility(View.GONE);
         }
     }
 
@@ -486,5 +524,52 @@ public class DialerActivity extends LoginRequiredActivity implements
 
     private boolean isContactsExpanded() {
         return mDialer.getVisibility() != View.VISIBLE;
+    }
+
+    /**
+     * Updates the contacts sync progress bar.
+     *
+     */
+    private static class ProgressUpdater implements Runnable {
+
+        private final DialerActivity mActivity;
+
+        /**
+         * The frequency to check the current status of the contacts import.
+         */
+        private static final int POLL_TIME_MS = 500;
+
+        ProgressUpdater(DialerActivity activity) {
+            mActivity = activity;
+        }
+
+        @Override
+        public void run() {
+            while (!Thread.currentThread().isInterrupted()) {
+                if (ContactsSyncTask.getProgress().isComplete()) {
+                    mActivity.runOnUiThread(mActivity::refreshUi);
+                    return;
+                }
+
+                mActivity.runOnUiThread(() -> {
+                    mActivity.mProgressText.setText(mActivity.getString(
+                            R.string.dialer_contacts_not_processed,
+                            ContactsSyncTask.getProgress().getProcessed(),
+                            ContactsSyncTask.getProgress().getTotal())
+                    );
+                    mActivity.mProgressBar.setProgress(getCompletionPercentage());
+                });
+
+                try {
+                    Thread.sleep(POLL_TIME_MS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private int getCompletionPercentage() {
+            return (int) (((float) ContactsSyncTask.getProgress().getProcessed() / (float) ContactsSyncTask.getProgress().getTotal()) * 100);
+        }
     }
 }
