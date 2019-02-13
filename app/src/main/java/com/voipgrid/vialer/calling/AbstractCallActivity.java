@@ -9,8 +9,6 @@ import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.CallSuper;
-import androidx.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -28,6 +26,8 @@ import com.voipgrid.vialer.util.ProximitySensorHelper;
 
 import javax.inject.Inject;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.Optional;
 
@@ -101,6 +101,8 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     public void sipServiceHasConnected(SipService sipService) {
         if (sipService.getFirstCall() != null) {
             mCurrentCallId = sipService.getFirstCall().getIdentifier();
+        } else {
+            finishAfterDelay();
         }
     }
 
@@ -124,8 +126,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
     }
-
-    public void onCallStatusReceived(String status, String callId) {}
 
     /**
      * Attempt to shutdown the activity after a few seconds giving the services enough

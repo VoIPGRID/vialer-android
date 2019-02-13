@@ -12,11 +12,6 @@ import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.RequiresApi;
-import androidx.constraintlayout.widget.Group;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
-import android.text.format.DateUtils;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,6 +40,7 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import javax.inject.Inject;
 
+import androidx.constraintlayout.widget.Group;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
