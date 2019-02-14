@@ -27,6 +27,7 @@ import retrofit2.Response;
 
 import static com.voipgrid.vialer.middleware.MiddlewareConstants.CURRENT_TOKEN;
 import static com.voipgrid.vialer.middleware.MiddlewareConstants.LAST_REGISTRATION;
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.PUSHY_TOKEN;
 import static com.voipgrid.vialer.middleware.MiddlewareConstants.REGISTRATION_STATUS;
 import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_FAILED;
 import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_REGISTERED;
@@ -46,6 +47,17 @@ public class MiddlewareHelper {
     public static void setRegistrationStatus(Context context, int status) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putInt(REGISTRATION_STATUS, status).apply();
+    }
+
+    public static void setPushyToken(Context context, String token) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putString(PUSHY_TOKEN, token).apply();
+    }
+
+    public static String getPushyToken(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString(PUSHY_TOKEN,null);
+
     }
 
     /**
@@ -110,7 +122,7 @@ public class MiddlewareHelper {
                 Build.VERSION.RELEASE,
                 appName,
                 (preferences.remoteLoggingIsActive() ? preferences.getLoggerIdentifier() : null),
-                //add pushy token
+                getPushyToken(context)
         );
         editor.putString(CURRENT_TOKEN, token);
 

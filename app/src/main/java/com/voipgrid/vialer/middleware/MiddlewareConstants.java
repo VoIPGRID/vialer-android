@@ -8,6 +8,7 @@ public final class MiddlewareConstants {
     }
 
     public static final String REGISTRATION_STATUS = "VIALER_REGISTRATION_STATUS";
+    public static final String PUSHY_TOKEN = "PUSHY_TOKEN";
     public static final String LAST_REGISTRATION = "VIALER_LAST_REGISTRATION";
     public static final String CURRENT_TOKEN = "VIALER_CURRENT_TOKEN";
 

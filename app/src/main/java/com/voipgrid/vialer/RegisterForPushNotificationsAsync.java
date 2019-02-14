@@ -1,9 +1,13 @@
 package com.voipgrid.vialer;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
 import java.net.URL;
 
@@ -25,8 +29,7 @@ class RegisterForPushNotificationsAsync extends AsyncTask<Void, Void, Exception>
             // Log it for debugging purposes
             Log.d("MyApp", "Pushy device token: " + deviceToken);
 
-
-
+            MiddlewareHelper.setPushyToken(mContext,deviceToken);
         }
         catch (Exception exc) {
             // Return exc to onPostExecute
