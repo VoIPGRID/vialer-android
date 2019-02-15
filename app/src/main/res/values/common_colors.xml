@@ -45,4 +45,7 @@
     <color name="drawer_header_text_color_email">#B3FFFFFF</color>
 
     <color name="call_transfer_color">@color/call_fab_pickup_color</color>
+
+    <color name="call_records_background">#E9E9E9</color>
+    <color name="call_records_item_background">#fff</color>
 </resources>

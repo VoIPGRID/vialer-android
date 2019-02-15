@@ -38,9 +38,7 @@ import com.voipgrid.vialer.util.UpdateActivity;
 import com.voipgrid.vialer.util.UpdateHelper;
 
 
-public class MainActivity extends NavigationDrawerActivity implements
-        View.OnClickListener,
-        CallRecordFragment.OnFragmentInteractionListener {
+public class MainActivity extends NavigationDrawerActivity implements View.OnClickListener {
 
     private ViewPager mViewPager;
     private View mView;
@@ -294,11 +292,6 @@ public class MainActivity extends NavigationDrawerActivity implements
         } else {
             startActivity(intent);
         }
-    }
-
-    @Override
-    public void onFragmentInteraction(String id) {
-
     }
 
     /**

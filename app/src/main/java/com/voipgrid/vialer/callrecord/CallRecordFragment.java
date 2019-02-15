@@ -7,13 +7,19 @@ import androidx.annotation.NonNull;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.ListFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.Switch;
 
 import com.voipgrid.vialer.EmptyView;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
@@ -28,6 +34,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
+import butterknife.Unbinder;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,17 +54,19 @@ public class CallRecordFragment extends ListFragment implements
     private static final String ARG_FILTER = "filter";
     public static final String FILTER_MISSED_RECORDS = "missed-records";
 
-    private OnFragmentInteractionListener mListener;
     private CallRecordAdapter mAdapter;
     private List<CallRecord> mCallRecords = new ArrayList<>();
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
-    private AnalyticsHelper mAnalyticsHelper;
-    private ConnectivityHelper mConnectivityHelper;
-    private JsonStorage mJsonStorage;
+    @Inject ConnectivityHelper mConnectivityHelper;
+    @Inject JsonStorage mJsonStorage;
+    @Inject Preferences mPreferences;
 
     private String mFilter;
     private boolean mHaveNetworkRecords;
+    private Unbinder mUnbinder;
+
+    @BindView(R.id.show_calls_for_whole_client_switch) CompoundButton mShowCallsForWholeClientSwitch;
 
     public static CallRecordFragment newInstance(String filter) {
         CallRecordFragment fragment = new CallRecordFragment();
@@ -62,43 +76,6 @@ public class CallRecordFragment extends ListFragment implements
         return fragment;
     }
 
-    private class AsyncCallRecordLoader extends AsyncTask<Void, Void, List<CallRecord>> {
-        private JsonStorage<CallRecord[]> mJsonStorage;
-        public AsyncCallRecordLoader() {
-            mJsonStorage = new JsonStorage<>(getActivity());
-        }
-
-        protected List<CallRecord> doInBackground(Void args[]) {
-            CallRecord[] records = mJsonStorage.get(CallRecord[].class);
-            if (records != null) {
-                return Arrays.asList(records);
-            } else {
-                return new ArrayList<>();
-            }
-        }
-
-        protected void onPostExecute(List<CallRecord> records) {
-            if(isAdded()){
-                // Only display Records when the fragment is still attached to an activity.
-                displayCachedRecords(records);
-            }
-        }
-    }
-
-    private class AsyncCallRecordSaver extends AsyncTask<Void, Void, Void> {
-        private List<CallRecord> mRecords;
-
-        public AsyncCallRecordSaver(List<CallRecord> records) {
-            mRecords = records;
-        }
-
-        protected Void doInBackground(Void args[]) {
-            CallRecord[] records = new CallRecord[mRecords.size()];
-            mRecords.toArray(records);
-            mJsonStorage.save(records);
-            return null;
-        }
-    }
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -109,14 +86,7 @@ public class CallRecordFragment extends ListFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /* set the AnalyticsHelper */
-        mAnalyticsHelper = new AnalyticsHelper(
-                ((AnalyticsApplication) getActivity().getApplication()).getDefaultTracker()
-        );
-
-        mConnectivityHelper = ConnectivityHelper.get(getActivity());
-
-        mJsonStorage = new JsonStorage(getActivity());
+        VialerApplication.get().component().inject(this);
         mFilter = getArguments().getString(ARG_FILTER);
     }
 
@@ -124,7 +94,9 @@ public class CallRecordFragment extends ListFragment implements
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
     ) {
-        return inflater.inflate(R.layout.fragment_call_records, null);
+        View view = inflater.inflate(R.layout.fragment_call_records, null);
+        mUnbinder = ButterKnife.bind(this, view);
+        return view;
     }
 
     @Override
@@ -134,16 +106,10 @@ public class CallRecordFragment extends ListFragment implements
         mAdapter = new CallRecordAdapter(getActivity(), mCallRecords);
 
         /* setup swipe refresh layout */
-        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        mSwipeRefreshLayout = view.findViewById(R.id.swipe_container);
         mSwipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.color_refresh));
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-            }
-        });
-
+        mSwipeRefreshLayout.post(() -> mSwipeRefreshLayout.setRefreshing(true));
         loadCallRecordsFromApi();
         loadCallRecordsFromCache();
         getListView().setAdapter(mAdapter);
@@ -162,31 +128,33 @@ public class CallRecordFragment extends ListFragment implements
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(
-                    activity.toString() + " must implement OnFragmentInteractionListener"
-            );
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (mShowCallsForWholeClientSwitch != null) {
+            mShowCallsForWholeClientSwitch.setChecked(mPreferences.getDisplayCallRecordsForWholeClient());
         }
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
+    @OnCheckedChanged(R.id.show_calls_for_whole_client_switch)
+    void showCallsForWholeClientSwitchWasChanged(CompoundButton view, boolean checked) {
+        Log.e("TEST123", "checke change");
+        mPreferences.setDisplayCallRecordsForWholeClient(checked);
+        clearCallRecordCache();
+        onRefresh();
+    }
+
+    /**
+     * Completely clear the call record cache so call records must be fetched from the API.
+     *
+     */
+    private void clearCallRecordCache() {
+        mJsonStorage.remove(CallRecord[].class);
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
     }
 
     /**
@@ -202,9 +170,14 @@ public class CallRecordFragment extends ListFragment implements
 
         Api api = ServiceGenerator.createApiService(getContext());
 
-        Call<VoipGridResponse<CallRecord>> call = api.getRecentCalls(
-                50, 0, CallRecord.getLimitDate()
-        );
+        Call<VoipGridResponse<CallRecord>> call;
+
+        if (mPreferences.getDisplayCallRecordsForWholeClient()) {
+             call = api.getRecentCalls(50, 0, CallRecord.getLimitDate());
+        } else {
+            call = api.getRecentCallsForLoggedInUser(50, 0, CallRecord.getLimitDate());
+        }
+
         call.enqueue(this);
     }
 
@@ -227,23 +200,27 @@ public class CallRecordFragment extends ListFragment implements
         if(filtered != null && filtered.size() > 0) {
             mAdapter.setCallRecords(filtered);
             setEmptyView(null, false);
-        } else if(mAdapter.getCount() == 0) {
-            // List is empty, but adapter view may not be. Since this method is only called in
-            // success cases, ignore this case.
-            String emptyText;
-
-            if (mFilter != null && mFilter.equals(FILTER_MISSED_RECORDS)) {
-                emptyText = getString(R.string.empty_view_missed_message);
-            } else {
-                emptyText = getString(R.string.empty_view_default_message);
-            }
+        } else if(filtered.size() == 0) {
+            mAdapter.setCallRecords(filtered);
 
             setEmptyView(
-                    new EmptyView(getActivity(), emptyText),
+                    new EmptyView(
+                            getActivity(),
+                            isShowingMissedCallRecords() ? getString(R.string.empty_view_missed_message) : getString(R.string.empty_view_default_message)
+                    ),
                     true
             );
         }
         mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    /**
+     * Check if this call record fragment is meant to be showing missed call records rather than all call records.
+     *
+     * @return TRUE if fragment is showing missed calls, otherwise FALSE.
+     */
+    private boolean isShowingMissedCallRecords() {
+        return mFilter != null && mFilter.equals(FILTER_MISSED_RECORDS);
     }
 
     /**
@@ -255,7 +232,7 @@ public class CallRecordFragment extends ListFragment implements
         if (mFilter != null && callRecords != null && callRecords.size() > 0) {
             List<CallRecord> filtered = new ArrayList<>();
 
-            if (mFilter.equals(FILTER_MISSED_RECORDS)) {
+            if (isShowingMissedCallRecords()) {
                 for (int i=0, size = callRecords.size(); i < size; i++) {
                     CallRecord callRecord = callRecords.get(i);
 
@@ -319,7 +296,7 @@ public class CallRecordFragment extends ListFragment implements
 
     private void setEmptyView(EmptyView emptyView, boolean visible) {
         if(getView() != null) {
-            ViewGroup view = (ViewGroup) getView().findViewById(R.id.empty_view);
+            ViewGroup view = getView().findViewById(R.id.empty_view);
             if (view.getChildCount() > 0) {
                 view.removeAllViews();
             }
@@ -330,18 +307,41 @@ public class CallRecordFragment extends ListFragment implements
         }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(String id);
+    private class AsyncCallRecordLoader extends AsyncTask<Void, Void, List<CallRecord>> {
+        private JsonStorage<CallRecord[]> mJsonStorage;
+        public AsyncCallRecordLoader() {
+            mJsonStorage = new JsonStorage<>(getActivity());
+        }
+
+        protected List<CallRecord> doInBackground(Void args[]) {
+            CallRecord[] records = mJsonStorage.get(CallRecord[].class);
+            if (records != null) {
+                return Arrays.asList(records);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+
+        protected void onPostExecute(List<CallRecord> records) {
+            if(isAdded()){
+                // Only display Records when the fragment is still attached to an activity.
+                displayCachedRecords(records);
+            }
+        }
     }
 
+    private class AsyncCallRecordSaver extends AsyncTask<Void, Void, Void> {
+        private List<CallRecord> mRecords;
+
+        public AsyncCallRecordSaver(List<CallRecord> records) {
+            mRecords = records;
+        }
+
+        protected Void doInBackground(Void args[]) {
+            CallRecord[] records = new CallRecord[mRecords.size()];
+            mRecords.toArray(records);
+            mJsonStorage.save(records);
+            return null;
+        }
+    }
 }

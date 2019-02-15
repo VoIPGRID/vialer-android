@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.interceptors.AddAuthorizationCredentialsToRequest;
 import com.voipgrid.vialer.api.interceptors.AddUserAgentToHeader;
+import com.voipgrid.vialer.api.interceptors.LogResponsesToConsole;
 import com.voipgrid.vialer.api.interceptors.LogUserOutOnUnauthorizedResponse;
 import com.voipgrid.vialer.api.interceptors.ModifyCacheLifetimeBasedOnConnectivity;
 import com.voipgrid.vialer.util.AccountHelper;
@@ -49,6 +50,7 @@ public class ServiceGenerator {
         httpClient.addInterceptor(new AddUserAgentToHeader(context));
         httpClient.addInterceptor(new ModifyCacheLifetimeBasedOnConnectivity(context));
         httpClient.addInterceptor(new LogUserOutOnUnauthorizedResponse(context));
+        httpClient.addInterceptor(new LogResponsesToConsole());
 
         httpClient.cache(getCache(context));
 

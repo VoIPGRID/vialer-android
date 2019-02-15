@@ -8,6 +8,7 @@ import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
+import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.sip.CodecPriorityMap;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
@@ -41,4 +42,6 @@ public interface VialerComponent {
     void inject(NetworkConnectivity networkConnectivity);
 
     Preferences getPreferences();
+
+    void inject(CallRecordFragment fragment);
 }

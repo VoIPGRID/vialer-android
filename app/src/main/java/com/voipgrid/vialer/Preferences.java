@@ -30,6 +30,7 @@ public class Preferences {
     public static final String PREF_HAS_TLS_ENABLED = "PREF_HAS_TLS_ENABLED";
     public static final String PREF_HAS_STUN_ENABLED = "PREF_HAS_STUN_ENABLED";
     public static final String PREF_AUDIO_CODEC = "PREF_AUDIO_CODEC";
+    public static final String PREF_DISPLAY_CALL_RECORDS_FOR_WHOLE_CLIENT = "PREF_DISPLAY_CALL_RECORDS_FOR_WHOLE_CLIENT";
 
     public static final String CONNECTION_PREFERENCE = "CONNECTION_PREFERENCE";
     public static final long CONNECTION_PREFERENCE_NONE = -10;
@@ -201,5 +202,13 @@ public class Preferences {
 
     public @AudioCodec int getAudioCodec() {
         return mPreferences.getInt(PREF_AUDIO_CODEC, DEFAULT_VALUE_AUDIO_CODEC);
+    }
+
+    public boolean getDisplayCallRecordsForWholeClient() {
+        return mPreferences.getBoolean(PREF_DISPLAY_CALL_RECORDS_FOR_WHOLE_CLIENT, false);
+    }
+
+    public void setDisplayCallRecordsForWholeClient(boolean displayCallRecordsForWholeClient) {
+        mPreferences.edit().putBoolean(PREF_DISPLAY_CALL_RECORDS_FOR_WHOLE_CLIENT, displayCallRecordsForWholeClient).apply();
     }
 }

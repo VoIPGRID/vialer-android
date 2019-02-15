@@ -64,6 +64,11 @@ public interface Api {
                                                       @Query("offset") int offset,
                                                       @Query("call_date__gt") String date);
 
+    @GET("api/cdr/record/personalized/")
+    Call<VoipGridResponse<CallRecord>> getRecentCallsForLoggedInUser(@Query("limit") int limit,
+            @Query("offset") int offset,
+            @Query("call_date__gt") String date);
+
     @GET("api/userdestination/")
     Call<VoipGridResponse<UserDestination>> getUserDestination();
 
