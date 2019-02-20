@@ -1,27 +1,18 @@
 package com.voipgrid.vialer.callrecord;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.fragment.app.ListFragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.ListView;
-import android.widget.Switch;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.voipgrid.vialer.EmptyView;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.CallRecord;
@@ -36,6 +27,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.ListFragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -229,22 +223,19 @@ public class CallRecordFragment extends ListFragment implements
      * @return List of CallRecord instances.
      */
     private List<CallRecord> filter(List<CallRecord> callRecords) {
-        if (mFilter != null && callRecords != null && callRecords.size() > 0) {
-            List<CallRecord> filtered = new ArrayList<>();
-
-            if (isShowingMissedCallRecords()) {
-                for (int i=0, size = callRecords.size(); i < size; i++) {
-                    CallRecord callRecord = callRecords.get(i);
-
-                    if (callRecord.getDirection().equals(CallRecord.DIRECTION_INBOUND) &&
-                            callRecord.getDuration() == 0) {
-                        filtered.add(callRecord);
-                    }
-                }
-            }
-            return filtered;
+        if (!isShowingMissedCallRecords() || mFilter == null || callRecords == null || callRecords.size() <= 0) {
+            return callRecords;
         }
-        return callRecords;
+
+        List<CallRecord> filtered = new ArrayList<>();
+
+        for (CallRecord record : callRecords) {
+            if (record.wasMissed()) {
+                filtered.add(record);
+            }
+        }
+
+        return filtered;
     }
 
     @Override

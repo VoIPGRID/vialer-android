@@ -3,6 +3,8 @@ package com.voipgrid.vialer.dagger;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.api.models.CallRecord;
+import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
@@ -16,6 +18,7 @@ import com.voipgrid.vialer.sip.SipService;
 
 import javax.inject.Singleton;
 
+import androidx.annotation.Nullable;
 import dagger.Component;
 
 @Singleton
@@ -44,4 +47,9 @@ public interface VialerComponent {
     Preferences getPreferences();
 
     void inject(CallRecordFragment fragment);
+
+    void inject(CallRecord callRecord);
+
+    @Nullable
+    PhoneAccount getPhoneAccount();
 }

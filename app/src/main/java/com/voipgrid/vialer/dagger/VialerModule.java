@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
+
+import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
@@ -71,7 +73,7 @@ public class VialerModule {
         return (SystemUser) jsonStorage.get(SystemUser.class);
     }
 
-    @Provides
+    @Provides @Nullable
     PhoneAccount providePhoneAccount(JsonStorage jsonStorage) {
         return (PhoneAccount) jsonStorage.get(PhoneAccount.class);
     }
