@@ -22,10 +22,8 @@ import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.IconHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
+import com.voipgrid.vialer.util.TimeUtils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -154,7 +152,7 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
                 R.id.text_view_contact_information
         );
 
-        ImageButton callButton = (ImageButton) convertView.findViewById(R.id.call_record_call_button);
+        ImageButton callButton = convertView.findViewById(R.id.call_record_call_button);
 
         // Store the holder with the view.
         convertView.setTag(viewHolder);
@@ -178,19 +176,14 @@ public class CallRecordAdapter extends BaseAdapter implements View.OnClickListen
             // Set the compound drawable to the view.
             viewHolder.information.setCompoundDrawablesWithIntrinsicBounds(resource, 0, 0, 0);
 
-            // Format the date.
-            SimpleDateFormat dateFormat = new SimpleDateFormat(CallRecord.DATE_FORMAT);
-            Date date = null;
-            try {
-                date = dateFormat.parse(callRecord.getCallDate());
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
-            // Set the call record date information to the view.
             viewHolder.information.setText(DateUtils.getRelativeDateTimeString(
-                    mActivity, date.getTime(), DateUtils.SECOND_IN_MILLIS,
-                    DateUtils.YEAR_IN_MILLIS, DateUtils.FORMAT_ABBREV_TIME));
+                    mActivity,
+                    TimeUtils.convertToSystemTime(callRecord.getCallDate()),
+                    DateUtils.SECOND_IN_MILLIS,
+                    DateUtils.YEAR_IN_MILLIS,
+                    DateUtils.FORMAT_ABBREV_TIME
+            ));
+
         }
         return convertView;
     }

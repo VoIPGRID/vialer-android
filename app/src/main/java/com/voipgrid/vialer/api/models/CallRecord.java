@@ -13,7 +13,6 @@ public class CallRecord {
 
     public static final String DIRECTION_OUTBOUND = "outbound";
     public static final String DIRECTION_INBOUND = "inbound";
-    public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     private static final String CALL_DATE_FORMAT = "yyyy-MM-dd";
 
