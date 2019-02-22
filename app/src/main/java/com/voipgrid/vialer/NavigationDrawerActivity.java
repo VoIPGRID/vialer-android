@@ -20,6 +20,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.Destination;
 import com.voipgrid.vialer.api.models.FixedDestination;
+import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -44,6 +46,8 @@ import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -186,7 +190,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
                 String version = packageInfo.versionName;
                 if (version.contains("beta")) {
-                    textView.setText(getString(R.string.version_info_beta, version, packageInfo.versionCode));
+                    textView.setText(getString(R.string.version_info_beta, version, String.valueOf(packageInfo.versionCode)));
                 } else {
                     textView.setText(getString(R.string.version_info, version));
                 }
@@ -338,6 +342,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 return;
             }
 
+            storeInternalNumbers(userDestinationObjects);
+
             UserDestination userDestination = userDestinationObjects.get(0);
 
             // Create not available destination.
@@ -376,6 +382,24 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             mSpinnerAdapter.notifyDataSetChanged();
             mSpinner.setSelection(activeIndex);
         }
+    }
+
+    /**
+     * Store a list of internal numbers to storage.
+     *
+     * @param userDestinationObjects
+     */
+    private void storeInternalNumbers(List<UserDestination> userDestinationObjects) {
+        InternalNumbers internalNumbers = new InternalNumbers();
+        for (UserDestination userDestination : userDestinationObjects) {
+            internalNumbers.add(userDestination.getInternalNumber());
+
+            for (PhoneAccount phoneAccount : userDestination.getPhoneAccounts()) {
+                internalNumbers.add(phoneAccount.getNumber());
+            }
+        }
+
+        mJsonStorage.save(internalNumbers);
     }
 
     private static class CustomFontSpinnerAdapter<D> extends ArrayAdapter {

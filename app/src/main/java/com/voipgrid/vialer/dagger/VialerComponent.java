@@ -4,7 +4,9 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.CallRecord;
+import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
@@ -51,5 +53,5 @@ public interface VialerComponent {
     void inject(CallRecord callRecord);
 
     @Nullable
-    PhoneAccount getPhoneAccount();
+    InternalNumbers getInternalNumbers();
 }

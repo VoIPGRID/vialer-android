@@ -28,7 +28,7 @@
             android:layout_marginTop="10dp">
 
             <Switch
-                android:id="@+id/show_calls_for_whole_client_switch"
+                android:id="@+id/show_missed_calls_only_switch"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -50,8 +50,8 @@
             android:layout_height="match_parent"
             >
 
-            <ListView
-                android:id="@android:id/list"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/call_records"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingBottom="90dp"

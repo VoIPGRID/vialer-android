@@ -31,11 +31,11 @@ public class MicrophonePermission {
     /**
      * Function to check if the we have the microphone permission.
      *
-     * @param context Context needed for the check.
+     * @param activity Context needed for the check.
      * @return Whether or not we have permission.
      */
-    public static boolean hasPermission(Context context) {
-        return getPermissionStatus((Activity) context, mPermissionToCheck) == GRANTED;
+    public static boolean hasPermission(Activity activity) {
+        return getPermissionStatus(activity, mPermissionToCheck) == GRANTED;
     }
 
     private static int getPermissionStatus(Activity activity, String androidPermissionName) {

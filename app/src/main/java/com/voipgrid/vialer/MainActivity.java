@@ -9,6 +9,7 @@ import com.google.android.material.tabs.TabLayout;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
@@ -216,14 +217,17 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_title_recents));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_title_missed));
 
-        mViewPager = (ViewPager) findViewById(R.id.view_pager);
+        TabAdapter adapter = new TabAdapter(getSupportFragmentManager());
+        mViewPager = findViewById(R.id.view_pager);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        mViewPager.setAdapter(new TabAdapter(getSupportFragmentManager()));
+        mViewPager.setAdapter(adapter);
 
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 mViewPager.setCurrentItem(tab.getPosition());
+
+                ((CallRecordFragment) adapter.getItem(tab.getPosition())).fragmentIsVisible();
 
                 // Get tracker.
                 Tracker tracker = ((AnalyticsApplication) getApplication()).getDefaultTracker();
@@ -297,7 +301,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
     /**
      * Tab adapter to handle tabs in the ViewPager
      */
-    public class TabAdapter extends FragmentStatePagerAdapter {
+    public class TabAdapter extends FragmentPagerAdapter {
 
         public TabAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
@@ -305,11 +309,11 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
 
         @Override
         public Fragment getItem(int position) {
-            if(position == 0) { // recents tab
-                return CallRecordFragment.newInstance(null);
+            if(position == 0) {
+                return CallRecordFragment.mine();
             }
-            if(position == 1) { // missed tab
-                return CallRecordFragment.newInstance(CallRecordFragment.FILTER_MISSED_RECORDS);
+            if(position == 1) {
+                return CallRecordFragment.all();
             }
             return TabFragment.newInstance("");
         }

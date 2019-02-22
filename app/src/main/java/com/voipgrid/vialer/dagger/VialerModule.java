@@ -7,16 +7,26 @@ import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
+import com.github.tamir7.contacts.Contact;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
+import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.calling.CallNotifications;
+import com.voipgrid.vialer.callrecord.CachedContacts;
+import com.voipgrid.vialer.callrecord.CallRecordAdapter;
+import com.voipgrid.vialer.callrecord.CallRecordDataSource;
+import com.voipgrid.vialer.callrecord.CallRecordDataSourceFactory;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
@@ -76,6 +86,16 @@ public class VialerModule {
     @Provides @Nullable
     PhoneAccount providePhoneAccount(JsonStorage jsonStorage) {
         return (PhoneAccount) jsonStorage.get(PhoneAccount.class);
+    }
+
+    @Provides @Nullable
+    UserDestination provideUserDestination(JsonStorage jsonStorage) {
+        return (UserDestination) jsonStorage.get(UserDestination.class);
+    }
+
+    @Provides @Nullable
+    InternalNumbers provideInternalNumbers(JsonStorage jsonStorage) {
+        return (InternalNumbers) jsonStorage.get(InternalNumbers.class);
     }
 
     @Provides
@@ -147,4 +167,24 @@ public class VialerModule {
     NetworkUtil provideNetworkUtil(Context context) {
         return new NetworkUtil(context);
     }
+
+    @Provides
+    Api provideApi(Context context) {
+        return ServiceGenerator.createApiService(context);
+    }
+
+    @Provides
+    CallRecordDataSourceFactory provideCallRecordDataSourceFactory(Api api) {
+        return new CallRecordDataSourceFactory(api);
+    }
+
+    @Provides
+    CallRecordAdapter provideCallRecordAdapter(Context context, CachedContacts cachedContacts) {
+        return new CallRecordAdapter(context, cachedContacts);
+    }
+
+    @Provides CachedContacts provideCachedContacts(Contacts contacts) {
+        return new CachedContacts(contacts);
+    }
+
 }
