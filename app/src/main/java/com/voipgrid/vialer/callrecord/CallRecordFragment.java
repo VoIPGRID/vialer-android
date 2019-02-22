@@ -128,6 +128,5 @@ public class CallRecordFragment extends Fragment
     }
 
     public void fragmentIsVisible() {
-        Log.e("TEST123", "VISSISISBISBE");
     }
 }

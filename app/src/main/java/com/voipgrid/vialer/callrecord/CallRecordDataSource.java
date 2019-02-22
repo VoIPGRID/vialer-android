@@ -86,9 +86,7 @@ public class CallRecordDataSource extends PositionalDataSource<CallRecord> {
             }
 
             List<CallRecord> records = call.body().getObjects();
-for(CallRecord callRecord : records) {
-    Log.e("TEST123", "RECORD: " + callRecord);
-}
+
             total = call.body().getMeta().getTotalCount();
 
             return records;
