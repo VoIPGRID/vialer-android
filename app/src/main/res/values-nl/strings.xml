@@ -148,8 +148,6 @@
     <string name="account_availability_switch_title">Bereikbaarheid</string>
     <string name="add_availability">Bereikbaarheid toevoegen</string>
     <string name="not_available">Niet bereikbaar</string>
-    <string name="tab_title_recents">recent</string>
-    <string name="tab_title_missed">gemist</string>
 
     <!-- Call notification values -->
     <string name="callnotification_incoming_call">Inkomend gesprek</string>

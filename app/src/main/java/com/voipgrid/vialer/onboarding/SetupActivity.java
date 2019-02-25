@@ -329,7 +329,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
                     });
                 } else {
                     if (systemUser.getOutgoingCli() == null || systemUser.getOutgoingCli().isEmpty()) {
-                        mLogger.d("onResponse getOutgoingCli is null");
+                        mLogger.d("missedCallsHaveBeenRetrieved getOutgoingCli is null");
                     }
                     mPreferences.setSipPermission(true);
 

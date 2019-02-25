@@ -27,6 +27,8 @@ import com.voipgrid.vialer.callrecord.CachedContacts;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.callrecord.CallRecordDataSource;
 import com.voipgrid.vialer.callrecord.CallRecordDataSourceFactory;
+import com.voipgrid.vialer.callrecord.MissedCalls;
+import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
@@ -179,12 +181,20 @@ public class VialerModule {
     }
 
     @Provides
-    CallRecordAdapter provideCallRecordAdapter(Context context, CachedContacts cachedContacts) {
-        return new CallRecordAdapter(context, cachedContacts);
+    CallRecordAdapter provideCallRecordAdapter(CachedContacts cachedContacts) {
+        return new CallRecordAdapter(cachedContacts);
     }
 
     @Provides CachedContacts provideCachedContacts(Contacts contacts) {
         return new CachedContacts(contacts);
     }
 
+    @Provides
+    MissedCalls provideMissedCalls(Api api) {
+        return new MissedCalls(api);
+    }
+
+    @Provides MissedCallsAdapter provideMissedCallsAdapter(CachedContacts cachedContacts) {
+        return new MissedCallsAdapter(cachedContacts);
+    }
 }

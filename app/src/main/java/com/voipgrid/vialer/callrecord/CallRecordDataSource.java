@@ -37,7 +37,7 @@ public class CallRecordDataSource extends PositionalDataSource<CallRecord> {
      * Instruct the data source to fetch calls from the entire account.
      *
      */
-    public CallRecordDataSource fetchCallsFromEntireAccount() {
+    CallRecordDataSource fetchCallsFromEntireAccount() {
         fetchCallsFromEntireAccount = true;
         return this;
     }

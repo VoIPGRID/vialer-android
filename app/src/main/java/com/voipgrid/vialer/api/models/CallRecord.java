@@ -124,13 +124,21 @@ public class CallRecord {
         return destinationCode.equals(INTERNAL_DESTINATION_CODE) || destinationCode.equals(SIP_DESTINATION_CODE);
     }
 
+    public boolean isInbound() {
+        return getDirection().equals(DIRECTION_INBOUND);
+    }
+
+    public boolean isOutbound() {
+        return getDirection().equals(DIRECTION_OUTBOUND);
+    }
+
     /**
      * Check if this was a missed call.
      *
      * @return TRUE if missed call, otherwise FALSE.
      */
     public boolean wasMissed() {
-        return getDirection().equals(CallRecord.DIRECTION_INBOUND) && getDuration() == 0;
+        return isInbound() && getDuration() == 0;
     }
 
     public long getId() {

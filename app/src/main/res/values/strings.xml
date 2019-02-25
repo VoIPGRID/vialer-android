@@ -160,7 +160,7 @@
     <string name="add_availability">Add availability</string>
     <string name="not_available">Not available</string>
     <string name="tab_title_recents">my calls</string>
-    <string name="tab_title_missed">all</string>
+    <string name="tab_title_missed">all calls</string>
 
     <string name="navigation_name_placeholder_text">No outgoing number configured</string>
     <string name="supressed_number">Anonymous</string>
