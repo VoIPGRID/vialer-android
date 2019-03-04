@@ -49,8 +49,6 @@ import androidx.annotation.Nullable;
 
 public class PersistentSipService extends Service {
 
-    @Inject SipConfig mSipConfig;
-    @Inject PhoneAccount mPhoneAccount;
     private Endpoint mEndpoint;
     private SipAccount mSipAccount;
     private SipLogWriter mSipLogWriter;
@@ -145,8 +143,8 @@ public class PersistentSipService extends Service {
         return endpoint;
     }
 
-    private static final String VOIP_ACCOUNT = "169710098";
-    private static final String VOIP_PASSWORD = "";
+    private static final String VOIP_ACCOUNT = "126680016";
+    private static final String VOIP_PASSWORD = "mYbeSbTKWGJBs54";
 
     /**
      * Create the AccountConfig with the PhoneAccount credentials.
@@ -162,7 +160,7 @@ public class PersistentSipService extends Service {
         );
 
         String transportString = getTransportString();
-        String sipAccountRegId = SipUri.sipAddress(this, VOIP_PASSWORD) + transportString;
+        String sipAccountRegId = SipUri.sipAddress(this, VOIP_ACCOUNT) + transportString;
         String sipRegistrarUri = SipUri.prependSIPUri(this, getSipHost()) + transportString;
 
         AccountConfig config = new AccountConfig();
