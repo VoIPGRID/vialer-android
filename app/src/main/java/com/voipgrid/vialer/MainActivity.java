@@ -227,8 +227,6 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
             public void onTabSelected(TabLayout.Tab tab) {
                 mViewPager.setCurrentItem(tab.getPosition());
 
-                ((CallRecordFragment) adapter.getItem(tab.getPosition())).fragmentIsVisible();
-
                 // Get tracker.
                 Tracker tracker = ((AnalyticsApplication) getApplication()).getDefaultTracker();
 

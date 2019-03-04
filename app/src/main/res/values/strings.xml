@@ -109,7 +109,7 @@
     <string name="two_factor_authentication_header_label_subtext">Authentication</string>
 
     <!-- strings empty view call records -->
-    <string name="empty_view_default_message">No recent calls available (yet).</string>
+    <string name="empty_view_default_message">No recent calls available.</string>
     <string name="empty_view_missed_message">No missed calls.</string>
     <string name="empty_view_unauthorized_message">You are not allowed to see call records.</string>
 

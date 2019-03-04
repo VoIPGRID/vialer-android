@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -168,6 +167,11 @@ public class CallRecordFragment extends Fragment
     public void onChanged(PagedList<CallRecord> callRecords) {
         swipeContainer.setRefreshing(false);
 
+        if (callRecords.isEmpty()) {
+            displayError(R.string.empty_view_default_message);
+            return;
+        }
+
         int code = factory.getPostLiveData().getValue().getLastCode();
 
         if (!String.valueOf(code).startsWith("2")) {
@@ -175,22 +179,31 @@ public class CallRecordFragment extends Fragment
             return;
         }
 
+        hideError();
         adapter.submitList(callRecords);
     }
 
-    public void fragmentIsVisible() {
-        VialerApplication.get().component().inject(this);
-        Log.e("TEST123", "Frag is visible");
+    @Override
+    public void setUserVisibleHint(boolean visible) {
+        super.setUserVisibleHint(visible);
+        if (!visible) return;
+
         if (mPreferences != null && showMissedCallsOnlySwitch != null) {
-            Log.e("TEST123", "set checked");
             showMissedCallsOnlySwitch.setChecked(mPreferences.getDisplayMissedCallsOnly());
         }
     }
 
     @Override
     public void missedCallsHaveBeenRetrieved(List<CallRecord> missedCallRecords) {
-        missedCallsAdapter.setRecords(missedCallRecords);
         swipeContainer.setRefreshing(false);
+
+        if (missedCallRecords.isEmpty()) {
+            displayError(R.string.empty_view_missed_message);
+            return;
+        }
+
+        hideError();
+        missedCallsAdapter.setRecords(missedCallRecords);
     }
 
     @Override
@@ -234,6 +247,14 @@ public class CallRecordFragment extends Fragment
     public void onPause() {
         super.onPause();
         mBroadcastReceiverManager.unregisterReceiver(mNetworkChangeReceiver);
+    }
+
+    private void displayError(int string) {
+        setEmptyView(new EmptyView(getActivity(), getString(string)), true);
+    }
+
+    private void hideError() {
+        setEmptyView(new EmptyView(getActivity(), null), false);
     }
 
     private void setEmptyView(EmptyView emptyView, boolean visible) {
