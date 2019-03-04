@@ -39,7 +39,7 @@ public class MissedCalls {
                     public void onResponse(Call<VoipGridResponse<CallRecord>> call,
                             Response<VoipGridResponse<CallRecord>> response) {
                         if (!response.isSuccessful()) {
-                            callback.attemptToRetrieveMissedCallsDidFail();
+                            callback.attemptToRetrieveMissedCallsDidFail(response.code());
                             return;
                         }
 
@@ -48,7 +48,7 @@ public class MissedCalls {
 
                     @Override
                     public void onFailure(Call<VoipGridResponse<CallRecord>> call, Throwable t) {
-                        callback.attemptToRetrieveMissedCallsDidFail();
+                        callback.attemptToRetrieveMissedCallsDidFail(500);
                     }
                 });
     }
@@ -90,6 +90,6 @@ public class MissedCalls {
     public interface Callback {
         void missedCallsHaveBeenRetrieved(List<CallRecord> missedCallRecords);
 
-        void attemptToRetrieveMissedCallsDidFail();
+        void attemptToRetrieveMissedCallsDidFail(int code);
     }
 }

@@ -15,20 +15,15 @@ import com.voipgrid.vialer.EmptyView;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.Api;
 import com.voipgrid.vialer.api.models.CallRecord;
-import com.voipgrid.vialer.api.models.VoipGridResponse;
-import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.NetworkUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
@@ -41,9 +36,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.Unbinder;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 
 public class CallRecordFragment extends Fragment
@@ -63,6 +55,7 @@ public class CallRecordFragment extends Fragment
     @BindView(R.id.call_records_container) View mCallRecordsContainer;
 
     private Unbinder unbinder;
+    private NetworkChangeReceiver mNetworkChangeReceiver = new NetworkChangeReceiver();
 
     private boolean fetchCallsFromEntireAccount = false;
 
@@ -173,12 +166,23 @@ public class CallRecordFragment extends Fragment
 
     @Override
     public void onChanged(PagedList<CallRecord> callRecords) {
-        adapter.submitList(callRecords);
         swipeContainer.setRefreshing(false);
+
+        int code = factory.getPostLiveData().getValue().getLastCode();
+
+        if (!String.valueOf(code).startsWith("2")) {
+            handleFailedRequest(code);
+            return;
+        }
+
+        adapter.submitList(callRecords);
     }
 
     public void fragmentIsVisible() {
-        if (mPreferences != null) {
+        VialerApplication.get().component().inject(this);
+        Log.e("TEST123", "Frag is visible");
+        if (mPreferences != null && showMissedCallsOnlySwitch != null) {
+            Log.e("TEST123", "set checked");
             showMissedCallsOnlySwitch.setChecked(mPreferences.getDisplayMissedCallsOnly());
         }
     }
@@ -190,7 +194,22 @@ public class CallRecordFragment extends Fragment
     }
 
     @Override
-    public void attemptToRetrieveMissedCallsDidFail() {
+    public void attemptToRetrieveMissedCallsDidFail(int code) {
+        handleFailedRequest(code);
+    }
+
+    private void handleFailedRequest(int code) {
+        swipeContainer.setRefreshing(false);
+
+        int message = R.string.empty_view_default_message;
+
+        if(code == 401 || code == 403) {
+            message = R.string.empty_view_unauthorized_message;
+        }
+
+        final String messageString = getString(message);
+
+        getActivity().runOnUiThread(() -> setEmptyView(new EmptyView(getActivity(), messageString), true));
     }
 
     private boolean showMissedCalls() {
@@ -204,8 +223,6 @@ public class CallRecordFragment extends Fragment
         swipeContainer.setRefreshing(true);
         onRefresh();
     }
-
-    private NetworkChangeReceiver mNetworkChangeReceiver = new NetworkChangeReceiver();
 
     @Override
     public void onResume() {

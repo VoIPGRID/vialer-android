@@ -7,6 +7,7 @@ import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -17,6 +18,8 @@ import retrofit2.Response;
 public class CallRecordDataSource extends PositionalDataSource<CallRecord> {
 
     private final Api api;
+
+    private int code;
 
     CallRecordDataSource(Api api) {
         this.api = api;
@@ -77,12 +80,14 @@ public class CallRecordDataSource extends PositionalDataSource<CallRecord> {
                 call = api.getRecentCallsForLoggedInUser(size, startPosition, CallRecord.getLimitDate()).execute();
             }
 
+            code = call.code();
+
             if (!call.isSuccessful()) {
-                return null;
+                return new ArrayList<>();
             }
 
             if (call.body() == null) {
-                return null;
+                return new ArrayList<>();
             }
 
             List<CallRecord> records = call.body().getObjects();
@@ -91,7 +96,12 @@ public class CallRecordDataSource extends PositionalDataSource<CallRecord> {
 
             return records;
         } catch (IOException e) {
+            code = 500;
             return null;
         }
+    }
+
+    public int getLastCode() {
+        return code;
     }
 }
