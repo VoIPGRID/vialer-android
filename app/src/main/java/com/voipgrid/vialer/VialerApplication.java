@@ -38,6 +38,7 @@ public class VialerApplication extends AnalyticsApplication {
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         new ANRWatchDog().start();
         Contacts.initialize(this);
+        getDeviceToken();
     }
 
     public static String getAppVersion() {
