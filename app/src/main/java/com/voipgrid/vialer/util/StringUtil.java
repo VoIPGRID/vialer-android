@@ -23,7 +23,7 @@ public class StringUtil {
 
         if (subject == null) return null;
 
-        Pattern p = Pattern.compile(pattern);
+        Pattern p = Pattern.compile(pattern, Pattern.MULTILINE);
         Matcher m = p.matcher(subject);
 
         if (!m.find()) {

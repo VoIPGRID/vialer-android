@@ -53,6 +53,7 @@ public class PersistentSipService extends Service {
     private SipAccount mSipAccount;
     private SipLogWriter mSipLogWriter;
     @Inject Preferences mPreferences;
+    private SipAccount sipAccount ;
 
     public PersistentSipService() {
         super();
@@ -206,10 +207,13 @@ public class PersistentSipService extends Service {
      * @return
      */
     private SipAccount createSipAccount() {
-        AccountConfig accountConfig = createAccountConfig();
-        SipAccount sipAccount = null;
+        if (sipAccount != null) {
+            Log.e("TEST123", "sip account is being reused");
+            return sipAccount;
+        }
+
         try {
-            sipAccount = new SipAccount(accountConfig);
+            sipAccount = new SipAccount(createAccountConfig());
         } catch (Exception e) {
             e.printStackTrace();
         }

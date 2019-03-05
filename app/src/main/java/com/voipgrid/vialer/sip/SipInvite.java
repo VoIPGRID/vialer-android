@@ -17,6 +17,8 @@ public class SipInvite {
             REMOTE_PARTY_ID_HEADER_NAME = "Remote-Party-ID";
 
     private final String packet;
+    private final String callId;
+    private final String time;
 
     private CallerInformationHeader pAssertedIdentity;
     private CallerInformationHeader remotePartyId;
@@ -31,6 +33,8 @@ public class SipInvite {
         this.packet = packet;
         this.pAssertedIdentity = extractFromLikeHeader(P_ASSERTED_IDENTITY_HEADER_NAME);
         this.remotePartyId = extractFromLikeHeader(REMOTE_PARTY_ID_HEADER_NAME);
+        this.callId = extractHeader("Call-ID");
+        this.time = extractHeader("Date");
         this.from = extractFromLikeHeader("From");
     }
 
@@ -48,6 +52,14 @@ public class SipInvite {
         }
 
         return new CallerInformationHeader(data.get(0), data.get(1));
+    }
+
+    private String extractHeader(String header){
+        ArrayList<String> extracted = StringUtil.extractCaptureGroups(packet, header + ": (.+)$");
+
+        if (extracted.isEmpty()) return null;
+
+        return extracted.get(0);
     }
 
     public CallerInformationHeader getFrom() {
@@ -68,6 +80,14 @@ public class SipInvite {
 
     public CallerInformationHeader getRemotePartyId() {
         return remotePartyId;
+    }
+
+    public String getCallId() {
+        return this.callId;
+    }
+
+    public String getTime() {
+        return time;
     }
 
     /**

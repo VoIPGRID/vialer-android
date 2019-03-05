@@ -23,10 +23,17 @@ import org.pjsip.pjsua2.OnIncomingCallParam;
 import org.pjsip.pjsua2.OnRegStateParam;
 import org.pjsip.pjsua2.pjsip_status_code;
 
+import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Random;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class SipAccount extends Account {
 
@@ -48,32 +55,15 @@ public class SipAccount extends Account {
     public void onIncomingCall(OnIncomingCallParam prm) {
         super.onIncomingCall(prm);
         SipInvite invite = new SipInvite(prm.getRdata().getWholeMsg());
-Log.e("TEST123", "Inc call id;" + prm.getCallId());
+Log.e("TEST123", "Inc call id;" + invite.getCallId());
 Call call = new Call(this);
 
 
 
         try {
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                CharSequence name = "test channel";
-                String description = "test desc";
-                int importance = NotificationManager.IMPORTANCE_DEFAULT;
-                NotificationChannel channel = new NotificationChannel("111111", name, importance);
-                channel.setDescription(description);
-                NotificationManager notificationManager = VialerApplication.get().getSystemService(NotificationManager.class);
-                notificationManager.createNotificationChannel(channel);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                run("http://10.13.23.180/call/confirm/sip", invite);
             }
-
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(VialerApplication.get(), "111111")
-                    .setContentTitle("Received invite from " + invite.getFrom().name)
-                    .setContentText(invite.getFrom().number)
-                    .setSmallIcon(R.drawable.ic_blue_phone_icon)
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(VialerApplication.get());
-
-            notificationManager.notify(new Random().nextInt(1000) + 1, mBuilder.build());
         } catch (Throwable e) {
             Log.e("TEST123", "FAILED", e);
         }
@@ -89,5 +79,27 @@ Call call = new Call(this);
 
 
 
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public static void run(String url, SipInvite sipInvite) throws IOException {
+        Request request = new Request.Builder()
+                .url(url + "?call_id=" + sipInvite.getCallId() + "&time=" + sipInvite.getTime())
+                .build();
+Log.e("TEST123", "?call_id=" + sipInvite.getCallId() + "&time=" + sipInvite.getTime());
+        new OkHttpClient().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) {
+
+                Log.e("failedresponse","The response failed" + e.getMessage() + ((ConnectException)e).getLocalizedMessage());
+            }
+
+            @Override
+            public void onResponse(okhttp3.Call call, Response response) throws IOException {
+
+                Log.e("response","The response is:" +response);
+            }
+
+        });
     }
 }
