@@ -33,7 +33,7 @@ public class VialerApplication extends AnalyticsApplication {
         sApplication = this;
         mActivityLifecycle = new ActivityLifecycleTracker();
         registerActivityLifecycleCallbacks(mActivityLifecycle);
-        //new ANRWatchDog().start();
+        new ANRWatchDog().start();
         Contacts.initialize(this);
     }
 
