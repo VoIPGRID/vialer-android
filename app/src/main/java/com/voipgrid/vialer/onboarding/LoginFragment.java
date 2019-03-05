@@ -155,10 +155,6 @@ public class LoginFragment extends OnboardingFragment implements
         }
     }
 
-    public void onSucces() {
-        mListener.onNextStep(this);
-    }
-
     public void onError(String error) {
         reportErrorOrConnectivityError(R.string.onboarding_login_failed_title, R.string.onboarding_login_failed_message);
     }

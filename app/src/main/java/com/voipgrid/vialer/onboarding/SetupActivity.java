@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -35,6 +34,7 @@ import com.voipgrid.vialer.util.PhoneAccountHelper;
 
 import java.io.IOException;
 
+import androidx.annotation.NonNull;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -281,24 +281,38 @@ public class SetupActivity extends RemoteLoggingActivity implements
         alertDialogBuilder
                 .setMessage(getString(R.string.forgot_password_alert_message, email))
                 .setCancelable(false)
-                .setPositiveButton(this.getString(R.string.ok), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        resetPassword(email);
-                    }
-                })
-                .setNegativeButton(this.getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
+                .setPositiveButton(this.getString(R.string.ok),
+                        (dialog, id) -> resetPassword(email))
+                .setNegativeButton(this.getString(R.string.cancel),
+                        (dialog, id) -> dialog.dismiss());
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
     }
 
     private void resetPassword(String email) {
         Api api = ServiceGenerator.createApiService(this, null, null, null);
-        Call<Object> call = api.resetPassword(new PasswordResetParams(email));
-        call.enqueue(this);
+        Call<Void> call = api.resetPassword(new PasswordResetParams(email));
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (!response.isSuccessful()) {
+                    failedFeedback("Request failed");
+                    return;
+                }
+
+               new AlertDialog.Builder(SetupActivity.this)
+                        .setTitle(R.string.forgot_password_success_title)
+                        .setMessage(R.string.forgot_password_success_message)
+                        .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.dismiss())
+                        .create()
+                        .show();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                failedFeedback(t.getMessage());
+            }
+        });
     }
 
     /**
@@ -408,14 +422,11 @@ public class SetupActivity extends RemoteLoggingActivity implements
 
     private void failedFeedback(String message) {
         final String mMessage = message;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                enableProgressBar(false);
-                OnboardingFragment fragment = getCurrentFragment();
-                if (fragment != null) {
-                    fragment.onError(mMessage);
-                }
+        runOnUiThread(() -> {
+            enableProgressBar(false);
+            OnboardingFragment fragment = getCurrentFragment();
+            if (fragment != null) {
+                fragment.onError(mMessage);
             }
         });
     }

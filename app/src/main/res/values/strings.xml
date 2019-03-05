@@ -74,6 +74,10 @@
     <string name="forgot_password_missing_field_message">Please fill in all fields before login!</string>
     <string name="forgot_password_alert_title">Password reset</string>
     <string name="forgot_password_alert_message">If your user is %1s we will send you an email with instructions to reset your password.</string>
+    <string name="forgot_password_failed_title">Forgot Password failed</string>
+    <string name="forgot_password_failed_message">Please try again.</string>
+    <string name="forgot_password_success_title">Password reset</string>
+    <string name="forgot_password_success_message">You should receive an email shortly, containing instructions for resetting your password.</string>
 
     <!-- Configure fragment values. -->
     <string name="configure_button_title">Configure</string>

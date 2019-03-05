@@ -70,6 +70,10 @@
     <string name="forgot_password_missing_field_message">Vul alstublieft alle velden in</string>
     <string name="forgot_password_alert_title">Wachtwoord herstellen</string>
     <string name="forgot_password_alert_message">Als uw gebruikersnaam %1s is zullen we u een e-mail sturen met instructies om uw wachtwoord te herstellen.</string>
+    <string name="forgot_password_failed_title">Wachtwoord herstellen mislukt</string>
+    <string name="forgot_password_failed_message">Probeer nogmaals</string>
+    <string name="forgot_password_success_title">Wachtwoord herstellen</string>
+    <string name="forgot_password_success_message">Binnen enkele momenten zul je een email moeten ontvangen met daarin instructies voor het opnieuw instellen van het wachtwoord.</string>
 
     <!-- Configure fragment values. -->
     <string name="configure_button_title">Instellen</string>
