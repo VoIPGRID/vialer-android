@@ -315,6 +315,9 @@ public class CallActivity extends AbstractCallActivity implements
                 case DialogInterface.BUTTON_POSITIVE:
                     hangup();
                     break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
             }
         };
 

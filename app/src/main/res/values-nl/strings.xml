@@ -22,9 +22,9 @@
     <string name="call_hangup">Ophangen</string>
     <string name="call_connected">Verbonden</string>
     <string name="call_unreachable">Onbereikbaar</string>
-    <string name="call_back_button_confirmation">Je staat op het punt de verbinding te verbreken, wil je doorgaan?</string>
-    <string name="call_back_button_confirmation_yes">Verbreken</string>
-    <string name="call_back_button_confirmation_no">Doorgaan</string>
+    <string name="call_back_button_confirmation">Weet je zeker dat je het gesprek wilt beëindigen?</string>
+    <string name="call_back_button_confirmation_yes">Ja, beëindig het gesprek</string>
+    <string name="call_back_button_confirmation_no">Nee</string>
     <string name="dialer_connect_a_b_info">Twee staps modus zal een gesprek opzetten naar je telefoon en zal na beantwooring het gesprek opzetten naar de andere partij.</string>
     <string name="dialer_connect_a_b_info_title">Twee staps modus</string>
     <string name="dialer_warning_a_b_connect">Slechte verbinding, Twee staps modus geactiveerd</string>
