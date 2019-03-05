@@ -10,8 +10,6 @@ import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -25,6 +23,7 @@ import com.voipgrid.vialer.sip.SipService;
 
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -142,17 +141,10 @@ public class IncomingCallActivity extends AbstractCallActivity {
     protected void onPause() {
         super.onPause();
 
-        // Check if the screen is interactive because when the activity becomes active.
-        // After the screen turns on onStart and onPause are called again.
-        // Hence : onCreate - onStart - onResume - onPause - onStop - onStart - onPause.
-        if (!isScreenInteractive()) {
-            mLogger.i("We come from an screen that has been off. Don't execute the onPause!");
-            return;
-        }
-
         if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             mCallNotifications.callScreenIsBeingHiddenOnRingingCall(getCallNotificationDetails());
         }
+
         getMediaManager().stopIncomingCallRinger();
         ringingIsPaused = true;
     }
