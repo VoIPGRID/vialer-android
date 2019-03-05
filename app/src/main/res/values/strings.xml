@@ -25,9 +25,9 @@
     <string name="call_unreachable">Unreachable</string>
     <string name="call_incoming_accept">Accept</string>
     <string name="call_incoming_decline">Decline</string>
-    <string name="call_back_button_confirmation">You are about to terminate this call, do you want to proceed?</string>
-    <string name="call_back_button_confirmation_yes">End the call</string>
-    <string name="call_back_button_confirmation_no">Continue</string>
+    <string name="call_back_button_confirmation">You are about to end this call, are you sure?</string>
+    <string name="call_back_button_confirmation_yes">Yes, end the call</string>
+    <string name="call_back_button_confirmation_no">No</string>
     <string name="dialer_connect_a_b_info">Two step modus will setup a call to your phone first and will call the other party when you answer the call.</string>
     <string name="dialer_connect_a_b_info_title">Two step modus</string>
     <string name="dialer_warning_a_b_connect">Poor connection, Two step calling enabled</string>
