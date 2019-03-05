@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.analytics.Tracker;

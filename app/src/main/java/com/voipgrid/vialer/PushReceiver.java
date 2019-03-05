@@ -13,6 +13,7 @@ import android.os.Build;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.Calendar;
 
 public class PushReceiver extends BroadcastReceiver {
 
@@ -21,11 +22,11 @@ public class PushReceiver extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
             Log.e("pushMessageId", "I am here!");
             // Attempt to extract the "message" property from the payload: {"message":"Hello World!"}
-            if (intent.getIntExtra("push-message-id", 0) != 0) {
-                int pushMessageId = intent.getIntExtra("push-message-id",0);
-                Log.e("testJeremy","testJeremy"+pushMessageId);
+            if (intent.getStringExtra("unique_key") != null) {
+                String UniqueKey = intent.getStringExtra("unique_key");
+                Log.e("testJeremy","testJeremy"+UniqueKey);
                 try {
-                    run("http://10.13.25.90/call/confirm/pushy");
+                    run("http://10.13.23.180/call/confirm/pushy", UniqueKey, "");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -34,9 +35,9 @@ public class PushReceiver extends BroadcastReceiver {
         }
 
         @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-        public static void run(String url) throws IOException {
+        public static void run(String url, String uniquekey, String time) throws IOException {
             Request request = new Request.Builder()
-                    .url(url)
+                    .url(url + "?call_id=" + uniquekey+ "&time=" + time)
                     .build();
 
             new OkHttpClient().newCall(request).enqueue(new Callback() {
