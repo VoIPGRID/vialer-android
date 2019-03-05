@@ -17,7 +17,7 @@ public class MissedCalls {
      * and will look through every record for missed calls.
      *
      */
-    private static final int NUMBER_OF_RECORDS_TO__PARSE_FOR_MISSED_CALLS = 500;
+    private static final int NUMBER_OF_RECORDS_TO_PARSE_FOR_MISSED_CALLS = 500;
 
     private final Api api;
 
@@ -62,9 +62,9 @@ public class MissedCalls {
      */
     private Call<VoipGridResponse<CallRecord>> createHttpCall(boolean fetchCallsFromEntireAccount) {
         if (fetchCallsFromEntireAccount) {
-            return api.getRecentCalls(NUMBER_OF_RECORDS_TO__PARSE_FOR_MISSED_CALLS, 0, CallRecord.getLimitDate());
+            return api.getRecentCalls(NUMBER_OF_RECORDS_TO_PARSE_FOR_MISSED_CALLS, 0, CallRecord.getLimitDate());
         } else {
-            return api.getRecentCallsForLoggedInUser(NUMBER_OF_RECORDS_TO__PARSE_FOR_MISSED_CALLS, 0, CallRecord.getLimitDate());
+            return api.getRecentCallsForLoggedInUser(NUMBER_OF_RECORDS_TO_PARSE_FOR_MISSED_CALLS, 0, CallRecord.getLimitDate());
         }
     }
 
