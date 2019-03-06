@@ -57,7 +57,7 @@ public interface Api {
     Call<UseEncryption> useEncryption(@Body UseEncryption useEncryption);
 
     @POST("api/permission/password_reset/")
-    Call<Object> resetPassword(@Body PasswordResetParams params);
+    Call<Void> resetPassword(@Body PasswordResetParams params);
 
     @GET("api/cdr/record/")
     Call<VoipGridResponse<CallRecord>> getRecentCalls(@Query("limit") int limit,
