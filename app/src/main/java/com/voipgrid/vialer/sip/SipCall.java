@@ -3,8 +3,8 @@ package com.voipgrid.vialer.sip;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 

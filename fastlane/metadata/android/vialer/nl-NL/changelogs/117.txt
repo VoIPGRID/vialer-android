@@ -1,0 +1,2 @@
+Bugfix:
+- De app crasht niet meer wanneer de gebruiker geen toestemming geeft tot de contacten.

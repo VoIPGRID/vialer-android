@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.provider.ContactsContract;
-import android.support.v4.content.AsyncTaskLoader;
+import androidx.loader.content.AsyncTaskLoader;
 import android.util.Base64;
 
 import com.voipgrid.vialer.logging.Logger;

@@ -20,7 +20,6 @@ public class PendingCallActivity extends LoginRequiredActivity {
 
     @Inject CallActivityHelper mCallActivityHelper;
 
-    @BindView(R.id.lock_ring_container) View mLockRing;
     @BindView(R.id.call_state) TextView mCallState;
     @BindView(R.id.establishing_text_container) View mEstablishingTextContainer;
     @BindView(R.id.establishing_text) TextView mEstablishingText;
@@ -35,7 +34,6 @@ public class PendingCallActivity extends LoginRequiredActivity {
         setContentView(R.layout.activity_incoming_call);
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
-        mLockRing.setVisibility(View.GONE);
         mCallButtons.setVisibility(View.GONE);
         mEstablishingTextContainer.setVisibility(View.VISIBLE);
         mCallState.setText(R.string.pending_call_description);

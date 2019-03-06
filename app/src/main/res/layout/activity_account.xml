@@ -9,7 +9,7 @@
     android:orientation="vertical"
     tools:context="com.voipgrid.vialer.AccountActivity">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/action_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
                     android:paddingStart="4dp"
                     android:text="@string/account_sip_switch" />
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:hintTextAppearance="@style/AccountTextInputLayoutStyle"
@@ -69,9 +69,9 @@
                         android:hint="@string/account_sip_id_edit_text_hint"
                         android:inputType="text" />
 
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
@@ -82,11 +82,11 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:hint="@string/account_mobile_number_edit_text_hint"
-                        android:inputType="number" />
+                        android:inputType="phone" />
 
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
@@ -98,7 +98,7 @@
                         android:enabled="false"
                         android:hint="@string/account_outgoing_number_edit_text_hint"/>
 
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <Switch
                     android:id="@+id/use_3g_switch"
@@ -111,7 +111,7 @@
                     android:paddingTop="@dimen/activity_vertical_margin"
                     android:text="@string/switch_use_3g" />
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
@@ -124,7 +124,7 @@
                         android:paddingLeft="4dp"
                         android:paddingStart="4dp"
                         android:text="@string/choose_network_text" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <Spinner
                     android:id="@+id/call_connection_spinner"
@@ -143,7 +143,7 @@
                     android:paddingTop="@dimen/activity_vertical_margin"
                     android:text="@string/remote_logging_switch_title" />
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:hintTextAppearance="@style/AccountTextInputLayoutStyle"
@@ -160,9 +160,9 @@
                         android:layout_marginBottom="@dimen/activity_vertical_margin"
                          />
 
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:hintTextAppearance="@style/AccountTextInputLayoutStyle">
@@ -175,7 +175,7 @@
                         android:paddingStart="4dp"
                         android:paddingBottom="@dimen/activity_vertical_margin"
                         android:text="@string/advanced_settings_title" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
                     android:id="@+id/advanced_settings_layout"

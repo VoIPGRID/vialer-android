@@ -1,0 +1,10 @@
+New feature:
+- Call screens have been updated with a new design
+- Call records will now display the associated contact photo if one is available
+
+Improvement:
+- Various improvements have been made to the stability and responsiveness of the app
+- VoIP will be disabled and a notification displayed if a login occurs on a different device
+
+Bugfix:
+- Contacts with very long names will no longer run over multiple lines

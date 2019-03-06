@@ -1,0 +1,127 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+update_fastlane
+
+default_platform(:android)
+flavors = ["vialer", "voys", "verbonden", "annabel"]
+
+platform :android do
+  before_all do
+    gradle(task: 'clean')
+  end
+
+  desc 'Runs all the tests'
+  lane :test do
+    gradle(
+      task: 'test',
+      flavor: ENV['APP_NAME'],
+      build_type: 'Debug'
+    )
+  end
+
+  desc 'Do a screenshot run'
+  lane :screenshot do
+    gradle(
+      task: 'assemble',
+      flavor: ENV['APP_NAME'],
+      build_type: 'Debug'
+    )
+    gradle(
+      task: 'assemble',
+      flavor: ENV['APP_NAME'],
+      build_type: 'DebugAndroidTest'
+    )
+
+    # automated_test_emulator_run(
+    #   AVD_setup_path: './fastlane/avd/phone.json'
+    # )
+
+    screengrab(
+      clear_previous_screenshots: true,
+      use_tests_in_packages: 'com.voipgrid.vialer.screenshots',
+      # reinstall_app: true,
+      app_apk_path: "app/build/outputs/apk/#{ENV['APP_NAME']}/debug/app-#{ENV['APP_NAME']}-debug.apk",
+      tests_apk_path: "app/build/outputs/apk/androidTest/#{ENV['APP_NAME']}/debug/app-#{ENV['APP_NAME']}-debug-androidTest.apk",
+      test_instrumentation_runner: 'androidx.test.runner.AndroidJUnitRunner'
+    )
+  end
+
+  desc 'Generate a signed APK for each flavor'
+  lane :apks do
+     flavors.each do |flavor|
+        gradle(
+            task: 'assemble',
+            flavor: flavor,
+            build_type: 'Release'
+         )
+     end
+     flavors.each do |flavor|
+        puts create_apk_path_string(flavor)
+     end
+  end
+
+  desc 'Generate a signed APK'
+  lane :apk do
+    gradle(
+      task: 'assemble',
+      flavor: ENV['APP_NAME'],
+      build_type: 'Release'
+    )
+    puts create_apk_path_string(ENV['APP_NAME'])
+  end
+
+  desc 'Submit a new Beta version to the Google Play Store'
+  lane :beta do
+    apk
+    upload(track: 'beta')
+  end
+
+  desc 'Submit a new Production version to the Google Play Store'
+  lane :production do
+    apk
+    upload(track: 'production')
+  end
+
+  desc 'Submit a new Alpha version to the Google Play Store'
+  lane :alpha do
+    apk
+    upload(track: 'alpha')
+  end
+
+  desc 'Upload to the play store give either alpha, beta or release as parameter'
+  private_lane :upload do |options|
+     upload_to_play_store(
+       track: options[:track],
+       package_name: ENV['PACKAGE_NAME'],
+       apk: create_apk_path(ENV['APP_NAME']),
+       skip_upload_metadata: false,
+       skip_upload_images: true,
+       skip_upload_screenshots: true,
+       json_key: ENV['JSON_SECRET_LOCATION'],
+       metadata_path: ENV['METADATA_PATH']
+     )
+
+    slack(
+      message: ENV['APP_NAME'] + ' ' + options[:track] + ' has been uploaded to Google Play Store',
+    )
+  end
+end
+
+def create_apk_path_string(flavor)
+    return "APK for #{flavor} has been generated to " + create_apk_path(flavor)
+end
+
+def create_apk_path(flavor)
+    return "app/build/outputs/apk/#{flavor}/release/app-#{flavor}-release.apk"
+end

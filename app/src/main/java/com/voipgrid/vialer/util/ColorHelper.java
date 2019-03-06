@@ -1,6 +1,6 @@
 package com.voipgrid.vialer.util;
 
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 
 import com.voipgrid.vialer.VialerApplication;
 

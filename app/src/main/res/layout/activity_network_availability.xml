@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_gradient">
+
+    <TextView
+        android:id="@+id/network_call_message"
+        style="@style/CallTextViewStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="118dp"
+        android:layout_marginStart="118dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/network_call_message"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/incoming_caller_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints"/>
+
+    <TextView
+        android:id="@+id/incoming_caller_title"
+        style="@style/CallTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="Ghostbusters"
+        android:textSize="30sp"
+        app:layout_constraintTop_toBottomOf="@+id/network_call_message"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"/>
+
+    <TextView
+        android:id="@+id/incoming_caller_subtitle"
+        style="@style/CallTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="+31 50 446 7828"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/incoming_caller_title"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"/>
+
+    <TextView
+        android:id="@+id/duration_text_view"
+        style="@style/CallDurationTextViewStyle"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/name_text_view"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/incoming_caller_subtitle"/>
+
+    <FrameLayout
+        android:id="@+id/frameLayout2"
+        android:layout_width="168dp"
+        android:layout_height="168dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/contact_picture_circle"
+        android:gravity="center"
+        android:padding="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/duration_text_view">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="85dp"
+            android:layout_height="85dp"
+            android:src="@drawable/no_user"
+            app:civ_border_color="#ffffff"
+            app:civ_border_width="2dp"
+            tools:layout_editor_absoluteX="132dp"
+            tools:layout_editor_absoluteY="212dp"/>
+
+        <ImageButton
+            android:id="@+id/call_interrupted"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="bottom|right"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:padding="15dp"
+            app:layout_constraintBottom_toBottomOf="@+id/profile_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.34"
+            app:layout_constraintStart_toStartOf="@+id/profile_image"
+            app:layout_constraintTop_toTopOf="@+id/profile_image"
+            app:layout_constraintVertical_bias="1.0"
+            app:srcCompat="@drawable/ic_call_interrupted"/>
+
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/network_call_status"
+        style="@style/CallTextViewStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="115dp"
+        android:layout_marginStart="115dp"
+        android:layout_marginTop="30dp"
+        android:text="@string/network_call_status"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/frameLayout2"
+        tools:ignore="MissingConstraints"/>
+
+    <TextView
+        android:id="@+id/network_call_suggestion"
+        style="@style/CallTextViewStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="25dp"
+        android:layout_marginStart="25dp"
+        android:lines="2"
+        android:text="@string/network_call_suggestion"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/network_call_status"
+        tools:ignore="MissingConstraints"
+    />
+
+
+    <ImageButton
+        android:id="@+id/button_hangup"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/call_decline_button"
+        android:backgroundTint="@color/call_fab_hangup_color"
+        android:onClick="onClick"
+        android:padding="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.983"
+        app:srcCompat="@drawable/ic_call_end_white"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

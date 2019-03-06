@@ -6,7 +6,9 @@ import static com.voipgrid.vialer.call.CallActionButton.ENABLED_ALPHA;
 import android.content.Context;
 import android.util.AttributeSet;
 
-public class HangupButton extends android.support.v7.widget.AppCompatImageButton {
+import androidx.appcompat.widget.AppCompatImageButton;
+
+public class HangupButton extends AppCompatImageButton {
     public HangupButton(Context context, AttributeSet attrs) {
         super(context, attrs);
     }

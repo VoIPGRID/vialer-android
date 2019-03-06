@@ -5,13 +5,13 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.CallActivity;
@@ -24,6 +24,7 @@ import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -44,6 +45,7 @@ public class SipService extends Service implements SipConfig.Listener {
     private Handler mHandler;
     private Intent mIncomingCallDetails = null;
     private ToneGenerator mToneGenerator;
+    private NetworkConnectivity mNetworkConnectivity = new NetworkConnectivity();
 
     private Preferences mPreferences;
     private Logger mLogger;
@@ -61,6 +63,7 @@ public class SipService extends Service implements SipConfig.Listener {
     @Nullable private Intent mIntent;
 
     @Inject SipConfig mSipConfig;
+    @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
 
     /**
      * This will track whether this instance of SipService has ever handled a call,
@@ -160,10 +163,8 @@ public class SipService extends Service implements SipConfig.Listener {
 
         mLogger.d("onCreate");
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-
-        registerReceiver(phoneStateReceiver, filter);
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(phoneStateReceiver, TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
 
         // Create runnable to check if the SipService is still in use.
         mCheckServiceHandler = new Handler();
@@ -231,7 +232,7 @@ public class SipService extends Service implements SipConfig.Listener {
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
         try {
-            unregisterReceiver(phoneStateReceiver);
+            mBroadcastReceiverManager.unregisterReceiver(phoneStateReceiver, mNetworkConnectivity);
         } catch(IllegalArgumentException e) {
             mLogger.w("Trying to unregister phoneStateReceiver not registered.");
         }

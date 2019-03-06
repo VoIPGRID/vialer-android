@@ -138,7 +138,7 @@
     <string name="connection_preference_switch_toast">Controleren of het mobiele netwerk beschikbaar is</string>
     <string name="switch_use_3g">Gebruik 3G+ om te bellen</string>
 
-    <string name="url_app_info">http://vialerapp.com/nl/app-info/</string>
+    <string name="url_app_info">https://vialerapp.com/nl/app-info/</string>
 
     <string name="add_destination_title">Bestemmingen</string>
     <string name="info_menu_item_title">Info</string>
@@ -242,6 +242,9 @@
     <string name="incoming_call_answer">Beantwoorden</string>
     <string name="incoming_call_decline">Weigeren</string>
     <string name="pending_call_status">Gesprek wordt opgezet</string>
+    <string name="network_call_message">Gesprek onderbroken met</string>
+    <string name="network_call_status">Geen netwerk gevonden</string>
+    <string name="network_call_suggestion">Zorg ervoor dat u verbonden bent met een WiFi \nof mobiel netwerk</string>
     <string name="transfer_connect">voeg samen</string>
     <string name="transfer_hangup">ophangen</string>
     <string name="permission_contact_title">Geen overeenkomende contacten</string>

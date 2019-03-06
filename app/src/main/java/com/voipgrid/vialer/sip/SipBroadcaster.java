@@ -1,7 +1,7 @@
 package com.voipgrid.vialer.sip;
 
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /**
  * Helper class for sending broadcasts from background SIP classes to listening activities.

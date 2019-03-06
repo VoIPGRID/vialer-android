@@ -1,7 +1,7 @@
 package com.voipgrid.vialer.logging;
 
 import android.content.Context;
-import android.support.annotation.StringDef;
+import androidx.annotation.StringDef;
 import android.util.Log;
 
 import com.voipgrid.vialer.Preferences;
@@ -13,6 +13,7 @@ import com.voipgrid.vialer.logging.tracing.CallerLocator;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * Class used for sending logs to a remote service.
@@ -39,8 +40,14 @@ public class Logger {
     private CallerLocator mCallerLocator;
     private LogFileCreator mLogFileCreator;
 
+    private static Buffer sBuffer;
+
     private boolean mRemoteLoggingEnabled;
     private boolean mLogToConsole = true;
+
+    static  {
+        sBuffer = new Buffer();
+    }
 
     public Logger(Class thisClass) {
         mContext = VialerApplication.get();
@@ -115,9 +122,7 @@ public class Logger {
             logToConsole(level, tag, message);
         }
 
-        if (mRemoteLoggingEnabled) {
-            logToRemote(level, tag, message);
-        }
+        logToRemote(level, tag, message);
     }
 
     /**
@@ -156,7 +161,11 @@ public class Logger {
             message = mLogFormatter.applyAllFormatters(tag, message);
             message = mLogComposer.compose(level, tag, message);
 
-            logEntryLogger.log(message);
+            if (mRemoteLoggingEnabled) {
+                logEntryLogger.log(message);
+            } else {
+                sBuffer.add(message);
+            }
         } catch (Exception e) {
             // Avoid crashing the app in background logging.
         }
@@ -207,4 +216,20 @@ public class Logger {
         log(EXCEPTION_TAG, message);
     }
 
+    /**
+     * Sends the entire contents of the buffer to remote.
+     *
+     */
+    void logBufferToRemote() {
+        List<String> buffer = sBuffer.get();
+        sBuffer.clear();
+
+        if (logEntryLogger == null) {
+            return;
+        }
+
+        for (String log : buffer) {
+            logEntryLogger.log(log + " (FROM LOG BUFFER)");
+        }
+    }
 }

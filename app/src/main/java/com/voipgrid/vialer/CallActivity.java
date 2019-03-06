@@ -12,7 +12,10 @@ import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.constraint.Group;
+import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.widget.Group;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import android.text.format.DateUtils;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,6 +32,7 @@ import com.voipgrid.vialer.call.HangupButton;
 import com.voipgrid.vialer.call.TransferCompleteDialog;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.Dialer;
+import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
@@ -36,6 +40,7 @@ import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
+import com.voipgrid.vialer.util.NetworkUtil;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import javax.inject.Inject;
@@ -64,6 +69,8 @@ public class CallActivity extends AbstractCallActivity implements
     @BindView(R.id.call_status) TextView mCallStatusTv;
 
     @Inject AnalyticsHelper mAnalyticsHelper;
+    @Inject NetworkUtil mNetworkUtil;
+
 
     @BindView(R.id.button_transfer) CallActionButton mTransferButton;
     @BindView(R.id.button_onhold) CallActionButton mOnHoldButton;
@@ -160,6 +167,10 @@ public class CallActivity extends AbstractCallActivity implements
     protected void onResume() {
         super.onResume();
         updateUi();
+
+        if(!mNetworkUtil.isOnline()) {
+          NetworkAvailabilityActivity.start();
+        }
     }
 
     @Override
@@ -319,7 +330,8 @@ public class CallActivity extends AbstractCallActivity implements
     private void toggleMute() {
         mLogger.d("toggleMute");
         mMute = !mMute;
-        updateMicrophoneVolume(mMute ? R.integer.mute_microphone_volume_value : R.integer.unmute_microphone_volume_value);
+        int volume = getResources().getInteger(mMute ? R.integer.mute_microphone_volume_value : R.integer.unmute_microphone_volume_value);
+        updateMicrophoneVolume(volume);
         updateUi();
     }
 
@@ -373,7 +385,7 @@ public class CallActivity extends AbstractCallActivity implements
      * @param newVolume new volume level for the Rx level of the current media of active call.
      */
     void updateMicrophoneVolume(long newVolume) {
-        mLogger.d("updateMicrophoneVolume");
+        mLogger.d("updateMicrophoneVolume setting volume to: " + newVolume);
         if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             mSipServiceConnection.get().getCurrentCall().updateMicrophoneVolume(newVolume);
         }
@@ -492,15 +504,6 @@ public class CallActivity extends AbstractCallActivity implements
                 }
             }
         }
-    }
-
-    @Override
-    public void onCallDurationUpdate(long seconds) {
-        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
-            return;
-        }
-
-        mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
     }
 
     @Override

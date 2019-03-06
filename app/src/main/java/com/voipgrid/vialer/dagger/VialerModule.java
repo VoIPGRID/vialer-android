@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
-import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -24,6 +22,7 @@ import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.NetworkUtil;
 import com.voipgrid.vialer.util.NotificationHelper;
 
 import javax.inject.Singleton;
@@ -140,5 +139,10 @@ public class VialerModule {
     @Provides
     ReachabilityReceiver provideReachabilityReceiver(Context context) {
         return new ReachabilityReceiver(context);
+    }
+
+    @Provides
+    NetworkUtil provideNetworkUtil(Context context) {
+        return new NetworkUtil(context);
     }
 }

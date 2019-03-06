@@ -5,7 +5,7 @@ import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public class ClipboardHelper {
 
