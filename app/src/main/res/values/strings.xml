@@ -157,7 +157,7 @@
     <string name="advanced_settings_stun_description">Enabling STUN can improve connectivity when behind a Network Address Translator (NAT).
     </string>
 
-    <string name="url_app_info">http://vialerapp.com/app-info/</string>
+    <string name="url_app_info">https://vialerapp.com/app-info/</string>
 
     <string name="add_destination_title">Destinations</string>
     <string name="info_menu_item_title">Info</string>

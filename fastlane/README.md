@@ -26,6 +26,11 @@ Runs all the tests
 fastlane android screenshot
 ```
 Do a screenshot run
+### android apks
+```
+fastlane android apks
+```
+Generate a signed APK for each flavor
 ### android apk
 ```
 fastlane android apk
@@ -36,9 +41,9 @@ Generate a signed APK
 fastlane android beta
 ```
 Submit a new Beta version to the Google Play Store
-### android release
+### android production
 ```
-fastlane android release
+fastlane android production
 ```
 Submit a new Production version to the Google Play Store
 ### android alpha

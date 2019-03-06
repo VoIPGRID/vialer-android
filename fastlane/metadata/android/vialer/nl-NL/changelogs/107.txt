@@ -1,0 +1,6 @@
+Verbeteringen:
+- Prestatieverbeteringen tijdens het instellen van de app
+
+Bugfix:
+- Crash die kon ontstaan bij gebruik van het keypad
+- Crash die kon ontstaan bij het bijwerken van account informatie
