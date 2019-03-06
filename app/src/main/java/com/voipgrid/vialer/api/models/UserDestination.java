@@ -7,9 +7,6 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by eltjo on 16/09/15.
- */
 public class UserDestination {
 
     @SerializedName("fixeddestinations")
@@ -23,6 +20,9 @@ public class UserDestination {
 
     @SerializedName("id")
     private String id;
+
+    @SerializedName("internal_number")
+    private String internalNumber;
 
     public List<FixedDestination> getFixedDestinations() {
         return fixedDestinations;
@@ -98,5 +98,9 @@ public class UserDestination {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getInternalNumber() {
+        return internalNumber;
     }
 }

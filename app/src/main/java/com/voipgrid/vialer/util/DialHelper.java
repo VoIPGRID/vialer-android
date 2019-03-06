@@ -7,10 +7,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+
 import android.widget.Toast;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -49,7 +52,7 @@ public class DialHelper {
     public static DialHelper fromActivity (Activity activity) {
         JsonStorage jsonStorage = new JsonStorage(activity);
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(activity);
-        AnalyticsHelper analyticsHelper = new AnalyticsHelper(((AnalyticsApplication) activity.getApplication()).getDefaultTracker());
+        AnalyticsHelper analyticsHelper = new AnalyticsHelper(VialerApplication.get().getDefaultTracker());
 
         return new DialHelper(activity, jsonStorage, connectivityHelper, analyticsHelper);
     }
@@ -117,7 +120,7 @@ public class DialHelper {
                     && mJsonStorage.has(PhoneAccount.class)
                     && mConnectivityHelper.hasFastData()) {
                 // Check if we have permission to use the microphone. If not, request it.
-                if (!MicrophonePermission.hasPermission(mContext)) {
+                if (!MicrophonePermission.hasPermission((Activity) mContext)) {
                     sNumberAttemptedToCall = number;
                     MicrophonePermission.askForPermission((Activity) mContext);
                     return;

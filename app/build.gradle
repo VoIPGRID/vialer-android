@@ -208,8 +208,9 @@ dependencies {
 
     // Scytale -  Manage key generation
     implementation 'com.yakivmospan:scytale:1.0.1'
-
     implementation "com.github.nisrulz:easydeviceinfo-base:2.4.1"
+    implementation 'joda-time:joda-time:2.10.1'
+    implementation "android.arch.paging:runtime:1.0.1"
 
     // Testing below are supported api level because SNAPSHOT version is to unstable.
     testImplementation "org.robolectric:robolectric:${roboElectricVersion}"

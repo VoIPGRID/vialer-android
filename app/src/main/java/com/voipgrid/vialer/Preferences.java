@@ -30,6 +30,7 @@ public class Preferences {
     public static final String PREF_HAS_TLS_ENABLED = "PREF_HAS_TLS_ENABLED";
     public static final String PREF_HAS_STUN_ENABLED = "PREF_HAS_STUN_ENABLED";
     public static final String PREF_AUDIO_CODEC = "PREF_AUDIO_CODEC";
+    public static final String PREF_DISPLAY_MISSED_CALLS_ONLY = "PREF_DISPLAY_MISSED_CALLS_ONLY";
 
     public static final String CONNECTION_PREFERENCE = "CONNECTION_PREFERENCE";
     public static final long CONNECTION_PREFERENCE_NONE = -10;
@@ -201,5 +202,13 @@ public class Preferences {
 
     public @AudioCodec int getAudioCodec() {
         return mPreferences.getInt(PREF_AUDIO_CODEC, DEFAULT_VALUE_AUDIO_CODEC);
+    }
+
+    public boolean getDisplayMissedCallsOnly() {
+        return mPreferences.getBoolean(PREF_DISPLAY_MISSED_CALLS_ONLY, false);
+    }
+
+    public void setDisplayMissedCallsOnly(boolean displayMissedCallsOnly) {
+        mPreferences.edit().putBoolean(PREF_DISPLAY_MISSED_CALLS_ONLY, displayMissedCallsOnly).apply();
     }
 }

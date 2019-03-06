@@ -148,8 +148,6 @@
     <string name="account_availability_switch_title">Bereikbaarheid</string>
     <string name="add_availability">Bereikbaarheid toevoegen</string>
     <string name="not_available">Niet bereikbaar</string>
-    <string name="tab_title_recents">recent</string>
-    <string name="tab_title_missed">gemist</string>
 
     <!-- Call notification values -->
     <string name="callnotification_incoming_call">Inkomend gesprek</string>
@@ -254,4 +252,7 @@
     <string name="choose_codec_text">Audio Kwaliteit</string>
     <string name="call_codec_standard_quality">Standaard audio</string>
     <string name="call_codec_high_quality">Hogere audio kwaliteit</string>
+    <string name="tab_title_recents">mijn gesprekken</string>
+    <string name="tab_title_missed">alle gesprekken</string>
+    <string name="call_records_show_all">Laat alleen gemiste gesprekken zien</string>
 </resources>
