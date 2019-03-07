@@ -189,8 +189,17 @@ public class CallRecordFragment extends Fragment
         if (!visible) return;
 
         if (mPreferences != null && showMissedCallsOnlySwitch != null) {
+            redrawList();
             showMissedCallsOnlySwitch.setChecked(mPreferences.getDisplayMissedCallsOnly());
         }
+    }
+
+    /**
+     * Force the recycler view to redraw the table, updating the relative timestamps.
+     *
+     */
+    private void redrawList() {
+        mRecyclerView.setAdapter(mRecyclerView.getAdapter());
     }
 
     @Override
@@ -240,6 +249,7 @@ public class CallRecordFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
+        redrawList();
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkChangeReceiver, "android.net.conn.CONNECTIVITY_CHANGE");
     }
 

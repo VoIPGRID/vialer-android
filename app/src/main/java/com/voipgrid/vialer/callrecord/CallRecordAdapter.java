@@ -50,7 +50,7 @@ public class CallRecordAdapter extends PagedListAdapter<CallRecord, CallRecordVi
                 }
                 @Override
                 public boolean areContentsTheSame(CallRecord oldItem, CallRecord newItem) {
-                    return areItemsTheSame(oldItem, newItem);
+                    return false;
                 }
             };
 
