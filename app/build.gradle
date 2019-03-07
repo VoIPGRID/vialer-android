@@ -12,7 +12,7 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 125
+        versionCode 126
         versionName "6.2"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
