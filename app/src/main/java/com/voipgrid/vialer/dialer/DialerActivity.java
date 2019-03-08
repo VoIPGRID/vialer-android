@@ -413,6 +413,7 @@ public class DialerActivity extends LoginRequiredActivity implements
     void onCallButtonClicked() {
         String phoneNumber = mDialer.getNumber();
         if (phoneNumber != null && !phoneNumber.isEmpty()) {
+            mFloatingActionButton.setClickable(false);
             onCallNumber(PhoneNumberUtils.format(phoneNumber), null);
         } else {
             // Set last dialed number on call button clicked when number is empty.
