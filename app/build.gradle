@@ -227,6 +227,8 @@ dependencies {
 
     // Automated screenshots for instrumented tests.
     androidTestImplementation 'tools.fastlane:screengrab:1.1.0'
+
+    implementation 'me.pushy:sdk:1.0.43'
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

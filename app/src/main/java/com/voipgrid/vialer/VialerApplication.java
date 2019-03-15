@@ -7,6 +7,8 @@ import com.voipgrid.vialer.dagger.DaggerVialerComponent;
 import com.voipgrid.vialer.dagger.VialerComponent;
 import com.voipgrid.vialer.dagger.VialerModule;
 
+import me.pushy.sdk.Pushy;
+
 /**
  * VialerApplication that extends the AnalyticsApplication
  * so the Analytics are all setup.
@@ -35,6 +37,7 @@ public class VialerApplication extends AnalyticsApplication {
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         new ANRWatchDog().start();
         Contacts.initialize(this);
+        Pushy.listen(this);
     }
 
     public static String getAppVersion() {

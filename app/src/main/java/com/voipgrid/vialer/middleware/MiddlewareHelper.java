@@ -4,12 +4,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.analytics.Tracker;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Registration;
@@ -20,6 +23,8 @@ import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
+import me.pushy.sdk.Pushy;
+import me.pushy.sdk.util.exceptions.PushyException;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -109,7 +114,8 @@ public class MiddlewareHelper {
                 Build.VERSION.CODENAME,
                 Build.VERSION.RELEASE,
                 appName,
-                (preferences.remoteLoggingIsActive() ? preferences.getLoggerIdentifier() : null)
+                (preferences.remoteLoggingIsActive() ? preferences.getLoggerIdentifier() : null),
+                getPushyToken()
         );
         editor.putString(CURRENT_TOKEN, token);
 
@@ -212,5 +218,22 @@ public class MiddlewareHelper {
         if (refreshedToken != null) {
             register(context, refreshedToken);
         }
+    }
+
+    private static String pushyToken = null;
+
+    public static String getPushyToken() {
+        if (pushyToken != null) {
+            return pushyToken;
+        }
+
+            try {
+                String pushyToken = Pushy.register(VialerApplication.get());
+                Log.e("TEST123", "got token:" + pushyToken);
+                return pushyToken;
+            } catch (PushyException e) {
+                Log.e("TEST123", "e", e);
+                return null;
+            }
     }
 }

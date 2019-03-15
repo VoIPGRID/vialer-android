@@ -7,7 +7,7 @@ import java.util.ArrayList;
 /**
  * This object represents the original invite that initiated the call.
  */
-class SipInvite {
+public class SipInvite {
 
     /**
      * The names of headers that will be extracted from the invite packet.
@@ -17,19 +17,25 @@ class SipInvite {
             REMOTE_PARTY_ID_HEADER_NAME = "Remote-Party-ID";
 
     private final String packet;
+    private final String callId;
+    private final String time;
 
     private CallerInformationHeader pAssertedIdentity;
     private CallerInformationHeader remotePartyId;
+    private CallerInformationHeader from;
 
     /**
      * Initialise the SipInvite.
      *
      * @param packet The whole INVITE that was received with the incoming call.
      */
-    SipInvite(String packet) {
+    public SipInvite(String packet) {
         this.packet = packet;
         this.pAssertedIdentity = extractFromLikeHeader(P_ASSERTED_IDENTITY_HEADER_NAME);
         this.remotePartyId = extractFromLikeHeader(REMOTE_PARTY_ID_HEADER_NAME);
+        this.callId = extractHeader("Call-ID");
+        this.time = extractHeader("Date");
+        this.from = extractFromLikeHeader("From");
     }
 
     private CallerInformationHeader extractFromLikeHeader(String header) {
@@ -48,20 +54,40 @@ class SipInvite {
         return new CallerInformationHeader(data.get(0), data.get(1));
     }
 
-    boolean hasPAssertedIdentity() {
+    private String extractHeader(String header){
+        ArrayList<String> extracted = StringUtil.extractCaptureGroups(packet, header + ": (.+)");
+
+        if (extracted.isEmpty()) return null;
+
+        return extracted.get(0);
+    }
+
+    public CallerInformationHeader getFrom() {
+        return from;
+    }
+
+    public boolean hasPAssertedIdentity() {
         return pAssertedIdentity != null;
     }
 
-    boolean hasRemotePartyId() {
+    public boolean hasRemotePartyId() {
         return remotePartyId != null;
     }
 
-    CallerInformationHeader getPAssertedIdentity() {
+    public CallerInformationHeader getPAssertedIdentity() {
         return pAssertedIdentity;
     }
 
-    CallerInformationHeader getRemotePartyId() {
+    public CallerInformationHeader getRemotePartyId() {
         return remotePartyId;
+    }
+
+    public String getCallId() {
+        return this.callId;
+    }
+
+    public String getTime() {
+        return time;
     }
 
     /**

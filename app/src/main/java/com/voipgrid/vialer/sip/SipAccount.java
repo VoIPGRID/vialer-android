@@ -3,11 +3,25 @@ package com.voipgrid.vialer.sip;
 import static com.voipgrid.vialer.fcm.RemoteMessageData.MESSAGE_START_TIME;
 
 import android.content.Intent;
+import android.os.Build;
+import android.util.Log;
 
 import org.pjsip.pjsua2.AccountConfig;
 import org.pjsip.pjsua2.AccountInfo;
+import org.pjsip.pjsua2.Call;
+import org.pjsip.pjsua2.CallOpParam;
 import org.pjsip.pjsua2.OnIncomingCallParam;
 import org.pjsip.pjsua2.OnRegStateParam;
+import org.pjsip.pjsua2.pjsip_status_code;
+
+import java.io.IOException;
+import java.net.ConnectException;
+
+import androidx.annotation.RequiresApi;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 /**
@@ -40,14 +54,51 @@ class SipAccount extends org.pjsip.pjsua2.Account {
      */
     @Override
     public void onIncomingCall(OnIncomingCallParam incomingCallParam) {
-        SipCall sipCall = new SipCall(mSipService, this, incomingCallParam.getCallId(), new SipInvite(incomingCallParam.getRdata().getWholeMsg()));
-        sipCall.onCallIncoming();
+        Log.e("TEST123", incomingCallParam.getRdata().getWholeMsg());
+        SipInvite invite = new SipInvite(incomingCallParam.getRdata().getWholeMsg());
+        Log.e("TEST123", "Inc call id;" + invite.getCallId());
+        Call call = new Call(this);
 
-        if (mSipService != null && mSipService.getIncomingCallDetails() != null) {
-            Intent incomingCallDetails = mSipService.getIncomingCallDetails();
-            sipCall.setMiddlewareKey(incomingCallDetails.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN));
-            sipCall.setMessageStartTime(incomingCallDetails.getStringExtra(MESSAGE_START_TIME));
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                run("http://10.13.23.180/call/confirm/new", invite);
+            }
+        } catch (Throwable e) {
+            Log.e("TEST123", "FAILED", e);
         }
+
+
+        try {
+            Thread.sleep(2000);
+            CallOpParam callOpParam = new CallOpParam(true);
+            callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_BUSY_HERE);
+            call.hangup(callOpParam);
+        } catch (Exception e) {
+        }
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public static void run(String url, SipInvite sipInvite) throws IOException {
+        Request request = new Request.Builder()
+                .url(url + "?call_id=" + sipInvite.getCallId() + "&time=" + sipInvite.getTime())
+                .build();
+        Log.e("TEST123", "?call_id=" + sipInvite.getCallId() + "&time=" + sipInvite.getTime());
+        new OkHttpClient().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) {
+
+                Log.e("failedresponse","The response failed" + e.getMessage() + ((ConnectException)e).getLocalizedMessage());
+            }
+
+            @Override
+            public void onResponse(okhttp3.Call call, Response response) throws IOException {
+
+                Log.e("response","The response is:" +response);
+            }
+
+        });
     }
 
     /**
@@ -57,6 +108,7 @@ class SipAccount extends org.pjsip.pjsua2.Account {
      */
     @Override
     public void onRegState(OnRegStateParam regStateParam) {
+        Log.e("TEST123", "onRegState: " + regStateParam.getReason());
         try {
             AccountInfo info = getInfo();
             if (info.getRegIsActive()) {
