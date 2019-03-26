@@ -74,7 +74,7 @@ public class PushReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Map<String, String> data = new HashMap<>();
-        data.put("message_start_time", intent.getStringExtra("message_start_time"));
+        data.put("message_start_time", String.valueOf(intent.getDoubleExtra("message_start_time", 0)));
         data.put("caller_id", intent.getStringExtra("caller_id"));
         data.put("attempt", intent.getStringExtra("attempt"));
         data.put("phonenumber", intent.getStringExtra("phonenumber"));
@@ -86,33 +86,9 @@ public class PushReceiver extends BroadcastReceiver {
 Log.e("TEST123", "Got pushy message:" + remoteMessageData.getCallerId() + remoteMessageData.getPhoneNumber() + remoteMessageData.getRequestToken());
 
         if (remoteMessageData.isCallRequest()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                run("http://10.13.23.180/call/confirm/pushy", remoteMessageData.getRequestToken(), remoteMessageData.getMessageStartTime());
-            }
+            handleCall(remoteMessageData);
             return;
         }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public static void run(String url, String id, String time) {
-        Request request = new Request.Builder()
-                .url(url + "?call_id=" + id + "&time=" + time)
-                .build();
-        Log.e("TEST123", "?call_id=" + id + "&time=" + time);
-        new OkHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
-            @Override
-            public void onFailure(okhttp3.Call call, IOException e) {
-
-                Log.e("failedresponse","The response failed" + e.getMessage() + ((ConnectException)e).getLocalizedMessage());
-            }
-
-            @Override
-            public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
-
-                Log.e("response","The response is:" +response);
-            }
-
-        });
     }
 
     /**
@@ -124,14 +100,14 @@ Log.e("TEST123", "Got pushy message:" + remoteMessageData.getCallerId() + remote
         logCurrentState(remoteMessageData);
 
         if (!isConnectionSufficient()) {
-            handleInsufficientConnection(null, remoteMessageData);
             return;
         }
 
         if (isAVialerCallAlreadyInProgress()) {
-            rejectDueToVialerCallAlreadyInProgress(null, remoteMessageData);
+            rejectDueToVialerCallAlreadyInProgress(remoteMessageData);
             return;
         }
+
 
         sLastHandledCall = remoteMessageData.getRequestToken();
 
@@ -140,32 +116,6 @@ Log.e("TEST123", "Got pushy message:" + remoteMessageData.getCallerId() + remote
         startSipService(remoteMessageData);
     }
 
-    /**
-     * Performs various tasks that are required when we are rejecting a call due to an insufficient
-     * network connection.
-     *
-     * @param remoteMessage The remote message that we are handling.
-     * @param remoteMessageData The remote message data that we are handling.
-     */
-    private void handleInsufficientConnection(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
-        if (hasExceededMaximumAttempts(remoteMessageData)) {
-
-            String analyticsLabel = mConnectivityHelper.getAnalyticsLabel();
-
-            mAnalyticsHelper.sendEvent(
-                    VialerApplication.get().getString(R.string.analytics_event_category_middleware),
-                    VialerApplication.get().getString(R.string.analytics_event_action_middleware_rejected),
-                    analyticsLabel
-            );
-        }
-
-        if (isDeviceInIdleMode()) {
-            mRemoteLogger.e("Device in idle mode and connection insufficient. For now do nothing wait for next middleware push.");
-        }
-        else {
-            mRemoteLogger.e("Connection is insufficient. For now do nothing and wait for next middleware push");
-        }
-    }
 
     /**
      * Check if we have a good enough connection to accept an incoming call.
@@ -201,30 +151,14 @@ Log.e("TEST123", "Got pushy message:" + remoteMessageData.getCallerId() + remote
      * Performs various tasks that are necessary when rejecting a call based on the fact that there is
      * already a Vialer call in progress.
      *
-     * @param remoteMessage The remote message that we are handling.
      * @param remoteMessageData The remote message data that we are handling.
      */
-    private void rejectDueToVialerCallAlreadyInProgress(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
+    private void rejectDueToVialerCallAlreadyInProgress(RemoteMessageData remoteMessageData) {
         mRemoteLogger.d("Reject due to call already in progress");
 
         replyServer(remoteMessageData, false);
-
-        sendCallFailedDueToOngoingVialerCallMetric(remoteMessage, remoteMessageData.getRequestToken());
     }
 
-    /**
-     * Send the vialer metric for ongoing call if appropriate.
-     *
-     * @param remoteMessage
-     * @param requestToken
-     */
-    private void sendCallFailedDueToOngoingVialerCallMetric(RemoteMessage remoteMessage, String requestToken) {
-        if (sLastHandledCall != null && sLastHandledCall.equals(requestToken)) {
-            mRemoteLogger.i("Push notification (" + sLastHandledCall + ") is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully");
-            return;
-        }
-
-    }
 
     /**
      * Notify the middleware server that we are, in fact, alive.
@@ -240,12 +174,12 @@ Log.e("TEST123", "Got pushy message:" + remoteMessageData.getCallerId() + remote
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-
+                Log.e("TEST123", "Middleware OK responded with: " + response.code());
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-
+    Log.e("TEST123", "e", t);
             }
         });
     }

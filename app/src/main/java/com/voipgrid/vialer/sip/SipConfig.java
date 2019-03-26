@@ -382,22 +382,27 @@ public class SipConfig implements AccountStatus {
      * calls.
      */
     private void respondToMiddleware() {
+        Log.e("TEST123", "respond1");
         Intent incomingCallDetails = mSipService.getIncomingCallDetails();
 
+        Log.e("TEST123", "respond2");
         if (incomingCallDetails == null) {
             mLogger.w("Trying to respond to middleware with no details");
             return;
         }
 
+        Log.e("TEST123", "respond3");
         String url = incomingCallDetails.getStringExtra(SipConstants.EXTRA_RESPONSE_URL);
         String messageStartTime = incomingCallDetails.getStringExtra(RemoteMessageData.MESSAGE_START_TIME);
         String token = incomingCallDetails.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN);
         String attempt = incomingCallDetails.getStringExtra(RemoteMessageData.ATTEMPT);
 
+        Log.e("TEST123", "respond4");
         // Set responded as soon as possible to avoid duplicate requests due to multiple
         // onAccountRegistered calls in a row.
         mHasRespondedToMiddleware = true;
 
+        Log.e("TEST123", "respond5");
         AnalyticsHelper analyticsHelper = new AnalyticsHelper(
                 ((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()
         );
@@ -406,6 +411,7 @@ public class SipConfig implements AccountStatus {
 
         String analyticsLabel = ConnectivityHelper.get(mSipService).getAnalyticsLabel();
 
+        Log.e("TEST123", "respond6");
         // Accepted event.
         analyticsHelper.sendEvent(
                 mSipService.getString(R.string.analytics_event_category_middleware),
@@ -422,11 +428,13 @@ public class SipConfig implements AccountStatus {
                 mSipService.getString(R.string.analytics_event_name_call_response),
                 startUpTime
         );
-
+Log.e("TEST123", "Sending middleware response with:" + token + " start time:" + messageStartTime );
         retrofit2.Call<ResponseBody> call = registrationApi.reply(token, true, messageStartTime);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                Log.e("TEST123", "Got success middleware response" );
+
                 if (!response.isSuccessful()) {
                     mLogger.w(
                             "Unsuccessful response to middleware: " + Integer.toString(response.code()));
@@ -461,8 +469,11 @@ public class SipConfig implements AccountStatus {
             }
         }
 
+        Log.e("TEST123", "Initial call type:" +  mSipService.getInitialCallType() + "hasresponded:" + mHasRespondedToMiddleware);
+
         // Check if it is an incoming call and we did not respond to the middleware already.
         if (mSipService.getInitialCallType().equals(SipConstants.ACTION_CALL_INCOMING) && !mHasRespondedToMiddleware) {
+            Log.e("TEST123", "Responding to middleware...");
             respondToMiddleware();
         }
     }

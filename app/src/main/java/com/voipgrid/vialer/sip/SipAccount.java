@@ -62,7 +62,7 @@ class SipAccount extends org.pjsip.pjsua2.Account {
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                run("http://10.13.23.180/call/confirm/new", invite);
+                run("http://10.13.23.180/call/confirm/pushy", invite.getCallId(), invite.getTime());
             }
         } catch (Throwable e) {
             Log.e("TEST123", "FAILED", e);
@@ -80,12 +80,12 @@ class SipAccount extends org.pjsip.pjsua2.Account {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public static void run(String url, SipInvite sipInvite) throws IOException {
+    public static void run(String url, String id, String time) {
         Request request = new Request.Builder()
-                .url(url + "?call_id=" + sipInvite.getCallId() + "&time=" + sipInvite.getTime())
+                .url(url + "?call_id=" + id + "&time=" + time)
                 .build();
-        Log.e("TEST123", "?call_id=" + sipInvite.getCallId() + "&time=" + sipInvite.getTime());
-        new OkHttpClient().newCall(request).enqueue(new Callback() {
+        Log.e("TEST123", "?call_id=" + id + "&time=" + time);
+        new OkHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
 
@@ -93,7 +93,7 @@ class SipAccount extends org.pjsip.pjsua2.Account {
             }
 
             @Override
-            public void onResponse(okhttp3.Call call, Response response) throws IOException {
+            public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
 
                 Log.e("response","The response is:" +response);
             }
