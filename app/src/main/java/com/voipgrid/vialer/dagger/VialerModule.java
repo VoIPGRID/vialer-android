@@ -3,7 +3,9 @@ package com.voipgrid.vialer.dagger;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import androidx.annotation.Nullable;
@@ -21,6 +23,7 @@ import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
+import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.calling.CallNotifications;
 import com.voipgrid.vialer.callrecord.CachedContacts;
@@ -30,9 +33,12 @@ import com.voipgrid.vialer.callrecord.CallRecordDataSourceFactory;
 import com.voipgrid.vialer.callrecord.MissedCalls;
 import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
 import com.voipgrid.vialer.contacts.Contacts;
+import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
+import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipConfig;
+import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -196,5 +202,21 @@ public class VialerModule {
 
     @Provides MissedCallsAdapter provideMissedCallsAdapter(CachedContacts cachedContacts) {
         return new MissedCallsAdapter(cachedContacts);
+    }
+
+    @Provides Handler provideHandler() {
+        return new Handler();
+    }
+
+    @Provides NativeCallManager provideNativeCallManager(TelephonyManager telephonyManager) {
+        return new NativeCallManager(telephonyManager);
+    }
+
+    @Provides ToneGenerator provideToneGenerator() {
+        return new ToneGenerator(AudioManager.STREAM_VOICE_CALL, SipConstants.RINGING_VOLUME);
+    }
+
+    @Provides NetworkConnectivity provideNetworkConnectivity() {
+        return new NetworkConnectivity();
     }
 }

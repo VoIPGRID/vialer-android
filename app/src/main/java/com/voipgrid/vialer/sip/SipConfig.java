@@ -107,18 +107,16 @@ public class SipConfig implements AccountStatus {
      * Function to init the PJSIP library and setup all credentials.
      * @throws LibraryInitFailedException
      */
-    void initLibrary(Listener listener) {
-        try {
-            loadPjsip();
-            mEndpoint = createEndpoint();
-            setCodecPrio();
-            mSipAccount = createSipAccount();
-            startNetworkingListener();
-        } catch (Exception e) {
-            listener.pjSipFailedToLoad(e);
-        }
+    void initLibrary() throws Exception {
+        if (mEndpoint != null) return;
 
-        listener.pjSipDidLoad();
+        loadPjsip();
+        mEndpoint = createEndpoint();
+        setCodecPrio();
+        mSipAccount = createSipAccount();
+        startNetworkingListener();
+
+        mLogger.i("Loaded PJSIP library version: " + mEndpoint.libVersion().getFull());
     }
 
     private void startNetworkingListener() {
@@ -461,9 +459,10 @@ public class SipConfig implements AccountStatus {
             }
         }
 
-        // Check if it is an incoming call and we did not respond to the middleware already.
         if (mSipService.getInitialCallType().equals(SipConstants.ACTION_CALL_INCOMING) && !mHasRespondedToMiddleware) {
             respondToMiddleware();
+        } else if (mSipService.getInitialCallType().equals(SipConstants.ACTION_CALL_INCOMING)) {
+            mLogger.e("Not responding to middleware so call may not start");
         }
     }
 
@@ -526,10 +525,5 @@ public class SipConfig implements AccountStatus {
      */
     public static boolean shouldUseTls() {
         return SecureCalling.fromContext(VialerApplication.get()).isEnabled();
-    }
-
-    interface Listener {
-        void pjSipDidLoad();
-        void pjSipFailedToLoad(Exception e);
     }
 }

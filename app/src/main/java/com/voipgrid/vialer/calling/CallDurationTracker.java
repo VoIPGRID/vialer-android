@@ -37,7 +37,14 @@ public class CallDurationTracker implements Runnable {
         }
 
         if (hasActiveCalls(mSipServiceConnection)) {
-            mListener.onCallDurationUpdate(findCallDuration());
+            long duration = findCallDuration();
+
+            if (duration < 0) {
+                stop();
+                return;
+            }
+
+            mListener.onCallDurationUpdate(duration);
         }
 
         sHandler.postDelayed(this, INTERVAL_MS);

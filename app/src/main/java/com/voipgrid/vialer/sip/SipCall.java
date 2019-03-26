@@ -177,12 +177,11 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public int getCallDuration() {
-        TimeVal timeVal = new TimeVal();
         try {
             CallInfo callInfo = this.getInfo();
             return callInfo.getConnectDuration().getSec();
         } catch (Exception e) {
-            return timeVal.getSec();
+            return -1;
         }
     }
 
