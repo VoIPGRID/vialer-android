@@ -20,7 +20,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.Destination;
 import com.voipgrid.vialer.api.models.FixedDestination;
@@ -46,8 +45,6 @@ import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -68,7 +65,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     private TextView mNoConnectionText;
     private View mNavigationHeaderView;
 
-    private Api mApi;
+    private VoipgridApi mVoipgridApi;
     private ConnectivityHelper mConnectivityHelper;
     private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
@@ -165,8 +162,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             return;
         }
 
-        mApi = ServiceGenerator.createApiService(this);
-        Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
+        mVoipgridApi = ServiceGenerator.createApiService(this);
+        Call<VoipGridResponse<UserDestination>> call = mVoipgridApi.getUserDestination();
         call.enqueue(this);
     }
 
@@ -236,7 +233,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 );
                 break;
             case R.id.navigation_item_settings:
-                startActivity(new Intent(this, AccountActivity.class));
+                startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.navigation_item_logout:
                 logout();
@@ -461,7 +458,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 SelectedUserDestinationParams params = new SelectedUserDestinationParams();
                 params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
                 params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
-                Call<Object> call = mApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
+                Call<Object> call = mVoipgridApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
                 call.enqueue(this);
                 if (!MiddlewareHelper.isRegistered(this)) {
                     // If the previous destination was not available, or if we're not registered

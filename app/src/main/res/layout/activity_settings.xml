@@ -7,7 +7,7 @@
     android:focusable="true"
     android:focusableInTouchMode="true"
     android:orientation="vertical"
-    tools:context="com.voipgrid.vialer.AccountActivity">
+    tools:context="com.voipgrid.vialer.SettingsActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/action_bar"

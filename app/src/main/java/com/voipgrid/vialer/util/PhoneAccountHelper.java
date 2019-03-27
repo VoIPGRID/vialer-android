@@ -6,7 +6,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.voipgrid.vialer.Preferences;
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -24,7 +24,7 @@ import retrofit2.Response;
  */
 public class PhoneAccountHelper {
 
-    private Api mApi;
+    private VoipgridApi mVoipgridApi;
     private Context mContext;
     private Preferences mPreferences;
     private JsonStorage mJsonStorage;
@@ -37,7 +37,7 @@ public class PhoneAccountHelper {
         mJsonStorage = new JsonStorage(context);
         mSecureCalling = SecureCalling.fromContext(context);
 
-        mApi = ServiceGenerator.createApiService(mContext);
+        mVoipgridApi = ServiceGenerator.createApiService(mContext);
     }
 
     /**
@@ -45,7 +45,7 @@ public class PhoneAccountHelper {
      * @return
      */
     public SystemUser getAndUpdateSystemUser() {
-        Call<SystemUser> call = mApi.systemUser();
+        Call<SystemUser> call = mVoipgridApi.systemUser();
         SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
         if (systemUser == null) {
             systemUser = null;
@@ -97,7 +97,7 @@ public class PhoneAccountHelper {
                 // If no PhoneAccountId is returned, remove current PhoneAccount information from jsonstorage.
                 new JsonStorage(mContext).remove(PhoneAccount.class);
 
-                Call<PhoneAccount> phoneAccountCall = mApi.phoneAccount(phoneAccountId);
+                Call<PhoneAccount> phoneAccountCall = mVoipgridApi.phoneAccount(phoneAccountId);
                 try {
                     Response<PhoneAccount> phoneAccountResponse = phoneAccountCall.execute();
                     if (phoneAccountResponse.isSuccessful() && phoneAccountResponse.body() != null) {

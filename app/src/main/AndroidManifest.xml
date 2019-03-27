@@ -67,7 +67,7 @@
             android:name=".dialer.DialerActivity"
             android:label="@string/title_activity_dialer"
             android:screenOrientation="portrait" >
-            <intent-filter>
+            <intent-filter tools:ignore="AppLinkUrlError">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -217,7 +217,7 @@
         <service android:name=".contacts.UpdateChangedContactsService" />
 
         <activity
-            android:name=".AccountActivity"
+            android:name=".SettingsActivity"
             android:label="@string/title_activity_account"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" >

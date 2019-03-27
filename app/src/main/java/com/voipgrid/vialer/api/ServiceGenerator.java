@@ -57,20 +57,20 @@ public class ServiceGenerator {
         return httpClient.build();
     }
 
-    public static Api createApiService(Context context) {
+    public static VoipgridApi createApiService(Context context) {
         AccountHelper accountHelper = new AccountHelper(context);
         return createApiService(context, accountHelper.getEmail(), accountHelper.getPassword(), accountHelper.getApiToken());
     }
 
-    public static Api createApiService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
-        return ServiceGenerator.createService(context, Api.class, username, password, token, getVgApiUrl(context));
+    public static VoipgridApi createApiService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
+        return ServiceGenerator.createService(context, VoipgridApi.class, username, password, token, getVgApiUrl(context));
     }
 
-    public static Registration createRegistrationService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
-        return ServiceGenerator.createService(context, Registration.class, username, password, token, getRegistrationUrl(context));
+    public static Middleware createRegistrationService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
+        return ServiceGenerator.createService(context, Middleware.class, username, password, token, getRegistrationUrl(context));
     }
 
-    public static Registration createRegistrationService(Context context) {
+    public static Middleware createRegistrationService(Context context) {
         AccountHelper accountHelper = new AccountHelper(context);
         return createRegistrationService(context, accountHelper.getEmail(), accountHelper.getPassword(), accountHelper.getApiToken());
     }

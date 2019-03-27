@@ -8,7 +8,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.api.models.UseEncryption;
+import com.voipgrid.vialer.api.models.UpdateVoIPAccountParameters;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -36,7 +36,7 @@ public class SecureCalling {
     public static final String EXTRA_API_CALL_WAS_ATTEMPTING_TO_ENABLE = "EXTRA_API_WAS_ATTEMPTING_TO_ENABLE";
 
     private SharedPreferences mSharedPreferences;
-    private Api mApi;
+    private VoipgridApi mVoipgridApi;
     private Logger mLogger;
     private Preferences mPreferences;
     private String mIdentifier;
@@ -47,10 +47,10 @@ public class SecureCalling {
      *                   preference, this should uniquely identify the current VoIP account and
      *                   be updated when the VoIP account is switched.
      */
-    public SecureCalling(SharedPreferences sharedPreferences, Api api, Preferences preferences,
+    public SecureCalling(SharedPreferences sharedPreferences, VoipgridApi voipgridApi, Preferences preferences,
             String identifier, LocalBroadcastManager localBroadcastManager, Logger logger) {
         mSharedPreferences = sharedPreferences;
-        mApi = api;
+        mVoipgridApi = voipgridApi;
         mIdentifier = identifier;
         mPreferences = preferences;
         mLocalBroadcastManager = localBroadcastManager;
@@ -116,10 +116,18 @@ public class SecureCalling {
         }
     }
 
-    private Call<UseEncryption> createCall(boolean enable) {
+    public void updateApiBasedOnCurrentPreferenceSetting() {
+        if (mPreferences.hasTlsEnabled()) {
+            enable(new EmptyCallback());
+        } else {
+            disable(new EmptyCallback());
+        }
+    }
+
+    private Call<UpdateVoIPAccountParameters> createCall(boolean enable) {
         mLogger.i("Sending an API request to set secure calling to: " + enable);
 
-        return mApi.useEncryption(new UseEncryption(enable));
+        return mVoipgridApi.updateVoipAccount(new UpdateVoIPAccountParameters(enable));
     }
 
     /**
@@ -189,7 +197,7 @@ public class SecureCalling {
      * The OkHTTP callback that SecureCalling uses internally to handle the result from the API
      * call.
      */
-    private class HttpCallback implements retrofit2.Callback<UseEncryption> {
+    private class HttpCallback implements retrofit2.Callback<UpdateVoIPAccountParameters> {
         private boolean mEnable;
         private Callback mCallback;
 
@@ -199,7 +207,7 @@ public class SecureCalling {
         }
 
         @Override
-        public void onResponse(Call<UseEncryption> call, Response<UseEncryption> response) {
+        public void onResponse(Call<UpdateVoIPAccountParameters> call, Response<UpdateVoIPAccountParameters> response) {
             if (response.isSuccessful()) {
                 handleSuccessfulApiCall(mEnable);
 
@@ -222,7 +230,7 @@ public class SecureCalling {
         }
 
         @Override
-        public void onFailure(Call<UseEncryption> call, Throwable t) {
+        public void onFailure(Call<UpdateVoIPAccountParameters> call, Throwable t) {
             mLogger.e("Secure calling API call failed with error: " + t.getMessage());
 
             handleFailedApiCall(mEnable);
@@ -230,6 +238,18 @@ public class SecureCalling {
             if (mCallback != null) {
                 mCallback.onFail();
             }
+        }
+    }
+
+     public static class EmptyCallback implements Callback {
+        @Override
+        public void onSuccess() {
+
+        }
+
+        @Override
+        public void onFail() {
+
         }
     }
 }

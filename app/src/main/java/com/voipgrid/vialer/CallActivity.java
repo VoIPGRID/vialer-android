@@ -391,7 +391,8 @@ public class CallActivity extends AbstractCallActivity implements
             mSipServiceConnection.get().getCurrentCall().hangup(true);
             updateUi();
         } catch (Exception e) {
-            e.printStackTrace();
+            finish();
+            return;
         }
 
         finishAfterDelay();
