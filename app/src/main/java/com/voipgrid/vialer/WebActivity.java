@@ -16,7 +16,7 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.AutoLoginToken;
 import com.voipgrid.vialer.util.AccountHelper;
@@ -144,13 +144,13 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
      */
     private void autoLoginToken() {
         mProgressBar.setVisibility(View.VISIBLE);
-        Api api = ServiceGenerator.createApiService(
+        VoipgridApi voipgridApi = ServiceGenerator.createApiService(
                 this,
                 getIntent().getStringExtra(USERNAME),
                 getIntent().getStringExtra(PASSWORD),
                 getIntent().getStringExtra(API_TOKEN)
         );
-        Call<AutoLoginToken> call = api.autoLoginToken();
+        Call<AutoLoginToken> call = voipgridApi.autoLoginToken();
         call.enqueue(this);
     }
 

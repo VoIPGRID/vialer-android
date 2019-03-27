@@ -1,8 +1,6 @@
 package com.voipgrid.vialer.callrecord;
 
-import android.util.Log;
-
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 
@@ -17,12 +15,12 @@ import retrofit2.Response;
 
 public class CallRecordDataSource extends PositionalDataSource<CallRecord> {
 
-    private final Api api;
+    private final VoipgridApi mVoipgridApi;
 
     private int code;
 
-    CallRecordDataSource(Api api) {
-        this.api = api;
+    CallRecordDataSource(VoipgridApi voipgridApi) {
+        this.mVoipgridApi = voipgridApi;
     }
 
     /**
@@ -75,9 +73,9 @@ public class CallRecordDataSource extends PositionalDataSource<CallRecord> {
             Response<VoipGridResponse<CallRecord>> call;
 
             if (fetchCallsFromEntireAccount) {
-                call = api.getRecentCalls(size, startPosition, CallRecord.getLimitDate()).execute();
+                call = mVoipgridApi.getRecentCalls(size, startPosition, CallRecord.getLimitDate()).execute();
             } else {
-                call = api.getRecentCallsForLoggedInUser(size, startPosition, CallRecord.getLimitDate()).execute();
+                call = mVoipgridApi.getRecentCallsForLoggedInUser(size, startPosition, CallRecord.getLimitDate()).execute();
             }
 
             code = call.code();

@@ -16,7 +16,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.api.Registration;
+import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -45,8 +45,6 @@ import org.pjsip.pjsua2.pj_log_decoration;
 import org.pjsip.pjsua2.pjmedia_srtp_use;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
 import org.pjsip.pjsua2.pjsua_call_flag;
-
-import java.util.Map;
 
 import okhttp3.ResponseBody;
 import retrofit2.Callback;
@@ -400,7 +398,7 @@ public class SipConfig implements AccountStatus {
                 ((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()
         );
 
-        Registration registrationApi = ServiceGenerator.createRegistrationService(mSipService);
+        Middleware middlewareApi = ServiceGenerator.createRegistrationService(mSipService);
 
         String analyticsLabel = ConnectivityHelper.get(mSipService).getAnalyticsLabel();
 
@@ -421,7 +419,7 @@ public class SipConfig implements AccountStatus {
                 startUpTime
         );
 
-        retrofit2.Call<ResponseBody> call = registrationApi.reply(token, true, messageStartTime);
+        retrofit2.Call<ResponseBody> call = middlewareApi.reply(token, true, messageStartTime);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
