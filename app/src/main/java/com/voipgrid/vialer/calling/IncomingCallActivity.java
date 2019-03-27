@@ -10,6 +10,7 @@ import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -76,7 +77,9 @@ public class IncomingCallActivity extends AbstractCallActivity {
         try {
             mSipServiceConnection.get().getCurrentCall().decline();
         } catch (Exception e) {
-            e.printStackTrace();
+            mLogger.e("Unable to decline call with error: " + e.getMessage());
+            finish();
+            return;
         }
 
         mCallNotifications.removeAll();
@@ -96,7 +99,8 @@ public class IncomingCallActivity extends AbstractCallActivity {
         try {
             mSipServiceConnection.get().getCurrentCall().answer();
         } catch (Exception e) {
-            e.printStackTrace();
+            mLogger.e("Unable to answer phone with error: " + e.getMessage());
+            finish();
         }
     }
 

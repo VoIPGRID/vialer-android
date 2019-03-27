@@ -17,16 +17,16 @@ public class ApiTokenFetcher {
 
     private final String mUsername;
     private final String mPassword;
-    private final Api mApi;
+    private final VoipgridApi mVoipgridApi;
     private final AccountHelper mAccountHelper;
     private final Logger mLogger;
 
     private ApiTokenListener mListener;
 
-    private ApiTokenFetcher(String username, String password, Api api, AccountHelper accountHelper, Logger logger) {
+    private ApiTokenFetcher(String username, String password, VoipgridApi voipgridApi, AccountHelper accountHelper, Logger logger) {
         mUsername = username;
         mPassword = password;
-        mApi = api;
+        mVoipgridApi = voipgridApi;
         mAccountHelper = accountHelper;
         mLogger = logger;
     }
@@ -106,7 +106,7 @@ public class ApiTokenFetcher {
      * @param responseHandler
      */
     private void enqueue(ApiTokenRequest request, ApiTokenHttpResponseHandler responseHandler) {
-        mApi
+        mVoipgridApi
                 .apiToken(request)
                 .enqueue(responseHandler);
     }

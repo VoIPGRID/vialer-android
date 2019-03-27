@@ -19,7 +19,7 @@ import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
-import com.voipgrid.vialer.AccountActivity;
+import com.voipgrid.vialer.SettingsActivity;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
@@ -284,7 +284,7 @@ public class NotificationHelper {
         // Create stack for the app to use when clicking the notification.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
         stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(new Intent(mContext, AccountActivity.class));
+        stackBuilder.addNextIntent(new Intent(mContext, SettingsActivity.class));
 
         mBuilder.setContentIntent(stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT));
 

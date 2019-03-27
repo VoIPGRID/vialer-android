@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources>
     <string name="ga_trackingId">UA-401436-29</string>
 
     <!-- Enable automatic Activity measurement -->
@@ -12,7 +12,7 @@
     <screenName name="com.voipgrid.vialer.onboarding.SetupActivity">
         Onboarding
     </screenName>
-    <screenName name="com.voipgrid.vialer.AccountActivity">
+    <screenName name="com.voipgrid.vialer.SettingsActivity">
         Settings
     </screenName>
     <screenName name="com.voipgrid.vialer.CallActivity">

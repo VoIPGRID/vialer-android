@@ -12,7 +12,7 @@ import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.api.Registration;
+import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -97,7 +97,7 @@ public class MiddlewareHelper {
             return;
         }
 
-        Registration api = ServiceGenerator.createRegistrationService(context);
+        Middleware api = ServiceGenerator.createRegistrationService(context);
 
         String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
         String fullName = ((SystemUser) jsonStorage.get(SystemUser.class)).getFullName();
@@ -153,7 +153,7 @@ public class MiddlewareHelper {
             JsonStorage jsonStorage = new JsonStorage(context);
             AccountHelper accountHelper = new AccountHelper(context);
 
-            Registration api = ServiceGenerator.createRegistrationService(context);
+            Middleware api = ServiceGenerator.createRegistrationService(context);
             String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
             String appName = context.getPackageName();
 
