@@ -2,8 +2,6 @@ package com.voipgrid.vialer.api.interceptors;
 
 import android.util.Log;
 
-import com.google.gson.GsonBuilder;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,7 +25,11 @@ public class LogResponsesToConsole implements Interceptor {
             JSONObject jsonObject = new JSONObject(body);
             Log.d("HTTP", "Response from " + request.url() + ": " + jsonObject.toString(2));
         } catch (JSONException e) {
-            Log.e("HTTP", "Unable to format JSON: " + body);
+            if (body != null && body.length() > 10) {
+                Log.e("HTTP", "Unable to format JSON from " + request.url() + ", with body: " + body);
+            } else {
+                Log.e("HTTP", "Empty response from: " + request.url() +  " (" + response.code() + ")");
+            }
         }
 
         return response.newBuilder()

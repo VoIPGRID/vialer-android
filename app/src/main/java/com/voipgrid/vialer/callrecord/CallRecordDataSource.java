@@ -5,9 +5,7 @@ import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-
 
 import androidx.annotation.NonNull;
 import androidx.paging.PositionalDataSource;
@@ -81,11 +79,11 @@ public class CallRecordDataSource extends PositionalDataSource<CallRecord> {
             code = call.code();
 
             if (!call.isSuccessful()) {
-                return new ArrayList<>();
+                return null;
             }
 
             if (call.body() == null) {
-                return new ArrayList<>();
+                return null;
             }
 
             List<CallRecord> records = call.body().getObjects();
