@@ -50,6 +50,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected boolean mBluetoothDeviceConnected = false;
     protected boolean mBluetoothAudioActive;
     private ProximitySensorHelper mProximityHelper;
+    private MediaManager mMediaManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,6 +95,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         super.onDestroy();
         mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver, mBluetoothButtonReceiver);
         getMediaManager().deInit();
+        mMediaManager = null;
     }
 
     @Override
@@ -219,8 +221,20 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         return getPhoneNumberFromIntent();
     }
 
+    /**
+     * Get the MediaManager, a new one will be generated if it does not already exist. There must
+     * be an instance of this class alive (not deinited) or audio will not be present.
+     *
+     * @return
+     */
+
     protected MediaManager getMediaManager() {
-        return MediaManager.init(this, this, this);
+        if (mMediaManager == null) {
+            mMediaManager = new MediaManager(this, this, this);
+        }
+
+        return mMediaManager;
+
     }
 
     protected boolean wasOpenedViaNotification() {
