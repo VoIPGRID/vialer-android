@@ -23,13 +23,13 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.calling.CallActivityHelper;
-import com.voipgrid.vialer.calling.CallNotifications;
 import com.voipgrid.vialer.callrecord.CachedContacts;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.callrecord.CallRecordDataSourceFactory;
 import com.voipgrid.vialer.callrecord.MissedCalls;
 import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
 import com.voipgrid.vialer.contacts.Contacts;
+import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
@@ -40,7 +40,6 @@ import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NetworkUtil;
-import com.voipgrid.vialer.util.NotificationHelper;
 
 import javax.inject.Singleton;
 
@@ -111,15 +110,6 @@ public class VialerModule {
 
     @Provides AnalyticsHelper provideAnalyticsHelper() {
         return new AnalyticsHelper(mVialerApplication.getDefaultTracker());
-    }
-
-    @Provides NotificationHelper provideNotificationHelper(Context context) {
-        return NotificationHelper.getInstance(context);
-    }
-
-    @Provides
-    CallNotifications provideCallNotifications(NotificationHelper notificationHelper, Context context) {
-        return new CallNotifications(notificationHelper, context);
     }
 
     @Provides
@@ -199,5 +189,10 @@ public class VialerModule {
 
     @Provides NetworkConnectivity provideNetworkConnectivity() {
         return new NetworkConnectivity();
+    }
+
+    @Provides
+    PhoneNumberImageGenerator provideNumberImageFinder(Contacts contacts) {
+        return new PhoneNumberImageGenerator(contacts);
     }
 }

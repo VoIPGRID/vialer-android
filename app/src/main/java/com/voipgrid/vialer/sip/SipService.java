@@ -1,23 +1,21 @@
 package com.voipgrid.vialer.sip;
 
-import static com.voipgrid.vialer.sip.SipConstants.ACTION_CALL_INCOMING;
-import static com.voipgrid.vialer.sip.SipConstants.ACTION_CALL_OUTGOING;
-
-import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
-import android.telephony.TelephonyManager;
-import android.util.Log;
+import androidx.annotation.StringDef;
 
+import android.telephony.TelephonyManager;
+
+import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
@@ -28,11 +26,13 @@ import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
+import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
-import com.voipgrid.vialer.util.JsonStorage;
-import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,9 +61,8 @@ public class SipService extends Service {
     private SipCall mCurrentCall;
     private SipCall mInitialCall;
     private List<SipCall> mCallList = new ArrayList<>();
-    private String mInitialCallType;
 
-    @Nullable private Intent mIntent;
+    @Nullable private Intent intent;
 
     private Logger mLogger;
     private SipBroadcaster mSipBroadcaster;
@@ -71,6 +70,8 @@ public class SipService extends Service {
     private Runnable mRingbackRunnable = new OutgoingCallRinger();
     private final IBinder mBinder = new SipServiceBinder();
     private CheckServiceIsRunning mCheckService = new CheckServiceIsRunning();
+    private AbstractCallNotification callNotification = new DefaultCallNotification();
+
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
     @Inject protected Handler mHandler;
@@ -97,6 +98,7 @@ public class SipService extends Service {
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(phoneStateReceiver, TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
         mCheckService.start();
+        startForeground(callNotification.getNotificationId(), callNotification.build());
     }
 
     @Override
@@ -112,33 +114,44 @@ public class SipService extends Service {
             return START_NOT_STICKY;
         }
 
-        handleCallDeclineIntentIfAppropriate();
-
-        initialiseCallBasedOnIntent(intent);
+        try {
+            performActionBasedOnIntent(intent);
+        } catch (Exception e) {
+            mLogger.e("Failed to perform action based on intent, stopping service: " + e.getMessage());
+            stopSelf();
+        }
 
         return START_NOT_STICKY;
     }
 
     /**
-     * Initialise the call based on the information in the intent.
+     * Performs an action based on the action in the intent that was used to start
+     * the SipService.
      *
      * @param intent
      */
-    public void initialiseCallBasedOnIntent(Intent intent) {
+    public void performActionBasedOnIntent(Intent intent) throws Exception {
         if (intent == null) return;
 
-        mIntent = intent;
-        mInitialCallType = mIntent.getAction();
+        this.intent = intent;
+        final String action = this.intent.getAction();
 
-        if (ACTION_CALL_INCOMING.equals(mInitialCallType)) {
+        mLogger.i("Performing action: " + action);
+
+        if (Actions.HANDLE_INCOMING_CALL.equals(action)) {
             initialiseIncomingCall();
         }
-        else if (ACTION_CALL_OUTGOING.equals(mInitialCallType)) {
+        else if (Actions.HANDLE_OUTGOING_CALL.equals(action)) {
             initialiseOutgoingCall(intent);
         }
+        else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
+            mCurrentCall.decline();
+        }
+        else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
+            mCurrentCall.answer();
+        }
         else {
-            mLogger.e("Stopping SipService as an intent with no action was received");
-            stopSelf();
+            mLogger.e("SipService received an invalid action: " + action);
         }
     }
 
@@ -148,7 +161,7 @@ public class SipService extends Service {
      */
     private void initialiseIncomingCall() {
         mLogger.d("incomingCall");
-        mIncomingCallDetails = mIntent;
+        mIncomingCallDetails = intent;
         loadSip();
     }
 
@@ -161,9 +174,12 @@ public class SipService extends Service {
         loadSip();
         makeCall(
                 intent.getData(),
-                mIntent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
-                mIntent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
+                this.intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
+                this.intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
                 true
+        );
+        callNotification.outgoing(
+                this.intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER), this.intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME)
         );
     }
 
@@ -181,7 +197,11 @@ public class SipService extends Service {
 
         try {
             mLogger.i("Attempting to load sip lib");
-            mSipConfig = mSipConfig.init(this, mPhoneAccount);
+            mSipConfig = mSipConfig.init(
+                    this,
+                    mPhoneAccount,
+                    intent != null && Actions.HANDLE_INCOMING_CALL.equals(intent.getAction())
+            );
             mSipConfig.initLibrary();
         } catch (Exception e) {
             mLogger.e("Failed to load pjsip, stopping the service");
@@ -211,28 +231,6 @@ public class SipService extends Service {
 
         sipServiceActive = false;
         super.onDestroy();
-    }
-
-    /**
-     * We will also handle an intent that is telling us to decline the incoming call,
-     * this intent is currently sent when the user presses decline on the call
-     * notification as there is no activity to defer to, it must be handled here.
-     *
-     */
-    private void handleCallDeclineIntentIfAppropriate() {
-        if (mIntent == null || mIntent.getType() == null) return;
-
-        if (!mIntent.getType().equals(SipConstants.CALL_DECLINE_INCOMING_CALL)) return;
-
-        try {
-            mLogger.i("Attempting to decline a call based on the intent type broadcast to the SipService");
-            mCurrentCall.decline();
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.cancelAll();
-            stopSelf();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -303,7 +301,12 @@ public class SipService extends Service {
      * @param number
      * @param callerId
      */
-    public void startIncomingCallActivity(String number, String callerId) {
+    public void informUserAboutIncomingCall(String number, String callerId) {
+        callNotification.incoming(
+                mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
+                mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME)
+        );
+
         startCallActivity(
                 SipUri.sipAddressUri(this, PhoneNumberUtils.format(number)),
                 CallingConstants.TYPE_INCOMING_CALL,
@@ -353,13 +356,9 @@ public class SipService extends Service {
     public void removeCallFromList(SipCall call) {
         mCallList.remove(call);
 
-        if (mCallList.isEmpty()) {
+        if (mCallList.isEmpty() || call.getCallIsTransferred()) {
             setCurrentCall(null);
-            NotificationHelper notificationHelper = NotificationHelper.getInstance(this);
-            notificationHelper.removeAllNotifications();
             stopSelf();
-        } else if (call.getCallIsTransferred()) {
-            setCurrentCall(null);
         } else {
             setCurrentCall(mCallList.get(0));
         }
@@ -402,16 +401,16 @@ public class SipService extends Service {
         return mNativeCallManager;
     }
 
-    public String getInitialCallType() {
-        return mInitialCallType;
-    }
-
     public SipConfig getSipConfig() {
         return mSipConfig;
     }
 
     public SipBroadcaster getSipBroadcaster() {
         return mSipBroadcaster;
+    }
+
+    public AbstractCallNotification getNotification() {
+        return callNotification;
     }
 
     /**
@@ -471,6 +470,18 @@ public class SipService extends Service {
     }
 
     /**
+     * Create an action for the SipService, specifying a valid action.
+     *
+     * @param action The action the SipService should perform when resolved
+     * @return The complete pending intent
+     */
+    public static PendingIntent createSipServiceAction(@Actions.Valid String action) {
+        Intent intent = new Intent(VialerApplication.get(), SipService.class);
+        intent.setAction(action);
+        return PendingIntent.getService(VialerApplication.get(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /**
      * Starting this runnable spawns an ongoing check every {@value #CHECK_SERVICE_USER_INTERVAL_MS}ms that will
      * shutdown the service if there is no active call. This is a fallback to ensure the SipService is properly
      * shut down after a call if for some reason it wasn't.
@@ -501,5 +512,48 @@ public class SipService extends Service {
                 stopSelf();
             }
         }
+    }
+
+    /**
+     * This contains the list of valid actions that the SipService can
+     * take. Whenever the SipService is started, the intent should contain
+     * one of these.
+     *
+     */
+    public interface Actions {
+
+        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL})
+        @Retention(RetentionPolicy.SOURCE)
+        @interface Valid {}
+
+        String PREFIX = BuildConfig.APPLICATION_ID + ".";
+
+        /**
+         * An action that should be received when first creating the SipService
+         * when there is an outgoing call being started.
+         *
+         */
+        String HANDLE_OUTGOING_CALL = PREFIX + "CALL_OUTGOING";
+
+        /**
+         * An action that should be received when first creating the SipService
+         * when there is an incoming call expected.
+         *
+         */
+        String HANDLE_INCOMING_CALL = PREFIX + "CALL_INCOMING";
+
+        /**
+         * An action that should be received when there is already an active
+         * call, this allows something like a notification to decline a call.
+         *
+         */
+        String DECLINE_INCOMING_CALL = PREFIX + "DECLINE_INCOMING_CALL";
+
+        /**
+         * An action that should be received when there is already an active
+         * call, this allows something like a notification to answer a call.
+         *
+         */
+        String ANSWER_INCOMING_CALL = PREFIX + "ANSWER_INCOMING_CALL";
     }
 }

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.telephony.TelephonyManager;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.voipgrid.vialer.R;
@@ -183,6 +184,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         } catch (Exception e) {
             return -1;
         }
+    }
+
+    public String getPrettyCallDuration() {
+        return DateUtils.formatElapsedTime(getCallDuration());
     }
 
     /**
@@ -496,7 +501,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                     number = incomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
                 }
 
-                mSipService.startIncomingCallActivity(number, callerId);
+                mSipService.informUserAboutIncomingCall(number, callerId);
             }
         } catch (Exception e) {
             onCallInvalidState(e);
@@ -529,6 +534,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_CONNECTED_MESSAGE);
         mCallMediaMonitor = new CallMediaMonitor(this);
         new Thread(mCallMediaMonitor).start();
+        mSipService.getNotification().active(this);
     }
 
     /**
@@ -714,5 +720,9 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public double getMos() {
         return mos;
+    }
+
+    public SipService getSipService() {
+        return mSipService;
     }
 }

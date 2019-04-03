@@ -14,7 +14,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.util.NotificationHelper;
+import com.voipgrid.vialer.notifications.MediaButtonNotification;
 
 public class BluetoothMediaSessionService extends Service {
 
@@ -54,7 +54,7 @@ public class BluetoothMediaSessionService extends Service {
         mLogger.v("onStartCommand");
 
         if (shouldBecomeForegroundService(intent)) {
-            startForeground(1, NotificationHelper.getInstance(this).createMediaButtonNotification());
+            startForeground(1, new MediaButtonNotification().build());
         }
 
         mSession.setActive(true);

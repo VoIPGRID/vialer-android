@@ -32,6 +32,7 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
+import com.voipgrid.vialer.notifications.VoipDisabledNotification;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -39,7 +40,6 @@ import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -236,7 +236,7 @@ public class SettingsActivity extends LoginRequiredActivity {
                         SetupActivity.launchToSetVoIPAccount(SettingsActivity.this);
                     }
 
-                    NotificationHelper.getInstance(SettingsActivity.this).removeVoipDisabledNotification();
+                    new VoipDisabledNotification().remove();
                 }
             }.execute();
         }

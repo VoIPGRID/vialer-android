@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.media.monitoring;
 
+import android.util.Log;
+
 import com.voipgrid.vialer.logging.InternetConnectionDiagnosticsLogger;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipCall;
@@ -68,6 +70,7 @@ public class CallMediaMonitor implements Runnable {
     public void run() {
         while (shouldBeMonitoringMedia()) {
             calculateMos();
+            mSipCall.getSipService().getNotification().active(mSipCall);
 
             mMostRecentPacketStats = mSipCall.getMediaPacketStats();
 

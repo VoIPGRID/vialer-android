@@ -17,12 +17,12 @@ import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.notifications.VoipDisabledNotification;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import okhttp3.ResponseBody;
@@ -136,7 +136,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         Preferences preferences = new Preferences(this);
 
         if (preferences.hasSipEnabled()) {
-            NotificationHelper.getInstance(this).displayVoipDisabledNotification();
+            new VoipDisabledNotification().display();
         }
 
         new Preferences(this).setSipEnabled(false);
@@ -264,7 +264,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     private void startSipService(RemoteMessageData remoteMessageData) {
         mRemoteLogger.d("startSipService");
         Intent intent = new Intent(this, SipService.class);
-        intent.setAction(SipConstants.ACTION_CALL_INCOMING);
+        intent.setAction(SipService.Actions.HANDLE_INCOMING_CALL);
 
         // Set a phoneNumberUri as DATA for the intent to SipServiceOld.
         Uri sipAddressUri = SipUri.sipAddressUri(
@@ -280,7 +280,11 @@ public class FcmMessagingService extends FirebaseMessagingService {
         intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, remoteMessageData.getCallerId());
         intent.putExtra(RemoteMessageData.MESSAGE_START_TIME, remoteMessageData.getMessageStartTime());
 
-        startService(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
     }
 
     /**

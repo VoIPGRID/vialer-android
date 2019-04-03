@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -123,19 +124,12 @@ public class CallActivity extends AbstractCallActivity implements
             mBluetoothDeviceConnected = getIntent().getBooleanExtra(CALL_BLUETOOTH_CONNECTED, false);
         }
 
-        if (!mType.equals(TYPE_INCOMING_CALL) && !mType.equals(TYPE_OUTGOING_CALL)) {
+        if (!TYPE_INCOMING_CALL.equals(mType) && !TYPE_OUTGOING_CALL.equals(mType)) {
             return;
         }
 
         mForceDisplayedCallDetails = new DisplayCallDetail(getIntent().getStringExtra(PHONE_NUMBER), getIntent().getStringExtra(CONTACT_NAME));
         updateUi();
-
-        if (wasOpenedViaNotification() && !isIncomingCall()) {
-            mCallNotifications.callWasOpenedFromNotificationButIsNotIncoming(getCallNotificationDetails());
-            updateMediaManager(TYPE_CONNECTED_CALL);
-            updateUi();
-            return;
-        }
 
         updateMediaManager(mType);
 
@@ -155,7 +149,6 @@ public class CallActivity extends AbstractCallActivity implements
 
         } else {
             mLogger.d("outgoingCall");
-            mCallNotifications.outgoingCall(getCallNotificationDetails());
         }
 
         updateUi();
@@ -174,7 +167,6 @@ public class CallActivity extends AbstractCallActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mCallNotifications.removeAll();
         if (mTransferCompleteDialog != null) {
             mTransferCompleteDialog.dismiss();
         }
@@ -191,8 +183,6 @@ public class CallActivity extends AbstractCallActivity implements
         mConnected = true;
 
         mForceDisplayedCallDetails = null;
-
-        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
 
         if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             mInitialCallDetail = CallDetail.fromSipCall(mSipServiceConnection.get().getFirstCall());
@@ -234,13 +224,11 @@ public class CallActivity extends AbstractCallActivity implements
     @Override
     public void onCallHold() {
         mOnHold = true;
-        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_on_hold);
     }
 
     @Override
     public void onCallUnhold() {
         mOnHold = false;
-        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
     }
 
     @Override
@@ -648,7 +636,7 @@ public class CallActivity extends AbstractCallActivity implements
      * @return TRUE if incoming
      */
     private boolean isIncomingCall() {
-        return mType.equals(TYPE_INCOMING_CALL);
+        return TYPE_INCOMING_CALL.equals(mType);
     }
 
     @Override

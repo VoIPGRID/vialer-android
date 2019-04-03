@@ -20,6 +20,7 @@ import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.fcm.RemoteMessageData;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
@@ -64,6 +65,7 @@ public class SipConfig implements AccountStatus {
     private SipService mSipService;
     private Preferences mPreferences;
 
+    private boolean shouldResponseToMiddlewareOnRegistration = false;
     private boolean mHasRespondedToMiddleware = false;
 
     private IpSwitchMonitor mIpSwitchMonitor;
@@ -84,11 +86,13 @@ public class SipConfig implements AccountStatus {
      *
      * @param sipService
      * @param phoneAccount
+     * @param shouldResponseToMiddlewareOnRegistration Set to TRUE if when the account has been registered, that a reply should be sent to the middleware.
      * @return
      */
-    public SipConfig init(SipService sipService, PhoneAccount phoneAccount) {
+    public SipConfig init(SipService sipService, PhoneAccount phoneAccount, boolean shouldResponseToMiddlewareOnRegistration) {
         mSipService = sipService;
         mPhoneAccount = phoneAccount;
+        this.shouldResponseToMiddlewareOnRegistration = shouldResponseToMiddlewareOnRegistration;
 
         return this;
     }
@@ -457,10 +461,8 @@ public class SipConfig implements AccountStatus {
             }
         }
 
-        if (mSipService.getInitialCallType().equals(SipConstants.ACTION_CALL_INCOMING) && !mHasRespondedToMiddleware) {
+        if (shouldResponseToMiddlewareOnRegistration && !mHasRespondedToMiddleware) {
             respondToMiddleware();
-        } else if (mSipService.getInitialCallType().equals(SipConstants.ACTION_CALL_INCOMING)) {
-            mLogger.e("Not responding to middleware so call may not start");
         }
     }
 

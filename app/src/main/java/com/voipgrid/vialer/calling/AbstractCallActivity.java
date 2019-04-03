@@ -21,7 +21,6 @@ import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.ProximitySensorHelper;
 
 import javax.inject.Inject;
@@ -45,7 +44,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Nullable @BindView(R.id.duration_text_view) TextView mCallDurationView;
 
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
-    @Inject protected CallNotifications mCallNotifications;
 
     protected boolean mBluetoothDeviceConnected = false;
     protected boolean mBluetoothAudioActive;
@@ -205,15 +203,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
     }
 
-    /**
-     * Generate the details needed for the call notifications.
-     *
-     * @return
-     */
-    protected CallNotifications.CallNotificationDetail getCallNotificationDetails() {
-        return new CallNotifications.CallNotificationDetail(getCallerInfo(), getCallerIdFromIntent(), getPhoneNumberFromIntent(), getIntent().getType());
-    }
-
     private String getCallerInfo() {
         if (getCallerIdFromIntent() != null && !getCallerIdFromIntent().isEmpty()) {
             return getCallerIdFromIntent();
@@ -235,14 +224,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
         return mMediaManager;
 
-    }
-
-    protected boolean wasOpenedViaNotification() {
-        if (getIntent() == null) {
-            return false;
-        }
-
-        return getIntent().getBooleanExtra(NotificationHelper.TAG, false);
     }
 
     public SipServiceConnection getSipServiceConnection() {

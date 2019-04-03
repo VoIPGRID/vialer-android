@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -160,7 +161,7 @@ public class DialHelper {
      */
     private void callWithSip(String number, String contactName) {
         Intent intent = new Intent(mContext, SipService.class);
-        intent.setAction(SipConstants.ACTION_CALL_OUTGOING);
+        intent.setAction(SipService.Actions.HANDLE_OUTGOING_CALL);
 
         // set a phoneNumberUri as DATA for the intent to SipServiceOld.
         Uri sipAddressUri = SipUri.sipAddressUri(
@@ -172,7 +173,11 @@ public class DialHelper {
         intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, number);
         intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, contactName);
 
-        mContext.startService(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mContext.startForegroundService(intent);
+        } else {
+            mContext.startService(intent);
+        }
 
         mAnalyticsHelper.sendEvent(
                 mContext.getString(R.string.analytics_event_category_call),
