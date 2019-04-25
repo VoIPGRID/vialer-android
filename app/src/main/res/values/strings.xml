@@ -221,10 +221,6 @@
     <string name="permission_phone_dialog_title">Phone permission</string>
     <string name="permission_phone_dialog_message">This permission is needed to handle regular calls during a VoIP call</string>
 
-    <string name="permission_read_external_storage_dialog_title">Read external storage permission</string>
-    <string name="permission_read_external_storage_dialog_message">Permission to the external storage is needed to access your ringtones</string>
-    <string name="permission_read_external_storage_missing_message">This permission is needed to choose a ringtone on your external storage</string>
-
     <string name="invalid_mobile_number_title">Invalid number</string>
     <string name="invalid_mobile_number_message">Your mobile number should start with your country code e.g. +31.</string>
 

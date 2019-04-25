@@ -224,9 +224,6 @@
     <string name="call_incoming_expanded">Inkomend gesprek van:</string>
     <string name="call_incoming_accept">Antwoord</string>
     <string name="call_incoming_decline">Weigeren</string>
-    <string name="permission_read_external_storage_dialog_title">Externe opslag permissie</string>
-    <string name="permission_read_external_storage_missing_message">Permissie tot de externe opslag is nodig om toegang tot je ringtones te krijgen</string>
-    <string name="permission_read_external_storage_dialog_message">Deze permissie is nodig om ringtones te kunnen kiezen die op je externe opslag staan</string>      
     <string name="advanced_settings_title">Geavanceerde instellingen</string>
     <string name="advanced_settings_tls_description">Externe partijen kunnen je gesprekken afluisteren als deze functie is uitgeschakeld.</string>
     <string name="advanced_settings_tls_switch">Gebruik versleuteld bellen</string>
