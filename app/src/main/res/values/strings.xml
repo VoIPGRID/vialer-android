@@ -145,6 +145,9 @@
     <string name="call_connection_only_cellular">Only cellular networks</string>
     <string name="call_connection_use_wifi_cellular">Cellular networks and WiFi</string>
     <string name="call_connection_optional">Show pop-up for outgoing calls</string>
+    <string name="call_connection_setting_not_supported">Your Android version does not allow this
+        setting to be configured
+    </string>
     <string name="connection_preference_dialog_title">Advice: turn off WiFi for this call</string>
     <string name="connection_preference_dialog_message">Cellular networks are more stable which leads to a higher audio quality. \n\nTurn off WiFi for this call?</string>
     <string name="connection_preference_switch_toast">Trying to handover to the cellular network</string>
