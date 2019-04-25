@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
@@ -33,7 +33,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
     private TextView mStatusTextView;
 
     private AnalyticsHelper mAnalyticsHelper;
-    private Api mApi;
+    private VoipgridApi mVoipgridApi;
     private Logger mLogger;
     private SystemUser mSystemUser;
     private TwoStepCallTask mTwoStepCallTask;
@@ -51,13 +51,13 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
 
         mSystemUser = (SystemUser) new JsonStorage(this).get(SystemUser.class);
 
-        mApi = ServiceGenerator.createApiService(this);
+        mVoipgridApi = ServiceGenerator.createApiService(this);
 
         mLogger = new Logger(TwoStepCallActivity.class);
 
         String numberToCall = getIntent().getStringExtra(NUMBER_TO_CALL);
 
-        mTwoStepCallTask = new TwoStepCallTask(mApi, mSystemUser.getMobileNumber(), numberToCall);
+        mTwoStepCallTask = new TwoStepCallTask(mVoipgridApi, mSystemUser.getMobileNumber(), numberToCall);
         mTwoStepCallTask.execute();
 
         mStatusTextView = ((TextView) findViewById(R.id.status_text_view));
@@ -89,7 +89,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
                 String callId = mTwoStepCallTask.getCallId();
 
                 if (callId != null) {  // callId exists so cancel right away
-                    Call<Object> call = mApi.twoStepCallCancel(callId);
+                    Call<Object> call = mVoipgridApi.twoStepCallCancel(callId);
                     call.enqueue(this);
                     cancelCall = true;
                 } else {  // set cancelCall so the two way task will cancel it once it's created
@@ -169,13 +169,13 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
 
 
     public class TwoStepCallTask extends AsyncTask<Void, String, Boolean> {
-        private Api mApi;
+        private VoipgridApi mVoipgridApi;
 
         private String mCallId;
         private String mNumberA, mNumberB;
 
-        public TwoStepCallTask(Api api, String numberA, String numberB) {
-            mApi = api;
+        public TwoStepCallTask(VoipgridApi voipgridApi, String numberA, String numberB) {
+            mVoipgridApi = voipgridApi;
             mNumberA = numberA;
             mNumberB = numberB;
         }
@@ -187,7 +187,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
         @Override
         protected Boolean doInBackground(Void... params) {
             TwoStepCallStatus status;
-            Call<TwoStepCallStatus> call = mApi.twoStepCall(new ClickToDialParams(mNumberA, mNumberB));
+            Call<TwoStepCallStatus> call = mVoipgridApi.twoStepCall(new ClickToDialParams(mNumberA, mNumberB));
             try {
                 Response<TwoStepCallStatus> response = call.execute();
                 if (response.isSuccessful() && response.body() != null) {
@@ -203,7 +203,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
             mCallId = status.getCallId();
             // If cancel has been pressed before the call was made cancel it here.
             if (cancelCall) {
-                Call<Object> cancelCall = mApi.twoStepCallCancel(mCallId);
+                Call<Object> cancelCall = mVoipgridApi.twoStepCallCancel(mCallId);
                 cancelCall.enqueue(TwoStepCallActivity.this);
             }
             // We continue with the task because if the cancel fails there is no way to inform
@@ -244,7 +244,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
                         message.equals(TwoStepCallStatus.STATE_CONNECTED)) {
                     try {
                         Thread.sleep(1000);
-                        Call<TwoStepCallStatus> call = mApi.twoStepCall(mCallId);
+                        Call<TwoStepCallStatus> call = mVoipgridApi.twoStepCall(mCallId);
 
                         try {
                             Response<TwoStepCallStatus> response = call.execute();

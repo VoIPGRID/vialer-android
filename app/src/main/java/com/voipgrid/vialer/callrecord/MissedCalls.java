@@ -1,6 +1,6 @@
 package com.voipgrid.vialer.callrecord;
 
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 
@@ -19,10 +19,10 @@ public class MissedCalls {
      */
     private static final int NUMBER_OF_RECORDS_TO_PARSE_FOR_MISSED_CALLS = 500;
 
-    private final Api api;
+    private final VoipgridApi mVoipgridApi;
 
-    public MissedCalls(Api api) {
-        this.api = api;
+    public MissedCalls(VoipgridApi voipgridApi) {
+        this.mVoipgridApi = voipgridApi;
     }
 
     /**
@@ -62,9 +62,9 @@ public class MissedCalls {
      */
     private Call<VoipGridResponse<CallRecord>> createHttpCall(boolean fetchCallsFromEntireAccount) {
         if (fetchCallsFromEntireAccount) {
-            return api.getRecentCalls(NUMBER_OF_RECORDS_TO_PARSE_FOR_MISSED_CALLS, 0, CallRecord.getLimitDate());
+            return mVoipgridApi.getRecentCalls(NUMBER_OF_RECORDS_TO_PARSE_FOR_MISSED_CALLS, 0, CallRecord.getLimitDate());
         } else {
-            return api.getRecentCallsForLoggedInUser(NUMBER_OF_RECORDS_TO_PARSE_FOR_MISSED_CALLS, 0, CallRecord.getLimitDate());
+            return mVoipgridApi.getRecentCallsForLoggedInUser(NUMBER_OF_RECORDS_TO_PARSE_FOR_MISSED_CALLS, 0, CallRecord.getLimitDate());
         }
     }
 

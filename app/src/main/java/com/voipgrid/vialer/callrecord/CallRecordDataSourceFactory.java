@@ -1,6 +1,6 @@
 package com.voipgrid.vialer.callrecord;
 
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.CallRecord;
 
 import androidx.lifecycle.MutableLiveData;
@@ -8,18 +8,18 @@ import androidx.paging.DataSource;
 
 public class CallRecordDataSourceFactory extends DataSource.Factory<Integer, CallRecord> {
 
-    private final Api api;
+    private final VoipgridApi mVoipgridApi;
     private MutableLiveData<CallRecordDataSource> postLiveData;
 
     private boolean fetchCallsFromEntireAccount = false;
 
-    public CallRecordDataSourceFactory(Api api) {
-        this.api = api;
+    public CallRecordDataSourceFactory(VoipgridApi voipgridApi) {
+        this.mVoipgridApi = voipgridApi;
     }
 
     @Override
     public DataSource<Integer, CallRecord> create() {
-        CallRecordDataSource dataSource = new CallRecordDataSource(api);
+        CallRecordDataSource dataSource = new CallRecordDataSource(mVoipgridApi);
         if (fetchCallsFromEntireAccount) {
             dataSource.fetchCallsFromEntireAccount();
         }
@@ -28,13 +28,13 @@ public class CallRecordDataSourceFactory extends DataSource.Factory<Integer, Cal
         return dataSource;
     }
 
-    public CallRecordDataSourceFactory fetchCallsFromEntireAccount() {
+    CallRecordDataSourceFactory fetchCallsFromEntireAccount() {
         fetchCallsFromEntireAccount = true;
 
         return this;
     }
 
-    public MutableLiveData<CallRecordDataSource> getPostLiveData() {
+    MutableLiveData<CallRecordDataSource> getPostLiveData() {
         return postLiveData;
     }
 }

@@ -12,9 +12,6 @@ import com.voipgrid.vialer.statistics.AppState;
  */
 public class MediaManager implements
         AudioManager.OnAudioFocusChangeListener, AudioRouter.AudioRouterInterface {
-    private static String TAG = MediaManager.class.getSimpleName();
-
-    private static MediaManager mMediaManager;
 
     private static int mCurrentAudioRoute;
 
@@ -48,7 +45,7 @@ public class MediaManager implements
      *
      * @param context Reference to the Context object from where the class is created.
      */
-    private MediaManager(Activity activity, Context context, AudioChangedInterface audioChangedInterface) {
+    public MediaManager(Activity activity, Context context, AudioChangedInterface audioChangedInterface) {
         mContext = context;
         mAudioChangedInterfaceListener = audioChangedInterface;
 
@@ -61,30 +58,6 @@ public class MediaManager implements
 
         mAudioRouter = new AudioRouter(context, this, mAudioManager);
         mIncomingRinger = new IncomingRinger(activity, context, mAudioManager);
-    }
-
-    /**
-     * Get an instance reference to this class.
-     *
-     * @return this MediaManager class.
-     */
-    public MediaManager getInstance() {
-        return mMediaManager;
-    }
-
-    /**
-     * Singleton creation for this class.
-     *
-     * @param context Reference to the context from where the class is created.
-     * @param audioChangedInterface Callback reference so can sent updates from this class.
-     *
-     * @return this MediaManager class.
-     */
-    public static synchronized MediaManager init(Activity activity, Context context, AudioChangedInterface audioChangedInterface) {
-        if (mMediaManager == null) {
-            mMediaManager = new MediaManager(activity, context, audioChangedInterface);
-        }
-        return mMediaManager;
     }
 
     public void deInit() {
@@ -100,7 +73,6 @@ public class MediaManager implements
 
         resetAudioManager();
 
-        mMediaManager = null;
         mAudioRouter = null;
         mIncomingRinger = null;
     }

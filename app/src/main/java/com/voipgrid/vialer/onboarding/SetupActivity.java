@@ -13,12 +13,12 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.AccountActivity;
+import com.voipgrid.vialer.SettingsActivity;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.WebActivityHelper;
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
@@ -55,7 +55,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
     private String mPassword;
     private String mActivityToReturnToName = "";
 
-    private Api mApi;
+    private VoipgridApi mVoipgridApi;
     private JsonStorage mJsonStorage;
     private Preferences mPreferences;
     private Logger mLogger;
@@ -172,9 +172,9 @@ public class SetupActivity extends RemoteLoggingActivity implements
     public void onUpdateMobileNumber(Fragment fragment, String mobileNumber) {
         enableProgressBar(true);
 
-        mApi = ServiceGenerator.createApiService(this);
+        mVoipgridApi = ServiceGenerator.createApiService(this);
 
-        Call<MobileNumber> call = mApi.mobileNumber(new MobileNumber(mobileNumber));
+        Call<MobileNumber> call = mVoipgridApi.mobileNumber(new MobileNumber(mobileNumber));
         call.enqueue(this);
     }
 
@@ -191,7 +191,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
         String phoneAccountId = systemUser.getPhoneAccountId();
 
         if (phoneAccountId != null) {
-            Call<PhoneAccount> call = mApi.phoneAccount(phoneAccountId);
+            Call<PhoneAccount> call = mVoipgridApi.phoneAccount(phoneAccountId);
             call.enqueue(this);
         } else {
             enableProgressBar(false);
@@ -218,11 +218,11 @@ public class SetupActivity extends RemoteLoggingActivity implements
 
     @Override
     public void onFinish(Fragment fragment) {
-        if (mActivityToReturnToName.equals(AccountActivity.class.getSimpleName())){
+        if (mActivityToReturnToName.equals(SettingsActivity.class.getSimpleName())){
             PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(this);
             phoneAccountHelper.savePhoneAccountAndRegister(
                     (PhoneAccount) mJsonStorage.get(PhoneAccount.class));
-            Intent intent = new Intent(this, AccountActivity.class);
+            Intent intent = new Intent(this, SettingsActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         } else {
@@ -290,8 +290,8 @@ public class SetupActivity extends RemoteLoggingActivity implements
     }
 
     private void resetPassword(String email) {
-        Api api = ServiceGenerator.createApiService(this, null, null, null);
-        Call<Void> call = api.resetPassword(new PasswordResetParams(email));
+        VoipgridApi voipgridApi = ServiceGenerator.createApiService(this, null, null, null);
+        Call<Void> call = voipgridApi.resetPassword(new PasswordResetParams(email));
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -448,7 +448,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
         enableProgressBar(true);
         enableProgressBar(true);
 
-        mApi = ServiceGenerator.createApiService(this, mUsername, mPassword, null);
+        mVoipgridApi = ServiceGenerator.createApiService(this, mUsername, mPassword, null);
 
         ApiTokenFetcher
                 .forCredentials(this, mUsername, mPassword)
@@ -470,7 +470,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
         Intent intent = new Intent(fromActivity, SetupActivity.class);
         Bundle b = new Bundle();
         b.putInt("fragment", R.id.fragment_voip_account_missing);
-        b.putString("activity", AccountActivity.class.getSimpleName());
+        b.putString("activity", SettingsActivity.class.getSimpleName());
         intent.putExtras(b);
 
         fromActivity.startActivity(intent);
@@ -490,9 +490,9 @@ public class SetupActivity extends RemoteLoggingActivity implements
             AccountHelper accountHelper = new AccountHelper(SetupActivity.this);
             accountHelper.setCredentials(mUsername, mPassword, apiToken);
 
-            mApi = ServiceGenerator.createApiService(SetupActivity.this);
+            mVoipgridApi = ServiceGenerator.createApiService(SetupActivity.this);
 
-            Call<SystemUser> call2 = mApi.systemUser();
+            Call<SystemUser> call2 = mVoipgridApi.systemUser();
             call2.enqueue(SetupActivity.this);
         }
 
