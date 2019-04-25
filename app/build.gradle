@@ -242,6 +242,8 @@ dependencies {
 
     // Crashlytics
     releaseImplementation "com.crashlytics.sdk.android:crashlytics:2.9.9"
+    compile "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

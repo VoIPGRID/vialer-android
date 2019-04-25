@@ -8,16 +8,13 @@ import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-
-import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -37,6 +34,7 @@ import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipConfig;
+import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
 import com.voipgrid.vialer.t9.T9ViewBinder;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -48,6 +46,8 @@ import com.voipgrid.vialer.util.NetworkUtil;
 
 import javax.inject.Singleton;
 
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import dagger.Module;
 import dagger.Provides;
 
@@ -198,5 +198,41 @@ public class VialerModule {
     @Provides
     T9ViewBinder provideT9ViewBinder(Context context) {
         return new T9ViewBinder(context);
+    }
+
+    @Provides Handler provideHandler() {
+        return new Handler();
+    }
+
+    @Provides NativeCallManager provideNativeCallManager(TelephonyManager telephonyManager) {
+        return new NativeCallManager(telephonyManager);
+    }
+
+    @Provides ToneGenerator provideToneGenerator() {
+        return new ToneGenerator(AudioManager.STREAM_VOICE_CALL, SipConstants.RINGING_VOLUME);
+    }
+
+    @Provides NetworkConnectivity provideNetworkConnectivity() {
+        return new NetworkConnectivity();
+    }
+
+    @Provides
+    PhoneNumberImageGenerator provideNumberImageFinder(Contacts contacts) {
+        return new PhoneNumberImageGenerator(contacts);
+    }
+
+    @Provides
+    AudioManager provideAudioManager(Context context) {
+        return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    @Provides
+    Vibrator provideVibrator(Context context) {
+        return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    }
+
+    @Provides
+    IncomingCallVibration provideIncomingCallVibrator(AudioManager audioManager, Vibrator vibrator) {
+        return new IncomingCallVibration(audioManager, vibrator);
     }
 }

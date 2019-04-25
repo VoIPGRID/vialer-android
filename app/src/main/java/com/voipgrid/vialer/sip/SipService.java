@@ -12,10 +12,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
-
-import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.BuildConfig;
@@ -42,6 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -184,9 +183,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
                 this.intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
                 this.intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
                 true
-        );
-        callNotification.outgoing(
-                this.intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER), this.intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME)
         );
     }
 
