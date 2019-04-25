@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.ActionMode;
@@ -66,6 +67,7 @@ public class SettingsActivity extends LoginRequiredActivity {
     @BindView(R.id.use_3g_switch) CompoundButton mUse3GSwitch;
 
     @BindView(R.id.call_connection_spinner) Spinner mConnectionSpinner;
+    @BindView(R.id.connection_container) View connectionContainer;
     @BindView(R.id.codec_spinner) Spinner mCodecSpinner;
 
     @BindView(R.id.remote_logging_switch) CompoundButton mRemoteLoggingSwitch;
@@ -129,6 +131,10 @@ public class SettingsActivity extends LoginRequiredActivity {
         initializeAdvancedSettings();
 
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mVoipDisabledReceiver, FcmMessagingService.VOIP_HAS_BEEN_DISABLED);
+
+        if (Build.VERSION.SDK_INT >= BuildConfig.ANDROID_Q_SDK_VERSION) {
+            mConnectionSpinner.setEnabled(false);
+        }
     }
 
     @Override
