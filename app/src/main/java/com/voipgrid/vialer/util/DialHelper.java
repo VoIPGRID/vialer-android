@@ -7,15 +7,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
-
+import android.util.Log;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.calling.PendingCallActivity;
@@ -24,6 +21,8 @@ import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.twostepcall.TwoStepCallActivity;
+
+import androidx.appcompat.app.AlertDialog;
 
 /**
  * Helper class to use to setup a outgoing call. Based on connectivity choose between SIP or
@@ -131,6 +130,8 @@ public class DialHelper {
             } else {
                 callWithApi(number, contactName);
             }
+        } else {
+            Log.e("TEST123", "has conn:" + mConnectivityHelper.hasNetworkConnection());
         }
     }
 

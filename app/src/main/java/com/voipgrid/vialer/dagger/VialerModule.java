@@ -37,9 +37,12 @@ import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipConfig;
-import com.voipgrid.vialer.sip.SipConstants;
+import com.voipgrid.vialer.t9.T9DatabaseHelper;
+import com.voipgrid.vialer.t9.T9ViewBinder;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
+import com.voipgrid.vialer.util.ColorHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.HtmlHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NetworkUtil;
 
@@ -177,39 +180,23 @@ public class VialerModule {
         return new MissedCallsAdapter(cachedContacts);
     }
 
-    @Provides Handler provideHandler() {
-        return new Handler();
-    }
-
-    @Provides NativeCallManager provideNativeCallManager(TelephonyManager telephonyManager) {
-        return new NativeCallManager(telephonyManager);
-    }
-
-    @Provides ToneGenerator provideToneGenerator() {
-        return new ToneGenerator(AudioManager.STREAM_VOICE_CALL, SipConstants.RINGING_VOLUME);
-    }
-
-    @Provides NetworkConnectivity provideNetworkConnectivity() {
-        return new NetworkConnectivity();
+    @Provides
+    T9DatabaseHelper provideT9DatabaseHelper(Context context) {
+        return new T9DatabaseHelper(context);
     }
 
     @Provides
-    PhoneNumberImageGenerator provideNumberImageFinder(Contacts contacts) {
-        return new PhoneNumberImageGenerator(contacts);
+    ColorHelper provideColorHelper() {
+        return new ColorHelper();
     }
 
     @Provides
-    AudioManager provideAudioManager(Context context) {
-        return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    HtmlHelper provideHtmlHelper() {
+        return new HtmlHelper();
     }
 
     @Provides
-    Vibrator provideVibrator(Context context) {
-        return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-    }
-
-    @Provides
-    IncomingCallVibration provideIncomingCallVibrator(AudioManager audioManager, Vibrator vibrator) {
-        return new IncomingCallVibration(audioManager, vibrator);
+    T9ViewBinder provideT9ViewBinder(Context context) {
+        return new T9ViewBinder(context);
     }
 }

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/message"
+        style="@style/EmptyViewMessageTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"/>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical"
+                  android:gravity="center"
+                  android:id="@+id/no_contact_permission_warning"
+                  android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/permission_contact_title"
+            android:textSize="18sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/permission_contact_description"
+            android:gravity="center"/>
+
+        <Button
+            android:id="@+id/give_contact_permission_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/permission_contact_button"
+            style="@style/PermissionButton"
+            android:layout_marginTop="20dp"/>
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@null"
+        android:visibility="gone"
+        android:fadeScrollbars="false"/>
+
+    <FrameLayout android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:name="com.voipgrid.vialer.t9.T9HelperFragment"
+              android:id="@+id/helper"
+              tools:layout="@layout/fragment_t9_helper"/>
+</LinearLayout>

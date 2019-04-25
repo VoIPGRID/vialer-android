@@ -17,6 +17,7 @@
     <color name="key_pad_divider_color">#E2E2E2</color>
 
     <color name="dialpad_fab_call_color">#75c25e</color>
+    <color name="dialpad_fab_call_color_disabled">#888888</color>
 
     <color name="tint_color_backspace">#B9B9B9</color>
 
@@ -35,6 +36,7 @@
 
     <color name="call_fab_hangup_color">#DB4437</color>
     <color name="call_fab_pickup_color">@color/dialpad_fab_call_color</color>
+    <color name="call_fab_disabled_color">#888888</color>
 
     <color name="dialpad_input_background_color">#ffa3a3a3</color>
 

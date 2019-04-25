@@ -1,8 +1,6 @@
 package com.voipgrid.vialer.t9;
 
-import android.app.Fragment;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.LayoutInflater;
@@ -18,27 +16,29 @@ import com.voipgrid.vialer.util.HtmlHelper;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
-public class T9HelperFragment extends Fragment {
+public class T9HelperFragment extends Fragment  {
 
-    private T9DatabaseHelper mT9DatabaseHelper;
-
-    private HtmlHelper mHtmlHelper = new HtmlHelper();
-
-    private ColorHelper mColorHelper = new ColorHelper();
+    @Inject HtmlHelper htmlHelper;
+    @Inject ColorHelper colorHelper;
+    @Inject T9DatabaseHelper t9DatabaseHelper;
 
     private Unbinder mUnbinder;
 
     @BindView(R.id.help_text) TextView mainText;
 
-    @BindViews({ R.id.digit_1, R.id.digit_2, R.id.digit_3})
+    @BindViews({ R.id.digit_1, R.id.digit_2, R.id.digit_3 })
     List<TextView> digitViews;
 
-    @BindViews({ R.id.digit_1_letters, R.id.digit_2_letters, R.id.digit_3_letters})
+    @BindViews({ R.id.digit_1_letters, R.id.digit_2_letters, R.id.digit_3_letters })
     List<TextView> digitLetterViews;
 
     /**
@@ -58,22 +58,21 @@ public class T9HelperFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_t9_helper, container, false);
 
         mUnbinder = ButterKnife.bind(this, view);
-
-        mT9DatabaseHelper = new T9DatabaseHelper(VialerApplication.get());
+        VialerApplication.get().component().inject(this);
 
         return view;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        mUnbinder.unbind();
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initialize();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
     }
 
     /**
@@ -94,7 +93,7 @@ public class T9HelperFragment extends Fragment {
      * @param name The name to initialize the main text for.
      */
     private void initializeMainText(String name) {
-        String highlightedName = mHtmlHelper.colorSubstring(
+        String highlightedName = htmlHelper.colorSubstring(
                 name,
                 getHighlightColor(),
                 0,
@@ -133,7 +132,7 @@ public class T9HelperFragment extends Fragment {
 
         int positionOfLetterToHighlight = letters.indexOf(String.valueOf(letterToHighlight).toUpperCase());
 
-        letters = mHtmlHelper.colorSubstring(
+        letters = htmlHelper.colorSubstring(
                 letters,
                 getHighlightColor(),
                 positionOfLetterToHighlight,
@@ -150,11 +149,11 @@ public class T9HelperFragment extends Fragment {
      * @return An example first name to use in the helper
      */
     private String getExampleFirstNameToDemonstrateT9() {
-        if (mT9DatabaseHelper == null) {
+        if (t9DatabaseHelper == null) {
             return DEFAULT_NAME;
         }
 
-        String contactName = mT9DatabaseHelper.getRandomContactName();
+        String contactName = t9DatabaseHelper.getRandomContactName();
 
         if (contactName == null) {
             return DEFAULT_NAME;
@@ -181,7 +180,19 @@ public class T9HelperFragment extends Fragment {
         return contactName;
     }
 
+    public void hide() {
+        if (getView() == null) return;
+
+        getView().setVisibility(View.GONE);
+    }
+
+    public void show() {
+        if (getView() == null) return;
+
+        getView().setVisibility(View.VISIBLE);
+    }
+
     private String getHighlightColor() {
-        return mColorHelper.getColorResourceAsHexCode(R.color.color_primary);
+        return colorHelper.getColorResourceAsHexCode(R.color.color_primary);
     }
 }

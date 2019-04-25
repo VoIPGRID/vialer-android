@@ -21,16 +21,9 @@
                   app:layout_constraintStart_toStartOf="parent"
                   app:layout_constraintTop_toTopOf="parent">
 
-        <ListView
-            android:id="@+id/list_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:divider="@null"
-            android:visibility="gone"
-            android:fadeScrollbars="false"/>
 
-        <fragment android:id="@+id/t9helper"
-                  android:name="com.voipgrid.vialer.t9.T9HelperFragment"
+        <fragment android:id="@+id/t9_search"
+                  android:name="com.voipgrid.vialer.t9.T9Fragment"
                   android:layout_width="match_parent"
                   android:layout_height="0dp"
                   android:layout_marginStart="8dp"
@@ -40,17 +33,9 @@
                   android:layout_marginRight="8dp"
                   android:layout_marginBottom="8dp"
                   android:layout_weight="1"
-                  tools:layout="@layout/fragment_t9_helper"/>
+                  tools:layout="@layout/fragment_t9_search"
+        />
 
-        <TextView
-        android:id="@+id/message"
-        style="@style/EmptyViewMessageTextStyle"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:visibility="gone"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"/>
 
         <LinearLayout
             android:id="@+id/contact_processing_container"
@@ -60,9 +45,9 @@
             android:orientation="vertical"
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
-            android:visibility="gone">
+            android:visibility="visible">
 
-            <ProgressBar
+            <com.voipgrid.vialer.dialer.ContactsProgressBar
                 android:id="@+id/progress_bar"
                 style="?android:attr/progressBarStyleLarge"
                 android:layout_width="match_parent"
@@ -76,33 +61,38 @@
                 android:paddingTop="10dp"/>
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/no_connectivity_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:visibility="gone">
 
-        <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="match_parent"
-                      android:orientation="vertical"
-                      android:gravity="center"
-                      android:id="@+id/no_contact_permission_warning"
-                      android:visibility="gone">
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:tint="@color/color_primary"
+                       app:srcCompat="@drawable/ic_signal_wifi_off"/>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/no_connectivity_text"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/permission_contact_title"
-                android:textSize="18sp"/>
+                android:gravity="center"
+                android:paddingTop="10dp"
+                android:text="@string/dialer_no_connectivity"
+                android:textColor="@color/color_primary"
+                android:textStyle="bold"/>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/no_connectivity_subtext"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/permission_contact_description"
-                android:gravity="center"/>
-
-            <Button
-                android:id="@+id/give_contact_permission_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/permission_contact_button"
-                style="@style/PermissionButton"
-                android:layout_marginTop="20dp"/>
+                android:gravity="center"
+                android:paddingTop="3dp"
+                android:text="@string/dialer_no_connectivity_subtext"/>
         </LinearLayout>
 
 

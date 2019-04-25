@@ -260,4 +260,6 @@
     <string name="call_codec_standard_quality">Standard audio</string>
     <string name="call_codec_high_quality">Higher quality audio</string>
     <string name="call_records_show_all">Show missed calls only</string>
+    <string name="dialer_no_connectivity">No internet connection</string>
+    <string name="dialer_no_connectivity_subtext">Calls cannot be made or received without a connection</string>
 </resources>
