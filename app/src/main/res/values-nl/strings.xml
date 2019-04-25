@@ -258,5 +258,6 @@
     <string name="tab_title_recents">mijn gesprekken</string>
     <string name="tab_title_missed">alle gesprekken</string>
     <string name="call_records_show_all">Laat alleen gemiste gesprekken zien</string>
-    <string name="notification_channel_incoming_calls">Inkomend gesprek</string>
+    <string name="dialer_no_connectivity">Geen internet verbinding</string>
+    <string name="dialer_no_connectivity_subtext">Gesprekken kunnen niet worden opgezet of ontvangen zonder internet</string>
 </resources>
