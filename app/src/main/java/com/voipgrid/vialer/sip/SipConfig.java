@@ -16,7 +16,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.api.Registration;
+import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -46,8 +46,6 @@ import org.pjsip.pjsua2.pjmedia_srtp_use;
 import org.pjsip.pjsua2.pjsip_transport_type_e;
 import org.pjsip.pjsua2.pjsua_call_flag;
 
-import java.util.Map;
-
 import okhttp3.ResponseBody;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,7 +65,6 @@ public class SipConfig implements AccountStatus {
     private Preferences mPreferences;
 
     private boolean mHasRespondedToMiddleware = false;
-    private static Map<String, Short> sCodecPrioMapping;
 
     private IpSwitchMonitor mIpSwitchMonitor;
 
@@ -96,11 +93,11 @@ public class SipConfig implements AccountStatus {
         return this;
     }
 
-    public VialerEndpoint getEndpoint() {
+    VialerEndpoint getEndpoint() {
         return mEndpoint;
     }
 
-    public SipAccount getSipAccount() {
+    SipAccount getSipAccount() {
         return mSipAccount;
     }
 
@@ -108,20 +105,16 @@ public class SipConfig implements AccountStatus {
      * Function to init the PJSIP library and setup all credentials.
      * @throws LibraryInitFailedException
      */
-    public void initLibrary(Listener listener) {
-        new Thread(() -> {
-            try {
-                loadPjsip();
-                mEndpoint = createEndpoint();
-                setCodecPrio();
-                mSipAccount = createSipAccount();
-                startNetworkingListener();
-            } catch (Exception e) {
-                listener.pjSipFailedToLoad(e);
-            }
+    void initLibrary() throws Exception {
+        if (mEndpoint != null) return;
 
-            listener.pjSipDidLoad();
-        }).start();
+        loadPjsip();
+        mEndpoint = createEndpoint();
+        setCodecPrio();
+        mSipAccount = createSipAccount();
+        startNetworkingListener();
+
+        mLogger.i("Loaded PJSIP library version: " + mEndpoint.libVersion().getFull());
     }
 
     private void startNetworkingListener() {
@@ -405,7 +398,7 @@ public class SipConfig implements AccountStatus {
                 ((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()
         );
 
-        Registration registrationApi = ServiceGenerator.createRegistrationService(mSipService);
+        Middleware middlewareApi = ServiceGenerator.createRegistrationService(mSipService);
 
         String analyticsLabel = ConnectivityHelper.get(mSipService).getAnalyticsLabel();
 
@@ -426,7 +419,7 @@ public class SipConfig implements AccountStatus {
                 startUpTime
         );
 
-        retrofit2.Call<ResponseBody> call = registrationApi.reply(token, true, messageStartTime);
+        retrofit2.Call<ResponseBody> call = middlewareApi.reply(token, true, messageStartTime);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
@@ -464,9 +457,10 @@ public class SipConfig implements AccountStatus {
             }
         }
 
-        // Check if it is an incoming call and we did not respond to the middleware already.
         if (mSipService.getInitialCallType().equals(SipConstants.ACTION_CALL_INCOMING) && !mHasRespondedToMiddleware) {
             respondToMiddleware();
+        } else if (mSipService.getInitialCallType().equals(SipConstants.ACTION_CALL_INCOMING)) {
+            mLogger.e("Not responding to middleware so call may not start");
         }
     }
 
@@ -529,10 +523,5 @@ public class SipConfig implements AccountStatus {
      */
     public static boolean shouldUseTls() {
         return SecureCalling.fromContext(VialerApplication.get()).isEnabled();
-    }
-
-    interface Listener {
-        void pjSipDidLoad();
-        void pjSipFailedToLoad(Exception e);
     }
 }

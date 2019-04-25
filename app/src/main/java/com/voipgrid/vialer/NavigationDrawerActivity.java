@@ -29,10 +29,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.Destination;
 import com.voipgrid.vialer.api.models.FixedDestination;
+import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -64,7 +65,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     private TextView mNoConnectionText;
     private View mNavigationHeaderView;
 
-    private Api mApi;
+    private VoipgridApi mVoipgridApi;
     private ConnectivityHelper mConnectivityHelper;
     private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
@@ -161,8 +162,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             return;
         }
 
-        mApi = ServiceGenerator.createApiService(this);
-        Call<VoipGridResponse<UserDestination>> call = mApi.getUserDestination();
+        mVoipgridApi = ServiceGenerator.createApiService(this);
+        Call<VoipGridResponse<UserDestination>> call = mVoipgridApi.getUserDestination();
         call.enqueue(this);
     }
 
@@ -186,7 +187,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
                 String version = packageInfo.versionName;
                 if (version.contains("beta")) {
-                    textView.setText(getString(R.string.version_info_beta, version, packageInfo.versionCode));
+                    textView.setText(getString(R.string.version_info_beta, version, String.valueOf(packageInfo.versionCode)));
                 } else {
                     textView.setText(getString(R.string.version_info, version));
                 }
@@ -232,7 +233,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 );
                 break;
             case R.id.navigation_item_settings:
-                startActivity(new Intent(this, AccountActivity.class));
+                startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.navigation_item_logout:
                 logout();
@@ -338,6 +339,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 return;
             }
 
+            storeInternalNumbers(userDestinationObjects);
+
             UserDestination userDestination = userDestinationObjects.get(0);
 
             // Create not available destination.
@@ -376,6 +379,24 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             mSpinnerAdapter.notifyDataSetChanged();
             mSpinner.setSelection(activeIndex);
         }
+    }
+
+    /**
+     * Store a list of internal numbers to storage.
+     *
+     * @param userDestinationObjects
+     */
+    private void storeInternalNumbers(List<UserDestination> userDestinationObjects) {
+        InternalNumbers internalNumbers = new InternalNumbers();
+        for (UserDestination userDestination : userDestinationObjects) {
+            internalNumbers.add(userDestination.getInternalNumber());
+
+            for (PhoneAccount phoneAccount : userDestination.getPhoneAccounts()) {
+                internalNumbers.add(phoneAccount.getNumber());
+            }
+        }
+
+        mJsonStorage.save(internalNumbers);
     }
 
     private static class CustomFontSpinnerAdapter<D> extends ArrayAdapter {
@@ -437,7 +458,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 SelectedUserDestinationParams params = new SelectedUserDestinationParams();
                 params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
                 params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
-                Call<Object> call = mApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
+                Call<Object> call = mVoipgridApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
                 call.enqueue(this);
                 if (!MiddlewareHelper.isRegistered(this)) {
                     // If the previous destination was not available, or if we're not registered

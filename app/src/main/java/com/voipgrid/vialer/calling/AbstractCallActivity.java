@@ -9,8 +9,6 @@ import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.CallSuper;
-import androidx.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -28,6 +26,8 @@ import com.voipgrid.vialer.util.ProximitySensorHelper;
 
 import javax.inject.Inject;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.Optional;
 
@@ -50,6 +50,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected boolean mBluetoothDeviceConnected = false;
     protected boolean mBluetoothAudioActive;
     private ProximitySensorHelper mProximityHelper;
+    private MediaManager mMediaManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,6 +95,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         super.onDestroy();
         mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver, mBluetoothButtonReceiver);
         getMediaManager().deInit();
+        mMediaManager = null;
     }
 
     @Override
@@ -101,6 +103,8 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     public void sipServiceHasConnected(SipService sipService) {
         if (sipService.getFirstCall() != null) {
             mCurrentCallId = sipService.getFirstCall().getIdentifier();
+        } else {
+            finishAfterDelay();
         }
     }
 
@@ -124,8 +128,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
     }
-
-    public void onCallStatusReceived(String status, String callId) {}
 
     /**
      * Attempt to shutdown the activity after a few seconds giving the services enough
@@ -219,8 +221,20 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         return getPhoneNumberFromIntent();
     }
 
+    /**
+     * Get the MediaManager, a new one will be generated if it does not already exist. There must
+     * be an instance of this class alive (not deinited) or audio will not be present.
+     *
+     * @return
+     */
+
     protected MediaManager getMediaManager() {
-        return MediaManager.init(this, this, this);
+        if (mMediaManager == null) {
+            mMediaManager = new MediaManager(this, this, this);
+        }
+
+        return mMediaManager;
+
     }
 
     protected boolean wasOpenedViaNotification() {

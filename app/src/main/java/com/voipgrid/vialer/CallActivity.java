@@ -9,14 +9,11 @@ import static com.voipgrid.vialer.calling.CallingConstants.TYPE_CONNECTED_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.RequiresApi;
-import androidx.constraintlayout.widget.Group;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
-import android.text.format.DateUtils;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,6 +42,7 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import javax.inject.Inject;
 
+import androidx.constraintlayout.widget.Group;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -298,13 +296,36 @@ public class CallActivity extends AbstractCallActivity implements
             if (mSipServiceConnection.get().getCurrentCall() == null || mSipServiceConnection.get().getFirstCall() == null) {
                 super.onBackPressed();
             } else {
-                hangup();
+                hangupViaBackButton();
             }
         } else if (mHangupButton != null && mHangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
-            hangup();
+            hangupViaBackButton();
         } else if (isDialpadVisible()) {
             hideDialpad();
         }
+    }
+
+    /**
+     * Presents a confirmation box before hanging up the call.
+     *
+     */
+    private void hangupViaBackButton() {
+        DialogInterface.OnClickListener listener = (dialog, which) -> {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    hangup();
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        };
+
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.call_back_button_confirmation)
+                .setPositiveButton(R.string.call_back_button_confirmation_yes, listener)
+                .setNegativeButton(R.string.call_back_button_confirmation_no, listener)
+                .show();
     }
 
     @Override
@@ -370,7 +391,8 @@ public class CallActivity extends AbstractCallActivity implements
             mSipServiceConnection.get().getCurrentCall().hangup(true);
             updateUi();
         } catch (Exception e) {
-            e.printStackTrace();
+            finish();
+            return;
         }
 
         finishAfterDelay();

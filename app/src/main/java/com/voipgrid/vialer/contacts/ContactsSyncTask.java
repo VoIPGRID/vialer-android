@@ -10,7 +10,6 @@ import android.util.Log;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
-import com.voipgrid.vialer.util.NotificationHelper;
 
 
 /**
@@ -22,6 +21,8 @@ public class ContactsSyncTask {
 
     private Context mContext;
     private Logger mLogger;
+
+    private static Progress progress = new Progress(0);
 
     /**
      * AsyncTask that adds Data entry in Contacts app with "Call with AppName" action.
@@ -85,19 +86,11 @@ public class ContactsSyncTask {
             return;
         }
 
-        boolean requireFullContactSync = SyncUtils.requiresFullContactSync(mContext);
-
-        // Gives you the list of contacts who have phone numbers.
         Cursor cursor = queryAllContacts();
         SyncUtils.setFullSyncInProgress(mContext, true);
         sync(cursor);
         SyncUtils.setFullSyncInProgress(mContext, false);
         SyncUtils.setRequiresFullContactSync(mContext, false);
-
-        // When there was a full contact sync required inform the user.
-        if (requireFullContactSync) {
-            NotificationHelper.getInstance(mContext).displayContactsSyncNotification();
-        }
     }
 
     /**
@@ -175,6 +168,7 @@ public class ContactsSyncTask {
             return;
         }
 
+        progress = new Progress(cursor.getCount());
         T9DatabaseHelper t9Database = new T9DatabaseHelper(mContext);
 
         SyncContact syncContact;
@@ -182,6 +176,7 @@ public class ContactsSyncTask {
 
         // Loop all contacts to sync.
         while (cursor.moveToNext()) {
+            progress.setProcessed(cursor.getPosition() + 1);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 long lastUpdated =
                         cursor.getLong(cursor.getColumnIndex(
@@ -234,6 +229,34 @@ public class ContactsSyncTask {
         // Remove dead weight from t9 db.
         t9Database.afterSyncCleanup();
         SyncUtils.setLastSyncNow(mContext);
+    }
+
+    public static Progress getProgress() {
+        return progress;
+    }
+
+    public static class Progress {
+        private int processed, total;
+
+        private Progress(int total) {
+            this.total = total;
+        }
+
+        private void setProcessed(int processed) {
+            this.processed = processed;
+        }
+
+        public int getProcessed() {
+            return processed;
+        }
+
+        public int getTotal() {
+            return total;
+        }
+
+        public boolean isComplete() {
+            return total == processed;
+        }
     }
 }
 

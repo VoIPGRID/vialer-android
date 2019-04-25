@@ -22,6 +22,9 @@
     <string name="call_hangup">Ophangen</string>
     <string name="call_connected">Verbonden</string>
     <string name="call_unreachable">Onbereikbaar</string>
+    <string name="call_back_button_confirmation">Weet je zeker dat je het gesprek wilt beëindigen?</string>
+    <string name="call_back_button_confirmation_yes">Ja, beëindig het gesprek</string>
+    <string name="call_back_button_confirmation_no">Nee</string>
     <string name="dialer_connect_a_b_info">Twee staps modus zal een gesprek opzetten naar je telefoon en zal na beantwooring het gesprek opzetten naar de andere partij.</string>
     <string name="dialer_connect_a_b_info_title">Twee staps modus</string>
     <string name="dialer_warning_a_b_connect">Slechte verbinding, Twee staps modus geactiveerd</string>
@@ -70,6 +73,10 @@
     <string name="forgot_password_missing_field_message">Vul alstublieft alle velden in</string>
     <string name="forgot_password_alert_title">Wachtwoord herstellen</string>
     <string name="forgot_password_alert_message">Als uw gebruikersnaam %1s is zullen we u een e-mail sturen met instructies om uw wachtwoord te herstellen.</string>
+    <string name="forgot_password_failed_title">Wachtwoord herstellen mislukt</string>
+    <string name="forgot_password_failed_message">Probeer nogmaals</string>
+    <string name="forgot_password_success_title">Wachtwoord herstellen</string>
+    <string name="forgot_password_success_message">Binnen enkele momenten zul je een email moeten ontvangen met daarin instructies voor het opnieuw instellen van het wachtwoord.</string>
 
     <!-- Configure fragment values. -->
     <string name="configure_button_title">Instellen</string>
@@ -116,6 +123,7 @@
     <string name="dialer_warning_a_b_connect_connectivity_message">Internetverbinding is niet snel genoeg om te bellen via VoIP. Bellen in twee stappen is ingeschakeld. Wanneer je iemand belt via de app bellen wij jou eerst op je GSM waarmee we je daarna verbinden met degene die je wilt bellen. Het kan zijn dat je telefonieleverancier voor het opzetten van twee verbindingen dubbele kosten in rekening brengt.</string>
     <string name="dialer_warning_a_b_connect_account_message">Je hebt nog geen VoIP account geconfigureerd voor dit gebruikersaccount. Je kan in de beheeromgeving een VoIP account selecteren welke zal worden gebruikt door de app. Zodra je dit hebt gedaan zal je ook via VoIP kunnen bellen in de app.</string>
     <string name="dialer_no_contacts_found_message">Geen contacten gevonden</string>
+    <string name="dialer_contacts_not_processed">%1$d van de %2$d contacten verwerkt</string>
     <string name="dialer_invalid_number">Telefoonnummer incorrect</string>
 
     <string name="user_is_partner_error_title">Login mislukt</string>
@@ -147,8 +155,6 @@
     <string name="account_availability_switch_title">Bereikbaarheid</string>
     <string name="add_availability">Bereikbaarheid toevoegen</string>
     <string name="not_available">Niet bereikbaar</string>
-    <string name="tab_title_recents">recent</string>
-    <string name="tab_title_missed">gemist</string>
 
     <!-- Call notification values -->
     <string name="callnotification_incoming_call">Inkomend gesprek</string>
@@ -250,4 +256,10 @@
     <string name="permission_contact_title">Geen overeenkomende contacten</string>
     <string name="permission_contact_description">%1$s heeft toestemming nodig om toegang te krijgen tot je contacten</string>
     <string name="permission_contact_button">Geef toestemming</string>
+    <string name="choose_codec_text">Audio Kwaliteit</string>
+    <string name="call_codec_standard_quality">Standaard audio</string>
+    <string name="call_codec_high_quality">Hogere audio kwaliteit</string>
+    <string name="tab_title_recents">mijn gesprekken</string>
+    <string name="tab_title_missed">alle gesprekken</string>
+    <string name="call_records_show_all">Laat alleen gemiste gesprekken zien</string>
 </resources>

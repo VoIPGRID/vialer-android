@@ -27,6 +27,8 @@ public interface StatsConstants {
     String KEY_CALL_DURATION = "call_duration";
     String KEY_RX_PACKETS = "rx_packets";
     String KEY_TX_PACKETS = "tx_packets";
+    String KEY_MOS = "mos";
+    String KEY_CODEC = "codec";
 
     String VALUE_OS = "Android";
     String VALUE_APP_STATUS_ALPHA = "Alpha";

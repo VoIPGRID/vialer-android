@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/call_records_background">
 
     <LinearLayout
         android:id="@+id/empty_view"
@@ -9,14 +10,39 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center_horizontal">
-
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:id="@+id/call_records_container"
         >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/call_records_item_background"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp">
+
+            <Switch
+                android:id="@+id/show_missed_calls_only_switch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingRight="@dimen/list_item_contact_padding_right"
+                android:paddingLeft="@dimen/list_item_contact_padding_left"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
+                android:text="@string/call_records_show_all"
+                android:textSize="@dimen/contact_name_text_size"
+                android:fontFamily="sans-serif"
+                android:textColor="@color/contact_name_text_color"
+            />
+
+        </LinearLayout>
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipe_container"
@@ -24,8 +50,8 @@
             android:layout_height="match_parent"
             >
 
-            <ListView
-                android:id="@android:id/list"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/call_records"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingBottom="90dp"

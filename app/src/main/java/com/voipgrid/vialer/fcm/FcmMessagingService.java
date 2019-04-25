@@ -13,7 +13,7 @@ import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.api.Registration;
+import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
@@ -209,7 +209,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * @param remoteMessageData The remote message data that we are handling.
      */
     private void rejectDueToVialerCallAlreadyInProgress(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
-        mRemoteLogger.d("Reject due to lack of connection");
+        mRemoteLogger.d("Reject due to call already in progress");
 
         replyServer(remoteMessageData, false);
 
@@ -239,9 +239,9 @@ public class FcmMessagingService extends FirebaseMessagingService {
      */
     private void replyServer(RemoteMessageData remoteMessageData, boolean isAvailable) {
         mRemoteLogger.d("replyServer");
-        Registration registrationApi = ServiceGenerator.createRegistrationService(this);
+        Middleware middlewareApi = ServiceGenerator.createRegistrationService(this);
 
-        Call<ResponseBody> call = registrationApi.reply(remoteMessageData.getRequestToken(), isAvailable, remoteMessageData.getMessageStartTime());
+        Call<ResponseBody> call = middlewareApi.reply(remoteMessageData.getRequestToken(), isAvailable, remoteMessageData.getMessageStartTime());
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {

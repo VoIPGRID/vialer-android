@@ -10,6 +10,12 @@ import com.voipgrid.vialer.logging.LogUuidGenerator;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.StringDef;
+
 /**
  * Class used for storing preferences related to SIP.
  */
@@ -23,18 +29,27 @@ public class Preferences {
     public static final String PREF_HAS_3G_ENABLED = "PREF_HAS_3G_ENABLED";
     public static final String PREF_HAS_TLS_ENABLED = "PREF_HAS_TLS_ENABLED";
     public static final String PREF_HAS_STUN_ENABLED = "PREF_HAS_STUN_ENABLED";
+    public static final String PREF_AUDIO_CODEC = "PREF_AUDIO_CODEC";
+    public static final String PREF_DISPLAY_MISSED_CALLS_ONLY = "PREF_DISPLAY_MISSED_CALLS_ONLY";
 
     public static final String CONNECTION_PREFERENCE = "CONNECTION_PREFERENCE";
     public static final long CONNECTION_PREFERENCE_NONE = -10;
     public static final long CONNECTION_PREFERENCE_WIFI = ConnectivityHelper.Connection.WIFI.toInt();
     public static final long CONNECTION_PREFERENCE_LTE = ConnectivityHelper.Connection.LTE.toInt();
 
+    public static final int AUDIO_CODEC_ILBC = 1;
+    public static final int AUDIO_CODEC_OPUS = 2;
 
     public static final boolean DEFAULT_VALUE_HAS_SIP_ENABLED = true;
     public static final boolean DEFAULT_VALUE_HAS_SIP_PERMISSION = false;
     public static final boolean DEFAULT_VALUE_HAS_3G_ENABLED = true;
     public static final boolean DEFAULT_VALUE_HAS_TLS_ENABLED = true;
     public static final boolean DEFAULT_VALUE_HAS_STUN_ENABLED = false;
+    public static final int DEFAULT_VALUE_AUDIO_CODEC = AUDIO_CODEC_ILBC;
+
+    @IntDef({AUDIO_CODEC_ILBC, AUDIO_CODEC_OPUS})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioCodec {}
 
     private Context mContext;
     private SharedPreferences mPreferences;
@@ -179,5 +194,21 @@ public class Preferences {
 
     public void setStunEnabled(boolean stunEnabled) {
         mPreferences.edit().putBoolean(PREF_HAS_STUN_ENABLED, stunEnabled).apply();
+    }
+
+    public void setAudioCodec(@AudioCodec int audioCodec) {
+        mPreferences.edit().putInt(PREF_AUDIO_CODEC, audioCodec).apply();
+    }
+
+    public @AudioCodec int getAudioCodec() {
+        return mPreferences.getInt(PREF_AUDIO_CODEC, DEFAULT_VALUE_AUDIO_CODEC);
+    }
+
+    public boolean getDisplayMissedCallsOnly() {
+        return mPreferences.getBoolean(PREF_DISPLAY_MISSED_CALLS_ONLY, false);
+    }
+
+    public void setDisplayMissedCallsOnly(boolean displayMissedCallsOnly) {
+        mPreferences.edit().putBoolean(PREF_DISPLAY_MISSED_CALLS_ONLY, displayMissedCallsOnly).apply();
     }
 }

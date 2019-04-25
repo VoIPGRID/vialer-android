@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.calling;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -98,6 +100,7 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
 
     public static void start() {
         Intent intent = new Intent(VialerApplication.get(), NetworkAvailabilityActivity.class);
+        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
         Logger logger = new Logger(NetworkAvailabilityActivity.class);
         VialerApplication.get().startActivity(intent);
         logger.d("No connectivity available, the Network Availability Activity is being shown");

@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -28,7 +28,7 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
         View.OnClickListener, Callback {
 
     private AccountHelper mAccountHelper;
-    private Api mApi;
+    private VoipgridApi mVoipgridApi;
     private Context mContext;
     private FragmentInteractionListener mListener;
     private JsonStorage mJsonStorage;
@@ -64,7 +64,7 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
         mAccountHelper = new AccountHelper(mContext);
 
         mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        mApi = ServiceGenerator.createApiService(getActivity());
+        mVoipgridApi = ServiceGenerator.createApiService(getActivity());
 
         mVoipAccountButton = (Button) view.findViewById(R.id.set_voip_account_button);
         mVoipAccountButton.setOnClickListener(this);
@@ -136,7 +136,7 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
             String phoneAccountId = mSystemUser.getPhoneAccountId();
             if (phoneAccountId != null) {
                 // Request new phoneaccount object.
-                Call<PhoneAccount> apicall = mApi.phoneAccount(phoneAccountId);
+                Call<PhoneAccount> apicall = mVoipgridApi.phoneAccount(phoneAccountId);
                 apicall.enqueue(this);
             } else {
                 // User has no phone account linked so remove it from the local storage.
@@ -153,8 +153,8 @@ public class SetUpVoipAccountFragment extends OnboardingFragment implements
     }
 
     private void requestSystemUser() {
-        mApi = ServiceGenerator.createApiService(mContext);
-        Call<SystemUser> call = mApi.systemUser();
+        mVoipgridApi = ServiceGenerator.createApiService(mContext);
+        Call<SystemUser> call = mVoipgridApi.systemUser();
         call.enqueue(this);
     }
 

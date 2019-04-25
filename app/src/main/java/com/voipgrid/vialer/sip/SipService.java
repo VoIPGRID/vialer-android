@@ -1,5 +1,8 @@
 package com.voipgrid.vialer.sip;
 
+import static com.voipgrid.vialer.sip.SipConstants.ACTION_CALL_INCOMING;
+import static com.voipgrid.vialer.sip.SipConstants.ACTION_CALL_OUTGOING;
+
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -13,6 +16,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
@@ -39,31 +43,7 @@ import javax.inject.Inject;
  * provides a persistent interface to SIP services throughout the app.
  *
  */
-public class SipService extends Service implements SipConfig.Listener {
-    private final IBinder mBinder = new SipServiceBinder();
-
-    private Handler mHandler;
-    private Intent mIncomingCallDetails = null;
-    private ToneGenerator mToneGenerator;
-    private NetworkConnectivity mNetworkConnectivity = new NetworkConnectivity();
-
-    private Preferences mPreferences;
-    private Logger mLogger;
-    private SipBroadcaster mSipBroadcaster;
-    private SipCall mCurrentCall;
-    private SipCall mInitialCall;
-    private NativeCallManager mNativeCallManager;
-
-    private List<SipCall> mCallList = new ArrayList<>();
-    private String mInitialCallType;
-
-    private static final int CHECK_SERVICE_USER_INTERVAL_MS = 20000;
-    private Handler mCheckServiceHandler;
-    private Runnable mCheckServiceRunnable;
-    @Nullable private Intent mIntent;
-
-    @Inject SipConfig mSipConfig;
-    @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
+public class SipService extends Service {
 
     /**
      * This will track whether this instance of SipService has ever handled a call,
@@ -72,71 +52,33 @@ public class SipService extends Service implements SipConfig.Listener {
      */
     private boolean mSipServiceHasHandledACall = false;
 
-    private final BroadcastReceiver phoneStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            try {
-                String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-
-                if (!phoneState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
-                    return;
-                }
-
-                // When the native call has been picked up and there is a current call in the ringing state
-                // Then decline the current call.
-                mLogger.e("Native call is picked up.");
-                mLogger.e("Is there an active call: " + (mCurrentCall != null));
-
-                if (mCurrentCall == null) {
-                    return;
-                }
-
-                mLogger.e("Current call state: " + mCurrentCall.getCurrentCallState());
-
-                if (mCurrentCall.isCallRinging() || mCurrentCall.getCurrentCallState().equals(SipConstants.CALL_INVALID_STATE)) {
-                    mLogger.e("Our call is still ringing. So decline it.");
-                    mCurrentCall.decline();
-                    return;
-                }
-
-                if (mCurrentCall.isConnected() && !mCurrentCall.isOnHold()) {
-                    mLogger.e("Call was not on hold already. So put call on hold.");
-                    mCurrentCall.toggleHold();
-                }
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
     /**
      * Set when the SipService is active. This is used to respond to the middleware.
      */
     public static boolean sipServiceActive = false;
 
-    /**
-     * Class the be able to bind a activity to this service.
-     */
-    public class SipServiceBinder extends Binder {
-        public SipService getService() {
-            // Return this instance of SipService so clients can call public methods.
-            return SipService.this;
-        }
-    }
+    private Intent mIncomingCallDetails = null;
+    private SipCall mCurrentCall;
+    private SipCall mInitialCall;
+    private List<SipCall> mCallList = new ArrayList<>();
+    private String mInitialCallType;
 
-    /**
-     * SIP does not present Media by default.
-     * Use Android's ToneGenerator to play a dial tone at certain required times.
-     * @see for usage of delayed "mRingbackRunnable" callback.
-     */
-    private Runnable mRingbackRunnable = new Runnable() {
-        @Override
-        public void run() {
-            // Play a ring back tone to update a user that setup is ongoing.
-            mToneGenerator.startTone(ToneGenerator.Constants.TONE_SUP_DIAL, 1000);
-            mHandler.postDelayed(mRingbackRunnable, 4000);
-        }
-    };
+    @Nullable private Intent mIntent;
+
+    private Logger mLogger;
+    private SipBroadcaster mSipBroadcaster;
+    private final BroadcastReceiver phoneStateReceiver = new PhoneStateReceiver();
+    private Runnable mRingbackRunnable = new OutgoingCallRinger();
+    private final IBinder mBinder = new SipServiceBinder();
+    private CheckServiceIsRunning mCheckService = new CheckServiceIsRunning();
+    @Inject protected SipConfig mSipConfig;
+    @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
+    @Inject protected Handler mHandler;
+    @Inject protected Preferences mPreferences;
+    @Inject protected ToneGenerator mToneGenerator;
+    @Inject protected NetworkConnectivity mNetworkConnectivity;
+    @Inject protected NativeCallManager mNativeCallManager;
+    @Inject @Nullable protected PhoneAccount mPhoneAccount;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -146,77 +88,105 @@ public class SipService extends Service implements SipConfig.Listener {
     @Override
     public void onCreate() {
         super.onCreate();
+        mLogger = new Logger(SipService.class);
+        mSipBroadcaster = new SipBroadcaster(this);
         VialerApplication.get().component().inject(this);
         AudioStateChangeReceiver.fetch();
-
-        mHandler = new Handler();
-
-        mToneGenerator = new ToneGenerator(
-                AudioManager.STREAM_VOICE_CALL,
-                SipConstants.RINGING_VOLUME);
-
-        mSipBroadcaster = new SipBroadcaster(this);
-
-        mPreferences = new Preferences(this);
-        mLogger = new Logger(SipService.class);
-        mNativeCallManager = new NativeCallManager((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE));
-
         mLogger.d("onCreate");
 
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(phoneStateReceiver, TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
+        mCheckService.start();
+    }
 
-        // Create runnable to check if the SipService is still in use.
-        mCheckServiceHandler = new Handler();
-        mCheckServiceRunnable = new Runnable() {
-            @Override
-            public void run() {
-                // Check if the service is being used after 10 seconds and shutdown the service
-                // if required.
-                checkServiceBeingUsed();
-                mCheckServiceHandler.postDelayed(this, CHECK_SERVICE_USER_INTERVAL_MS);
-            }
-        };
-        mCheckServiceHandler.postDelayed(mCheckServiceRunnable, CHECK_SERVICE_USER_INTERVAL_MS);
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mLogger.i("mSipServiceHasHandledACall: " + mSipServiceHasHandledACall);
 
-        PhoneAccount phoneAccount = new JsonStorage<PhoneAccount>(this).get(PhoneAccount.class);
-        if (phoneAccount != null) {
-            // Try to load PJSIP library.
-            mSipConfig = mSipConfig.init(this, phoneAccount);
-            mSipConfig.initLibrary(this);
-        } else {
-            // User has no sip account so destroy the service.
+        // If the SipService has already handled a call but now has no call, this suggests
+        // that the SipService is stuck not doing anything so it should be immediately shut
+        // down.
+        if (mSipServiceHasHandledACall && mCurrentCall == null) {
+            mLogger.i("onStartCommand was triggered after a call has already been handled but with no current call, stopping SipService...");
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        handleCallDeclineIntentIfAppropriate();
+
+        initialiseCallBasedOnIntent(intent);
+
+        return START_NOT_STICKY;
+    }
+
+    /**
+     * Initialise the call based on the information in the intent.
+     *
+     * @param intent
+     */
+    public void initialiseCallBasedOnIntent(Intent intent) {
+        if (intent == null) return;
+
+        mIntent = intent;
+        mInitialCallType = mIntent.getAction();
+
+        if (ACTION_CALL_INCOMING.equals(mInitialCallType)) {
+            initialiseIncomingCall();
+        }
+        else if (ACTION_CALL_OUTGOING.equals(mInitialCallType)) {
+            initialiseOutgoingCall(intent);
+        }
+        else {
+            mLogger.e("Stopping SipService as an intent with no action was received");
+            stopSelf();
+        }
+    }
+
+    /**
+     * Perform necessary steps to initialise an incoming call.
+     *
+     */
+    private void initialiseIncomingCall() {
+        mLogger.d("incomingCall");
+        mIncomingCallDetails = mIntent;
+        loadSip();
+    }
+
+    /**
+     * Perform necessary steps to initialise an outgoing call.
+     *
+     */
+    private void initialiseOutgoingCall(Intent intent) {
+        mLogger.d("outgoingCall");
+        loadSip();
+        makeCall(
+                intent.getData(),
+                mIntent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
+                mIntent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
+                true
+        );
+    }
+
+    /**
+     * Begin the process of actually starting the SIP library so we can
+     * start/receive calls.
+     *
+     */
+    private void loadSip() {
+        if (mPhoneAccount == null) {
             mLogger.w("No sip account when trying to create service");
             stopSelf();
+            return;
         }
-    }
 
-    private void checkServiceBeingUsed() {
-        mLogger.d("checkServiceBeingUsed");
-        if (mCurrentCall == null) {
-            mLogger.i("No active calls stop the service");
+        try {
+            mLogger.i("Attempting to load sip lib");
+            mSipConfig = mSipConfig.init(this, mPhoneAccount);
+            mSipConfig.initLibrary();
+        } catch (Exception e) {
+            mLogger.e("Failed to load pjsip, stopping the service");
             stopSelf();
         }
-    }
-
-    public Logger getLogger() {
-        return mLogger;
-    }
-
-    public Preferences getPreferences() {
-        return mPreferences;
-    }
-
-    public NativeCallManager getNativeCallManager() {
-        return mNativeCallManager;
-    }
-
-    public String getInitialCallType() {
-        return mInitialCallType;
-    }
-
-    public SipConfig getSipConfig() {
-        return mSipConfig;
     }
 
     @Override
@@ -237,80 +207,32 @@ public class SipService extends Service implements SipConfig.Listener {
             mLogger.w("Trying to unregister phoneStateReceiver not registered.");
         }
 
-        mCheckServiceHandler.removeCallbacks(mCheckServiceRunnable);
+        mHandler.removeCallbacks(mCheckService);
 
         sipServiceActive = false;
         super.onDestroy();
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        mLogger.d("onStartCommand");
-        mLogger.i("onStartCommand mSipServiceHasHandledACall: " + mSipServiceHasHandledACall);
+    /**
+     * We will also handle an intent that is telling us to decline the incoming call,
+     * this intent is currently sent when the user presses decline on the call
+     * notification as there is no activity to defer to, it must be handled here.
+     *
+     */
+    private void handleCallDeclineIntentIfAppropriate() {
+        if (mIntent == null || mIntent.getType() == null) return;
 
-        // If the SipService has already handled a call but now has no call, this suggests
-        // that the SipService is stuck not doing anything so it should be immediately shut
-        // down.
-        if (mSipServiceHasHandledACall && mCurrentCall == null) {
-            mLogger.i("onStartCommand was triggered after a call has already been handled but with no current call, stopping SipService...");
+        if (!mIntent.getType().equals(SipConstants.CALL_DECLINE_INCOMING_CALL)) return;
+
+        try {
+            mLogger.i("Attempting to decline a call based on the intent type broadcast to the SipService");
+            mCurrentCall.decline();
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.cancelAll();
             stopSelf();
-            return START_NOT_STICKY;
+        } catch(Exception e) {
+            e.printStackTrace();
         }
-
-        mIntent = intent;
-
-        return START_NOT_STICKY;
-    }
-
-    @Override
-    public void pjSipDidLoad() {
-        if (mIntent == null) {
-            return;
-        }
-
-        mInitialCallType = mIntent.getAction();
-        Uri number = mIntent.getData();
-
-        switch (mInitialCallType) {
-            case SipConstants.ACTION_CALL_INCOMING:
-                mLogger.d("incomingCall");
-                mIncomingCallDetails = mIntent;
-                break;
-            case SipConstants.ACTION_CALL_OUTGOING:
-                mLogger.d("outgoingCall");
-                makeCall(
-                        number,
-                        mIntent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
-                        mIntent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
-                        true
-                );
-                break;
-            default:
-                stopSelf();
-        }
-
-        if (mIntent.getType() != null) {
-            if (mIntent.getType().equals(SipConstants.CALL_DECLINE_INCOMING_CALL)) {
-                try {
-                    mCurrentCall.decline();
-                    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                    notificationManager.cancelAll();
-                    stopSelf();
-                } catch(Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    @Override
-    public void pjSipFailedToLoad(Exception e) {
-        mLogger.e("Unable to load pjsip: " + e.getClass().getSimpleName() + ": " + e.getMessage());
-        stopSelf();
-    }
-
-    public SipBroadcaster getSipBroadcaster() {
-        return mSipBroadcaster;
     }
 
     /**
@@ -354,13 +276,11 @@ public class SipService extends Service implements SipConfig.Listener {
      * @param startActivity
      */
     public void makeCall(Uri number, String contactName, String phoneNumber, boolean startActivity) {
-        new Thread(() -> {
-            SipCall call = new SipCall(this, getSipConfig().getSipAccount());
-            call.setPhoneNumberUri(number);
-            call.setCallerId(contactName);
-            call.setPhoneNumber(phoneNumber);
-            call.onCallOutgoing(number, startActivity);
-        }).start();
+        SipCall call = new SipCall(this, getSipConfig().getSipAccount());
+        call.setPhoneNumberUri(number);
+        call.setCallerId(contactName);
+        call.setPhoneNumber(phoneNumber);
+        call.onCallOutgoing(number, startActivity);
     }
 
     /**
@@ -467,6 +387,119 @@ public class SipService extends Service implements SipConfig.Listener {
             return mCallList.get(0);
         } else {
             return null;
+        }
+    }
+
+    public Logger getLogger() {
+        return mLogger;
+    }
+
+    public Preferences getPreferences() {
+        return mPreferences;
+    }
+
+    public NativeCallManager getNativeCallManager() {
+        return mNativeCallManager;
+    }
+
+    public String getInitialCallType() {
+        return mInitialCallType;
+    }
+
+    public SipConfig getSipConfig() {
+        return mSipConfig;
+    }
+
+    public SipBroadcaster getSipBroadcaster() {
+        return mSipBroadcaster;
+    }
+
+    /**
+     * Class the be able to bind a activity to this service.
+     */
+    public class SipServiceBinder extends Binder {
+        public SipService getService() {
+            // Return this instance of SipService so clients can call public methods.
+            return SipService.this;
+        }
+    }
+
+    private class PhoneStateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try {
+                String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
+
+                if (!phoneState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                    return;
+                }
+
+                // When the native call has been picked up and there is a current call in the ringing state
+                // Then decline the current call.
+                mLogger.e("Native call is picked up.");
+                mLogger.e("Is there an active call: " + (mCurrentCall != null));
+
+                if (mCurrentCall == null) {
+                    return;
+                }
+
+                mLogger.e("Current call state: " + mCurrentCall.getCurrentCallState());
+
+                if (mCurrentCall.isCallRinging() || mCurrentCall.getCurrentCallState().equals(SipConstants.CALL_INVALID_STATE)) {
+                    mLogger.e("Our call is still ringing. So decline it.");
+                    mCurrentCall.decline();
+                    return;
+                }
+
+                if (mCurrentCall.isConnected() && !mCurrentCall.isOnHold()) {
+                    mLogger.e("Call was not on hold already. So put call on hold.");
+                    mCurrentCall.toggleHold();
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class OutgoingCallRinger implements Runnable {
+        @Override
+        public void run() {
+            // Play a ring back tone to update a user that setup is ongoing.
+            mToneGenerator.startTone(ToneGenerator.Constants.TONE_SUP_DIAL, 1000);
+            mHandler.postDelayed(mRingbackRunnable, 4000);
+        }
+    }
+
+    /**
+     * Starting this runnable spawns an ongoing check every {@value #CHECK_SERVICE_USER_INTERVAL_MS}ms that will
+     * shutdown the service if there is no active call. This is a fallback to ensure the SipService is properly
+     * shut down after a call if for some reason it wasn't.
+     *
+     */
+    private class CheckServiceIsRunning implements Runnable {
+
+        /**
+         * The timeout between checks to determine the service is still running.
+         *
+         */
+        static final int CHECK_SERVICE_USER_INTERVAL_MS = 20000;
+
+        private void start() {
+            mHandler.postDelayed(mCheckService, CHECK_SERVICE_USER_INTERVAL_MS);
+        }
+
+        @Override
+        public void run() {
+            stopServiceIfNoActiveCalls();
+            mHandler.postDelayed(this, CHECK_SERVICE_USER_INTERVAL_MS);
+        }
+
+        private void stopServiceIfNoActiveCalls() {
+            mLogger.d("checkServiceBeingUsed");
+            if (mCurrentCall == null) {
+                mLogger.i("No active calls stop the service");
+                stopSelf();
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_DURATION;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_SETUP_SUCCESSFUL;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CLIENT_COUNTRY;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CODEC;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CONNECTION_TYPE;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_DEVICE_MANUFACTURER;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_DEVICE_MODEL;
@@ -22,6 +23,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_HANGUP_REASON;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_LOG_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_MIDDLEWARE_ATTEMPTS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_MIDDLEWARE_KEY;
+import static com.voipgrid.vialer.statistics.StatsConstants.KEY_MOS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_NETWORK;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_NETWORK_OPERATOR;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_OS;
@@ -54,13 +56,12 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_WIFI;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_OS;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.Registration;
+import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.Logger;
@@ -84,7 +85,7 @@ public class VialerStatistics {
     private final DefaultDataProvider mDefaultDataProvider;
     private final BluetoothDataProvider mBluetoothDataProvider;
     private final Logger mLogger;
-    private final Registration mRegistration;
+    private final Middleware mMiddleware;
 
     private Map<String, String> payload;
 
@@ -98,8 +99,8 @@ public class VialerStatistics {
         );
     }
 
-    private VialerStatistics(Preferences preferences, JsonStorage jsonStorage, Registration registration) {
-        mRegistration = registration;
+    private VialerStatistics(Preferences preferences, JsonStorage jsonStorage, Middleware middleware) {
+        mMiddleware = middleware;
         mLogger = new Logger(this.getClass());
         mDefaultDataProvider = new DefaultDataProvider(preferences, jsonStorage);
         mBluetoothDataProvider = new BluetoothDataProvider();
@@ -311,6 +312,7 @@ public class VialerStatistics {
         addValue(KEY_CALL_DIRECTION, call.getCallDirection());
         addValue(KEY_CONNECTION_TYPE, call.getTransport() != null ? call.getTransport().toUpperCase() : "");
         addValue(KEY_ACCOUNT_CONNECTION_TYPE, SecureCalling.fromContext(VialerApplication.get()).isEnabled() ? VALUE_ACCOUNT_CONNECTION_TYPE_TLS : VALUE_ACCOUNT_CONNECTION_TYPE_TCP);
+        addValue(KEY_CODEC, call.getCodec());
 
         if (call.getMessageStartTime() != null) {
             addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(call.getMessageStartTime())));
@@ -321,6 +323,10 @@ public class VialerStatistics {
         if (packetStats != null) {
             addValue(KEY_RX_PACKETS, String.valueOf(packetStats.getReceived()));
             addValue(KEY_TX_PACKETS, String.valueOf(packetStats.getSent()));
+        }
+
+        if (call.hasCalculatedMos()) {
+            addValue(KEY_MOS, String.valueOf(call.getMos()));
         }
 
         return this;
@@ -361,7 +367,7 @@ public class VialerStatistics {
     }
 
     private void send() {
-        mRegistration.metrics(payload).enqueue(new VialerStatisticsRequestCallback(mLogger));
+        mMiddleware.metrics(payload).enqueue(new VialerStatisticsRequestCallback(mLogger));
         log();
         resetPayload();
     }

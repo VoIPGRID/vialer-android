@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.voipgrid.vialer.AccountActivity">
+    tools:context="com.voipgrid.vialer.SettingsActivity">
     <item android:id="@+id/action_edit" android:title="@string/action_edit"
         android:icon="@drawable/ic_mode_edit_white_18dp"
         android:visible="false"

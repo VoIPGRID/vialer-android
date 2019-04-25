@@ -113,7 +113,7 @@ public class ForgotPasswordFragment extends OnboardingFragment implements View.O
 
     @Override
     public void onError(String error) {
-
+        reportErrorOrConnectivityError(R.string.forgot_password_failed_title, R.string.forgot_password_failed_message);
     }
 
     interface FragmentInteractionListener extends OnboardingFragment.FragmentInteractionListener {

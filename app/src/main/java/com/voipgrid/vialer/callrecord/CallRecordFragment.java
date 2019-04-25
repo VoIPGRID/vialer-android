@@ -1,325 +1,275 @@
 package com.voipgrid.vialer.callrecord;
 
-import android.app.Activity;
-import android.os.AsyncTask;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.fragment.app.ListFragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 
 import com.voipgrid.vialer.EmptyView;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.api.Api;
-import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.CallRecord;
-import com.voipgrid.vialer.api.models.VoipGridResponse;
-import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.JsonStorage;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
+import com.voipgrid.vialer.util.NetworkUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import javax.inject.Inject;
 
-/**
- * A fragment representing a list of call records.
- */
-public class CallRecordFragment extends ListFragment implements
-        Callback<VoipGridResponse<CallRecord>>,
-        SwipeRefreshLayout.OnRefreshListener {
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.paging.LivePagedListBuilder;
+import androidx.paging.PagedList;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
+import butterknife.Unbinder;
 
-    private static final String ARG_FILTER = "filter";
-    public static final String FILTER_MISSED_RECORDS = "missed-records";
 
-    private OnFragmentInteractionListener mListener;
-    private CallRecordAdapter mAdapter;
-    private List<CallRecord> mCallRecords = new ArrayList<>();
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+public class CallRecordFragment extends Fragment
+        implements SwipeRefreshLayout.OnRefreshListener, Observer<PagedList<CallRecord>>, MissedCalls.Callback {
 
-    private AnalyticsHelper mAnalyticsHelper;
-    private ConnectivityHelper mConnectivityHelper;
-    private JsonStorage mJsonStorage;
+    @Inject CallRecordDataSourceFactory factory;
+    @Inject CallRecordAdapter adapter;
+    @Inject MissedCalls mMissedCalls;
+    @Inject MissedCallsAdapter missedCallsAdapter;
+    @Inject Preferences mPreferences;
+    @Inject NetworkUtil mNetworkUtil;
+    @Inject BroadcastReceiverManager mBroadcastReceiverManager;
 
-    private String mFilter;
-    private boolean mHaveNetworkRecords;
+    @BindView(R.id.swipe_container) SwipeRefreshLayout swipeContainer;
+    @BindView(R.id.call_records) RecyclerView mRecyclerView;
+    @BindView(R.id.show_missed_calls_only_switch) Switch showMissedCallsOnlySwitch;
+    @BindView(R.id.call_records_container) View mCallRecordsContainer;
 
-    public static CallRecordFragment newInstance(String filter) {
+    private Unbinder unbinder;
+    private NetworkChangeReceiver mNetworkChangeReceiver = new NetworkChangeReceiver();
+
+    private boolean fetchCallsFromEntireAccount = false;
+
+    /**
+     * The number of call records to fetch with each HTTP request.
+     */
+    private static final int CALL_RECORDS_PAGE_SIZE = 50;
+
+    /**
+     * Display only the user's calls.
+     *
+     */
+    public static CallRecordFragment mine() {
+        return new CallRecordFragment();
+    }
+
+    /**
+     * Display the user's calls for the entire account.
+     *
+     */
+    public static CallRecordFragment all() {
         CallRecordFragment fragment = new CallRecordFragment();
-        Bundle arguments = new Bundle();
-        arguments.putString(ARG_FILTER, filter);
-        fragment.setArguments(arguments);
+        fragment.fetchCallsFromEntireAccount = true;
         return fragment;
     }
 
-    private class AsyncCallRecordLoader extends AsyncTask<Void, Void, List<CallRecord>> {
-        private JsonStorage<CallRecord[]> mJsonStorage;
-        public AsyncCallRecordLoader() {
-            mJsonStorage = new JsonStorage<>(getActivity());
-        }
-
-        protected List<CallRecord> doInBackground(Void args[]) {
-            CallRecord[] records = mJsonStorage.get(CallRecord[].class);
-            if (records != null) {
-                return Arrays.asList(records);
-            } else {
-                return new ArrayList<>();
-            }
-        }
-
-        protected void onPostExecute(List<CallRecord> records) {
-            if(isAdded()){
-                // Only display Records when the fragment is still attached to an activity.
-                displayCachedRecords(records);
-            }
-        }
-    }
-
-    private class AsyncCallRecordSaver extends AsyncTask<Void, Void, Void> {
-        private List<CallRecord> mRecords;
-
-        public AsyncCallRecordSaver(List<CallRecord> records) {
-            mRecords = records;
-        }
-
-        protected Void doInBackground(Void args[]) {
-            CallRecord[] records = new CallRecord[mRecords.size()];
-            mRecords.toArray(records);
-            mJsonStorage.save(records);
-            return null;
-        }
-    }
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public CallRecordFragment() {
-    }
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        /* set the AnalyticsHelper */
-        mAnalyticsHelper = new AnalyticsHelper(
-                ((AnalyticsApplication) getActivity().getApplication()).getDefaultTracker()
-        );
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_call_records, null);
+        VialerApplication.get().component().inject(this);
+        unbinder = ButterKnife.bind(this, view);
 
-        mConnectivityHelper = ConnectivityHelper.get(getActivity());
+        if (fetchCallsFromEntireAccount) {
+            factory.fetchCallsFromEntireAccount();
+        }
 
-        mJsonStorage = new JsonStorage(getActivity());
-        mFilter = getArguments().getString(ARG_FILTER);
-    }
-
-    @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
-    ) {
-        return inflater.inflate(R.layout.fragment_call_records, null);
+        return view;
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setupMissedCallsAdapter();
+        setupCallRecordAdapter();
+        setupSwipeContainer();
+        setupRecyclerView();
+        showAppropriateRecords();
+        showMissedCallsOnlySwitch.setChecked(mPreferences.getDisplayMissedCallsOnly());
+        onRefresh();
+    }
 
-        mAdapter = new CallRecordAdapter(getActivity(), mCallRecords);
+    private void showAppropriateRecords() {
+        mRecyclerView.setAdapter(showMissedCalls() ? missedCallsAdapter : adapter);
+    }
 
-        /* setup swipe refresh layout */
-        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
-        mSwipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.color_refresh));
-        mSwipeRefreshLayout.setOnRefreshListener(this);
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-            }
-        });
+    private void setupCallRecordAdapter() {
+        PagedList.Config config = new PagedList.Config.Builder().setPageSize(CALL_RECORDS_PAGE_SIZE).build();
+        new LivePagedListBuilder(factory, config).build().observe(this, this);
+        adapter.setActivity(getActivity());
+    }
 
-        loadCallRecordsFromApi();
-        loadCallRecordsFromCache();
-        getListView().setAdapter(mAdapter);
+    private void setupMissedCallsAdapter() {
+        missedCallsAdapter.setActivity(getActivity());
+    }
+
+    private void setupSwipeContainer() {
+        swipeContainer.setColorSchemeColors(getResources().getColor(R.color.color_refresh));
+        swipeContainer.setOnRefreshListener(this);
+        swipeContainer.post(() -> swipeContainer.setRefreshing(true));
+    }
+
+    private void setupRecyclerView() {
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(VialerApplication.get());
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
+    @Override
+    public void onRefresh() {
+        if (!mNetworkUtil.isOnline()) {
+            mCallRecordsContainer.setVisibility(View.GONE);
+            setEmptyView(new EmptyView(getActivity(), getString(R.string.no_network_connection)), true);
+            return;
+        } else {
+            setEmptyView(null, false);
+        }
+
+        mCallRecordsContainer.setVisibility(View.VISIBLE);
+
+        if (showMissedCalls()) {
+            mMissedCalls.fetch(this, fetchCallsFromEntireAccount);
+            return;
+        }
+
+        if (factory == null || factory.getPostLiveData() == null || factory.getPostLiveData().getValue() == null) {
+            return;
+        }
+
+        factory.getPostLiveData().getValue().invalidate();
+    }
+
+    @Override
+    public void onChanged(PagedList<CallRecord> callRecords) {
+        swipeContainer.setRefreshing(false);
+
+        if (callRecords.isEmpty()) {
+            displayError(R.string.empty_view_default_message);
+            return;
+        }
+
+        int code = factory.getPostLiveData().getValue().getLastCode();
+
+        if (!String.valueOf(code).startsWith("2")) {
+            handleFailedRequest(code);
+            return;
+        }
+
+        hideError();
+        adapter.submitList(callRecords);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean visible) {
+        super.setUserVisibleHint(visible);
+        if (!visible) return;
+
+        if (mPreferences != null && showMissedCallsOnlySwitch != null) {
+            redrawList();
+            showMissedCallsOnlySwitch.setChecked(mPreferences.getDisplayMissedCallsOnly());
+        }
+    }
+
+    /**
+     * Force the recycler view to redraw the table, updating the relative timestamps.
+     *
+     */
+    private void redrawList() {
+        mRecyclerView.setAdapter(mRecyclerView.getAdapter());
+    }
+
+    @Override
+    public void missedCallsHaveBeenRetrieved(List<CallRecord> missedCallRecords) {
+        swipeContainer.setRefreshing(false);
+
+        if (missedCallRecords.isEmpty()) {
+            displayError(R.string.empty_view_missed_message);
+            return;
+        }
+
+        hideError();
+        missedCallsAdapter.setRecords(missedCallRecords);
+    }
+
+    @Override
+    public void attemptToRetrieveMissedCallsDidFail(int code) {
+        handleFailedRequest(code);
+    }
+
+    private void handleFailedRequest(int code) {
+        swipeContainer.setRefreshing(false);
+
+        int message = R.string.empty_view_default_message;
+
+        if(code == 401 || code == 403) {
+            message = R.string.empty_view_unauthorized_message;
+        }
+
+        final String messageString = getString(message);
+
+        getActivity().runOnUiThread(() -> setEmptyView(new EmptyView(getActivity(), messageString), true));
+    }
+
+    private boolean showMissedCalls() {
+        return mPreferences.getDisplayMissedCallsOnly();
+    }
+
+    @OnCheckedChanged(R.id.show_missed_calls_only_switch)
+    void missedCallsSwitchWasChanged(CompoundButton missedCallsSwitch, boolean checked) {
+        mPreferences.setDisplayMissedCallsOnly(checked);
+        showAppropriateRecords();
+        swipeContainer.setRefreshing(true);
+        onRefresh();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
-        // Check if wifi should be turned back on.
-        if(ConnectivityHelper.mWifiKilled) {
-            mConnectivityHelper.useWifi(getActivity(), true);
-            ConnectivityHelper.mWifiKilled = false;
-        }
-        mAdapter.mCallAlreadySetup = false;
+        redrawList();
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkChangeReceiver, "android.net.conn.CONNECTIVITY_CHANGE");
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(
-                    activity.toString() + " must implement OnFragmentInteractionListener"
-            );
-        }
+    public void onPause() {
+        super.onPause();
+        mBroadcastReceiverManager.unregisterReceiver(mNetworkChangeReceiver);
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
+    private void displayError(int string) {
+        setEmptyView(new EmptyView(getActivity(), getString(string)), true);
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-    }
-
-    /**
-     * Perform a refresh action
-     */
-    @Override
-    public void onRefresh() {
-        loadCallRecordsFromApi();
-    }
-
-    private void loadCallRecordsFromApi() {
-        mHaveNetworkRecords = false;
-
-        Api api = ServiceGenerator.createApiService(getContext());
-
-        Call<VoipGridResponse<CallRecord>> call = api.getRecentCalls(
-                50, 0, CallRecord.getLimitDate()
-        );
-        call.enqueue(this);
-    }
-
-    /* Load from local cache first */
-    private void loadCallRecordsFromCache() {
-        new AsyncCallRecordLoader().execute();
-    }
-
-    private void displayCachedRecords(List<CallRecord> records) {
-        // Cached results arrived later than the network results.
-        if (mHaveNetworkRecords) {
-            return;
-        }
-        displayCallRecords(records);
-    }
-
-    private void displayCallRecords(List<CallRecord> records) {
-        List<CallRecord> filtered = filter(records);
-
-        if(filtered != null && filtered.size() > 0) {
-            mAdapter.setCallRecords(filtered);
-            setEmptyView(null, false);
-        } else if(mAdapter.getCount() == 0) {
-            // List is empty, but adapter view may not be. Since this method is only called in
-            // success cases, ignore this case.
-            String emptyText;
-
-            if (mFilter != null && mFilter.equals(FILTER_MISSED_RECORDS)) {
-                emptyText = getString(R.string.empty_view_missed_message);
-            } else {
-                emptyText = getString(R.string.empty_view_default_message);
-            }
-
-            setEmptyView(
-                    new EmptyView(getActivity(), emptyText),
-                    true
-            );
-        }
-        mSwipeRefreshLayout.setRefreshing(false);
-    }
-
-    /**
-     * Apply filter on call records or return the call record list when the filter is null
-     * @param callRecords List of CallRecord instances
-     * @return List of CallRecord instances.
-     */
-    private List<CallRecord> filter(List<CallRecord> callRecords) {
-        if (mFilter != null && callRecords != null && callRecords.size() > 0) {
-            List<CallRecord> filtered = new ArrayList<>();
-
-            if (mFilter.equals(FILTER_MISSED_RECORDS)) {
-                for (int i=0, size = callRecords.size(); i < size; i++) {
-                    CallRecord callRecord = callRecords.get(i);
-
-                    if (callRecord.getDirection().equals(CallRecord.DIRECTION_INBOUND) &&
-                            callRecord.getDuration() == 0) {
-                        filtered.add(callRecord);
-                    }
-                }
-            }
-            return filtered;
-        }
-        return callRecords;
-    }
-
-    @Override
-    public void onResponse(@NonNull Call<VoipGridResponse<CallRecord>> call,
-                           @NonNull Response<VoipGridResponse<CallRecord>> response) {
-        if (response.isSuccessful() && response.body() != null) {
-            mHaveNetworkRecords = true;
-            List<CallRecord> records = response.body().getObjects();
-
-            if(getActivity() != null && isAdded()) {
-                displayCallRecords(records);
-            }
-
-            // Save the records to cache, if there are any.
-            if (filter(records).size() > 0) {
-                new AsyncCallRecordSaver(records).execute();
-            }
-        } else {
-            failedFeedback(response);
-        }
-    }
-
-    @Override
-    public void onFailure(Call call, Throwable t) {
-        failedFeedback(null);
-    }
-
-    private void failedFeedback(Response response) {
-        if (getActivity() == null) {
-            new Logger(CallRecordFragment.class).e("CallRecordFragment is no longer attached to an activity");
-            return;
-        }
-
-        String message = getString(R.string.empty_view_default_message);
-
-        // Check if authorized.
-        if(response != null && (response.code() == 401 || response.code() == 403)) {
-            message = getString(R.string.empty_view_unauthorized_message);
-        }
-        if (mAdapter.getCount() == 0) {
-            setEmptyView(new EmptyView(getActivity(), message), true);
-        } else {
-            // Adapter has cached values and we're not about to overwrite them. However,
-            // we do want to notify the user.
-            Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();
-        }
-        mSwipeRefreshLayout.setRefreshing(false);
+    private void hideError() {
+        setEmptyView(new EmptyView(getActivity(), null), false);
     }
 
     private void setEmptyView(EmptyView emptyView, boolean visible) {
         if(getView() != null) {
-            ViewGroup view = (ViewGroup) getView().findViewById(R.id.empty_view);
+            ViewGroup view = getView().findViewById(R.id.empty_view);
             if (view.getChildCount() > 0) {
                 view.removeAllViews();
             }
@@ -330,18 +280,13 @@ public class CallRecordFragment extends ListFragment implements
         }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(String id);
-    }
+    public class NetworkChangeReceiver extends BroadcastReceiver {
 
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mCallRecordsContainer.getVisibility() != View.VISIBLE) {
+                onRefresh();
+            }
+        }
+    }
 }

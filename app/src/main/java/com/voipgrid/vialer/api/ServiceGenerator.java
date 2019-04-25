@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.interceptors.AddAuthorizationCredentialsToRequest;
 import com.voipgrid.vialer.api.interceptors.AddUserAgentToHeader;
+import com.voipgrid.vialer.api.interceptors.LogResponsesToConsole;
 import com.voipgrid.vialer.api.interceptors.LogUserOutOnUnauthorizedResponse;
 import com.voipgrid.vialer.api.interceptors.ModifyCacheLifetimeBasedOnConnectivity;
 import com.voipgrid.vialer.util.AccountHelper;
@@ -49,26 +50,27 @@ public class ServiceGenerator {
         httpClient.addInterceptor(new AddUserAgentToHeader(context));
         httpClient.addInterceptor(new ModifyCacheLifetimeBasedOnConnectivity(context));
         httpClient.addInterceptor(new LogUserOutOnUnauthorizedResponse(context));
+        httpClient.addInterceptor(new LogResponsesToConsole());
 
         httpClient.cache(getCache(context));
 
         return httpClient.build();
     }
 
-    public static Api createApiService(Context context) {
+    public static VoipgridApi createApiService(Context context) {
         AccountHelper accountHelper = new AccountHelper(context);
         return createApiService(context, accountHelper.getEmail(), accountHelper.getPassword(), accountHelper.getApiToken());
     }
 
-    public static Api createApiService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
-        return ServiceGenerator.createService(context, Api.class, username, password, token, getVgApiUrl(context));
+    public static VoipgridApi createApiService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
+        return ServiceGenerator.createService(context, VoipgridApi.class, username, password, token, getVgApiUrl(context));
     }
 
-    public static Registration createRegistrationService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
-        return ServiceGenerator.createService(context, Registration.class, username, password, token, getRegistrationUrl(context));
+    public static Middleware createRegistrationService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
+        return ServiceGenerator.createService(context, Middleware.class, username, password, token, getRegistrationUrl(context));
     }
 
-    public static Registration createRegistrationService(Context context) {
+    public static Middleware createRegistrationService(Context context) {
         AccountHelper accountHelper = new AccountHelper(context);
         return createRegistrationService(context, accountHelper.getEmail(), accountHelper.getPassword(), accountHelper.getApiToken());
     }

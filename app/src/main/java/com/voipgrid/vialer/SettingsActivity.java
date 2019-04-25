@@ -23,7 +23,7 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
@@ -51,7 +51,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AccountActivity extends LoginRequiredActivity {
+public class SettingsActivity extends LoginRequiredActivity {
 
     @BindView(R.id.container) View mContainer;
     @BindView(R.id.progressBar) ProgressBar mProgressBar;
@@ -66,6 +66,7 @@ public class AccountActivity extends LoginRequiredActivity {
     @BindView(R.id.use_3g_switch) CompoundButton mUse3GSwitch;
 
     @BindView(R.id.call_connection_spinner) Spinner mConnectionSpinner;
+    @BindView(R.id.codec_spinner) Spinner mCodecSpinner;
 
     @BindView(R.id.remote_logging_switch) CompoundButton mRemoteLoggingSwitch;
     @BindView(R.id.remote_logging_id_container) View mRemoteLogIdContainer;
@@ -80,7 +81,7 @@ public class AccountActivity extends LoginRequiredActivity {
     private Preferences mPreferences;
     private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
-    private Api mApi;
+    private VoipgridApi mVoipgridApi;
     private Logger mLogger;
     private ClipboardHelper mClipboardHelper;
     private BroadcastReceiverManager mBroadcastReceiverManager;
@@ -97,13 +98,13 @@ public class AccountActivity extends LoginRequiredActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_account);
+        setContentView(R.layout.activity_settings);
         ButterKnife.bind(this);
 
         mJsonStorage = new JsonStorage(this);
         mPhoneAccountHelper = new PhoneAccountHelper(this);
         mPreferences = new Preferences(this);
-        mApi = ServiceGenerator.createApiService(this);
+        mVoipgridApi = ServiceGenerator.createApiService(this);
         mLogger = new Logger(this.getClass());
         mClipboardHelper =  ClipboardHelper.fromContext(this);
         mBroadcastReceiverManager = BroadcastReceiverManager.fromContext(this);
@@ -111,6 +112,7 @@ public class AccountActivity extends LoginRequiredActivity {
         setupActionBar();
 
         initConnectionSpinner();
+        initCodecSpinner();
         initRemoteLoggingSwitch();
         initUse3GSwitch();
     }
@@ -154,6 +156,14 @@ public class AccountActivity extends LoginRequiredActivity {
         mConnectionSpinner.setSelection(adapter.getPosition(converseFromPreference((mPreferences.getConnectionPreference()), this)));
     }
 
+    private void initCodecSpinner() {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.codec_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mCodecSpinner.setAdapter(adapter);
+        mCodecSpinner.setSelection(mPreferences.getAudioCodec() - 1);
+    }
+
     private void initRemoteLoggingSwitch() {
         mRemoteLoggingSwitch.setChecked(mPreferences.remoteLoggingIsActive());
         mRemoteLogIdEditText.setInputType(InputType.TYPE_NULL);
@@ -177,7 +187,7 @@ public class AccountActivity extends LoginRequiredActivity {
         });
         mRemoteLogIdEditText.setOnLongClickListener(view -> {
             mClipboardHelper.copyToClipboard(mRemoteLogIdEditText.getText().toString());
-            Toast.makeText(AccountActivity.this,R.string.remote_logging_id_copied , Toast.LENGTH_SHORT).show();
+            Toast.makeText(SettingsActivity.this,R.string.remote_logging_id_copied , Toast.LENGTH_SHORT).show();
             return true;
         });
         if (mPreferences.remoteLoggingIsActive()) {
@@ -223,10 +233,10 @@ public class AccountActivity extends LoginRequiredActivity {
                         // to disabled. Setting disabled in the settings first makes sure
                         // the onCheckChanged does not execute the code that normally is executed
                         // on a change in the check of the switch.
-                        SetupActivity.launchToSetVoIPAccount(AccountActivity.this);
+                        SetupActivity.launchToSetVoIPAccount(SettingsActivity.this);
                     }
 
-                    NotificationHelper.getInstance(AccountActivity.this).removeVoipDisabledNotification();
+                    NotificationHelper.getInstance(SettingsActivity.this).removeVoipDisabledNotification();
                 }
             }.execute();
         }
@@ -244,6 +254,12 @@ public class AccountActivity extends LoginRequiredActivity {
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         String selected = parent.getItemAtPosition(pos).toString();
         mPreferences.setConnectionPreference(converseToPreference(selected, this));
+    }
+
+    @OnItemSelected(R.id.codec_spinner)
+    public void onCodecSelected(AdapterView<?> parent, View view, int pos, long id) {
+        mPreferences.setAudioCodec(pos + 1);
+        SecureCalling.fromContext(this).updateApiBasedOnCurrentPreferenceSetting();
     }
 
     @OnCheckedChanged(R.id.remote_logging_switch)
@@ -386,7 +402,7 @@ public class AccountActivity extends LoginRequiredActivity {
 
         String number = PhoneNumberUtils.formatMobileNumber(mMobileNumberEditText.getText().toString());
 
-        mApi
+        mVoipgridApi
                 .mobileNumber(new MobileNumber(number))
                 .enqueue(new MobileNumberUpdatedCallback(number));
 
@@ -480,7 +496,7 @@ public class AccountActivity extends LoginRequiredActivity {
             enableProgressBar(false);
 
             DialogHelper.displayAlert(
-                    AccountActivity.this,
+                    SettingsActivity.this,
                     getString(R.string.onboarding_account_configure_failed_title),
                     getString(R.string.onboarding_account_configure_invalid_phone_number)
             );

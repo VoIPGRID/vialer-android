@@ -3,6 +3,8 @@ package com.voipgrid.vialer.api.models;
 import android.text.format.DateFormat;
 
 import com.google.gson.annotations.SerializedName;
+import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import java.util.Calendar;
 
@@ -13,9 +15,10 @@ public class CallRecord {
 
     public static final String DIRECTION_OUTBOUND = "outbound";
     public static final String DIRECTION_INBOUND = "inbound";
-    public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     private static final String CALL_DATE_FORMAT = "yyyy-MM-dd";
+    private static final String INTERNAL_DESTINATION_CODE = "internal";
+    private static final String SIP_DESTINATION_CODE = "sip";
 
     private int amount;
 
@@ -31,7 +34,12 @@ public class CallRecord {
     @SerializedName("src_number")
     private String caller;
 
+    @SerializedName("dst_code")
+    private String destinationCode;
+
     private String direction;
+
+    private long id;
 
     public static String getLimitDate() {
         Calendar currentTime = Calendar.getInstance();
@@ -79,11 +87,79 @@ public class CallRecord {
         this.caller = caller;
     }
 
+    /**
+     * Returns the direction from VOIPGrid api for most calls, but for internal calls
+     * will attempt to determine the correct direction based on the called numbers.
+     *
+     * @return
+     */
     public String getDirection() {
+        InternalNumbers internalNumbers = VialerApplication.get().component().getInternalNumbers();
+
+        if (!isInternalCall() || internalNumbers == null) {
+            return direction;
+        }
+
+        if (internalNumbers.contains(caller)) {
+             return DIRECTION_OUTBOUND;
+        }
+
+        if (internalNumbers.contains(dialedNumber)) {
+            return DIRECTION_INBOUND;
+        }
+
         return direction;
     }
 
     public void setDirection(String direction) {
         this.direction = direction;
+    }
+
+    /**
+     * Check if this was a call made between two users on the same account.
+     *
+     * @return TRUE if internal call, otherwise FALSE.
+     */
+    public boolean isInternalCall() {
+        return destinationCode.equals(INTERNAL_DESTINATION_CODE) || destinationCode.equals(SIP_DESTINATION_CODE);
+    }
+
+    public boolean isInbound() {
+        return getDirection().equals(DIRECTION_INBOUND);
+    }
+
+    public boolean isOutbound() {
+        return getDirection().equals(DIRECTION_OUTBOUND);
+    }
+
+    /**
+     * Check if this was a missed call.
+     *
+     * @return TRUE if missed call, otherwise FALSE.
+     */
+    public boolean wasMissed() {
+        return isInbound() && getDuration() == 0;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    /**
+     * Get the number of the third party, this will be based on the direction.
+     *
+     * @return The number of the third party involved in this call.
+     */
+    public String getThirdPartyNumber() {
+        return getDirection().equals(CallRecord.DIRECTION_OUTBOUND) ? getDialedNumber() : getCaller();
+    }
+
+    /**
+     * Return true if this is a call from an anonymous number.
+     *
+     * @return
+     */
+    public boolean isAnonymous() {
+        return PhoneNumberUtils.isAnonymousNumber(getCaller());
     }
 }

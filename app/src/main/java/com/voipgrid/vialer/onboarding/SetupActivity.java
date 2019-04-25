@@ -9,17 +9,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.AccountActivity;
+import com.voipgrid.vialer.SettingsActivity;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.WebActivityHelper;
-import com.voipgrid.vialer.api.Api;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.MobileNumber;
@@ -35,6 +34,7 @@ import com.voipgrid.vialer.util.PhoneAccountHelper;
 
 import java.io.IOException;
 
+import androidx.annotation.NonNull;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -55,7 +55,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
     private String mPassword;
     private String mActivityToReturnToName = "";
 
-    private Api mApi;
+    private VoipgridApi mVoipgridApi;
     private JsonStorage mJsonStorage;
     private Preferences mPreferences;
     private Logger mLogger;
@@ -172,9 +172,9 @@ public class SetupActivity extends RemoteLoggingActivity implements
     public void onUpdateMobileNumber(Fragment fragment, String mobileNumber) {
         enableProgressBar(true);
 
-        mApi = ServiceGenerator.createApiService(this);
+        mVoipgridApi = ServiceGenerator.createApiService(this);
 
-        Call<MobileNumber> call = mApi.mobileNumber(new MobileNumber(mobileNumber));
+        Call<MobileNumber> call = mVoipgridApi.mobileNumber(new MobileNumber(mobileNumber));
         call.enqueue(this);
     }
 
@@ -191,7 +191,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
         String phoneAccountId = systemUser.getPhoneAccountId();
 
         if (phoneAccountId != null) {
-            Call<PhoneAccount> call = mApi.phoneAccount(phoneAccountId);
+            Call<PhoneAccount> call = mVoipgridApi.phoneAccount(phoneAccountId);
             call.enqueue(this);
         } else {
             enableProgressBar(false);
@@ -218,11 +218,11 @@ public class SetupActivity extends RemoteLoggingActivity implements
 
     @Override
     public void onFinish(Fragment fragment) {
-        if (mActivityToReturnToName.equals(AccountActivity.class.getSimpleName())){
+        if (mActivityToReturnToName.equals(SettingsActivity.class.getSimpleName())){
             PhoneAccountHelper phoneAccountHelper = new PhoneAccountHelper(this);
             phoneAccountHelper.savePhoneAccountAndRegister(
                     (PhoneAccount) mJsonStorage.get(PhoneAccount.class));
-            Intent intent = new Intent(this, AccountActivity.class);
+            Intent intent = new Intent(this, SettingsActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         } else {
@@ -281,24 +281,38 @@ public class SetupActivity extends RemoteLoggingActivity implements
         alertDialogBuilder
                 .setMessage(getString(R.string.forgot_password_alert_message, email))
                 .setCancelable(false)
-                .setPositiveButton(this.getString(R.string.ok), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        resetPassword(email);
-                    }
-                })
-                .setNegativeButton(this.getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
+                .setPositiveButton(this.getString(R.string.ok),
+                        (dialog, id) -> resetPassword(email))
+                .setNegativeButton(this.getString(R.string.cancel),
+                        (dialog, id) -> dialog.dismiss());
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
     }
 
     private void resetPassword(String email) {
-        Api api = ServiceGenerator.createApiService(this, null, null, null);
-        Call<Object> call = api.resetPassword(new PasswordResetParams(email));
-        call.enqueue(this);
+        VoipgridApi voipgridApi = ServiceGenerator.createApiService(this, null, null, null);
+        Call<Void> call = voipgridApi.resetPassword(new PasswordResetParams(email));
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (!response.isSuccessful()) {
+                    failedFeedback("Request failed");
+                    return;
+                }
+
+               new AlertDialog.Builder(SetupActivity.this)
+                        .setTitle(R.string.forgot_password_success_title)
+                        .setMessage(R.string.forgot_password_success_message)
+                        .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.dismiss())
+                        .create()
+                        .show();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                failedFeedback(t.getMessage());
+            }
+        });
     }
 
     /**
@@ -329,7 +343,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
                     });
                 } else {
                     if (systemUser.getOutgoingCli() == null || systemUser.getOutgoingCli().isEmpty()) {
-                        mLogger.d("onResponse getOutgoingCli is null");
+                        mLogger.d("missedCallsHaveBeenRetrieved getOutgoingCli is null");
                     }
                     mPreferences.setSipPermission(true);
 
@@ -408,14 +422,11 @@ public class SetupActivity extends RemoteLoggingActivity implements
 
     private void failedFeedback(String message) {
         final String mMessage = message;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                enableProgressBar(false);
-                OnboardingFragment fragment = getCurrentFragment();
-                if (fragment != null) {
-                    fragment.onError(mMessage);
-                }
+        runOnUiThread(() -> {
+            enableProgressBar(false);
+            OnboardingFragment fragment = getCurrentFragment();
+            if (fragment != null) {
+                fragment.onError(mMessage);
             }
         });
     }
@@ -437,7 +448,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
         enableProgressBar(true);
         enableProgressBar(true);
 
-        mApi = ServiceGenerator.createApiService(this, mUsername, mPassword, null);
+        mVoipgridApi = ServiceGenerator.createApiService(this, mUsername, mPassword, null);
 
         ApiTokenFetcher
                 .forCredentials(this, mUsername, mPassword)
@@ -459,7 +470,7 @@ public class SetupActivity extends RemoteLoggingActivity implements
         Intent intent = new Intent(fromActivity, SetupActivity.class);
         Bundle b = new Bundle();
         b.putInt("fragment", R.id.fragment_voip_account_missing);
-        b.putString("activity", AccountActivity.class.getSimpleName());
+        b.putString("activity", SettingsActivity.class.getSimpleName());
         intent.putExtras(b);
 
         fromActivity.startActivity(intent);
@@ -479,9 +490,9 @@ public class SetupActivity extends RemoteLoggingActivity implements
             AccountHelper accountHelper = new AccountHelper(SetupActivity.this);
             accountHelper.setCredentials(mUsername, mPassword, apiToken);
 
-            mApi = ServiceGenerator.createApiService(SetupActivity.this);
+            mVoipgridApi = ServiceGenerator.createApiService(SetupActivity.this);
 
-            Call<SystemUser> call2 = mApi.systemUser();
+            Call<SystemUser> call2 = mVoipgridApi.systemUser();
             call2.enqueue(SetupActivity.this);
         }
 

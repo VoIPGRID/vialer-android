@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="log_entry_token">YOUR LOGENTRY TOKEN</string>
+    <string name="log_entry_token" translatable="false">YOUR_LOGENTRY_TOKEN</string>
+    <string name="secondary_log_entry_token" translatable="false">OPTIONAL_SECOND_LOGENTRY_TOKEN</string>
+    <string name="push_log_entries_token" translatable="false">SEPARATE_LOGENTRY_TOKEN_FOR_PUSH_LOGS</string>
 </resources>
-

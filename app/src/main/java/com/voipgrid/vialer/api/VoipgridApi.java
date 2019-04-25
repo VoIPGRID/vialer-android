@@ -9,7 +9,7 @@ import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.api.models.UseEncryption;
+import com.voipgrid.vialer.api.models.UpdateVoIPAccountParameters;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.models.ClickToDialParams;
@@ -27,7 +27,7 @@ import retrofit2.http.Query;
 /**
  * API interface
  */
-public interface Api {
+public interface VoipgridApi {
 
     @GET("api/autologin/token/")
     Call<AutoLoginToken> autoLoginToken();
@@ -54,15 +54,20 @@ public interface Api {
     Call<MobileNumber> mobileNumber(@Body MobileNumber mobileNumber);
 
     @PUT("api/mobile/profile/")
-    Call<UseEncryption> useEncryption(@Body UseEncryption useEncryption);
+    Call<UpdateVoIPAccountParameters> updateVoipAccount(@Body UpdateVoIPAccountParameters updateVoIPAccountParameters);
 
     @POST("api/permission/password_reset/")
-    Call<Object> resetPassword(@Body PasswordResetParams params);
+    Call<Void> resetPassword(@Body PasswordResetParams params);
 
     @GET("api/cdr/record/")
     Call<VoipGridResponse<CallRecord>> getRecentCalls(@Query("limit") int limit,
                                                       @Query("offset") int offset,
                                                       @Query("call_date__gt") String date);
+
+    @GET("api/cdr/record/personalized/")
+    Call<VoipGridResponse<CallRecord>> getRecentCallsForLoggedInUser(@Query("limit") int limit,
+            @Query("offset") int offset,
+            @Query("call_date__gt") String date);
 
     @GET("api/userdestination/")
     Call<VoipGridResponse<UserDestination>> getUserDestination();

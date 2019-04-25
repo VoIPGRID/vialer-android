@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_url" translatable="false">https://staging.voipgrid.nl/</string>
+    <string name="registration_url" translatable="false">https://vialerpush-staging.voipgrid.nl/</string>
+
+    <string name="web_url" translatable="false">https://staging.voipgrid.nl</string>
+    <string name="web_password_change" translatable="false">https://staging.voipgrid.nl/user/login/</string>
+</resources>

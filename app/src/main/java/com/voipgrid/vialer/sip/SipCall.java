@@ -3,8 +3,6 @@ package com.voipgrid.vialer.sip;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -44,6 +42,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.UUID;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
+
 
 /**
  * Call class used to interact with a call.
@@ -52,7 +53,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     @StringDef({CALL_DIRECTION_OUTGOING, CALL_DIRECTION_INCOMING})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface CallDirection {}
+    @interface CallDirection {}
 
     public static final String TAG = SipCall.class.getSimpleName();
 
@@ -77,6 +78,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mMessageStartTime;
     private CallInfo mLastCallInfo;
     private CallMediaMonitor mCallMediaMonitor;
+
+    private Double mos;
+    private String codec;
+  
+    /**
+     * An object that represents the original invite received.
+     */
+    private SipInvite invite;
 
     public static final String CALL_DIRECTION_OUTGOING = "outgoing";
     public static final String CALL_DIRECTION_INCOMING = "incoming";
@@ -107,27 +116,30 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     private void sendMos() {
-        if (getCallDuration() > 10) {
-            float mos = this.calculateMos();
-            new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
-                    mSipService.getString(R.string.analytics_event_category_metrics),
-                    mSipService.getString(R.string.analytics_event_action_callmetrics),
-                    mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
-                    (int) (100 * (long) mos)
-            );
-            mLogger.e("MOS for CONNECTION: " + ConnectivityHelper.get(mSipService).getConnectionTypeString() + " with value: " + mos);
-        }
+        if (!hasCalculatedMos()) return;
+
+        getAnalyticsHelper().sendEvent(
+                mSipService.getString(R.string.analytics_event_category_metrics),
+                mSipService.getString(R.string.analytics_event_action_callmetrics),
+                mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
+                (int) (100 * mos)
+        );
+        mLogger.e("MOS for CONNECTION: " + ConnectivityHelper.get(mSipService).getConnectionTypeString() + " with value: " + mos);
     }
 
     private void sendBandwidth() {
         if (getCallDuration() > 10) {
-            new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()).sendEvent(
+            getAnalyticsHelper().sendEvent(
                     mSipService.getString(R.string.analytics_event_category_metrics),
                     mSipService.getString(R.string.analytics_event_action_callmetrics),
                     mSipService.getString(R.string.analytics_event_label_bandwidth, getCodec()),
                     (int) this.getBandwidthUsage() * 1024
             );
         }
+    }
+
+    private AnalyticsHelper getAnalyticsHelper() {
+        return new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker());
     }
 
     void setIsIPChangeInProgress(boolean inProgress){
@@ -159,13 +171,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipBroadcaster = mSipService.getSipBroadcaster();
     }
 
+    public SipCall(SipService sipService, SipAccount sipAccount, int callId, SipInvite invite) {
+        this(sipService, sipAccount, callId);
+        this.invite = invite;
+    }
+
     public int getCallDuration() {
-        TimeVal timeVal = new TimeVal();
         try {
             CallInfo callInfo = this.getInfo();
             return callInfo.getConnectDuration().getSec();
         } catch (Exception e) {
-            return timeVal.getSec();
+            return -1;
         }
     }
 
@@ -182,8 +198,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         return (timeVal.getSec() * 1000) + timeVal.getMsec();
     }
 
-    private String getCodec() {
+    public String getCodec() {
+        if (codec != null && !codec.isEmpty()) {
+            return codec;
+        }
+
         try {
+            if (!isConnected()) return "";
+
             StreamInfo streaminfo = this.getStreamInfo(0);
             return streaminfo.getCodecName();
         } catch (Exception e) {
@@ -201,17 +223,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
 
         return bandwidth;
-    }
-
-    private float calculateMos() {
-        float MOS = 0;
-        try {
-            MOS = (float) SipCallStats.calculateMOS(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return MOS;
     }
 
     public String getIdentifier() {
@@ -404,7 +415,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public String getPhoneNumber() {
-        return mPhoneNumber;
+        return getAppropriateCallerInformationHeader().number;
     }
 
     public void setPhoneNumber(String phoneNumber) {
@@ -412,7 +423,31 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public String getCallerId() {
-        return mCallerId;
+        return getAppropriateCallerInformationHeader().name;
+    }
+
+    /**
+     * This will select the correct header from the INVITE based on the priority that we should
+     * be displaying the various caller information headers.
+     *
+     * @return
+     */
+    private SipInvite.CallerInformationHeader getAppropriateCallerInformationHeader() {
+        SipInvite.CallerInformationHeader defaultCallerInformation = new SipInvite.CallerInformationHeader(mCallerId, mPhoneNumber);
+
+        if (this.invite == null) {
+            return defaultCallerInformation;
+        }
+
+        if (this.invite.hasPAssertedIdentity()) {
+            return this.invite.getPAssertedIdentity();
+        }
+
+        if (this.invite.hasRemotePartyId()) {
+            return this.invite.getRemotePartyId();
+        }
+
+        return defaultCallerInformation;
     }
 
     public void setCallerId(String callerId) {
@@ -667,5 +702,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             mLogger.e("Unable to get call info");
             return null;
         }
+    }
+
+    public boolean hasCalculatedMos() {
+        return mos != null;
+    }
+
+    public void setMos(double mos) {
+        this.mos = mos;
+    }
+
+    public double getMos() {
+        return mos;
     }
 }
