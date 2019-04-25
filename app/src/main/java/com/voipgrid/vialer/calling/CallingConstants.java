@@ -16,17 +16,6 @@ public interface CallingConstants {
     String TYPE_CONNECTED_CALL = "type-connected-call";
     String CONTACT_NAME = "contact-name";
     String PHONE_NUMBER = "phone-number";
-    String TAG_CALL_CONNECTED_FRAGMENT = "callConnectedFragment";
-    String TAG_CALL_INCOMING_FRAGMENT = "callIncomingFragment";
-    String TAG_CALL_LOCK_RING_FRAGMENT = "callLockRingFragment";
-    String TAG_CALL_KEY_PAD_FRAGMENT = "callKeyPadFragment";
-    String TAG_CALL_TRANSFER_FRAGMENT = "callTransferFragment";
-    String TAG_CALL_TRANSFER_COMPLETE_FRAGMENT = "callTransferCompleteFragment";
-
-    String MAP_ORIGINAL_CALLER_PHONE_NUMBER = "originalCallerPhoneNumber";
-    String MAP_ORIGINAL_CALLER_ID = "originalCallerId";
-    String MAP_TRANSFERRED_PHONE_NUMBER = "transferredNumber";
-    String MAP_SECOND_CALL_IS_CONNECTED = "secondCallIsConnected";
 
     String CALL_IS_CONNECTED = "callIsConnected";
     String CALL_BLUETOOTH_ACTIVE = "bluetoothAvailable";

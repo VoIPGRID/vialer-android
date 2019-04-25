@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 apply plugin: 'io.fabric'
 apply plugin: 'com.google.firebase.firebase-perf'
 
@@ -227,6 +229,7 @@ dependencies {
 
     // Automated screenshots for instrumented tests.
     androidTestImplementation 'tools.fastlane:screengrab:1.1.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

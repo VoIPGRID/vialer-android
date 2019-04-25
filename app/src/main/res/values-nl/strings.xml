@@ -163,7 +163,6 @@
     <string name="callnotification_dialing">Kiezen</string>
 
     <string name="notification_channel_calls">Telefoongesprekken</string>
-    <string name="notification_channel_contacts">Contact synchronisatie</string>
     <string name="notification_channel_media_button">Bluetooth</string>
 
     <string name="navigation_name_placeholder_text">Geen uitgaand nummer geconfigureerd</string>
@@ -262,4 +261,5 @@
     <string name="tab_title_recents">mijn gesprekken</string>
     <string name="tab_title_missed">alle gesprekken</string>
     <string name="call_records_show_all">Laat alleen gemiste gesprekken zien</string>
+    <string name="notification_channel_incoming_calls">Inkomend gesprek</string>
 </resources>

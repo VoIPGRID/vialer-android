@@ -3,14 +3,11 @@ package com.voipgrid.vialer.calling;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_ACTIVE;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
-import static com.voipgrid.vialer.calling.CallingConstants.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 
 import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -82,7 +79,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
             return;
         }
 
-        mCallNotifications.removeAll();
         sendBroadcast(new Intent(DECLINE_BTN));
         endRinging();
     }
@@ -144,11 +140,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @Override
     protected void onPause() {
         super.onPause();
-
-        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
-            mCallNotifications.callScreenIsBeingHiddenOnRingingCall(getCallNotificationDetails());
-        }
-
         getMediaManager().stopIncomingCallRinger();
         ringingIsPaused = true;
     }
@@ -156,8 +147,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        mCallNotifications.removeAll();
 
         if (currentlyOnLockScreen()) {
             mCallButtons.setVisibility(View.VISIBLE);
@@ -169,27 +158,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
             getMediaManager().startIncomingCallRinger();
             ringingIsPaused = false;
         }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        if (userPressedAcceptFromNotification(intent)) {
-            new Handler().postDelayed(this::onPickupButtonClicked, 500);
-            mCallNotifications.acceptedFromNotification(getCallNotificationDetails());
-            return;
-        }
-    }
-
-    /**
-     * Check if the received intent is from the user pressing the accept button on the notification.
-     *
-     * @param intent
-     * @return
-     */
-    private boolean userPressedAcceptFromNotification(Intent intent) {
-        return TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL.equals(intent.getType());
     }
 
     @Override
