@@ -13,6 +13,5 @@ class DefaultCallNotification : AbstractCallNotification() {
         return builder
                 .setContentTitle(" ")
                 .setPriority(NotificationCompat.PRIORITY_MIN)
-                .setSound(null)
     }
 }

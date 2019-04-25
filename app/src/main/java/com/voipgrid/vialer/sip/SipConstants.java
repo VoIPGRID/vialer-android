@@ -53,6 +53,10 @@ public interface SipConstants {
      */
     String CALL_RINGING_IN_MESSAGE        = "RINGING_IN";
 
+    String CALL_MUTED                     = "MUTED";
+
+    String CALL_UNMUTED                   = "UNMUTED";
+
     /**
      * CallInteraction broadcast type for communicating a "Put on hold" to the SIP service through
      * Broadcasts.

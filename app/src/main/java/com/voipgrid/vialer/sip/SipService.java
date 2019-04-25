@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.sip;
 
+import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
+
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -13,6 +15,7 @@ import android.os.IBinder;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
+import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.BuildConfig;
@@ -22,6 +25,8 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
+import com.voipgrid.vialer.calling.AbstractCallActivity;
+import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.dialer.ToneGenerator;
@@ -43,8 +48,7 @@ import javax.inject.Inject;
  * provides a persistent interface to SIP services throughout the app.
  *
  */
-public class SipService extends Service {
-
+public class SipService extends Service implements CallStatusReceiver.Listener {
     /**
      * This will track whether this instance of SipService has ever handled a call,
      * if this is the case we can shut down the sip service immediately if we don't
@@ -71,6 +75,7 @@ public class SipService extends Service {
     private final IBinder mBinder = new SipServiceBinder();
     private CheckServiceIsRunning mCheckService = new CheckServiceIsRunning();
     private AbstractCallNotification callNotification = new DefaultCallNotification();
+    private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
 
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
@@ -97,6 +102,7 @@ public class SipService extends Service {
 
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(phoneStateReceiver, TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
+        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
         mCheckService.start();
         startForeground(callNotification.getNotificationId(), callNotification.build());
     }
@@ -146,6 +152,7 @@ public class SipService extends Service {
         }
         else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
             mCurrentCall.decline();
+            getNotification().cancel();
         }
         else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
             mCurrentCall.answer();
@@ -221,11 +228,7 @@ public class SipService extends Service {
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
-        try {
-            mBroadcastReceiverManager.unregisterReceiver(phoneStateReceiver, mNetworkConnectivity);
-        } catch(IllegalArgumentException e) {
-            mLogger.w("Trying to unregister phoneStateReceiver not registered.");
-        }
+        mBroadcastReceiverManager.unregisterReceiver(phoneStateReceiver, mNetworkConnectivity, callStatusReceiver);
 
         mHandler.removeCallbacks(mCheckService);
 
@@ -278,7 +281,12 @@ public class SipService extends Service {
         call.setPhoneNumberUri(number);
         call.setCallerId(contactName);
         call.setPhoneNumber(phoneNumber);
-        call.onCallOutgoing(number, startActivity);
+
+        boolean success = call.startOutgoingCall(number);
+
+        if (success && startActivity) {
+            startOutgoingCallActivity(call, call.getPhoneNumberUri());
+        }
     }
 
     /**
@@ -292,8 +300,10 @@ public class SipService extends Service {
                 CallingConstants.TYPE_OUTGOING_CALL,
                 sipCall.getCallerId(),
                 sipCall.getPhoneNumber(),
-                 CallActivity.class
+                CallActivity.class
         );
+
+        callNotification.outgoing(sipCall);
     }
 
     /**
@@ -303,8 +313,8 @@ public class SipService extends Service {
      */
     public void informUserAboutIncomingCall(String number, String callerId) {
         callNotification.incoming(
-                mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
-                mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME)
+                number,
+                callerId
         );
 
         startCallActivity(
@@ -316,16 +326,17 @@ public class SipService extends Service {
         );
     }
 
-    private void startCallActivity(Uri sipAddressUri, @CallingConstants.CallTypes String type, String callerId, String number, Class activity) {
+    public void startCallActivity(Uri sipAddressUri, @CallingConstants.CallTypes String type, String callerId, String number, Class activity) {
         mLogger.d("callVisibleForUser");
-        Intent intent = new Intent(this, activity);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.setDataAndType(sipAddressUri, type);
-        intent.putExtra(CallingConstants.CONTACT_NAME, callerId);
-        intent.putExtra(CallingConstants.PHONE_NUMBER, number);
-
+        startActivity(AbstractCallActivity.createIntentForCallActivity(
+                this,
+                activity,
+                sipAddressUri,
+                type,
+                callerId,
+                number
+        ));
         sipServiceActive = true;
-        startActivity(intent);
     }
 
     /**
@@ -413,6 +424,57 @@ public class SipService extends Service {
         return callNotification;
     }
 
+    @Override
+    public void onCallStatusChanged(String status, String callId) {
+
+    }
+
+    @Override
+    public void onCallConnected() {
+        if (SipCall.CALL_DIRECTION_OUTGOING.equals(getCurrentCall().getCallDirection())) {
+            return;
+        }
+
+        getNotification().active(getCurrentCall());
+        startCallActivity(
+                SipUri.sipAddressUri(this, PhoneNumberUtils.format(getCurrentCall().getPhoneNumber())),
+                CallingConstants.TYPE_INCOMING_CALL,
+                getCurrentCall().getCallerId(),
+                getCurrentCall().getPhoneNumber(),
+                CallActivity.class
+        );
+    }
+
+    @Override
+    public void onCallDisconnected() {
+
+    }
+
+    @Override
+    public void onCallHold() {
+
+    }
+
+    @Override
+    public void onCallUnhold() {
+
+    }
+
+    @Override
+    public void onCallRingingOut() {
+
+    }
+
+    @Override
+    public void onCallRingingIn() {
+
+    }
+
+    @Override
+    public void onServiceStopped() {
+
+    }
+
     /**
      * Class the be able to bind a activity to this service.
      */
@@ -479,6 +541,12 @@ public class SipService extends Service {
         Intent intent = new Intent(VialerApplication.get(), SipService.class);
         intent.setAction(action);
         return PendingIntent.getService(VialerApplication.get(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    public static void performActionOnSipService(Context context, @Actions.Valid String action) {
+        Intent intent = new Intent(context, SipService.class);
+        intent.setAction(action);
+        context.startService(intent);
     }
 
     /**

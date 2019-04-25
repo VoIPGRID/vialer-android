@@ -19,7 +19,6 @@ public class MediaManager implements
     private AudioManager mAudioManager;
     private AudioChangedInterface mAudioChangedInterfaceListener;
     private Logger mLogger;
-    private IncomingRinger mIncomingRinger;
 
     static int CURRENT_CALL_STATE = Constants.CALL_INVALID;
 
@@ -57,7 +56,6 @@ public class MediaManager implements
         activity.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 
         mAudioRouter = new AudioRouter(context, this, mAudioManager);
-        mIncomingRinger = new IncomingRinger(activity, context, mAudioManager);
     }
 
     public void deInit() {
@@ -67,14 +65,10 @@ public class MediaManager implements
             mAudioRouter.deInit();
         }
 
-        if(mIncomingRinger != null) {
-            mIncomingRinger.stop();
-        }
 
         resetAudioManager();
 
         mAudioRouter = null;
-        mIncomingRinger = null;
     }
 
     public void callStarted() {
@@ -145,26 +139,6 @@ public class MediaManager implements
     }
 
     /**
-     * Get the ringer mode for when there is an incoming call.
-     */
-    public void startIncomingCallRinger() {
-        mLogger.d("startIncomingCallRinger()");
-        if (mIncomingRinger != null) {
-            mIncomingRinger.start();
-        }
-    }
-
-    /**
-     * Stop the incoming call ringer.
-     */
-    public void stopIncomingCallRinger() {
-        mLogger.d("stopIncomingCallRinger");
-        if (mIncomingRinger != null) {
-            mIncomingRinger.stop();
-        }
-    }
-
-    /**
      * When the user wants to enable the speaker function.
      *
      * @param onSpeaker Whether to turn the speaker mode on or off.
@@ -232,7 +206,6 @@ public class MediaManager implements
 //                    }
 
                     if (CURRENT_CALL_STATE == Constants.CALL_RINGING) {
-                        mIncomingRinger.start();
                     }
                     mAudioChangedInterfaceListener.audioLost(false);
                 }
@@ -242,7 +215,6 @@ public class MediaManager implements
                 mLogger.i("Lost audio focus! Probably incoming native audio call.");
                 mAudioIsLost = true;
                 mAudioChangedInterfaceListener.audioLost(true);
-                mIncomingRinger.pause();
                 mAudioRouter.setAudioIsLost(true);
                 break;
             case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
@@ -251,7 +223,6 @@ public class MediaManager implements
                 mPreviousVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
                 mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, 1, 0);
                 if (CURRENT_CALL_STATE == Constants.CALL_RINGING) {
-                    mIncomingRinger.pause();
                     mAudioRouter.setAudioIsLost(true);
                     mAudioChangedInterfaceListener.audioLost(true);
                 }
@@ -267,9 +238,6 @@ public class MediaManager implements
             mCurrentAudioRoute = newRoute;
             if (mCurrentAudioRoute == Constants.ROUTE_BT) {
                 if (CURRENT_CALL_STATE == Constants.CALL_RINGING) {
-                    if (mIncomingRinger != null) {
-                        mIncomingRinger.restart();
-                    }
                 }
             }
         }

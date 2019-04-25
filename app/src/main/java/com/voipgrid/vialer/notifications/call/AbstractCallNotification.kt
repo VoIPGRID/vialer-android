@@ -38,6 +38,7 @@ abstract class AbstractCallNotification : AbstractNotification() {
     private val logo = R.drawable.ic_logo
 
     @Inject protected lateinit var phoneNumberImageGenerator : PhoneNumberImageGenerator
+    @Inject protected lateinit var incomingCallVibration: IncomingCallVibration
 
     init {
         VialerApplication.get().component().inject(this)
@@ -54,7 +55,7 @@ abstract class AbstractCallNotification : AbstractNotification() {
         return NotificationChannel(
                 CHANNEL_ID,
                 context.getString(com.voipgrid.vialer.R.string.notification_channel_calls),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_MIN
         )
     }
 
@@ -93,13 +94,6 @@ abstract class AbstractCallNotification : AbstractNotification() {
         return NotificationCompat.Builder(context, CHANNEL_ID)
     }
 
-    /**
-     * Create a pending intent to open the CallActivity.
-     *
-     */
-    protected fun createCallActivityPendingIntent(): PendingIntent {
-        return createPendingIntent(Intent(context, CallActivity::class.java))
-    }
 
     /**
      * Create a pending intent to open the incoming call activity screen.
@@ -113,7 +107,7 @@ abstract class AbstractCallNotification : AbstractNotification() {
      * Create a pending intent from an intent.
      *
      */
-    private fun createPendingIntent(intent : Intent) : PendingIntent {
+    protected fun createPendingIntent(intent : Intent) : PendingIntent {
         return PendingIntent.getActivity(
                 context,
                 0,
@@ -128,14 +122,15 @@ abstract class AbstractCallNotification : AbstractNotification() {
      */
     fun incoming(number: String, callerId: String) {
         IncomingCallNotification(number, callerId).display()
+        incomingCallVibration.start()
     }
 
     /**
      * Transform the call notification to an ongoing call notification.
      *
      */
-    fun outgoing(number: String, callerId: String?) {
-        OutgoingCallDiallingNotification(number, callerId).display()
+    fun outgoing(call : SipCall) {
+        OutgoingCallDiallingNotification(call).display()
     }
 
     /**
@@ -144,6 +139,11 @@ abstract class AbstractCallNotification : AbstractNotification() {
      */
     fun active(call : SipCall) {
         ActiveCallNotification(call).display()
+        incomingCallVibration.stop()
+    }
+
+    fun cancel() {
+        incomingCallVibration.stop()
     }
 
     companion object {

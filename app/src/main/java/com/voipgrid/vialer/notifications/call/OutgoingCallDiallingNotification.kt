@@ -1,9 +1,14 @@
 package com.voipgrid.vialer.notifications.call
 
+import android.app.PendingIntent
 import androidx.core.app.NotificationCompat
+import com.voipgrid.vialer.CallActivity
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.calling.AbstractCallActivity
+import com.voipgrid.vialer.calling.CallingConstants
+import com.voipgrid.vialer.sip.SipCall
 
-class OutgoingCallDiallingNotification(private val number : String, private val callerId : String?) : AbstractCallNotification() {
+class OutgoingCallDiallingNotification(private val call : SipCall) : AbstractCallNotification() {
 
     /**
      * Build an outgoing call notification for during dialling.
@@ -15,16 +20,27 @@ class OutgoingCallDiallingNotification(private val number : String, private val 
                 .setContentTitle(createNotificationTitle())
                 .setContentText(context.getString(R.string.callnotification_active_call))
                 .setContentIntent(createCallActivityPendingIntent())
-                .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(number))
+                .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(call.phoneNumber))
     }
 
     private fun createNotificationTitle() : String {
         val dialing = context.getString(R.string.callnotification_dialing)
 
-        if (!callerId.isNullOrEmpty()) {
-            return "$dialing $callerId ($number)"
+        if (!call.callerId.isNullOrEmpty()) {
+            return "$dialing ${call.callerId} (${call.phoneNumber})"
         }
 
-        return "$dialing $number"
+        return "$dialing ${call.phoneNumber}"
+    }
+
+    private fun createCallActivityPendingIntent(): PendingIntent? {
+        return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
+                context,
+                CallActivity::class.java,
+                call.phoneNumberUri,
+                CallingConstants.TYPE_OUTGOING_CALL,
+                call.callerId,
+                call.phoneNumber
+        ))
     }
 }

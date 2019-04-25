@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 
 import androidx.annotation.Nullable;
@@ -31,6 +32,7 @@ import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
+import com.voipgrid.vialer.notifications.call.IncomingCallVibration;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
@@ -194,5 +196,20 @@ public class VialerModule {
     @Provides
     PhoneNumberImageGenerator provideNumberImageFinder(Contacts contacts) {
         return new PhoneNumberImageGenerator(contacts);
+    }
+
+    @Provides
+    AudioManager provideAudioManager(Context context) {
+        return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    @Provides
+    Vibrator provideVibrator(Context context) {
+        return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    }
+
+    @Provides
+    IncomingCallVibration provideIncomingCallVibrator(AudioManager audioManager, Vibrator vibrator) {
+        return new IncomingCallVibration(audioManager, vibrator);
     }
 }

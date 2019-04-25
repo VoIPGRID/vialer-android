@@ -6,10 +6,15 @@ import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.CALL_BTN;
 import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
 
+import android.app.Activity;
+import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -232,5 +237,14 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
     public String getCurrentCallId() {
         return mCurrentCallId;
+    }
+
+    public static Intent createIntentForCallActivity(Context caller, Class<?> activity, Uri sipAddressUri, String type, String callerId, String number) {
+        Intent intent = new Intent(caller, activity);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setDataAndType(sipAddressUri, type);
+        intent.putExtra(CallingConstants.CONTACT_NAME, callerId);
+        intent.putExtra(CallingConstants.PHONE_NUMBER, number);
+        return intent;
     }
 }

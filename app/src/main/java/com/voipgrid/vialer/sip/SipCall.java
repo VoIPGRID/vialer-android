@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.sip;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -56,8 +57,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     @Retention(RetentionPolicy.SOURCE)
     @interface CallDirection {}
 
-    public static final String TAG = SipCall.class.getSimpleName();
-
     private Uri mPhoneNumberUri;
 
     private Logger mLogger;
@@ -79,17 +78,19 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mMessageStartTime;
     private CallInfo mLastCallInfo;
     private CallMediaMonitor mCallMediaMonitor;
-
+    private boolean isMicrophoneMuted = false;
     private Double mos;
-    private String codec;
-  
+
     /**
      * An object that represents the original invite received.
      */
     private SipInvite invite;
 
-    public static final String CALL_DIRECTION_OUTGOING = "outgoing";
-    public static final String CALL_DIRECTION_INCOMING = "incoming";
+    static final String CALL_DIRECTION_OUTGOING = "outgoing";
+    static final String CALL_DIRECTION_INCOMING = "incoming";
+
+    private static final int MICROPHONE_VOLUME_MUTED = 0;
+    private static final int MICROPHONE_VOLUME_UNUTED = 2;
 
     @Override
     public void onCallTsxState(OnCallTsxStateParam prm) {
@@ -204,10 +205,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public String getCodec() {
-        if (codec != null && !codec.isEmpty()) {
-            return codec;
-        }
-
         try {
             if (!isConnected()) return "";
 
@@ -274,7 +271,12 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     }
 
-    public void updateMicrophoneVolume(long newVolume) {
+    /**
+     * Update the calls microphone volume.
+     *
+     * @param newVolume
+     */
+    private void updateMicrophoneVolume(long newVolume) {
         try {
             CallMediaInfoVector callMediaInfoVector = this.getInfo().getMedia();
             long size = callMediaInfoVector.size();
@@ -291,6 +293,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_UPDATE_MICROPHONE_VOLUME_FAILED);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Toggle the microphone mute status of this call.
+     *
+     */
+    public void toggleMute() {
+        mLogger.d("Changing the mute status of this call from " + isMicrophoneMuted + " to " + !isMicrophoneMuted);
+        updateMicrophoneVolume(isMicrophoneMuted ? MICROPHONE_VOLUME_UNUTED : MICROPHONE_VOLUME_MUTED);
+        isMicrophoneMuted = !isMicrophoneMuted;
+        mSipBroadcaster.broadcastCallStatus(getIdentifier(), isMicrophoneMuted ? SipConstants.CALL_MUTED : SipConstants.CALL_UNMUTED);
     }
 
     /**
@@ -508,7 +521,13 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     }
 
-    public void onCallOutgoing(Uri phoneNumber, boolean startActivity) {
+    /**
+     * Start an outgoing call.
+     *
+     * @param phoneNumber The phone number uri to call
+     * @return TRUE if the call has been successfully started, otherwise FALSE.
+     */
+    boolean startOutgoingCall(Uri phoneNumber) {
         mLogger.d("onCallOutgoing");
         mCallDirection = CALL_DIRECTION_OUTGOING;
 
@@ -519,11 +538,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
             mSipService.setCurrentCall(this);
 
-            if (startActivity) {
-                mSipService.startOutgoingCallActivity(this, getPhoneNumberUri());
-            }
+            return true;
         } catch (Exception e) {
             onCallInvalidState(e);
+            return false;
         }
     }
 
@@ -628,8 +646,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     private Object getConnectionType() {
         return new ConnectivityHelper(
-                (ConnectivityManager) mSipService.getSystemService(mSipService.CONNECTIVITY_SERVICE),
-                (TelephonyManager) mSipService.getSystemService(mSipService.TELEPHONY_SERVICE)
+                (ConnectivityManager) mSipService.getSystemService(Context.CONNECTIVITY_SERVICE),
+                (TelephonyManager) mSipService.getSystemService(Context.TELEPHONY_SERVICE)
         ).getConnectionTypeString();
     }
 
@@ -724,5 +742,9 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public SipService getSipService() {
         return mSipService;
+    }
+
+    public boolean isMuted() {
+        return isMicrophoneMuted;
     }
 }
