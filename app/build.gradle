@@ -125,6 +125,9 @@ android {
         debug {
             manifestPlaceholders = [enableCrashReporting:"false"]
         }
+        debug {
+            versionNameSuffix '-DEBUG'
+        }
     }
     dexOptions {
         javaMaxHeapSize "4g"
@@ -147,9 +150,9 @@ ext {
     supportLibVersion = "1.0.2"
     espressoVersion = "2.2"
     androidTestVersion = "1.1.0"
-    firebaseCoreVersion = "16.0.5"
-    firebaseMessagingVersion = "17.3.4"
-    googleAnalyticsVersion = "16.0.5"
+    firebaseCoreVersion = "16.0.8"
+    firebaseMessagingVersion = "17.6.0"
+    googleAnalyticsVersion = "16.0.8"
     okHttpVersion = "3.11.0"
     retroFitVersion = "2.4.0"
     roboElectricVersion = "3.6.2"
@@ -166,10 +169,10 @@ dependencies {
     implementation(name: 'pjsip', ext: 'aar')
 
     // Support libs.
-    implementation "androidx.multidex:multidex:2.0.0"
+    implementation "androidx.multidex:multidex:2.0.1"
     implementation "androidx.appcompat:appcompat:${supportLibVersion}"
     implementation "com.google.android.material:material:1.0.0"
-    implementation "androidx.annotation:annotation:1.0.0"
+    implementation "androidx.annotation:annotation:1.0.2"
     implementation "androidx.gridlayout:gridlayout:1.0.0"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
@@ -178,10 +181,9 @@ dependencies {
     // Firebase setup.
     implementation "com.google.firebase:firebase-core:${firebaseCoreVersion}"
     implementation "com.google.firebase:firebase-messaging:${firebaseMessagingVersion}"
-    // Crashlytics.
-    implementation "com.crashlytics.sdk.android:crashlytics:2.9.6"
+
     // Firebase Performance Measurement.
-    implementation 'com.google.firebase:firebase-perf:16.2.0'
+    implementation 'com.google.firebase:firebase-perf:16.2.5'
 
     // Google Analytics setup.
     implementation "com.google.android.gms:play-services-analytics:${googleAnalyticsVersion}"
@@ -221,19 +223,21 @@ dependencies {
     // Testing below are supported api level because SNAPSHOT version is to unstable.
     testImplementation "org.robolectric:robolectric:${roboElectricVersion}"
     testImplementation "org.mockito:mockito-core:${mockitoCoreVersion}"
-    testImplementation "androidx.test.ext:junit:1.0.0"
+    testImplementation "androidx.test.ext:junit:1.1.0"
 
     // Setup for instrumented tests.
-    androidTestImplementation "androidx.test:runner:1.1.0"
-    androidTestUtil "androidx.test:orchestrator:1.1.0"
+    androidTestImplementation "androidx.test:runner:1.1.1"
+    androidTestUtil "androidx.test:orchestrator:1.1.1"
     androidTestImplementation "androidx.test:rules:${androidTestVersion}"
-    implementation "androidx.test.ext:junit:1.0.0"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.1.0"
-    androidTestImplementation 'androidx.annotation:annotation:1.0.0'
+    implementation "androidx.test.ext:junit:1.1.0"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.1.1"
+    androidTestImplementation 'androidx.annotation:annotation:1.0.2'
 
     // Automated screenshots for instrumented tests.
     androidTestImplementation 'tools.fastlane:screengrab:1.1.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    // Crashlytics
+    releaseImplementation "com.crashlytics.sdk.android:crashlytics:2.9.9"
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.
