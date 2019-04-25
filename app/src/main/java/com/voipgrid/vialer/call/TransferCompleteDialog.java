@@ -9,7 +9,8 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class TransferCompleteDialog extends SweetAlertDialog {
 
-    TransferCompleteDialog(Context context, String firstPhoneNumber, String secondPhoneNumber) {
+    private TransferCompleteDialog(Context context, String firstPhoneNumber,
+            String secondPhoneNumber) {
         super(context,  SweetAlertDialog.SUCCESS_TYPE);
         this.showCancelButton(false);
         this.setContentText(

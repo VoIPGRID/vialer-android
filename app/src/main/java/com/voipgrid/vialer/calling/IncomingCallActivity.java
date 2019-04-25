@@ -49,7 +49,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
 
-        getMediaManager().startIncomingCallRinger();
         mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent(), mContactImage);
     }
 
@@ -71,13 +70,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
             return;
         }
 
-        try {
-            mSipServiceConnection.get().getCurrentCall().decline();
-        } catch (Exception e) {
-            mLogger.e("Unable to decline call with error: " + e.getMessage());
-            finish();
-            return;
-        }
+        SipService.performActionOnSipService(this, SipService.Actions.DECLINE_INCOMING_CALL);
 
         sendBroadcast(new Intent(DECLINE_BTN));
         endRinging();
@@ -124,7 +117,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
      *
      */
     private void endRinging() {
-        getMediaManager().stopIncomingCallRinger();
         finish();
     }
 
@@ -134,13 +126,11 @@ public class IncomingCallActivity extends AbstractCallActivity {
             return;
         }
 
-        getMediaManager().startIncomingCallRinger();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        getMediaManager().stopIncomingCallRinger();
         ringingIsPaused = true;
     }
 
@@ -155,7 +145,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         }
 
         if (ringingIsPaused) {
-            getMediaManager().startIncomingCallRinger();
             ringingIsPaused = false;
         }
     }
@@ -182,7 +171,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @Override
     public void onCallConnected() {
         mSipServiceConnection.disconnect(true);
-        getMediaManager().stopIncomingCallRinger();
         startCallActivity();
     }
 

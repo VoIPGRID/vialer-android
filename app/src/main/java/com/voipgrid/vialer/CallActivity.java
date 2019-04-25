@@ -33,7 +33,6 @@ import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.media.MediaManager;
-import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -70,7 +69,6 @@ public class CallActivity extends AbstractCallActivity implements
     @Inject AnalyticsHelper mAnalyticsHelper;
     @Inject NetworkUtil mNetworkUtil;
 
-
     @BindView(R.id.button_transfer) CallActionButton mTransferButton;
     @BindView(R.id.button_onhold) CallActionButton mOnHoldButton;
     @BindView(R.id.button_mute) CallActionButton mMuteButton;
@@ -81,8 +79,6 @@ public class CallActivity extends AbstractCallActivity implements
     private SweetAlertDialog mTransferCompleteDialog;
 
     private boolean mConnected = false;
-    private boolean mMute = false;
-    private boolean mOnHold = false;
     private boolean mOnTransfer = false;
     private String mType;
     private boolean mCallIsTransferred = false;
@@ -106,10 +102,8 @@ public class CallActivity extends AbstractCallActivity implements
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
         mCallPresenter = new CallPresenter(this);
-
         updateUi();
 
-        // Get the intent to see if it's an outgoing or an incoming call.
         mType = getIntent().getType();
 
         updateMediaManager(TYPE_CONNECTED_CALL);
@@ -129,28 +123,7 @@ public class CallActivity extends AbstractCallActivity implements
         }
 
         mForceDisplayedCallDetails = new DisplayCallDetail(getIntent().getStringExtra(PHONE_NUMBER), getIntent().getStringExtra(CONTACT_NAME));
-        updateUi();
-
         updateMediaManager(mType);
-
-        if (isIncomingCall()) {
-            mLogger.d("inComingCall");
-
-            // Ringing event.
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_inbound),
-                    getString(R.string.analytics_event_label_ringing)
-            );
-
-            if (!ReadExternalStoragePermission.hasPermission(this)) {
-                ReadExternalStoragePermission.askForPermission(this);
-            }
-
-        } else {
-            mLogger.d("outgoingCall");
-        }
-
         updateUi();
     }
 
@@ -165,8 +138,9 @@ public class CallActivity extends AbstractCallActivity implements
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
+
         if (mTransferCompleteDialog != null) {
             mTransferCompleteDialog.dismiss();
         }
@@ -211,10 +185,8 @@ public class CallActivity extends AbstractCallActivity implements
             mForceDisplayedCallDetails = null;
             getMediaManager().setCallOnSpeaker(false);
             mConnected = true;
-            mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
             updateUi();
         } else {
-            mOnHold = false;
             mConnected = false;
             getMediaManager().callEnded();
             finishAfterDelay();
@@ -223,12 +195,10 @@ public class CallActivity extends AbstractCallActivity implements
 
     @Override
     public void onCallHold() {
-        mOnHold = true;
     }
 
     @Override
     public void onCallUnhold() {
-        mOnHold = false;
     }
 
     @Override
@@ -335,15 +305,6 @@ public class CallActivity extends AbstractCallActivity implements
         updateUi();
     }
 
-    // Mute or un-mute a call when the user presses the button.
-    private void toggleMute() {
-        mLogger.d("toggleMute");
-        mMute = !mMute;
-        int volume = getResources().getInteger(mMute ? R.integer.mute_microphone_volume_value : R.integer.unmute_microphone_volume_value);
-        updateMicrophoneVolume(volume);
-        updateUi();
-    }
-
     // Toggle the hold the call when the user presses the button.
     private void toggleOnHold() {
         mLogger.d("toggleOnHold");
@@ -354,7 +315,6 @@ public class CallActivity extends AbstractCallActivity implements
         try {
             SipCall call = mOnTransfer ? mSipServiceConnection.get().getCurrentCall() : mSipServiceConnection.get().getFirstCall();
             call.toggleHold();
-            mOnHold = call.isOnHold();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -386,30 +346,11 @@ public class CallActivity extends AbstractCallActivity implements
         finishAfterDelay();
     }
 
-    /**
-     * Method for setting new  microphone volume value (SIP Rx level):
-     * - level 0 means mute:
-     * - level 1 means no volume change, so we won't use this.
-     * - level 2 mean 100% increase.
-     *
-     * @param newVolume new volume level for the Rx level of the current media of active call.
-     */
-    void updateMicrophoneVolume(long newVolume) {
-        mLogger.d("updateMicrophoneVolume setting volume to: " + newVolume);
-        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
-            mSipServiceConnection.get().getCurrentCall().updateMicrophoneVolume(newVolume);
-        }
-    }
-
     @OnClick(R.id.button_mute)
     public void onMuteButtonClick(View view) {
-        if (mOnTransfer) {
-            if (mSipServiceConnection.get().getCurrentCall().isConnected()) {
-                toggleMute();
-            }
-        } else {
-            if (mConnected) {
-                toggleMute();
+        if ((mOnTransfer && mSipServiceConnection.get().getCurrentCall().isConnected()) || mConnected) {
+            if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
+                mSipServiceConnection.get().getCurrentCall().toggleMute();
             }
         }
     }
@@ -425,7 +366,7 @@ public class CallActivity extends AbstractCallActivity implements
             return;
         }
 
-        if (!mOnHold) {
+        if (!isCallOnHold()) {
             onHoldButtonClick(mOnHoldButton);
         }
 
@@ -436,12 +377,8 @@ public class CallActivity extends AbstractCallActivity implements
 
     @OnClick(R.id.button_onhold)
     public void onHoldButtonClick(View view) {
-        if (mOnTransfer) {
-            if (mSipServiceConnection.get().getCurrentCall().isConnected()) {
-                toggleOnHold();
-            }
-        } else {
-            if (mConnected) {
+        if ((mOnTransfer && mSipServiceConnection.get().getCurrentCall().isConnected()) || mConnected) {
+            if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
                 toggleOnHold();
             }
         }
@@ -574,7 +511,6 @@ public class CallActivity extends AbstractCallActivity implements
     private void beginCallTransferTo(String number) {
         mOnTransfer = true;
         callTransferMakeSecondCall(number);
-        mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
         mForceDisplayedCallDetails = new DisplayCallDetail(number, null);
         updateUi();
     }
@@ -644,8 +580,8 @@ public class CallActivity extends AbstractCallActivity implements
         super.sipServiceHasConnected(sipService);
         if (isIncomingCall()) {
             onCallConnected();
-            updateUi();
         }
+        updateUi();
     }
 
     /**
@@ -682,7 +618,11 @@ public class CallActivity extends AbstractCallActivity implements
     }
 
     public boolean isMuted() {
-        return mMute;
+        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
+            return mSipServiceConnection.get().getCurrentCall().isMuted();
+        }
+
+        return false;
     }
 
     public boolean hasBluetoothDeviceConnected() {
@@ -707,5 +647,18 @@ public class CallActivity extends AbstractCallActivity implements
 
     public DisplayCallDetail getForceDisplayedCallDetails() {
         return mForceDisplayedCallDetails;
+    }
+
+    /**
+     * Check if the primary call is on hold.
+     *
+     * @return TRUE if it is on hold, otherwise FALSE.
+     */
+    public boolean isCallOnHold() {
+        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
+            return mSipServiceConnection.get().getCurrentCall().isOnHold();
+        }
+
+        return false;
     }
 }

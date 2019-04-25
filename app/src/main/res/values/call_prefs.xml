@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Microphone mute value for SIP SIPCall Rx level -->
-    <integer name="mute_microphone_volume_value">0</integer>
-    <!-- Microphone unmute value for SIP SIPCall Rx level. 1 means no change. 2 means 100% volume increase. -->
-    <integer name="unmute_microphone_volume_value">2</integer>
-</resources>

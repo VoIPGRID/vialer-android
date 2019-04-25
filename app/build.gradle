@@ -120,6 +120,10 @@ android {
 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            manifestPlaceholders = [enableCrashReporting:"true"]
+        }
+        debug {
+            manifestPlaceholders = [enableCrashReporting:"false"]
         }
     }
     dexOptions {

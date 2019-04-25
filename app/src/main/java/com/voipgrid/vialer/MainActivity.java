@@ -29,7 +29,6 @@ import com.voipgrid.vialer.onboarding.AccountFragment;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
-import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
@@ -143,22 +142,13 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
     private void askForPermissions(int requestNr) {
         switch (requestNr) {
             case 0:
-                int storagePermissionState = ReadExternalStoragePermission.getPermissionStatus(this, ReadExternalStoragePermission.mPermissionToCheck);
-                if (storagePermissionState != ReadExternalStoragePermission.BLOCKED || ReadExternalStoragePermission.firstRequest) {
-                    if (!ReadExternalStoragePermission.hasPermission(this)) {
-                        ReadExternalStoragePermission.askForPermission(this);
-                        requestCounter++;
-                        return;
-                    }
-                }
-            case 1:
                 // Ask for phone permissions.
                 if (!PhonePermission.hasPermission(this)) {
                     PhonePermission.askForPermission(this);
                     requestCounter++;
                     return;
                 }
-            case 2:
+            case 1:
                 if (!ContactsPermission.hasPermission(this)) {
                     // We need to avoid a permission loop.
                     if (mAskForPermission) {
