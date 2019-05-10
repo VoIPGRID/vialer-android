@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.contacts.ContactsSyncTask;
 import com.voipgrid.vialer.contacts.SyncUtils;
@@ -34,7 +33,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         T9Fragment.Listener {
 
     @Inject SharedPreferences mSharedPreferences;
-    @Inject AnalyticsHelper mAnalyticsHelper;
     @Inject ConnectivityHelper mConnectivityHelper;
     @Inject JsonStorage mJsonStorage;
 

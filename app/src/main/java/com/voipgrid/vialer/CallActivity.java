@@ -22,7 +22,6 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.call.CallActionButton;
 import com.voipgrid.vialer.call.CallDetail;
 import com.voipgrid.vialer.call.DisplayCallDetail;
@@ -66,7 +65,6 @@ public class CallActivity extends AbstractCallActivity implements
     @BindView(R.id.transfer_label) TextView mTransferLabel;
     @BindView(R.id.call_status) TextView mCallStatusTv;
 
-    @Inject AnalyticsHelper mAnalyticsHelper;
     @Inject NetworkUtil mNetworkUtil;
 
     @BindView(R.id.button_transfer) CallActionButton mTransferButton;
@@ -541,18 +539,8 @@ public class CallActivity extends AbstractCallActivity implements
         try {
             mSipServiceConnection.get().getFirstCall().xFerReplaces(mSipServiceConnection.get().getCurrentCall());
             mCallIsTransferred = true;
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_transfer),
-                    getString(R.string.analytics_event_label_success)
-            );
         } catch (Exception e) {
             e.printStackTrace();
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_transfer),
-                    getString(R.string.analytics_event_label_fail)
-            );
         }
     }
 
