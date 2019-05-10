@@ -15,7 +15,6 @@ import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
@@ -398,30 +397,7 @@ public class SipConfig implements AccountStatus {
         // onAccountRegistered calls in a row.
         mHasRespondedToMiddleware = true;
 
-        AnalyticsHelper analyticsHelper = new AnalyticsHelper(
-                ((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker()
-        );
-
         Middleware middlewareApi = ServiceGenerator.createRegistrationService(mSipService);
-
-        String analyticsLabel = ConnectivityHelper.get(mSipService).getAnalyticsLabel();
-
-        // Accepted event.
-        analyticsHelper.sendEvent(
-                mSipService.getString(R.string.analytics_event_category_middleware),
-                mSipService.getString(R.string.analytics_event_action_middleware_accepted),
-                analyticsLabel
-        );
-
-        long startTime = (long) (Double.parseDouble(messageStartTime) * 1000);  // To ms.
-        long startUpTime = System.currentTimeMillis() - startTime;
-
-        // Response timing.
-        analyticsHelper.sendTiming(
-                mSipService.getString(R.string.analytics_event_category_middleware),
-                mSipService.getString(R.string.analytics_event_name_call_response),
-                startUpTime
-        );
 
         retrofit2.Call<ResponseBody> call = middlewareApi.reply(token, true, messageStartTime);
         call.enqueue(new Callback<ResponseBody>() {

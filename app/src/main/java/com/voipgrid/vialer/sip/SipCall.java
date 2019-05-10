@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
@@ -115,33 +114,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 }
             }
         }
-    }
-
-    private void sendMos() {
-        if (!hasCalculatedMos()) return;
-
-        getAnalyticsHelper().sendEvent(
-                mSipService.getString(R.string.analytics_event_category_metrics),
-                mSipService.getString(R.string.analytics_event_action_callmetrics),
-                mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
-                (int) (100 * mos)
-        );
-        mLogger.e("MOS for CONNECTION: " + ConnectivityHelper.get(mSipService).getConnectionTypeString() + " with value: " + mos);
-    }
-
-    private void sendBandwidth() {
-        if (getCallDuration() > 10) {
-            getAnalyticsHelper().sendEvent(
-                    mSipService.getString(R.string.analytics_event_category_metrics),
-                    mSipService.getString(R.string.analytics_event_action_callmetrics),
-                    mSipService.getString(R.string.analytics_event_label_bandwidth, getCodec()),
-                    (int) this.getBandwidthUsage() * 1024
-            );
-        }
-    }
-
-    private AnalyticsHelper getAnalyticsHelper() {
-        return new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker());
     }
 
     void setIsIPChangeInProgress(boolean inProgress){
@@ -574,8 +546,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     private void onCallDisconnected() {
         mLogger.d("onCallDisconnected");
-        sendMos();
-        sendBandwidth();
 
         // Play end of call beep only when the remote party hangs up and the call was connected.
         if (!mUserHangup && mCallIsConnected && !mCallIsTransferred) {

@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -32,7 +31,6 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
 
     private TextView mStatusTextView;
 
-    private AnalyticsHelper mAnalyticsHelper;
     private VoipgridApi mVoipgridApi;
     private Logger mLogger;
     private SystemUser mSystemUser;
@@ -43,11 +41,6 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_two_step_call);
-
-        /* set the AnalyticsHelper */
-        mAnalyticsHelper = new AnalyticsHelper(
-                ((AnalyticsApplication) getApplication()).getDefaultTracker()
-        );
 
         mSystemUser = (SystemUser) new JsonStorage(this).get(SystemUser.class);
 
@@ -67,12 +60,6 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
         mTwoStepCallView.setNumberA(mSystemUser.getMobileNumber());
         mTwoStepCallView.setNumberB(numberToCall);
         updateStateView(TwoStepCallUtils.STATE_INITIAL);
-
-        mAnalyticsHelper.sendEvent(
-                getString(R.string.analytics_event_category_call),
-                getString(R.string.analytics_event_action_outbound),
-                getString(R.string.analytics_event_label_connect_a_b)
-        );
 
         ((TextView) findViewById(R.id.name_text_view)).setText(numberToCall);
     }

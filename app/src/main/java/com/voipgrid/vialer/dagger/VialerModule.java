@@ -12,7 +12,6 @@ import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.InternalNumbers;
@@ -111,10 +110,6 @@ public class VialerModule {
     @Provides
     BroadcastReceiverManager provideBroadcastReceiverManager(LocalBroadcastManager localBroadcastManager, Context context) {
         return new BroadcastReceiverManager(localBroadcastManager, context);
-    }
-
-    @Provides AnalyticsHelper provideAnalyticsHelper() {
-        return new AnalyticsHelper(mVialerApplication.getDefaultTracker());
     }
 
     @Provides

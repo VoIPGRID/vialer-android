@@ -13,7 +13,6 @@ import android.widget.Toast;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
@@ -32,7 +31,6 @@ public class DialHelper {
 
     private Context mContext;
 
-    private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private final Preferences mPreferences;
     private JsonStorage mJsonStorage;
@@ -41,20 +39,17 @@ public class DialHelper {
     private static String sNumberAttemptedToCall;
 
     private DialHelper(Context context, JsonStorage jsonStorage,
-            ConnectivityHelper connectivityHelper, AnalyticsHelper analyticsHelper ) {
+            ConnectivityHelper connectivityHelper) {
         mContext = context;
         mJsonStorage = jsonStorage;
         mConnectivityHelper = connectivityHelper;
-        mAnalyticsHelper = analyticsHelper;
         mPreferences = new Preferences(context);
     }
 
     public static DialHelper fromActivity (Activity activity) {
         JsonStorage jsonStorage = new JsonStorage(activity);
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(activity);
-        AnalyticsHelper analyticsHelper = new AnalyticsHelper(VialerApplication.get().getDefaultTracker());
-
-        return new DialHelper(activity, jsonStorage, connectivityHelper, analyticsHelper);
+        return new DialHelper(activity, jsonStorage, connectivityHelper);
     }
 
     public void callNumber(final String number, final String contactName) {
@@ -179,12 +174,6 @@ public class DialHelper {
         } else {
             mContext.startService(intent);
         }
-
-        mAnalyticsHelper.sendEvent(
-                mContext.getString(R.string.analytics_event_category_call),
-                mContext.getString(R.string.analytics_event_action_outbound),
-                mContext.getString(R.string.analytics_event_label_sip)
-        );
     }
 
     /**
