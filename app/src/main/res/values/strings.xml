@@ -265,4 +265,5 @@
     <string name="call_records_show_all">Show missed calls only</string>
     <string name="dialer_no_connectivity">No internet connection</string>
     <string name="dialer_no_connectivity_subtext">Calls cannot be made or received without a connection</string>
+    <string name="call_records_answered_elsewhere">%1$s (%2$s)</string>
 </resources>

@@ -16,12 +16,16 @@ public class StringUtil {
      * @return The captured group or null if not found
      */
     public static @Nullable String extractFirstCaptureGroupFromString(String subject, String pattern) {
-        return extractCaptureGroups(subject, pattern).get(0);
+        try {
+            return extractCaptureGroups(subject, pattern).get(0);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static ArrayList<String> extractCaptureGroups(String subject, String pattern) {
 
-        if (subject == null) return null;
+        if (subject == null) return new ArrayList<>();
 
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(subject);

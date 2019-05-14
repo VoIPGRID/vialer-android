@@ -12,10 +12,13 @@ import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.analytics.AnalyticsHelper;
+import com.voipgrid.vialer.api.PhoneAccountFetcher;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.call.NativeCallManager;
@@ -103,6 +106,11 @@ public class VialerModule {
         return (InternalNumbers) jsonStorage.get(InternalNumbers.class);
     }
 
+    @Provides @Nullable
+    PhoneAccounts providePhoneAccounts(JsonStorage jsonStorage) {
+        return (PhoneAccounts) jsonStorage.get(PhoneAccounts.class);
+    }
+
     @Provides LocalBroadcastManager provideLocalBroadcastManager(Context context) {
         return LocalBroadcastManager.getInstance(context);
     }
@@ -159,8 +167,8 @@ public class VialerModule {
     }
 
     @Provides
-    CallRecordAdapter provideCallRecordAdapter(CachedContacts cachedContacts) {
-        return new CallRecordAdapter(cachedContacts);
+    CallRecordAdapter provideCallRecordAdapter() {
+        return new CallRecordAdapter();
     }
 
     @Provides CachedContacts provideCachedContacts(Contacts contacts) {
@@ -209,6 +217,11 @@ public class VialerModule {
 
     @Provides NetworkConnectivity provideNetworkConnectivity() {
         return new NetworkConnectivity();
+    }
+
+    @Provides @Singleton
+    PhoneAccountFetcher providePhoneAccountFetcher(VoipgridApi api, JsonStorage jsonStorage) {
+        return new PhoneAccountFetcher(api, jsonStorage);
     }
 
     @Provides

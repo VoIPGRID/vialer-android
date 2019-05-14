@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+                xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingRight="@dimen/list_item_contact_padding_right"
@@ -10,39 +10,44 @@
     android:background="@color/call_records_item_background">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/text_view_contact_icon"
+        android:id="@+id/icon"
         android:layout_width="@dimen/contact_icon_width"
         android:layout_height="@dimen/contact_icon_height" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="295dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_gravity="center"
-        android:paddingLeft="@dimen/list_item_contact_padding_top"
-        android:layout_toRightOf="@id/text_view_contact_icon">
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_toStartOf="@+id/call_button"
+        android:layout_toLeftOf="@+id/call_button"
+        android:layout_toRightOf="@id/icon"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/list_item_contact_padding_top">
 
         <TextView
-            android:id="@+id/text_view_contact_name"
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:textColor="@color/contact_name_text_color"
             android:textIsSelectable="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/contact_name_text_size"
-            android:fontFamily="sans-serif"
-            android:textColor="@color/contact_name_text_color"/>
+            android:textSize="@dimen/contact_name_text_size"/>
 
         <TextView
-            android:id="@+id/text_view_contact_information"
+            android:id="@+id/subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/contact_information_text_size"
-            android:fontFamily="sans-serif"
             android:drawablePadding="@dimen/direction_icon_padding"
-            android:textColor="@color/contact_information_text_color"/>
+            android:fontFamily="sans-serif"
+            android:singleLine="true"
+            android:textColor="@color/contact_information_text_color"
+            android:textSize="@dimen/contact_information_text_size"/>
     </LinearLayout>
 
     <ImageButton
-        android:id="@+id/call_record_call_button"
+        android:id="@+id/call_button"
         android:contentDescription="@null"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -50,7 +55,7 @@
         android:layout_alignParentEnd="true"
         android:layout_centerInParent="true"
         android:padding="@dimen/list_item_call_button_padding"
-        android:src="@drawable/ic_phone"
+        app:srcCompat="@drawable/ic_phone"
         android:tint="@color/tint_color_backspace"
         android:background="?selectableItemBackgroundBorderless"/>
 </RelativeLayout>
