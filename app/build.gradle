@@ -14,8 +14,8 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 131
-        versionName "6.2"
+        versionCode 134
+        versionName "answered elsewhere alpha 02"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         flavorDimensions "default"
@@ -242,7 +242,7 @@ dependencies {
 
     // Crashlytics
     releaseImplementation "com.crashlytics.sdk.android:crashlytics:2.9.9"
-    compile "androidx.core:core-ktx:+"
+    implementation "androidx.core:core-ktx:1.0.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 

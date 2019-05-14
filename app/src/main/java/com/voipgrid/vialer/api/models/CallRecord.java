@@ -5,6 +5,7 @@ import android.text.format.DateFormat;
 import com.google.gson.annotations.SerializedName;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
+import com.voipgrid.vialer.util.StringUtil;
 
 import java.util.Calendar;
 
@@ -36,6 +37,9 @@ public class CallRecord {
 
     @SerializedName("dst_code")
     private String destinationCode;
+
+    @SerializedName("dst_account")
+    private String destinationAccount;
 
     private String direction;
 
@@ -109,6 +113,29 @@ public class CallRecord {
         }
 
         return direction;
+    }
+
+    public String getDestinationAccount() {
+        return StringUtil.extractFirstCaptureGroupFromString(this.destinationAccount, "/([0-9]+)/$");
+    }
+
+
+    /**
+     * Determine if this call was answered elsewhere, this applies when the user is in a call group with
+     * multiple phones and a different phone in this call group answers it.
+     *
+     * @return
+     */
+    public boolean wasAnsweredElsewhere() {
+        if (DIRECTION_OUTBOUND.equals(this.direction)) return false;
+
+        PhoneAccounts phoneAccounts = VialerApplication.get().component().getPhoneAccounts();
+
+        if (phoneAccounts == null || phoneAccounts.isEmpty()) return false;
+
+        if (getDestinationAccount() == null) return false;
+
+        return !phoneAccounts.contains(getDestinationAccount());
     }
 
     public void setDirection(String direction) {
