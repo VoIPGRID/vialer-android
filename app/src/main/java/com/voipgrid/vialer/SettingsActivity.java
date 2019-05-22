@@ -525,6 +525,7 @@ public class SettingsActivity extends LoginRequiredActivity {
             mPreferences.setTlsEnabled(mSwitchEnabled);
             mLogger.i("TLS switch has been set to: " + mSwitchEnabled);
             initializeAdvancedSettings();
+            ActivityLifecycleTracker.removeEncryptionNotification();
         }
 
         @Override

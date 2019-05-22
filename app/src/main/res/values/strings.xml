@@ -244,7 +244,6 @@
     <string name="t9helper_title">Tips</string>
     <string name="t9helper_text">You can search for %s by keying the numbers on the dialpad below.</string>
     <string name="t9helper_joining_character" translatable="false">+</string>
-    <string name="call_not_encrypted_warning_bar_text">Call not encrypted</string>
     <string name="notification_channel_voip_disabled">Your VoIP account has been registered on another device. You can re-enable VoIP in Settings</string>
     <string name="pending_call_description">Setting up call with</string>
     <string name="pending_call_status">Establishing VoIP connection…</string>
@@ -265,5 +264,11 @@
     <string name="call_records_show_all">Show missed calls only</string>
     <string name="dialer_no_connectivity">No internet connection</string>
     <string name="dialer_no_connectivity_subtext">Calls cannot be made or received without a connection</string>
-    <string name="call_records_answered_elsewhere">%1$s (%2$s)</string>
+    <string name="dialer_no_encryption_dialog">Encrypted calling is not currently enabled, third parties may be able to intercept and listen to your phone calls. Do you wish to enable it?</string>
+    <string name="dialer_enable_encryption_failed">Unable to enable encrypted calling at this time, please try again later.</string>
+    <string name="call_records_answered_elsewhere" translatable="false">%1$s (%2$s)</string>
+    <string name="encrypted_calling_notification_title">Encrypted Calling is not enabled</string>
+    <string name="encrypted_calling_notification_description">\"Encrypted calling is not currently
+        enabled, third parties may be able to intercept and listen to your phone calls.
+    </string>
 </resources>

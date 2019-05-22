@@ -16,6 +16,18 @@
         app:srcCompat="@drawable/ic_close"
         android:visibility="gone"/>
 
+    <ImageButton
+        android:id="@+id/encryption_disabled"
+        style="@style/DialpadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:contentDescription="@null"
+        android:padding="10dp"
+        android:tint="@color/dial_button_chars_color"
+        app:srcCompat="@drawable/ic_lock_open"
+        android:visibility="visible"/>
+
     <com.voipgrid.vialer.dialer.DialerEditText
         android:id="@+id/edit_text"
         style="@style/DialpadNumberInput"

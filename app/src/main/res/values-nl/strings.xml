@@ -263,4 +263,16 @@
     </string>
     <string name="dialer_no_connectivity">Geen internet verbinding</string>
     <string name="dialer_no_connectivity_subtext">Gesprekken kunnen niet worden opgezet of ontvangen zonder internet</string>
+    <string name="dialer_no_encryption_dialog">Versleuteld bellen is momenteel niet ingeschakeld.
+        Anderen kunnen mogelijk jouw gesprekken opvangen en meeluisteren. Wil je versleuteld bellen
+        inschakelen?
+    </string>
+    <string name="dialer_enable_encryption_failed">Het inschakelen van versleuteld bellen is
+        momenteel niet mogelijk, probeer het later opnieuw.
+    </string>
+    <string name="encrypted_calling_notification_title">Versleuteld bellen is niet ingeschakeld
+    </string>
+    <string name="encrypted_calling_notification_description">Versleuteld bellen is momenteel niet
+        ingeschakeld. Anderen kunnen mogelijk jouw gesprekken opvangen en meeluisteren.
+    </string>
 </resources>
