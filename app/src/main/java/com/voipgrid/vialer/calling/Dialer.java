@@ -76,7 +76,10 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
 
         mNumberInput.add(digit);
         mNumberInput.setCorrectFontSize();
-        listener.digitWasPressed(digit);
+
+        if (listener != null) {
+            listener.digitWasPressed(digit);
+        }
     }
 
     public String getNumber() {
@@ -96,6 +99,8 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
 
     @Override
     public void onInputChanged(String number) {
+        if (listener == null) return;
+
         listener.numberWasChanged(number);
     }
 
