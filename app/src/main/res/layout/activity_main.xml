@@ -38,9 +38,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <com.voipgrid.vialer.EncryptionBarView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
