@@ -546,6 +546,18 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     }
 
     /**
+     * This method is called when the user opens the multi-tasking menu and swipes/closes Vialer.
+     *
+     * @param rootIntent
+     */
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        mLogger.i("Stopping SipService as task has been removed");
+        stopSelf();
+    }
+
+    /**
      * Starting this runnable spawns an ongoing check every {@value #CHECK_SERVICE_USER_INTERVAL_MS}ms that will
      * shutdown the service if there is no active call. This is a fallback to ensure the SipService is properly
      * shut down after a call if for some reason it wasn't.

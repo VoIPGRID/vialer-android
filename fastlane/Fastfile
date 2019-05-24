@@ -123,5 +123,8 @@ def create_apk_path_string(flavor)
 end
 
 def create_apk_path(flavor)
-    return "app/build/outputs/apk/#{flavor}/release/app-#{flavor}-release.apk"
+    time = Time.new.strftime("%m%d%Y_%H%M%S")
+    code = get_version_code()
+    version = get_version_code(ext_constant_name:"versionName").gsub('.', '_').gsub(' ', '_')
+    return "app/build/outputs/apk/#{flavor}/release/#{flavor}-#{version}-#{code}-#{time}.apk"
 end
