@@ -123,11 +123,18 @@ public class CallRecordFragment extends Fragment
     private void setupSwipeContainer() {
         swipeContainer.setColorSchemeColors(getResources().getColor(R.color.color_refresh));
         swipeContainer.setOnRefreshListener(this);
-        swipeContainer.post(() -> {
-            if (swipeContainer != null) {
-                swipeContainer.setRefreshing(true);
-            }
-        });
+        swipeContainer.post(() -> setRefreshing(true));
+    }
+
+    /**
+     * Helper method to set refreshing on the swipe container but to avoid NPE if it is null.
+     *
+     * @param refreshing
+     */
+    private void setRefreshing(boolean refreshing) {
+        if (swipeContainer == null) return;
+
+        swipeContainer.setRefreshing(refreshing);
     }
 
     private void setupRecyclerView() {
@@ -169,14 +176,16 @@ public class CallRecordFragment extends Fragment
 
     @Override
     public void onChanged(PagedList<CallRecord> callRecords) {
-        swipeContainer.setRefreshing(false);
+        setRefreshing(false);
 
         if (callRecords.isEmpty()) {
             displayError(R.string.empty_view_default_message);
             return;
         }
 
-        int code = factory.getPostLiveData().getValue().getLastCode();
+        CallRecordDataSource value = factory.getPostLiveData().getValue();
+
+        int code = (value == null ? 500 : value.getLastCode());
 
         if (!String.valueOf(code).startsWith("2")) {
             handleFailedRequest(code);
@@ -208,7 +217,7 @@ public class CallRecordFragment extends Fragment
 
     @Override
     public void missedCallsHaveBeenRetrieved(List<CallRecord> missedCallRecords) {
-        swipeContainer.setRefreshing(false);
+        setRefreshing(false);
 
         if (missedCallRecords.isEmpty()) {
             displayError(R.string.empty_view_missed_message);
@@ -225,7 +234,7 @@ public class CallRecordFragment extends Fragment
     }
 
     private void handleFailedRequest(int code) {
-        swipeContainer.setRefreshing(false);
+        setRefreshing(false);
 
         int message = R.string.empty_view_default_message;
 
@@ -246,7 +255,7 @@ public class CallRecordFragment extends Fragment
     void missedCallsSwitchWasChanged(CompoundButton missedCallsSwitch, boolean checked) {
         mPreferences.setDisplayMissedCallsOnly(checked);
         showAppropriateRecords();
-        swipeContainer.setRefreshing(true);
+        setRefreshing(true);
         onRefresh();
     }
 

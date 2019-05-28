@@ -141,38 +141,42 @@ public class MiddlewareHelper {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String token = preferences.getString(CURRENT_TOKEN, "");
 
-        // Check if we have a phone account and a push token.
-        if (new Preferences(context).hasPhoneAccount() && !token.equals("")) {
-            JsonStorage jsonStorage = new JsonStorage(context);
-            AccountHelper accountHelper = new AccountHelper(context);
+        if (token == null || token.isEmpty()) {
+            logger.d("No token so unregister");
+            setRegistrationStatus(context, STATUS_FAILED);
+            return;
+        }
 
-            Middleware api = ServiceGenerator.createRegistrationService(context);
-            String sipUserId = ((PhoneAccount) jsonStorage.get(PhoneAccount.class)).getAccountId();
-            String appName = context.getPackageName();
+        JsonStorage jsonStorage = new JsonStorage(context);
+        PhoneAccount phoneAccount = (PhoneAccount) jsonStorage.get(PhoneAccount.class);
 
-            Call<ResponseBody> call = api.unregister(token, sipUserId, appName);
-            call.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                    if (response.isSuccessful()) {
-                        logger.d("unregister successful");
-                        setRegistrationStatus(context, STATUS_UNREGISTERED);
-                    } else {
-                        logger.d("unregister failed");
-                        setRegistrationStatus(context, STATUS_FAILED);
-                    }
-                }
+        if (phoneAccount == null) {
+            logger.d("No phone account so unregister");
+            setRegistrationStatus(context, STATUS_FAILED);
+            return;
+        }
 
-                @Override
-                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+        Middleware api = ServiceGenerator.createRegistrationService(context);
+
+        Call<ResponseBody> call = api.unregister(token, phoneAccount.getAccountId(), context.getPackageName());
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    logger.d("unregister successful");
+                    setRegistrationStatus(context, STATUS_UNREGISTERED);
+                } else {
                     logger.d("unregister failed");
                     setRegistrationStatus(context, STATUS_FAILED);
                 }
-            });
-        } else {
-            logger.d("No token or phone account so unregister");
-            setRegistrationStatus(context, STATUS_FAILED);
-        }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                logger.d("unregister failed");
+                setRegistrationStatus(context, STATUS_FAILED);
+            }
+        });
     }
 
     /**
