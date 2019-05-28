@@ -2,6 +2,8 @@ package com.voipgrid.vialer.calling;
 
 import android.os.Handler;
 
+import com.voipgrid.vialer.sip.SipService;
+
 public class CallDurationTracker implements Runnable {
 
     /**
@@ -56,19 +58,21 @@ public class CallDurationTracker implements Runnable {
      * @return
      */
     private long findCallDuration() {
-        String firstCallIdentifier = mSipServiceConnection.get().getFirstCall().getIdentifier();
+        SipService sipService = mSipServiceConnection.get();
 
-        if (mSipServiceConnection.get().getCurrentCall() == null) {
-            return mSipServiceConnection.get().getFirstCall().getCallDuration();
+        if (sipService.getFirstCall() == null) {
+            return 0L;
         }
 
-        String currentCallIdentifier = mSipServiceConnection.get().getCurrentCall().getIdentifier();
-
-        if (firstCallIdentifier.equals(currentCallIdentifier)) {
-            return mSipServiceConnection.get().getFirstCall().getCallDuration();
+        if (sipService.getCurrentCall() == null) {
+            return sipService.getFirstCall().getCallDuration();
         }
 
-        return mSipServiceConnection.get().getCurrentCall().getCallDuration();
+        if (sipService.getFirstCall().getIdentifier().equals(sipService.getCurrentCall().getIdentifier())) {
+            return sipService.getFirstCall().getCallDuration();
+        }
+
+        return sipService.getCurrentCall().getCallDuration();
     }
 
     /**

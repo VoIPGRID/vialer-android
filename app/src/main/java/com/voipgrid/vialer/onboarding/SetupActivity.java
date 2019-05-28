@@ -257,7 +257,7 @@ public class SetupActivity extends VialerBaseActivity implements
     private OnboardingFragment getCurrentFragment() {
         OnboardingFragment fragment = null;
         int count = 0;
-        while (fragment == null) {
+        while (fragment == null && count < tags.length) {
             fragment = getCurrentFragment(tags[count]);
             count++;
         }

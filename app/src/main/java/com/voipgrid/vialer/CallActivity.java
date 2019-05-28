@@ -248,6 +248,11 @@ public class CallActivity extends AbstractCallActivity implements
     public void onBackPressed() {
         mLogger.d("onBackPressed");
 
+        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
+            super.onBackPressed();
+            return;
+        }
+
         if (mOnTransfer) {
             if (mSipServiceConnection.get().getCurrentCall() == null || mSipServiceConnection.get().getFirstCall() == null) {
                 super.onBackPressed();
@@ -594,7 +599,7 @@ public class CallActivity extends AbstractCallActivity implements
      *
      */
     private void showCallTransferCompletedDialog() {
-        if (isFinishing()) {
+        if (isFinishing() || mInitialCallDetail == null) {
             return;
         }
 

@@ -243,9 +243,14 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
      * Starts the service that will listen for changes to contacts.
      */
     private void startContactObserverService() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
-                && ContactsPermission.hasPermission(this)) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2 || !ContactsPermission.hasPermission(this)) {
+            return;
+        }
+
+        try {
             startService(new Intent(this, UpdateChangedContactsService.class));
+        } catch (IllegalStateException e) {
+            mLogger.e("Unable to start UpdateChangedContactsService: " + e.getMessage());
         }
     }
 

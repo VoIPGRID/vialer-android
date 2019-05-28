@@ -238,7 +238,9 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
                 if (syncContact.getLookupKey() != null) {
                     contactInsert.bindString(3, syncContact.getLookupKey());
                 }
-                contactInsert.bindString(4, syncContact.getDisplayName());
+                if (syncContact.getDisplayName() != null) {
+                    contactInsert.bindString(4, syncContact.getDisplayName());
+                }
                 if (syncContact.getThumbnailUri() != null) {
                     contactInsert.bindString(5, syncContact.getThumbnailUri());
                 }

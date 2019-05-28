@@ -114,7 +114,7 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
      *
      */
     public void fadeIn() {
-        mKeypad.setAlpha(1);
+        setKeypadAlpha(1);
         mCallButton.fadeIn();
     }
 
@@ -124,8 +124,19 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
      *
      */
     public void fadeOut() {
-        mKeypad.setAlpha(0.3f);
+        setKeypadAlpha(0.3f);
         mCallButton.fadeOut();
+    }
+
+    /**
+     * Set the alpha of the keypad while avoiding NPE.
+     *
+     * @param alpha
+     */
+    private void setKeypadAlpha(float alpha) {
+        if (mKeypad == null) return;
+
+        mKeypad.setAlpha(alpha);
     }
 
     public interface Listener {
