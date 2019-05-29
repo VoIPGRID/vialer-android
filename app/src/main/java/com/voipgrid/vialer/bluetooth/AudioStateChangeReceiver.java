@@ -44,10 +44,6 @@ public class AudioStateChangeReceiver extends BroadcastReceiver {
      * class property.
      */
     public static void fetch() {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            return;
-        }
-
         new Thread(() -> {
             BluetoothManager bluetoothManager = (BluetoothManager) VialerApplication.get().getSystemService(Context.BLUETOOTH_SERVICE);
             if (bluetoothManager == null) {

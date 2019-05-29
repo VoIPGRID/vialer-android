@@ -94,11 +94,7 @@ public abstract class VialerBaseActivity extends AppCompatActivity {
      */
     protected boolean isScreenInteractive() {
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            return powerManager.isScreenOn();
-        } else {
-            return powerManager.isInteractive();
-        }
+        return powerManager.isInteractive();
     }
 
     /**
