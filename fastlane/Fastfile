@@ -50,8 +50,7 @@ def rename_apk(old_path, flavor)
     fl = flavor.downcase
     time = Time.new.strftime("%m%d%Y_%H%M%S")
     code = get_version_code()
-    version = get_version_code(ext_constant_name:"versionName").gsub('\.', '_').gsub(' ', '_')
-    puts get_version_code(ext_constant_name:"versionName")
+    version = get_version_name().gsub('\.', '_').gsub(' ', '_')
     new_file_name = "#{fl}-#{version}-#{code}-#{time}.apk"
     apk_location_new = old_path.gsub("app-#{fl}-release.apk", new_file_name)
     sh("mv #{old_path} #{apk_location_new}", log: false)

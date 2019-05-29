@@ -59,6 +59,12 @@ public class CallMediaMonitor implements Runnable {
      */
     private static final int CHECK_FOR_NO_AUDIO_IN_PREVIOUS_S = 5;
 
+    /**
+     * The interval between which a reinvite will always occur, regardless of situation.
+     *
+     */
+    private static final int REINVITE_INTERVAL = 60 * 10;
+
     public CallMediaMonitor(SipCall sipCall) {
         mSipCall = sipCall;
         mLogger = new Logger(this.getClass());
@@ -72,6 +78,8 @@ public class CallMediaMonitor implements Runnable {
             calculateMos();
             mSipCall.getSipService().getNotification().active(mSipCall);
 
+            reinviteIfDue();
+
             mMostRecentPacketStats = mSipCall.getMediaPacketStats();
 
             if (mMostRecentPacketStats == null) break;
@@ -79,6 +87,21 @@ public class CallMediaMonitor implements Runnable {
             handleMediaPacketStats(mMostRecentPacketStats);
 
             sleep(QUERY_PACKET_STATS_INTERVAL_S * 1000);
+        }
+    }
+
+    /**
+     * Reinvite the call if a reinvite is due.
+     *
+     */
+    private void reinviteIfDue() {
+        if (intervalShouldBeTriggered(REINVITE_INTERVAL)) {
+            try {
+                mLogger.i("Attempting regularly scheduled reinvite");
+                mSipCall.reinvite(new CallOpParam(true));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
