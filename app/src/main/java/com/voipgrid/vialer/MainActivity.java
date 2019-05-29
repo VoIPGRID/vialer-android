@@ -243,8 +243,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
      * Starts the service that will listen for changes to contacts.
      */
     private void startContactObserverService() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
-                && ContactsPermission.hasPermission(this)) {
+        if (ContactsPermission.hasPermission(this)) {
             startService(new Intent(this, UpdateChangedContactsService.class));
         }
     }
@@ -275,15 +274,11 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
      */
     public void openDialer() {
         Intent intent = new Intent(this, DialerActivity.class);
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            ActivityOptionsCompat options = ActivityOptionsCompat.
-                    makeSceneTransitionAnimation(
-                            this, findViewById(R.id.floating_action_button),
-                            "floating_action_button_transition_name");
-            startActivity(intent, options.toBundle());
-        } else {
-            startActivity(intent);
-        }
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(
+                        this, findViewById(R.id.floating_action_button),
+                        "floating_action_button_transition_name");
+        startActivity(intent, options.toBundle());
     }
 
     /**
