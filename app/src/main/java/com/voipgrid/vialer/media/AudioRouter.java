@@ -375,6 +375,8 @@ class AudioRouter {
             public void onReceive(Context context, Intent intent) {
                 int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
 
+                if (isInitialStickyBroadcast()) return;
+
                 mLogger.v("==> onReceive() action: " + intent.getAction()
                         + "\n state: " + state
                         + "\n stickyBroadcast: " + isInitialStickyBroadcast()
