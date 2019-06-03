@@ -37,7 +37,7 @@ import butterknife.Optional;
 
 public abstract class AbstractCallActivity extends LoginRequiredActivity implements
         SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, BluetoothButtonReceiver.Listener, CallStatusReceiver.Listener,
-        MediaManager.AudioChangedInterface {
+        MediaManager.AudioLostListener {
 
     protected SipServiceConnection mSipServiceConnection;
     protected String mCurrentCallId;
@@ -50,10 +50,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
 
-    protected boolean mBluetoothDeviceConnected = false;
-    protected boolean mBluetoothAudioActive;
     private ProximitySensorHelper mProximityHelper;
-    private MediaManager mMediaManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,8 +94,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected void onDestroy() {
         super.onDestroy();
         mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver, mBluetoothButtonReceiver);
-        getMediaManager().deInit();
-        mMediaManager = null;
     }
 
     @Override
@@ -139,26 +134,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
      */
     protected void finishAfterDelay() {
         mDelayedFinish.begin();
-    }
-
-    @Override
-    public void bluetoothDeviceConnected(boolean connected) {
-        mLogger.i("BluetoothDeviceConnected()");
-        mLogger.i("==>" + connected);
-        mBluetoothDeviceConnected = connected;
-    }
-
-    @Override
-    public void bluetoothAudioAvailable(boolean available) {
-        mLogger.i("BluetoothAudioAvailable()");
-        mLogger.i("==> " + available);
-        mBluetoothAudioActive = available;
-    }
-
-    @Override
-    public void audioLost(boolean lost) {
-        mLogger.i("AudioLost or Recovered: ");
-        mLogger.i("==> " + lost);
     }
 
     @Override
@@ -222,13 +197,10 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
      * @return
      */
 
-    protected MediaManager getMediaManager() {
-        if (mMediaManager == null) {
-            mMediaManager = new MediaManager(this, this, this);
-        }
-
-        return mMediaManager;
-
+    public MediaManager getMediaManager() {
+        MediaManager mediaManager = MediaManager.init(this, this);
+        mediaManager.setAudioLostListener(this);
+        return mediaManager;
     }
 
     public SipServiceConnection getSipServiceConnection() {
@@ -246,5 +218,10 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         intent.putExtra(CallingConstants.CONTACT_NAME, callerId);
         intent.putExtra(CallingConstants.PHONE_NUMBER, number);
         return intent;
+    }
+
+    @Override
+    public void audioWasLost(boolean lost) {
+        mLogger.i("Audio was lost: " + lost);
     }
 }

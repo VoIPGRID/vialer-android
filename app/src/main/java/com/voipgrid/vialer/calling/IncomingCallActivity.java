@@ -74,6 +74,8 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
         sendBroadcast(new Intent(DECLINE_BTN));
         endRinging();
+        getMediaManager().deInit();
+
     }
 
     @OnClick(R.id.button_pickup)
@@ -106,8 +108,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         Intent intent = getIntent();
         intent.setClass(this, CallActivity.class);
         intent.putExtra(CALL_IS_CONNECTED, true);
-        intent.putExtra(CALL_BLUETOOTH_ACTIVE, mBluetoothAudioActive);
-        intent.putExtra(CALL_BLUETOOTH_CONNECTED, mBluetoothDeviceConnected);
         startActivity(intent);
         mLogger.d("callVisibleForUser");
     }

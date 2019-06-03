@@ -1,7 +1,5 @@
 package com.voipgrid.vialer;
 
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_ACTIVE;
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
@@ -14,7 +12,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,8 +48,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 /**
  * CallActivity for incoming or outgoing call.
  */
-public class CallActivity extends AbstractCallActivity implements
-        MediaManager.AudioChangedInterface, PopupMenu.OnMenuItemClickListener, Dialer.Listener {
+public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMenuItemClickListener, Dialer.Listener {
 
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
     @BindView(R.id.incoming_caller_title) TextView mTitle;
@@ -107,14 +103,6 @@ public class CallActivity extends AbstractCallActivity implements
         updateMediaManager(TYPE_CONNECTED_CALL);
 
         mConnected = getIntent().getBooleanExtra(CALL_IS_CONNECTED, false);
-
-        if (!mBluetoothAudioActive) {
-            mBluetoothAudioActive = getIntent().getBooleanExtra(CALL_BLUETOOTH_ACTIVE, false);
-        }
-
-        if (!mBluetoothDeviceConnected) {
-            mBluetoothDeviceConnected = getIntent().getBooleanExtra(CALL_BLUETOOTH_CONNECTED, false);
-        }
 
         if (!TYPE_INCOMING_CALL.equals(mType) && !TYPE_OUTGOING_CALL.equals(mType)) {
             return;
@@ -284,18 +272,6 @@ public class CallActivity extends AbstractCallActivity implements
                 .show();
     }
 
-    @Override
-    public void bluetoothAudioAvailable(boolean available) {
-        super.bluetoothAudioAvailable(available);
-        updateUi();
-    }
-
-    @Override
-    public void bluetoothDeviceConnected(boolean connected) {
-        super.bluetoothDeviceConnected(connected);
-        updateUi();
-    }
-
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
         mLogger.d("toggleSpeaker");
@@ -384,7 +360,7 @@ public class CallActivity extends AbstractCallActivity implements
 
     @OnClick(R.id.button_speaker)
     public void onAudioSourceButtonClick(View view) {
-        if (!mBluetoothDeviceConnected) {
+        if (!getMediaManager().getAudioRouter().isBluetoothCommunicationDevicePresent()) {
             toggleSpeaker();
             return;
         }
@@ -401,6 +377,13 @@ public class CallActivity extends AbstractCallActivity implements
     protected void onDeclineButtonClicked() {
         mLogger.i("Hangup the call");
         hangup();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getMediaManager().deInit();
+
     }
 
     @OnClick(R.id.button_dialpad)
@@ -432,8 +415,8 @@ public class CallActivity extends AbstractCallActivity implements
         mSipServiceConnection.get().makeCall(sipAddressUri, "", numberToCall);
     }
 
-    public void audioLost(boolean lost) {
-        super.audioLost(lost);
+    public void audioWasLost(boolean lost) {
+        super.audioWasLost(lost);
 
         if (mSipServiceConnection.get() == null) {
             mLogger.e("mSipService is null");
@@ -470,6 +453,8 @@ public class CallActivity extends AbstractCallActivity implements
         }
 
         updateUi();
+
+//        new Handler().postDelayed(() -> runOnUiThread(this::updateUi), 3000);
 
         return false;
     }
@@ -613,17 +598,10 @@ public class CallActivity extends AbstractCallActivity implements
         return false;
     }
 
-    public boolean hasBluetoothDeviceConnected() {
-        return mBluetoothDeviceConnected;
-    }
-
     public boolean isOnSpeaker() {
         return getMediaManager().isCallOnSpeaker();
     }
 
-    public boolean isBluetoothAudioActive() {
-        return mBluetoothAudioActive;
-    }
 
     public CallDetail getInitialCallDetail() {
         return mInitialCallDetail;

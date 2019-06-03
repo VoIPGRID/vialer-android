@@ -3,6 +3,7 @@ package com.voipgrid.vialer.media;
 import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
+import android.util.Log;
 
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.statistics.AppState;
@@ -13,11 +14,9 @@ import com.voipgrid.vialer.statistics.AppState;
 public class MediaManager implements
         AudioManager.OnAudioFocusChangeListener, AudioRouter.AudioRouterInterface {
 
-    private static int mCurrentAudioRoute;
-
     private Context mContext;
     private AudioManager mAudioManager;
-    private AudioChangedInterface mAudioChangedInterfaceListener;
+    private AudioLostListener audioLostListener;
     private Logger mLogger;
 
     static int CURRENT_CALL_STATE = Constants.CALL_INVALID;
@@ -38,15 +37,15 @@ public class MediaManager implements
      * When the app can duck for audio loss. To keep reference to the previous volume level.
      */
     private int mPreviousVolume = -1;
+    private static MediaManager mMediaManager;
 
     /**
      * Private constructor for the class.
      *
      * @param context Reference to the Context object from where the class is created.
      */
-    public MediaManager(Activity activity, Context context, AudioChangedInterface audioChangedInterface) {
+    private MediaManager(Activity activity, Context context) {
         mContext = context;
-        mAudioChangedInterfaceListener = audioChangedInterface;
 
         mLogger = new Logger(MediaManager.class);
 
@@ -55,7 +54,28 @@ public class MediaManager implements
         // Make sure the hardware volume buttons control the volume of the call.
         activity.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 
-        mAudioRouter = new AudioRouter(context, this, mAudioManager);
+        mAudioRouter = new AudioRouter(this);
+    }
+
+    /**
+     * Get an instance reference to this class.
+     *
+     * @return this MediaManager class.
+     */
+    public MediaManager getInstance() {
+        return mMediaManager;
+    }
+
+
+    public static synchronized MediaManager init(Activity activity, Context context) {
+        if (mMediaManager == null) {
+            mMediaManager = new MediaManager(activity, context);
+        }
+        return mMediaManager;
+    }
+
+    public void setAudioLostListener(AudioLostListener listener) {
+        audioLostListener = listener;
     }
 
     public void deInit() {
@@ -65,7 +85,7 @@ public class MediaManager implements
             mAudioRouter.deInit();
         }
 
-
+        mMediaManager = null;
         resetAudioManager();
 
         mAudioRouter = null;
@@ -82,7 +102,7 @@ public class MediaManager implements
     public void callAnswered() {
         mLogger.v("callAnswered()");
         if(mAudioRouter == null) {
-            mAudioRouter = new AudioRouter(mContext, this, mAudioManager);
+            mAudioRouter = new AudioRouter(this);
             mAudioRouter.onAnsweredCall();
         } else {
             mAudioRouter.onAnsweredCall();
@@ -200,21 +220,15 @@ public class MediaManager implements
                 if (mAudioIsLost) {
                     mAudioIsLost = false;
                     mAudioRouter.setAudioIsLost(false);
-                    mLogger.e("CURRENT_ROUTE: " + AudioRouter.CURRENT_ROUTE);
-//                    if (AudioRouter.CURRENT_ROUTE == Constants.ROUTE_BT) {
-                        mAudioRouter.reconnectBluetoothSco();
-//                    }
-
-                    if (CURRENT_CALL_STATE == Constants.CALL_RINGING) {
-                    }
-                    mAudioChangedInterfaceListener.audioLost(false);
+                    mAudioRouter.reconnectBluetoothSco();
+                    audioLostListener.audioWasLost(false);
                 }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
             case AudioManager.AUDIOFOCUS_LOSS:
                 mLogger.i("Lost audio focus! Probably incoming native audio call.");
                 mAudioIsLost = true;
-                mAudioChangedInterfaceListener.audioLost(true);
+                audioLostListener.audioWasLost(true);
                 mAudioRouter.setAudioIsLost(true);
                 break;
             case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
@@ -224,7 +238,7 @@ public class MediaManager implements
                 mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, 1, 0);
                 if (CURRENT_CALL_STATE == Constants.CALL_RINGING) {
                     mAudioRouter.setAudioIsLost(true);
-                    mAudioChangedInterfaceListener.audioLost(true);
+                    audioLostListener.audioWasLost(true);
                 }
                 break;
         }
@@ -233,14 +247,7 @@ public class MediaManager implements
     @Override
     public void audioRouteUpdate(int newRoute) {
         mLogger.d("audioRouteUpdate()");
-        mLogger.d("==> newRoute: " + newRoute + " oldRoute: " + mCurrentAudioRoute);
-        if (newRoute != mCurrentAudioRoute) {
-            mCurrentAudioRoute = newRoute;
-            if (mCurrentAudioRoute == Constants.ROUTE_BT) {
-                if (CURRENT_CALL_STATE == Constants.CALL_RINGING) {
-                }
-            }
-        }
+        mLogger.d("==> newRoute: " + newRoute + " oldRoute: ");
     }
 
     @Override
@@ -248,7 +255,6 @@ public class MediaManager implements
         mLogger.d("btDeviceConnected()");
         mLogger.d("==> " + connected);
         AppState.isUsingBluetoothAudio = connected;
-        mAudioChangedInterfaceListener.bluetoothDeviceConnected(connected);
     }
 
     @Override
@@ -257,17 +263,15 @@ public class MediaManager implements
         mLogger.d("==> " + connected);
 
         if (!connected) {
-            mAudioManager.setSpeakerphoneOn(mCallIsOnSpeaker);
+            mAudioRouter.configureSpeakerPhone(mCallIsOnSpeaker);
         }
-        mAudioChangedInterfaceListener.bluetoothAudioAvailable(connected);
     }
 
-    /**
-     * Interface for when a class implements the MediaManager.
-     */
-    public interface AudioChangedInterface {
-        void bluetoothDeviceConnected(boolean connected);
-        void bluetoothAudioAvailable(boolean available);
-        void audioLost(boolean lost);
+    public AudioRouter getAudioRouter() {
+        return mAudioRouter;
+    }
+
+    public interface AudioLostListener {
+        void audioWasLost(boolean lost);
     }
 }
