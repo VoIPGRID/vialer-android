@@ -275,7 +275,7 @@ public class AudioRouter {
                         + "\n isBluetoothScoOn: " + audioManager.isBluetoothScoOn()
                 );
 
-                if (!bluetooth.isOn() && state == AudioManager.SCO_AUDIO_STATE_DISCONNECTED) {
+                if (!bluetooth.isOn() && state == AudioManager.SCO_AUDIO_STATE_DISCONNECTED && !bluetoothManuallyDisabled) {
                     routeAudioViaBluetooth();
                     SipService.performActionOnSipService(context, SipService.Actions.SMART_SINGLE_BUTTON_ACTION);
                 }
