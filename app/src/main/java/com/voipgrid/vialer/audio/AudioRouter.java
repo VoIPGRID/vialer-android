@@ -8,11 +8,14 @@ import static com.voipgrid.vialer.audio.Constants.STATE_WIRED_HS_INVALID;
 import static com.voipgrid.vialer.audio.Constants.STATE_WIRED_HS_PLUGGED;
 import static com.voipgrid.vialer.audio.Constants.STATE_WIRED_HS_UNPLUGGED;
 
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.voipgrid.vialer.bluetooth.BluetoothMediaSessionService;
@@ -34,6 +37,8 @@ public class AudioRouter {
     // Stores the audio states for a wired headset
     private int mWiredHsState = STATE_WIRED_HS_UNPLUGGED;
 
+    private BluetoothDevice connectedBluetoothHeadset;
+
     /**
      * This boolean is set to TRUE when the audio is being routed around
      * bluetooth despite bluetooth being available, this will be when the
@@ -43,8 +48,8 @@ public class AudioRouter {
      */
     private boolean bluetoothManuallyDisabled = false;
 
-    private BluetoothScoReceiver mBluetoothScoReceiver = new BluetoothScoReceiver();
     private WiredHeadsetBroadcastReceiver mWiredHeadsetReceiver = new WiredHeadsetBroadcastReceiver();
+    private BluetoothHeadsetBroadcastReceiver bluetoothHeadsetReceiver = new BluetoothHeadsetBroadcastReceiver();
     private AudioFocusHandler audioFocusHandler = new AudioFocusHandler();
 
     public AudioRouter(Context context, AudioManager audioManager, BroadcastReceiverManager broadcastReceiverManager) {
@@ -54,10 +59,9 @@ public class AudioRouter {
         this.audioManager = audioManager;
         this.bluetooth = new Bluetooth(audioManager);
 
-        broadcastReceiverManager.unregisterReceiver(mBluetoothScoReceiver, mWiredHeadsetReceiver);
-        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mBluetoothScoReceiver, AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED);
+        broadcastReceiverManager.unregisterReceiver(mWiredHeadsetReceiver, bluetoothHeadsetReceiver);
         broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mWiredHeadsetReceiver, Intent.ACTION_HEADSET_PLUG);
-
+        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(bluetoothHeadsetReceiver, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
         BluetoothMediaSessionService.start(context);
         initializeAndroidAudioManager();
 
@@ -75,7 +79,7 @@ public class AudioRouter {
         logger.v("Destroying the audio router");
         bluetooth.stop();
         resetAndroidAudioManager();
-        broadcastReceiverManager.unregisterReceiver(mBluetoothScoReceiver, mWiredHeadsetReceiver);
+        broadcastReceiverManager.unregisterReceiver(mWiredHeadsetReceiver, bluetoothHeadsetReceiver);
         context.stopService(new Intent(context, BluetoothMediaSessionService.class));
     }
 
@@ -176,6 +180,9 @@ public class AudioRouter {
         return Constants.ROUTE_INVALID;
     }
 
+    public BluetoothDevice getConnectedBluetoothHeadset() {
+        return connectedBluetoothHeadset;
+    }
 
     /**
      * Check if the device actually has an earpiece, this will only be relevant on Android
@@ -209,6 +216,23 @@ public class AudioRouter {
 
         audioManager.setMode(AudioManager.MODE_NORMAL);
         audioManager.abandonAudioFocus(audioFocusHandler);
+    }
+
+    private class BluetoothHeadsetBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+            if (bluetoothDevice != null) {
+                connectedBluetoothHeadset = bluetoothDevice;
+            }
+
+            if (!bluetooth.isOn() && !bluetoothManuallyDisabled) {
+                bluetooth.start();
+                SipService.performActionOnSipService(context, SipService.Actions.SMART_SINGLE_BUTTON_ACTION);
+            }
+        }
     }
 
     private class AudioFocusHandler implements AudioManager.OnAudioFocusChangeListener {
@@ -256,65 +280,39 @@ public class AudioRouter {
         }
     }
 
-        /**
-         * The BluetoothScoReceiver allows us to intercept button clicks on devices with just a
-         * single
-         * button, allowing us to answer/decline the call.
-         */
-        private class BluetoothScoReceiver extends BroadcastReceiver {
+    private class WiredHeadsetBroadcastReceiver extends BroadcastReceiver {
+        private static final int STATE_UNPLUGGED = 0;
+        private static final int STATE_PLUGGED = 1;
+        private static final int HAS_NO_MIC = 0;
 
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (isInitialStickyBroadcast()) return;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            logger.v("onReceive()");
+            int state = intent.getIntExtra("state", STATE_UNPLUGGED);
+            int microphone = intent.getIntExtra("microphone", HAS_NO_MIC);
 
-                int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+            String name = intent.getStringExtra("name");
+            logger.v("==> action: " + intent.getAction()
+                    + "\n state: " + state
+                    + "\n microphone: " + microphone
+                    + "\n name: " + name
+                    + "\n stickyBroadcast: " + isInitialStickyBroadcast()
+            );
 
-                logger.v("==> onReceive() action: " + intent.getAction()
-                        + "\n state: " + state
-                        + "\n stickyBroadcast: " + isInitialStickyBroadcast()
-                        + "\n isBluetoothScoOn: " + audioManager.isBluetoothScoOn()
-                );
-
-                if (!bluetooth.isOn() && state == AudioManager.SCO_AUDIO_STATE_DISCONNECTED && !bluetoothManuallyDisabled) {
-                    routeAudioViaBluetooth();
-                    SipService.performActionOnSipService(context, SipService.Actions.SMART_SINGLE_BUTTON_ACTION);
-                }
+            switch (state) {
+                case STATE_UNPLUGGED:
+                    logger.v("==> Headset unplugged");
+                    mWiredHsState = STATE_WIRED_HS_UNPLUGGED;
+                    break;
+                case STATE_PLUGGED:
+                    logger.v("==> Headset plugged");
+                    mWiredHsState = STATE_WIRED_HS_PLUGGED;
+                    break;
+                default:
+                    logger.v("==> Headset invalid state");
+                    mWiredHsState = STATE_WIRED_HS_INVALID;
+                    break;
             }
         }
-
-        private class WiredHeadsetBroadcastReceiver extends BroadcastReceiver {
-            private static final int STATE_UNPLUGGED = 0;
-            private static final int STATE_PLUGGED = 1;
-            private static final int HAS_NO_MIC = 0;
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                logger.v("onReceive()");
-                int state = intent.getIntExtra("state", STATE_UNPLUGGED);
-                int microphone = intent.getIntExtra("microphone", HAS_NO_MIC);
-
-                String name = intent.getStringExtra("name");
-                logger.v("==> action: " + intent.getAction()
-                        + "\n state: " + state
-                        + "\n microphone: " + microphone
-                        + "\n name: " + name
-                        + "\n stickyBroadcast: " + isInitialStickyBroadcast()
-                );
-
-                switch (state) {
-                    case STATE_UNPLUGGED:
-                        logger.v("==> Headset unplugged");
-                        mWiredHsState = STATE_WIRED_HS_UNPLUGGED;
-                        break;
-                    case STATE_PLUGGED:
-                        logger.v("==> Headset plugged");
-                        mWiredHsState = STATE_WIRED_HS_PLUGGED;
-                        break;
-                    default:
-                        logger.v("==> Headset invalid state");
-                        mWiredHsState = STATE_WIRED_HS_INVALID;
-                        break;
-                }
-            }
-        }
+    }
 }

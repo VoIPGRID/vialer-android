@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -175,9 +176,12 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     }
 
 
-
-    public SipServiceConnection getSipServiceConnection() {
+    protected SipServiceConnection getSipServiceConnection() {
         return mSipServiceConnection;
+    }
+
+    protected AudioRouter getAudioRouter() {
+        return getSipServiceConnection().get().getAudioRouter();
     }
 
     public String getCurrentCallId() {

@@ -7,10 +7,16 @@ import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
 
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +37,7 @@ import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.NetworkUtil;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -60,6 +67,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     @BindView(R.id.call_status) TextView mCallStatusTv;
 
     @Inject NetworkUtil mNetworkUtil;
+    @Inject BroadcastReceiverManager broadcastReceiverManager;
 
     @BindView(R.id.button_transfer) CallActionButton mTransferButton;
     @BindView(R.id.button_onhold) CallActionButton mOnHoldButton;
@@ -69,6 +77,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     private CallPresenter mCallPresenter;
     private SweetAlertDialog mTransferCompleteDialog;
+    private UpdateUiReceiver updateUiReceiver = new UpdateUiReceiver();
 
     private boolean mConnected = false;
     private boolean mOnTransfer = false;
@@ -116,6 +125,8 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         if(!mNetworkUtil.isOnline()) {
           NetworkAvailabilityActivity.start();
         }
+
+        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(updateUiReceiver, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED, Intent.ACTION_HEADSET_PLUG);
     }
 
     @Override
@@ -125,6 +136,8 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         if (mTransferCompleteDialog != null) {
             mTransferCompleteDialog.dismiss();
         }
+
+        broadcastReceiverManager.unregisterReceiver(updateUiReceiver);
     }
 
     @Override
@@ -249,10 +262,10 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
         mLogger.d("toggleSpeaker");
-        if (!getSipServiceConnection().get().getAudioRouter().isCurrentlyRoutingAudioViaSpeaker()) {
-            getSipServiceConnection().get().getAudioRouter().routeAudioViaSpeaker();
+        if (!getAudioRouter().isCurrentlyRoutingAudioViaSpeaker()) {
+            getAudioRouter().routeAudioViaSpeaker();
         } else {
-            getSipServiceConnection().get().getAudioRouter().routeAudioViaEarpiece();
+            getAudioRouter().routeAudioViaEarpiece();
         }
         updateUi();
     }
@@ -338,14 +351,20 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @OnClick(R.id.button_speaker)
     public void onAudioSourceButtonClick(View view) {
-        if (!getSipServiceConnection().get().getAudioRouter().isBluetoothRouteAvailable()) {
+        if (!getAudioRouter().isBluetoothRouteAvailable()) {
             toggleSpeaker();
             return;
         }
 
+        BluetoothDevice bluetoothDevice = getAudioRouter().getConnectedBluetoothHeadset();
+
         PopupMenu popup = new PopupMenu(this, view);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_audio_source, popup.getMenu());
+        if (bluetoothDevice != null) {
+            MenuItem menuItem = popup.getMenu().getItem(2);
+            menuItem.setTitle(menuItem + " (" + bluetoothDevice.getName() + ")");
+        }
         popup.setOnMenuItemClickListener(this);
         popup.show();
     }
@@ -390,15 +409,15 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.audio_source_option_phone:
-                getSipServiceConnection().get().getAudioRouter().routeAudioViaEarpiece();
+                getAudioRouter().routeAudioViaEarpiece();
                 break;
 
             case R.id.audio_source_option_speaker:
-                getSipServiceConnection().get().getAudioRouter().routeAudioViaSpeaker();
+                getAudioRouter().routeAudioViaSpeaker();
                 break;
 
             case R.id.audio_source_option_bluetooth:
-                getSipServiceConnection().get().getAudioRouter().routeAudioViaBluetooth();
+                getAudioRouter().routeAudioViaBluetooth();
                 break;
         }
 
@@ -547,7 +566,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     }
 
     public boolean isOnSpeaker() {
-        return getSipServiceConnection().get().getAudioRouter().isCurrentlyRoutingAudioViaSpeaker();
+        return getAudioRouter().isCurrentlyRoutingAudioViaSpeaker();
     }
 
 
@@ -574,5 +593,17 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         }
 
         return false;
+    }
+
+    /**
+     * Updates the UI whenever any events are received.
+     *
+     */
+    private class UpdateUiReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            runOnUiThread(CallActivity.this::updateUi);
+        }
     }
 }

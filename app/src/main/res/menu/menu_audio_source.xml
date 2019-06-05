@@ -10,5 +10,5 @@
 
     <item android:id="@+id/audio_source_option_bluetooth"
           android:title="@string/audio_source_option_bluetooth"
-          android:icon="@drawable/ic_bluetooth"/>
+          android:icon="@drawable/ic_backspace"/>
 </menu>

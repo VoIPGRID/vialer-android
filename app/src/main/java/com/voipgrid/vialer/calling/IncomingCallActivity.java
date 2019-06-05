@@ -135,7 +135,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @Override
     protected void onResume() {
         super.onResume();
-Log.e("TEST123", "ON RESUMME INC");
+
         if (currentlyOnLockScreen()) {
             mCallButtons.setVisibility(View.VISIBLE);
         } else {

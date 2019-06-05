@@ -55,7 +55,7 @@ public class BluetoothMediaSessionService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mLogger.v("onStartCommand");
-Log.e("TEST123", "Started service for bluetooth stuff");
+
         if (shouldBecomeForegroundService(intent)) {
             startForeground(1, new MediaButtonNotification().build());
         }
