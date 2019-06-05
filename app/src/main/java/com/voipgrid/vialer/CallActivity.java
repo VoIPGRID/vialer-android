@@ -169,7 +169,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
         if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             mForceDisplayedCallDetails = null;
-            getMediaManager().setCallOnSpeaker(false);
             mConnected = true;
             updateUi();
         } else {
@@ -275,7 +274,11 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
         mLogger.d("toggleSpeaker");
-        getMediaManager().setCallOnSpeaker(!isOnSpeaker());
+        if (!getMediaManager().isCallOnSpeaker()) {
+            getMediaManager().getAudioRouter().routeAudioViaSpeaker();
+        } else {
+            getMediaManager().getAudioRouter().routeAudioViaEarpiece();
+        }
         updateUi();
     }
 
@@ -438,23 +441,19 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.audio_source_option_phone:
-                getMediaManager().useBluetoothAudio(false);
-                getMediaManager().setCallOnSpeaker(false);
+                getMediaManager().getAudioRouter().routeAudioViaEarpiece();
                 break;
 
             case R.id.audio_source_option_speaker:
-                getMediaManager().useBluetoothAudio(false);
-                getMediaManager().setCallOnSpeaker(true);
+                getMediaManager().getAudioRouter().routeAudioViaSpeaker();
                 break;
 
             case R.id.audio_source_option_bluetooth:
-                getMediaManager().useBluetoothAudio(true);
+                getMediaManager().getAudioRouter().routeAudioViaBluetooth();
                 break;
         }
 
         updateUi();
-
-//        new Handler().postDelayed(() -> runOnUiThread(this::updateUi), 3000);
 
         return false;
     }

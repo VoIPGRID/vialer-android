@@ -2,8 +2,6 @@ package com.voipgrid.vialer.calling;
 
 import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
-import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.CALL_BTN;
-import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
 
 import android.app.Activity;
@@ -36,13 +34,12 @@ import butterknife.BindView;
 import butterknife.Optional;
 
 public abstract class AbstractCallActivity extends LoginRequiredActivity implements
-        SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, BluetoothButtonReceiver.Listener, CallStatusReceiver.Listener,
+        SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, CallStatusReceiver.Listener,
         MediaManager.AudioLostListener {
 
     protected SipServiceConnection mSipServiceConnection;
     protected String mCurrentCallId;
     protected CallDurationTracker mCallDurationTracker;
-    protected BluetoothButtonReceiver mBluetoothButtonReceiver;
     protected CallStatusReceiver mCallStatusReceiver;
     protected DelayedFinish mDelayedFinish;
 
@@ -58,7 +55,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         VialerApplication.get().component().inject(this);
         mSipServiceConnection = new SipServiceConnection(this);
         mCallDurationTracker = new CallDurationTracker(mSipServiceConnection);
-        mBluetoothButtonReceiver = new BluetoothButtonReceiver(this);
         mCallStatusReceiver = new CallStatusReceiver(this);
         mDelayedFinish = new DelayedFinish(this, new Handler(), mSipServiceConnection);
         mProximityHelper = new ProximitySensorHelper(this);
@@ -72,7 +68,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected void onStart() {
         super.onStart();
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mCallStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
-        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mBluetoothButtonReceiver, CALL_BTN, DECLINE_BTN);
     }
 
     @Override
@@ -93,7 +88,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver, mBluetoothButtonReceiver);
+        mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver);
     }
 
     @Override
@@ -134,16 +129,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
      */
     protected void finishAfterDelay() {
         mDelayedFinish.begin();
-    }
-
-    @Override
-    public void bluetoothCallButtonWasPressed() {
-        onPickupButtonClicked();
-    }
-
-    @Override
-    public void bluetoothDeclineButtonWasPressed() {
-        onDeclineButtonClicked();
     }
 
     protected void onPickupButtonClicked() {

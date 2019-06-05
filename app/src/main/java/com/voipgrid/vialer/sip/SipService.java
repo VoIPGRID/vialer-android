@@ -156,6 +156,13 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
             mCurrentCall.answer();
         }
+        else if (Actions.SMART_SINGLE_BUTTON_ACTION.equals(action)) {
+            if (mCurrentCall.isCallRinging()) {
+                mCurrentCall.answer();
+            } else if (mCurrentCall.isConnected()) {
+                mCurrentCall.hangup(true);
+            }
+        }
         else {
             mLogger.e("SipService received an invalid action: " + action);
         }
@@ -631,5 +638,13 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
          *
          */
         String ANSWER_INCOMING_CALL = PREFIX + "ANSWER_INCOMING_CALL";
+
+        /**
+         * Perform a smart action, this performs different tasks based on the current state
+         * of the call. It is designed to handle input from a device when there is only
+         * one button to press (e.g. a simple bluetooth headset).
+         *
+         */
+        String SMART_SINGLE_BUTTON_ACTION = PREFIX + "SMART_SINGLE_BUTTON_ACTION";
     }
 }

@@ -16,6 +16,7 @@ import com.voipgrid.vialer.callrecord.CallRecordViewHolder;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.logging.VialerBaseActivity;
 import com.voipgrid.vialer.media.AudioRouter;
+import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipService;
@@ -75,5 +76,5 @@ public interface VialerComponent {
 
     void inject(AbstractCallNotification notification);
 
-    void inject(AudioRouter audioRouter);
+    void inject(MediaManager mediaManager);
 }

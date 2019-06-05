@@ -30,6 +30,7 @@ import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
+import com.voipgrid.vialer.media.AudioRouter;
 import com.voipgrid.vialer.notifications.call.IncomingCallVibration;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
@@ -48,6 +49,7 @@ import com.voipgrid.vialer.util.NetworkUtil;
 import javax.inject.Singleton;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import dagger.Module;
 import dagger.Provides;
@@ -241,5 +243,10 @@ public class VialerModule {
     @Provides
     IncomingCallVibration provideIncomingCallVibrator(AudioManager audioManager, Vibrator vibrator) {
         return new IncomingCallVibration(audioManager, vibrator);
+    }
+
+    @Provides @Singleton
+    AudioRouter provideAudioRouter(Context context, BroadcastReceiverManager broadcastReceiverManager) {
+        return new AudioRouter(context, broadcastReceiverManager);
     }
 }
