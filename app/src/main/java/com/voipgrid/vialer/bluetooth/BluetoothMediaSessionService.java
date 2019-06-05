@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.media;
+package com.voipgrid.vialer.bluetooth;
 
 import static android.view.KeyEvent.KEYCODE_CALL;
 import static android.view.KeyEvent.KEYCODE_ENDCALL;
@@ -10,7 +10,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.IBinder;
-import androidx.annotation.NonNull;
+
 import androidx.annotation.Nullable;
 import androidx.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -18,7 +18,6 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import com.voipgrid.vialer.bluetooth.BluetoothKeyNormalizer;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.MediaButtonNotification;
 import com.voipgrid.vialer.sip.SipService;
@@ -56,7 +55,7 @@ public class BluetoothMediaSessionService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mLogger.v("onStartCommand");
-
+Log.e("TEST123", "Started service for bluetooth stuff");
         if (shouldBecomeForegroundService(intent)) {
             startForeground(1, new MediaButtonNotification().build());
         }
@@ -130,6 +129,8 @@ public class BluetoothMediaSessionService extends Service {
             if (action != null) {
                 SipService.performActionOnSipService(context, action);
             }
+
+            stopSelf();
 
             return true;
         }

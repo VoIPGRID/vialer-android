@@ -20,6 +20,7 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
+import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.callrecord.CachedContacts;
@@ -30,7 +31,6 @@ import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
-import com.voipgrid.vialer.media.AudioRouter;
 import com.voipgrid.vialer.notifications.call.IncomingCallVibration;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
@@ -49,7 +49,6 @@ import com.voipgrid.vialer.util.NetworkUtil;
 import javax.inject.Singleton;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import dagger.Module;
 import dagger.Provides;
@@ -213,7 +212,7 @@ public class VialerModule {
     }
 
     @Provides ToneGenerator provideToneGenerator() {
-        return new ToneGenerator(AudioManager.STREAM_VOICE_CALL, SipConstants.RINGING_VOLUME);
+        return new ToneGenerator(android.media.AudioManager.STREAM_VOICE_CALL, SipConstants.RINGING_VOLUME);
     }
 
     @Provides NetworkConnectivity provideNetworkConnectivity() {
@@ -231,8 +230,8 @@ public class VialerModule {
     }
 
     @Provides
-    AudioManager provideAudioManager(Context context) {
-        return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    android.media.AudioManager provideAudioManager(Context context) {
+        return (android.media.AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Provides
@@ -241,12 +240,12 @@ public class VialerModule {
     }
 
     @Provides
-    IncomingCallVibration provideIncomingCallVibrator(AudioManager audioManager, Vibrator vibrator) {
+    IncomingCallVibration provideIncomingCallVibrator(android.media.AudioManager audioManager, Vibrator vibrator) {
         return new IncomingCallVibration(audioManager, vibrator);
     }
 
-    @Provides @Singleton
-    AudioRouter provideAudioRouter(Context context, BroadcastReceiverManager broadcastReceiverManager) {
-        return new AudioRouter(context, broadcastReceiverManager);
+    @Provides
+    AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager) {
+        return new AudioRouter(context, androidAudioManager, broadcastReceiverManager);
     }
 }

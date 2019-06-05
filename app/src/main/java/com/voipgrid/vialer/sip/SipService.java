@@ -19,6 +19,7 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
@@ -84,6 +85,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     @Inject protected NetworkConnectivity mNetworkConnectivity;
     @Inject protected NativeCallManager mNativeCallManager;
     @Inject @Nullable protected PhoneAccount mPhoneAccount;
+    @Inject AudioRouter audioRouter;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -222,6 +224,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     @Override
     public void onDestroy() {
         mLogger.d("onDestroy");
+
+        audioRouter.destroy();
 
         // If no phoneaccount was found in the onCreate there won't be a sipconfig either.
         // Check to avoid nullpointers.
@@ -476,6 +480,10 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     @Override
     public void onServiceStopped() {
 
+    }
+
+    public AudioRouter getAudioRouter() {
+        return audioRouter;
     }
 
     /**

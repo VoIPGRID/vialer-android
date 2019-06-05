@@ -73,7 +73,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         SipService.performActionOnSipService(this, SipService.Actions.DECLINE_INCOMING_CALL);
 
         endRinging();
-        getMediaManager().deInit();
 
     }
 

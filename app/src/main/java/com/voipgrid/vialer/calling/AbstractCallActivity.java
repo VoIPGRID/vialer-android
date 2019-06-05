@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,7 +20,6 @@ import android.widget.TextView;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -34,8 +34,7 @@ import butterknife.BindView;
 import butterknife.Optional;
 
 public abstract class AbstractCallActivity extends LoginRequiredActivity implements
-        SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, CallStatusReceiver.Listener,
-        MediaManager.AudioLostListener {
+        SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, CallStatusReceiver.Listener {
 
     protected SipServiceConnection mSipServiceConnection;
     protected String mCurrentCallId;
@@ -61,7 +60,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
         requestMicrophonePermissionIfNecessary();
         configureActivityFlags();
-        getMediaManager().callStarted();
+        setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
     }
 
     @Override
@@ -175,18 +174,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         return getPhoneNumberFromIntent();
     }
 
-    /**
-     * Get the MediaManager, a new one will be generated if it does not already exist. There must
-     * be an instance of this class alive (not deinited) or audio will not be present.
-     *
-     * @return
-     */
 
-    public MediaManager getMediaManager() {
-        MediaManager mediaManager = MediaManager.init(this, this);
-        mediaManager.setAudioLostListener(this);
-        return mediaManager;
-    }
 
     public SipServiceConnection getSipServiceConnection() {
         return mSipServiceConnection;
@@ -203,10 +191,5 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         intent.putExtra(CallingConstants.CONTACT_NAME, callerId);
         intent.putExtra(CallingConstants.PHONE_NUMBER, number);
         return intent;
-    }
-
-    @Override
-    public void audioWasLost(boolean lost) {
-        mLogger.i("Audio was lost: " + lost);
     }
 }

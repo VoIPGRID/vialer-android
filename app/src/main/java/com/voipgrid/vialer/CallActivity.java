@@ -3,7 +3,6 @@ package com.voipgrid.vialer;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
-import static com.voipgrid.vialer.calling.CallingConstants.TYPE_CONNECTED_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
 
@@ -28,7 +27,6 @@ import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
-import com.voipgrid.vialer.media.MediaManager;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -100,8 +98,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
         mType = getIntent().getType();
 
-        updateMediaManager(TYPE_CONNECTED_CALL);
-
         mConnected = getIntent().getBooleanExtra(CALL_IS_CONNECTED, false);
 
         if (!TYPE_INCOMING_CALL.equals(mType) && !TYPE_OUTGOING_CALL.equals(mType)) {
@@ -109,7 +105,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         }
 
         mForceDisplayedCallDetails = new DisplayCallDetail(getIntent().getStringExtra(PHONE_NUMBER), getIntent().getStringExtra(CONTACT_NAME));
-        updateMediaManager(mType);
         updateUi();
     }
 
@@ -139,7 +134,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @Override
     public void onCallConnected() {
-        updateMediaManager(TYPE_CONNECTED_CALL);
         mConnected = true;
 
         mForceDisplayedCallDetails = null;
@@ -173,7 +167,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
             updateUi();
         } else {
             mConnected = false;
-            getMediaManager().callEnded();
             finishAfterDelay();
         }
     }
@@ -211,24 +204,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         }
 
         mCallPresenter.update();
-    }
-
-    /**
-     * Based on type show/hide and position the buttons to answer/decline a call.
-     *
-     * @param type a string containing a call type (INCOMING or OUTGOING)
-     */
-    private void updateMediaManager(String type) {
-        if (type.equals(TYPE_OUTGOING_CALL) || type.equals(TYPE_CONNECTED_CALL)) {
-            if (!mOnTransfer) {
-                if (type.equals(TYPE_CONNECTED_CALL) && !mConnected) {
-                    getMediaManager().callAnswered();
-                }
-                if (type.equals(TYPE_OUTGOING_CALL) && !mConnected) {
-                    getMediaManager().callOutgoing();
-                }
-            }
-        }
     }
 
     @Override
@@ -274,10 +249,10 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
         mLogger.d("toggleSpeaker");
-        if (!getMediaManager().isCallOnSpeaker()) {
-            getMediaManager().getAudioRouter().routeAudioViaSpeaker();
+        if (!getSipServiceConnection().get().getAudioRouter().isCurrentlyRoutingAudioViaSpeaker()) {
+            getSipServiceConnection().get().getAudioRouter().routeAudioViaSpeaker();
         } else {
-            getMediaManager().getAudioRouter().routeAudioViaEarpiece();
+            getSipServiceConnection().get().getAudioRouter().routeAudioViaEarpiece();
         }
         updateUi();
     }
@@ -363,7 +338,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @OnClick(R.id.button_speaker)
     public void onAudioSourceButtonClick(View view) {
-        if (!getMediaManager().getAudioRouter().isBluetoothCommunicationDevicePresent()) {
+        if (!getSipServiceConnection().get().getAudioRouter().isBluetoothRouteAvailable()) {
             toggleSpeaker();
             return;
         }
@@ -380,13 +355,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     protected void onDeclineButtonClicked() {
         mLogger.i("Hangup the call");
         hangup();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        getMediaManager().deInit();
-
     }
 
     @OnClick(R.id.button_dialpad)
@@ -418,38 +386,19 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         mSipServiceConnection.get().makeCall(sipAddressUri, "", numberToCall);
     }
 
-    public void audioWasLost(boolean lost) {
-        super.audioWasLost(lost);
-
-        if (mSipServiceConnection.get() == null) {
-            mLogger.e("mSipService is null");
-        } else {
-            if (lost) {
-                // Don't put the call on hold when there is a native call is ringing.
-                if (mConnected && !mSipServiceConnection.get().getNativeCallManager().nativeCallIsRinging()) {
-                    onCallHold();
-                }
-            } else {
-                if (mConnected && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getCurrentCall().isOnHold()) {
-                    onCallHold();
-                }
-            }
-        }
-    }
-
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.audio_source_option_phone:
-                getMediaManager().getAudioRouter().routeAudioViaEarpiece();
+                getSipServiceConnection().get().getAudioRouter().routeAudioViaEarpiece();
                 break;
 
             case R.id.audio_source_option_speaker:
-                getMediaManager().getAudioRouter().routeAudioViaSpeaker();
+                getSipServiceConnection().get().getAudioRouter().routeAudioViaSpeaker();
                 break;
 
             case R.id.audio_source_option_bluetooth:
-                getMediaManager().getAudioRouter().routeAudioViaBluetooth();
+                getSipServiceConnection().get().getAudioRouter().routeAudioViaBluetooth();
                 break;
         }
 
@@ -598,7 +547,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     }
 
     public boolean isOnSpeaker() {
-        return getMediaManager().isCallOnSpeaker();
+        return getSipServiceConnection().get().getAudioRouter().isCurrentlyRoutingAudioViaSpeaker();
     }
 
 
