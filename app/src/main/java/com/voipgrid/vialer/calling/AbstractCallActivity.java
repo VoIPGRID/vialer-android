@@ -176,11 +176,11 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     }
 
 
-    protected SipServiceConnection getSipServiceConnection() {
+    public SipServiceConnection getSipServiceConnection() {
         return mSipServiceConnection;
     }
 
-    protected AudioRouter getAudioRouter() {
+    public AudioRouter getAudioRouter() {
         return getSipServiceConnection().get().getAudioRouter();
     }
 
