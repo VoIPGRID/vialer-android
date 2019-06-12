@@ -1,16 +1,16 @@
-package com.voipgrid.vialer.notifications.call
+package com.voipgrid.vialer.call.incoming.alerts
 
 import android.media.AudioManager
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 
-class IncomingCallVibration(private val audioManager: AudioManager, private val vibrator: Vibrator) {
+class IncomingCallVibration(private val audioManager: AudioManager, private val vibrator: Vibrator) : IncomingCallAlert {
 
     private val pattern = longArrayOf(0, 1000L, 1000L)
 
-    fun start() {
-        if (audioManager.ringerMode != AudioManager.RINGER_MODE_VIBRATE) return
+    override fun start() {
+        if (audioManager.ringerMode == AudioManager.RINGER_MODE_SILENT) return
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0))
@@ -19,7 +19,7 @@ class IncomingCallVibration(private val audioManager: AudioManager, private val 
         }
     }
 
-    fun stop() {
+    override fun stop() {
         vibrator.cancel()
     }
 }

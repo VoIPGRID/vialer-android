@@ -22,6 +22,8 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.callrecord.CachedContacts;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
@@ -31,7 +33,7 @@ import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
-import com.voipgrid.vialer.notifications.call.IncomingCallVibration;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
@@ -247,5 +249,15 @@ public class VialerModule {
     @Provides
     AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager) {
         return new AudioRouter(context, androidAudioManager, broadcastReceiverManager);
+    }
+
+    @Provides
+    IncomingCallAlerts incomingCallAlerts(IncomingCallVibration vibration, IncomingCallRinger ringer) {
+        return new IncomingCallAlerts(vibration, ringer);
+    }
+
+    @Provides
+    IncomingCallRinger provideRinger(Context context) {
+        return new IncomingCallRinger(context);
     }
 }

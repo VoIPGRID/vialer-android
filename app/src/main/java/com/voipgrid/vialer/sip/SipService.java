@@ -21,6 +21,8 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
@@ -86,6 +88,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     @Inject protected NativeCallManager mNativeCallManager;
     @Inject @Nullable protected PhoneAccount mPhoneAccount;
     @Inject AudioRouter audioRouter;
+    @Inject IncomingCallAlerts incomingCallAlerts;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -254,6 +257,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mLogger.d("onDestroy");
 
         audioRouter.destroy();
+        incomingCallAlerts.stop();
 
         // If no phoneaccount was found in the onCreate there won't be a sipconfig either.
         // Check to avoid nullpointers.
@@ -347,6 +351,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * @param callerId
      */
     public void informUserAboutIncomingCall(String number, String callerId) {
+        incomingCallAlerts.start();
+
         callNotification.incoming(
                 number,
                 callerId
@@ -479,6 +485,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
             return;
         }
 
+        incomingCallAlerts.stop();
         getNotification().active(getCurrentCall());
         startCallActivity(
                 SipUri.sipAddressUri(this, PhoneNumberUtils.format(getCurrentCall().getPhoneNumber())),

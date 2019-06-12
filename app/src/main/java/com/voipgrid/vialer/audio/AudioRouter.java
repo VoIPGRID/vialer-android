@@ -83,6 +83,7 @@ public class AudioRouter {
      */
     public void routeAudioViaBluetooth() {
         logAudioRouteRequest("bluetooth");
+        initializeAndroidAudioManager();
 
         bluetoothManuallyDisabled = false;
 
@@ -102,6 +103,7 @@ public class AudioRouter {
      */
     public void routeAudioViaSpeaker() {
         logAudioRouteRequest("speaker");
+        initializeAndroidAudioManager();
 
         bluetoothManuallyDisabled = true;
 
@@ -121,6 +123,7 @@ public class AudioRouter {
      */
     public void routeAudioViaEarpiece() {
         logAudioRouteRequest("earpiece");
+        initializeAndroidAudioManager();
 
         bluetoothManuallyDisabled = true;
 
