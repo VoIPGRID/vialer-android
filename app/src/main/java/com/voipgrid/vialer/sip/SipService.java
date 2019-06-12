@@ -158,7 +158,10 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
             mCurrentCall.answer();
         }
-        else if (Actions.SMART_SINGLE_BUTTON_ACTION.equals(action)) {
+        else if (Actions.END_CALL.equals(action)) {
+            mCurrentCall.hangup(true);
+        }
+        else if (Actions.ANSWER_OR_HANGUP.equals(action)) {
             if (mCurrentCall.isCallRinging()) {
                 mCurrentCall.answer();
             } else if (mCurrentCall.isConnected()) {
@@ -613,7 +616,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      */
     public interface Actions {
 
-        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL})
+        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL, END_CALL, ANSWER_OR_HANGUP})
         @Retention(RetentionPolicy.SOURCE)
         @interface Valid {}
 
@@ -648,11 +651,17 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         String ANSWER_INCOMING_CALL = PREFIX + "ANSWER_INCOMING_CALL";
 
         /**
-         * Perform a smart action, this performs different tasks based on the current state
-         * of the call. It is designed to handle input from a device when there is only
-         * one button to press (e.g. a simple bluetooth headset).
+         * End an already in progress call.
          *
          */
-        String SMART_SINGLE_BUTTON_ACTION = PREFIX + "SMART_SINGLE_BUTTON_ACTION";
+        String END_CALL = PREFIX + "END_CALL";
+
+        /**
+         * This action will either answer or hangup the call based on the current call state,
+         * this is to enable a user to perform multiple actions on a single button click
+         * (e.g. on a bluetooth headset).
+         *
+         */
+        String ANSWER_OR_HANGUP = PREFIX + "ANSWER_OR_HANGUP";
     }
 }

@@ -16,10 +16,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.voipgrid.vialer.bluetooth.BluetoothMediaSessionService;
 import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 
@@ -34,9 +36,6 @@ public class AudioRouter {
     private final Logger logger;
     private final AudioManager audioManager;
 
-    // Stores the audio states for a wired headset
-    private int mWiredHsState = STATE_WIRED_HS_UNPLUGGED;
-
     private BluetoothDevice connectedBluetoothHeadset;
 
     /**
@@ -48,7 +47,6 @@ public class AudioRouter {
      */
     private boolean bluetoothManuallyDisabled = false;
 
-    private WiredHeadsetBroadcastReceiver mWiredHeadsetReceiver = new WiredHeadsetBroadcastReceiver();
     private BluetoothHeadsetBroadcastReceiver bluetoothHeadsetReceiver = new BluetoothHeadsetBroadcastReceiver();
     private AudioFocusHandler audioFocusHandler = new AudioFocusHandler();
 
@@ -59,9 +57,9 @@ public class AudioRouter {
         this.audioManager = audioManager;
         this.bluetooth = new Bluetooth(audioManager);
 
-        broadcastReceiverManager.unregisterReceiver(mWiredHeadsetReceiver, bluetoothHeadsetReceiver);
-        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mWiredHeadsetReceiver, Intent.ACTION_HEADSET_PLUG);
+        broadcastReceiverManager.unregisterReceiver( bluetoothHeadsetReceiver);
         broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(bluetoothHeadsetReceiver, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
+
         BluetoothMediaSessionService.start(context);
         initializeAndroidAudioManager();
 
@@ -79,49 +77,93 @@ public class AudioRouter {
         logger.v("Destroying the audio router");
         bluetooth.stop();
         resetAndroidAudioManager();
-        broadcastReceiverManager.unregisterReceiver(mWiredHeadsetReceiver, bluetoothHeadsetReceiver);
+        broadcastReceiverManager.unregisterReceiver(bluetoothHeadsetReceiver);
         context.stopService(new Intent(context, BluetoothMediaSessionService.class));
     }
 
+    /**
+     * Route the audio through the currently connected bluetooth device.
+     *
+     */
     public void routeAudioViaBluetooth() {
+        logAudioRouteRequest("bluetooth");
+
         bluetoothManuallyDisabled = false;
 
-        if (bluetooth.isOn()) return;
+        if (bluetooth.isOn()) {
+            logger.e("Aborting request to route call audio via BLUETOOTH as bluetooth is currently enabled");
+            return;
+        }
 
         bluetooth.start();
+
+        logAudioRouteHandled("bluetooth");
     }
 
+    /**
+     * Route the audio through the phone's loud speaker.
+     *
+     */
     public void routeAudioViaSpeaker() {
-        bluetoothManuallyDisabled = true;
-        logger.d("enableSpeaker()");
+        logAudioRouteRequest("speaker");
 
-        if (getCurrentRoute() == ROUTE_BT) {
+        bluetoothManuallyDisabled = true;
+
+        if (isCurrentlyRoutingAudioViaBluetooth()) {
+            logger.i("Stopping bluetooth routing as speaker route was requested");
             bluetooth.stop();
         }
 
         audioManager.setSpeakerphoneOn(true);
+
+        logAudioRouteHandled("speaker");
     }
 
+    /**
+     * Route the audio through the phone's earpiece, this is the standard method for making a call.
+     *
+     */
     public void routeAudioViaEarpiece() {
+        logAudioRouteRequest("earpiece");
+
         bluetoothManuallyDisabled = true;
-        logger.v("enableEarpiece()");
 
         if (!hasEarpiece()) {
-            logger.v("===> no earpiece");
+            logger.e("Unable to route audio via earpiece as the current device does not have one, is this not a phone?");
             return;
         }
 
-        if (getCurrentRoute() == Constants.ROUTE_HEADSET) {
-            logger.v("===> ROUTE_HEADSET");
+        if (isCurrentlyRoutingAudioViaWiredHeadset() || isCurrentlyRoutingAudioViaEarpiece()) {
+            logger.e("Already routing audio via wired headset or earpiece");
             return;
         }
 
-        if (getCurrentRoute() == ROUTE_BT) {
-            logger.v("===> ROUTE_BT");
+        if (isCurrentlyRoutingAudioViaBluetooth()) {
+            logger.i("Stopping bluetooth routing as earpiece route was requested");
             bluetooth.stop();
         }
 
         audioManager.setSpeakerphoneOn(false);
+
+        logAudioRouteHandled("earpiece");
+    }
+
+    /**
+     * Helper method for logging audio requests.
+     *
+     * @param method
+     */
+    private void logAudioRouteRequest(String method) {
+        logger.i("Received request to route the call audio via " + method.toUpperCase());
+    }
+
+    /**
+     * Helper method for logging audio route completion.
+     *
+     * @param method
+     */
+    private void logAudioRouteHandled(String method) {
+        logger.i("Handled request to route the call audio via " + method.toUpperCase());
     }
 
     /**
@@ -133,18 +175,40 @@ public class AudioRouter {
         return getCurrentRoute() == ROUTE_BT;
     }
 
+    /**
+     * Check if we are currently routing audio through the phone's speaker.
+     *
+     * @return TRUE if audio is being routed over the speaker, otherwise FALSE.
+     */
     public boolean isCurrentlyRoutingAudioViaSpeaker() {
         return getCurrentRoute() == ROUTE_SPEAKER;
     }
 
+    /**
+     * Check if we are currently routing audio through the phone's earpiece.
+     *
+     * @return TRUE if audio is being routed over the earpiece, otherwise FALSE.
+     */
     public boolean isCurrentlyRoutingAudioViaEarpiece() {
         return getCurrentRoute() == ROUTE_EARPIECE;
     }
 
+    /**
+     * Check if we are currently routing audio through a wired headset.
+     *
+     * @return TRUE if audio is being routed through a wired headset, otherwise FALSE.
+     */
     public boolean isCurrentlyRoutingAudioViaWiredHeadset() {
         return getCurrentRoute() == ROUTE_HEADSET;
     }
 
+    /**
+     * Check if bluetooth if it is currently possible to route audio via bluetooth,
+     * essentially determining if a bluetooth device is connected that is capable of
+     * handling phone calls.
+     *
+     * @return TRUE if we can route via bluetooth, otherwise FALSE.
+     */
     public boolean isBluetoothRouteAvailable() {
         return bluetooth.isBluetoothCommunicationDevicePresent();
     }
@@ -155,31 +219,31 @@ public class AudioRouter {
      * @return
      */
     private int getCurrentRoute() {
-        logger.i("getCurrentRoute()");
-
         if (bluetooth.isOn()) {
-            logger.i("==> ROUTE_BT");
             return ROUTE_BT;
         }
 
         if (audioManager.isSpeakerphoneOn()) {
-            logger.i("==> ROUTE_SPEAKER");
             return Constants.ROUTE_SPEAKER;
         }
 
-        if (mWiredHsState == STATE_WIRED_HS_PLUGGED) {
-            logger.i("==> ROUTE_HEADSET");
+        if (audioManager.isWiredHeadsetOn()) {
             return Constants.ROUTE_HEADSET;
         }
 
         if (hasEarpiece()) {
-            logger.i("==> ROUTE_EARPIECE");
             return Constants.ROUTE_EARPIECE;
         }
 
         return Constants.ROUTE_INVALID;
     }
 
+    /**
+     * Return the most recently connected bluetooth device, this may return a valid object
+     * even if the device is no longer connected.
+     *
+     * @return The last connected BluetoothDevice
+     */
     public BluetoothDevice getConnectedBluetoothHeadset() {
         return connectedBluetoothHeadset;
     }
@@ -218,19 +282,41 @@ public class AudioRouter {
         audioManager.abandonAudioFocus(audioFocusHandler);
     }
 
+    /**
+     * This broadcast receiver handles events from bluetooth headsets, as these are the only
+     * events we receive when a single button press is detected on a headset with a single button
+     * (i.e. no designated call/end call buttons) we have to make some assumptions and perform
+     * a call action if one occurs.
+     *
+     * This is a bit of a hack but there does not currently seem to be any alternative method
+     * of implementing this functionality.
+     *
+     */
     private class BluetoothHeadsetBroadcastReceiver extends BroadcastReceiver {
+
+        private Logger logger;
+
+        public BluetoothHeadsetBroadcastReceiver() {
+            logger = new Logger(this);
+        }
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
             BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, -1);
+            int previousState = intent.getIntExtra(BluetoothHeadset.EXTRA_PREVIOUS_STATE, -1);
+
+            logger.i("Received a bluetooth headset state update. Transitioned from state: " + previousState + " to: " + state);
 
             if (bluetoothDevice != null) {
                 connectedBluetoothHeadset = bluetoothDevice;
+                logger.i("Bluetooth headset detected with name: " + bluetoothDevice.getName() + ", address: " + bluetoothDevice.getAddress() + ", and class: " + bluetoothDevice.getBluetoothClass().toString());
             }
 
-            if (!bluetooth.isOn() && !bluetoothManuallyDisabled) {
-                bluetooth.start();
-                SipService.performActionOnSipService(context, SipService.Actions.SMART_SINGLE_BUTTON_ACTION);
+            if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED && !bluetoothManuallyDisabled) {
+                logger.i("This state suggests the user has pressed a button, reconnecting bluetooth and performing a single button action on the current call");
+                SipService.performActionOnSipService(context, SipService.Actions.ANSWER_OR_HANGUP);
+                routeAudioViaBluetooth();
             }
         }
     }
@@ -275,42 +361,6 @@ public class AudioRouter {
                     audioManager.setStreamVolume(
                             AudioManager.STREAM_VOICE_CALL, 1,
                             0);
-                    break;
-            }
-        }
-    }
-
-    private class WiredHeadsetBroadcastReceiver extends BroadcastReceiver {
-        private static final int STATE_UNPLUGGED = 0;
-        private static final int STATE_PLUGGED = 1;
-        private static final int HAS_NO_MIC = 0;
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            logger.v("onReceive()");
-            int state = intent.getIntExtra("state", STATE_UNPLUGGED);
-            int microphone = intent.getIntExtra("microphone", HAS_NO_MIC);
-
-            String name = intent.getStringExtra("name");
-            logger.v("==> action: " + intent.getAction()
-                    + "\n state: " + state
-                    + "\n microphone: " + microphone
-                    + "\n name: " + name
-                    + "\n stickyBroadcast: " + isInitialStickyBroadcast()
-            );
-
-            switch (state) {
-                case STATE_UNPLUGGED:
-                    logger.v("==> Headset unplugged");
-                    mWiredHsState = STATE_WIRED_HS_UNPLUGGED;
-                    break;
-                case STATE_PLUGGED:
-                    logger.v("==> Headset plugged");
-                    mWiredHsState = STATE_WIRED_HS_PLUGGED;
-                    break;
-                default:
-                    logger.v("==> Headset invalid state");
-                    mWiredHsState = STATE_WIRED_HS_INVALID;
                     break;
             }
         }

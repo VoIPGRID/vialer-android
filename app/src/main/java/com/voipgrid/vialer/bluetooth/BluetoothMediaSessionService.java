@@ -124,6 +124,8 @@ public class BluetoothMediaSessionService extends Service {
                 return true;
             }
 
+            logger.i("Key event has been normalized from " + keyEvent.getKeyCode() + " to " + code);
+
             String action = convertKeycodeToSipAction(code);
 
             if (action != null) {
@@ -146,8 +148,9 @@ public class BluetoothMediaSessionService extends Service {
                 case KEYCODE_CALL:
                     return SipService.Actions.ANSWER_INCOMING_CALL;
                 case KEYCODE_MEDIA_PAUSE:
+                    return SipService.Actions.END_CALL;
                 case KEYCODE_ENDCALL:
-                    return SipService.Actions.SMART_SINGLE_BUTTON_ACTION;
+                    return SipService.Actions.END_CALL;
             }
 
             return null;
