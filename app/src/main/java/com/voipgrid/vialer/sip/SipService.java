@@ -13,6 +13,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
@@ -168,6 +169,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
                 mCurrentCall.hangup(true);
             }
         }
+        else if (Actions.DISPLAY_CALL.equals(action)) {
+            if (getCurrentCall() != null) {
+                startCallActivityForCurrentCall();
+            }
+        }
         else {
             mLogger.e("SipService received an invalid action: " + action);
         }
@@ -181,6 +187,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mLogger.d("incomingCall");
         mIncomingCallDetails = intent;
         loadSip();
+        performPostCallCreationActions();
     }
 
     /**
@@ -188,6 +195,12 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      *
      */
     private void initialiseOutgoingCall(Intent intent) {
+        if (getCurrentCall() != null) {
+            getLogger().i("Attempting to initialise a second outgoing call but this is not currently supported");
+            startCallActivityForCurrentCall();
+            return;
+        }
+
         mLogger.d("outgoingCall");
         loadSip();
         makeCall(
@@ -196,6 +209,17 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
                 this.intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
                 true
         );
+        performPostCallCreationActions();
+    }
+
+    /**
+     * Actions to perform when a call has been created, that being outgoing or incoming.
+     *
+     */
+    private void performPostCallCreationActions() {
+        if (audioRouter.isBluetoothRouteAvailable() && !audioRouter.isCurrentlyRoutingAudioViaBluetooth()) {
+            audioRouter.routeAudioViaBluetooth();
+        }
     }
 
     /**
@@ -383,6 +407,15 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         } else {
             setCurrentCall(mCallList.get(0));
         }
+    }
+
+    private void startCallActivityForCurrentCall() {
+        if (getCurrentCall() == null) {
+            getLogger().e("Unable to start call activity for current call as there is no current call");
+            return;
+        }
+
+        startOutgoingCallActivity(getCurrentCall(), getCurrentCall().getPhoneNumberUri());
     }
 
     /**
@@ -616,7 +649,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      */
     public interface Actions {
 
-        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL, END_CALL, ANSWER_OR_HANGUP})
+        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL, END_CALL, ANSWER_OR_HANGUP, DISPLAY_CALL})
         @Retention(RetentionPolicy.SOURCE)
         @interface Valid {}
 
@@ -663,5 +696,12 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
          *
          */
         String ANSWER_OR_HANGUP = PREFIX + "ANSWER_OR_HANGUP";
+
+        /**
+         * Cause the SipService to create a call activity for the current call, if there is no call
+         * this action will have no affect.
+         *
+         */
+        String DISPLAY_CALL = PREFIX + "DISPLAY_CALL";
     }
 }

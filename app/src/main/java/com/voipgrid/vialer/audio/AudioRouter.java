@@ -57,15 +57,11 @@ public class AudioRouter {
         this.audioManager = audioManager;
         this.bluetooth = new Bluetooth(audioManager);
 
-        broadcastReceiverManager.unregisterReceiver( bluetoothHeadsetReceiver);
+        broadcastReceiverManager.unregisterReceiver(bluetoothHeadsetReceiver);
         broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(bluetoothHeadsetReceiver, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
 
         BluetoothMediaSessionService.start(context);
         initializeAndroidAudioManager();
-
-        if (bluetooth.isBluetoothCommunicationDevicePresent()) {
-            routeAudioViaBluetooth();
-        }
     }
 
     /**
@@ -313,7 +309,7 @@ public class AudioRouter {
                 logger.i("Bluetooth headset detected with name: " + bluetoothDevice.getName() + ", address: " + bluetoothDevice.getAddress() + ", and class: " + bluetoothDevice.getBluetoothClass().toString());
             }
 
-            if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED && !bluetoothManuallyDisabled) {
+            if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED && !bluetoothManuallyDisabled && isBluetoothRouteAvailable()) {
                 logger.i("This state suggests the user has pressed a button, reconnecting bluetooth and performing a single button action on the current call");
                 SipService.performActionOnSipService(context, SipService.Actions.ANSWER_OR_HANGUP);
                 routeAudioViaBluetooth();

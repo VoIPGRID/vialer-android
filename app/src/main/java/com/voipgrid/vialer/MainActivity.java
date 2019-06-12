@@ -30,6 +30,7 @@ import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
+import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -165,6 +166,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         askForPermissions(requestCounter);
         mReachabilityReceiver.startListening();
         super.onResume();
+        SipService.performActionOnSipService(this, SipService.Actions.DISPLAY_CALL);
     }
 
     @Override
