@@ -166,7 +166,12 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         askForPermissions(requestCounter);
         mReachabilityReceiver.startListening();
         super.onResume();
-        SipService.performActionOnSipService(this, SipService.Actions.DISPLAY_CALL);
+
+
+        // We currently only support a single call so any time this activity is opened, we will
+        // request the SipService to display the current call. If there is no current call, this will have no
+        // affect.
+        SipService.performActionOnSipService(this, SipService.Actions.DISPLAY_CALL_IF_AVAILABLE);
     }
 
     @Override

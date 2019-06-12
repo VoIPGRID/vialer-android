@@ -15,7 +15,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 135
-        versionName "bluetooth-overhaul"
+        versionName "bluetooth-and-conference-fixes"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         flavorDimensions "default"

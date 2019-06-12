@@ -13,7 +13,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
@@ -169,9 +168,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
                 mCurrentCall.hangup(true);
             }
         }
-        else if (Actions.DISPLAY_CALL.equals(action)) {
+        else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
             if (getCurrentCall() != null) {
                 startCallActivityForCurrentCall();
+            } else {
+                stopSelf();
             }
         }
         else {
@@ -649,7 +650,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      */
     public interface Actions {
 
-        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL, END_CALL, ANSWER_OR_HANGUP, DISPLAY_CALL})
+        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL, END_CALL, ANSWER_OR_HANGUP, DISPLAY_CALL_IF_AVAILABLE})
         @Retention(RetentionPolicy.SOURCE)
         @interface Valid {}
 
@@ -702,6 +703,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
          * this action will have no affect.
          *
          */
-        String DISPLAY_CALL = PREFIX + "DISPLAY_CALL";
+        String DISPLAY_CALL_IF_AVAILABLE = PREFIX + "DISPLAY_CALL_IF_AVAILABLE";
     }
 }
