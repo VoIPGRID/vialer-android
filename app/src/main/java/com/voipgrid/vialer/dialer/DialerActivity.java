@@ -102,6 +102,12 @@ public class DialerActivity extends LoginRequiredActivity implements
         }
 
         refreshUi();
+
+        // If we have ever disabled the call button, we don't want the user to return
+        // to this activity so just close.
+        if (!callButton.isClickable()) {
+            finish();
+        }
     }
 
     private boolean shouldReturnNumberAsResult() {
