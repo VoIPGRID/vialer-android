@@ -36,7 +36,7 @@ public class BroadcastReceiverManager {
      * @param events The events to listen for.
      */
     public void registerReceiverViaLocalBroadcastManager(BroadcastReceiver broadcastReceiver, String... events) {
-        mLocalBroadcastManager.registerReceiver(broadcastReceiver, eventsToIntentFilter(events));
+        mLocalBroadcastManager.registerReceiver(broadcastReceiver, eventsToIntentFilter(events, null));
     }
 
     /**
@@ -46,7 +46,11 @@ public class BroadcastReceiverManager {
      * @param events The events to listen for.
      */
     public void registerReceiverViaGlobalBroadcastManager(BroadcastReceiver broadcastReceiver, String... events) {
-        mContext.registerReceiver(broadcastReceiver, eventsToIntentFilter(events));
+        mContext.registerReceiver(broadcastReceiver, eventsToIntentFilter(events, null));
+    }
+
+    public void registerReceiverViaGlobalBroadcastManager(BroadcastReceiver broadcastReceiver, int priority, String... events) {
+        mContext.registerReceiver(broadcastReceiver, eventsToIntentFilter(events, priority));
     }
 
     /**
@@ -55,8 +59,12 @@ public class BroadcastReceiverManager {
      * @param events The array of events
      * @return The constructed intent filter
      */
-    private IntentFilter eventsToIntentFilter(String[] events) {
+    private IntentFilter eventsToIntentFilter(String[] events, Integer priority) {
         IntentFilter filter = new IntentFilter();
+
+        if (priority != null) {
+            filter.setPriority(priority);
+        }
 
         for (String event : events) {
             filter.addAction(event);
