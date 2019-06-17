@@ -30,6 +30,7 @@ import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
+import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -165,6 +166,12 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         askForPermissions(requestCounter);
         mReachabilityReceiver.startListening();
         super.onResume();
+
+
+        // We currently only support a single call so any time this activity is opened, we will
+        // request the SipService to display the current call. If there is no current call, this will have no
+        // affect.
+        SipService.performActionOnSipService(this, SipService.Actions.DISPLAY_CALL_IF_AVAILABLE);
     }
 
     @Override

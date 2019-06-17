@@ -3,11 +3,11 @@ package com.voipgrid.vialer.calling;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_ACTIVE;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
-import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 
 import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -72,8 +72,8 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
         SipService.performActionOnSipService(this, SipService.Actions.DECLINE_INCOMING_CALL);
 
-        sendBroadcast(new Intent(DECLINE_BTN));
         endRinging();
+
     }
 
     @OnClick(R.id.button_pickup)
@@ -106,8 +106,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         Intent intent = getIntent();
         intent.setClass(this, CallActivity.class);
         intent.putExtra(CALL_IS_CONNECTED, true);
-        intent.putExtra(CALL_BLUETOOTH_ACTIVE, mBluetoothAudioActive);
-        intent.putExtra(CALL_BLUETOOTH_CONNECTED, mBluetoothDeviceConnected);
         startActivity(intent);
         mLogger.d("callVisibleForUser");
     }
@@ -147,6 +145,12 @@ public class IncomingCallActivity extends AbstractCallActivity {
         if (ringingIsPaused) {
             ringingIsPaused = false;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mSipServiceConnection.disconnect(true);
     }
 
     @Override
