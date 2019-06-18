@@ -18,12 +18,13 @@ platform :android do
   lane :apk do |options|
     flavor = options[:flavor]
 
-    if (flavor == "all")
+    if (flavor == "all" || flavor.nil? || flavor.empty?)
         apks
         next
     end
 
     puts "Building .apk for #{flavor}"
+
     gradle(
       task: 'assemble',
       flavor: flavor,
@@ -36,9 +37,10 @@ platform :android do
   end
 
   desc 'Generate a signed APK for each flavor'
-  private_lane :apks do
+  private_lane :apks do |options|
     flavors.each do |flavor|
-         apk(flavor: flavor)
+         options[:flavor] = flavor
+         apk(options)
     end
   end
 
