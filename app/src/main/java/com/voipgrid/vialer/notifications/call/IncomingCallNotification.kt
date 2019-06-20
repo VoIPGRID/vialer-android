@@ -56,7 +56,6 @@ class IncomingCallNotification(private val number : String, private val callerId
                 .setCategory(NotificationCompat.CATEGORY_CALL)
                 .setFullScreenIntent(createIncomingCallActivityPendingIntent(), true)
                 .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(number))
-                .setDeleteIntent(SipService.createSipServiceAction(SipService.Actions.END_RINGING))
                 .addAction(
                         drawable.ic_call_decline_normal,
                         context.getString(string.call_incoming_decline),
