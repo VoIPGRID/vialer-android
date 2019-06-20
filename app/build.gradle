@@ -31,6 +31,9 @@ android {
         // This should be removed when Android Q build tools
         // are available, and you can use Build.VERSION_CODES.Q
         buildConfigField 'int', 'ANDROID_Q_SDK_VERSION', '29'
+
+        buildConfigField "String", 'TEST_USERNAME', '"jeremy5@wearespindle.com"'
+        buildConfigField "String", 'TEST_PASSWORD', '"jeremy37482"'
     }
     signingConfigs {
         vialer {
@@ -57,9 +60,6 @@ android {
             storeFile file(keystoreProperties['annabelStoreFile'])
             storePassword keystoreProperties['annabelStorePassword']
         }
-    }
-    testOptions {
-        execution 'ANDROID_TEST_ORCHESTRATOR'
     }
     dexOptions {
         // Prevent OutOfMemory with MultiDex during the build phase
