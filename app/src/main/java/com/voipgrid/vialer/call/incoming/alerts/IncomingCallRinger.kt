@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.call.incoming.alerts
 
 import android.content.Context
-import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.provider.Settings

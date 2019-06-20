@@ -21,9 +21,8 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
-import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
-import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
 import com.voipgrid.vialer.call.NativeCallManager;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
@@ -78,6 +77,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     private CheckServiceIsRunning mCheckService = new CheckServiceIsRunning();
     private AbstractCallNotification callNotification = new DefaultCallNotification();
     private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
+    private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
 
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
@@ -107,6 +107,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(phoneStateReceiver, TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Intent.ACTION_SCREEN_OFF);
         mCheckService.start();
         startForeground(callNotification.getNotificationId(), callNotification.build());
     }
@@ -156,7 +157,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         }
         else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
             mCurrentCall.decline();
-            getNotification().cancel();
         }
         else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
             mCurrentCall.answer();
@@ -267,7 +267,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
-        mBroadcastReceiverManager.unregisterReceiver(phoneStateReceiver, mNetworkConnectivity, callStatusReceiver);
+        mBroadcastReceiverManager.unregisterReceiver(phoneStateReceiver, mNetworkConnectivity, callStatusReceiver, screenOffReceiver);
 
         mHandler.removeCallbacks(mCheckService);
 
@@ -587,6 +587,19 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     }
 
     /**
+     * We want to allow the user to press the power button to turn off
+     * ringing/vibration.
+     *
+     */
+    private class ScreenOffReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            incomingCallAlerts.stop();
+        }
+    }
+
+    /**
      * Create an action for the SipService, specifying a valid action.
      *
      * @param action The action the SipService should perform when resolved
@@ -598,6 +611,12 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         return PendingIntent.getService(VialerApplication.get(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
+    /**
+     * Given a context, this will directly perform an action on the SipService.
+     *
+     * @param context
+     * @param action
+     */
     public static void performActionOnSipService(Context context, @Actions.Valid String action) {
         Intent intent = new Intent(context, SipService.class);
         intent.setAction(action);
@@ -656,6 +675,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      *
      */
     public interface Actions {
+
 
         @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL, END_CALL, ANSWER_OR_HANGUP, DISPLAY_CALL_IF_AVAILABLE})
         @Retention(RetentionPolicy.SOURCE)
