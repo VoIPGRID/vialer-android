@@ -13,7 +13,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
@@ -597,7 +596,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             mLogger.i("Detected screen off event, disabling call alert");
-            Log.e("TEST123", "onRec");
+
             incomingCallAlerts.stop();
         }
     }
