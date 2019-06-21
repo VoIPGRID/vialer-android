@@ -264,4 +264,7 @@
     <string name="dialer_no_connectivity">No internet connection</string>
     <string name="dialer_no_connectivity_subtext">Calls cannot be made or received without a connection</string>
     <string name="call_records_answered_elsewhere">%1$s (%2$s)</string>
+    <string name="ignore_battery_optimization_switch">Always run in background</string>
+    <string name="ignore_battery_optimization_description">This application will no longer be restricted by Android battery optimization, increasing the reliability of incoming calls. It is highly recommended that this is enabled.
+    </string>
 </resources>

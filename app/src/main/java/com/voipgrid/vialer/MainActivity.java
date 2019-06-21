@@ -1,22 +1,15 @@
 package com.voipgrid.vialer;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.tabs.TabLayout;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.core.content.ContextCompat;
-import androidx.viewpager.widget.ViewPager;
 import android.view.View;
 
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -31,6 +24,7 @@ import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -38,11 +32,19 @@ import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.UpdateActivity;
 import com.voipgrid.vialer.util.UpdateHelper;
 
+import javax.inject.Inject;
+
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
 
 public class MainActivity extends NavigationDrawerActivity implements View.OnClickListener {
 
     private ViewPager mViewPager;
-    private View mView;
     private boolean mAskForPermission = true;
     private int requestCounter = -1;
     private Logger mLogger;
@@ -50,9 +52,13 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
 
     private ReachabilityReceiver mReachabilityReceiver;
 
+    @Inject BatteryOptimizationManager batteryOptimizationManager;
+    @Inject SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        VialerApplication.get().component().inject(this);
 
         Bundle startBundle = getIntent().getExtras();
         if (startBundle != null) {
@@ -103,6 +109,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
             new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
         }
 
+
         if (SyncUtils.requiresFullContactSync(this)) {
             SyncUtils.requestContactSync(this);
         } else {
@@ -126,6 +133,28 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
 
         requestCounter = 0;
         mReachabilityReceiver = new ReachabilityReceiver(this);
+
+        if (isFirstLoad()) {
+            if (!batteryOptimizationManager.isIgnoringBatteryOptimization()) {
+                batteryOptimizationManager.prompt(this);
+            }
+        }
+    }
+
+    /**
+     * Determine if this is the first time this activity has been loaded, therefore just after installing the app.
+     *
+     * @return
+     */
+    private boolean isFirstLoad() {
+        String key = "has_loaded";
+
+        if (!sharedPreferences.getBoolean(key, false)) {
+            sharedPreferences.edit().putBoolean(key, true).apply();
+            return true;
+        }
+
+        return false;
     }
 
     /**

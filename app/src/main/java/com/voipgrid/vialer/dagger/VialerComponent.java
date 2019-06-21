@@ -1,7 +1,9 @@
 package com.voipgrid.vialer.dagger;
 
 import com.voipgrid.vialer.CallActivity;
+import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.SettingsActivity;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.InternalNumbers;
@@ -65,6 +67,10 @@ public interface VialerComponent {
     void inject(CallRecordViewHolder callRecordViewHolder);
 
     void inject(LoginRequiredActivity loginRequiredActivity);
+
+    void inject(MainActivity activity);
+
+    void inject(SettingsActivity activity);
 
     void inject(VialerBaseActivity vialerBaseActivity);
 
