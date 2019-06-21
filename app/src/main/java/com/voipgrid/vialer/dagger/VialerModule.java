@@ -241,6 +241,7 @@ public class VialerModule {
         return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
+    @Singleton
     @Provides
     IncomingCallVibration provideIncomingCallVibrator(android.media.AudioManager audioManager, Vibrator vibrator) {
         return new IncomingCallVibration(audioManager, vibrator);
@@ -251,11 +252,13 @@ public class VialerModule {
         return new AudioRouter(context, androidAudioManager, broadcastReceiverManager);
     }
 
+    @Singleton
     @Provides
     IncomingCallAlerts incomingCallAlerts(IncomingCallVibration vibration, IncomingCallRinger ringer) {
         return new IncomingCallAlerts(vibration, ringer);
     }
 
+    @Singleton
     @Provides
     IncomingCallRinger provideRinger(Context context) {
         return new IncomingCallRinger(context);
