@@ -13,6 +13,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
@@ -107,7 +108,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(phoneStateReceiver, TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
-        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Intent.ACTION_SCREEN_OFF);
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
         mCheckService.start();
         startForeground(callNotification.getNotificationId(), callNotification.build());
     }
@@ -595,6 +596,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
+            mLogger.i("Detected screen off event, disabling call alert");
+            Log.e("TEST123", "onRec");
             incomingCallAlerts.stop();
         }
     }
