@@ -38,7 +38,6 @@ abstract class AbstractCallNotification : AbstractNotification() {
     private val logo = R.drawable.ic_logo
 
     @Inject protected lateinit var phoneNumberImageGenerator : PhoneNumberImageGenerator
-    @Inject protected lateinit var incomingCallVibration: IncomingCallVibration
 
     init {
         VialerApplication.get().component().inject(this)
@@ -122,7 +121,6 @@ abstract class AbstractCallNotification : AbstractNotification() {
      */
     fun incoming(number: String, callerId: String) {
         IncomingCallNotification(number, callerId).display()
-        incomingCallVibration.start()
     }
 
     /**
@@ -139,11 +137,6 @@ abstract class AbstractCallNotification : AbstractNotification() {
      */
     fun active(call : SipCall) {
         ActiveCallNotification(call).display()
-        incomingCallVibration.stop()
-    }
-
-    fun cancel() {
-        incomingCallVibration.stop()
     }
 
     companion object {
