@@ -31,9 +31,6 @@ android {
         // This should be removed when Android Q build tools
         // are available, and you can use Build.VERSION_CODES.Q
         buildConfigField 'int', 'ANDROID_Q_SDK_VERSION', '29'
-
-        buildConfigField "String", 'TEST_USERNAME', '"jeremy5@wearespindle.com"'
-        buildConfigField "String", 'TEST_PASSWORD', '"jeremy37482"'
     }
     signingConfigs {
         vialer {
@@ -128,6 +125,8 @@ android {
         }
         debug {
             manifestPlaceholders = [enableCrashReporting:"false"]
+            buildConfigField("String", "TEST_USERNAME", "\"${testUsername}\"")
+            buildConfigField("String", "TEST_PASSWORD", "\"${testPassword}\"")
         }
         debug {
             versionNameSuffix '-DEBUG'
