@@ -261,4 +261,6 @@
     </string>
     <string name="dialer_no_connectivity">Geen internet verbinding</string>
     <string name="dialer_no_connectivity_subtext">Gesprekken kunnen niet worden opgezet of ontvangen zonder internet</string>
+    <string name="ignore_battery_optimization_switch">Altijd op de achtergrond laten draaien</string>
+    <string name="ignore_battery_optimization_description">Deze applicatie wordt niet langer beperkt door Android batterijbesparing, waardoor de betrouwbaarheid van inkomend belverkeer toeneemt. Wij raden je sterk aan deze functie in te schakelen.</string>
 </resources>
