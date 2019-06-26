@@ -148,6 +148,17 @@ public class SecureCalling {
     }
 
     /**
+     * Check if secure calling has been specifically disabled, unlike the isEnabled() method
+     * this will not return TRUE unless we know it has been disabled rather than just not
+     * having information yet.
+     *
+     * @return TRUE if it has been disabled, otherwise FALSE
+     */
+    public boolean hasBeenDisabled() {
+        return mSharedPreferences.contains(getSharedPreferencesKey()) && !isEnabled();
+    }
+
+    /**
      * Perform various actions when a successful call has been made to the API.
      */
     private void handleSuccessfulApiCall(boolean enabled) {
