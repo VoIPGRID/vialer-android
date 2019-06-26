@@ -58,9 +58,6 @@ android {
             storePassword keystoreProperties['annabelStorePassword']
         }
     }
-    testOptions {
-        execution 'ANDROID_TEST_ORCHESTRATOR'
-    }
     dexOptions {
         // Prevent OutOfMemory with MultiDex during the build phase
         javaMaxHeapSize "4g"
@@ -128,6 +125,8 @@ android {
         }
         debug {
             manifestPlaceholders = [enableCrashReporting:"false"]
+            buildConfigField("String", "TEST_USERNAME", "\"${testUsername}\"")
+            buildConfigField("String", "TEST_PASSWORD", "\"${testPassword}\"")
         }
         debug {
             versionNameSuffix '-DEBUG'
