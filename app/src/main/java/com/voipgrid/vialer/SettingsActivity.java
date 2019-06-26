@@ -24,9 +24,9 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -36,6 +36,7 @@ import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.VoipDisabledNotification;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
@@ -44,6 +45,9 @@ import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
+import javax.inject.Inject;
+
+import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -53,6 +57,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SettingsActivity extends LoginRequiredActivity {
+
+    @Inject BatteryOptimizationManager batteryOptimizationManager;
 
     @BindView(R.id.container) View mContainer;
     @BindView(R.id.progressBar) ProgressBar mProgressBar;
@@ -73,6 +79,7 @@ public class SettingsActivity extends LoginRequiredActivity {
     @BindView(R.id.remote_logging_switch) CompoundButton mRemoteLoggingSwitch;
     @BindView(R.id.remote_logging_id_container) View mRemoteLogIdContainer;
     @BindView(R.id.remote_logging_id_edit_text) EditText mRemoteLogIdEditText;
+    @BindView(R.id.ignore_battery_optimization_switch) CompoundButton ignoreBatteryOptimizationSwitch;
 
     @BindView(R.id.advanced_settings_layout) LinearLayout advancedSettings;
     @BindView(R.id.tls_switch) Switch tlsSwitch;
@@ -102,6 +109,7 @@ public class SettingsActivity extends LoginRequiredActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         ButterKnife.bind(this);
+        VialerApplication.get().component().inject(this);
 
         mJsonStorage = new JsonStorage(this);
         mPhoneAccountHelper = new PhoneAccountHelper(this);
@@ -122,6 +130,8 @@ public class SettingsActivity extends LoginRequiredActivity {
     @Override
     public void onResume() {
         super.onResume();
+        initIgnoreBatteryOptimizationSwitch();
+
         // Update and populate the fields.
         updateAndPopulate();
 
@@ -204,6 +214,29 @@ public class SettingsActivity extends LoginRequiredActivity {
 
     private void initUse3GSwitch() {
         mUse3GSwitch.setChecked(mPreferences.has3GEnabled());
+    }
+
+    private void initIgnoreBatteryOptimizationSwitch() {
+        ignoreBatteryOptimizationSwitch.setOnClickListener(null);
+        ignoreBatteryOptimizationSwitch.setChecked(batteryOptimizationManager.isIgnoringBatteryOptimization());
+        ignoreBatteryOptimizationSwitch.setOnClickListener(
+                view -> batteryOptimizationManager.prompt(SettingsActivity.this));
+    }
+
+    /**
+     * We are sometimes prompting the user to disable battery optimisation, this callback will be received when they have
+     * finished the dialog.
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode,
+            @Nullable final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mLogger.i("User has changed ignore battery optimization setting to: " + batteryOptimizationManager.isIgnoringBatteryOptimization());
+        initIgnoreBatteryOptimizationSwitch();
     }
 
     @OnCheckedChanged(R.id.account_sip_switch)
