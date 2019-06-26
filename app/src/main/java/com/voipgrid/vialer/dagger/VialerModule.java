@@ -41,6 +41,7 @@ import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
 import com.voipgrid.vialer.t9.T9ViewBinder;
+import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ColorHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -262,5 +263,11 @@ public class VialerModule {
     @Provides
     IncomingCallRinger provideRinger(Context context) {
         return new IncomingCallRinger(context);
+    }
+
+    @Provides
+    @Singleton
+    BatteryOptimizationManager provideBom(Context context) {
+        return new BatteryOptimizationManager(context);
     }
 }
