@@ -30,7 +30,7 @@ public class AccountHelper {
         mEncrypter = new Encrypter(context);
         mEncryptionPorter = new LegacyAsymmetricToSymmetricPorter(
                 mEncrypter,
-                new LegacyAsymmetricEncrypter(mLogger, Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2),
+                new LegacyAsymmetricEncrypter(mLogger, true),
                 mPrefs,
                 mLogger
         );

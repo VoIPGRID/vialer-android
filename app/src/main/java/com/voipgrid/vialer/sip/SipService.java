@@ -19,8 +19,10 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
@@ -75,6 +77,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     private CheckServiceIsRunning mCheckService = new CheckServiceIsRunning();
     private AbstractCallNotification callNotification = new DefaultCallNotification();
     private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
+    private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
 
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
@@ -84,6 +87,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     @Inject protected NetworkConnectivity mNetworkConnectivity;
     @Inject protected NativeCallManager mNativeCallManager;
     @Inject @Nullable protected PhoneAccount mPhoneAccount;
+    @Inject AudioRouter audioRouter;
+    @Inject IncomingCallAlerts incomingCallAlerts;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -102,6 +107,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(phoneStateReceiver, TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
         mCheckService.start();
         startForeground(callNotification.getNotificationId(), callNotification.build());
     }
@@ -151,10 +157,26 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         }
         else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
             mCurrentCall.decline();
-            getNotification().cancel();
         }
         else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
             mCurrentCall.answer();
+        }
+        else if (Actions.END_CALL.equals(action)) {
+            mCurrentCall.hangup(true);
+        }
+        else if (Actions.ANSWER_OR_HANGUP.equals(action)) {
+            if (mCurrentCall.isCallRinging()) {
+                mCurrentCall.answer();
+            } else if (mCurrentCall.isConnected()) {
+                mCurrentCall.hangup(true);
+            }
+        }
+        else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
+            if (getCurrentCall() != null) {
+                startCallActivityForCurrentCall();
+            } else {
+                stopSelf();
+            }
         }
         else {
             mLogger.e("SipService received an invalid action: " + action);
@@ -169,6 +191,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mLogger.d("incomingCall");
         mIncomingCallDetails = intent;
         loadSip();
+        performPostCallCreationActions();
     }
 
     /**
@@ -176,6 +199,12 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      *
      */
     private void initialiseOutgoingCall(Intent intent) {
+        if (getCurrentCall() != null) {
+            getLogger().i("Attempting to initialise a second outgoing call but this is not currently supported");
+            startCallActivityForCurrentCall();
+            return;
+        }
+
         mLogger.d("outgoingCall");
         loadSip();
         makeCall(
@@ -184,6 +213,17 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
                 this.intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
                 true
         );
+        performPostCallCreationActions();
+    }
+
+    /**
+     * Actions to perform when a call has been created, that being outgoing or incoming.
+     *
+     */
+    private void performPostCallCreationActions() {
+        if (audioRouter.isBluetoothRouteAvailable() && !audioRouter.isCurrentlyRoutingAudioViaBluetooth()) {
+            audioRouter.routeAudioViaBluetooth();
+        }
     }
 
     /**
@@ -216,6 +256,9 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     public void onDestroy() {
         mLogger.d("onDestroy");
 
+        audioRouter.destroy();
+        incomingCallAlerts.stop();
+
         // If no phoneaccount was found in the onCreate there won't be a sipconfig either.
         // Check to avoid nullpointers.
         if (mSipConfig != null) {
@@ -224,7 +267,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
-        mBroadcastReceiverManager.unregisterReceiver(phoneStateReceiver, mNetworkConnectivity, callStatusReceiver);
+        mBroadcastReceiverManager.unregisterReceiver(phoneStateReceiver, mNetworkConnectivity, callStatusReceiver, screenOffReceiver);
 
         mHandler.removeCallbacks(mCheckService);
 
@@ -308,6 +351,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * @param callerId
      */
     public void informUserAboutIncomingCall(String number, String callerId) {
+        incomingCallAlerts.start();
+
         callNotification.incoming(
                 number,
                 callerId
@@ -371,6 +416,15 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         }
     }
 
+    private void startCallActivityForCurrentCall() {
+        if (getCurrentCall() == null) {
+            getLogger().e("Unable to start call activity for current call as there is no current call");
+            return;
+        }
+
+        startOutgoingCallActivity(getCurrentCall(), getCurrentCall().getPhoneNumberUri());
+    }
+
     /**
      * Get the details used for a incoming call.
      * @return
@@ -431,6 +485,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
             return;
         }
 
+        incomingCallAlerts.stop();
         getNotification().active(getCurrentCall());
         startCallActivity(
                 SipUri.sipAddressUri(this, PhoneNumberUtils.format(getCurrentCall().getPhoneNumber())),
@@ -469,6 +524,10 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     @Override
     public void onServiceStopped() {
 
+    }
+
+    public AudioRouter getAudioRouter() {
+        return audioRouter;
     }
 
     /**
@@ -528,6 +587,21 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     }
 
     /**
+     * We want to allow the user to press the power button to turn off
+     * ringing/vibration.
+     *
+     */
+    private class ScreenOffReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            mLogger.i("Detected screen off event, disabling call alert");
+
+            incomingCallAlerts.stop();
+        }
+    }
+
+    /**
      * Create an action for the SipService, specifying a valid action.
      *
      * @param action The action the SipService should perform when resolved
@@ -539,10 +613,28 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         return PendingIntent.getService(VialerApplication.get(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
+    /**
+     * Given a context, this will directly perform an action on the SipService.
+     *
+     * @param context
+     * @param action
+     */
     public static void performActionOnSipService(Context context, @Actions.Valid String action) {
         Intent intent = new Intent(context, SipService.class);
         intent.setAction(action);
         context.startService(intent);
+    }
+
+    /**
+     * This method is called when the user opens the multi-tasking menu and swipes/closes Vialer.
+     *
+     * @param rootIntent
+     */
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        mLogger.i("Stopping SipService as task has been removed");
+        stopSelf();
     }
 
     /**
@@ -586,7 +678,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      */
     public interface Actions {
 
-        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL})
+
+        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL, END_CALL, ANSWER_OR_HANGUP, DISPLAY_CALL_IF_AVAILABLE})
         @Retention(RetentionPolicy.SOURCE)
         @interface Valid {}
 
@@ -619,5 +712,26 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
          *
          */
         String ANSWER_INCOMING_CALL = PREFIX + "ANSWER_INCOMING_CALL";
+
+        /**
+         * End an already in progress call.
+         *
+         */
+        String END_CALL = PREFIX + "END_CALL";
+
+        /**
+         * This action will either answer or hangup the call based on the current call state,
+         * this is to enable a user to perform multiple actions on a single button click
+         * (e.g. on a bluetooth headset).
+         *
+         */
+        String ANSWER_OR_HANGUP = PREFIX + "ANSWER_OR_HANGUP";
+
+        /**
+         * Cause the SipService to create a call activity for the current call, if there is no call
+         * this action will have no affect.
+         *
+         */
+        String DISPLAY_CALL_IF_AVAILABLE = PREFIX + "DISPLAY_CALL_IF_AVAILABLE";
     }
 }

@@ -125,8 +125,6 @@ public class DialHelper {
             } else {
                 callWithApi(number, contactName);
             }
-        } else {
-            Log.e("TEST123", "has conn:" + mConnectivityHelper.hasNetworkConnection());
         }
     }
 

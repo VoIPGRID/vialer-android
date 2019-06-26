@@ -9,9 +9,9 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import com.voipgrid.vialer.CallActivity
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration
 import com.voipgrid.vialer.calling.IncomingCallActivity
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator
 import com.voipgrid.vialer.notifications.AbstractNotification
@@ -38,7 +38,6 @@ abstract class AbstractCallNotification : AbstractNotification() {
     private val logo = R.drawable.ic_logo
 
     @Inject protected lateinit var phoneNumberImageGenerator : PhoneNumberImageGenerator
-    @Inject protected lateinit var incomingCallVibration: IncomingCallVibration
 
     init {
         VialerApplication.get().component().inject(this)
@@ -122,7 +121,6 @@ abstract class AbstractCallNotification : AbstractNotification() {
      */
     fun incoming(number: String, callerId: String) {
         IncomingCallNotification(number, callerId).display()
-        incomingCallVibration.start()
     }
 
     /**
@@ -139,11 +137,6 @@ abstract class AbstractCallNotification : AbstractNotification() {
      */
     fun active(call : SipCall) {
         ActiveCallNotification(call).display()
-        incomingCallVibration.stop()
-    }
-
-    fun cancel() {
-        incomingCallVibration.stop()
     }
 
     companion object {

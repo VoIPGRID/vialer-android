@@ -20,7 +20,10 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
+import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.callrecord.CachedContacts;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
@@ -30,7 +33,7 @@ import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
-import com.voipgrid.vialer.notifications.call.IncomingCallVibration;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
@@ -211,7 +214,7 @@ public class VialerModule {
     }
 
     @Provides ToneGenerator provideToneGenerator() {
-        return new ToneGenerator(AudioManager.STREAM_VOICE_CALL, SipConstants.RINGING_VOLUME);
+        return new ToneGenerator(android.media.AudioManager.STREAM_VOICE_CALL, SipConstants.RINGING_VOLUME);
     }
 
     @Provides NetworkConnectivity provideNetworkConnectivity() {
@@ -229,8 +232,8 @@ public class VialerModule {
     }
 
     @Provides
-    AudioManager provideAudioManager(Context context) {
-        return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    android.media.AudioManager provideAudioManager(Context context) {
+        return (android.media.AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Provides
@@ -238,8 +241,26 @@ public class VialerModule {
         return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
+    @Singleton
     @Provides
-    IncomingCallVibration provideIncomingCallVibrator(AudioManager audioManager, Vibrator vibrator) {
+    IncomingCallVibration provideIncomingCallVibrator(android.media.AudioManager audioManager, Vibrator vibrator) {
         return new IncomingCallVibration(audioManager, vibrator);
+    }
+
+    @Provides
+    AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager) {
+        return new AudioRouter(context, androidAudioManager, broadcastReceiverManager);
+    }
+
+    @Singleton
+    @Provides
+    IncomingCallAlerts incomingCallAlerts(IncomingCallVibration vibration, IncomingCallRinger ringer) {
+        return new IncomingCallAlerts(vibration, ringer);
+    }
+
+    @Singleton
+    @Provides
+    IncomingCallRinger provideRinger(Context context) {
+        return new IncomingCallRinger(context);
     }
 }

@@ -16,41 +16,11 @@ or alternatively using `brew cask install fastlane`
 
 # Available Actions
 ## Android
-### android test
-```
-fastlane android test
-```
-Runs all the tests
-### android screenshot
-```
-fastlane android screenshot
-```
-Do a screenshot run
-### android apks
-```
-fastlane android apks
-```
-Generate a signed APK for each flavor
 ### android apk
 ```
 fastlane android apk
 ```
 Generate a signed APK
-### android beta
-```
-fastlane android beta
-```
-Submit a new Beta version to the Google Play Store
-### android production
-```
-fastlane android production
-```
-Submit a new Production version to the Google Play Store
-### android alpha
-```
-fastlane android alpha
-```
-Submit a new Alpha version to the Google Play Store
 
 ----
 

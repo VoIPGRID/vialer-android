@@ -49,7 +49,6 @@ public class ReachabilityBarView extends RelativeLayout implements View.OnClickL
         initLayout();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public ReachabilityBarView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mContext = context;

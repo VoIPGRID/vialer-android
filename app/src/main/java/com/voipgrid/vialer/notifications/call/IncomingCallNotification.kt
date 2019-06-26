@@ -19,8 +19,6 @@ import com.voipgrid.vialer.sip.SipService
 
 class IncomingCallNotification(private val number : String, private val callerId : String) : AbstractCallNotification() {
 
-    private val vibration = longArrayOf(0, 1000, 1000)
-
     /**
      * We are creating a new notification channel for incoming calls because they
      * will have a different priority to the other notifications.
@@ -34,13 +32,8 @@ class IncomingCallNotification(private val number : String, private val callerId
                 NotificationManager.IMPORTANCE_HIGH
         )
 
-        val attributes = AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-                .build()
-
-        channel.setSound(Settings.System.DEFAULT_RINGTONE_URI, attributes)
         channel.enableVibration(false)
+        channel.setSound(null, null)
 
         return channel
     }
@@ -73,7 +66,7 @@ class IncomingCallNotification(private val number : String, private val callerId
                         context.getString(string.call_incoming_accept),
                         SipService.createSipServiceAction(SipService.Actions.ANSWER_INCOMING_CALL)
                 )
-                .setVibrate(vibration)
+                .setSound(null)
     }
 
     private fun createNotificationTitle() : String {

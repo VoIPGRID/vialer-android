@@ -222,7 +222,7 @@
 
     <string name="call_transfer_complete_success"> Succesvol doorverbonden %1$s en %2$s</string>
     <string name="call_incoming_expanded">Inkomend gesprek van:</string>
-    <string name="call_incoming_accept">Antwoord</string>
+    <string name="call_incoming_accept">Beantwoorden</string>
     <string name="call_incoming_decline">Weigeren</string>
     <string name="advanced_settings_title">Geavanceerde instellingen</string>
     <string name="advanced_settings_tls_description">Externe partijen kunnen je gesprekken afluisteren als deze functie is uitgeschakeld.</string>
@@ -241,8 +241,6 @@
     <string name="audio_source_option_speaker">Luidspreker</string>
     <string name="pending_call_description">Bellen</string>
     <string name="audio_source_option_phone">Telefoon</string>
-    <string name="incoming_call_answer">Beantwoorden</string>
-    <string name="incoming_call_decline">Weigeren</string>
     <string name="pending_call_status">Gesprek wordt opgezet</string>
     <string name="network_call_message">Gesprek onderbroken met</string>
     <string name="network_call_status">Geen netwerk gevonden</string>

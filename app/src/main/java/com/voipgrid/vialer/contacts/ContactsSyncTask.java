@@ -177,16 +177,14 @@ public class ContactsSyncTask {
         // Loop all contacts to sync.
         while (cursor.moveToNext()) {
             progress.setProcessed(cursor.getPosition() + 1);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                long lastUpdated =
-                        cursor.getLong(cursor.getColumnIndex(
-                                ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP));
-                // Skip the contact if it has not changed since the last sync AND a full sync
-                // is not required.
-                if (lastUpdated <= Long.parseLong(SyncUtils.getLastSync(mContext))
-                        && !SyncUtils.requiresFullContactSync(mContext)) {
-                    continue;
-                }
+            long lastUpdated =
+                    cursor.getLong(cursor.getColumnIndex(
+                            ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP));
+            // Skip the contact if it has not changed since the last sync AND a full sync
+            // is not required.
+            if (lastUpdated <= Long.parseLong(SyncUtils.getLastSync(mContext))
+                    && !SyncUtils.requiresFullContactSync(mContext)) {
+                continue;
             }
 
             syncContact = createSyncContactFromCursor(cursor);
