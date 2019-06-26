@@ -1,19 +1,22 @@
 package com.voipgrid.vialer;
 
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_ACTIVE;
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
-import static com.voipgrid.vialer.calling.CallingConstants.TYPE_CONNECTED_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
 
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,7 +24,6 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.call.CallActionButton;
 import com.voipgrid.vialer.call.CallDetail;
 import com.voipgrid.vialer.call.DisplayCallDetail;
@@ -31,12 +33,11 @@ import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
-import com.voipgrid.vialer.media.MediaManager;
-import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
+import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.NetworkUtil;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -52,8 +53,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 /**
  * CallActivity for incoming or outgoing call.
  */
-public class CallActivity extends AbstractCallActivity implements
-        MediaManager.AudioChangedInterface, PopupMenu.OnMenuItemClickListener, Dialer.Listener {
+public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMenuItemClickListener, Dialer.Listener {
 
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
     @BindView(R.id.incoming_caller_title) TextView mTitle;
@@ -66,9 +66,8 @@ public class CallActivity extends AbstractCallActivity implements
     @BindView(R.id.transfer_label) TextView mTransferLabel;
     @BindView(R.id.call_status) TextView mCallStatusTv;
 
-    @Inject AnalyticsHelper mAnalyticsHelper;
     @Inject NetworkUtil mNetworkUtil;
-
+    @Inject BroadcastReceiverManager broadcastReceiverManager;
 
     @BindView(R.id.button_transfer) CallActionButton mTransferButton;
     @BindView(R.id.button_onhold) CallActionButton mOnHoldButton;
@@ -78,10 +77,9 @@ public class CallActivity extends AbstractCallActivity implements
 
     private CallPresenter mCallPresenter;
     private SweetAlertDialog mTransferCompleteDialog;
+    private UpdateUiReceiver updateUiReceiver = new UpdateUiReceiver();
 
     private boolean mConnected = false;
-    private boolean mMute = false;
-    private boolean mOnHold = false;
     private boolean mOnTransfer = false;
     private String mType;
     private boolean mCallIsTransferred = false;
@@ -105,59 +103,17 @@ public class CallActivity extends AbstractCallActivity implements
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
         mCallPresenter = new CallPresenter(this);
-
         updateUi();
 
-        // Get the intent to see if it's an outgoing or an incoming call.
         mType = getIntent().getType();
-
-        updateMediaManager(TYPE_CONNECTED_CALL);
 
         mConnected = getIntent().getBooleanExtra(CALL_IS_CONNECTED, false);
 
-        if (!mBluetoothAudioActive) {
-            mBluetoothAudioActive = getIntent().getBooleanExtra(CALL_BLUETOOTH_ACTIVE, false);
-        }
-
-        if (!mBluetoothDeviceConnected) {
-            mBluetoothDeviceConnected = getIntent().getBooleanExtra(CALL_BLUETOOTH_CONNECTED, false);
-        }
-
-        if (!mType.equals(TYPE_INCOMING_CALL) && !mType.equals(TYPE_OUTGOING_CALL)) {
+        if (!TYPE_INCOMING_CALL.equals(mType) && !TYPE_OUTGOING_CALL.equals(mType)) {
             return;
         }
 
         mForceDisplayedCallDetails = new DisplayCallDetail(getIntent().getStringExtra(PHONE_NUMBER), getIntent().getStringExtra(CONTACT_NAME));
-        updateUi();
-
-        if (wasOpenedViaNotification() && !isIncomingCall()) {
-            mCallNotifications.callWasOpenedFromNotificationButIsNotIncoming(getCallNotificationDetails());
-            updateMediaManager(TYPE_CONNECTED_CALL);
-            updateUi();
-            return;
-        }
-
-        updateMediaManager(mType);
-
-        if (isIncomingCall()) {
-            mLogger.d("inComingCall");
-
-            // Ringing event.
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_inbound),
-                    getString(R.string.analytics_event_label_ringing)
-            );
-
-            if (!ReadExternalStoragePermission.hasPermission(this)) {
-                ReadExternalStoragePermission.askForPermission(this);
-            }
-
-        } else {
-            mLogger.d("outgoingCall");
-            mCallNotifications.outgoingCall(getCallNotificationDetails());
-        }
-
         updateUi();
     }
 
@@ -169,15 +125,19 @@ public class CallActivity extends AbstractCallActivity implements
         if(!mNetworkUtil.isOnline()) {
           NetworkAvailabilityActivity.start();
         }
+
+        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(updateUiReceiver, BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED, Intent.ACTION_HEADSET_PLUG);
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mCallNotifications.removeAll();
+    protected void onPause() {
+        super.onPause();
+
         if (mTransferCompleteDialog != null) {
             mTransferCompleteDialog.dismiss();
         }
+
+        broadcastReceiverManager.unregisterReceiver(updateUiReceiver);
     }
 
     @Override
@@ -187,12 +147,9 @@ public class CallActivity extends AbstractCallActivity implements
 
     @Override
     public void onCallConnected() {
-        updateMediaManager(TYPE_CONNECTED_CALL);
         mConnected = true;
 
         mForceDisplayedCallDetails = null;
-
-        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
 
         if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             mInitialCallDetail = CallDetail.fromSipCall(mSipServiceConnection.get().getFirstCall());
@@ -219,28 +176,20 @@ public class CallActivity extends AbstractCallActivity implements
 
         if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
             mForceDisplayedCallDetails = null;
-            getMediaManager().setCallOnSpeaker(false);
             mConnected = true;
-            mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
             updateUi();
         } else {
-            mOnHold = false;
             mConnected = false;
-            getMediaManager().callEnded();
             finishAfterDelay();
         }
     }
 
     @Override
     public void onCallHold() {
-        mOnHold = true;
-        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_on_hold);
     }
 
     @Override
     public void onCallUnhold() {
-        mOnHold = false;
-        mCallNotifications.update(getCallNotificationDetails(), R.string.callnotification_active_call);
     }
 
     @Override
@@ -268,24 +217,6 @@ public class CallActivity extends AbstractCallActivity implements
         }
 
         mCallPresenter.update();
-    }
-
-    /**
-     * Based on type show/hide and position the buttons to answer/decline a call.
-     *
-     * @param type a string containing a call type (INCOMING or OUTGOING)
-     */
-    private void updateMediaManager(String type) {
-        if (type.equals(TYPE_OUTGOING_CALL) || type.equals(TYPE_CONNECTED_CALL)) {
-            if (!mOnTransfer) {
-                if (type.equals(TYPE_CONNECTED_CALL) && !mConnected) {
-                    getMediaManager().callAnswered();
-                }
-                if (type.equals(TYPE_OUTGOING_CALL) && !mConnected) {
-                    getMediaManager().callOutgoing();
-                }
-            }
-        }
     }
 
     @Override
@@ -328,31 +259,14 @@ public class CallActivity extends AbstractCallActivity implements
                 .show();
     }
 
-    @Override
-    public void bluetoothAudioAvailable(boolean available) {
-        super.bluetoothAudioAvailable(available);
-        updateUi();
-    }
-
-    @Override
-    public void bluetoothDeviceConnected(boolean connected) {
-        super.bluetoothDeviceConnected(connected);
-        updateUi();
-    }
-
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
         mLogger.d("toggleSpeaker");
-        getMediaManager().setCallOnSpeaker(!isOnSpeaker());
-        updateUi();
-    }
-
-    // Mute or un-mute a call when the user presses the button.
-    private void toggleMute() {
-        mLogger.d("toggleMute");
-        mMute = !mMute;
-        int volume = getResources().getInteger(mMute ? R.integer.mute_microphone_volume_value : R.integer.unmute_microphone_volume_value);
-        updateMicrophoneVolume(volume);
+        if (!getAudioRouter().isCurrentlyRoutingAudioViaSpeaker()) {
+            getAudioRouter().routeAudioViaSpeaker();
+        } else {
+            getAudioRouter().routeAudioViaEarpiece();
+        }
         updateUi();
     }
 
@@ -366,7 +280,6 @@ public class CallActivity extends AbstractCallActivity implements
         try {
             SipCall call = mOnTransfer ? mSipServiceConnection.get().getCurrentCall() : mSipServiceConnection.get().getFirstCall();
             call.toggleHold();
-            mOnHold = call.isOnHold();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -398,30 +311,11 @@ public class CallActivity extends AbstractCallActivity implements
         finishAfterDelay();
     }
 
-    /**
-     * Method for setting new  microphone volume value (SIP Rx level):
-     * - level 0 means mute:
-     * - level 1 means no volume change, so we won't use this.
-     * - level 2 mean 100% increase.
-     *
-     * @param newVolume new volume level for the Rx level of the current media of active call.
-     */
-    void updateMicrophoneVolume(long newVolume) {
-        mLogger.d("updateMicrophoneVolume setting volume to: " + newVolume);
-        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
-            mSipServiceConnection.get().getCurrentCall().updateMicrophoneVolume(newVolume);
-        }
-    }
-
     @OnClick(R.id.button_mute)
     public void onMuteButtonClick(View view) {
-        if (mOnTransfer) {
-            if (mSipServiceConnection.get().getCurrentCall().isConnected()) {
-                toggleMute();
-            }
-        } else {
-            if (mConnected) {
-                toggleMute();
+        if ((mOnTransfer && mSipServiceConnection.get().getCurrentCall().isConnected()) || mConnected) {
+            if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
+                mSipServiceConnection.get().getCurrentCall().toggleMute();
             }
         }
     }
@@ -437,7 +331,7 @@ public class CallActivity extends AbstractCallActivity implements
             return;
         }
 
-        if (!mOnHold) {
+        if (!isCallOnHold()) {
             onHoldButtonClick(mOnHoldButton);
         }
 
@@ -448,12 +342,8 @@ public class CallActivity extends AbstractCallActivity implements
 
     @OnClick(R.id.button_onhold)
     public void onHoldButtonClick(View view) {
-        if (mOnTransfer) {
-            if (mSipServiceConnection.get().getCurrentCall().isConnected()) {
-                toggleOnHold();
-            }
-        } else {
-            if (mConnected) {
+        if ((mOnTransfer && mSipServiceConnection.get().getCurrentCall().isConnected()) || mConnected) {
+            if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
                 toggleOnHold();
             }
         }
@@ -461,14 +351,20 @@ public class CallActivity extends AbstractCallActivity implements
 
     @OnClick(R.id.button_speaker)
     public void onAudioSourceButtonClick(View view) {
-        if (!mBluetoothDeviceConnected) {
+        if (!getAudioRouter().isBluetoothRouteAvailable()) {
             toggleSpeaker();
             return;
         }
 
+        BluetoothDevice bluetoothDevice = getAudioRouter().getConnectedBluetoothHeadset();
+
         PopupMenu popup = new PopupMenu(this, view);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_audio_source, popup.getMenu());
+        if (bluetoothDevice != null) {
+            MenuItem menuItem = popup.getMenu().getItem(2);
+            menuItem.setTitle(menuItem + " (" + bluetoothDevice.getName() + ")");
+        }
         popup.setOnMenuItemClickListener(this);
         popup.show();
     }
@@ -509,40 +405,19 @@ public class CallActivity extends AbstractCallActivity implements
         mSipServiceConnection.get().makeCall(sipAddressUri, "", numberToCall);
     }
 
-    public void audioLost(boolean lost) {
-        super.audioLost(lost);
-
-        if (mSipServiceConnection.get() == null) {
-            mLogger.e("mSipService is null");
-        } else {
-            if (lost) {
-                // Don't put the call on hold when there is a native call is ringing.
-                if (mConnected && !mSipServiceConnection.get().getNativeCallManager().nativeCallIsRinging()) {
-                    onCallHold();
-                }
-            } else {
-                if (mConnected && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getCurrentCall().isOnHold()) {
-                    onCallHold();
-                }
-            }
-        }
-    }
-
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.audio_source_option_phone:
-                getMediaManager().useBluetoothAudio(false);
-                getMediaManager().setCallOnSpeaker(false);
+                getAudioRouter().routeAudioViaEarpiece();
                 break;
 
             case R.id.audio_source_option_speaker:
-                getMediaManager().useBluetoothAudio(false);
-                getMediaManager().setCallOnSpeaker(true);
+                getAudioRouter().routeAudioViaSpeaker();
                 break;
 
             case R.id.audio_source_option_bluetooth:
-                getMediaManager().useBluetoothAudio(true);
+                getAudioRouter().routeAudioViaBluetooth();
                 break;
         }
 
@@ -586,7 +461,6 @@ public class CallActivity extends AbstractCallActivity implements
     private void beginCallTransferTo(String number) {
         mOnTransfer = true;
         callTransferMakeSecondCall(number);
-        mOnHold = mSipServiceConnection.get().getCurrentCall().isOnHold();
         mForceDisplayedCallDetails = new DisplayCallDetail(number, null);
         updateUi();
     }
@@ -617,18 +491,8 @@ public class CallActivity extends AbstractCallActivity implements
         try {
             mSipServiceConnection.get().getFirstCall().xFerReplaces(mSipServiceConnection.get().getCurrentCall());
             mCallIsTransferred = true;
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_transfer),
-                    getString(R.string.analytics_event_label_success)
-            );
         } catch (Exception e) {
             e.printStackTrace();
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_call),
-                    getString(R.string.analytics_event_action_transfer),
-                    getString(R.string.analytics_event_label_fail)
-            );
         }
     }
 
@@ -648,7 +512,7 @@ public class CallActivity extends AbstractCallActivity implements
      * @return TRUE if incoming
      */
     private boolean isIncomingCall() {
-        return mType.equals(TYPE_INCOMING_CALL);
+        return TYPE_INCOMING_CALL.equals(mType);
     }
 
     @Override
@@ -656,8 +520,8 @@ public class CallActivity extends AbstractCallActivity implements
         super.sipServiceHasConnected(sipService);
         if (isIncomingCall()) {
             onCallConnected();
-            updateUi();
         }
+        updateUi();
     }
 
     /**
@@ -694,20 +558,17 @@ public class CallActivity extends AbstractCallActivity implements
     }
 
     public boolean isMuted() {
-        return mMute;
-    }
+        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
+            return mSipServiceConnection.get().getCurrentCall().isMuted();
+        }
 
-    public boolean hasBluetoothDeviceConnected() {
-        return mBluetoothDeviceConnected;
+        return false;
     }
 
     public boolean isOnSpeaker() {
-        return getMediaManager().isCallOnSpeaker();
+        return getAudioRouter().isCurrentlyRoutingAudioViaSpeaker();
     }
 
-    public boolean isBluetoothAudioActive() {
-        return mBluetoothAudioActive;
-    }
 
     public CallDetail getInitialCallDetail() {
         return mInitialCallDetail;
@@ -719,5 +580,30 @@ public class CallActivity extends AbstractCallActivity implements
 
     public DisplayCallDetail getForceDisplayedCallDetails() {
         return mForceDisplayedCallDetails;
+    }
+
+    /**
+     * Check if the primary call is on hold.
+     *
+     * @return TRUE if it is on hold, otherwise FALSE.
+     */
+    public boolean isCallOnHold() {
+        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
+            return mSipServiceConnection.get().getCurrentCall().isOnHold();
+        }
+
+        return false;
+    }
+
+    /**
+     * Updates the UI whenever any events are received.
+     *
+     */
+    private class UpdateUiReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            runOnUiThread(CallActivity.this::updateUi);
+        }
     }
 }

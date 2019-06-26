@@ -5,18 +5,22 @@ import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.InternalNumbers;
-import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.api.models.UserDestination;
+import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
+import com.voipgrid.vialer.callrecord.CallRecordViewHolder;
 import com.voipgrid.vialer.dialer.DialerActivity;
-import com.voipgrid.vialer.sip.CodecPriorityMap;
+import com.voipgrid.vialer.logging.VialerBaseActivity;
+import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.t9.T9Fragment;
+import com.voipgrid.vialer.t9.T9HelperFragment;
+import com.voipgrid.vialer.util.LoginRequiredActivity;
 
 import javax.inject.Singleton;
 
@@ -54,4 +58,19 @@ public interface VialerComponent {
 
     @Nullable
     InternalNumbers getInternalNumbers();
+
+    @Nullable
+    PhoneAccounts getPhoneAccounts();
+
+    void inject(CallRecordViewHolder callRecordViewHolder);
+
+    void inject(LoginRequiredActivity loginRequiredActivity);
+
+    void inject(VialerBaseActivity vialerBaseActivity);
+
+    void inject(T9HelperFragment t9HelperFragment);
+
+    void inject(T9Fragment t9Fragment);
+
+    void inject(AbstractCallNotification notification);
 }

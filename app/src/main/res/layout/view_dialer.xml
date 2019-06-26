@@ -30,7 +30,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintHeight_percent="0.8"/>
 
-        <ImageButton
+        <com.voipgrid.vialer.dialer.CallButton
             android:id="@+id/button_call"
             android:layout_width="60dp"
             android:layout_height="60dp"

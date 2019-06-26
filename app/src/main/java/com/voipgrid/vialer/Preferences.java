@@ -2,6 +2,7 @@ package com.voipgrid.vialer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -14,7 +15,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import androidx.annotation.IntDef;
-import androidx.annotation.StringDef;
 
 /**
  * Class used for storing preferences related to SIP.
@@ -177,6 +177,10 @@ public class Preferences {
     }
 
     public long getConnectionPreference() {
+        if (Build.VERSION.SDK_INT >= BuildConfig.ANDROID_Q_SDK_VERSION) {
+            return CONNECTION_PREFERENCE_WIFI;
+        }
+
         return mPreferences.getLong(CONNECTION_PREFERENCE, CONNECTION_PREFERENCE_WIFI);
     }
 

@@ -1,14 +1,15 @@
 package com.voipgrid.vialer.sip;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.telephony.TelephonyManager;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
@@ -55,8 +56,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     @Retention(RetentionPolicy.SOURCE)
     @interface CallDirection {}
 
-    public static final String TAG = SipCall.class.getSimpleName();
-
     private Uri mPhoneNumberUri;
 
     private Logger mLogger;
@@ -78,17 +77,19 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private String mMessageStartTime;
     private CallInfo mLastCallInfo;
     private CallMediaMonitor mCallMediaMonitor;
-
+    private boolean isMicrophoneMuted = false;
     private Double mos;
-    private String codec;
-  
+
     /**
      * An object that represents the original invite received.
      */
     private SipInvite invite;
 
-    public static final String CALL_DIRECTION_OUTGOING = "outgoing";
-    public static final String CALL_DIRECTION_INCOMING = "incoming";
+    static final String CALL_DIRECTION_OUTGOING = "outgoing";
+    static final String CALL_DIRECTION_INCOMING = "incoming";
+
+    private static final int MICROPHONE_VOLUME_MUTED = 0;
+    private static final int MICROPHONE_VOLUME_UNUTED = 2;
 
     @Override
     public void onCallTsxState(OnCallTsxStateParam prm) {
@@ -113,33 +114,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 }
             }
         }
-    }
-
-    private void sendMos() {
-        if (!hasCalculatedMos()) return;
-
-        getAnalyticsHelper().sendEvent(
-                mSipService.getString(R.string.analytics_event_category_metrics),
-                mSipService.getString(R.string.analytics_event_action_callmetrics),
-                mSipService.getString(R.string.analytics_event_label_mos, getCodec(), getConnectionType()),
-                (int) (100 * mos)
-        );
-        mLogger.e("MOS for CONNECTION: " + ConnectivityHelper.get(mSipService).getConnectionTypeString() + " with value: " + mos);
-    }
-
-    private void sendBandwidth() {
-        if (getCallDuration() > 10) {
-            getAnalyticsHelper().sendEvent(
-                    mSipService.getString(R.string.analytics_event_category_metrics),
-                    mSipService.getString(R.string.analytics_event_action_callmetrics),
-                    mSipService.getString(R.string.analytics_event_label_bandwidth, getCodec()),
-                    (int) this.getBandwidthUsage() * 1024
-            );
-        }
-    }
-
-    private AnalyticsHelper getAnalyticsHelper() {
-        return new AnalyticsHelper(((AnalyticsApplication) mSipService.getApplication()).getDefaultTracker());
     }
 
     void setIsIPChangeInProgress(boolean inProgress){
@@ -185,6 +159,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     }
 
+    public String getPrettyCallDuration() {
+        return DateUtils.formatElapsedTime(getCallDuration());
+    }
+
     /**
      * Get the call duration in milliseconds, this will use the stored callinfo
      * so should not be used for live duration reporting but only for getting the
@@ -199,10 +177,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public String getCodec() {
-        if (codec != null && !codec.isEmpty()) {
-            return codec;
-        }
-
         try {
             if (!isConnected()) return "";
 
@@ -269,7 +243,12 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
     }
 
-    public void updateMicrophoneVolume(long newVolume) {
+    /**
+     * Update the calls microphone volume.
+     *
+     * @param newVolume
+     */
+    private void updateMicrophoneVolume(long newVolume) {
         try {
             CallMediaInfoVector callMediaInfoVector = this.getInfo().getMedia();
             long size = callMediaInfoVector.size();
@@ -286,6 +265,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_UPDATE_MICROPHONE_VOLUME_FAILED);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Toggle the microphone mute status of this call.
+     *
+     */
+    public void toggleMute() {
+        mLogger.d("Changing the mute status of this call from " + isMicrophoneMuted + " to " + !isMicrophoneMuted);
+        updateMicrophoneVolume(isMicrophoneMuted ? MICROPHONE_VOLUME_UNUTED : MICROPHONE_VOLUME_MUTED);
+        isMicrophoneMuted = !isMicrophoneMuted;
+        mSipBroadcaster.broadcastCallStatus(getIdentifier(), isMicrophoneMuted ? SipConstants.CALL_MUTED : SipConstants.CALL_UNMUTED);
     }
 
     /**
@@ -496,14 +486,20 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                     number = incomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
                 }
 
-                mSipService.startIncomingCallActivity(number, callerId);
+                mSipService.informUserAboutIncomingCall(number, callerId);
             }
         } catch (Exception e) {
             onCallInvalidState(e);
         }
     }
 
-    public void onCallOutgoing(Uri phoneNumber, boolean startActivity) {
+    /**
+     * Start an outgoing call.
+     *
+     * @param phoneNumber The phone number uri to call
+     * @return TRUE if the call has been successfully started, otherwise FALSE.
+     */
+    boolean startOutgoingCall(Uri phoneNumber) {
         mLogger.d("onCallOutgoing");
         mCallDirection = CALL_DIRECTION_OUTGOING;
 
@@ -514,11 +510,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
             mSipService.setCurrentCall(this);
 
-            if (startActivity) {
-                mSipService.startOutgoingCallActivity(this, getPhoneNumberUri());
-            }
+            return true;
         } catch (Exception e) {
             onCallInvalidState(e);
+            return false;
         }
     }
 
@@ -529,6 +524,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_CONNECTED_MESSAGE);
         mCallMediaMonitor = new CallMediaMonitor(this);
         new Thread(mCallMediaMonitor).start();
+        mSipService.getNotification().active(this);
     }
 
     /**
@@ -550,8 +546,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     private void onCallDisconnected() {
         mLogger.d("onCallDisconnected");
-        sendMos();
-        sendBandwidth();
 
         // Play end of call beep only when the remote party hangs up and the call was connected.
         if (!mUserHangup && mCallIsConnected && !mCallIsTransferred) {
@@ -622,8 +616,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     private Object getConnectionType() {
         return new ConnectivityHelper(
-                (ConnectivityManager) mSipService.getSystemService(mSipService.CONNECTIVITY_SERVICE),
-                (TelephonyManager) mSipService.getSystemService(mSipService.TELEPHONY_SERVICE)
+                (ConnectivityManager) mSipService.getSystemService(Context.CONNECTIVITY_SERVICE),
+                (TelephonyManager) mSipService.getSystemService(Context.TELEPHONY_SERVICE)
         ).getConnectionTypeString();
     }
 
@@ -714,5 +708,13 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public double getMos() {
         return mos;
+    }
+
+    public SipService getSipService() {
+        return mSipService;
+    }
+
+    public boolean isMuted() {
+        return isMicrophoneMuted;
     }
 }

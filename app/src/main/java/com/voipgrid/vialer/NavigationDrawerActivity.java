@@ -20,6 +20,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ import com.voipgrid.vialer.api.models.Destination;
 import com.voipgrid.vialer.api.models.FixedDestination;
 import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
@@ -388,15 +390,19 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
      */
     private void storeInternalNumbers(List<UserDestination> userDestinationObjects) {
         InternalNumbers internalNumbers = new InternalNumbers();
+        PhoneAccounts phoneAccounts = new PhoneAccounts();
+
         for (UserDestination userDestination : userDestinationObjects) {
             internalNumbers.add(userDestination.getInternalNumber());
 
             for (PhoneAccount phoneAccount : userDestination.getPhoneAccounts()) {
                 internalNumbers.add(phoneAccount.getNumber());
+                phoneAccounts.add(phoneAccount.getId());
             }
         }
 
         mJsonStorage.save(internalNumbers);
+        mJsonStorage.save(phoneAccounts);
     }
 
     private static class CustomFontSpinnerAdapter<D> extends ArrayAdapter {

@@ -3,13 +3,10 @@ package com.voipgrid.vialer.calling;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_ACTIVE;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
-import static com.voipgrid.vialer.calling.CallingConstants.TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL;
-import static com.voipgrid.vialer.media.BluetoothMediaButtonReceiver.DECLINE_BTN;
 
 import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -52,7 +49,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
 
-        getMediaManager().startIncomingCallRinger();
         mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent(), mContactImage);
     }
 
@@ -74,17 +70,10 @@ public class IncomingCallActivity extends AbstractCallActivity {
             return;
         }
 
-        try {
-            mSipServiceConnection.get().getCurrentCall().decline();
-        } catch (Exception e) {
-            mLogger.e("Unable to decline call with error: " + e.getMessage());
-            finish();
-            return;
-        }
+        SipService.performActionOnSipService(this, SipService.Actions.DECLINE_INCOMING_CALL);
 
-        mCallNotifications.removeAll();
-        sendBroadcast(new Intent(DECLINE_BTN));
         endRinging();
+
     }
 
     @OnClick(R.id.button_pickup)
@@ -117,8 +106,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         Intent intent = getIntent();
         intent.setClass(this, CallActivity.class);
         intent.putExtra(CALL_IS_CONNECTED, true);
-        intent.putExtra(CALL_BLUETOOTH_ACTIVE, mBluetoothAudioActive);
-        intent.putExtra(CALL_BLUETOOTH_CONNECTED, mBluetoothDeviceConnected);
         startActivity(intent);
         mLogger.d("callVisibleForUser");
     }
@@ -128,7 +115,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
      *
      */
     private void endRinging() {
-        getMediaManager().stopIncomingCallRinger();
         finish();
     }
 
@@ -138,26 +124,17 @@ public class IncomingCallActivity extends AbstractCallActivity {
             return;
         }
 
-        getMediaManager().startIncomingCallRinger();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
-            mCallNotifications.callScreenIsBeingHiddenOnRingingCall(getCallNotificationDetails());
-        }
-
-        getMediaManager().stopIncomingCallRinger();
         ringingIsPaused = true;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        mCallNotifications.removeAll();
 
         if (currentlyOnLockScreen()) {
             mCallButtons.setVisibility(View.VISIBLE);
@@ -166,30 +143,14 @@ public class IncomingCallActivity extends AbstractCallActivity {
         }
 
         if (ringingIsPaused) {
-            getMediaManager().startIncomingCallRinger();
             ringingIsPaused = false;
         }
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        if (userPressedAcceptFromNotification(intent)) {
-            new Handler().postDelayed(this::onPickupButtonClicked, 500);
-            mCallNotifications.acceptedFromNotification(getCallNotificationDetails());
-            return;
-        }
-    }
-
-    /**
-     * Check if the received intent is from the user pressing the accept button on the notification.
-     *
-     * @param intent
-     * @return
-     */
-    private boolean userPressedAcceptFromNotification(Intent intent) {
-        return TYPE_NOTIFICATION_ACCEPT_INCOMING_CALL.equals(intent.getType());
+    protected void onDestroy() {
+        super.onDestroy();
+        mSipServiceConnection.disconnect(true);
     }
 
     @Override
@@ -214,7 +175,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @Override
     public void onCallConnected() {
         mSipServiceConnection.disconnect(true);
-        getMediaManager().stopIncomingCallRinger();
         startCallActivity();
     }
 

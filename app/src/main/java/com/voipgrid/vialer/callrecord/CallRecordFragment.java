@@ -123,7 +123,11 @@ public class CallRecordFragment extends Fragment
     private void setupSwipeContainer() {
         swipeContainer.setColorSchemeColors(getResources().getColor(R.color.color_refresh));
         swipeContainer.setOnRefreshListener(this);
-        swipeContainer.post(() -> swipeContainer.setRefreshing(true));
+        swipeContainer.post(() -> {
+            if (swipeContainer != null) {
+                swipeContainer.setRefreshing(true);
+            }
+        });
     }
 
     private void setupRecyclerView() {

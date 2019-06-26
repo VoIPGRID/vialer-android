@@ -1,127 +1,73 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
-
-# Uncomment the line if you want fastlane to automatically update itself
+ensure_bundle_exec
 update_fastlane
-
 default_platform(:android)
-flavors = ["vialer", "voys", "verbonden", "annabel"]
 
 platform :android do
+
+ flavors = ["vialer", "voys", "verbonden", "annabel"]
+
   before_all do
-    gradle(task: 'clean')
-  end
-
-  desc 'Runs all the tests'
-  lane :test do
     gradle(
-      task: 'test',
-      flavor: ENV['APP_NAME'],
-      build_type: 'Debug'
+      task: 'clean',
+      print_command: false,
+      print_command_output: false
     )
-  end
-
-  desc 'Do a screenshot run'
-  lane :screenshot do
-    gradle(
-      task: 'assemble',
-      flavor: ENV['APP_NAME'],
-      build_type: 'Debug'
-    )
-    gradle(
-      task: 'assemble',
-      flavor: ENV['APP_NAME'],
-      build_type: 'DebugAndroidTest'
-    )
-
-    # automated_test_emulator_run(
-    #   AVD_setup_path: './fastlane/avd/phone.json'
-    # )
-
-    screengrab(
-      clear_previous_screenshots: true,
-      use_tests_in_packages: 'com.voipgrid.vialer.screenshots',
-      # reinstall_app: true,
-      app_apk_path: "app/build/outputs/apk/#{ENV['APP_NAME']}/debug/app-#{ENV['APP_NAME']}-debug.apk",
-      tests_apk_path: "app/build/outputs/apk/androidTest/#{ENV['APP_NAME']}/debug/app-#{ENV['APP_NAME']}-debug-androidTest.apk",
-      test_instrumentation_runner: 'androidx.test.runner.AndroidJUnitRunner'
-    )
-  end
-
-  desc 'Generate a signed APK for each flavor'
-  lane :apks do
-     flavors.each do |flavor|
-        gradle(
-            task: 'assemble',
-            flavor: flavor,
-            build_type: 'Release'
-         )
-     end
-     flavors.each do |flavor|
-        puts create_apk_path_string(flavor)
-     end
   end
 
   desc 'Generate a signed APK'
-  lane :apk do
+  lane :apk do |options|
+    flavor = options[:flavor]
+
+    if (flavor == "all" || flavor.nil? || flavor.empty?)
+        apks
+        next
+    end
+
+    puts "Building .apk for #{flavor}"
+
     gradle(
       task: 'assemble',
-      flavor: ENV['APP_NAME'],
-      build_type: 'Release'
+      flavor: flavor,
+      build_type: 'Release',
+      print_command: false,
+      print_command_output: false
     )
-    puts create_apk_path_string(ENV['APP_NAME'])
+    apk_path = rename_apk(lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH], flavor)
+    notify(flavor, apk_path)
   end
 
-  desc 'Submit a new Beta version to the Google Play Store'
-  lane :beta do
-    apk
-    upload(track: 'beta')
+  desc 'Generate a signed APK for each flavor'
+  private_lane :apks do |options|
+    flavors.each do |flavor|
+         options[:flavor] = flavor
+         apk(options)
+    end
   end
 
-  desc 'Submit a new Production version to the Google Play Store'
-  lane :production do
-    apk
-    upload(track: 'production')
-  end
-
-  desc 'Submit a new Alpha version to the Google Play Store'
-  lane :alpha do
-    apk
-    upload(track: 'alpha')
-  end
-
-  desc 'Upload to the play store give either alpha, beta or release as parameter'
-  private_lane :upload do |options|
-     upload_to_play_store(
-       track: options[:track],
-       package_name: ENV['PACKAGE_NAME'],
-       apk: create_apk_path(ENV['APP_NAME']),
-       skip_upload_metadata: false,
-       skip_upload_images: true,
-       skip_upload_screenshots: true,
-       json_key: ENV['JSON_SECRET_LOCATION'],
-       metadata_path: ENV['METADATA_PATH']
-     )
-
-    slack(
-      message: ENV['APP_NAME'] + ' ' + options[:track] + ' has been uploaded to Google Play Store',
-    )
-  end
 end
 
-def create_apk_path_string(flavor)
-    return "APK for #{flavor} has been generated to " + create_apk_path(flavor)
+# Generates a new filename for the apk and then renames the apk to this, the new file path is then
+# returned.
+def rename_apk(old_path, flavor)
+    fl = flavor.downcase
+    time = Time.new.strftime("%m%d%Y_%H%M%S")
+    code = get_version_code()
+    version = get_version_name().gsub('\.', '_').gsub(' ', '_')
+    new_file_name = "#{fl}-#{version}-#{code}-#{time}.apk"
+    apk_location_new = old_path.gsub("app-#{fl}-release.apk", new_file_name)
+    sh("mv #{old_path} #{apk_location_new}", log: false)
+    return apk_location_new
 end
 
-def create_apk_path(flavor)
-    return "app/build/outputs/apk/#{flavor}/release/app-#{flavor}-release.apk"
+# Notify the user that this apk has finished building
+def notify(flavor, apk_path)
+    puts apk_path
+    flavor_dir = flavor == "vialer" ? "main" : flavor
+    image_path = "app/src/#{flavor_dir}/res/drawable-hdpi/ic_logo.png"
+    notification(
+        open:"file://" + apk_path.gsub(File.basename(apk_path), ''),
+        message: "Finished building apk for #{flavor}",
+        app_icon: image_path,
+        content_image: image_path
+   )
 end

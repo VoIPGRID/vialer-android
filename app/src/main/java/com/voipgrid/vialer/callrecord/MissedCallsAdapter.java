@@ -40,7 +40,7 @@ public class MissedCallsAdapter extends RecyclerView.Adapter<CallRecordViewHolde
 
         if (callRecord == null) return;
 
-        holder.provideDependencies(activity, contacts);
+        holder.setActivity(activity);
         holder.update(callRecord);
     }
 

@@ -46,7 +46,7 @@ public class CallStatusReceiver extends BroadcastReceiver {
         mListener.onCallStatusChanged(status, callId);
     }
 
-    interface Listener {
+    public interface Listener {
         void onCallStatusChanged(String status, String callId);
 
         void onCallConnected();

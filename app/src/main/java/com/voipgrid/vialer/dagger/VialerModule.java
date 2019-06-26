@@ -6,44 +6,52 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
-
-import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
-import com.voipgrid.vialer.api.VoipgridApi;
+import com.voipgrid.vialer.api.PhoneAccountFetcher;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
+import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
 import com.voipgrid.vialer.calling.CallActivityHelper;
-import com.voipgrid.vialer.calling.CallNotifications;
 import com.voipgrid.vialer.callrecord.CachedContacts;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.callrecord.CallRecordDataSourceFactory;
 import com.voipgrid.vialer.callrecord.MissedCalls;
 import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
 import com.voipgrid.vialer.contacts.Contacts;
+import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
+import com.voipgrid.vialer.t9.T9DatabaseHelper;
+import com.voipgrid.vialer.t9.T9ViewBinder;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
+import com.voipgrid.vialer.util.ColorHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.HtmlHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NetworkUtil;
-import com.voipgrid.vialer.util.NotificationHelper;
 
 import javax.inject.Singleton;
 
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import dagger.Module;
 import dagger.Provides;
 
@@ -100,6 +108,11 @@ public class VialerModule {
         return (InternalNumbers) jsonStorage.get(InternalNumbers.class);
     }
 
+    @Provides @Nullable
+    PhoneAccounts providePhoneAccounts(JsonStorage jsonStorage) {
+        return (PhoneAccounts) jsonStorage.get(PhoneAccounts.class);
+    }
+
     @Provides LocalBroadcastManager provideLocalBroadcastManager(Context context) {
         return LocalBroadcastManager.getInstance(context);
     }
@@ -107,19 +120,6 @@ public class VialerModule {
     @Provides
     BroadcastReceiverManager provideBroadcastReceiverManager(LocalBroadcastManager localBroadcastManager, Context context) {
         return new BroadcastReceiverManager(localBroadcastManager, context);
-    }
-
-    @Provides AnalyticsHelper provideAnalyticsHelper() {
-        return new AnalyticsHelper(mVialerApplication.getDefaultTracker());
-    }
-
-    @Provides NotificationHelper provideNotificationHelper(Context context) {
-        return NotificationHelper.getInstance(context);
-    }
-
-    @Provides
-    CallNotifications provideCallNotifications(NotificationHelper notificationHelper, Context context) {
-        return new CallNotifications(notificationHelper, context);
     }
 
     @Provides
@@ -169,8 +169,8 @@ public class VialerModule {
     }
 
     @Provides
-    CallRecordAdapter provideCallRecordAdapter(CachedContacts cachedContacts) {
-        return new CallRecordAdapter(cachedContacts);
+    CallRecordAdapter provideCallRecordAdapter() {
+        return new CallRecordAdapter();
     }
 
     @Provides CachedContacts provideCachedContacts(Contacts contacts) {
@@ -185,6 +185,26 @@ public class VialerModule {
         return new MissedCallsAdapter(cachedContacts);
     }
 
+    @Provides
+    T9DatabaseHelper provideT9DatabaseHelper(Context context) {
+        return new T9DatabaseHelper(context);
+    }
+
+    @Provides
+    ColorHelper provideColorHelper() {
+        return new ColorHelper();
+    }
+
+    @Provides
+    HtmlHelper provideHtmlHelper() {
+        return new HtmlHelper();
+    }
+
+    @Provides
+    T9ViewBinder provideT9ViewBinder(Context context) {
+        return new T9ViewBinder(context);
+    }
+
     @Provides Handler provideHandler() {
         return new Handler();
     }
@@ -194,10 +214,53 @@ public class VialerModule {
     }
 
     @Provides ToneGenerator provideToneGenerator() {
-        return new ToneGenerator(AudioManager.STREAM_VOICE_CALL, SipConstants.RINGING_VOLUME);
+        return new ToneGenerator(android.media.AudioManager.STREAM_VOICE_CALL, SipConstants.RINGING_VOLUME);
     }
 
     @Provides NetworkConnectivity provideNetworkConnectivity() {
         return new NetworkConnectivity();
+    }
+
+    @Provides @Singleton
+    PhoneAccountFetcher providePhoneAccountFetcher(VoipgridApi api, JsonStorage jsonStorage) {
+        return new PhoneAccountFetcher(api, jsonStorage);
+    }
+
+    @Provides
+    PhoneNumberImageGenerator provideNumberImageFinder(Contacts contacts) {
+        return new PhoneNumberImageGenerator(contacts);
+    }
+
+    @Provides
+    android.media.AudioManager provideAudioManager(Context context) {
+        return (android.media.AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    @Provides
+    Vibrator provideVibrator(Context context) {
+        return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    }
+
+    @Singleton
+    @Provides
+    IncomingCallVibration provideIncomingCallVibrator(android.media.AudioManager audioManager, Vibrator vibrator) {
+        return new IncomingCallVibration(audioManager, vibrator);
+    }
+
+    @Provides
+    AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager) {
+        return new AudioRouter(context, androidAudioManager, broadcastReceiverManager);
+    }
+
+    @Singleton
+    @Provides
+    IncomingCallAlerts incomingCallAlerts(IncomingCallVibration vibration, IncomingCallRinger ringer) {
+        return new IncomingCallAlerts(vibration, ringer);
+    }
+
+    @Singleton
+    @Provides
+    IncomingCallRinger provideRinger(Context context) {
+        return new IncomingCallRinger(context);
     }
 }

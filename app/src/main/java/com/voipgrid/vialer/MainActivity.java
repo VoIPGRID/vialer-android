@@ -29,8 +29,8 @@ import com.voipgrid.vialer.onboarding.AccountFragment;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
-import com.voipgrid.vialer.permissions.ReadExternalStoragePermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
+import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.JsonStorage;
@@ -143,22 +143,13 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
     private void askForPermissions(int requestNr) {
         switch (requestNr) {
             case 0:
-                int storagePermissionState = ReadExternalStoragePermission.getPermissionStatus(this, ReadExternalStoragePermission.mPermissionToCheck);
-                if (storagePermissionState != ReadExternalStoragePermission.BLOCKED || ReadExternalStoragePermission.firstRequest) {
-                    if (!ReadExternalStoragePermission.hasPermission(this)) {
-                        ReadExternalStoragePermission.askForPermission(this);
-                        requestCounter++;
-                        return;
-                    }
-                }
-            case 1:
                 // Ask for phone permissions.
                 if (!PhonePermission.hasPermission(this)) {
                     PhonePermission.askForPermission(this);
                     requestCounter++;
                     return;
                 }
-            case 2:
+            case 1:
                 if (!ContactsPermission.hasPermission(this)) {
                     // We need to avoid a permission loop.
                     if (mAskForPermission) {
@@ -175,6 +166,12 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         askForPermissions(requestCounter);
         mReachabilityReceiver.startListening();
         super.onResume();
+
+
+        // We currently only support a single call so any time this activity is opened, we will
+        // request the SipService to display the current call. If there is no current call, this will have no
+        // affect.
+        SipService.performActionOnSipService(this, SipService.Actions.DISPLAY_CALL_IF_AVAILABLE);
     }
 
     @Override
@@ -253,8 +250,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
      * Starts the service that will listen for changes to contacts.
      */
     private void startContactObserverService() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
-                && ContactsPermission.hasPermission(this)) {
+        if (ContactsPermission.hasPermission(this)) {
             startService(new Intent(this, UpdateChangedContactsService.class));
         }
     }
@@ -285,15 +281,11 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
      */
     public void openDialer() {
         Intent intent = new Intent(this, DialerActivity.class);
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            ActivityOptionsCompat options = ActivityOptionsCompat.
-                    makeSceneTransitionAnimation(
-                            this, findViewById(R.id.floating_action_button),
-                            "floating_action_button_transition_name");
-            startActivity(intent, options.toBundle());
-        } else {
-            startActivity(intent);
-        }
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(
+                        this, findViewById(R.id.floating_action_button),
+                        "floating_action_button_transition_name");
+        startActivity(intent, options.toBundle());
     }
 
     /**

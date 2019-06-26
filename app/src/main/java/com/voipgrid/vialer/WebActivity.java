@@ -15,7 +15,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.AutoLoginToken;
@@ -118,12 +117,6 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
             // request an autologin token and load the requested page.
             autoLoginToken();
         }
-
-        // Track the web view.
-        AnalyticsHelper analyticsHelper = new AnalyticsHelper(
-                ((AnalyticsApplication) getApplication()).getDefaultTracker()
-        );
-        analyticsHelper.sendScreenViewTrack(getIntent().getStringExtra(GA_TITLE));
     }
 
     @Override

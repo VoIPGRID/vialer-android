@@ -6,13 +6,13 @@ import androidx.annotation.Nullable;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.logging.RemoteLoggingActivity;
+import com.voipgrid.vialer.logging.VialerBaseActivity;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 
 /**
  * Super class to handle logged in state of activity.
  */
-public class LoginRequiredActivity extends RemoteLoggingActivity {
+public abstract class LoginRequiredActivity extends VialerBaseActivity {
 
     private AccountHelper mAccountHelper;
 

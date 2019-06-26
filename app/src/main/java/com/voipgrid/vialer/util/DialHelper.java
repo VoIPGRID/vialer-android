@@ -5,17 +5,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
-
+import android.util.Log;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
@@ -23,6 +20,8 @@ import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.twostepcall.TwoStepCallActivity;
+
+import androidx.appcompat.app.AlertDialog;
 
 /**
  * Helper class to use to setup a outgoing call. Based on connectivity choose between SIP or
@@ -32,7 +31,6 @@ public class DialHelper {
 
     private Context mContext;
 
-    private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private final Preferences mPreferences;
     private JsonStorage mJsonStorage;
@@ -41,20 +39,17 @@ public class DialHelper {
     private static String sNumberAttemptedToCall;
 
     private DialHelper(Context context, JsonStorage jsonStorage,
-            ConnectivityHelper connectivityHelper, AnalyticsHelper analyticsHelper ) {
+            ConnectivityHelper connectivityHelper) {
         mContext = context;
         mJsonStorage = jsonStorage;
         mConnectivityHelper = connectivityHelper;
-        mAnalyticsHelper = analyticsHelper;
         mPreferences = new Preferences(context);
     }
 
     public static DialHelper fromActivity (Activity activity) {
         JsonStorage jsonStorage = new JsonStorage(activity);
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(activity);
-        AnalyticsHelper analyticsHelper = new AnalyticsHelper(VialerApplication.get().getDefaultTracker());
-
-        return new DialHelper(activity, jsonStorage, connectivityHelper, analyticsHelper);
+        return new DialHelper(activity, jsonStorage, connectivityHelper);
     }
 
     public void callNumber(final String number, final String contactName) {
@@ -160,7 +155,7 @@ public class DialHelper {
      */
     private void callWithSip(String number, String contactName) {
         Intent intent = new Intent(mContext, SipService.class);
-        intent.setAction(SipConstants.ACTION_CALL_OUTGOING);
+        intent.setAction(SipService.Actions.HANDLE_OUTGOING_CALL);
 
         // set a phoneNumberUri as DATA for the intent to SipServiceOld.
         Uri sipAddressUri = SipUri.sipAddressUri(
@@ -172,13 +167,11 @@ public class DialHelper {
         intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, number);
         intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, contactName);
 
-        mContext.startService(intent);
-
-        mAnalyticsHelper.sendEvent(
-                mContext.getString(R.string.analytics_event_category_call),
-                mContext.getString(R.string.analytics_event_action_outbound),
-                mContext.getString(R.string.analytics_event_label_sip)
-        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mContext.startForegroundService(intent);
+        } else {
+            mContext.startService(intent);
+        }
     }
 
     /**

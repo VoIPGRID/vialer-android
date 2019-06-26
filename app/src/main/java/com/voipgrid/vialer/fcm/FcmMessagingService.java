@@ -12,17 +12,16 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.notifications.VoipDisabledNotification;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import okhttp3.ResponseBody;
@@ -52,7 +51,6 @@ public class FcmMessagingService extends FirebaseMessagingService {
     public static final String VOIP_HAS_BEEN_DISABLED = "com.voipgrid.vialer.voip_disabled";
 
     private Logger mRemoteLogger;
-    private AnalyticsHelper mAnalyticsHelper;
     private ConnectivityHelper mConnectivityHelper;
     private PowerManager mPowerManager;
 
@@ -60,7 +58,6 @@ public class FcmMessagingService extends FirebaseMessagingService {
     public void onCreate() {
         super.onCreate();
         mRemoteLogger = new Logger(FcmMessagingService.class);
-        mAnalyticsHelper = new AnalyticsHelper(((AnalyticsApplication) getApplication()).getDefaultTracker());
         mConnectivityHelper = ConnectivityHelper.get(this);
         mPowerManager = (PowerManager) getSystemService(POWER_SERVICE);
         mRemoteLogger.d("onCreate");
@@ -136,7 +133,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         Preferences preferences = new Preferences(this);
 
         if (preferences.hasSipEnabled()) {
-            NotificationHelper.getInstance(this).displayVoipDisabledNotification();
+            new VoipDisabledNotification().display();
         }
 
         new Preferences(this).setSipEnabled(false);
@@ -153,14 +150,6 @@ public class FcmMessagingService extends FirebaseMessagingService {
     private void handleInsufficientConnection(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
         if (hasExceededMaximumAttempts(remoteMessageData)) {
             VialerStatistics.incomingCallFailedDueToInsufficientNetwork(remoteMessage);
-
-            String analyticsLabel = mConnectivityHelper.getAnalyticsLabel();
-
-            mAnalyticsHelper.sendEvent(
-                    getString(R.string.analytics_event_category_middleware),
-                    getString(R.string.analytics_event_action_middleware_rejected),
-                    analyticsLabel
-            );
         }
 
         if (isDeviceInIdleMode()) {
@@ -264,7 +253,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     private void startSipService(RemoteMessageData remoteMessageData) {
         mRemoteLogger.d("startSipService");
         Intent intent = new Intent(this, SipService.class);
-        intent.setAction(SipConstants.ACTION_CALL_INCOMING);
+        intent.setAction(SipService.Actions.HANDLE_INCOMING_CALL);
 
         // Set a phoneNumberUri as DATA for the intent to SipServiceOld.
         Uri sipAddressUri = SipUri.sipAddressUri(
@@ -280,7 +269,11 @@ public class FcmMessagingService extends FirebaseMessagingService {
         intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, remoteMessageData.getCallerId());
         intent.putExtra(RemoteMessageData.MESSAGE_START_TIME, remoteMessageData.getMessageStartTime());
 
-        startService(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
     }
 
     /**

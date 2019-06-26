@@ -145,6 +145,9 @@
     <string name="call_connection_only_cellular">Only cellular networks</string>
     <string name="call_connection_use_wifi_cellular">Cellular networks and WiFi</string>
     <string name="call_connection_optional">Show pop-up for outgoing calls</string>
+    <string name="call_connection_setting_not_supported">Your Android version does not allow this
+        setting to be configured
+    </string>
     <string name="connection_preference_dialog_title">Advice: turn off WiFi for this call</string>
     <string name="connection_preference_dialog_message">Cellular networks are more stable which leads to a higher audio quality. \n\nTurn off WiFi for this call?</string>
     <string name="connection_preference_switch_toast">Trying to handover to the cellular network</string>
@@ -180,8 +183,8 @@
     <string name="callnotification_on_hold">On hold</string>
     <string name="callnotification_dialing">Dialing</string>
 
-    <string name="notification_channel_calls">Calls</string>
-    <string name="notification_channel_contacts">Contact synchronisation</string>
+    <string name="notification_channel_calls">Ongoing Calls</string>
+    <string name="notification_channel_incoming_calls">Incoming Calls</string>
     <string name="notification_channel_media_button">Bluetooth</string>
 
     <string name="two_step_call_description_platform">Outgoing number</string>
@@ -221,10 +224,6 @@
     <string name="permission_phone_dialog_title">Phone permission</string>
     <string name="permission_phone_dialog_message">This permission is needed to handle regular calls during a VoIP call</string>
 
-    <string name="permission_read_external_storage_dialog_title">Read external storage permission</string>
-    <string name="permission_read_external_storage_dialog_message">Permission to the external storage is needed to access your ringtones</string>
-    <string name="permission_read_external_storage_missing_message">This permission is needed to choose a ringtone on your external storage</string>
-
     <string name="invalid_mobile_number_title">Invalid number</string>
     <string name="invalid_mobile_number_message">Your mobile number should start with your country code e.g. +31.</string>
 
@@ -255,8 +254,6 @@
     <string name="audio_source_option_phone">Phone</string>
     <string name="audio_source_option_speaker">Speaker</string>
     <string name="audio_source_option_bluetooth">Bluetooth</string>
-    <string name="incoming_call_answer">Answer</string>
-    <string name="incoming_call_decline">Ignore</string>
     <string name="permission_contact_title">No contacts found</string>
     <string name="permission_contact_description">%1$s needs permission to access your contacts</string>
     <string name="permission_contact_button">Give Permission</string>
@@ -264,4 +261,7 @@
     <string name="call_codec_standard_quality">Standard audio</string>
     <string name="call_codec_high_quality">Higher quality audio</string>
     <string name="call_records_show_all">Show missed calls only</string>
+    <string name="dialer_no_connectivity">No internet connection</string>
+    <string name="dialer_no_connectivity_subtext">Calls cannot be made or received without a connection</string>
+    <string name="call_records_answered_elsewhere">%1$s (%2$s)</string>
 </resources>

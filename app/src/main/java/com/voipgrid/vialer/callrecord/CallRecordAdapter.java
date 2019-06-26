@@ -54,12 +54,10 @@ public class CallRecordAdapter extends PagedListAdapter<CallRecord, CallRecordVi
                 }
             };
 
-    private final CachedContacts contacts;
     private Activity activity;
 
-    public CallRecordAdapter(CachedContacts contacts) {
+    public CallRecordAdapter() {
         super(DIFF_CALLBACK);
-        this.contacts = contacts;
     }
 
     @NonNull
@@ -76,7 +74,7 @@ public class CallRecordAdapter extends PagedListAdapter<CallRecord, CallRecordVi
 
         if (callRecord == null) return;
 
-        holder.provideDependencies(activity, contacts);
+        holder.setActivity(activity);
         holder.update(callRecord);
     }
 

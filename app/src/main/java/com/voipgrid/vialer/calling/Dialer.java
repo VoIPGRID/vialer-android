@@ -4,10 +4,12 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import androidx.annotation.Nullable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.dialer.CallButton;
 import com.voipgrid.vialer.dialer.KeyPadView;
 import com.voipgrid.vialer.dialer.NumberInputView;
 
@@ -21,7 +23,7 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
 
     @BindView(R.id.number_input_edit_text) NumberInputView mNumberInput;
     @BindView(R.id.key_pad_view) KeyPadView mKeypad;
-    @BindView(R.id.button_call) ImageButton mCallButton;
+    @BindView(R.id.button_call) CallButton mCallButton;
 
     private Unbinder unbinder;
     private final boolean showExitButton;
@@ -70,6 +72,8 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
 
     @Override
     public void onKeyPadButtonClick(String digit, String chars) {
+        if (isFadedOut()) return;
+
         mNumberInput.add(digit);
         mNumberInput.setCorrectFontSize();
         listener.digitWasPressed(digit);
@@ -77,6 +81,17 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
 
     public String getNumber() {
         return mNumberInput.getNumber();
+    }
+
+    /**
+     * Determine if the keypad is faded out or not based on
+     * its alpha, if it is faded out it should probably not
+     * accept input.
+     *
+     * @return TRUE if faded out, FALSE otherwise.
+     */
+    private boolean isFadedOut() {
+        return mKeypad.getAlpha() < 1;
     }
 
     @Override
@@ -87,6 +102,25 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
     @Override
     public void exitButtonWasPressed() {
         listener.exitButtonWasPressed();
+    }
+
+    /**
+     * Reverse the fade out method..
+     *
+     */
+    public void fadeIn() {
+        mKeypad.setAlpha(1);
+        mCallButton.fadeIn();
+    }
+
+    /**
+     * Fade the entire dialer out, making it transparent
+     * and stopping user interaction.
+     *
+     */
+    public void fadeOut() {
+        mKeypad.setAlpha(0.3f);
+        mCallButton.fadeOut();
     }
 
     public interface Listener {

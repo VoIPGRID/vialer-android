@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.ActionMode;
@@ -32,6 +33,7 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
+import com.voipgrid.vialer.notifications.VoipDisabledNotification;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -39,7 +41,6 @@ import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.NotificationHelper;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -66,6 +67,7 @@ public class SettingsActivity extends LoginRequiredActivity {
     @BindView(R.id.use_3g_switch) CompoundButton mUse3GSwitch;
 
     @BindView(R.id.call_connection_spinner) Spinner mConnectionSpinner;
+    @BindView(R.id.connection_container) View connectionContainer;
     @BindView(R.id.codec_spinner) Spinner mCodecSpinner;
 
     @BindView(R.id.remote_logging_switch) CompoundButton mRemoteLoggingSwitch;
@@ -129,6 +131,10 @@ public class SettingsActivity extends LoginRequiredActivity {
         initializeAdvancedSettings();
 
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mVoipDisabledReceiver, FcmMessagingService.VOIP_HAS_BEEN_DISABLED);
+
+        if (Build.VERSION.SDK_INT >= BuildConfig.ANDROID_Q_SDK_VERSION) {
+            mConnectionSpinner.setEnabled(false);
+        }
     }
 
     @Override
@@ -236,7 +242,7 @@ public class SettingsActivity extends LoginRequiredActivity {
                         SetupActivity.launchToSetVoIPAccount(SettingsActivity.this);
                     }
 
-                    NotificationHelper.getInstance(SettingsActivity.this).removeVoipDisabledNotification();
+                    new VoipDisabledNotification().remove();
                 }
             }.execute();
         }

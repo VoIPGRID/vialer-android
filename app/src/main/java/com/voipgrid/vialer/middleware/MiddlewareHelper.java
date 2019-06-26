@@ -11,7 +11,6 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
-import com.voipgrid.vialer.analytics.AnalyticsHelper;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -78,7 +77,6 @@ public class MiddlewareHelper {
     public static void register(final Context context, String token) {
         Preferences sipPreferences = new Preferences(context);
         Tracker analyticsTracker = ((AnalyticsApplication) context.getApplicationContext()).getDefaultTracker();
-        final AnalyticsHelper analyticsHelper = new AnalyticsHelper(analyticsTracker);
 
         if (!sipPreferences.canUseSip()) {
             return;
@@ -120,11 +118,6 @@ public class MiddlewareHelper {
                     setRegistrationStatus(context, STATUS_REGISTERED);
                 } else {
                     setRegistrationStatus(context, STATUS_FAILED);
-                    analyticsHelper.sendException(
-                            context.getString(
-                                    R.string.analytics_event_description_registration_failed
-                            )
-                    );
                 }
                 editor.apply();
             }

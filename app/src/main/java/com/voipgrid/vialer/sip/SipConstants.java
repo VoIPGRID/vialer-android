@@ -9,16 +9,6 @@ public interface SipConstants {
     String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
 
     /**
-     * ACTION parameter for explicit Intents to start this Service for OUTGOING call.
-     */
-    String ACTION_CALL_OUTGOING = PACKAGE_NAME + ".CALL_OUTGOING";
-
-    /**
-     * ACTION parameter for explicit Intents to start this Service for INCOMING call.
-     */
-    String ACTION_CALL_INCOMING = PACKAGE_NAME + ".CALL_INCOMING";
-
-    /**
      * ACTION parameter for explicit Intents to communicate Service information with a view through
      * Broadcasts.
      */
@@ -63,6 +53,10 @@ public interface SipConstants {
      */
     String CALL_RINGING_IN_MESSAGE        = "RINGING_IN";
 
+    String CALL_MUTED                     = "MUTED";
+
+    String CALL_UNMUTED                   = "UNMUTED";
+
     /**
      * CallInteraction broadcast type for communicating a "Put on hold" to the SIP service through
      * Broadcasts.
@@ -89,6 +83,7 @@ public interface SipConstants {
 
     String CALL_INCOMING_RINGING = "CALL_RINGING";
     String CALL_DECLINE_INCOMING_CALL = "CALL_DECLINE_CALL";
+    String CALL_ANSWER_INCOMING_CALL = "CALL_ANSWER_CALL";
 
     String EXTRA_CONTACT_NAME = "EXTRA_CONTACT_NAME";
     String EXTRA_PHONE_NUMBER = "EXTRA_PHONE_NUMBER";
