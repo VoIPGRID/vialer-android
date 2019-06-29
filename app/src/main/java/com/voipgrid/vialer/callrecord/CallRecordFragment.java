@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -208,6 +209,8 @@ public class CallRecordFragment extends Fragment
 
     @Override
     public void missedCallsHaveBeenRetrieved(List<CallRecord> missedCallRecords) {
+        if (!isAdded()) return;
+
         swipeContainer.setRefreshing(false);
 
         if (missedCallRecords.isEmpty()) {
