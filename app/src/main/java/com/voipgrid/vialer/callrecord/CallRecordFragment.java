@@ -228,6 +228,8 @@ public class CallRecordFragment extends Fragment
     }
 
     private void handleFailedRequest(int code) {
+        if (!isAdded()) return;
+
         swipeContainer.setRefreshing(false);
 
         int message = R.string.empty_view_default_message;
