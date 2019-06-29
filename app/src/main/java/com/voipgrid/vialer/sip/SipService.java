@@ -109,7 +109,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
         mCheckService.start();
-        startForeground(callNotification.getNotificationId(), callNotification.build());
     }
 
     @Override
@@ -126,7 +125,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         }
 
         try {
-            performActionBasedOnIntent(intent);
+            boolean shouldStartForeground = performActionBasedOnIntent(intent);
+
+            if (shouldStartForeground) {
+                startForeground(callNotification.getNotificationId(), callNotification.build());
+            }
         } catch (Exception e) {
             mLogger.e("Failed to perform action based on intent, stopping service: " + e.getMessage());
             stopSelf();
@@ -141,8 +144,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      *
      * @param intent
      */
-    public void performActionBasedOnIntent(Intent intent) throws Exception {
-        if (intent == null) return;
+    public boolean performActionBasedOnIntent(Intent intent) throws Exception {
+        if (intent == null) return false;
 
         this.intent = intent;
         final String action = this.intent.getAction();
@@ -151,9 +154,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
         if (Actions.HANDLE_INCOMING_CALL.equals(action)) {
             initialiseIncomingCall();
+            return true;
         }
         else if (Actions.HANDLE_OUTGOING_CALL.equals(action)) {
             initialiseOutgoingCall(intent);
+            return true;
         }
         else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
             mCurrentCall.decline();
@@ -181,6 +186,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         else {
             mLogger.e("SipService received an invalid action: " + action);
         }
+
+        return false;
     }
 
     /**
