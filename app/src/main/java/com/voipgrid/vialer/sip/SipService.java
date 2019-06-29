@@ -110,6 +110,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
         mCheckService.start();
+        startForeground(callNotification.getNotificationId(), callNotification.build());
     }
 
     @Override

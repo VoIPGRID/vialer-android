@@ -13,6 +13,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.contacts.ContactsSyncTask;
+import com.voipgrid.vialer.contacts.ImportContactsForT9Search;
 import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.t9.ContactsImportProgressUpdater;
 import com.voipgrid.vialer.t9.T9Fragment;
@@ -138,7 +139,7 @@ public class DialerActivity extends LoginRequiredActivity implements
         }
 
         if (requestCode == this.getResources().getInteger(R.integer.contact_permission_request_code)) {
-            SyncUtils.requestContactSync(this);
+            ImportContactsForT9Search.Companion.run();
             Intent intent = getIntent();
             startActivity(intent);
             finish();

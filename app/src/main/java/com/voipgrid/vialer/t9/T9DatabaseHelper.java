@@ -72,7 +72,6 @@ public class T9DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
         // Make sure a full contact sync is done.
         SyncUtils.setRequiresFullContactSync(mContext, true);
-        SyncUtils.requestContactSync(mContext);
     }
 
     @Override
