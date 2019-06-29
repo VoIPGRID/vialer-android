@@ -485,6 +485,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
             return;
         }
 
+        if (getCurrentCall() == null) return;
+
         incomingCallAlerts.stop();
         getNotification().active(getCurrentCall());
         startCallActivity(
