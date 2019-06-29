@@ -223,6 +223,11 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     public void onBackPressed() {
         mLogger.d("onBackPressed");
 
+        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
+            super.onBackPressed();
+            return;
+        }
+
         if (mOnTransfer) {
             if (mSipServiceConnection.get().getCurrentCall() == null || mSipServiceConnection.get().getFirstCall() == null) {
                 super.onBackPressed();
