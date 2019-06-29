@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
@@ -631,7 +632,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     public static void performActionOnSipService(Context context, @Actions.Valid String action) {
         Intent intent = new Intent(context, SipService.class);
         intent.setAction(action);
-        context.startService(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
     }
 
     /**
