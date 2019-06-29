@@ -96,6 +96,8 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
 
     @Override
     public void onInputChanged(String number) {
+        if (listener == null) return;
+
         listener.numberWasChanged(number);
     }
 
