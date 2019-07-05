@@ -1,91 +1,16 @@
 package com.voipgrid.vialer.contacts;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 
-import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.permissions.ContactsPermission;
 
 /**
  * SyncUtils provides functions to handling actions related to the contact sync.
  */
 public class SyncUtils {
     private static final String TAG = SyncUtils.class.getName();
-    /**
-     * Check if their is a sync account present. If not create one.
-     *
-     * @param context The context used to get the AccountManager, Strings and ContentResolver.
-     */
-    private static Account checkSyncAccount(Context context) {
-        AccountManager am = AccountManager.get(context);
-        Account[] accounts;
-        accounts = am.getAccountsByType(context.getString(R.string.account_type));
-        Account account;
-        if (accounts == null || accounts.length <= 0) {
-            account = new Account(context.getString(R.string.contacts_app_name),
-                    context.getString(R.string.account_type));
-            am.addAccountExplicitly(account, "", null);
-            ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
-        } else {
-            account = accounts[0];
-        }
-        return account;
-    }
-
-    /**
-     * Function to initiate a contact sync. The only function that should be used to initiate
-     * a contact sync.
-     *
-     * @param context
-     */
-    public static void requestContactSync(Context context) {
-        new Logger(SyncUtils.class).d(TAG + " requestContactSync");
-        // Check contacts permission. Do nothing if we don't have it. Since it's a background
-        // job we can't really ask the user for permission.
-        if (!ContactsPermission.hasPermission(context)) {
-            // TODO VIALA-349 Delete sync account.
-            return;
-        }
-
-        // No need to request sync when a full sync is in progress.
-        if (PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean(SyncConstants.FULL_SYNC_INPROGRESS, false)) {
-            return;
-        }
-
-        Account account = checkSyncAccount(context);
-
-        ContentResolver.requestSync(account, ContactsContract.AUTHORITY, new Bundle());
-    }
-
-    /**
-     * Function to set the periodic sync interval (1 day) for a full contact sync.
-     * @param context
-     */
-    public static void setPeriodicSync(Context context) {
-        new Logger(SyncUtils.class).d(TAG + " setPeriodicSync");
-        // Check contacts permission. Do nothing if we don't have it. Since it's a background
-        // job we can't really ask the user for permission.
-        if (!ContactsPermission.hasPermission(context)) {
-            // TODO VIALA-349 Delete sync account.
-            return;
-        }
-        Account account = checkSyncAccount(context);
-
-        // Full sync every day.
-        ContentResolver.addPeriodicSync(
-                account,
-                ContactsContract.AUTHORITY,
-                new Bundle(),
-                SyncConstants.PERIODIC_SYNC_INTERVAL);
-    }
 
     /**
      * Function to check if a full contact sync is required.

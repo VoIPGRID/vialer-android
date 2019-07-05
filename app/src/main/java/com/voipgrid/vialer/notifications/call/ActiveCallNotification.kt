@@ -44,7 +44,7 @@ class ActiveCallNotification(private val call : SipCall) : AbstractCallNotificat
      */
     private fun createNotificationTitle() : String {
         if (call.callerId == null || call.callerId.isEmpty()) {
-            return call.phoneNumber
+            return if (call.phoneNumber == null) " " else call.phoneNumber
         }
 
         return "${call.callerId} (${call.phoneNumber})"
