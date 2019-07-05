@@ -39,6 +39,14 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
         showCallButton = a.getBoolean(R.styleable.Dialer_show_call_button, true);
     }
 
+    public Dialer(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr) {
+        this(context, attrs);
+    }
+
+    public Dialer(final Context context, final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
+        this(context, attrs);
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -96,6 +104,8 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
 
     @Override
     public void onInputChanged(String number) {
+        if (listener == null) return;
+
         listener.numberWasChanged(number);
     }
 

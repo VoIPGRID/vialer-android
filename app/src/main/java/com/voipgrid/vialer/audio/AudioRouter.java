@@ -262,12 +262,7 @@ public class AudioRouter {
      *
      */
     private void initializeAndroidAudioManager() {
-        audioManager.requestAudioFocus(
-                audioFocusHandler,
-                AudioManager.STREAM_VOICE_CALL,
-                AudioManager.AUDIOFOCUS_GAIN
-        );
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        focus();
     }
 
     /**
@@ -279,6 +274,19 @@ public class AudioRouter {
 
         audioManager.setMode(AudioManager.MODE_NORMAL);
         audioManager.abandonAudioFocus(audioFocusHandler);
+    }
+
+    /**
+     * Make sure we have audio focus.
+     *
+     */
+    public void focus() {
+        audioManager.requestAudioFocus(
+                audioFocusHandler,
+                AudioManager.STREAM_VOICE_CALL,
+                AudioManager.AUDIOFOCUS_GAIN
+        );
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
     }
 
     /**

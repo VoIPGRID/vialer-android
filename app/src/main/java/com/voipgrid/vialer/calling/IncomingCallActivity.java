@@ -85,12 +85,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
         disableAllButtons();
 
-        try {
-            mSipServiceConnection.get().getCurrentCall().answer();
-        } catch (Exception e) {
-            mLogger.e("Unable to answer phone with error: " + e.getMessage());
-            finish();
-        }
+        SipService.performActionOnSipService(this, SipService.Actions.ANSWER_INCOMING_CALL);
     }
 
     private void disableAllButtons() {
