@@ -66,8 +66,6 @@ class IncomingCallRinger(val context : Context) : IncomingCallAlert {
         return null
     }
 
-
-
     /**
      * Stop playing the phone's ringtone.
      *
