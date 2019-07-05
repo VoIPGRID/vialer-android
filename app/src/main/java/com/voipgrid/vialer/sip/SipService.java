@@ -505,6 +505,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
                 getCurrentCall().getPhoneNumber(),
                 CallActivity.class
         );
+        audioRouter.focus();
     }
 
     @Override
@@ -631,6 +632,10 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * @param action
      */
     public static void performActionOnSipService(Context context, @Actions.Valid String action) {
+        if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action) && !SipService.sipServiceActive) {
+            return;
+        }
+
         Intent intent = new Intent(context, SipService.class);
         intent.setAction(action);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
