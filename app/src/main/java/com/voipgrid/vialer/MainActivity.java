@@ -15,9 +15,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.view.View;
 
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
@@ -52,6 +50,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
 
     @Inject BatteryOptimizationManager batteryOptimizationManager;
     @Inject SharedPreferences sharedPreferences;
+    @Inject FirebaseAnalytics firebaseAnalytics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -242,14 +241,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
             public void onTabSelected(TabLayout.Tab tab) {
                 mViewPager.setCurrentItem(tab.getPosition());
 
-                // Get tracker.
-                Tracker tracker = ((AnalyticsApplication) getApplication()).getDefaultTracker();
-
-                // Set screen name.
-                tracker.setScreenName(getScreenName(tab.getText().toString()));
-
-                // Send a screen view.
-                tracker.send(new HitBuilders.ScreenViewBuilder().build());
+                firebaseAnalytics.setCurrentScreen(MainActivity.this, getScreenName(tab.getText().toString()), null);
             }
 
             @Override

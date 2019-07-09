@@ -1,8 +1,9 @@
 package com.voipgrid.vialer;
 
+import android.app.Application;
+
 import com.github.anrwatchdog.ANRWatchDog;
 import com.github.tamir7.contacts.Contacts;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.dagger.DaggerVialerComponent;
 import com.voipgrid.vialer.dagger.VialerComponent;
 import com.voipgrid.vialer.dagger.VialerModule;
@@ -11,7 +12,7 @@ import com.voipgrid.vialer.dagger.VialerModule;
  * VialerApplication that extends the AnalyticsApplication
  * so the Analytics are all setup.
  */
-public class VialerApplication extends AnalyticsApplication {
+public class VialerApplication extends Application {
 
     private static VialerApplication sApplication;
 
