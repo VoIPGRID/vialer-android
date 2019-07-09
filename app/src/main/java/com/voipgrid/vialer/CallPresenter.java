@@ -194,7 +194,6 @@ public class CallPresenter {
      * @param hangUp
      */
     private void enableOrDisableButtons(boolean mute, boolean hold, boolean dialpad, boolean speaker, boolean transfer, boolean hangUp) {
-        Log.e("TEST123", "Changing buttons...");
         enableOrDisableCallActionButtons(mute, hold, dialpad, speaker, transfer);
         if (hangUp) {
             mActivity.mHangupButton.enable();
