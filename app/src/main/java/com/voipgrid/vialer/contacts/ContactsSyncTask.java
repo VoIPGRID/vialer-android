@@ -3,7 +3,6 @@ package com.voipgrid.vialer.contacts;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.ContactsContract;
 import android.util.Log;
 
@@ -52,16 +51,6 @@ public class ContactsSyncTask {
     }
 
     /**
-     * execute a query to the Contacts database to get all contacts with a phone number.
-     * @return
-     */
-    public Cursor queryAllContacts() {
-        // gives you the list of contacts who has phone numbers
-        return query(ContactsContract.Contacts.CONTENT_URI,
-                ContactsContract.Data.HAS_PHONE_NUMBER + " = 1");
-    }
-
-    /**
      * Retrieve all the phone numbers of a certain contact.
      * @param contactId contact id of which we query its Phone CommonDataKind.
      * @return
@@ -70,27 +59,6 @@ public class ContactsSyncTask {
         // Gives the list of phone numbers for a given contact.
         return query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId);
-    }
-
-    /**
-     * Runs the sync for all contacts.
-     */
-    public void fullSync() {
-        mLogger.d("fullSync");
-
-        // Check contacts permission. Do nothing if we don't have it. Since it's a background
-        // job we can't really ask the user for permission.
-        if (!ContactsPermission.hasPermission(mContext)) {
-            mLogger.d("fullsync: no contact permission");
-            // TODO VIALA-349 Delete sync account.
-            return;
-        }
-
-        Cursor cursor = queryAllContacts();
-        SyncUtils.setFullSyncInProgress(mContext, true);
-        sync(cursor);
-        SyncUtils.setFullSyncInProgress(mContext, false);
-        SyncUtils.setRequiresFullContactSync(mContext, false);
     }
 
     /**

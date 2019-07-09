@@ -555,7 +555,9 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
             return;
         }
 
-        mTransferCompleteDialog = TransferCompleteDialog.createAndShow(this, mInitialCallDetail.getPhoneNumber(), mTransferCallDetail.getPhoneNumber());
+        if (mInitialCallDetail != null && mTransferCallDetail != null) {
+            mTransferCompleteDialog = TransferCompleteDialog.createAndShow(this, mInitialCallDetail.getPhoneNumber(), mTransferCallDetail.getPhoneNumber());
+        }
     }
 
     public boolean isOnTransfer() {
