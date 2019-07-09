@@ -2,7 +2,6 @@ package com.voipgrid.vialer;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -10,9 +9,9 @@ import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
+
 import android.view.View;
 
 import com.google.android.gms.analytics.HitBuilders;
@@ -21,8 +20,7 @@ import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
-import com.voipgrid.vialer.contacts.SyncUtils;
-import com.voipgrid.vialer.contacts.UpdateChangedContactsService;
+import com.voipgrid.vialer.contacts.ImportContactsForT9Search;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.onboarding.AccountFragment;
@@ -103,13 +101,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
             new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
         }
 
-        if (SyncUtils.requiresFullContactSync(this)) {
-            SyncUtils.requestContactSync(this);
-        } else {
-            startContactObserverService();
-        }
-
-        SyncUtils.setPeriodicSync(this);
+        observeContacts();
 
         setContentView(R.layout.activity_main);
 
@@ -194,9 +186,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
                 }
             }
             if (allPermissionsGranted) {
-                // ContactSync.
-                SyncUtils.requestContactSync(this);
-                startContactObserverService();
+                observeContacts();
             }
         } else if (requestCode == this.getResources().getInteger(R.integer.microphone_permission_request_code)) {
             mDialHelper.callAttemptedNumber();
@@ -247,12 +237,14 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
     }
 
     /**
-     * Starts the service that will listen for changes to contacts.
+     * Schedule a task to update the contacts when there are changes.
+     *
      */
-    private void startContactObserverService() {
-        if (ContactsPermission.hasPermission(this)) {
-            startService(new Intent(this, UpdateChangedContactsService.class));
-        }
+    private void observeContacts() {
+        if (!ContactsPermission.hasPermission(this)) return;
+
+        ImportContactsForT9Search.Companion.run();
+        ImportContactsForT9Search.Companion.schedule();
     }
 
     private String getScreenName(String text) {

@@ -189,31 +189,6 @@
             android:enabled="true"
             android:exported="false" />
 
-        <!-- SyncService for sync adapter -->
-        <service
-            android:name=".contacts.SyncService"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.content.SyncAdapter" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.content.SyncAdapter"
-                android:resource="@xml/syncadapter" />
-            <meta-data
-                android:name="android.provider.CONTACTS_STRUCTURE"
-                android:resource="@xml/contacts" />
-        </service>
-        <service android:name=".contacts.AuthenticationService" >
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
-        </service>
-        <service android:name=".contacts.UpdateChangedContactsService" />
 
         <activity
             android:name=".SettingsActivity"

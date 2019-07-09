@@ -14,8 +14,8 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 141
-        versionName "6.3"
+        versionCode 144
+        versionName "6.3.1"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         flavorDimensions "default"
@@ -163,6 +163,7 @@ ext {
     mockitoCoreVersion = "2.23.0"
     butterKnifeVersion = "9.0.0-rc1"
     daggerVersion = "2.18"
+    workVersion = "2.0.1"
 }
 
 dependencies {
@@ -244,6 +245,7 @@ dependencies {
     releaseImplementation "com.crashlytics.sdk.android:crashlytics:2.9.9"
     implementation "androidx.core:core-ktx:1.0.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "androidx.work:work-runtime-ktx:$workVersion"
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.
