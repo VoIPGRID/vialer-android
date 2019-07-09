@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-<<<<<<< HEAD
-=======
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import androidx.core.app.ActivityOptionsCompat;
@@ -15,13 +13,10 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
->>>>>>> release/6.3.1
 import android.view.View;
 
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.tabs.TabLayout;
 import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -44,14 +39,6 @@ import com.voipgrid.vialer.util.UpdateActivity;
 import com.voipgrid.vialer.util.UpdateHelper;
 
 import javax.inject.Inject;
-
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-
 
 public class MainActivity extends NavigationDrawerActivity implements View.OnClickListener {
 
@@ -120,18 +107,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
             new PhoneAccountHelper(this).executeUpdatePhoneAccountTask();
         }
 
-<<<<<<< HEAD
-
-        if (SyncUtils.requiresFullContactSync(this)) {
-            SyncUtils.requestContactSync(this);
-        } else {
-            startContactObserverService();
-        }
-
-        SyncUtils.setPeriodicSync(this);
-=======
         observeContacts();
->>>>>>> release/6.3.1
 
         setContentView(R.layout.activity_main);
 

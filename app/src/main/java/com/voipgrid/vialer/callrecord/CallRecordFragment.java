@@ -218,13 +218,9 @@ public class CallRecordFragment extends Fragment
 
     @Override
     public void missedCallsHaveBeenRetrieved(List<CallRecord> missedCallRecords) {
-<<<<<<< HEAD
-        setRefreshing(false);
-=======
         if (!isAdded()) return;
 
-        swipeContainer.setRefreshing(false);
->>>>>>> release/6.3.1
+        setRefreshing(false);
 
         if (missedCallRecords.isEmpty()) {
             displayError(R.string.empty_view_missed_message);
@@ -241,13 +237,9 @@ public class CallRecordFragment extends Fragment
     }
 
     private void handleFailedRequest(int code) {
-<<<<<<< HEAD
-        setRefreshing(false);
-=======
         if (!isAdded()) return;
 
-        swipeContainer.setRefreshing(false);
->>>>>>> release/6.3.1
+        setRefreshing(false);
 
         int message = R.string.empty_view_default_message;
 
