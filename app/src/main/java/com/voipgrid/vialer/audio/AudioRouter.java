@@ -274,6 +274,7 @@ public class AudioRouter {
 
         audioManager.setMode(AudioManager.MODE_NORMAL);
         audioManager.abandonAudioFocus(audioFocusHandler);
+        audioManager.setSpeakerphoneOn(false);
     }
 
     /**

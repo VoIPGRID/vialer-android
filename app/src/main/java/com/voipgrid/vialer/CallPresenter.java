@@ -6,6 +6,7 @@ import static com.voipgrid.vialer.sip.SipConstants.CALL_INVALID_STATE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_PUT_ON_HOLD_ACTION;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_UNHOLD_ACTION;
 
+import android.util.Log;
 import android.view.View;
 
 import com.voipgrid.vialer.calling.CallActivityHelper;
@@ -71,6 +72,8 @@ public class CallPresenter {
 
         mActivity.mOnHoldButton.activate(call.isOnHold());
         mActivity.mMuteButton.activate(mActivity.isMuted());
+        mActivity.mDialpadButton.activate(false);
+        mActivity.mTransferButton.activate(false);
 
         if (state.equals(CALL_CONNECTED_MESSAGE) || state.equals(CALL_UNHOLD_ACTION)) {
             showCallDuration();

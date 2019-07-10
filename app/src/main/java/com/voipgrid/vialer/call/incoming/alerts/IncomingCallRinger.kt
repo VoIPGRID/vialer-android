@@ -29,7 +29,7 @@ class IncomingCallRinger(val context : Context) : IncomingCallAlert {
 
         logger.i("Starting ringer")
 
-        MediaPlayer().findRingtone()?.apply {
+        player = MediaPlayer().findRingtone()?.apply {
             setAudioStreamType(AudioManager.STREAM_RING)
             isLooping = true
             prepare()
@@ -80,7 +80,7 @@ class IncomingCallRinger(val context : Context) : IncomingCallAlert {
             }
             player = null
         } catch (e: Exception) {
-
+            logger.e("Unable to stop ringer: " + e.message)
         }
     }
 }
