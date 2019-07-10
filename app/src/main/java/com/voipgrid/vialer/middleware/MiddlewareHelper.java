@@ -6,11 +6,9 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.analytics.Tracker;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -76,7 +74,6 @@ public class MiddlewareHelper {
 
     public static void register(final Context context, String token) {
         Preferences sipPreferences = new Preferences(context);
-        Tracker analyticsTracker = ((AnalyticsApplication) context.getApplicationContext()).getDefaultTracker();
 
         if (!sipPreferences.canUseSip()) {
             return;

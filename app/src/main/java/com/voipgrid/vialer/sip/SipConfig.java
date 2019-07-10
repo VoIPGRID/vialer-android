@@ -14,7 +14,6 @@ import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
