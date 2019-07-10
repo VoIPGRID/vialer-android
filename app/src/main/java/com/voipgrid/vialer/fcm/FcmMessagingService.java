@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.fcm;
 
+import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -11,11 +13,11 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.VoipDisabledNotification;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
@@ -297,5 +299,13 @@ public class FcmMessagingService extends FirebaseMessagingService {
         mRemoteLogger.d("SipService Active: " + SipService.sipServiceActive);
         mRemoteLogger.d("CurrentConnection: " + mConnectivityHelper.getConnectionTypeString());
         mRemoteLogger.d("Payload: " + remoteMessageData.getRawData().toString());
+    }
+
+    @Override
+    public void onNewToken(final String s) {
+        super.onNewToken(s);
+        mRemoteLogger.d("onTokenRefresh");
+        MiddlewareHelper.setRegistrationStatus(this, STATUS_UNREGISTERED);
+        MiddlewareHelper.registerAtMiddleware(this);
     }
 }

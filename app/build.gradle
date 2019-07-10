@@ -153,9 +153,8 @@ ext {
     supportLibVersion = "1.0.2"
     espressoVersion = "2.2"
     androidTestVersion = "1.1.0"
-    firebaseCoreVersion = "16.0.8"
-    firebaseMessagingVersion = "17.6.0"
-    googleAnalyticsVersion = "16.0.8"
+    firebaseCoreVersion = "17.0.0"
+    firebaseMessagingVersion = "19.0.1"
     okHttpVersion = "3.11.0"
     retroFitVersion = "2.4.0"
     roboElectricVersion = "3.6.2"
@@ -172,8 +171,6 @@ dependencies {
     implementation files('libs/logentries-android.jar')
     implementation(name: 'pjsip', ext: 'aar')
 
-    // Support libs.
-    implementation "androidx.multidex:multidex:2.0.1"
     implementation "androidx.appcompat:appcompat:${supportLibVersion}"
     implementation "com.google.android.material:material:1.0.0"
     implementation "androidx.annotation:annotation:1.0.2"
@@ -187,10 +184,7 @@ dependencies {
     implementation "com.google.firebase:firebase-messaging:${firebaseMessagingVersion}"
 
     // Firebase Performance Measurement.
-    implementation 'com.google.firebase:firebase-perf:16.2.5'
-
-    // Google Analytics setup.
-    implementation "com.google.android.gms:play-services-analytics:${googleAnalyticsVersion}"
+    implementation 'com.google.firebase:firebase-perf:18.0.1'
 
     // Circular image view
     implementation 'de.hdodenhof:circleimageview:2.2.0'

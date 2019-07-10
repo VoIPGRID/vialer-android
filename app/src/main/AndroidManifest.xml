@@ -97,14 +97,6 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name=".fcm.FcmInstanceIdListenerService"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-            </intent-filter>
-        </service>
-
         <receiver
             android:name=".util.OnBootReceiver"
             android:label="OnBootReceiverBroadcastReceiver"

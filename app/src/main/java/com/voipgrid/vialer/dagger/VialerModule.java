@@ -10,6 +10,7 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.PhoneAccountFetcher;
@@ -269,5 +270,10 @@ public class VialerModule {
     @Singleton
     BatteryOptimizationManager provideBom(Context context) {
         return new BatteryOptimizationManager(context);
+    }
+
+    @Provides
+    FirebaseAnalytics provideFirebaseAnalytics(Context context) {
+        return FirebaseAnalytics.getInstance(context);
     }
 }
