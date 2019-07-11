@@ -147,8 +147,6 @@ public class BluetoothMediaSessionService extends Service {
             switch (code) {
                 case KEYCODE_CALL:
                     return SipService.Actions.ANSWER_INCOMING_CALL;
-                case KEYCODE_MEDIA_PAUSE:
-                    return SipService.Actions.END_CALL;
                 case KEYCODE_ENDCALL:
                     return SipService.Actions.END_CALL;
             }
