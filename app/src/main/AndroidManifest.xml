@@ -203,6 +203,7 @@
                   android:screenOrientation="portrait"
                   android:exported="true"
                   android:launchMode="singleTop"/>
+        <activity android:name=".onboarding.OnboardingActivity"/>
     </application>
 
 </manifest>
