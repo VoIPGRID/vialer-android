@@ -320,8 +320,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             mLastCallInfo = getInfo();  // Check to see if we can get CallInfo with this callback.
 
             pjsip_inv_state callState = mLastCallInfo.getState();
-            mLogger.e("CallState changed!");
-            mLogger.e(callState.toString());
+            mLogger.i("CallState changed!");
+            mLogger.i(callState.toString());
 
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                 onCallStartRingback();
