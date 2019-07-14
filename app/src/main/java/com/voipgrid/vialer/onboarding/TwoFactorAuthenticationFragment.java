@@ -1,6 +1,5 @@
 package com.voipgrid.vialer.onboarding;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -12,6 +11,7 @@ import android.widget.EditText;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.util.TwoFactorFragmentHelper;
 
+import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

@@ -2,7 +2,6 @@ package com.voipgrid.vialer.onboarding;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -35,6 +34,7 @@ import com.voipgrid.vialer.util.PhoneAccountHelper;
 import java.io.IOException;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,9 +44,7 @@ import retrofit2.Response;
  */
 public class SetupActivity extends VialerBaseActivity implements
         OnboardingFragment.FragmentInteractionListener,
-        LoginFragment.FragmentInteractionListener,
         AccountFragment.FragmentInteractionListener,
-        ForgotPasswordFragment.FragmentInteractionListener,
         SetUpVoipAccountFragment.FragmentInteractionListener,
         TwoFactorAuthenticationFragment.FragmentInteractionListener,
         Callback {
@@ -81,20 +79,20 @@ public class SetupActivity extends VialerBaseActivity implements
         if (bundle != null) {
             fragmentId = bundle.getInt("fragment");
             mActivityToReturnToName = bundle.getString("activity");
-            if (fragmentId == R.id.fragment_voip_account_missing) {
-                gotoFragment = ((SetUpVoipAccountFragment) getFragmentManager()
-                        .findFragmentById(fragmentId)).newInstance();
-            } else if (fragmentId == R.id.fragment_account) {
-                SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-                gotoFragment = ((AccountFragment) getFragmentManager()
-                        .findFragmentById(fragmentId))
-                        .newInstance(systemUser.getMobileNumber(), systemUser.getOutgoingCli());
-            }
+//            if (fragmentId == R.id.fragment_voip_account_missing) {
+//                gotoFragment = ((SetUpVoipAccountFragment) getFragmentManager()
+//                        .findFragmentById(fragmentId)).newInstance();
+//            } else if (fragmentId == R.id.fragment_account) {
+//                SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+//                gotoFragment = ((AccountFragment) getFragmentManager()
+//                        .findFragmentById(fragmentId))
+//                        .newInstance(systemUser.getMobileNumber(), systemUser.getOutgoingCli());
+//            }
         }
 
         if (findViewById(R.id.fragment_container) != null) {
             if (gotoFragment == null) {
-                gotoFragment = LogoFragment.newInstance();
+//                gotoFragment = LogoFragment.newInstance();
             }
 
             if (fragmentId != null && fragmentId == R.id.fragment_account) {
@@ -111,19 +109,19 @@ public class SetupActivity extends VialerBaseActivity implements
      * @param newFragment next step in the setup process to present to the user.
      */
     private void swapFragment(Fragment newFragment, String tag) {
-        if(isFinishing()) return;
-
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        if (tag != null) {
-            transaction.addToBackStack(null);
-        } else {
-            tag = "fragment";
-        }
-
-        transaction.replace(R.id.fragment_container, newFragment, tag).commitAllowingStateLoss();
-
-        // Hide the keyboard when switching fragments.
-        manageKeyboard();
+//        if(isFinishing()) return;
+//
+//        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+//        if (tag != null) {
+//            transaction.addToBackStack(null);
+//        } else {
+//            tag = "fragment";
+//        }
+//
+//        transaction.replace(R.id.fragment_container, newFragment, tag).commitAllowingStateLoss();
+//
+//        // Hide the keyboard when switching fragments.
+//        manageKeyboard();
     }
 
     /**
@@ -151,15 +149,15 @@ public class SetupActivity extends VialerBaseActivity implements
 
     @Override
     public void onBackPressed() {
-        Fragment forgotPasswordFragment = getFragmentManager()
-                .findFragmentByTag(ForgotPasswordFragment.class.getSimpleName());
-        if (forgotPasswordFragment instanceof ForgotPasswordFragment) {
-            // In case of a forgot password fragment we want to move back.
-            getFragmentManager().popBackStack();
-        } else {
-            // Otherwise normal behavior
-            super.onBackPressed();
-        }
+//        Fragment forgotPasswordFragment = getFragmentManager()
+//                .findFragmentByTag(ForgotPasswordFragment.class.getSimpleName());
+//        if (forgotPasswordFragment instanceof ForgotPasswordFragment) {
+//            // In case of a forgot password fragment we want to move back.
+//            getFragmentManager().popBackStack();
+//        } else {
+//            // Otherwise normal behavior
+//            super.onBackPressed();
+//        }
     }
 
     @Override
@@ -246,10 +244,9 @@ public class SetupActivity extends VialerBaseActivity implements
     }
 
     private String[] tags = {
-            LogoFragment.class.getSimpleName(),
-            LoginFragment.class.getSimpleName(),
+//            LogoFragment.class.getSimpleName(),
+//            LoginFragment.class.getSimpleName(),
             TwoFactorAuthenticationFragment.class.getSimpleName(),
-            ForgotPasswordFragment.class.getSimpleName(),
             AccountFragment.class.getSimpleName(),
             WelcomeFragment.class.getSimpleName()
     };
@@ -265,67 +262,16 @@ public class SetupActivity extends VialerBaseActivity implements
     }
 
     private OnboardingFragment getCurrentFragment(String tag) {
-        OnboardingFragment fragment = (OnboardingFragment) getFragmentManager()
-                .findFragmentByTag(tag);
+//        OnboardingFragment fragment = (OnboardingFragment) getFragmentManager()
+//                .findFragmentByTag(tag);
 
-        if(fragment != null && fragment.isVisible()) {
-            return fragment;
-        }
+//        if(fragment != null && fragment.isVisible()) {
+//            return fragment;
+//        }
         return null;
     }
 
-    @Override
-    public void onForgotPassword(Fragment fragment, final String email) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle(getString(R.string.forgot_password_alert_title));
-        alertDialogBuilder
-                .setMessage(getString(R.string.forgot_password_alert_message, email))
-                .setCancelable(false)
-                .setPositiveButton(this.getString(R.string.ok),
-                        (dialog, id) -> resetPassword(email))
-                .setNegativeButton(this.getString(R.string.cancel),
-                        (dialog, id) -> dialog.dismiss());
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
-    }
 
-    private void resetPassword(String email) {
-        VoipgridApi voipgridApi = ServiceGenerator.createApiService(this, null, null, null);
-        Call<Void> call = voipgridApi.resetPassword(new PasswordResetParams(email));
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (!response.isSuccessful()) {
-                    failedFeedback("Request failed");
-                    return;
-                }
-
-               new AlertDialog.Builder(SetupActivity.this)
-                        .setTitle(R.string.forgot_password_success_title)
-                        .setMessage(R.string.forgot_password_success_message)
-                        .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.dismiss())
-                        .create()
-                        .show();
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                failedFeedback(t.getMessage());
-            }
-        });
-    }
-
-    /**
-     *  Hide keyboard on fragment switch
-     */
-    public void manageKeyboard() {
-        View focus = getCurrentFocus();
-        if (focus != null) {
-            InputMethodManager keyboard = (InputMethodManager) getSystemService(
-                    Context.INPUT_METHOD_SERVICE);
-            keyboard.hideSoftInputFromWindow(focus.getWindowToken(), 0);
-        }
-    }
 
     @Override
     public void onResponse(@NonNull Call call, @NonNull Response response) {
@@ -370,13 +316,13 @@ public class SetupActivity extends VialerBaseActivity implements
                 FragmentManager fragmentManager = getFragmentManager();
 
                 // First see if an AccountFragment exists
-                AccountFragment fragment = (AccountFragment) fragmentManager
-                        .findFragmentByTag(AccountFragment.class.getSimpleName());
+//                AccountFragment fragment = (AccountFragment) fragmentManager
+//                        .findFragmentByTag(AccountFragment.class.getSimpleName());
 
-                if (fragment != null) {
-                    fragment.onNextStep();
-                    return;
-                }
+//                if (fragment != null) {
+//                    fragment.onNextStep();
+//                    return;
+//                }
 
                 // Check if the current fragment is the account fragment.
                 AccountFragment accountFragment = (AccountFragment) getCurrentFragment();
@@ -385,12 +331,12 @@ public class SetupActivity extends VialerBaseActivity implements
                     return;
                 }
 
-                ForgotPasswordFragment forgotFragment = (ForgotPasswordFragment) fragmentManager
-                        .findFragmentByTag(ForgotPasswordFragment.class.getSimpleName());
-                if (forgotFragment != null) {
-                    onNextStep(LoginFragment.newInstance());
-                    return;
-                }
+//                ForgotPasswordFragment forgotFragment = (ForgotPasswordFragment) fragmentManager
+//                        .findFragmentByTag(ForgotPasswordFragment.class.getSimpleName());
+//                if (forgotFragment != null) {
+//                    onNextStep(LoginFragment.newInstance());
+//                    return;
+//                }
             }
         } else {
             String errorString = "";
@@ -441,7 +387,6 @@ public class SetupActivity extends VialerBaseActivity implements
         }
     }
 
-    @Override
     public void onLogin(final Fragment fragment, String username, String password) {
         mUsername = username;
         mPassword = password;
@@ -481,7 +426,7 @@ public class SetupActivity extends VialerBaseActivity implements
         @Override
         public void twoFactorCodeRequired() {
             enableProgressBar(false);
-            onNextStep(TwoFactorAuthenticationFragment.newInstance());
+//            onNextStep(TwoFactorAuthenticationFragment.newInstance());
         }
 
         @Override

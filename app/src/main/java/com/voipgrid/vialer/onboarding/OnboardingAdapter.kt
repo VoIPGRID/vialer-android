@@ -1,28 +1,35 @@
 package com.voipgrid.vialer.onboarding
 
+import android.content.Context
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.voipgrid.vialer.R
+import com.voipgrid.vialer.onboarding.steps.Step
+import kotlin.reflect.KClass
 
-class OnboardingAdapter: RecyclerView.Adapter<OnboardingAdapter.ViewHolder>() {
+class OnboardingAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle): FragmentStateAdapter(fragmentManager, lifecycle) {
 
-    val views = listOf<String>()
+    private var steps = arrayListOf<Step>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun addStep(step: Step) {
+        steps.add(step)
     }
 
     override fun getItemCount(): Int {
-        return views.size
+        return steps.size
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.tv
+    override fun createFragment(position: Int): Fragment {
+        return steps[position]
     }
 
-    class ViewHolder(view: RecyclerView) : RecyclerView.ViewHolder(view) {
-
-        val text: TextView
-
+    fun getStep(position: Int): Step {
+        return createFragment(position) as Step
     }
 }

@@ -2,7 +2,6 @@ package com.voipgrid.vialer.onboarding;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,6 +17,8 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
+
+import androidx.fragment.app.Fragment;
 
 /**
  * A simple {@link Fragment} subclass.

@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.onboarding;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,6 +16,7 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
+import androidx.fragment.app.Fragment;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

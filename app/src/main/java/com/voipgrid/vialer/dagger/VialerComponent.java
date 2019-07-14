@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.dagger;
 
 import com.voipgrid.vialer.CallActivity;
+import com.voipgrid.vialer.ForgottenPasswordActivity;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.SettingsActivity;
@@ -24,6 +25,8 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.t9.T9HelperFragment;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
+
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
 
@@ -82,4 +85,6 @@ public interface VialerComponent {
     void inject(AbstractCallNotification notification);
 
     void inject(NumberInputView numberInputView);
+
+    void inject(ForgottenPasswordActivity forgottenPasswordActivity);
 }

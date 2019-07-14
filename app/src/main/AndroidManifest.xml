@@ -203,7 +203,8 @@
                   android:screenOrientation="portrait"
                   android:exported="true"
                   android:launchMode="singleTop"/>
-        <activity android:name=".onboarding.OnboardingActivity"/>
+        <activity android:name=".onboarding.OnboardingActivity" android:exported="true"/>
+        <activity android:name=".ForgottenPasswordActivity"/>
     </application>
 
 </manifest>
