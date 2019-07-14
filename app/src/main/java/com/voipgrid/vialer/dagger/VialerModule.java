@@ -13,6 +13,7 @@ import android.telephony.TelephonyManager;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.PhoneAccountFetcher;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.VoipgridApi;
@@ -42,6 +43,7 @@ import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
 import com.voipgrid.vialer.t9.T9ViewBinder;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ColorHelper;
@@ -80,6 +82,12 @@ public class VialerModule {
     @Singleton
     @Provides
     JsonStorage provideJsonStorage() {
+        return new JsonStorage(mVialerApplication);
+    }
+
+    @Singleton
+    @Provides
+    JsonStorage<Object> provideJson() {
         return new JsonStorage(mVialerApplication);
     }
 
@@ -275,5 +283,10 @@ public class VialerModule {
     @Provides
     FirebaseAnalytics provideFirebaseAnalytics(Context context) {
         return FirebaseAnalytics.getInstance(context);
+    }
+
+    @Provides
+    AccountHelper provideAccountHelper(Context context) {
+        return new AccountHelper(context);
     }
 }

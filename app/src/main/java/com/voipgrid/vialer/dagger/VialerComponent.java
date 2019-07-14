@@ -20,6 +20,7 @@ import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.dialer.NumberInputView;
 import com.voipgrid.vialer.logging.VialerBaseActivity;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
+import com.voipgrid.vialer.onboarding.steps.LoginStep;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.t9.T9Fragment;
@@ -87,4 +88,6 @@ public interface VialerComponent {
     void inject(NumberInputView numberInputView);
 
     void inject(ForgottenPasswordActivity forgottenPasswordActivity);
+
+    void inject(LoginStep loginStep);
 }

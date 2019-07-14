@@ -5,39 +5,53 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.TextView
-import com.voipgrid.vialer.ForgottenPasswordActivity
-import com.voipgrid.vialer.R
-import com.voipgrid.vialer.WebActivity
+import com.voipgrid.vialer.*
 import com.voipgrid.vialer.api.ApiTokenFetcher
+import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.api.VoipgridApi
 import com.voipgrid.vialer.api.models.SystemUser
+import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.util.AccountHelper
 import com.voipgrid.vialer.util.ConnectivityHelper
+import com.voipgrid.vialer.util.JsonStorage
 import kotlinx.android.synthetic.main.fragment_login.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
-class LoginStep: Step(), TextWatcher, Callback<SystemUser> {
+class LoginStep: Step(), Callback<SystemUser> {
 
     override val layout = R.layout.fragment_login
 
-    private lateinit var connectivityHelper: ConnectivityHelper
-    private lateinit var apiTokenFetcher: ApiTokenFetcher
-    private lateinit var voipgridApi: VoipgridApi
-    private lateinit var accountHelper: AccountHelper
+    @Inject lateinit var connectivityHelper: ConnectivityHelper
+    @Inject lateinit var accountHelper: AccountHelper
+    @Inject lateinit var preferences: Preferences
+    @Inject lateinit var jsonStorage: JsonStorage<Any>
 
+    private val logger = Logger(this)
     private val apiTokenListener = ApiTokenFetchListener()
+
+    private val voipgridApi: VoipgridApi
+        get() = ServiceGenerator.createApiService(onboarding)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        VialerApplication.get().component().inject(this)
 
-        emailTextDialog.addTextChangedListener(this)
-        passwordTextDialog.addTextChangedListener(this)
+        val enableSubmitButton: (_: Editable?) -> Unit = {
+            button_login.isEnabled = emailTextDialog.length() > 0 && passwordTextDialog.length() > 0
+        }
+
+        emailTextDialog.onTextChanged(enableSubmitButton)
+        passwordTextDialog.onTextChanged(enableSubmitButton)
+
         passwordTextDialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent ->
             actionId == EditorInfo.IME_ACTION_DONE && button_login.performClick()
         }
@@ -60,38 +74,50 @@ class LoginStep: Step(), TextWatcher, Callback<SystemUser> {
 
     private fun attemptLogin() {
         ApiTokenFetcher
-                .forCredentials(activity, emailTextDialog.toString(), passwordTextDialog.toString())
+                .forCredentials(activity, emailTextDialog.text.toString(), passwordTextDialog.text.toString())
                 .setListener(apiTokenListener)
                 .fetch()
+    }
+
+    override fun onResponse(call: Call<SystemUser>, response: Response<SystemUser>) {
+        if (!response.isSuccessful) {
+            error(R.string.onboarding_login_failed_title, R.string.onboarding_login_failed_message)
+            return
+        }
+
+        val user = response.body() as SystemUser
+
+        if (user.partner != null) {
+            error(R.string.user_is_partner_error_title, R.string.user_is_partner_error_message)
+            return
+        }
+
+        if (user.outgoingCli == null || user.outgoingCli.isEmpty()) {
+            logger.d("The user does not have an outgoing cli")
+        }
+
+        preferences.setSipPermission(true)
+        accountHelper.setCredentials(user.email, passwordTextDialog.text.toString())
+        jsonStorage.save(user)
+        onboarding?.progress()
     }
 
     override fun onFailure(call: Call<SystemUser>, t: Throwable) {
     }
 
-    override fun onResponse(call: Call<SystemUser>, response: Response<SystemUser>) {
-    }
-
-    override fun afterTextChanged(s: Editable?) {
-        button_login.isEnabled = emailTextDialog.length() > 0 && emailTextDialog.length() > 0
-    }
-
-    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-    }
-
-    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-    }
-
     private inner class ApiTokenFetchListener: ApiTokenFetcher.ApiTokenListener {
+
         override fun twoFactorCodeRequired() {
             // go to 2 factor
         }
 
         override fun onSuccess(apiToken: String?) {
-            accountHelper.setCredentials(emailTextDialog.toString(), passwordTextDialog.toString(), apiToken)
+            accountHelper.setCredentials(emailTextDialog.text.toString(), passwordTextDialog.text.toString(), apiToken)
             voipgridApi.systemUser().enqueue(this@LoginStep)
         }
 
         override fun onFailure() {
+            error(R.string.onboarding_login_failed_title, R.string.onboarding_login_failed_message)
         }
     }
 

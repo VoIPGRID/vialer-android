@@ -279,15 +279,6 @@ public class SetupActivity extends VialerBaseActivity implements
             enableProgressBar(false);
             if (response.body() instanceof SystemUser) {
                 SystemUser systemUser = ((SystemUser) response.body());
-                if (systemUser.getPartner() != null) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            onAlertDialog(getString(R.string.user_is_partner_error_title),
-                                    getString(R.string.user_is_partner_error_message));
-                        }
-                    });
-                } else {
                     if (systemUser.getOutgoingCli() == null || systemUser.getOutgoingCli().isEmpty()) {
                         mLogger.d("missedCallsHaveBeenRetrieved getOutgoingCli is null");
                     }
@@ -302,7 +293,7 @@ public class SetupActivity extends VialerBaseActivity implements
                             systemUser.getMobileNumber(),
                             systemUser.getOutgoingCli()
                     ));
-                }
+
             } else if (response.body() instanceof PhoneAccount) {
                 mJsonStorage.save(response.body());
                 if (mPreferences.hasSipPermission()) {

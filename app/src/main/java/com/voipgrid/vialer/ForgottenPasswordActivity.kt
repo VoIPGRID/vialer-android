@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.voipgrid.vialer.api.VoipgridApi
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.models.PasswordResetParams
+import com.voipgrid.vialer.onboarding.steps.onTextChanged
 import kotlinx.android.synthetic.main.activity_forgotten_password.*
 import kotlinx.android.synthetic.main.fragment_login.*
 import retrofit2.Call
@@ -19,7 +20,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import javax.inject.Inject
 
-class ForgottenPasswordActivity: AppCompatActivity(), View.OnClickListener, TextWatcher {
+class ForgottenPasswordActivity: AppCompatActivity(), View.OnClickListener {
 
     @Inject lateinit var voipgridApi: VoipgridApi
 
@@ -34,7 +35,11 @@ class ForgottenPasswordActivity: AppCompatActivity(), View.OnClickListener, Text
 
         forgotPasswordEmailTextDialog.setText(intent.getStringExtra(EMAIL_EXTRA) ?: "")
         button_send_password_email.setOnClickListener(this)
-        forgotPasswordEmailTextDialog.addTextChangedListener(this)
+
+
+        forgotPasswordEmailTextDialog.onTextChanged {
+            s -> button_send_password_email.isEnabled = s?.isNotEmpty() ?: false
+        }
     }
 
     override fun onClick(view: View?) {
@@ -84,16 +89,6 @@ class ForgottenPasswordActivity: AppCompatActivity(), View.OnClickListener, Text
                 .setPositiveButton(R.string.ok, null)
                 .create()
                 .show()
-    }
-
-    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-    }
-
-    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-    }
-
-    override fun afterTextChanged(s: Editable?) {
-        button_send_password_email.isEnabled = s?.isNotEmpty() ?: false
     }
 
     companion object {

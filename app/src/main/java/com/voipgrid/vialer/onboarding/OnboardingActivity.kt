@@ -31,6 +31,10 @@ class OnboardingActivity: AppCompatActivity() {
         viewPager.setCurrentItem(1, true)
     }
 
+    fun progress() {
+        viewPager.setCurrentItem(viewPager.currentItem + 1, true)
+    }
+
     private inner class OnPageChangeCallback : ViewPager2.OnPageChangeCallback() {
 
         override fun onPageSelected(position: Int) {
