@@ -114,6 +114,16 @@
     <string name="two_factor_authentication_token_invalid_description">The two-factor token is invalid</string>
     <string name="two_factor_authentication_header_label_text">Two-factor</string>
     <string name="two_factor_authentication_header_label_subtext">Authentication</string>
+    <string name="onboarding_permission_contacts_title">Contacts Permission</string>
+    <string name="onboarding_permission_contacts_justification">This permission is used to display your contact\'s information (name, image) against call records, it also allows you to search through your contacts for a number to dial. Your contact data will never be uploaded or leave your phone in any way.</string>
+    <string name="onboarding_permission_call_state_title">Call State Permission</string>
+    <string name="onboarding_permission_call_state_justification">This permission enables allows us to check the status of native calls and allows us to handle VoIP calls appropriately. For example, if you accept a native call, your VoIP call will automatically be put on hold.</string>
+    <string name="onboarding_permission_microphone_title">Microphone Permission</string>
+    <string name="onboarding_permission_microphone_justification">This permission is required to transmit your voice when making or receiving calls, calls are not possible without this permission enabled. We do not access the microphone at any other time other than when there is a call in progress.</string>
+    <string name="onboarding_permission_accept">Accept</string>
+    <string name="onboarding_permission_deny">Skip</string>
+    <string name="onboarding_battery_optimization_whitelist_title">Battery Optimization</string>
+    <string name="onboarding_battery_optimization_whitelist_justification">We ask to be whitelisted against battery optimization to prevent certain Android operating systems for silently killing the app, preventing incoming calls. Even when whitelisted we are aware of how important battery is and use it very conservatively.</string>
 
     <!-- strings empty view call records -->
     <string name="empty_view_default_message">No recent calls available.</string>

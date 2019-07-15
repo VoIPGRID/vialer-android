@@ -23,6 +23,7 @@ import com.voipgrid.vialer.contacts.ImportContactsForT9Search;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.onboarding.AccountFragment;
+import com.voipgrid.vialer.onboarding.OnboardingActivity;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.permissions.PhonePermission;
@@ -33,18 +34,13 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
-import com.voipgrid.vialer.util.UpdateActivity;
-import com.voipgrid.vialer.util.UpdateHelper;
 
 import javax.inject.Inject;
 
 public class MainActivity extends NavigationDrawerActivity implements View.OnClickListener {
 
     private ViewPager mViewPager;
-    private boolean mAskForPermission = true;
-    private int requestCounter = -1;
     private Logger mLogger;
-    private DialHelper mDialHelper;
 
     private ReachabilityReceiver mReachabilityReceiver;
 
@@ -71,7 +67,6 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(this);
         Boolean hasSystemUser = jsonStorage.has(SystemUser.class);
         SystemUser systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
-        mDialHelper = DialHelper.fromActivity(this);
 
         // Check if the app has a SystemUser.
         // When there is no SystemUser present start the on boarding process.
@@ -79,13 +74,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         // on boarding part where the mobile number needs to be configured.
         if (!hasSystemUser) {
             // Start on boarding flow.
-            startActivity(new Intent(this, SetupActivity.class));
-            finish();
-            return;
-        } else if (UpdateHelper.requiresUpdate(this)) {
-            Intent intent = new Intent(this, UpdateActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
+            startActivity(new Intent(this, OnboardingActivity.class));
             finish();
             return;
         } else if (systemUser.getMobileNumber() == null) {
@@ -121,30 +110,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         FloatingActionButton openDialerFab = findViewById(R.id.floating_action_button);
         openDialerFab.setOnClickListener(this);
 
-        requestCounter = 0;
         mReachabilityReceiver = new ReachabilityReceiver(this);
-
-        if (isFirstLoad()) {
-            if (!batteryOptimizationManager.isIgnoringBatteryOptimization()) {
-                batteryOptimizationManager.prompt(this);
-            }
-        }
-    }
-
-    /**
-     * Determine if this is the first time this activity has been loaded, therefore just after installing the app.
-     *
-     * @return
-     */
-    private boolean isFirstLoad() {
-        String key = "has_loaded";
-
-        if (!sharedPreferences.getBoolean(key, false)) {
-            sharedPreferences.edit().putBoolean(key, true).apply();
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -159,30 +125,8 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         ApiTokenFetcher.usingSavedCredentials(this).setListener(new ApiTokenListener()).fetch();
     }
 
-    private void askForPermissions(int requestNr) {
-        switch (requestNr) {
-            case 0:
-                // Ask for phone permissions.
-                if (!PhonePermission.hasPermission(this)) {
-                    PhonePermission.askForPermission(this);
-                    requestCounter++;
-                    return;
-                }
-            case 1:
-                if (!ContactsPermission.hasPermission(this)) {
-                    // We need to avoid a permission loop.
-                    if (mAskForPermission) {
-                        mAskForPermission = false;
-                        ContactsPermission.askForPermission(this);
-                        requestCounter++;
-                    }
-                }
-        }
-    }
-
     @Override
     protected void onResume() {
-        askForPermissions(requestCounter);
         mReachabilityReceiver.startListening();
         super.onResume();
 
@@ -197,27 +141,6 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
     protected void onPause() {
         super.onPause();
         mReachabilityReceiver.stopListening();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (!allPermissionsGranted(permissions, grantResults)) {
-            return;
-        }
-        if (requestCode == this.getResources().getInteger(R.integer.contact_permission_request_code)) {
-            boolean allPermissionsGranted = true;
-            for (int i = 0; i < permissions.length; i++) {
-                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                    allPermissionsGranted = false;
-                    break;
-                }
-            }
-            if (allPermissionsGranted) {
-                observeContacts();
-            }
-        } else if (requestCode == this.getResources().getInteger(R.integer.microphone_permission_request_code)) {
-            mDialHelper.callAttemptedNumber();
-        }
     }
 
     /**

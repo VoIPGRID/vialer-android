@@ -27,17 +27,20 @@ abstract class Step: Fragment() {
      */
     open val canManuallyLeaveThisStep = false
 
-    /**
-     * Should be set to TRUE if this step doesn't need to be completed in this
-     * specific situation.
-     *
-     */
-    open val shouldSkipThisStep = false
-
     protected var onboarding : OnboardingActivity? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(layout, container, false)
+        val view = inflater.inflate(layout, container, false)
+
+        if (shouldThisStepBeSkipped()) {
+            onboarding?.progress()
+        }
+
+        return view
+    }
+
+    open fun shouldThisStepBeSkipped(): Boolean {
+        return false
     }
 
     override fun onAttach(context: Context) {
