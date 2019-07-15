@@ -1,16 +1,15 @@
-package com.voipgrid.vialer.onboarding.steps
+package com.voipgrid.vialer.onboarding.steps.permissions
 
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.VialerApplication
+import com.voipgrid.vialer.onboarding.steps.Step
 import kotlinx.android.synthetic.main.onboarding_step_permissions.*
 
 abstract class PermissionsStep: Step() {
@@ -22,17 +21,11 @@ abstract class PermissionsStep: Step() {
     abstract val permission: String
     abstract val icon: Int
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
-        view?.findViewById<TextView>(R.id.titleTv)?.text = onboarding?.getText(title)
-        view?.findViewById<TextView>(R.id.justificationTv)?.text = onboarding?.getText(justification)
-        view?.findViewById<ImageView>(R.id.iconIv)?.setImageResource(icon)
-        Log.e("TEST123", "Creating permision view")
-        return view
-    }
-
-    override fun onResume() {
-        super.onResume()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        titleTv?.text = onboarding?.getText(title)
+        justificationTv.text = onboarding?.getText(justification)
+        iconIv?.setImageResource(icon)
 
         denyButton.setOnClickListener {
             onboarding?.progress()
@@ -60,7 +53,8 @@ abstract class PermissionsStep: Step() {
      *
      */
     protected open fun alreadyHasPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(onboarding as Context, permission) == PackageManager.PERMISSION_GRANTED
+        Log.e("TEST123", "in ${this.javaClass.simpleName} checking $permission, returned: ${PermissionChecker.checkSelfPermission(VialerApplication.get(), permission)}")
+        return PermissionChecker.checkSelfPermission(VialerApplication.get(), permission) == PermissionChecker.PERMISSION_GRANTED
     }
 
     override fun shouldThisStepBeSkipped(): Boolean {

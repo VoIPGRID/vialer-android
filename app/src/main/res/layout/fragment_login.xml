@@ -55,9 +55,10 @@
         android:layout_below="@id/email_field"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
+        app:endIconMode="password_toggle"
         >
 
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/passwordTextDialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

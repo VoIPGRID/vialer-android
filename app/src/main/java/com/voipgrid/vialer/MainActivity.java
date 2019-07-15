@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
+import android.util.Log;
 import android.view.View;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -86,7 +87,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
 //
 //            startActivity(intent);
 //            finish();
-//            return; todo launch to mobile number screen, possiblyu loop through each fragment and check
+//            return; todo launch to mobile number screen, possiblyu loop through each fragment and check OR JUST ADD TO ABOVE IF AND LG USER OUT/ CLEAR ALL PREFS
         } else if (connectivityHelper.hasNetworkConnection()) {
             fetchApiTokenIfDoesNotExist();
 

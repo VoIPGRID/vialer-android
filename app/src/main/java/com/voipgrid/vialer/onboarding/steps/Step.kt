@@ -7,6 +7,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,13 +36,7 @@ abstract class Step: Fragment() {
         get() = ServiceGenerator.createApiService(onboarding)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(layout, container, false)
-
-        if (shouldThisStepBeSkipped()) {
-            onboarding?.progress()
-        }
-
-        return view
+        return inflater.inflate(layout, container, false)
     }
 
     open fun shouldThisStepBeSkipped(): Boolean {

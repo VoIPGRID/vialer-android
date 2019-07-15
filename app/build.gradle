@@ -172,7 +172,7 @@ dependencies {
     implementation(name: 'pjsip', ext: 'aar')
 
     implementation "androidx.appcompat:appcompat:${supportLibVersion}"
-    implementation "com.google.android.material:material:1.0.0"
+    implementation "com.google.android.material:material:1.1.0-alpha07"
     implementation "androidx.annotation:annotation:1.0.2"
     implementation "androidx.gridlayout:gridlayout:1.0.0"
     implementation "androidx.cardview:cardview:1.0.0"

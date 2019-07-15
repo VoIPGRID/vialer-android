@@ -11,7 +11,12 @@ import androidx.core.app.ActivityCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.steps.*
+import com.voipgrid.vialer.onboarding.steps.permissions.ContactsPermissionStep
+import com.voipgrid.vialer.onboarding.steps.permissions.MicrophonePermissionStep
+import com.voipgrid.vialer.onboarding.steps.permissions.OptimizationWhitelistStep
+import com.voipgrid.vialer.onboarding.steps.permissions.PhoneStatePermissionStep
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
 typealias PermissionCallback = () -> Unit
@@ -19,12 +24,20 @@ typealias PermissionCallback = () -> Unit
 class OnboardingActivity: AppCompatActivity() {
 
     private lateinit var adapter: OnboardingAdapter
-
-    private val imm : InputMethodManager by lazy {
-        getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    }
+    private val logger = Logger(this)
 
     private var permissionCallback: PermissionCallback? = null
+
+    var username = ""
+    var password = ""
+    var code = ""
+    var requiresTwoFactor = false
+
+    val currentStep : Step
+        get() = adapter.getStep(viewPager.currentItem)
+
+    private val nextStep : Step
+        get() = adapter.getStep(viewPager.currentItem + 1)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,28 +48,30 @@ class OnboardingActivity: AppCompatActivity() {
         adapter = OnboardingAdapter(supportFragmentManager, lifecycle).apply {
             addStep(LogoStep())
             addStep(LoginStep())
+            addStep(TwoFactorStep())
             addStep(MobileNumberStep())
             addStep(ContactsPermissionStep())
             addStep(PhoneStatePermissionStep())
             addStep(MicrophonePermissionStep())
             addStep(OptimizationWhitelistStep())
+            addStep(WelcomeStep())
         }
 
         viewPager.adapter = adapter
     }
 
-    override fun onBackPressed() {
-        viewPager.setCurrentItem(1, true)
-    }
-
     fun progress() {
         if (isLastItem()) {
+            logger.i("Onboarding has been completed, forwarding to the main activity")
+
             val intent = Intent(this, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()
             return
         }
+
+        logger.i("Progressing the onboarder from ${currentStep.javaClass.simpleName} to ${nextStep.javaClass.simpleName}")
 
         viewPager.setCurrentItem(viewPager.currentItem + 1, true)
     }
@@ -85,15 +100,21 @@ class OnboardingActivity: AppCompatActivity() {
     }
 
     private inner class OnPageChangeCallback : ViewPager2.OnPageChangeCallback() {
-
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
             if (currentFocus != null) {
-                imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+                (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
             }
 
             viewPager.isUserInputEnabled = adapter.getStep(position).canManuallyLeaveThisStep
+
+
+            if (adapter.getStep(position).shouldThisStepBeSkipped()) {
+                logger.i("Skipping the current ${currentStep.javaClass.simpleName} and moving to ${nextStep.javaClass.simpleName}")
+
+                viewPager.setCurrentItem(position, false)
+            }
         }
     }
 }

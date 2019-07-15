@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.onboarding.steps
+package com.voipgrid.vialer.onboarding.steps.permissions
 
 import android.Manifest
 import com.voipgrid.vialer.R

@@ -36,6 +36,7 @@ import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
+import com.voipgrid.vialer.onboarding.VoipgridLogin;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
@@ -288,5 +289,10 @@ public class VialerModule {
     @Provides
     AccountHelper provideAccountHelper(Context context) {
         return new AccountHelper(context);
+    }
+
+    @Provides
+    VoipgridLogin provideVoipgridLogin(AccountHelper accountHelper, Preferences preferences, JsonStorage jsonStorage, Context context) {
+        return new VoipgridLogin(accountHelper, preferences, jsonStorage, context);
     }
 }

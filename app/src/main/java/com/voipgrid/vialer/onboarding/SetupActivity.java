@@ -214,7 +214,6 @@ public class SetupActivity extends VialerBaseActivity implements
 //            LogoFragment.class.getSimpleName(),
 //            LoginFragment.class.getSimpleName(),
             TwoFactorAuthenticationFragment.class.getSimpleName(),
-            WelcomeFragment.class.getSimpleName()
     };
 
     private OnboardingFragment getCurrentFragment() {
