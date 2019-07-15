@@ -44,7 +44,6 @@ import retrofit2.Response;
  */
 public class SetupActivity extends VialerBaseActivity implements
         OnboardingFragment.FragmentInteractionListener,
-        AccountFragment.FragmentInteractionListener,
         SetUpVoipAccountFragment.FragmentInteractionListener,
         TwoFactorAuthenticationFragment.FragmentInteractionListener,
         Callback {
@@ -96,7 +95,6 @@ public class SetupActivity extends VialerBaseActivity implements
             }
 
             if (fragmentId != null && fragmentId == R.id.fragment_account) {
-                swapFragment(gotoFragment, AccountFragment.class.getSimpleName());
             } else {
                 swapFragment(gotoFragment, gotoFragment.getClass().getSimpleName());
             }
@@ -166,38 +164,7 @@ public class SetupActivity extends VialerBaseActivity implements
         enableProgressBar(false);
     }
 
-    @Override
-    public void onUpdateMobileNumber(Fragment fragment, String mobileNumber) {
-        enableProgressBar(true);
 
-        mVoipgridApi = ServiceGenerator.createApiService(this);
-
-        Call<MobileNumber> call = mVoipgridApi.mobileNumber(new MobileNumber(mobileNumber));
-        call.enqueue(this);
-    }
-
-    @Override
-    public void onConfigure(Fragment fragment, String mobileNumber, String outgoingNumber) {
-        enableProgressBar(true);
-
-        // Save mobile and outgoing number.
-        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        systemUser.setMobileNumber(mobileNumber);
-        systemUser.setOutgoingCli(outgoingNumber);
-        mJsonStorage.save(systemUser);
-
-        String phoneAccountId = systemUser.getPhoneAccountId();
-
-        if (phoneAccountId != null) {
-            Call<PhoneAccount> call = mVoipgridApi.phoneAccount(phoneAccountId);
-            call.enqueue(this);
-        } else {
-            enableProgressBar(false);
-            onNextStep(WelcomeFragment.newInstance(
-                            ((SystemUser) mJsonStorage.get(SystemUser.class)).getFullName())
-            );
-        }
-    }
 
     @Override
     public void onSetVoipAccount(Fragment fragment) {
@@ -247,7 +214,6 @@ public class SetupActivity extends VialerBaseActivity implements
 //            LogoFragment.class.getSimpleName(),
 //            LoginFragment.class.getSimpleName(),
             TwoFactorAuthenticationFragment.class.getSimpleName(),
-            AccountFragment.class.getSimpleName(),
             WelcomeFragment.class.getSimpleName()
     };
 
@@ -288,21 +254,13 @@ public class SetupActivity extends VialerBaseActivity implements
                     accountHelper.setCredentials(systemUser.getEmail(), mPassword);
 
                     mJsonStorage.save(systemUser);
+//
+//                    onNextStep(AccountFragment.newInstance(
+//                            systemUser.getMobileNumber(),
+//                            systemUser.getOutgoingCli()
+//                    ));
 
-                    onNextStep(AccountFragment.newInstance(
-                            systemUser.getMobileNumber(),
-                            systemUser.getOutgoingCli()
-                    ));
 
-            } else if (response.body() instanceof PhoneAccount) {
-                mJsonStorage.save(response.body());
-                if (mPreferences.hasSipPermission()) {
-                    MiddlewareHelper.registerAtMiddleware(this);
-                }
-
-                SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-
-                onNextStep(WelcomeFragment.newInstance(systemUser.getFullName()));
             } else {
                 FragmentManager fragmentManager = getFragmentManager();
 
@@ -316,11 +274,7 @@ public class SetupActivity extends VialerBaseActivity implements
 //                }
 
                 // Check if the current fragment is the account fragment.
-                AccountFragment accountFragment = (AccountFragment) getCurrentFragment();
-                if (accountFragment != null) {
-                    accountFragment.onNextStep();
-                    return;
-                }
+
 
 //                ForgotPasswordFragment forgotFragment = (ForgotPasswordFragment) fragmentManager
 //                        .findFragmentByTag(ForgotPasswordFragment.class.getSimpleName());

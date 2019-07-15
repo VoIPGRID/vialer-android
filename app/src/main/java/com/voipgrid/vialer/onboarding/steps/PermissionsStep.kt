@@ -3,6 +3,7 @@ package com.voipgrid.vialer.onboarding.steps
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +27,7 @@ abstract class PermissionsStep: Step() {
         view?.findViewById<TextView>(R.id.titleTv)?.text = onboarding?.getText(title)
         view?.findViewById<TextView>(R.id.justificationTv)?.text = onboarding?.getText(justification)
         view?.findViewById<ImageView>(R.id.iconIv)?.setImageResource(icon)
+        Log.e("TEST123", "Creating permision view")
         return view
     }
 

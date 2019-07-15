@@ -22,7 +22,6 @@ import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.contacts.ImportContactsForT9Search;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.onboarding.AccountFragment;
 import com.voipgrid.vialer.onboarding.OnboardingActivity;
 import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.permissions.ContactsPermission;
@@ -78,16 +77,16 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
             finish();
             return;
         } else if (systemUser.getMobileNumber() == null) {
-            Intent intent = new Intent(this, SetupActivity.class);
-
-            Bundle bundle = new Bundle();
-            bundle.putInt("fragment", R.id.fragment_account);
-            bundle.putString("activity", AccountFragment.class.getSimpleName());
-            intent.putExtras(bundle);
-
-            startActivity(intent);
-            finish();
-            return;
+//            Intent intent = new Intent(this, SetupActivity.class);
+//
+//            Bundle bundle = new Bundle();
+//            bundle.putInt("fragment", R.id.fragment_account);
+//            bundle.putString("activity", AccountFragment.class.getSimpleName());
+//            intent.putExtras(bundle);
+//
+//            startActivity(intent);
+//            finish();
+//            return; todo launch to mobile number screen, possiblyu loop through each fragment and check
         } else if (connectivityHelper.hasNetworkConnection()) {
             fetchApiTokenIfDoesNotExist();
 

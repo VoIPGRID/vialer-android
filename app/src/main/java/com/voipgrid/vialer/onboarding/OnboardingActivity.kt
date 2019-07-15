@@ -35,6 +35,7 @@ class OnboardingActivity: AppCompatActivity() {
         adapter = OnboardingAdapter(supportFragmentManager, lifecycle).apply {
             addStep(LogoStep())
             addStep(LoginStep())
+            addStep(MobileNumberStep())
             addStep(ContactsPermissionStep())
             addStep(PhoneStatePermissionStep())
             addStep(MicrophonePermissionStep())

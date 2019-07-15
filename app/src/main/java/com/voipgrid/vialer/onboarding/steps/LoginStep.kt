@@ -38,9 +38,6 @@ class LoginStep: Step(), Callback<SystemUser> {
     private val logger = Logger(this)
     private val apiTokenListener = ApiTokenFetchListener()
 
-    private val voipgridApi: VoipgridApi
-        get() = ServiceGenerator.createApiService(onboarding)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         VialerApplication.get().component().inject(this)

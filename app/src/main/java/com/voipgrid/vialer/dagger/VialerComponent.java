@@ -9,6 +9,7 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccounts;
+import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
@@ -21,6 +22,7 @@ import com.voipgrid.vialer.dialer.NumberInputView;
 import com.voipgrid.vialer.logging.VialerBaseActivity;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.onboarding.steps.LoginStep;
+import com.voipgrid.vialer.onboarding.steps.MobileNumberStep;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.t9.T9Fragment;
@@ -69,6 +71,8 @@ public interface VialerComponent {
     @Nullable
     PhoneAccounts getPhoneAccounts();
 
+    SystemUser getSystemUser();
+
     void inject(CallRecordViewHolder callRecordViewHolder);
 
     void inject(LoginRequiredActivity loginRequiredActivity);
@@ -90,4 +94,6 @@ public interface VialerComponent {
     void inject(ForgottenPasswordActivity forgottenPasswordActivity);
 
     void inject(LoginStep loginStep);
+
+    void inject(MobileNumberStep mobileNumberStep);
 }
