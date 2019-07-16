@@ -50,7 +50,7 @@ class MobileNumberStep: Step(), View.OnClickListener {
         super.onResume()
         VialerApplication.get().component().inject(this)
 
-        TODO("Add is loading")
+//        TODO("Add is loading")
         if (!systemUserStorage.has(SystemUser::class.java)) {
             onboarding?.restart()
             return

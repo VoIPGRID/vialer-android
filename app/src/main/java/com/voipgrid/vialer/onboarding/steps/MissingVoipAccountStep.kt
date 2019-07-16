@@ -7,6 +7,9 @@ import com.voipgrid.vialer.WebActivityHelper
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.PhoneAccountHelper
 import kotlinx.android.synthetic.main.onboarding_missing_voip_account.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MissingVoipAccountStep: Step() {
 
@@ -28,7 +31,6 @@ class MissingVoipAccountStep: Step() {
                 )
             }
         }
-
     }
 
     override fun onResume() {
@@ -38,12 +40,21 @@ class MissingVoipAccountStep: Step() {
             return
         }
 
-        onboarding?.let {
-            Thread {
-                if (PhoneAccountHelper(onboarding).linkedPhoneAccount != null) {
+        progressIfLinkedPhoneAccountFound()
+    }
+
+    /**
+     * Perform a request to the api to check if we now have a phone
+     * account and automatically progress onboarding.
+     *
+     */
+    private fun progressIfLinkedPhoneAccountFound() {
+        GlobalScope.launch {
+            PhoneAccountHelper(onboarding).linkedPhoneAccount?.let {
+                launch(Dispatchers.Main) {
                     onboarding?.progress()
                 }
-            }.start()
+            }
         }
     }
 
