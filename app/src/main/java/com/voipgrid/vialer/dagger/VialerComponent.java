@@ -3,6 +3,7 @@ package com.voipgrid.vialer.dagger;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.ForgottenPasswordActivity;
 import com.voipgrid.vialer.MainActivity;
+import com.voipgrid.vialer.NavigationDrawerActivity;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.SettingsActivity;
 import com.voipgrid.vialer.VialerApplication;
@@ -21,6 +22,7 @@ import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.dialer.NumberInputView;
 import com.voipgrid.vialer.logging.VialerBaseActivity;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
+import com.voipgrid.vialer.onboarding.OnboardingActivity;
 import com.voipgrid.vialer.onboarding.steps.LoginStep;
 import com.voipgrid.vialer.onboarding.steps.MobileNumberStep;
 import com.voipgrid.vialer.onboarding.steps.TwoFactorStep;
@@ -99,4 +101,8 @@ public interface VialerComponent {
     void inject(MobileNumberStep mobileNumberStep);
 
     void inject(TwoFactorStep twoFactorStep);
+
+    void inject(NavigationDrawerActivity twoFactorStep);
+
+    void inject(OnboardingActivity onboardingActivity);
 }

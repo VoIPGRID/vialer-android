@@ -23,14 +23,8 @@ abstract class Step: Fragment() {
 
     protected abstract val layout: Int
 
-    /**
-     * Only set to TRUE if you want to let the user leave this
-     * step by scrolling right or left.
-     *
-     */
-    open val canManuallyLeaveThisStep = false
-
-    protected var onboarding : OnboardingActivity? = null
+    protected val onboarding : OnboardingActivity?
+        get() = activity as OnboardingActivity?
 
     protected val voipgridApi: VoipgridApi
         get() = ServiceGenerator.createApiService(onboarding)
@@ -47,11 +41,6 @@ abstract class Step: Fragment() {
      */
     open fun shouldThisStepBeSkipped(): Boolean {
         return false
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        onboarding = activity as OnboardingActivity
     }
 
     /**

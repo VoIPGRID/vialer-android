@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.onboarding.steps
 
 import android.app.AlertDialog
+import android.os.Bundle
 import android.text.Editable
 import android.util.Log
 import android.view.MotionEvent
@@ -27,12 +28,11 @@ class MobileNumberStep: Step(), View.OnClickListener {
 
     override val layout = R.layout.onboarding_step_mobile_number
 
-    private val user: SystemUser by lazy {
-        VialerApplication.get().component().systemUser
-    }
-
-    @Inject lateinit var jsonStorage: JsonStorage<Any>
+    @Inject lateinit var systemUserStorage: JsonStorage<SystemUser>
+    @Inject lateinit var phoneAccountStorage: JsonStorage<PhoneAccount>
     @Inject lateinit var preferences: Preferences
+
+    private lateinit var user: SystemUser
 
     private val outgoingNumber: String?
         get() = if (user.outgoingCli == "suppressed") onboarding?.getString(R.string.supressed_number) else user.outgoingCli
@@ -49,6 +49,13 @@ class MobileNumberStep: Step(), View.OnClickListener {
     override fun onResume() {
         super.onResume()
         VialerApplication.get().component().inject(this)
+
+        if (!systemUserStorage.has(SystemUser::class.java)) {
+            onboarding?.restart()
+            return
+        }
+
+        user = systemUserStorage.get(SystemUser::class.java)
 
         val enableContinueButton: (_: Editable?) -> Unit = {
             button_configure.isEnabled = mobileNumberTextDialog.text.isNotEmpty()
@@ -109,13 +116,12 @@ class MobileNumberStep: Step(), View.OnClickListener {
             val systemUser = user
             systemUser.mobileNumber = mobileNumber
             systemUser.outgoingCli = outgoingNumber
-            jsonStorage.save(user)
+            systemUserStorage.save(user)
 
             if (systemUser.phoneAccountId != null) {
                 voipgridApi.phoneAccount(systemUser.phoneAccountId).enqueue(configureCallback)
             } else {
-                Log.e("TEST123", "Setting no voip account...")
-                onboarding?.hasNoVoipAccount = true
+                onboarding?.hasVoipAccount = false
                 onboarding?.progress()
             }
         }
@@ -132,7 +138,7 @@ class MobileNumberStep: Step(), View.OnClickListener {
                 return
             }
 
-            jsonStorage.save(response.body() as PhoneAccount)
+            phoneAccountStorage.save(response.body() as PhoneAccount)
 
             if (preferences.hasSipPermission()) {
                 MiddlewareHelper.registerAtMiddleware(onboarding)

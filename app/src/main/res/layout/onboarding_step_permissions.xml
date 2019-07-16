@@ -19,9 +19,9 @@
                   tools:layout_editor_absoluteX="0dp">
 
         <ImageView
+            android:id="@+id/iconIv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/iconIv"
         />
 
         <TextView
@@ -36,9 +36,9 @@
             style="@style/HeaderSubTitleTextViewStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp"/>
+            android:paddingRight="10dp"
+            android:textSize="20sp"/>
     </LinearLayout>
 
 
@@ -59,7 +59,8 @@
                 android:text="@string/onboarding_skip"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/acceptButton"
-                app:layout_constraintHorizontal_bias="0.5" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
 
         <Button android:id="@+id/acceptButton"
@@ -70,7 +71,8 @@
                 android:text="@string/onboarding_permission_accept"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5" app:layout_constraintStart_toEndOf="@+id/denyButton"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/denyButton"
                 app:layout_constraintTop_toTopOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 

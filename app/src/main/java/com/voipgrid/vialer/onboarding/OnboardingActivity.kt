@@ -9,8 +9,10 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.viewpager2.widget.ViewPager2
+import com.voipgrid.vialer.Logout
 import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.steps.*
@@ -19,10 +21,13 @@ import com.voipgrid.vialer.onboarding.steps.permissions.MicrophonePermissionStep
 import com.voipgrid.vialer.onboarding.steps.permissions.OptimizationWhitelistStep
 import com.voipgrid.vialer.onboarding.steps.permissions.PhoneStatePermissionStep
 import kotlinx.android.synthetic.main.activity_onboarding.*
+import javax.inject.Inject
 
 typealias PermissionCallback = () -> Unit
 
 class OnboardingActivity: AppCompatActivity() {
+
+    @Inject lateinit var logout: Logout
 
     private lateinit var adapter: OnboardingAdapter
     private val logger = Logger(this)
@@ -33,7 +38,7 @@ class OnboardingActivity: AppCompatActivity() {
     var password = ""
     var code = ""
     var requiresTwoFactor = false
-    var hasNoVoipAccount = false
+    var hasVoipAccount = true
 
     private val currentStep : Step
         get() = adapter.getStep(viewPager.currentItem)
@@ -41,6 +46,7 @@ class OnboardingActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
+        VialerApplication.get().component().inject(this)
 
         viewPager.registerOnPageChangeCallback(OnPageChangeCallback())
 
@@ -79,8 +85,22 @@ class OnboardingActivity: AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        restart()
+    }
+
     private fun isLastItem(): Boolean {
         return viewPager.currentItem == (adapter.itemCount - 1)
+    }
+
+    /**
+     * Restart the onboarding process.
+     *
+     */
+    fun restart() {
+        logout.perform(true)
+        finish()
+        startActivity(intent)
     }
 
     /**
@@ -102,25 +122,28 @@ class OnboardingActivity: AppCompatActivity() {
         permissionCallback?.invoke()
     }
 
+    private fun hideKeyboard() {
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+        if (currentFocus != null) {
+            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+        }
+    }
+
     private inner class OnPageChangeCallback : ViewPager2.OnPageChangeCallback() {
 
         override fun onPageSelected(currentPage: Int) {
             super.onPageSelected(currentPage)
-            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
-            if (currentFocus != null) {
-                (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-            }
+            hideKeyboard()
 
-            val currentStep = adapter.getStep(currentPage)
-            val nextPage = currentPage + 1
+            viewPager.postDelayed({
+                val currentStep = adapter.getStep(currentPage)
+                val nextPage = currentPage + 1
 
-            if (currentStep.shouldThisStepBeSkipped()) {
-                logger.i("Skipping ${currentStep.javaClass.simpleName} at {$currentPage} and moving to {$currentPage + 1}")
-
-                viewPager.postDelayed({
+                if (currentStep.shouldThisStepBeSkipped()) {
+                    logger.i("Skipping ${currentStep.javaClass.simpleName} at {$currentPage} and moving to {$nextPage}")
                     viewPager.setCurrentItem(nextPage, false)
-                }, 10)
-            }
+                }
+            }, 10)
         }
     }
 }

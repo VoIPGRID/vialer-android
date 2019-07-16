@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.onboarding.steps
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
@@ -32,6 +33,7 @@ class TwoFactorStep: Step() {
             button_continue.isEnabled = true
             error(title, description)
         }
+
         login.onLoggedIn = { onboarding?.progress() }
 
         button_continue.setOnClickListener {
@@ -48,6 +50,7 @@ class TwoFactorStep: Step() {
     }
 
     override fun shouldThisStepBeSkipped(): Boolean {
-        return !(onboarding?.requiresTwoFactor ?: false)
+        Log.e("TEST123", "onbaording is null in 2fa? " + (onboarding == null))
+        return !(onboarding?.requiresTwoFactor ?: true)
     }
 }

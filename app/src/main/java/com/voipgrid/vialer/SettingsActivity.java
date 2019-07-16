@@ -34,7 +34,6 @@ import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.VoipDisabledNotification;
-import com.voipgrid.vialer.onboarding.SetupActivity;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -272,7 +271,7 @@ public class SettingsActivity extends LoginRequiredActivity {
                         // to disabled. Setting disabled in the settings first makes sure
                         // the onCheckChanged does not execute the code that normally is executed
                         // on a change in the check of the switch.
-                        SetupActivity.launchToSetVoIPAccount(SettingsActivity.this);
+//                        SetupActivity.launchToSetVoIPAccount(SettingsActivity.this); TODO fix this to launch ours
                     }
 
                     new VoipDisabledNotification().remove();
