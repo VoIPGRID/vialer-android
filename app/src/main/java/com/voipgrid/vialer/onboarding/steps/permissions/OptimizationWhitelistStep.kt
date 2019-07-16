@@ -1,8 +1,9 @@
 package com.voipgrid.vialer.onboarding.steps.permissions
 
 import android.app.Activity
-import android.content.Context
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.VialerApplication
+import com.voipgrid.vialer.onboarding.core.PermissionsStep
 import com.voipgrid.vialer.util.BatteryOptimizationManager
 
 class OptimizationWhitelistStep: PermissionsStep() {
@@ -12,11 +13,11 @@ class OptimizationWhitelistStep: PermissionsStep() {
     override val icon = R.drawable.ic_battery_full
 
     private val batteryOptimizationManager: BatteryOptimizationManager by lazy {
-        BatteryOptimizationManager(onboarding as Context)
+        BatteryOptimizationManager(VialerApplication.get())
     }
 
     override fun performPermissionRequest() {
-        batteryOptimizationManager.prompt(onboarding as Activity)
+        batteryOptimizationManager.prompt(onboarding as Activity, onlyDisplayPrompt = true)
     }
 
     override fun alreadyHasPermission(): Boolean {

@@ -3,7 +3,6 @@ package com.voipgrid.vialer.onboarding;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +30,7 @@ public class TwoFactorAuthenticationFragment extends OnboardingFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_two_factor_authentication, container, false);
+        View view = inflater.inflate(R.layout.onboarding_step_two_factor, container, false);
 
         mUnbinder = ButterKnife.bind(this, view);
         mTwoFactorFragmentHelper = new TwoFactorFragmentHelper(getActivity(), mCodeField);

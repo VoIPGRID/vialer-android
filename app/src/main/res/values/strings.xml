@@ -121,7 +121,7 @@
     <string name="onboarding_permission_microphone_title">Microphone Permission</string>
     <string name="onboarding_permission_microphone_justification">This permission is required to transmit your voice when making or receiving calls, calls are not possible without this permission enabled. We do not access the microphone at any other time other than when there is a call in progress.</string>
     <string name="onboarding_permission_accept">Accept</string>
-    <string name="onboarding_permission_deny">Skip</string>
+    <string name="onboarding_skip">Skip</string>
     <string name="onboarding_battery_optimization_whitelist_title">Battery Optimization</string>
     <string name="onboarding_battery_optimization_whitelist_justification">We ask to be whitelisted against battery optimization to prevent certain Android operating systems for silently killing the app, preventing incoming calls. Even when whitelisted we are aware of how important battery is and use it very conservatively.</string>
 

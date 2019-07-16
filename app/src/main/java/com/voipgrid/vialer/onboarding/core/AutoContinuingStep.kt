@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.onboarding.steps
+package com.voipgrid.vialer.onboarding.core
 
 import android.os.Handler
 

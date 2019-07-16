@@ -81,7 +81,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
 //            Intent intent = new Intent(this, SetupActivity.class);
 //
 //            Bundle bundle = new Bundle();
-//            bundle.putInt("fragment", R.id.fragment_account);
+//            bundle.putInt("fragment", R.id.onboarding_step_mobile_number);
 //            bundle.putString("activity", AccountFragment.class.getSimpleName());
 //            intent.putExtras(bundle);
 //

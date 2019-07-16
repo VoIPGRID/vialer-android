@@ -5,16 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.voipgrid.vialer.api.VoipgridApi
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.models.PasswordResetParams
-import com.voipgrid.vialer.onboarding.steps.onTextChanged
+import com.voipgrid.vialer.onboarding.core.onTextChanged
 import kotlinx.android.synthetic.main.activity_forgotten_password.*
-import kotlinx.android.synthetic.main.fragment_login.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

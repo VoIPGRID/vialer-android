@@ -34,7 +34,7 @@ public class TwoFactorAuthenticationDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity())
                 .setView(getActivity().getLayoutInflater().inflate(
-                        R.layout.fragment_two_factor_authentication, null
+                        R.layout.onboarding_step_two_factor, null
                 ))
                 .create();
     }

@@ -220,7 +220,7 @@ public class SettingsActivity extends LoginRequiredActivity {
         ignoreBatteryOptimizationSwitch.setOnClickListener(null);
         ignoreBatteryOptimizationSwitch.setChecked(batteryOptimizationManager.isIgnoringBatteryOptimization());
         ignoreBatteryOptimizationSwitch.setOnClickListener(
-                view -> batteryOptimizationManager.prompt(SettingsActivity.this));
+                view -> batteryOptimizationManager.prompt(SettingsActivity.this, false));
     }
 
     /**

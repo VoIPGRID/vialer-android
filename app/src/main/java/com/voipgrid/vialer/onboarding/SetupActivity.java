@@ -44,7 +44,6 @@ import retrofit2.Response;
  */
 public class SetupActivity extends VialerBaseActivity implements
         OnboardingFragment.FragmentInteractionListener,
-        SetUpVoipAccountFragment.FragmentInteractionListener,
         TwoFactorAuthenticationFragment.FragmentInteractionListener,
         Callback {
 
@@ -78,10 +77,10 @@ public class SetupActivity extends VialerBaseActivity implements
         if (bundle != null) {
             fragmentId = bundle.getInt("fragment");
             mActivityToReturnToName = bundle.getString("activity");
-//            if (fragmentId == R.id.fragment_voip_account_missing) {
+//            if (fragmentId == R.id.onboarding_missing_voip_account) {
 //                gotoFragment = ((SetUpVoipAccountFragment) getFragmentManager()
 //                        .findFragmentById(fragmentId)).newInstance();
-//            } else if (fragmentId == R.id.fragment_account) {
+//            } else if (fragmentId == R.id.onboarding_step_mobile_number) {
 //                SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
 //                gotoFragment = ((AccountFragment) getFragmentManager()
 //                        .findFragmentById(fragmentId))
@@ -166,7 +165,6 @@ public class SetupActivity extends VialerBaseActivity implements
 
 
 
-    @Override
     public void onSetVoipAccount(Fragment fragment) {
         WebActivityHelper webHelper = new WebActivityHelper(this);
         webHelper.startWebActivity(
@@ -356,13 +354,13 @@ public class SetupActivity extends VialerBaseActivity implements
     }
 
     public static void launchToSetVoIPAccount(Activity fromActivity) {
-        Intent intent = new Intent(fromActivity, SetupActivity.class);
-        Bundle b = new Bundle();
-        b.putInt("fragment", R.id.fragment_voip_account_missing);
-        b.putString("activity", SettingsActivity.class.getSimpleName());
-        intent.putExtras(b);
-
-        fromActivity.startActivity(intent);
+//        Intent intent = new Intent(fromActivity, SetupActivity.class);
+//        Bundle b = new Bundle();
+//        b.putInt("fragment", R.id.fragment_voip_account_missing);
+//        b.putString("activity", SettingsActivity.class.getSimpleName());
+//        intent.putExtras(b);
+//
+//        fromActivity.startActivity(intent);
     }
 
     private class ApiTokenFetchListener implements ApiTokenFetcher.ApiTokenListener {

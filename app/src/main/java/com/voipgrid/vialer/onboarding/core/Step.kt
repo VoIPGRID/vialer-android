@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.onboarding.steps
+package com.voipgrid.vialer.onboarding.core
 
 import android.app.AlertDialog
 import android.content.ClipDescription
@@ -39,6 +39,12 @@ abstract class Step: Fragment() {
         return inflater.inflate(layout, container, false)
     }
 
+    /**
+     * Return TRUE to skip this step, this is checked twice, when first
+     * being added to the onboarder and also just before the screen is due
+     * to be shown.
+     *
+     */
     open fun shouldThisStepBeSkipped(): Boolean {
         return false
     }

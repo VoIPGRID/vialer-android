@@ -4,21 +4,22 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.onboarding.VoipgridLogin
+import com.voipgrid.vialer.onboarding.core.Step
+import com.voipgrid.vialer.onboarding.core.onTextChanged
 import com.voipgrid.vialer.util.AccountHelper
 import com.voipgrid.vialer.util.ConnectivityHelper
-import kotlinx.android.synthetic.main.fragment_login.*
+import kotlinx.android.synthetic.main.onboarding_step_login.*
 import javax.inject.Inject
 
 class LoginStep: Step() {
 
-    override val layout = R.layout.fragment_login
+    override val layout = R.layout.onboarding_step_login
 
     @Inject lateinit var connectivityHelper: ConnectivityHelper
     @Inject lateinit var accountHelper: AccountHelper

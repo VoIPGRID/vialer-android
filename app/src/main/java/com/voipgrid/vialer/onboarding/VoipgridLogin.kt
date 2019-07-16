@@ -10,7 +10,7 @@ import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.util.AccountHelper
 import com.voipgrid.vialer.util.JsonStorage
-import kotlinx.android.synthetic.main.fragment_login.*
+import kotlinx.android.synthetic.main.onboarding_step_login.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

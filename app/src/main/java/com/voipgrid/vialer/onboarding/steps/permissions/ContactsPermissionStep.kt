@@ -2,6 +2,7 @@ package com.voipgrid.vialer.onboarding.steps.permissions
 
 import android.Manifest
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.onboarding.core.PermissionsStep
 
 class ContactsPermissionStep: PermissionsStep() {
     override val title = R.string.onboarding_permission_contacts_title

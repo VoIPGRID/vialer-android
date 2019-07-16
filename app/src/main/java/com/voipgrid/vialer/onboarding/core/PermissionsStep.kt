@@ -1,15 +1,11 @@
-package com.voipgrid.vialer.onboarding.steps.permissions
+package com.voipgrid.vialer.onboarding.core
 
-import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
-import com.voipgrid.vialer.onboarding.steps.Step
 import kotlinx.android.synthetic.main.onboarding_step_permissions.*
 
 abstract class PermissionsStep: Step() {

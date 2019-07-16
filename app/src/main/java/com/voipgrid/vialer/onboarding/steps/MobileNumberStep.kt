@@ -2,6 +2,7 @@ package com.voipgrid.vialer.onboarding.steps
 
 import android.app.AlertDialog
 import android.text.Editable
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
@@ -12,9 +13,11 @@ import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.middleware.MiddlewareHelper
+import com.voipgrid.vialer.onboarding.core.Step
+import com.voipgrid.vialer.onboarding.core.onTextChanged
 import com.voipgrid.vialer.util.JsonStorage
 import com.voipgrid.vialer.util.PhoneNumberUtils
-import kotlinx.android.synthetic.main.fragment_account.*
+import kotlinx.android.synthetic.main.onboarding_step_mobile_number.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -22,7 +25,7 @@ import javax.inject.Inject
 
 class MobileNumberStep: Step(), View.OnClickListener {
 
-    override val layout = R.layout.fragment_account
+    override val layout = R.layout.onboarding_step_mobile_number
 
     private val user: SystemUser by lazy {
         VialerApplication.get().component().systemUser
@@ -70,6 +73,8 @@ class MobileNumberStep: Step(), View.OnClickListener {
             return
         }
 
+        button_configure.isEnabled = false
+
         if (hasOutgoingNumber) {
             processMobileAndOutgoingNumber(mobileNumber)
             return
@@ -91,6 +96,7 @@ class MobileNumberStep: Step(), View.OnClickListener {
 
     private fun error() {
         error(R.string.onboarding_account_configure_failed_title, R.string.onboarding_account_configure_invalid_phone_number)
+        button_configure.isEnabled = true
     }
 
     private inner class MobileNumberCallback: Callback<MobileNumber> {
@@ -108,6 +114,8 @@ class MobileNumberStep: Step(), View.OnClickListener {
             if (systemUser.phoneAccountId != null) {
                 voipgridApi.phoneAccount(systemUser.phoneAccountId).enqueue(configureCallback)
             } else {
+                Log.e("TEST123", "Setting no voip account...")
+                onboarding?.hasNoVoipAccount = true
                 onboarding?.progress()
             }
         }

@@ -1,19 +1,18 @@
 package com.voipgrid.vialer.onboarding.steps
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
-import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.onboarding.VoipgridLogin
+import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.TwoFactorFragmentHelper
-import kotlinx.android.synthetic.main.fragment_two_factor_authentication.*
+import kotlinx.android.synthetic.main.onboarding_step_two_factor.*
 import javax.inject.Inject
 
 class TwoFactorStep: Step() {
 
-    override val layout = R.layout.fragment_two_factor_authentication
+    override val layout = R.layout.onboarding_step_two_factor
 
     @Inject lateinit var login: VoipgridLogin
 

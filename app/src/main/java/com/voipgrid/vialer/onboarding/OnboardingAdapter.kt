@@ -1,25 +1,25 @@
 package com.voipgrid.vialer.onboarding
 
-import android.content.Context
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.voipgrid.vialer.R
-import com.voipgrid.vialer.onboarding.steps.Step
-import kotlin.reflect.KClass
+import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.onboarding.core.Step
 
 class OnboardingAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle): FragmentStateAdapter(fragmentManager, lifecycle) {
 
     private var steps = arrayListOf<Step>()
 
+    private val logger = Logger(this)
+
     fun addStep(step: Step) {
-        steps.add(step)
+        if (!step.shouldThisStepBeSkipped()) {
+            logger.i("Adding ${step.javaClass.simpleName} to onboarder")
+            steps.add(step)
+        } else {
+            logger.i("Not adding ${step.javaClass.simpleName} to onboarder")
+        }
     }
 
     override fun getItemCount(): Int {
