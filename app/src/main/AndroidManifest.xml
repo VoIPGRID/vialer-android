@@ -123,18 +123,6 @@
         </receiver>
 
         <activity
-            android:name=".util.UpdateActivity"
-            android:label="@string/title_activity_update"
-            android:screenOrientation="portrait"
-            android:theme="@style/OnboardingTheme" >
-        </activity>
-        <activity
-            android:name=".onboarding.SetupActivity"
-            android:label="@string/title_activity_setup"
-            android:screenOrientation="portrait"
-            android:theme="@style/OnboardingTheme">
-        </activity>
-        <activity
             android:name=".WebActivity"
             android:label="@string/title_activity_web"
             android:parentActivityName=".MainActivity"
@@ -143,26 +131,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.voipgrid.vialer.MainActivity" />
         </activity>
-        <activity
-            android:name=".WarningActivity"
-            android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.voipgrid.vialer.MainActivity" />
-        </activity>
-
-        <!--
-             Optionally, register AnalyticsReceiver and AnalyticsService to support background
-             dispatching on non-Google Play devices
-        -->
-        <receiver
-            android:name="com.google.android.gms.analytics.AnalyticsReceiver"
-            android:enabled="true" >
-            <intent-filter>
-                <action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" />
-            </intent-filter>
-        </receiver>
 
         <receiver android:name="androidx.media.session.MediaButtonReceiver" >
             <intent-filter>
@@ -176,12 +144,6 @@
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </service>
-
-        <service
-            android:name="com.google.android.gms.analytics.AnalyticsService"
-            android:enabled="true"
-            android:exported="false" />
-
 
         <activity
             android:name=".SettingsActivity"

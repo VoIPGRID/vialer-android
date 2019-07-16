@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.onboarding.steps
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.WebActivityHelper
@@ -16,12 +15,10 @@ class MissingVoipAccountStep: Step() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.e("TEST123", "onbaording is null? " + (onboarding == null))
         continueButton.setOnClickListener {
             onboarding?.progress()
         }
 
-        Log.e("TEST123", "onbaording is null? " + (onboarding == null))
         setVoipAccountButton.setOnClickListener {
             onboarding?.let {
                 WebActivityHelper(onboarding).startWebActivity(
@@ -37,7 +34,6 @@ class MissingVoipAccountStep: Step() {
     override fun onResume() {
         super.onResume()
 
-        Log.e("TEST123", "onbaording is null? " + (onboarding == null))
         if (onboarding?.hasVoipAccount == true) {
             return
         }
@@ -52,7 +48,6 @@ class MissingVoipAccountStep: Step() {
     }
 
     override fun shouldThisStepBeSkipped(): Boolean {
-        Log.e("TEST123", "onbaording is null? " + (onboarding == null))
         return (onboarding?.hasVoipAccount ?: false)
     }
 }

@@ -50,7 +50,6 @@ class TwoFactorStep: Step() {
     }
 
     override fun shouldThisStepBeSkipped(): Boolean {
-        Log.e("TEST123", "onbaording is null in 2fa? " + (onboarding == null))
         return !(onboarding?.requiresTwoFactor ?: true)
     }
 }
