@@ -45,6 +45,8 @@ class LoginStep: Step() {
             onboarding?.username = emailTextDialog.text.toString()
             onboarding?.password = passwordTextDialog.text.toString()
 
+            onboarding?.isLoading = true
+
             login.attempt(onboarding?.username ?: "", onboarding?.password ?: "")
         }
 

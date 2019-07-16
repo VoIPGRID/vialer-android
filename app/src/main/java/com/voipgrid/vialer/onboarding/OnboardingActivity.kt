@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
@@ -43,6 +45,12 @@ class OnboardingActivity: AppCompatActivity() {
     private val currentStep : Step
         get() = adapter.getStep(viewPager.currentItem)
 
+    var isLoading: Boolean
+        get() = progress.visibility == VISIBLE
+        set(loading) {
+            progress.visibility = if (loading) VISIBLE else INVISIBLE
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
@@ -68,6 +76,8 @@ class OnboardingActivity: AppCompatActivity() {
     }
 
     fun progress() {
+        isLoading = false
+
         if (isLastItem()) {
             logger.i("Onboarding has been completed, forwarding to the main activity")
 

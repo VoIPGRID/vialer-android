@@ -11,10 +11,10 @@
     <ProgressBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/progress_bar"
+        android:id="@+id/progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:progressTint="@color/progress_bar_color"
-        android:visibility="visible"
+        android:visibility="invisible"
         android:indeterminate="true"/>
 
     <androidx.viewpager2.widget.ViewPager2

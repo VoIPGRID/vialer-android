@@ -157,6 +157,7 @@
         <activity
             android:name=".twostepcall.TwoStepCallActivity"
             android:screenOrientation="portrait" />
+
         <activity android:name=".calling.IncomingCallActivity"
                   android:screenOrientation="portrait"
                   android:exported="true"
@@ -165,7 +166,11 @@
                   android:screenOrientation="portrait"
                   android:exported="true"
                   android:launchMode="singleTop"/>
-        <activity android:name=".onboarding.OnboardingActivity" android:exported="true"/>
+
+        <activity android:name=".onboarding.OnboardingActivity"
+                  android:exported="true"
+                  android:theme="@style/OnboardingTheme"/>
+
         <activity android:name=".ForgottenPasswordActivity"/>
     </application>
 

@@ -62,6 +62,7 @@ abstract class Step: Fragment() {
      *
      */
     open fun error(title: Int, description: Int) {
+        onboarding?.isLoading = false
         alert(title, description)
     }
 }
