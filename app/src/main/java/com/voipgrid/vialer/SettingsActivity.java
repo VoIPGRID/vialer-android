@@ -151,7 +151,6 @@ public class SettingsActivity extends LoginRequiredActivity {
 
         if (enableSipOnNextLoad) {
             mVoipSwitch.setChecked(true);
-            enableSipOnNextLoad = false;
         }
     }
 
@@ -251,6 +250,8 @@ public class SettingsActivity extends LoginRequiredActivity {
     public void onSipCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (mPreferences.hasSipEnabled() == isChecked) return;
 
+        boolean shouldLoadMissingVoip = !enableSipOnNextLoad;
+        enableSipOnNextLoad = false;
 
         if (!isChecked) {
             // Unregister at middleware.
@@ -269,12 +270,11 @@ public class SettingsActivity extends LoginRequiredActivity {
                         mPhoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
                         mPreferences.setSipEnabled(true);
                     } else {
-                        // Make sure sip is disabled in preference and the switch is returned
-                        // to disabled. Setting disabled in the settings first makes sure
-                        // the onCheckChanged does not execute the code that normally is executed
-                        // on a change in the check of the switch.
-                        enableSipOnNextLoad = true;
-                        SingleStepActivity.Companion.launch(SettingsActivity.this, MissingVoipAccountStep.class);
+                        if (shouldLoadMissingVoip) {
+                            enableSipOnNextLoad = true;
+                            SingleStepActivity.Companion.launch(SettingsActivity.this,
+                                    MissingVoipAccountStep.class);
+                        }
                     }
 
                     updateAndPopulate();

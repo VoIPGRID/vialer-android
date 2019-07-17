@@ -122,6 +122,7 @@ class MobileNumberStep: Step(), View.OnClickListener {
             if (systemUser.phoneAccountId != null) {
                 voipgridApi.phoneAccount(systemUser.phoneAccountId).enqueue(configureCallback)
             } else {
+                preferences.setSipEnabled(false)
                 onboarding?.hasVoipAccount = false
                 onboarding?.progress()
             }
