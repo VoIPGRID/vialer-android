@@ -20,6 +20,7 @@ import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
+import com.voipgrid.vialer.audio.AudioFocus;
 import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
@@ -248,8 +249,8 @@ public class VialerModule {
     }
 
     @Provides
-    AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager) {
-        return new AudioRouter(context, androidAudioManager, broadcastReceiverManager);
+    AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager, AudioFocus audioFocus) {
+        return new AudioRouter(context, androidAudioManager, broadcastReceiverManager, audioFocus);
     }
 
     @Singleton
@@ -260,7 +261,13 @@ public class VialerModule {
 
     @Singleton
     @Provides
-    IncomingCallRinger provideRinger(Context context) {
-        return new IncomingCallRinger(context);
+    IncomingCallRinger provideRinger(Context context, AudioFocus audioFocus) {
+        return new IncomingCallRinger(context, audioFocus);
+    }
+
+    @Singleton
+    @Provides
+    AudioFocus provideAudioFocus(AudioManager audioManager) {
+        return new AudioFocus(audioManager);
     }
 }
