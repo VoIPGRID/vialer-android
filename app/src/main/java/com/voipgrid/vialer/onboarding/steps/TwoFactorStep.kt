@@ -38,8 +38,8 @@ class TwoFactorStep: Step() {
 
         button_continue.setOnClickListener {
             button_continue.isEnabled = false
-            onboarding?.code = code
-            login.attempt(onboarding?.username ?: "", onboarding?.password ?: "", onboarding?.code ?: "")
+            onboarding?.isLoading = true
+            login.attempt(onboarding?.username ?: "", onboarding?.password ?: "", code)
         }
     }
 

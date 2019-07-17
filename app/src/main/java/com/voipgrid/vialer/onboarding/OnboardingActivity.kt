@@ -37,7 +37,6 @@ abstract class OnboardingActivity: AppCompatActivity() {
 
     var username = ""
     var password = ""
-    var code = ""
     var requiresTwoFactor = false
     var hasVoipAccount = true
 
