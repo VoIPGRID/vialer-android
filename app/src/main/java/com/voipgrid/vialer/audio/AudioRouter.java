@@ -35,6 +35,7 @@ public class AudioRouter {
     private final BroadcastReceiverManager broadcastReceiverManager;
     private final Logger logger;
     private final AudioManager audioManager;
+    private final AudioFocus audioFocus;
 
     private BluetoothDevice connectedBluetoothHeadset;
 
@@ -48,9 +49,9 @@ public class AudioRouter {
     private boolean bluetoothManuallyDisabled = false;
 
     private BluetoothHeadsetBroadcastReceiver bluetoothHeadsetReceiver = new BluetoothHeadsetBroadcastReceiver();
-    private AudioFocusHandler audioFocusHandler = new AudioFocusHandler();
 
-    public AudioRouter(Context context, AudioManager audioManager, BroadcastReceiverManager broadcastReceiverManager) {
+    public AudioRouter(Context context, AudioManager audioManager, BroadcastReceiverManager broadcastReceiverManager, AudioFocus audioFocus) {
+        this.audioFocus = audioFocus;
         this.logger = new Logger(AudioRouter.class);
         this.context = context;
         this.broadcastReceiverManager = broadcastReceiverManager;
@@ -61,7 +62,6 @@ public class AudioRouter {
         broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(bluetoothHeadsetReceiver, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
 
         BluetoothMediaSessionService.start(context);
-        initializeAndroidAudioManager();
     }
 
     /**
@@ -83,7 +83,6 @@ public class AudioRouter {
      */
     public void routeAudioViaBluetooth() {
         logAudioRouteRequest("bluetooth");
-        initializeAndroidAudioManager();
 
         bluetoothManuallyDisabled = false;
 
@@ -103,7 +102,6 @@ public class AudioRouter {
      */
     public void routeAudioViaSpeaker() {
         logAudioRouteRequest("speaker");
-        initializeAndroidAudioManager();
 
         bluetoothManuallyDisabled = true;
 
@@ -123,7 +121,6 @@ public class AudioRouter {
      */
     public void routeAudioViaEarpiece() {
         logAudioRouteRequest("earpiece");
-        initializeAndroidAudioManager();
 
         bluetoothManuallyDisabled = true;
 
@@ -258,23 +255,12 @@ public class AudioRouter {
     }
 
     /**
-     * Initialize the audio manager, setting the correct stream and listener.
-     *
-     */
-    private void initializeAndroidAudioManager() {
-        focus();
-    }
-
-    /**
      * Resets the audio manager, setting back to default and stopping listening for events.
      *
      */
     private void resetAndroidAudioManager() {
         if(audioManager == null) return;
-
-        audioManager.setMode(AudioManager.MODE_NORMAL);
-        audioManager.abandonAudioFocus(audioFocusHandler);
-        audioManager.setSpeakerphoneOn(false);
+        audioFocus.reset();
     }
 
     /**
@@ -282,12 +268,7 @@ public class AudioRouter {
      *
      */
     public void focus() {
-        audioManager.requestAudioFocus(
-                audioFocusHandler,
-                AudioManager.STREAM_VOICE_CALL,
-                AudioManager.AUDIOFOCUS_GAIN
-        );
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        audioFocus.forCall();
     }
 
     /**
@@ -325,51 +306,6 @@ public class AudioRouter {
                 logger.i("This state suggests the user has pressed a button, reconnecting bluetooth and performing a single button action on the current call");
                 SipService.performActionOnSipService(context, SipService.Actions.ANSWER_OR_HANGUP);
                 routeAudioViaBluetooth();
-            }
-        }
-    }
-
-    private class AudioFocusHandler implements AudioManager.OnAudioFocusChangeListener {
-
-        private int previousVolume = -1;
-
-        private boolean audioWasLost = false;
-
-        @Override
-        public void onAudioFocusChange(final int focusChange) {
-            logger.v("onAudioFocusChange()...");
-            logger.v("====> " + focusChange);
-            switch (focusChange) {
-                case AudioManager.AUDIOFOCUS_GAIN:
-                    logger.i("We gained audio focus!");
-                    if (previousVolume != -1) {
-                        audioManager.setStreamVolume(
-                                AudioManager.STREAM_VOICE_CALL, previousVolume, 0);
-                        previousVolume = -1;
-                    }
-
-                    logger.i("Was the audio lost: " + audioWasLost);
-                    if (audioWasLost) {
-                        audioWasLost = false;
-                        routeAudioViaBluetooth();
-                    }
-                    break;
-                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                case AudioManager.AUDIOFOCUS_LOSS:
-                    logger.i("Lost audio focus! Probably incoming native audio call.");
-                    audioWasLost = true;
-                    break;
-                case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
-                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                    logger.i(
-                            "We must lower our audio volume! Probably incoming notification / "
-                                    + "driving directions.");
-                    previousVolume = audioManager.getStreamVolume(
-                            AudioManager.STREAM_VOICE_CALL);
-                    audioManager.setStreamVolume(
-                            AudioManager.STREAM_VOICE_CALL, 1,
-                            0);
-                    break;
             }
         }
     }

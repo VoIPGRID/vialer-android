@@ -5,9 +5,10 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.provider.Settings
+import com.voipgrid.vialer.audio.AudioFocus
 import com.voipgrid.vialer.logging.Logger
 
-class IncomingCallRinger(val context : Context) : IncomingCallAlert {
+class IncomingCallRinger(private val context : Context, private val focus: AudioFocus) : IncomingCallAlert {
 
     private var logger = Logger(this)
 
@@ -22,10 +23,7 @@ class IncomingCallRinger(val context : Context) : IncomingCallAlert {
     override fun start() {
         if (manager.ringerMode != AudioManager.RINGER_MODE_NORMAL) return
 
-        manager.apply {
-            requestAudioFocus(null, AudioManager.STREAM_RING, AudioManager.AUDIOFOCUS_GAIN)
-            mode = AudioManager.MODE_RINGTONE
-        }
+        focus.forRinger()
 
         logger.i("Starting ringer")
 
