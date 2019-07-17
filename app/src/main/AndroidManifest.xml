@@ -169,11 +169,11 @@
 
         <activity android:name=".ForgottenPasswordActivity"/>
 
-        <activity android:name=".onboarding.FullOnboardingActivity"
+        <activity android:name=".onboarding.OnboardingActivity"
                   android:theme="@style/OnboardingTheme"
                   android:exported="true"/>
 
-        <activity android:name=".onboarding.SingleStepActivity"
+        <activity android:name=".onboarding.SingleOnboardingStepActivity"
                   android:theme="@style/OnboardingTheme"/>
     </application>
 

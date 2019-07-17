@@ -1,90 +1,105 @@
 package com.voipgrid.vialer.onboarding
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
-import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.startActivity
-import com.voipgrid.vialer.R
-import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.onboarding.core.OnboardingState
+import androidx.viewpager2.widget.ViewPager2
+import com.voipgrid.vialer.Logout
+import com.voipgrid.vialer.MainActivity
+import com.voipgrid.vialer.VialerApplication
+import com.voipgrid.vialer.onboarding.core.Step
+import com.voipgrid.vialer.onboarding.steps.*
+import com.voipgrid.vialer.onboarding.steps.permissions.ContactsPermissionStep
+import com.voipgrid.vialer.onboarding.steps.permissions.MicrophonePermissionStep
+import com.voipgrid.vialer.onboarding.steps.permissions.OptimizationWhitelistStep
+import com.voipgrid.vialer.onboarding.steps.permissions.PhoneStatePermissionStep
 import kotlinx.android.synthetic.main.activity_onboarding.*
+import javax.inject.Inject
 
-typealias PermissionCallback = () -> Unit
+class OnboardingActivity : Onboarder() {
 
-abstract class OnboardingActivity: AppCompatActivity() {
+    @Inject lateinit var logout: Logout
 
-    protected val logger = Logger(this)
+    private lateinit var adapter: OnboardingAdapter
 
-    private var permissionCallback: PermissionCallback? = null
-
-    open val state: OnboardingState = OnboardingState()
-
-    var isLoading: Boolean
-        get() = progress.visibility == VISIBLE
-        set(loading) {
-            progress.visibility = if (loading) VISIBLE else INVISIBLE
-        }
-
-    abstract fun progress()
-
-    abstract fun restart()
-
-    abstract override fun onBackPressed()
+    private val currentStep : Step
+        get() = adapter.getStep(viewPager.currentItem)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_onboarding)
+        VialerApplication.get().component().inject(this)
+
+        viewPager.registerOnPageChangeCallback(OnPageChangeCallback())
+
+        adapter = OnboardingAdapter(supportFragmentManager, lifecycle).apply {
+            addStep(LogoStep())
+            addStep(LoginStep())
+            addStep(TwoFactorStep())
+            addStep(MobileNumberStep())
+            addStep(MissingVoipAccountStep())
+            addStep(ContactsPermissionStep())
+            addStep(PhoneStatePermissionStep())
+            addStep(MicrophonePermissionStep())
+            addStep(OptimizationWhitelistStep())
+            addStep(WelcomeStep())
+        }
+
+        viewPager.adapter = adapter
+        viewPager.isUserInputEnabled = false
     }
 
-    /**
-     * Request a permission and provide a block that will be called back when the
-     * result is received. Only one callback can be active at any one time.
-     *
-     */
-    fun requestPermission(permission: String, callback: PermissionCallback) {
-        permissionCallback = callback
-        ActivityCompat.requestPermissions(this, arrayOf(permission), 1)
-    }
+    override fun progress() {
+        isLoading = false
 
-    /**
-     * Invoke the permission callback when the user accepts/denies a permission.
-     *
-     */
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        permissionCallback?.invoke()
-    }
+        if (isLastItem()) {
+            logger.i("Onboarding has been completed, forwarding to the main activity")
 
-    /**
-     * Whenever we receive an activity result, we want to invoke the permission callback
-     * as this is used when requesting the app to be whitelisted.
-     *
-     */
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        permissionCallback?.invoke()
-    }
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+            return
+        }
 
-    /**
-     * Hides the keyboard, this should be called every time a new fragment is loaded.
-     *
-     */
-    protected fun hideKeyboard() {
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
-        if (currentFocus != null) {
-            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+        logger.i("Progressing the onboarder from ${currentStep.javaClass.simpleName}")
+
+        runOnUiThread {
+            viewPager.setCurrentItem(viewPager.currentItem + 1, true)
         }
     }
 
-    companion object {
-        fun start(context: Context) {
-            context.startActivity(Intent(context, FullOnboardingActivity::class.java))
+    private fun isLastItem(): Boolean {
+        return viewPager.currentItem == (adapter.itemCount - 1)
+    }
+
+    override fun onBackPressed() {
+        restart()
+    }
+
+    /**
+     * Restart the onboarding process.
+     *
+     */
+    override fun restart() {
+        logout.perform(true)
+        finish()
+        startActivity(intent)
+    }
+
+    private inner class OnPageChangeCallback : ViewPager2.OnPageChangeCallback() {
+
+        override fun onPageSelected(currentPage: Int) {
+            super.onPageSelected(currentPage)
+            hideKeyboard()
+
+            viewPager.postDelayed({
+                val currentStep = adapter.getStep(currentPage)
+                val nextPage = currentPage + 1
+
+                if (currentStep.shouldThisStepBeSkipped()) {
+                    logger.i("Skipping ${currentStep.javaClass.simpleName} at {$currentPage} and moving to {$nextPage}")
+                    viewPager.setCurrentItem(nextPage, false)
+                }
+            }, 10)
         }
     }
 }
-

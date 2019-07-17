@@ -8,7 +8,7 @@ import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
 import kotlinx.android.synthetic.main.onboarding_step_permissions.*
 
-abstract class PermissionsStep: Step() {
+abstract class PermissionsStep : Step() {
 
     override val layout = R.layout.onboarding_step_permissions
 

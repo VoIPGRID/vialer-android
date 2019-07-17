@@ -8,7 +8,7 @@ import android.os.Handler;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.EncryptionDisabledNotification;
-import com.voipgrid.vialer.onboarding.OnboardingActivity;
+import com.voipgrid.vialer.onboarding.Onboarder;
 
 public class ActivityLifecycleTracker implements Application.ActivityLifecycleCallbacks {
 
@@ -33,7 +33,7 @@ public class ActivityLifecycleTracker implements Application.ActivityLifecycleCa
         isApplicationVisible = true;
         new Logger(activity.getClass()).d("onResume");
 
-        if (activity instanceof OnboardingActivity) return;
+        if (activity instanceof Onboarder) return;
 
         if (SecureCalling.fromContext(activity).hasBeenDisabled()) {
             handler.removeCallbacks(cancelEncryptionNotification);

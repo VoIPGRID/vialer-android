@@ -2,7 +2,7 @@ package com.voipgrid.vialer.onboarding.core
 
 import android.os.Handler
 
-abstract class AutoContinuingStep: Step() {
+abstract class AutoContinuingStep : Step() {
 
     abstract val delay: Int
 

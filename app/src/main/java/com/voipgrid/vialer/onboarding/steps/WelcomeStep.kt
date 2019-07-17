@@ -8,7 +8,7 @@ import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.onboarding.core.AutoContinuingStep
 import kotlinx.android.synthetic.main.onboarding_step_welcome.*
 
-class WelcomeStep: AutoContinuingStep() {
+class WelcomeStep : AutoContinuingStep() {
     override val delay = 3000
     override val layout = R.layout.onboarding_step_welcome
 

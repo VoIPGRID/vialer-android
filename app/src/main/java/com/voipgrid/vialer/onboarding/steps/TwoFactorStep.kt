@@ -11,7 +11,7 @@ import com.voipgrid.vialer.util.TwoFactorFragmentHelper
 import kotlinx.android.synthetic.main.onboarding_step_two_factor.*
 import javax.inject.Inject
 
-class TwoFactorStep: Step() {
+class TwoFactorStep : Step() {
 
     override val layout = R.layout.onboarding_step_two_factor
 

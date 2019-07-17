@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,7 +34,7 @@ import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.VoipDisabledNotification;
-import com.voipgrid.vialer.onboarding.SingleStepActivity;
+import com.voipgrid.vialer.onboarding.SingleOnboardingStepActivity;
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
@@ -272,7 +271,7 @@ public class SettingsActivity extends LoginRequiredActivity {
                     } else {
                         if (shouldLoadMissingVoip) {
                             enableSipOnNextLoad = true;
-                            SingleStepActivity.Companion.launch(SettingsActivity.this,
+                            SingleOnboardingStepActivity.Companion.launch(SettingsActivity.this,
                                     MissingVoipAccountStep.class);
                         }
                     }

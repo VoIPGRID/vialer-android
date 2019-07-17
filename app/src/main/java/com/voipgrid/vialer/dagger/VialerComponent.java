@@ -22,7 +22,6 @@ import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.dialer.NumberInputView;
 import com.voipgrid.vialer.logging.VialerBaseActivity;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
-import com.voipgrid.vialer.onboarding.FullOnboardingActivity;
 import com.voipgrid.vialer.onboarding.OnboardingActivity;
 import com.voipgrid.vialer.onboarding.steps.LoginStep;
 import com.voipgrid.vialer.onboarding.steps.MobileNumberStep;
@@ -32,8 +31,6 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.t9.T9HelperFragment;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-
-import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
 
@@ -105,5 +102,5 @@ public interface VialerComponent {
 
     void inject(NavigationDrawerActivity twoFactorStep);
 
-    void inject(FullOnboardingActivity onboardingActivity);
+    void inject(OnboardingActivity onboardingActivity);
 }

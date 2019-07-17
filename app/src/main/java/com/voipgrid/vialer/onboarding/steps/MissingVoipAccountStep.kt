@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class MissingVoipAccountStep: Step() {
+class MissingVoipAccountStep : Step() {
 
     override val layout = R.layout.onboarding_missing_voip_account
 

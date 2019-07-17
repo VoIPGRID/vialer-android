@@ -1,30 +1,25 @@
 package com.voipgrid.vialer.onboarding.core
 
 import android.app.AlertDialog
-import android.content.ClipDescription
-import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.annotation.IntegerRes
 import androidx.fragment.app.Fragment
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.api.VoipgridApi
-import com.voipgrid.vialer.onboarding.OnboardingActivity
+import com.voipgrid.vialer.onboarding.Onboarder
 
 abstract class Step: Fragment() {
 
     protected abstract val layout: Int
 
-    protected val onboarding : OnboardingActivity?
-        get() = activity as OnboardingActivity?
+    protected val onboarding : Onboarder?
+        get() = activity as Onboarder?
 
     protected val voipgridApi: VoipgridApi
         get() = ServiceGenerator.createApiService(onboarding)

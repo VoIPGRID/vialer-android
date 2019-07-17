@@ -7,7 +7,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.Step
 
-class OnboardingAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle): FragmentStateAdapter(fragmentManager, lifecycle) {
+class OnboardingAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(fragmentManager, lifecycle) {
 
     private var steps = arrayListOf<Step>()
 

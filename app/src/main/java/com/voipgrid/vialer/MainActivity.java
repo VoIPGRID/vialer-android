@@ -14,13 +14,9 @@ import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.contacts.ImportContactsForT9Search;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.onboarding.FullOnboardingActivity;
-import com.voipgrid.vialer.onboarding.OnboardingActivity;
-import com.voipgrid.vialer.onboarding.SingleStepActivity;
-import com.voipgrid.vialer.onboarding.steps.LoginStep;
-import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
+import com.voipgrid.vialer.onboarding.Onboarder;
+import com.voipgrid.vialer.onboarding.SingleOnboardingStepActivity;
 import com.voipgrid.vialer.onboarding.steps.TwoFactorStep;
-import com.voipgrid.vialer.onboarding.steps.WelcomeStep;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.SipService;
@@ -76,7 +72,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         // on boarding part where the mobile number needs to be configured.
         if (!hasSystemUser || systemUser.getMobileNumber() == null) {
             logout.perform(true);
-            OnboardingActivity.Companion.start(this);
+            Onboarder.Companion.start(this);
             finish();
             return;
         } else if (connectivityHelper.hasNetworkConnection()) {
@@ -254,7 +250,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
 
             mLogger.i("Prompting the user to enter a two-factor code");
 
-            SingleStepActivity.Companion.launch(MainActivity.this, TwoFactorStep.class);
+            SingleOnboardingStepActivity.Companion.launch(MainActivity.this, TwoFactorStep.class);
         }
 
         @Override

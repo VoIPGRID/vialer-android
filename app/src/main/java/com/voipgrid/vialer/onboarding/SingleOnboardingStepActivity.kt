@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.activity_onboarding.*
  * ONBOARDING_STEP, set to the class name of the step to launch.
  *
  */
-class SingleStepActivity: OnboardingActivity() {
+class SingleOnboardingStepActivity: Onboarder() {
 
     private var step: Step? = null
 
@@ -65,7 +65,7 @@ class SingleStepActivity: OnboardingActivity() {
         const val ONBOARDING_STEP = "ONBOARDING_STEP"
 
         fun launch(context: Context, step: Class<out Step>) {
-            context.startActivity(Intent(context, SingleStepActivity::class.java).apply {
+            context.startActivity(Intent(context, SingleOnboardingStepActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 putExtra(ONBOARDING_STEP, step.name)
             })

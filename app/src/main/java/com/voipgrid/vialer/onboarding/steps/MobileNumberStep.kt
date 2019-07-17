@@ -24,7 +24,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import javax.inject.Inject
 
-class MobileNumberStep: Step(), View.OnClickListener {
+class MobileNumberStep : Step(), View.OnClickListener {
 
     override val layout = R.layout.onboarding_step_mobile_number
 
@@ -50,7 +50,6 @@ class MobileNumberStep: Step(), View.OnClickListener {
         super.onResume()
         VialerApplication.get().component().inject(this)
 
-//        TODO("Add is loading")
         if (!systemUserStorage.has(SystemUser::class.java)) {
             onboarding?.restart()
             return

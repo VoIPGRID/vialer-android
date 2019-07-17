@@ -17,7 +17,7 @@ import com.voipgrid.vialer.util.ConnectivityHelper
 import kotlinx.android.synthetic.main.onboarding_step_login.*
 import javax.inject.Inject
 
-class LoginStep: Step() {
+class LoginStep : Step() {
 
     override val layout = R.layout.onboarding_step_login
 
