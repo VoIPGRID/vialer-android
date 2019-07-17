@@ -39,7 +39,7 @@ class TwoFactorStep: Step() {
         button_continue.setOnClickListener {
             button_continue.isEnabled = false
             onboarding?.isLoading = true
-            login.attempt(onboarding?.username ?: "", onboarding?.password ?: "", code)
+            login.attempt(state.username, state.password, code)
         }
     }
 
@@ -50,6 +50,6 @@ class TwoFactorStep: Step() {
     }
 
     override fun shouldThisStepBeSkipped(): Boolean {
-        return !(onboarding?.requiresTwoFactor ?: true)
+        return !state.requiresTwoFactor
     }
 }

@@ -3,42 +3,27 @@ package com.voipgrid.vialer.onboarding
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.viewpager2.widget.ViewPager2
-import com.voipgrid.vialer.Logout
-import com.voipgrid.vialer.MainActivity
+import androidx.core.content.ContextCompat.startActivity
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.onboarding.core.Step
-import com.voipgrid.vialer.onboarding.steps.*
-import com.voipgrid.vialer.onboarding.steps.permissions.ContactsPermissionStep
-import com.voipgrid.vialer.onboarding.steps.permissions.MicrophonePermissionStep
-import com.voipgrid.vialer.onboarding.steps.permissions.OptimizationWhitelistStep
-import com.voipgrid.vialer.onboarding.steps.permissions.PhoneStatePermissionStep
+import com.voipgrid.vialer.onboarding.core.OnboardingState
 import kotlinx.android.synthetic.main.activity_onboarding.*
-import javax.inject.Inject
 
 typealias PermissionCallback = () -> Unit
 
 abstract class OnboardingActivity: AppCompatActivity() {
 
-
     protected val logger = Logger(this)
 
     private var permissionCallback: PermissionCallback? = null
 
-    var username = ""
-    var password = ""
-    var requiresTwoFactor = false
-    var hasVoipAccount = true
+    open val state: OnboardingState = OnboardingState()
 
     var isLoading: Boolean
         get() = progress.visibility == VISIBLE
@@ -93,6 +78,12 @@ abstract class OnboardingActivity: AppCompatActivity() {
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
         if (currentFocus != null) {
             (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+        }
+    }
+
+    companion object {
+        fun start(context: Context) {
+            context.startActivity(Intent(context, FullOnboardingActivity::class.java))
         }
     }
 }

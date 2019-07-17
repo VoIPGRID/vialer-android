@@ -29,6 +29,9 @@ abstract class Step: Fragment() {
     protected val voipgridApi: VoipgridApi
         get() = ServiceGenerator.createApiService(onboarding)
 
+    protected val state: OnboardingState
+        get() = onboarding?.state ?: OnboardingState()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(layout, container, false)
     }

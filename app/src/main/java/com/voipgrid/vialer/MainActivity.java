@@ -19,6 +19,7 @@ import com.voipgrid.vialer.onboarding.OnboardingActivity;
 import com.voipgrid.vialer.onboarding.SingleStepActivity;
 import com.voipgrid.vialer.onboarding.steps.LoginStep;
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
+import com.voipgrid.vialer.onboarding.steps.TwoFactorStep;
 import com.voipgrid.vialer.onboarding.steps.WelcomeStep;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
@@ -47,6 +48,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
     @Inject BatteryOptimizationManager batteryOptimizationManager;
     @Inject SharedPreferences sharedPreferences;
     @Inject FirebaseAnalytics firebaseAnalytics;
+    @Inject Logout logout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,22 +74,11 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         // When there is no SystemUser present start the on boarding process.
         // When there is a SystemUser but there is no mobile number configured go to the
         // on boarding part where the mobile number needs to be configured.
-        if (!hasSystemUser) {
-            // Start on boarding flow.
-            startActivity(new Intent(this, FullOnboardingActivity.class));
+        if (!hasSystemUser || systemUser.getMobileNumber() == null) {
+            logout.perform(true);
+            OnboardingActivity.Companion.start(this);
             finish();
             return;
-        } else if (systemUser.getMobileNumber() == null) {
-//            Intent intent = new Intent(this, SetupActivity.class);
-//
-//            Bundle bundle = new Bundle();
-//            bundle.putInt("fragment", R.id.onboarding_step_mobile_number);
-//            bundle.putString("activity", AccountFragment.class.getSimpleName());
-//            intent.putExtras(bundle);
-//
-//            startActivity(intent);
-//            finish();
-//            return; todo launch to mobile number screen, possiblyu loop through each fragment and check OR JUST ADD TO ABOVE IF AND LG USER OUT/ CLEAR ALL PREFS
         } else if (connectivityHelper.hasNetworkConnection()) {
             fetchApiTokenIfDoesNotExist();
 
@@ -111,11 +102,6 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         openDialerFab.setOnClickListener(this);
 
         mReachabilityReceiver = new ReachabilityReceiver(this);
-    }
-
-    @Override
-    public void onBackPressed() {
-        SingleStepActivity.Companion.launch(this, MissingVoipAccountStep.class);
     }
 
     /**
@@ -268,9 +254,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
 
             mLogger.i("Prompting the user to enter a two-factor code");
 
-            TwoFactorAuthenticationDialogFragment twoFactorAuthenticationDialogFragment = new TwoFactorAuthenticationDialogFragment();
-            twoFactorAuthenticationDialogFragment.show(getFragmentManager(), "");
-            twoFactorAuthenticationDialogFragment.setCancelable(false);
+            SingleStepActivity.Companion.launch(MainActivity.this, TwoFactorStep.class);
         }
 
         @Override

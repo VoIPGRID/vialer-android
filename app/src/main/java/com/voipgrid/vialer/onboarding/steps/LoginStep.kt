@@ -42,12 +42,12 @@ class LoginStep: Step() {
 
         button_login.setOnClickListener {
 
-            onboarding?.username = emailTextDialog.text.toString()
-            onboarding?.password = passwordTextDialog.text.toString()
+            state.username = emailTextDialog.text.toString()
+            state.password = passwordTextDialog.text.toString()
 
             onboarding?.isLoading = true
 
-            login.attempt(onboarding?.username ?: "", onboarding?.password ?: "")
+            login.attempt(state.username, state.password)
         }
 
         button_forgot_password.setOnClickListener {
@@ -62,7 +62,7 @@ class LoginStep: Step() {
         }
 
         login.onRequiresTwoFactor = {
-            onboarding?.requiresTwoFactor = true
+            state.requiresTwoFactor = true
             onboarding?.progress()
         }
 
