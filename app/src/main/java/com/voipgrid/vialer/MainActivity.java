@@ -14,7 +14,12 @@ import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.contacts.ImportContactsForT9Search;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.onboarding.FullOnboardingActivity;
 import com.voipgrid.vialer.onboarding.OnboardingActivity;
+import com.voipgrid.vialer.onboarding.SingleStepActivity;
+import com.voipgrid.vialer.onboarding.steps.LoginStep;
+import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
+import com.voipgrid.vialer.onboarding.steps.WelcomeStep;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.SipService;
@@ -69,7 +74,7 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         // on boarding part where the mobile number needs to be configured.
         if (!hasSystemUser) {
             // Start on boarding flow.
-            startActivity(new Intent(this, OnboardingActivity.class));
+            startActivity(new Intent(this, FullOnboardingActivity.class));
             finish();
             return;
         } else if (systemUser.getMobileNumber() == null) {
@@ -106,6 +111,11 @@ public class MainActivity extends NavigationDrawerActivity implements View.OnCli
         openDialerFab.setOnClickListener(this);
 
         mReachabilityReceiver = new ReachabilityReceiver(this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        SingleStepActivity.Companion.launch(this, MissingVoipAccountStep.class);
     }
 
     /**

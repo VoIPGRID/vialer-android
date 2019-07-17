@@ -167,11 +167,14 @@
                   android:exported="true"
                   android:launchMode="singleTop"/>
 
-        <activity android:name=".onboarding.OnboardingActivity"
-                  android:exported="true"
-                  android:theme="@style/OnboardingTheme"/>
-
         <activity android:name=".ForgottenPasswordActivity"/>
+
+        <activity android:name=".onboarding.FullOnboardingActivity"
+                  android:theme="@style/OnboardingTheme"
+                  android:exported="true"/>
+
+        <activity android:name=".onboarding.SingleStepActivity"
+                  android:theme="@style/OnboardingTheme"/>
     </application>
 
 </manifest>

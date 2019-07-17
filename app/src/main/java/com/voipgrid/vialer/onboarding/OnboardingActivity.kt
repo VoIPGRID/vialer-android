@@ -3,6 +3,7 @@ package com.voipgrid.vialer.onboarding
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
@@ -27,12 +28,10 @@ import javax.inject.Inject
 
 typealias PermissionCallback = () -> Unit
 
-class OnboardingActivity: AppCompatActivity() {
+abstract class OnboardingActivity: AppCompatActivity() {
 
-    @Inject lateinit var logout: Logout
 
-    private lateinit var adapter: OnboardingAdapter
-    private val logger = Logger(this)
+    protected val logger = Logger(this)
 
     private var permissionCallback: PermissionCallback? = null
 
@@ -42,75 +41,21 @@ class OnboardingActivity: AppCompatActivity() {
     var requiresTwoFactor = false
     var hasVoipAccount = true
 
-    private val currentStep : Step
-        get() = adapter.getStep(viewPager.currentItem)
-
     var isLoading: Boolean
         get() = progress.visibility == VISIBLE
         set(loading) {
             progress.visibility = if (loading) VISIBLE else INVISIBLE
         }
 
+    abstract fun progress()
+
+    abstract fun restart()
+
+    abstract override fun onBackPressed()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
-        VialerApplication.get().component().inject(this)
-
-        viewPager.registerOnPageChangeCallback(OnPageChangeCallback())
-
-        adapter = OnboardingAdapter(supportFragmentManager, lifecycle).apply {
-            addStep(LogoStep())
-            addStep(LoginStep())
-            addStep(TwoFactorStep())
-            addStep(MobileNumberStep())
-            addStep(MissingVoipAccountStep())
-            addStep(ContactsPermissionStep())
-            addStep(PhoneStatePermissionStep())
-            addStep(MicrophonePermissionStep())
-            addStep(OptimizationWhitelistStep())
-            addStep(WelcomeStep())
-        }
-
-        viewPager.adapter = adapter
-        viewPager.isUserInputEnabled = false
-    }
-
-    fun progress() {
-        isLoading = false
-
-        if (isLastItem()) {
-            logger.i("Onboarding has been completed, forwarding to the main activity")
-
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
-            return
-        }
-
-        logger.i("Progressing the onboarder from ${currentStep.javaClass.simpleName}")
-
-        runOnUiThread {
-            viewPager.setCurrentItem(viewPager.currentItem + 1, true)
-        }
-    }
-
-    override fun onBackPressed() {
-        restart()
-    }
-
-    private fun isLastItem(): Boolean {
-        return viewPager.currentItem == (adapter.itemCount - 1)
-    }
-
-    /**
-     * Restart the onboarding process.
-     *
-     */
-    fun restart() {
-        logout.perform(true)
-        finish()
-        startActivity(intent)
     }
 
     /**
@@ -123,37 +68,32 @@ class OnboardingActivity: AppCompatActivity() {
         ActivityCompat.requestPermissions(this, arrayOf(permission), 1)
     }
 
+    /**
+     * Invoke the permission callback when the user accepts/denies a permission.
+     *
+     */
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         permissionCallback?.invoke()
     }
 
+    /**
+     * Whenever we receive an activity result, we want to invoke the permission callback
+     * as this is used when requesting the app to be whitelisted.
+     *
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         permissionCallback?.invoke()
     }
 
-    private fun hideKeyboard() {
+    /**
+     * Hides the keyboard, this should be called every time a new fragment is loaded.
+     *
+     */
+    protected fun hideKeyboard() {
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
         if (currentFocus != null) {
             (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-        }
-    }
-
-    private inner class OnPageChangeCallback : ViewPager2.OnPageChangeCallback() {
-
-        override fun onPageSelected(currentPage: Int) {
-            super.onPageSelected(currentPage)
-            hideKeyboard()
-
-            viewPager.postDelayed({
-                val currentStep = adapter.getStep(currentPage)
-                val nextPage = currentPage + 1
-
-                if (currentStep.shouldThisStepBeSkipped()) {
-                    logger.i("Skipping ${currentStep.javaClass.simpleName} at {$currentPage} and moving to {$nextPage}")
-                    viewPager.setCurrentItem(nextPage, false)
-                }
-            }, 10)
         }
     }
 }

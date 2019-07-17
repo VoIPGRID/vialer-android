@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +35,8 @@ import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.VoipDisabledNotification;
+import com.voipgrid.vialer.onboarding.SingleStepActivity;
+import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -102,6 +105,7 @@ public class SettingsActivity extends LoginRequiredActivity {
             updateAndPopulate();
         }
     };
+    private boolean enableSipOnNextLoad = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,6 +147,11 @@ public class SettingsActivity extends LoginRequiredActivity {
 
         if (Build.VERSION.SDK_INT >= BuildConfig.ANDROID_Q_SDK_VERSION) {
             mConnectionSpinner.setEnabled(false);
+        }
+
+        if (enableSipOnNextLoad) {
+            mVoipSwitch.setChecked(true);
+            enableSipOnNextLoad = false;
         }
     }
 
@@ -242,7 +251,6 @@ public class SettingsActivity extends LoginRequiredActivity {
     public void onSipCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (mPreferences.hasSipEnabled() == isChecked) return;
 
-        mPreferences.setSipEnabled(isChecked);
 
         if (!isChecked) {
             // Unregister at middleware.
@@ -250,33 +258,31 @@ public class SettingsActivity extends LoginRequiredActivity {
             // Stop the sipservice.
             stopService(new Intent(this, SipService.class));
             mSipIdContainer.setVisibility(View.GONE);
+            mPreferences.setSipEnabled(false);
         } else {
             enableProgressBar(true);
-            new AsyncTask<Void, Void, PhoneAccount>() {
+            new Thread(() -> {
+                PhoneAccount phoneAccount = mPhoneAccountHelper.getLinkedPhoneAccount();
 
-                @Override
-                protected PhoneAccount doInBackground(Void... params) {
-                    return mPhoneAccountHelper.getLinkedPhoneAccount();
-                }
-
-                @Override
-                protected void onPostExecute(PhoneAccount phoneAccount) {
-                    super.onPostExecute(phoneAccount);
-
+                runOnUiThread(() -> {
                     if (phoneAccount != null) {
                         mPhoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
-                        updateAndPopulate();
+                        mPreferences.setSipEnabled(true);
                     } else {
                         // Make sure sip is disabled in preference and the switch is returned
                         // to disabled. Setting disabled in the settings first makes sure
                         // the onCheckChanged does not execute the code that normally is executed
                         // on a change in the check of the switch.
-//                        SetupActivity.launchToSetVoIPAccount(SettingsActivity.this); TODO fix this to launch ours
+                        enableSipOnNextLoad = true;
+                        SingleStepActivity.Companion.launch(SettingsActivity.this, MissingVoipAccountStep.class);
                     }
 
+                    updateAndPopulate();
+
                     new VoipDisabledNotification().remove();
-                }
-            }.execute();
+                });
+
+            }).start();
         }
     }
 

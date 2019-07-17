@@ -22,6 +22,7 @@ import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.dialer.NumberInputView;
 import com.voipgrid.vialer.logging.VialerBaseActivity;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
+import com.voipgrid.vialer.onboarding.FullOnboardingActivity;
 import com.voipgrid.vialer.onboarding.OnboardingActivity;
 import com.voipgrid.vialer.onboarding.steps.LoginStep;
 import com.voipgrid.vialer.onboarding.steps.MobileNumberStep;
@@ -104,5 +105,5 @@ public interface VialerComponent {
 
     void inject(NavigationDrawerActivity twoFactorStep);
 
-    void inject(OnboardingActivity onboardingActivity);
+    void inject(FullOnboardingActivity onboardingActivity);
 }

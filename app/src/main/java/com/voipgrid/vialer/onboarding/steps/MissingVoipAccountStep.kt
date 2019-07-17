@@ -36,10 +36,6 @@ class MissingVoipAccountStep: Step() {
     override fun onResume() {
         super.onResume()
 
-        if (onboarding?.hasVoipAccount == true) {
-            return
-        }
-
         progressIfLinkedPhoneAccountFound()
     }
 

@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.VialerBaseActivity;
+import com.voipgrid.vialer.onboarding.FullOnboardingActivity;
 import com.voipgrid.vialer.onboarding.OnboardingActivity;
 
 /**
@@ -30,7 +31,7 @@ public abstract class LoginRequiredActivity extends VialerBaseActivity {
         if (!prefs.isLoggedIn() && prefs.finishedOnboarding()) {
             new Logger(LoginRequiredActivity.class).w("Not logged in anymore! Redirecting to onboarding");
             // Go to onboarding.
-            Intent intent = new Intent(new Intent(this, OnboardingActivity.class));
+            Intent intent = new Intent(new Intent(this, FullOnboardingActivity.class));
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
