@@ -31,6 +31,9 @@ abstract class Step: Fragment() {
         return inflater.inflate(layout, container, false)
     }
 
+    protected val isActiveScreen: Boolean
+        get() = onboarding != null
+
     /**
      * Return TRUE to skip this step, this is checked twice, when first
      * being added to the onboarder and also just before the screen is due

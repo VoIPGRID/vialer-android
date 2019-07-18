@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.onboarding.steps
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
@@ -50,6 +49,6 @@ class TwoFactorStep : Step() {
     }
 
     override fun shouldThisStepBeSkipped(): Boolean {
-        return !state.requiresTwoFactor
+        return isActiveScreen && !state.requiresTwoFactor
     }
 }

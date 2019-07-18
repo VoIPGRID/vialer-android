@@ -2,7 +2,9 @@ package com.voipgrid.vialer.onboarding.steps
 
 import android.os.Bundle
 import android.view.View
+import com.voipgrid.vialer.Preferences
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.WebActivityHelper
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.PhoneAccountHelper
@@ -10,13 +12,17 @@ import kotlinx.android.synthetic.main.onboarding_missing_voip_account.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class MissingVoipAccountStep : Step() {
+
+    @Inject lateinit var preferences: Preferences
 
     override val layout = R.layout.onboarding_missing_voip_account
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        VialerApplication.get().component().inject(this)
 
         continueButton.setOnClickListener {
             onboarding?.progress()
@@ -48,6 +54,7 @@ class MissingVoipAccountStep : Step() {
         GlobalScope.launch {
             PhoneAccountHelper(onboarding).linkedPhoneAccount?.let {
                 launch(Dispatchers.Main) {
+                    preferences.setSipEnabled(true)
                     onboarding?.progress()
                 }
             }
@@ -55,6 +62,6 @@ class MissingVoipAccountStep : Step() {
     }
 
     override fun shouldThisStepBeSkipped(): Boolean {
-        return state.hasVoipAccount
+        return isActiveScreen && state.hasVoipAccount
     }
 }

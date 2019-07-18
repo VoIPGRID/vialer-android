@@ -24,6 +24,7 @@ import com.voipgrid.vialer.logging.VialerBaseActivity;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.onboarding.OnboardingActivity;
 import com.voipgrid.vialer.onboarding.steps.LoginStep;
+import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
 import com.voipgrid.vialer.onboarding.steps.MobileNumberStep;
 import com.voipgrid.vialer.onboarding.steps.TwoFactorStep;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
@@ -103,4 +104,6 @@ public interface VialerComponent {
     void inject(NavigationDrawerActivity twoFactorStep);
 
     void inject(OnboardingActivity onboardingActivity);
+
+    void inject(MissingVoipAccountStep missingVoipAccountStep);
 }
