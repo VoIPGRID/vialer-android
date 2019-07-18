@@ -49,7 +49,6 @@ abstract class PermissionsStep : Step() {
      *
      */
     protected open fun alreadyHasPermission(): Boolean {
-        Log.e("TEST123", "in ${this.javaClass.simpleName} checking $permission, returned: ${PermissionChecker.checkSelfPermission(VialerApplication.get(), permission)}")
         return PermissionChecker.checkSelfPermission(VialerApplication.get(), permission) == PermissionChecker.PERMISSION_GRANTED
     }
 
