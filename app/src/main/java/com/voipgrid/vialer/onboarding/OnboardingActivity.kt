@@ -72,6 +72,7 @@ class OnboardingActivity : Onboarder() {
     }
 
     override fun onBackPressed() {
+        logger.i("Back pressed, restarting onboarding")
         restart()
     }
 
@@ -80,6 +81,7 @@ class OnboardingActivity : Onboarder() {
      *
      */
     override fun restart() {
+        logger.i("Restarting onboarding procedure")
         logout.perform(true)
         finish()
         startActivity(intent)

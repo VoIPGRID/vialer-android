@@ -13,6 +13,7 @@ import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.api.models.SystemUser
+import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.core.onTextChanged
@@ -46,11 +47,14 @@ class MobileNumberStep : Step(), View.OnClickListener {
     private val mobileNumberCallback = MobileNumberCallback()
     private val configureCallback = ConfigureCallback()
 
+    private val logger = Logger(this)
+
     override fun onResume() {
         super.onResume()
         VialerApplication.get().component().inject(this)
 
         if (!systemUserStorage.has(SystemUser::class.java)) {
+            logger.e("The user has made it to mobile number without a successful login, restart onboarding")
             onboarding?.restart()
             return
         }
@@ -113,6 +117,8 @@ class MobileNumberStep : Step(), View.OnClickListener {
                 return
             }
 
+            logger.i("Received a successful mobile number response, looking for a linked phone account")
+
             val systemUser = user
             systemUser.mobileNumber = mobileNumber
             systemUser.outgoingCli = outgoingNumber
@@ -122,6 +128,7 @@ class MobileNumberStep : Step(), View.OnClickListener {
                 onboarding?.isLoading = true
                 voipgridApi.phoneAccount(systemUser.phoneAccountId).enqueue(configureCallback)
             } else {
+                logger.w("There is no linked voip account, prompt user to configure one")
                 preferences.setSipEnabled(false)
                 state.hasVoipAccount = false
                 onboarding?.progress()
@@ -140,6 +147,8 @@ class MobileNumberStep : Step(), View.OnClickListener {
                 return
             }
 
+            logger.i("Successfully found a linked phone account")
+
             phoneAccountStorage.save(response.body() as PhoneAccount)
 
             if (preferences.hasSipPermission()) {
@@ -153,7 +162,6 @@ class MobileNumberStep : Step(), View.OnClickListener {
             error()
         }
     }
-
 }
 
 /**

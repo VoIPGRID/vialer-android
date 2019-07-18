@@ -9,6 +9,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import com.voipgrid.vialer.*
+import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.VoipgridLogin
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.core.onTextChanged
@@ -24,6 +25,8 @@ class LoginStep : Step() {
     @Inject lateinit var connectivityHelper: ConnectivityHelper
     @Inject lateinit var accountHelper: AccountHelper
     @Inject lateinit var login: VoipgridLogin
+
+    private val logger = Logger(this)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,20 +44,24 @@ class LoginStep : Step() {
         }
 
         button_login.setOnClickListener {
-
             state.username = emailTextDialog.text.toString()
             state.password = passwordTextDialog.text.toString()
 
             onboarding?.isLoading = true
 
+            logger.i("Attempting login...")
+
             login.attempt(state.username, state.password)
         }
 
         button_forgot_password.setOnClickListener {
+            logger.i("Detected forgot password click, launching activity")
+
             ForgottenPasswordActivity.launchForEmail(onboarding as Context, emailTextDialog.text.toString())
         }
 
         button_info.setOnClickListener {
+            logger.i("Launching app info page")
             val intent = Intent(activity, WebActivity::class.java)
             intent.putExtra(WebActivity.PAGE, getString(R.string.url_app_info))
             intent.putExtra(WebActivity.TITLE, getString(R.string.info_menu_item_title))
@@ -62,14 +69,19 @@ class LoginStep : Step() {
         }
 
         login.onRequiresTwoFactor = {
+            logger.i("This user requires a two-factor code to be entered")
             state.requiresTwoFactor = true
             onboarding?.progress()
         }
 
         login.onLoggedIn = {
+            logger.i("Logged in successfully!")
             onboarding?.progress()
         }
 
-        login.onError = { title: Int, description: Int -> error(title, description) }
+        login.onError = { title: Int, description: Int ->
+            logger.w("Error logging in $title - $description")
+            error(title, description)
+        }
     }
 }

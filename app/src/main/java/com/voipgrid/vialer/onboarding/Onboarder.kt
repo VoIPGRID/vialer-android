@@ -47,6 +47,7 @@ abstract class Onboarder : AppCompatActivity() {
      *
      */
     fun requestPermission(permission: String, callback: PermissionCallback) {
+        logger.i("Requesting $permission")
         permissionCallback = callback
         ActivityCompat.requestPermissions(this, arrayOf(permission), 1)
     }
@@ -56,6 +57,7 @@ abstract class Onboarder : AppCompatActivity() {
      *
      */
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        logger.i("Received permission result, invoking callback")
         permissionCallback?.invoke()
     }
 
@@ -66,6 +68,7 @@ abstract class Onboarder : AppCompatActivity() {
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        logger.i("Received activity result, invoking callback")
         permissionCallback?.invoke()
     }
 

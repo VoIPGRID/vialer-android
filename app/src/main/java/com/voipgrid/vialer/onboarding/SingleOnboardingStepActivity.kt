@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.OnboardingState
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep
@@ -45,6 +46,8 @@ class SingleOnboardingStepActivity: Onboarder() {
         }
 
         require(step != null) {"The step provided is invalid"}
+
+        logger.i("Displaying ${(step as Step)::javaClass.name} as single page")
 
         supportFragmentManager.beginTransaction().add(fragmentContainer.id, step as Step).commit()
     }

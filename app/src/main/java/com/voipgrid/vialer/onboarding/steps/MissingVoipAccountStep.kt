@@ -6,6 +6,7 @@ import com.voipgrid.vialer.Preferences
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.WebActivityHelper
+import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.PhoneAccountHelper
 import kotlinx.android.synthetic.main.onboarding_missing_voip_account.*
@@ -20,15 +21,21 @@ class MissingVoipAccountStep : Step() {
 
     override val layout = R.layout.onboarding_missing_voip_account
 
+    private val logger = Logger(this)
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         VialerApplication.get().component().inject(this)
 
         continueButton.setOnClickListener {
+            logger.i("User has decided not to set a voip account despite not having one")
+
             onboarding?.progress()
         }
 
         setVoipAccountButton.setOnClickListener {
+            logger.i("Loading a web view to let user set their missing voip account")
+
             onboarding?.let {
                 WebActivityHelper(onboarding).startWebActivity(
                         getString(R.string.user_change_title),
