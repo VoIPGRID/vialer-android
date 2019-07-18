@@ -1,7 +1,6 @@
 package com.voipgrid.vialer
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
@@ -9,7 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.voipgrid.vialer.api.ApiTokenFetcher
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.callrecord.CallRecordFragment
@@ -22,7 +20,6 @@ import com.voipgrid.vialer.onboarding.steps.TwoFactorStep
 import com.voipgrid.vialer.permissions.ContactsPermission
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.util.BatteryOptimizationManager
 import com.voipgrid.vialer.util.JsonStorage
 import com.voipgrid.vialer.util.PhoneAccountHelper
 import kotlinx.android.synthetic.main.activity_main.*
@@ -30,14 +27,11 @@ import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {
 
-    @Inject lateinit var batteryOptimizationManager: BatteryOptimizationManager
-    @Inject lateinit var sharedPreferences: SharedPreferences
-    @Inject lateinit var firebaseAnalytics: FirebaseAnalytics
     @Inject lateinit var jsonStorage: JsonStorage<SystemUser>
     @Inject lateinit var phoneAccountHelper: PhoneAccountHelper
+    @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
 
     private val logger = Logger(this)
-    private val reachabilityReceiver = ReachabilityReceiver(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,11 +118,14 @@ class MainActivity : NavigationDrawerActivity() {
      * Show the dialer view
      */
     private fun openDialer() {
-        val intent = Intent(this, DialerActivity::class.java)
-        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                this, floating_action_button,
-                "floating_action_button_transition_name")
-        startActivity(intent, options.toBundle())
+        startActivity(
+                Intent(this, DialerActivity::class.java),
+                ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        this,
+                        floating_action_button,
+                        "floating_action_button_transition_name"
+                ).toBundle()
+        )
     }
 
     private fun setupTabs() {
@@ -180,7 +177,7 @@ class MainActivity : NavigationDrawerActivity() {
     /**
      * Tab adapter to handle tabs in the ViewPager
      */
-    inner class TabAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
+    private inner class TabAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
 
         override fun getItem(position: Int): Fragment {
             return when(position) {
