@@ -17,9 +17,9 @@ public class BluetoothKeyNormalizer {
     private static SparseArray<Integer[]> sAliases = new SparseArray<>();
 
     static {
-        sAliases.put(KeyEvent.KEYCODE_CALL, new Integer[] {KeyEvent.KEYCODE_MEDIA_PLAY, KeyEvent.KEYCODE_MEDIA_NEXT});
-        sAliases.put(KeyEvent.KEYCODE_MEDIA_PAUSE, new Integer[] {KeyEvent.KEYCODE_HEADSETHOOK});
-        sAliases.put(KeyEvent.KEYCODE_ENDCALL, new Integer[] {KeyEvent.KEYCODE_MEDIA_STOP});
+        sAliases.put(KeyEvent.KEYCODE_CALL, new Integer[] {});
+        sAliases.put(KeyEvent.KEYCODE_ENDCALL, new Integer[] {KeyEvent.KEYCODE_HEADSETHOOK});
+
     }
 
     private BluetoothKeyNormalizer(SparseArray aliases) {
