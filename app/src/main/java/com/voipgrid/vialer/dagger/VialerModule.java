@@ -53,6 +53,7 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.HtmlHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NetworkUtil;
+import com.voipgrid.vialer.util.PhoneAccountHelper;
 
 import javax.inject.Singleton;
 
@@ -306,5 +307,11 @@ public class VialerModule {
     @Provides
     Logout provideLogout(Context context, JsonStorage jsonStorage, AccountHelper accountHelper, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper) {
         return new Logout(context, jsonStorage, accountHelper, sharedPreferences, connectivityHelper);
+    }
+
+    @Provides
+    @Singleton
+    PhoneAccountHelper providePhoneAccountHelper(Context context) {
+        return new PhoneAccountHelper(context);
     }
 }
