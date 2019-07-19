@@ -6,5 +6,5 @@
 
 (why should we do this?)
 
-/label ~task
+/label ~"type::task"
 /label ~triage
