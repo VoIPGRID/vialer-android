@@ -6,5 +6,5 @@
 
 (why do we need this?)
 
-/label ~feature
+/label ~"type::feature"
 /label ~triage
