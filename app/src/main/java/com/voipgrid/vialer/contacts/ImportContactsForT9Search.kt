@@ -67,7 +67,11 @@ class ImportContactsForT9Search(private val context: Context, params: WorkerPara
          *
          */
         fun run() {
-            WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<ImportContactsForT9Search>().build())
+            WorkManager.getInstance().enqueueUniqueWork(
+                    ImportContactsForT9Search::class.java.name,
+                    ExistingWorkPolicy.KEEP,
+                    OneTimeWorkRequestBuilder<ImportContactsForT9Search>().build()
+            )
         }
 
         /**

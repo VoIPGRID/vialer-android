@@ -65,15 +65,15 @@
         <!-- Activity responsible for choosing outgoing calls -->
         <activity
             android:name=".dialer.DialerActivity"
-            android:label="@string/title_activity_dialer"
+            android:label="@string/app_name"
             android:screenOrientation="portrait" >
-            <intent-filter tools:ignore="AppLinkUrlError">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <!-- Add the option to start a call from Contacts app. -->
-                <data android:mimeType="@string/profile_mimetype" />
+                <action android:name="android.intent.action.CALL"/>
+                <action android:name="android.intent.action.DIAL"/>
+                <action android:name="android.intent.action.CALL_PRIVILEGED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="tel"/>
             </intent-filter>
         </activity>
 

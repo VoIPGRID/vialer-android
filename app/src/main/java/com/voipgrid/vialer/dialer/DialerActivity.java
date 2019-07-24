@@ -14,7 +14,6 @@ import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.contacts.ContactsSyncTask;
 import com.voipgrid.vialer.contacts.ImportContactsForT9Search;
-import com.voipgrid.vialer.contacts.SyncUtils;
 import com.voipgrid.vialer.t9.ContactsImportProgressUpdater;
 import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -80,8 +79,31 @@ public class DialerActivity extends LoginRequiredActivity implements
         mDialer.setListener(this);
         mT9Fragment = (T9Fragment) getSupportFragmentManager().findFragmentById(R.id.t9_search);
         mT9Fragment.setListener(this);
-
         preventKeyboardFromBeingDisplayed();
+        handleIntents();
+    }
+
+    /**
+     * Handles when this activity has been launched from outside the app, for example
+     * a user clicking on a phone number link in a web browser.
+     *
+     */
+    private void handleIntents() {
+        String action = getIntent().getAction();
+        String data = getIntent().getDataString();
+
+        if (data == null) return;
+
+        mLogger.i("Received intent to automatically launch dialer: " + getIntent().getAction() + ", with data: " + data);
+
+        String number = PhoneNumberUtils.format(data);
+
+        if (Intent.ACTION_CALL.equals(action)) {
+            onCallNumber(number, null);
+        }
+        else if (Intent.ACTION_DIAL.equals(action)) {
+            mDialer.setNumber(number);
+        }
     }
 
     /**

@@ -573,23 +573,23 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
                 // When the native call has been picked up and there is a current call in the ringing state
                 // Then decline the current call.
-                mLogger.e("Native call is picked up.");
-                mLogger.e("Is there an active call: " + (mCurrentCall != null));
+                mLogger.i("Native call is picked up.");
+                mLogger.i("Is there an active call: " + (mCurrentCall != null));
 
                 if (mCurrentCall == null) {
                     return;
                 }
 
-                mLogger.e("Current call state: " + mCurrentCall.getCurrentCallState());
+                mLogger.i("Current call state: " + mCurrentCall.getCurrentCallState());
 
                 if (mCurrentCall.isCallRinging() || mCurrentCall.getCurrentCallState().equals(SipConstants.CALL_INVALID_STATE)) {
-                    mLogger.e("Our call is still ringing. So decline it.");
+                    mLogger.i("Our call is still ringing. So decline it.");
                     mCurrentCall.decline();
                     return;
                 }
 
                 if (mCurrentCall.isConnected() && !mCurrentCall.isOnHold()) {
-                    mLogger.e("Call was not on hold already. So put call on hold.");
+                    mLogger.i("Call was not on hold already. So put call on hold.");
                     mCurrentCall.toggleHold();
                 }
             } catch(Exception e) {
