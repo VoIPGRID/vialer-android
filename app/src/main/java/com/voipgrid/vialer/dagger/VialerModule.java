@@ -11,8 +11,10 @@ import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.voipgrid.vialer.Logout;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.PhoneAccountFetcher;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.VoipgridApi;
@@ -36,6 +38,7 @@ import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
+import com.voipgrid.vialer.onboarding.VoipgridLogin;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
@@ -43,6 +46,7 @@ import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.t9.T9DatabaseHelper;
 import com.voipgrid.vialer.t9.T9ViewBinder;
+import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ColorHelper;
@@ -50,6 +54,7 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.HtmlHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NetworkUtil;
+import com.voipgrid.vialer.util.PhoneAccountHelper;
 
 import javax.inject.Singleton;
 
@@ -82,6 +87,18 @@ public class VialerModule {
     @Provides
     JsonStorage provideJsonStorage() {
         return new JsonStorage(mVialerApplication);
+    }
+
+    @Singleton
+    @Provides
+    JsonStorage<PhoneAccount> providePhoneAccountStorage() {
+        return new JsonStorage<>(mVialerApplication);
+    }
+
+    @Singleton
+    @Provides
+    JsonStorage<SystemUser> provideSystemUserStorage() {
+        return new JsonStorage<>(mVialerApplication);
     }
 
     @Provides
@@ -282,5 +299,26 @@ public class VialerModule {
     @Provides
     FirebaseAnalytics provideFirebaseAnalytics(Context context) {
         return FirebaseAnalytics.getInstance(context);
+    }
+
+    @Provides
+    AccountHelper provideAccountHelper(Context context) {
+        return new AccountHelper(context);
+    }
+
+    @Provides
+    VoipgridLogin provideVoipgridLogin(AccountHelper accountHelper, Preferences preferences, JsonStorage jsonStorage, Context context) {
+        return new VoipgridLogin(accountHelper, preferences, jsonStorage, context);
+    }
+
+    @Provides
+    Logout provideLogout(Context context, JsonStorage jsonStorage, AccountHelper accountHelper, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper) {
+        return new Logout(context, jsonStorage, accountHelper, sharedPreferences, connectivityHelper);
+    }
+
+    @Provides
+    @Singleton
+    PhoneAccountHelper providePhoneAccountHelper(Context context) {
+        return new PhoneAccountHelper(context);
     }
 }

@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.api;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.voipgrid.vialer.api.models.ApiTokenRequest;
 import com.voipgrid.vialer.api.models.ApiTokenResponse;
@@ -50,6 +51,7 @@ public class ApiTokenFetcher {
      * @param password The password to authenticate with
      */
     public static ApiTokenFetcher forCredentials(Context context, String username, String password) {
+        Log.e("TEST123", "Fetching with " + username + " and " + password);
         return new ApiTokenFetcher(
                 username,
                 password,

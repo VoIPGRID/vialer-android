@@ -5,7 +5,6 @@
     android:layout_gravity="center"
     android:gravity="center"
     android:padding="@dimen/activity_horizontal_margin"
-    tools:context="com.voipgrid.vialer.onboarding.LoginFragment"
     >
     <TextView
         android:id="@+id/title_label"
@@ -24,14 +23,5 @@
         style="@style/HeaderTitleTextViewStyle"
         android:text="@string/placeholder_name"
         android:fontFamily="sans-serif-light"
-        />
-    <Button
-        android:id="@+id/button_welcome"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/subtitle_label"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:text="@string/start_calling_button"
         />
 </RelativeLayout>
