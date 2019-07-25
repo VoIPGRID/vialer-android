@@ -83,15 +83,6 @@ public class T9Fragment extends Fragment implements AbsListView.OnScrollListener
             startActivity(intent);
             getActivity().finish();
         }
-
-        // If we don't have permission we need to ask for it.
-        if (!mHasPermission) {
-            // We need to avoid a permission loop.
-            if (mAskForPermission) {
-                mAskForPermission = false;
-                ContactsPermission.askForPermission(getActivity());
-            }
-        }
     }
 
     @Override

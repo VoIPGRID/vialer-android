@@ -28,9 +28,9 @@ class BatteryOptimizationManager(private val context: Context) {
      *
      */
     @SuppressLint("BatteryLife")
-    fun prompt(activity: Activity) {
+    fun prompt(activity: Activity, onlyDisplayPrompt: Boolean = false) {
         activity.startActivityForResult(Intent().apply {
-            action = if (isIgnoringBatteryOptimization()) Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS else Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+            action = if (isIgnoringBatteryOptimization() && !onlyDisplayPrompt) Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS else Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
             if (!isIgnoringBatteryOptimization())  {
                 data = Uri.parse("package:${context.packageName}")
             }

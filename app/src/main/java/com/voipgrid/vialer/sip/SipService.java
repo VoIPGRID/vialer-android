@@ -14,10 +14,12 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
+import android.widget.Toast;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.audio.AudioRouter;
@@ -32,6 +34,7 @@ import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
+import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -166,6 +169,12 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
             mCurrentCall.decline();
         }
         else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
+            if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
+                Toast.makeText(this, getString(R.string.permission_microphone_missing_message), Toast.LENGTH_LONG).show();
+                mLogger.e("Unable to answer incoming call as we do not have microphone permission");
+                return false;
+            }
+
             mCurrentCall.answer();
         }
         else if (Actions.END_CALL.equals(action)) {

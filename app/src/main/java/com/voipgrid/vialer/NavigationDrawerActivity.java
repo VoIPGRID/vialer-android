@@ -49,6 +49,8 @@ import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -59,6 +61,8 @@ import retrofit2.Response;
 public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         implements Callback, AdapterView.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
+
+    @Inject Logout logout;
 
     private CustomFontSpinnerAdapter<Destination> mSpinnerAdapter;
     private DrawerLayout mDrawerLayout;
@@ -78,6 +82,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        VialerApplication.get().component().inject(this);
         mConnectivityHelper = new ConnectivityHelper(
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
@@ -267,32 +272,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
      * Perform logout; Remove the stored SystemUser and PhoneAccount and show the login view
      */
     private void performLogout() {
-        if (mConnectivityHelper.hasNetworkConnection()) {
-            MiddlewareHelper.unregister(this);
-
-            // Delete our account information.
-            mJsonStorage.clear();
-            new AccountHelper(this).clearCredentials();
-            // Mark ourselves as unregistered.
-            PreferenceManager.getDefaultSharedPreferences(this).edit().clear().apply();
-            // Start a new session.
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        } else {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-            alertDialogBuilder.setTitle(getText(R.string.cannot_logout_error_title));
-            alertDialogBuilder
-                    .setMessage(getText(R.string.cannot_logout_error_text))
-                    .setCancelable(false)
-                    .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.dismiss();
-                        }
-                    });
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
-        }
+        logout.perform(false);
     }
 
     /**
