@@ -84,8 +84,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
      */
     private SipInvite invite;
 
-    static final String CALL_DIRECTION_OUTGOING = "outgoing";
-    static final String CALL_DIRECTION_INCOMING = "incoming";
+    private static final String CALL_DIRECTION_OUTGOING = "outgoing";
+    private static final String CALL_DIRECTION_INCOMING = "incoming";
 
     private static final int MICROPHONE_VOLUME_MUTED = 0;
     private static final int MICROPHONE_VOLUME_UNUTED = 2;
@@ -648,6 +648,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     public String getCallDirection() {
         return mCallDirection;
+    }
+
+    public boolean isOutgoing() {
+        return CALL_DIRECTION_OUTGOING.equals(getCallDirection());
+    }
+
+    public boolean isIncoming() {
+        return CALL_DIRECTION_INCOMING.equals(getCallDirection());
     }
 
     /**

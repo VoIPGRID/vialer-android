@@ -14,5 +14,5 @@
 
 (What you want to see instead)
 
-/label ~improvement
+/label ~"type::improvement"
 /label ~triage

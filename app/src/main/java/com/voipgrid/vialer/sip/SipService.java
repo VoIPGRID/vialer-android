@@ -499,11 +499,15 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
     @Override
     public void onCallConnected() {
-        if (SipCall.CALL_DIRECTION_OUTGOING.equals(getCurrentCall().getCallDirection())) {
+        if (getCurrentCall() == null) return;
+
+        if (getCurrentCall().isOutgoing()) {
+            mLogger.i("Call has connected, it is an outbound call so just changing audio focus");
+            audioRouter.focus();
             return;
         }
 
-        if (getCurrentCall() == null) return;
+        mLogger.i("Call has connected, it is an inbound call so stop all incoming call notifications and change the audio focus");
 
         incomingCallAlerts.stop();
         getNotification().active(getCurrentCall());
