@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.sip;
 
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
+import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -297,7 +298,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * Play the busy tone used when a call get's disconnected by the recipient.
      */
     public void playBusyTone() {
-        mToneGenerator.startTone(ToneGenerator.Constants.TONE_CDMA_NETWORK_BUSY, 1500);
+        try {
+            mToneGenerator.startTone(ToneGenerator.Constants.TONE_CDMA_NETWORK_BUSY, BUSY_TONE_DURATION);
+            Thread.sleep(BUSY_TONE_DURATION);
+        } catch (InterruptedException ignored) {
+        }
     }
 
     /**

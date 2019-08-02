@@ -546,17 +546,17 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private void onCallDisconnected() {
         mLogger.d("onCallDisconnected");
 
-        // Play end of call beep only when the remote party hangs up and the call was connected.
-        if (!mUserHangup && mCallIsConnected && !mCallIsTransferred) {
-            mSipService.playBusyTone();
-            VialerStatistics.remoteDidHangUpCall(this);
-        }
         mCallIsConnected = false;
-        // Remove this call from the service.
         mSipService.removeCallFromList(this);
         mCurrentCallState = SipConstants.CALL_DISCONNECTED_MESSAGE;
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_DISCONNECTED_MESSAGE);
         new CallCompletionStatsDispatcher().callDidComplete(this);
+
+        // Play end of call beep only when the remote party hangs up and the call was connected.
+        if (!mUserHangup && !mCallIsTransferred) {
+            VialerStatistics.remoteDidHangUpCall(this);
+            mSipService.playBusyTone();
+        }
     }
 
     private void onCallInvalidState(Throwable fault) {
