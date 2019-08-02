@@ -111,10 +111,6 @@
     <string name="two_factor_authentication_header_label_text">Twee-Staps</string>
     <string name="two_factor_authentication_header_label_subtext">Verificatie</string>
 
-    <!-- strings empty view call records -->
-    <string name="empty_view_default_message">Je hebt (nog) geen recente telefoongesprekken.</string>
-    <string name="empty_view_missed_message">Je hebt geen gemiste telefoongesprekken.</string>
-    <string name="empty_view_unauthorized_message">Je bent niet gemachtigd om recente telefoongesprekken in te zien.</string>
 
     <string name="title_activity_click_to_dial">ClickToDialActivity</string>
     <string name="title_activity_warning">Waarschuwing</string>
