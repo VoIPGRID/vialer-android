@@ -4,14 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
-import com.voipgrid.vialer.EmptyView;
 import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
@@ -53,6 +51,7 @@ public class CallRecordFragment extends Fragment
     @BindView(R.id.call_records) RecyclerView mRecyclerView;
     @BindView(R.id.show_missed_calls_only_switch) Switch showMissedCallsOnlySwitch;
     @BindView(R.id.call_records_container) View mCallRecordsContainer;
+    @BindView(R.id.call_records_unavailable_view) CallRecordsUnavailableView callRecordsUnavailableView;
 
     private Unbinder unbinder;
     private NetworkChangeReceiver mNetworkChangeReceiver = new NetworkChangeReceiver();
@@ -155,10 +154,10 @@ public class CallRecordFragment extends Fragment
     public void onRefresh() {
         if (!mNetworkUtil.isOnline()) {
             mCallRecordsContainer.setVisibility(View.GONE);
-            setEmptyView(new EmptyView(getActivity(), getString(R.string.no_network_connection)), true);
+            callRecordsUnavailableView.noInternetConnection();
             return;
         } else {
-            setEmptyView(null, false);
+            callRecordsUnavailableView.hide();
         }
 
         mCallRecordsContainer.setVisibility(View.VISIBLE);
@@ -179,11 +178,6 @@ public class CallRecordFragment extends Fragment
     public void onChanged(PagedList<CallRecord> callRecords) {
         setRefreshing(false);
 
-        if (callRecords.isEmpty()) {
-            displayError(R.string.empty_view_default_message);
-            return;
-        }
-
         CallRecordDataSource value = factory.getPostLiveData().getValue();
 
         int code = (value == null ? 500 : value.getLastCode());
@@ -193,7 +187,13 @@ public class CallRecordFragment extends Fragment
             return;
         }
 
-        hideError();
+        callRecordsUnavailableView.hide();
+
+        if (callRecords.isEmpty()) {
+            callRecordsUnavailableView.unavailable();
+            return;
+        }
+
         adapter.submitList(callRecords);
     }
 
@@ -223,11 +223,11 @@ public class CallRecordFragment extends Fragment
         setRefreshing(false);
 
         if (missedCallRecords.isEmpty()) {
-            displayError(R.string.empty_view_missed_message);
+            callRecordsUnavailableView.noMissedCalls();
             return;
         }
 
-        hideError();
+        callRecordsUnavailableView.hide();
         missedCallsAdapter.setRecords(missedCallRecords);
     }
 
@@ -241,15 +241,14 @@ public class CallRecordFragment extends Fragment
 
         setRefreshing(false);
 
-        int message = R.string.empty_view_default_message;
-
-        if(code == 401 || code == 403) {
-            message = R.string.empty_view_unauthorized_message;
-        }
-
-        final String messageString = getString(message);
-
-        getActivity().runOnUiThread(() -> setEmptyView(new EmptyView(getActivity(), messageString), true));
+        getActivity().runOnUiThread(() -> {
+            if (code == 401 || code == 403) {
+                callRecordsUnavailableView.permissionsFailed();
+            }
+            else {
+                callRecordsUnavailableView.unavailable();
+            }
+        });
     }
 
     private boolean showMissedCalls() {
@@ -275,27 +274,6 @@ public class CallRecordFragment extends Fragment
     public void onPause() {
         super.onPause();
         mBroadcastReceiverManager.unregisterReceiver(mNetworkChangeReceiver);
-    }
-
-    private void displayError(int string) {
-        setEmptyView(new EmptyView(getActivity(), getString(string)), true);
-    }
-
-    private void hideError() {
-        setEmptyView(new EmptyView(getActivity(), null), false);
-    }
-
-    private void setEmptyView(EmptyView emptyView, boolean visible) {
-        if(getView() != null) {
-            ViewGroup view = getView().findViewById(R.id.empty_view);
-            if (view.getChildCount() > 0) {
-                view.removeAllViews();
-            }
-            if (emptyView != null) {
-                view.addView(emptyView);
-            }
-            view.setVisibility(visible ? View.VISIBLE : View.GONE);
-        }
     }
 
     public class NetworkChangeReceiver extends BroadcastReceiver {
