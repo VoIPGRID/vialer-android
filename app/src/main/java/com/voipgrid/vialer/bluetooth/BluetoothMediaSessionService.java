@@ -121,6 +121,7 @@ public class BluetoothMediaSessionService extends Service {
 
             if (code == null) {
                 mLogger.e("Received a key code that we don't know how to handle: " + keyEvent.getKeyCode());
+                stopSelf();
                 return true;
             }
 
