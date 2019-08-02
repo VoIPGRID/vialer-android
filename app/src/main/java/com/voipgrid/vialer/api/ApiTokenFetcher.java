@@ -51,7 +51,6 @@ public class ApiTokenFetcher {
      * @param password The password to authenticate with
      */
     public static ApiTokenFetcher forCredentials(Context context, String username, String password) {
-        Log.e("TEST123", "Fetching with " + username + " and " + password);
         return new ApiTokenFetcher(
                 username,
                 password,
