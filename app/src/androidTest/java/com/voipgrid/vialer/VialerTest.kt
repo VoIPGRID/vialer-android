@@ -7,11 +7,4 @@ import org.junit.runner.RunWith
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
-open class VialerTest {
-
-    @Before
-    fun beforeEach() {
-        Thread.sleep(2000)
-    }
-
-}
+open class VialerTest
