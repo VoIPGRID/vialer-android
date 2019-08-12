@@ -127,6 +127,7 @@ android {
             manifestPlaceholders = [enableCrashReporting:"false"]
             buildConfigField("String", "TEST_USERNAME", "\"${testUsername}\"")
             buildConfigField("String", "TEST_PASSWORD", "\"${testPassword}\"")
+            buildConfigField("String", "TEST_END_NUMBER", "\"${testEndNumber}\"")
         }
         debug {
             versionNameSuffix '-DEBUG'
