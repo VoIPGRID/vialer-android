@@ -20,14 +20,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/button_pickup"
+    <ImageView
+        android:id="@+id/call_icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:padding="15dp"
         app:layout_constraintBottom_toBottomOf="@+id/profile_image"
         app:layout_constraintEnd_toEndOf="@+id/profile_image"
-        app:srcCompat="@drawable/ic_blue_phone_icon" />
+        android:background="@drawable/ic_blue_phone_icon"
+        android:contentDescription="@string/call_icon" />
 
     <TextView
         android:id="@+id/incoming_caller_title"
