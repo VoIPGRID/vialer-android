@@ -284,4 +284,5 @@
     <string name="dialer_enable_encryption_failed">Unable to enable encrypted calling at this time, please try again later.</string>
     <string name="encrypted_calling_notification_title">Encrypted Calling is not enabled</string>
     <string name="encrypted_calling_notification_description">Encrypted calling is not currently enabled, third parties may be able to intercept and listen to your phone calls.</string>
+    <string name="call_icon">Call icon</string>
 </resources>

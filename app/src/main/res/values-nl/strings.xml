@@ -271,4 +271,5 @@
     <string name="encrypted_calling_notification_description">Versleuteld bellen is momenteel niet
         ingeschakeld. Anderen kunnen mogelijk jouw gesprekken opvangen en meeluisteren.
     </string>
+    <string name="call_icon">Bel icoon</string>
 </resources>
