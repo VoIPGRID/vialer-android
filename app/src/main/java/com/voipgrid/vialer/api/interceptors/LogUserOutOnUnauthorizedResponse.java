@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.onboarding.Onboarder;
+import com.voipgrid.vialer.onboarding.OnboardingActivity;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.JsonStorage;
 
@@ -50,7 +51,7 @@ public class LogUserOutOnUnauthorizedResponse implements Interceptor {
      *
      */
     private void returnUserToLoginScreen() {
-        Intent intent = new Intent(mContext, Onboarder.class);
+        Intent intent = new Intent(mContext, OnboardingActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         mContext.startActivity(intent);
         ((Activity) mContext).finish();
