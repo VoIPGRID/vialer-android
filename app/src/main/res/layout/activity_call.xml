@@ -219,8 +219,7 @@
         app:layout_constraintBottom_toTopOf="@+id/button_hangup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/linearLayout_transfer"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout_mute"
-        app:layout_constraintVertical_chainStyle="packed">
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout_mute">
 
         <com.voipgrid.vialer.call.CallActionButton
             android:id="@+id/button_onhold"
