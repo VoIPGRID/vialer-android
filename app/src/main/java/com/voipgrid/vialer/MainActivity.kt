@@ -11,7 +11,6 @@ import com.google.android.material.tabs.TabLayout
 import com.voipgrid.vialer.api.ApiTokenFetcher
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.callrecord.CallRecordFragment
-import com.voipgrid.vialer.contacts.ImportContactsForT9Search
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.Onboarder
@@ -51,7 +50,6 @@ class MainActivity : NavigationDrawerActivity() {
             phoneAccountHelper.executeUpdatePhoneAccountTask()
         }
 
-        observeContacts()
         setupTabs()
         floating_action_button.setOnClickListener { openDialer() }
     }
@@ -69,17 +67,6 @@ class MainActivity : NavigationDrawerActivity() {
     override fun onPause() {
         super.onPause()
         reachabilityReceiver.stopListening()
-    }
-
-    /**
-     * Schedule a task to update the contacts when there are changes.
-     *
-     */
-    private fun observeContacts() {
-        if (!ContactsPermission.hasPermission(this)) return
-
-        ImportContactsForT9Search.run()
-        ImportContactsForT9Search.schedule()
     }
 
     /**

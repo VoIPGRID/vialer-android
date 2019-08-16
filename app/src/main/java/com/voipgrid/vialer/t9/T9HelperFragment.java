@@ -29,7 +29,6 @@ public class T9HelperFragment extends Fragment  {
 
     @Inject HtmlHelper htmlHelper;
     @Inject ColorHelper colorHelper;
-    @Inject T9DatabaseHelper t9DatabaseHelper;
 
     private Unbinder mUnbinder;
 
@@ -112,23 +111,23 @@ public class T9HelperFragment extends Fragment  {
      * @param name The name to initialize the helper digits for.
      */
     private void initializeHelperDigitsForName(String name) {
-        String t9QueryForName = T9Query.generateT9NameQueries(name).get(0);
-
-        for (int i = 0; i < digitViews.size(); i++) {
-            TextView digitView = digitViews.get(i);
-            TextView digitLetterView = digitLetterViews.get(i);
-            char digit = t9QueryForName.charAt(i);
-
-            digitView.setText(String.valueOf(digit));
-            digitLetterView.setText(highlightRelevantLetter(digit, name, name.charAt(i)));
-        }
+//        String t9QueryForName = T9Query.generateT9NameQueries(name).get(0);
+//
+//        for (int i = 0; i < digitViews.size(); i++) {
+//            TextView digitView = digitViews.get(i);
+//            TextView digitLetterView = digitLetterViews.get(i);
+//            char digit = t9QueryForName.charAt(i);
+//
+//            digitView.setText(String.valueOf(digit));
+//            digitLetterView.setText(highlightRelevantLetter(digit, name, name.charAt(i)));
+//        }
     }
 
     /**
      * Formats the digit letter text, coloring the correct letters based on the digit being displayed.
      */
     private Spanned highlightRelevantLetter(char digitBeingDisplayed, String name, char letterToHighlight) {
-        String letters = T9Query.getLettersForDigitAsString(digitBeingDisplayed);
+        String letters = "123";
 
         int positionOfLetterToHighlight = letters.indexOf(String.valueOf(letterToHighlight).toUpperCase());
 
@@ -149,11 +148,7 @@ public class T9HelperFragment extends Fragment  {
      * @return An example first name to use in the helper
      */
     private String getExampleFirstNameToDemonstrateT9() {
-        if (t9DatabaseHelper == null) {
-            return DEFAULT_NAME;
-        }
-
-        String contactName = t9DatabaseHelper.getRandomContactName();
+        String contactName = null;
 
         if (contactName == null) {
             return DEFAULT_NAME;

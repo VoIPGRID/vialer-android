@@ -12,9 +12,6 @@ import android.widget.Toast;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.calling.Dialer;
-import com.voipgrid.vialer.contacts.ContactsSyncTask;
-import com.voipgrid.vialer.contacts.ImportContactsForT9Search;
-import com.voipgrid.vialer.t9.ContactsImportProgressUpdater;
 import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
@@ -167,7 +164,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         }
 
         if (requestCode == this.getResources().getInteger(R.integer.contact_permission_request_code)) {
-            ImportContactsForT9Search.Companion.run();
             Intent intent = getIntent();
             startActivity(intent);
             finish();
@@ -236,16 +232,6 @@ public class DialerActivity extends LoginRequiredActivity implements
         }
 
         mDialer.fadeIn();
-
-        if (!ContactsSyncTask.getProgress().isComplete()) {
-            if (mContactsProcessingThread == null || !mContactsProcessingThread.isAlive()) {
-                mContactsProcessingThread = ContactsImportProgressUpdater.start(this, mProgressText, mProgressBar);
-            }
-            mContactsProcessingContainer.setVisibility(View.VISIBLE);
-            mT9Fragment.hide();
-            noConnectivityContainer.setVisibility(View.GONE);
-            return;
-        }
 
         mT9Fragment.show();
         noConnectivityContainer.setVisibility(View.GONE);

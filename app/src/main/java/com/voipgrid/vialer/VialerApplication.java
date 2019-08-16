@@ -2,6 +2,7 @@ package com.voipgrid.vialer;
 
 import android.app.Application;
 
+import com.facebook.stetho.Stetho;
 import com.github.anrwatchdog.ANRWatchDog;
 import com.github.tamir7.contacts.Contacts;
 import com.voipgrid.vialer.dagger.DaggerVialerComponent;
@@ -36,6 +37,7 @@ public class VialerApplication extends Application {
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         new ANRWatchDog().start();
         Contacts.initialize(this);
+        Stetho.initializeWithDefaults(this);
     }
 
     public static String getAppVersion() {

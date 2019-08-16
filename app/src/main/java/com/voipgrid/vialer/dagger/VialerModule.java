@@ -44,8 +44,6 @@ import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
-import com.voipgrid.vialer.t9.T9DatabaseHelper;
-import com.voipgrid.vialer.t9.T9ViewBinder;
 import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -206,11 +204,6 @@ public class VialerModule {
     }
 
     @Provides
-    T9DatabaseHelper provideT9DatabaseHelper(Context context) {
-        return new T9DatabaseHelper(context);
-    }
-
-    @Provides
     ColorHelper provideColorHelper() {
         return new ColorHelper();
     }
@@ -218,11 +211,6 @@ public class VialerModule {
     @Provides
     HtmlHelper provideHtmlHelper() {
         return new HtmlHelper();
-    }
-
-    @Provides
-    T9ViewBinder provideT9ViewBinder(Context context) {
-        return new T9ViewBinder(context);
     }
 
     @Provides Handler provideHandler() {
