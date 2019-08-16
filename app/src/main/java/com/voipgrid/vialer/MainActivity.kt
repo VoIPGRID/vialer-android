@@ -2,8 +2,11 @@ package com.voipgrid.vialer
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -15,11 +18,11 @@ import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.Onboarder
 import com.voipgrid.vialer.onboarding.SingleOnboardingStepActivity
 import com.voipgrid.vialer.onboarding.steps.TwoFactorStep
-import com.voipgrid.vialer.permissions.ContactsPermission
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.PhoneAccountHelper
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_onboarding.view.*
 import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {
@@ -66,6 +69,21 @@ class MainActivity : NavigationDrawerActivity() {
     }
 
     /**
+<<<<<<< HEAD
+=======
+    * If we do not currently have an api token stored, fetch one from the server.
+    *
+    */
+    private fun fetchApiTokenIfDoesNotExist() {
+        if (hasApiToken()) return
+
+        logger.i("There is no api-key currently stored, will attempt to fetch one")
+
+        ApiTokenFetcher.usingSavedCredentials(this).setListener(ApiTokenListener()).fetch()
+    }
+
+    /**
+>>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
      * End immediately and return to the onboarding screen to let tthe user login
      * again.
      *
@@ -115,16 +133,21 @@ class MainActivity : NavigationDrawerActivity() {
                 }
 
                 override fun onTabSelected(tab: TabLayout.Tab?) {
-                    view_pager.currentItem = tab?.position ?: 0
+                    tab?.let {
+                        (call_record_fragment as CallRecordFragment).changeType(when(it.position) {
+                            0 -> CallRecordFragment.TYPE.ALL_CALLS
+                            1 -> CallRecordFragment.TYPE.MISSED_CALLS
+                            else -> CallRecordFragment.TYPE.ALL_CALLS
+                        })
+                    }
+
                 }
             })
         }
-
-        view_pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tab_layout))
-        view_pager.adapter = TabAdapter(supportFragmentManager)
     }
 
     /**
+<<<<<<< HEAD
      * Tab adapter to handle tabs in the ViewPager
      */
     private inner class TabAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
@@ -140,5 +163,25 @@ class MainActivity : NavigationDrawerActivity() {
         override fun getCount(): Int {
             return 2
         }
+=======
+     * Listen for the api token request and display a dialog to enter the two-factor token
+     * if one is required.
+     *
+     */
+    private inner class ApiTokenListener : ApiTokenFetcher.ApiTokenListener {
+        override fun twoFactorCodeRequired() {
+            if (isFinishing) {
+                return
+            }
+
+            logger.i("Prompting the user to enter a two-factor code")
+
+            SingleOnboardingStepActivity.launch(this@MainActivity, TwoFactorStep::class.java)
+        }
+
+        override fun onSuccess(apiToken: String) {}
+
+        override fun onFailure() {}
+>>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
     }
 }

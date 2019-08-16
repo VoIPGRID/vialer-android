@@ -17,6 +17,7 @@ import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.callrecord.CallRecordViewHolder;
+import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.dialer.NumberInputView;
 import com.voipgrid.vialer.logging.VialerBaseActivity;
@@ -31,6 +32,8 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.t9.T9HelperFragment;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
+
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
 
@@ -60,7 +63,11 @@ public interface VialerComponent {
 
     void inject(NetworkConnectivity networkConnectivity);
 
+<<<<<<< HEAD
     void inject(CallRecordFragment fragment);
+=======
+    Preferences getPreferences();
+>>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
 
     void inject(CallRecord callRecord);
 
@@ -103,4 +110,8 @@ public interface VialerComponent {
     void inject(OnboardingActivity onboardingActivity);
 
     void inject(MissingVoipAccountStep missingVoipAccountStep);
+
+    void inject(CallRecordFragment callRecordFragment);
+
+    void inject(HistoricCallRecordsImporter.Worker worker);
 }
