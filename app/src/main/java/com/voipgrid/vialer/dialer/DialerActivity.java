@@ -43,7 +43,6 @@ public class DialerActivity extends LoginRequiredActivity implements
 
     private DialHelper dialHelper;
     private T9Fragment mT9Fragment;
-    private Thread mContactsProcessingThread;
 
     /**
      * The key for where the dialer number will be stored
@@ -146,15 +145,6 @@ public class DialerActivity extends LoginRequiredActivity implements
     @Override
     public void exitButtonWasPressed() {
 
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (mContactsProcessingThread != null && mContactsProcessingThread.isAlive()) {
-            mContactsProcessingThread.interrupt();
-        }
     }
 
     @Override
@@ -275,5 +265,9 @@ public class DialerActivity extends LoginRequiredActivity implements
     @Override
     public void onContactSelected(String number, String name) {
         onCallNumber(number, name);
+    }
+
+    public Dialer getDialer() {
+        return mDialer;
     }
 }

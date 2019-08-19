@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingRight="@dimen/list_item_contact_padding_right"
-    android:paddingLeft="@dimen/list_item_contact_padding_left"
+    android:paddingRight="5dp"
+    android:paddingLeft="5dp"
     android:paddingTop="@dimen/list_item_contact_padding_top"
     android:paddingBottom="@dimen/list_item_contact_padding_bottom">
 
