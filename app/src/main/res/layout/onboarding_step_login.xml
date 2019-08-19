@@ -1,21 +1,20 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin">
 
     <TextView
         android:id="@+id/title_label"
         style="@style/HeaderTitleTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/login_header_label_text"
-    />
+        android:text="@string/login_header_label_text" />
 
     <TextView
         android:id="@+id/subtitle_label"
@@ -24,16 +23,14 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/title_label"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:text="@string/login_header_label_subtext"
-    />
+        android:text="@string/login_header_label_subtext" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/email_field"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/subtitle_label"
-        app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
-    >
+        app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle">
 
         <EditText
             android:id="@+id/emailTextDialog"
@@ -41,8 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/email_edittext_hint"
-            android:inputType="textEmailAddress"
-        />
+            android:inputType="textEmailAddress" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -53,8 +49,7 @@
         android:layout_below="@id/email_field"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         app:endIconMode="password_toggle"
-        app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
-    >
+        app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/passwordTextDialog"
@@ -62,8 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/password_edittext_hint"
-            android:inputType="textPassword"
-        />
+            android:inputType="textPassword" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -73,10 +67,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/password_field"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:enabled="false"
-        android:text="@string/login_button_title"
-    />
+        android:text="@string/login_button_title" />
 
     <Button
         android:id="@+id/button_forgot_password"
@@ -85,9 +77,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/password_field"
         android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:text="@string/forgot_password_button_title"
-    />
+        android:text="@string/forgot_password_button_title" />
 
     <Button
         android:id="@+id/button_info"
@@ -96,8 +86,5 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/button_forgot_password"
         android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:text="@string/info_button_title"
-    />
-
+        android:text="@string/info_button_title" />
 </RelativeLayout>

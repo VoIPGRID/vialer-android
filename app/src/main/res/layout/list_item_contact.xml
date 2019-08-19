@@ -3,58 +3,61 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingRight="@dimen/list_item_contact_padding_right"
-    android:paddingLeft="@dimen/list_item_contact_padding_left"
+    android:paddingStart="@dimen/list_item_contact_padding_left"
     android:paddingTop="@dimen/list_item_contact_padding_top"
+    android:paddingEnd="@dimen/list_item_contact_padding_right"
     android:paddingBottom="@dimen/list_item_contact_padding_bottom">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/text_view_contact_icon"
         android:layout_width="@dimen/contact_icon_width"
-        android:layout_height="@dimen/contact_icon_height" />
+        android:layout_height="@dimen/contact_icon_height"
+        android:layout_weight="0"/>
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_gravity="center"
-        android:paddingLeft="@dimen/list_item_contact_padding_top">
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/list_item_contact_padding_top"
+        android:paddingEnd="0dp">
 
-    <TextView
-        android:id="@+id/text_view_contact_name"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/contact_name_text_size"
-        android:fontFamily="sans-serif"
-        android:textColor="@color/contact_name_text_color"/>
+        <TextView
+            android:id="@+id/text_view_contact_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif"
+            android:maxLines="1"
+            android:textColor="@color/contact_name_text_color"
+            android:textSize="@dimen/contact_name_text_size" />
 
         <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/text_view_contact_information"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/contact_information_text_size"
                 android:fontFamily="sans-serif"
                 android:gravity="start"
-                android:textColor="@color/contact_information_text_color"/>
+                android:layout_weight="0"
+                android:textColor="@color/contact_information_text_color"
+                android:textSize="@dimen/contact_information_text_size" />
 
             <TextView
                 android:id="@+id/text_view_contact_type"
-                android:layout_width="fill_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/contact_information_text_size"
+                android:layout_gravity="end"
                 android:fontFamily="sans-serif"
+                android:layout_weight="1"
                 android:gravity="end"
                 android:textColor="@color/contact_information_text_color"
-                android:layout_gravity="right" />
+                android:textSize="@dimen/contact_information_text_size" />
         </LinearLayout>
-
     </LinearLayout>
-
 </LinearLayout>

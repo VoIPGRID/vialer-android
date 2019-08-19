@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -10,34 +10,28 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/color_primary"
         android:orientation="vertical"
         android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:background="@color/color_primary">
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin">
 
         <TextView
             android:id="@+id/name_text_view"
-            style="@style/CallNameTextViewStyle"/>
+            tools:text="John Doe"
+            style="@style/CallNameTextViewStyle" />
 
         <TextView
             android:id="@+id/status_text_view"
+            tools:text="Out of Reach"
             style="@style/CallStateTextViewStyle" />
-
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/dialer_warning"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:onClick="onClick"
-        style="@style/Warning"
-        />
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -47,29 +41,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"/>
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin" />
 
         </ScrollView>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal|bottom"
-            >
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/two_step_button_hangup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_call_end_white"
-                android:onClick="onClick"
-                app:backgroundTint="@color/call_fab_hangup_color"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                app:elevation="@dimen/fab_elevation"
-                app:borderWidth="@dimen/fab_border_width"
-                />
-        </LinearLayout>
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/two_step_button_hangup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:onClick="onClick"
+            android:src="@drawable/ic_call_end_white"
+            android:layout_gravity="bottom|end"
+            app:backgroundTint="@color/call_fab_hangup_color"
+            app:borderWidth="@dimen/fab_border_width"
+            app:elevation="@dimen/fab_elevation" />
     </FrameLayout>
 
 </LinearLayout>
