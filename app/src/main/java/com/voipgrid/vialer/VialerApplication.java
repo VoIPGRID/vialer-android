@@ -37,7 +37,6 @@ public class VialerApplication extends Application {
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         new ANRWatchDog().start();
         Contacts.initialize(this);
-        Stetho.initializeWithDefaults(this);
     }
 
     public static String getAppVersion() {
