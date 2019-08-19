@@ -1,27 +1,25 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:gravity="center"
-    android:padding="@dimen/activity_horizontal_margin"
-    >
+    android:orientation="vertical"
+    android:padding="@dimen/activity_horizontal_margin">
+
     <TextView
         android:id="@+id/title_label"
+        style="@style/HeaderTitleTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/HeaderTitleTextViewStyle"
-        android:text="@string/welcome_text"
         android:fontFamily="sans-serif"
-        />
+        android:text="@string/welcome_text" />
+
     <TextView
         android:id="@+id/subtitle_label"
+        style="@style/HeaderTitleTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_below="@id/title_label"
-        style="@style/HeaderTitleTextViewStyle"
-        android:text="@string/placeholder_name"
         android:fontFamily="sans-serif-light"
-        />
-</RelativeLayout>
+        android:text="@string/placeholder_name" />
+</LinearLayout>
