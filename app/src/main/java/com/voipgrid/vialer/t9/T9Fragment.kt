@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.tamir7.contacts.Contact
 import com.github.tamir7.contacts.PhoneNumber
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.contacts.Contacts
 import com.voipgrid.vialer.permissions.ContactsPermission
 import kotlinx.android.synthetic.main.fragment_t9_search.*
 import kotlinx.android.synthetic.main.list_item_contact.view.*
@@ -193,7 +192,7 @@ class T9Fragment : Fragment(), CoroutineScope {
             itemView.text_view_contact_name.text = highlightMatchedWithRegex(contact.displayName, query)
             itemView.text_view_contact_information.text = if (contact.phoneNumbers.size == 1) highlightMatchedWithRegex(contact.phoneNumbers[0].number, query) else context.getString(R.string.t9_search_numbers, contact.phoneNumbers.size)
             itemView.text_view_contact_type.text = if (contact.phoneNumbers.size == 1) contact.phoneNumbers[0].type.name.toLowerCase().capitalize() else ""
-            itemView.text_view_contact_icon.setImageBitmap(Contacts().getImageOrPlaceholderForContact(contact))
+            itemView.text_view_contact_icon.setImageURI(Uri.parse(contact.photoUri))
 
             setOnClickListener {
                 contactWasClicked(contact)
@@ -213,7 +212,6 @@ class T9Fragment : Fragment(), CoroutineScope {
 
             return str.toSpannable()
         }
-
     }
 
     class DiffCallback : DiffUtil.ItemCallback<Contact>() {
