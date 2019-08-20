@@ -24,7 +24,6 @@ import com.github.tamir7.contacts.Contact
 import com.github.tamir7.contacts.PhoneNumber
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.contacts.Contacts
-import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.permissions.ContactsPermission
 import kotlinx.android.synthetic.main.fragment_t9_search.*
 import kotlinx.android.synthetic.main.list_item_contact.view.*
@@ -120,17 +119,16 @@ class T9Fragment : Fragment(), CoroutineScope {
         }
     }
 
-    fun search(query: String)  = launch(Dispatchers.Main) {
-        val contacts = contactsSearcher.t9(T9.convertT9QueryToRegexQuery(query))
+    fun search(query: String) {
+        coroutineContext.cancelChildren()
 
-        val currentQuery = (activity as DialerActivity).dialer.number
-        val currentQueryAsT9 = T9.convertT9QueryToRegexQuery(currentQuery)
-
-        adapter.query = currentQueryAsT9
-
-        adapter.submitList(contacts)
-
-        updateUi(currentQuery)
+        launch(Dispatchers.Main) {
+            val t9query = T9.convertT9QueryToRegexQuery(query)
+            val contacts = contactsSearcher.t9(t9query)
+            adapter.query = t9query
+            adapter.submitList(contacts)
+            updateUi(query)
+        }
     }
 
     fun show() {

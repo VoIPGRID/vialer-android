@@ -2,7 +2,6 @@ package com.voipgrid.vialer;
 
 import android.app.Application;
 
-import com.facebook.stetho.Stetho;
 import com.github.anrwatchdog.ANRWatchDog;
 import com.github.tamir7.contacts.Contacts;
 import com.voipgrid.vialer.dagger.DaggerVialerComponent;
