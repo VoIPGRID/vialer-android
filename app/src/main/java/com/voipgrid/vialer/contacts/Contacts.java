@@ -10,7 +10,6 @@ import android.provider.ContactsContract;
 import com.github.tamir7.contacts.Contact;
 import com.github.tamir7.contacts.Query;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.util.IconHelper;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -57,15 +56,6 @@ public class Contacts {
             return null;
         }
 
-        return getContactImage(contact);
-    }
-
-    /**
-     * Method used to get the image by the phone number.
-     *
-     * @return bitmap image
-     */
-    private Bitmap getContactImage(Contact contact) {
         return openPhoto(contact.getId());
     }
 
@@ -111,16 +101,6 @@ public class Contacts {
         }
 
         return contact.getDisplayName();
-    }
-
-    public Bitmap getImageOrPlaceholderForContact(Contact contact) {
-        if (contact == null) {
-            return IconHelper.getCallerIconBitmap("", contact.getPhoneNumbers().get(0).getNumber(), 0);
-        }
-
-        Bitmap contactImage = getContactImage(contact);
-
-        return contactImage != null ? contactImage : IconHelper.getCallerIconBitmap(contact.getDisplayName().substring(0, 1), contact.getPhoneNumbers().get(0).getNumber(), 0);
     }
 
 }

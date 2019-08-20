@@ -24,6 +24,7 @@ import com.github.tamir7.contacts.Contact
 import com.github.tamir7.contacts.PhoneNumber
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.permissions.ContactsPermission
+import com.voipgrid.vialer.util.IconHelper
 import kotlinx.android.synthetic.main.fragment_t9_search.*
 import kotlinx.android.synthetic.main.list_item_contact.view.*
 import kotlinx.coroutines.*
@@ -192,11 +193,20 @@ class T9Fragment : Fragment(), CoroutineScope {
             itemView.text_view_contact_name.text = highlightMatchedWithRegex(contact.displayName, query)
             itemView.text_view_contact_information.text = if (contact.phoneNumbers.size == 1) highlightMatchedWithRegex(contact.phoneNumbers[0].number, query) else context.getString(R.string.t9_search_numbers, contact.phoneNumbers.size)
             itemView.text_view_contact_type.text = if (contact.phoneNumbers.size == 1) contact.phoneNumbers[0].type.name.toLowerCase().capitalize() else ""
-            itemView.text_view_contact_icon.setImageURI(Uri.parse(contact.photoUri))
+            setIcon(contact)
 
             setOnClickListener {
                 contactWasClicked(contact)
             }
+        }
+
+        private fun setIcon(contact: Contact) {
+            if (contact.photoUri != null && contact.photoUri.isNotBlank()) {
+                itemView.text_view_contact_icon.setImageURI(Uri.parse(contact.photoUri))
+                return
+            }
+
+            itemView.text_view_contact_icon.setImageBitmap(IconHelper.getCallerIconBitmap(contact.displayName.substring(0, 1), contact.phoneNumbers[0].number, 0))
         }
 
         /**
