@@ -1,7 +1,5 @@
 package com.voipgrid.vialer.t9
 
-import java.lang.RuntimeException
-
 object T9 {
 
     private val keyMappings = mapOf(
@@ -22,13 +20,7 @@ object T9 {
      *
      */
     fun convertT9QueryToRegexQuery(query: String) : Regex {
-        var regexQuery = "^"
-
-        query.forEach {
-            regexQuery = regexQuery.plus(createRegexForKey(it))
-        }
-
-        return Regex(regexQuery)
+        return query.map { createRegexForKey(it) }.joinToString(separator = "").toRegex()
     }
 
     /**
