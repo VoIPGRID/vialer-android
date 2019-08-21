@@ -24,13 +24,9 @@ class ContactsSearcher {
      *
      */
     suspend fun t9(t9Query: Regex) : List<Contact> = withContext(Dispatchers.Default) {
-        contacts.filter {
-            if (it.displayName.toLowerCase().contains(t9Query)) return@filter true
-
-            it.phoneNumbers.forEach { number -> if (number.number.contains(t9Query)) return@filter true }
-
-            false
-        }
+        contacts.asSequence().filter {
+            it.displayName.toLowerCase().contains(t9Query) or it.phoneNumbers.any { number -> number.number.contains(t9Query) }
+        }.toList()
     }
 
     /**

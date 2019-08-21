@@ -20,7 +20,7 @@ object T9 {
      *
      */
     fun convertT9QueryToRegexQuery(query: String) : Regex {
-        return query.map { createRegexForKey(it) }.joinToString(separator = "").toRegex()
+        return query.map { createRegexForKey(it) }.joinToString(separator = "", prefix = "^").toRegex()
     }
 
     /**
