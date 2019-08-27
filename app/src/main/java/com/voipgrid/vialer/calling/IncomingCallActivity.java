@@ -1,16 +1,13 @@
 package com.voipgrid.vialer.calling;
 
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_ACTIVE;
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_CONNECTED;
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
-
 import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
@@ -21,11 +18,12 @@ import com.voipgrid.vialer.sip.SipService;
 
 import javax.inject.Inject;
 
-import androidx.annotation.NonNull;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 
 public class IncomingCallActivity extends AbstractCallActivity {
 
@@ -131,11 +129,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
     protected void onResume() {
         super.onResume();
 
-        if (currentlyOnLockScreen()) {
-            mCallButtons.setVisibility(View.VISIBLE);
-        } else {
-            mCallButtons.setVisibility(View.VISIBLE);
-        }
+        mCallButtons.setVisibility(View.VISIBLE);
 
         if (ringingIsPaused) {
             ringingIsPaused = false;
@@ -175,6 +169,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
     @Override
     public void onCallDisconnected() {
+        //TODO: Seems like this is the scenario 1 of missed call.
         mSipServiceConnection.disconnect(true);
         endRinging();
     }

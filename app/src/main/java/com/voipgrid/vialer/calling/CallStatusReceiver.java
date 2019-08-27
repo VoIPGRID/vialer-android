@@ -1,5 +1,12 @@
 package com.voipgrid.vialer.calling;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+
+import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.sip.SipConstants;
+
 import static com.voipgrid.vialer.sip.SipConstants.CALL_CONNECTED_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_PUT_ON_HOLD_ACTION;
@@ -7,14 +14,6 @@ import static com.voipgrid.vialer.sip.SipConstants.CALL_RINGING_IN_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_RINGING_OUT_MESSAGE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_UNHOLD_ACTION;
 import static com.voipgrid.vialer.sip.SipConstants.SERVICE_STOPPED;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-
-import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.sip.SipConstants;
 
 public class CallStatusReceiver extends BroadcastReceiver {
 
@@ -28,7 +27,7 @@ public class CallStatusReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String status = intent.getStringExtra(SipConstants.CALL_STATUS_KEY);
+        String status = intent.getStringExtra(SipConstants.CALL_STATUS_KEY) + "";
         String callId = intent.getStringExtra(SipConstants.CALL_IDENTIFIER_KEY);
 
         mLogger.i("Dispatching call status " + status + " for call id " + callId + " to " + mListener.getClass().getSimpleName());
