@@ -57,7 +57,7 @@ class LoginStep : Step() {
         button_forgot_password.setOnClickListener {
             logger.i("Detected forgot password click, launching activity")
 
-            ForgottenPasswordActivity.launchForRequestEmail(onboarding as Context, emailTextDialog.text.toString())
+            ForgottenPasswordActivity.launchForEmail(onboarding as Context, emailTextDialog.text.toString())
         }
 
         button_info.setOnClickListener {
