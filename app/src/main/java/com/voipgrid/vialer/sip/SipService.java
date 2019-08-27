@@ -1,8 +1,5 @@
 package com.voipgrid.vialer.sip;
 
-import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
-import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
-
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -16,6 +13,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
@@ -46,8 +46,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
+import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
+import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -154,49 +154,49 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         if (intent == null) return false;
 
         this.intent = intent;
-        final String action = this.intent.getAction();
+        final String action = "" + this.intent.getAction();
 
         mLogger.i("Performing action: " + action);
 
-        if (Actions.HANDLE_INCOMING_CALL.equals(action)) {
-            initialiseIncomingCall();
-            return true;
-        }
-        else if (Actions.HANDLE_OUTGOING_CALL.equals(action)) {
-            initialiseOutgoingCall(intent);
-            return true;
-        }
-        else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
-            mCurrentCall.decline();
-        }
-        else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
-            if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
-                Toast.makeText(this, getString(R.string.permission_microphone_missing_message), Toast.LENGTH_LONG).show();
-                mLogger.e("Unable to answer incoming call as we do not have microphone permission");
-                return false;
-            }
+        switch (action) {
+            case Actions.HANDLE_INCOMING_CALL:
+                initialiseIncomingCall();
+                return true;
+            case Actions.HANDLE_OUTGOING_CALL:
+                initialiseOutgoingCall(intent);
+                return true;
+            case Actions.DECLINE_INCOMING_CALL:
+                mCurrentCall.decline();
+                break;
+            case Actions.ANSWER_INCOMING_CALL:
+                if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
+                    Toast.makeText(this, getString(R.string.permission_microphone_missing_message), Toast.LENGTH_LONG).show();
+                    mLogger.e("Unable to answer incoming call as we do not have microphone permission");
+                    return false;
+                }
 
-            mCurrentCall.answer();
-        }
-        else if (Actions.END_CALL.equals(action)) {
-            mCurrentCall.hangup(true);
-        }
-        else if (Actions.ANSWER_OR_HANGUP.equals(action)) {
-            if (mCurrentCall.isCallRinging()) {
                 mCurrentCall.answer();
-            } else if (mCurrentCall.isConnected()) {
+                break;
+            case Actions.END_CALL:
                 mCurrentCall.hangup(true);
-            }
-        }
-        else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
-            if (getCurrentCall() != null) {
-                startCallActivityForCurrentCall();
-            } else {
-                stopSelf();
-            }
-        }
-        else {
-            mLogger.e("SipService received an invalid action: " + action);
+                break;
+            case Actions.ANSWER_OR_HANGUP:
+                if (mCurrentCall.isCallRinging()) {
+                    mCurrentCall.answer();
+                } else if (mCurrentCall.isConnected()) {
+                    mCurrentCall.hangup(true);
+                }
+                break;
+            case Actions.DISPLAY_CALL_IF_AVAILABLE:
+                if (getCurrentCall() != null) {
+                    startCallActivityForCurrentCall();
+                } else {
+                    stopSelf();
+                }
+                break;
+            default:
+                mLogger.e("SipService received an invalid action: " + action);
+                break;
         }
 
         return false;
