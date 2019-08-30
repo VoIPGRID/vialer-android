@@ -8,7 +8,6 @@ import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.Log;
 
-import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
@@ -452,14 +451,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         if (mSipService.getCurrentCall() != null || mSipService.getNativeCallManager().isBusyWithNativeCall()) {
             code = pjsip_status_code.PJSIP_SC_BUSY_HERE;
             LogHelper.using(mLogger).logBusyReason(mSipService);
-        }
-
-        if (mSipService.getCurrentCall() != null) {
-            VialerStatistics.incomingCallFailedDueToOngoingVialerCall(this);
-        }
-
-        if (mSipService.getNativeCallManager().isBusyWithNativeCall()) {
-            VialerStatistics.incomingCallFailedDueToOngoingGsmCall(this);
         }
 
         mCurrentCallState = SipConstants.CALL_INCOMING_RINGING;

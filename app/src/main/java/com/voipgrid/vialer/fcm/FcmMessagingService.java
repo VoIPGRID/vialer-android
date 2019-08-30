@@ -2,19 +2,19 @@ package com.voipgrid.vialer.fcm;
 
 import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
-import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import android.telephony.TelephonyManager;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.voipgrid.vialer.Preferences;
-import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
@@ -26,6 +26,8 @@ import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,6 +57,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     private Logger mRemoteLogger;
     private ConnectivityHelper mConnectivityHelper;
     private PowerManager mPowerManager;
+    private NativeCallManager nativeCallManager;
 
     @Override
     public void onCreate() {
@@ -62,6 +65,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         mRemoteLogger = new Logger(FcmMessagingService.class);
         mConnectivityHelper = ConnectivityHelper.get(this);
         mPowerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        nativeCallManager = new NativeCallManager((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE));
         mRemoteLogger.d("onCreate");
     }
 
@@ -111,6 +115,11 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
         if (isAVialerCallAlreadyInProgress()) {
             rejectDueToVialerCallAlreadyInProgress(remoteMessage, remoteMessageData);
+            return;
+        }
+
+        if (nativeCallManager.isBusyWithNativeCall()) {
+            rejectDueToNativeCallAlreadyInProgress(remoteMessage, remoteMessageData);
             return;
         }
 
@@ -205,6 +214,21 @@ public class FcmMessagingService extends FirebaseMessagingService {
         replyServer(remoteMessageData, false);
 
         sendCallFailedDueToOngoingVialerCallMetric(remoteMessage, remoteMessageData.getRequestToken());
+    }
+
+    /**
+     * Performs various tasks that are necessary when rejecting a call based on the fact that there is
+     * already a Vialer call in progress.
+     *
+     * @param remoteMessage The remote message that we are handling.
+     * @param remoteMessageData The remote message data that we are handling.
+     */
+    private void rejectDueToNativeCallAlreadyInProgress(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
+        mRemoteLogger.d("Reject due to native call already in progress");
+
+        replyServer(remoteMessageData, false);
+
+        VialerStatistics.incomingCallFailedDueToOngoingGsmCall(remoteMessage);
     }
 
     /**
