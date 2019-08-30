@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:id="@+id/bottom"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="?android:colorBackground">
+    android:background="?android:colorBackground"
+    android:orientation="vertical">
 
     <com.voipgrid.vialer.dialer.NumberInputView
         android:id="@+id/number_input_edit_text"
         android:layout_width="match_parent"
-        android:layout_height="45dp"/>
+        android:layout_height="45dp" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/key_pad_container"
@@ -26,32 +26,32 @@
             android:layout_height="0dp"
             android:gravity="center_horizontal"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.8"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintHeight_percent="0.8"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.voipgrid.vialer.dialer.CallButton
             android:id="@+id/button_call"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
             android:adjustViewBounds="true"
             android:background="@drawable/call_pickup_button"
             android:backgroundTint="@color/call_fab_pickup_color"
             android:padding="15dp"
-            app:srcCompat="@drawable/ic_call_white"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio=""
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHeight_percent="0.2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/key_pad_view"
             app:layout_constraintVertical_bias="0.39"
-            app:layout_constraintDimensionRatio=""/>
+            app:srcCompat="@drawable/ic_call_white" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>
