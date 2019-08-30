@@ -1,42 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.voipgrid.vialer.twostepcall.TwoStepCallIconView
         android:id="@+id/icon"
-        app:icon_resource="@drawable/ic_twostepcall_platform"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        app:icon_resource="@drawable/ic_twostepcall_platform" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/icon"
-        android:layout_toEndOf="@+id/icon"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_toEndOf="@+id/icon"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:lines="1"
             android:ellipsize="end"
             android:fontFamily="sans-serif"
-            android:textSize="16sp"
-            android:textColor="@color/two_step_call_dots"/>
+            android:lines="1"
+            android:textColor="@color/two_step_call_dots"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:lines="1"
             android:ellipsize="end"
             android:fontFamily="sans-serif"
-            android:textSize="26sp"
-            android:textColor="@color/two_step_call_dots"/>
+            android:lines="1"
+            android:textColor="@color/two_step_call_dots"
+            android:textSize="26sp" />
 
     </LinearLayout>
 

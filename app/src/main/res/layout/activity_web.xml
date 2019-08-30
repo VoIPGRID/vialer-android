@@ -1,16 +1,16 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/container">
+    android:layout_height="match_parent">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/action_bar"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:theme="@style/ActionBar"
         android:background="@drawable/background_gradient"
+        android:theme="@style/ActionBar"
         app:popupTheme="@style/ActionBar_Popup">
 
     </androidx.appcompat.widget.Toolbar>
@@ -19,16 +19,15 @@
         android:id="@+id/web_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/action_bar"/>
+        android:layout_below="@id/action_bar" />
 
     <ProgressBar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
-        android:progressTint="@color/progress_bar_color"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/action_bar"
-        android:indeterminate="true"/>
-
+        android:indeterminate="true"
+        android:progressTint="@color/progress_bar_color" />
 
 </RelativeLayout>
