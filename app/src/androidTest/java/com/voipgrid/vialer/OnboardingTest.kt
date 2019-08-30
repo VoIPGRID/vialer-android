@@ -6,16 +6,19 @@ import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.runner.AndroidJUnit4
 import com.voipgrid.vialer.onboarding.OnboardingActivity
 import org.hamcrest.core.IsNot.not
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class OnboardingTest : VialerTest() {
 
     @Rule
     @JvmField
-    var mActivityTestRule = VialerActivityTestRule(OnboardingActivity::class.java, resetStateAfterEachTest = true)
+    var rule = VialerActivityTestRule(OnboardingActivity::class.java, this, resetStateAfterEachTest = true, loginAutomatically = false)
 
     @Test
     fun loginFailsWithInvalidCredentials() {

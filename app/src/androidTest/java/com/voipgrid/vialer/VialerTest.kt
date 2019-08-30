@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
-open class VialerTest {
+abstract class VialerTest {
 
     @Rule
     @JvmField
@@ -36,12 +36,24 @@ open class VialerTest {
         Thread.sleep(2000)
     }
 
-    protected fun onboard() {
+     fun onboard(skipIfLoggedIn: Boolean = false): Boolean {
+         Thread.sleep(2000)
+        try {
+            onView(withId(R.id.emailTextDialog)).check(matches(isDisplayed()))
+        } catch (e: Exception) {
+            if (skipIfLoggedIn) {
+                return false
+            } else {
+                throw e
+            }
+        }
+
         login()
         enterMobileNumber()
         onView(ViewMatchers.withText("Battery Optimization")).check(matches(isDisplayed()))
         onView(withId(R.id.denyButton)).perform(click())
         Thread.sleep(5000)
         onView(ViewMatchers.withText("MY CALLS")).check(matches(isDisplayed()))
+        return true
     }
 }

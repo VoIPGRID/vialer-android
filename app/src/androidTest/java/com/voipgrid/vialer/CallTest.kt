@@ -5,8 +5,6 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.longClick
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import com.voipgrid.vialer.onboarding.OnboardingActivity
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -14,12 +12,7 @@ class CallTest : VialerTest() {
 
     @Rule
     @JvmField
-    var rule = VialerActivityTestRule(OnboardingActivity::class.java, resetStateAfterEachTest = false)
-
-    @Before
-    fun loginToApp() {
-        onboard()
-    }
+    var rule = VialerActivityTestRule(MainActivity::class.java, this, resetStateAfterEachTest = false)
 
     @Test
     fun itWillPlaceACall() {
