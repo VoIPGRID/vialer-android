@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <com.voipgrid.vialer.twostepcall.TwoStepCallProgressView
         android:id="@+id/progress"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/progress"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_toEndOf="@+id/progress"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:fontFamily="sans-serif"
-        android:textSize="16sp"
-        android:textColor="#3D4154"/>
+        android:textColor="#3D4154"
+        android:textSize="16sp" />
 
 </merge>

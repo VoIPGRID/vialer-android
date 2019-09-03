@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.util;
 
+import android.util.Log;
+
 public class HtmlHelper {
 
     /**
@@ -12,6 +14,10 @@ public class HtmlHelper {
      * @return
      */
     public String colorSubstring(String str, String color, int start, int end) {
+        if (str == null || str.isEmpty()) {
+            return "";
+        }
+
         color = formatColorHexCode(color);
 
         return str.substring(0, start) + wrapInColorTags(str.substring(start, end), color) + str.substring(end);
