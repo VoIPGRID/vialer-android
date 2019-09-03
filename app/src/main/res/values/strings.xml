@@ -259,6 +259,7 @@
     <string name="t9helper_title">Tips</string>
     <string name="t9helper_text">You can search for %s by keying the numbers on the dialpad below.</string>
     <string name="t9helper_joining_character" translatable="false">+</string>
+    <string name="t9_search_numbers">%d numbers</string>
     <string name="notification_channel_voip_disabled">Your VoIP account has been registered on another device. You can re-enable VoIP in Settings</string>
     <string name="pending_call_description">Setting up call with</string>
     <string name="pending_call_status">Establishing VoIP connection…</string>

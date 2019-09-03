@@ -8,12 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.github.tamir7.contacts.Contact;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.util.ColorHelper;
 import com.voipgrid.vialer.util.HtmlHelper;
 
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -29,7 +31,6 @@ public class T9HelperFragment extends Fragment  {
 
     @Inject HtmlHelper htmlHelper;
     @Inject ColorHelper colorHelper;
-    @Inject T9DatabaseHelper t9DatabaseHelper;
 
     private Unbinder mUnbinder;
 
@@ -112,7 +113,7 @@ public class T9HelperFragment extends Fragment  {
      * @param name The name to initialize the helper digits for.
      */
     private void initializeHelperDigitsForName(String name) {
-        String t9QueryForName = T9Query.generateT9NameQueries(name).get(0);
+        String t9QueryForName = T9.INSTANCE.convertResultBackIntoT9Query(name);
 
         for (int i = 0; i < digitViews.size(); i++) {
             TextView digitView = digitViews.get(i);
@@ -120,20 +121,20 @@ public class T9HelperFragment extends Fragment  {
             char digit = t9QueryForName.charAt(i);
 
             digitView.setText(String.valueOf(digit));
-            digitLetterView.setText(highlightRelevantLetter(digit, name, name.charAt(i)));
+            digitLetterView.setText(highlightRelevantLetter(digit, name.charAt(i)));
         }
     }
 
     /**
      * Formats the digit letter text, coloring the correct letters based on the digit being displayed.
      */
-    private Spanned highlightRelevantLetter(char digitBeingDisplayed, String name, char letterToHighlight) {
-        String letters = T9Query.getLettersForDigitAsString(digitBeingDisplayed);
+    private Spanned highlightRelevantLetter(char digitBeingDisplayed, char letterToHighlight) {
+        String letters = T9.INSTANCE.getLettersThatMapToKey(digitBeingDisplayed);
 
-        int positionOfLetterToHighlight = letters.indexOf(String.valueOf(letterToHighlight).toUpperCase());
+        int positionOfLetterToHighlight = letters.indexOf(String.valueOf(letterToHighlight).toLowerCase());
 
         letters = htmlHelper.colorSubstring(
-                letters,
+                letters.toUpperCase(),
                 getHighlightColor(),
                 positionOfLetterToHighlight,
                 positionOfLetterToHighlight + 1
@@ -149,15 +150,13 @@ public class T9HelperFragment extends Fragment  {
      * @return An example first name to use in the helper
      */
     private String getExampleFirstNameToDemonstrateT9() {
-        if (t9DatabaseHelper == null) {
+        List<Contact> contacts = ContactsSearcher.Companion.getContacts();
+
+        if (contacts.isEmpty()) {
             return DEFAULT_NAME;
         }
 
-        String contactName = t9DatabaseHelper.getRandomContactName();
-
-        if (contactName == null) {
-            return DEFAULT_NAME;
-        }
+        String contactName = contacts.get(new Random().nextInt(contacts.size())).getDisplayName();
 
         String[] split = contactName.split(" ");
 
