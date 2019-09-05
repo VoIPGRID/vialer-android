@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -43,7 +43,6 @@ public class CallRecordFragment extends Fragment
     @Inject CallRecordAdapter adapter;
     @Inject MissedCalls mMissedCalls;
     @Inject MissedCallsAdapter missedCallsAdapter;
-    @Inject Preferences mPreferences;
     @Inject NetworkUtil mNetworkUtil;
     @Inject BroadcastReceiverManager mBroadcastReceiverManager;
 
@@ -102,7 +101,7 @@ public class CallRecordFragment extends Fragment
         setupSwipeContainer();
         setupRecyclerView();
         showAppropriateRecords();
-        showMissedCallsOnlySwitch.setChecked(mPreferences.getDisplayMissedCallsOnly());
+        showMissedCallsOnlySwitch.setChecked(User.userPreferences.getDisplayMissedCallsOnly());
         onRefresh();
     }
 
@@ -202,9 +201,9 @@ public class CallRecordFragment extends Fragment
         super.setUserVisibleHint(visible);
         if (!visible) return;
 
-        if (mPreferences != null && showMissedCallsOnlySwitch != null) {
+        if (showMissedCallsOnlySwitch != null) {
             redrawList();
-            showMissedCallsOnlySwitch.setChecked(mPreferences.getDisplayMissedCallsOnly());
+            showMissedCallsOnlySwitch.setChecked(User.userPreferences.getDisplayMissedCallsOnly());
         }
     }
 
@@ -252,12 +251,12 @@ public class CallRecordFragment extends Fragment
     }
 
     private boolean showMissedCalls() {
-        return mPreferences.getDisplayMissedCallsOnly();
+        return User.userPreferences.getDisplayMissedCallsOnly();
     }
 
     @OnCheckedChanged(R.id.show_missed_calls_only_switch)
     void missedCallsSwitchWasChanged(CompoundButton missedCallsSwitch, boolean checked) {
-        mPreferences.setDisplayMissedCallsOnly(checked);
+        User.userPreferences.setDisplayMissedCallsOnly(checked);
         showAppropriateRecords();
         setRefreshing(true);
         onRefresh();

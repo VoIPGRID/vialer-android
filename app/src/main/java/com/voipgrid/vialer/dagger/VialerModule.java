@@ -12,9 +12,8 @@ import android.telephony.TelephonyManager;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.voipgrid.vialer.Logout;
-import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.ApiTokenFetcher;
 import com.voipgrid.vialer.api.PhoneAccountFetcher;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.VoipgridApi;
@@ -22,12 +21,12 @@ import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.audio.AudioFocus;
 import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.callrecord.CachedContacts;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
@@ -37,20 +36,17 @@ import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
-import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
 import com.voipgrid.vialer.onboarding.VoipgridLogin;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
-import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ColorHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.HtmlHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.NetworkUtil;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 
@@ -81,24 +77,6 @@ public class VialerModule {
         return (TelephonyManager) mVialerApplication.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
-    @Singleton
-    @Provides
-    JsonStorage provideJsonStorage() {
-        return new JsonStorage(mVialerApplication);
-    }
-
-    @Singleton
-    @Provides
-    JsonStorage<PhoneAccount> providePhoneAccountStorage() {
-        return new JsonStorage<>(mVialerApplication);
-    }
-
-    @Singleton
-    @Provides
-    JsonStorage<SystemUser> provideSystemUserStorage() {
-        return new JsonStorage<>(mVialerApplication);
-    }
-
     @Provides
     ConnectivityManager provideCconnectivityManager(Context context) {
         return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -109,26 +87,21 @@ public class VialerModule {
         return new ConnectivityHelper(connectivityManager, telephonyManager);
     }
 
-    @Provides SystemUser provideSystemUser(JsonStorage jsonStorage) {
-        return (SystemUser) jsonStorage.get(SystemUser.class);
+    @Provides SystemUser provideSystemUser() {
+        return User.getVoipgridUser();
     }
 
-    @Provides @Nullable PhoneAccount providePhoneAccount(JsonStorage jsonStorage) {
-        return (PhoneAccount) jsonStorage.get(PhoneAccount.class);
+    @Provides @Nullable PhoneAccount providePhoneAccount() {
+        return User.getPhoneAccount();
     }
 
-    @Provides @Nullable
-    UserDestination provideUserDestination(JsonStorage jsonStorage) {
-        return (UserDestination) jsonStorage.get(UserDestination.class);
-    }
-
-    @Provides @Nullable InternalNumbers provideInternalNumbers(JsonStorage jsonStorage) {
-        return (InternalNumbers) jsonStorage.get(InternalNumbers.class);
+    @Provides @Nullable InternalNumbers provideInternalNumbers() {
+        return User.internal.getInternalNumbers();
     }
 
     @Provides @Nullable
-    PhoneAccounts providePhoneAccounts(JsonStorage jsonStorage) {
-        return (PhoneAccounts) jsonStorage.get(PhoneAccounts.class);
+    PhoneAccounts providePhoneAccounts() {
+        return User.internal.getPhoneAccounts();
     }
 
     @Provides LocalBroadcastManager provideLocalBroadcastManager(Context context) {
@@ -149,10 +122,6 @@ public class VialerModule {
         return new Contacts();
     }
 
-    @Provides Preferences providePreferences(Context context) {
-        return new Preferences(context);
-    }
-
     @Provides CallActivityHelper provideCallActivityHelper(Contacts contacts) {
         return new CallActivityHelper(contacts);
     }
@@ -162,8 +131,8 @@ public class VialerModule {
     }
 
     @Provides
-    SipConfig provideSipConfig(Preferences preferences, IpSwitchMonitor ipSwitchMonitor, BroadcastReceiverManager broadcastReceiverManager) {
-        return new SipConfig(preferences, ipSwitchMonitor, broadcastReceiverManager);
+    SipConfig provideSipConfig(IpSwitchMonitor ipSwitchMonitor, BroadcastReceiverManager broadcastReceiverManager) {
+        return new SipConfig(ipSwitchMonitor, broadcastReceiverManager);
     }
 
     @Provides SharedPreferences provideSharedPreferences(Context context) {
@@ -230,8 +199,8 @@ public class VialerModule {
     }
 
     @Provides @Singleton
-    PhoneAccountFetcher providePhoneAccountFetcher(VoipgridApi api, JsonStorage jsonStorage) {
-        return new PhoneAccountFetcher(api, jsonStorage);
+    PhoneAccountFetcher providePhoneAccountFetcher(VoipgridApi api) {
+        return new PhoneAccountFetcher(api);
     }
 
     @Provides
@@ -290,18 +259,13 @@ public class VialerModule {
     }
 
     @Provides
-    AccountHelper provideAccountHelper(Context context) {
-        return new AccountHelper(context);
+    VoipgridLogin provideVoipgridLogin(Context context) {
+        return new VoipgridLogin(context);
     }
 
     @Provides
-    VoipgridLogin provideVoipgridLogin(AccountHelper accountHelper, Preferences preferences, JsonStorage jsonStorage, Context context) {
-        return new VoipgridLogin(accountHelper, preferences, jsonStorage, context);
-    }
-
-    @Provides
-    Logout provideLogout(Context context, JsonStorage jsonStorage, AccountHelper accountHelper, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper) {
-        return new Logout(context, jsonStorage, accountHelper, sharedPreferences, connectivityHelper);
+    Logout provideLogout(Context context, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper) {
+        return new Logout(context, sharedPreferences, connectivityHelper);
     }
 
     @Provides

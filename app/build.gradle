@@ -164,6 +164,7 @@ ext {
     butterKnifeVersion = "9.0.0-rc1"
     daggerVersion = "2.18"
     workVersion = "2.1.0"
+    kotPrefVersion = "2.8.0"
     room_version = "2.2.0-alpha02"
 }
 
@@ -206,6 +207,8 @@ dependencies {
     kapt "com.google.dagger:dagger-android-processor:${daggerVersion}"
     implementation "com.google.dagger:dagger-android-support:${daggerVersion}"
     implementation 'com.github.tamir7.contacts:contacts:1.1.7'
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     implementation 'javax.inject:javax.inject:1@jar'
     implementation 'com.github.lzyzsd.randomcolor:library:1.0.0'
@@ -248,6 +251,12 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
+    implementation 'androidx.viewpager2:viewpager2:1.0.0-alpha06'
+
+    implementation "com.chibatching.kotpref:kotpref:$kotPrefVersion"
+    implementation "com.chibatching.kotpref:initializer:$kotPrefVersion"
+    implementation "com.chibatching.kotpref:enum-support:$kotPrefVersion"
+    implementation "com.chibatching.kotpref:gson-support:$kotPrefVersion"
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

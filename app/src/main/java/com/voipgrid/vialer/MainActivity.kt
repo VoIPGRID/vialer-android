@@ -9,7 +9,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
 import com.voipgrid.vialer.api.ApiTokenFetcher
-import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.callrecord.CallRecordFragment
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
@@ -19,14 +18,12 @@ import com.voipgrid.vialer.onboarding.steps.TwoFactorStep
 import com.voipgrid.vialer.permissions.ContactsPermission
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.util.JsonStorage
 import com.voipgrid.vialer.util.PhoneAccountHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {
 
-    @Inject lateinit var jsonStorage: JsonStorage<SystemUser>
     @Inject lateinit var phoneAccountHelper: PhoneAccountHelper
     @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
 
@@ -46,7 +43,6 @@ class MainActivity : NavigationDrawerActivity() {
         }
 
         if (connectivityHelper.hasNetworkConnection()) {
-            fetchApiTokenIfDoesNotExist()
             phoneAccountHelper.executeUpdatePhoneAccountTask()
         }
 
@@ -70,18 +66,6 @@ class MainActivity : NavigationDrawerActivity() {
     }
 
     /**
-    * If we do not currently have an api token stored, fetch one from the server.
-    *
-    */
-    private fun fetchApiTokenIfDoesNotExist() {
-        if (hasApiToken()) return
-
-        logger.i("There is no api-key currently stored, will attempt to fetch one")
-
-        ApiTokenFetcher.usingSavedCredentials(this).setListener(ApiTokenListener()).fetch()
-    }
-
-    /**
      * End immediately and return to the onboarding screen to let tthe user login
      * again.
      *
@@ -98,7 +82,7 @@ class MainActivity : NavigationDrawerActivity() {
      *
      */
     private fun userIsOnboarded(): Boolean {
-        return jsonStorage.has(SystemUser::class.java) && jsonStorage.get(SystemUser::class.java).mobileNumber != null
+        return User.isLoggedIn && User.voipgridUser?.mobileNumber != null
     }
 
     /**
@@ -138,27 +122,6 @@ class MainActivity : NavigationDrawerActivity() {
 
         view_pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tab_layout))
         view_pager.adapter = TabAdapter(supportFragmentManager)
-    }
-
-    /**
-     * Listen for the api token request and display a dialog to enter the two-factor token
-     * if one is required.
-     *
-     */
-    private inner class ApiTokenListener : ApiTokenFetcher.ApiTokenListener {
-        override fun twoFactorCodeRequired() {
-            if (isFinishing) {
-                return
-            }
-
-            logger.i("Prompting the user to enter a two-factor code")
-
-            SingleOnboardingStepActivity.launch(this@MainActivity, TwoFactorStep::class.java)
-        }
-
-        override fun onSuccess(apiToken: String) {}
-
-        override fun onFailure() {}
     }
 
     /**

@@ -10,7 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import com.google.android.material.navigation.NavigationView;
@@ -20,7 +20,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,9 +40,7 @@ import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
-import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
@@ -73,7 +70,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     private VoipgridApi mVoipgridApi;
     private ConnectivityHelper mConnectivityHelper;
-    private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
 
     private String mSelectedUserDestinationId;
@@ -88,8 +84,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
         );
 
-        mJsonStorage = new JsonStorage(this);
-        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        mSystemUser = User.getVoipgridUser();
         refreshCurrentAvailability();
     }
 
@@ -165,7 +160,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
      *
      */
     private void refreshCurrentAvailability() {
-        if (mSystemUser == null || !hasApiToken()) {
+        if (mSystemUser == null) {
             return;
         }
 
@@ -285,9 +280,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         Intent intent = new Intent(this, WebActivity.class);
         intent.putExtra(WebActivity.PAGE, page);
         intent.putExtra(WebActivity.TITLE, title);
-        intent.putExtra(WebActivity.USERNAME, getEmail());
-        intent.putExtra(WebActivity.PASSWORD, getPassword());
-        intent.putExtra(WebActivity.API_TOKEN, getApiToken());
         intent.putExtra(WebActivity.GA_TITLE, gaTitle);
         startActivity(intent);
     }
@@ -381,8 +373,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             }
         }
 
-        mJsonStorage.save(internalNumbers);
-        mJsonStorage.save(phoneAccounts);
+        User.internal.setInternalNumbers(internalNumbers);
+        User.internal.setPhoneAccounts(phoneAccounts);
     }
 
     private static class CustomFontSpinnerAdapter<D> extends ArrayAdapter {
@@ -446,7 +438,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
                 Call<Object> call = mVoipgridApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
                 call.enqueue(this);
-                if (!MiddlewareHelper.isRegistered(this)) {
+                if (!MiddlewareHelper.isRegistered()) {
                     // If the previous destination was not available, or if we're not registered
                     // for another reason, register again.
                     MiddlewareHelper.registerAtMiddleware(this);
@@ -478,7 +470,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             if (mSpinner != null) {
                 refreshCurrentAvailability();
                 // Make sure the systemuser info shown is up-to-date.
-                mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+                mSystemUser = User.getVoipgridUser();
                 setSystemUserInfo();
             }
         }

@@ -1,14 +1,12 @@
 package com.voipgrid.vialer;
 
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
-import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
@@ -17,7 +15,6 @@ import android.widget.Toast;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.AutoLoginToken;
-import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 
 import java.io.UnsupportedEncodingException;
@@ -49,7 +46,7 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
         setContentView(R.layout.activity_web);
 
         // Set the Toolbar to use as ActionBar
-        setSupportActionBar((Toolbar) findViewById(R.id.action_bar));
+        setSupportActionBar(findViewById(R.id.action_bar));
 
         // Set the Toolbar title
         getSupportActionBar().setTitle(getIntent().getStringExtra(TITLE));
@@ -61,10 +58,10 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
         getSupportActionBar().setHomeButtonEnabled(true);
 
         // Get the ProgressBar
-        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        mProgressBar = findViewById(R.id.progress_bar);
 
         // Get the WebView.
-        mWebView = (WebView) findViewById(R.id.web_view);
+        mWebView = findViewById(R.id.web_view);
 
         // Enable javascript.
         mWebView.getSettings().setJavaScriptEnabled(true);
@@ -90,22 +87,6 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
                 super.onPageFinished(view, url);
 
                 mProgressBar.setVisibility(View.INVISIBLE);
-
-                if (getIntent().getStringExtra(PAGE).equals(getString(R.string.web_password_change))) {
-                    final String js = "javascript:document.getElementById('id_username').value='" + getIntent().getStringExtra(USERNAME) + "';" +
-                            "document.getElementById('id_password').value='" + getIntent().getStringExtra(PASSWORD) + "';" +
-                            "document.forms[0].submit();";
-                    if (Build.VERSION.SDK_INT >= 19) {
-                        view.evaluateJavascript(js, new ValueCallback<String>() {
-                            @Override
-                            public void onReceiveValue(String s) {
-
-                            }
-                        });
-                    } else {
-                        view.loadUrl(js);
-                    }
-                }
             }
         });
 
@@ -122,11 +103,6 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
     public boolean onOptionsItemSelected(MenuItem item) {
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
-
-        if (getIntent().getStringExtra(PAGE).equals(getString(R.string.web_password_change))) {
-            AccountHelper accountHelper = new AccountHelper(this);
-            accountHelper.clearCredentials();
-        }
         finish();
         return true;
     }
@@ -136,12 +112,7 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
      */
     private void autoLoginToken() {
         mProgressBar.setVisibility(View.VISIBLE);
-        VoipgridApi voipgridApi = ServiceGenerator.createApiService(
-                this,
-                getIntent().getStringExtra(USERNAME),
-                getIntent().getStringExtra(PASSWORD),
-                getIntent().getStringExtra(API_TOKEN)
-        );
+        VoipgridApi voipgridApi = ServiceGenerator.createApiService(this);
         Call<AutoLoginToken> call = voipgridApi.autoLoginToken();
         call.enqueue(this);
     }
@@ -151,22 +122,17 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
      * @param url
      */
     private void loadPage(final String url) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mWebView.loadUrl(url);
-            }
-        });
+        runOnUiThread(() -> mWebView.loadUrl(url));
     }
 
     @Override
     public void onResponse(@NonNull Call<AutoLoginToken> call, @NonNull Response<AutoLoginToken> response) {
-        String username = getIntent().getStringExtra(USERNAME);
+        String username = "";
 
         if (response.isSuccessful() && response.body() != null) {
             AutoLoginToken autoLoginToken = response.body();
             try {
-                username = URLEncoder.encode(username, "utf-8");
+                username = URLEncoder.encode(User.getUsername(), "utf-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -191,16 +157,13 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
 
     private void failedFeedback(String message) {
         final String mMessage = message;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mProgressBar.setVisibility(View.INVISIBLE);
-                Toast.makeText(
-                        getApplicationContext(),
-                        getString(R.string.auto_login_error, mMessage),
-                        Toast.LENGTH_SHORT
-                ).show();
-            }
+        runOnUiThread(() -> {
+            mProgressBar.setVisibility(View.INVISIBLE);
+            Toast.makeText(
+                    getApplicationContext(),
+                    getString(R.string.auto_login_error, mMessage),
+                    Toast.LENGTH_SHORT
+            ).show();
         });
     }
 }

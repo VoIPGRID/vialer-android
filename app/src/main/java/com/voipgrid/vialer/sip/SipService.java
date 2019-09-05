@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -87,7 +86,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
     @Inject protected Handler mHandler;
-    @Inject protected Preferences mPreferences;
     @Inject protected ToneGenerator mToneGenerator;
     @Inject protected NetworkConnectivity mNetworkConnectivity;
     @Inject protected NativeCallManager mNativeCallManager;
@@ -475,10 +473,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
     public Logger getLogger() {
         return mLogger;
-    }
-
-    public Preferences getPreferences() {
-        return mPreferences;
     }
 
     public NativeCallManager getNativeCallManager() {
