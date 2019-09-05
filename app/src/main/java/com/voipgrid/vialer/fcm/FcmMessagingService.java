@@ -1,11 +1,8 @@
 package com.voipgrid.vialer.fcm;
 
-<<<<<<< HEAD
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
+
 
 import android.content.Context;
-=======
->>>>>>> 0be2efa... Refactored all shared preference interactions to be via a User object, rather than having to import ambiguous classes like JsonStorage. This creates a much more fluent, readable api throughout the code.
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -14,11 +11,7 @@ import android.telephony.TelephonyManager;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-<<<<<<< HEAD
-import com.voipgrid.vialer.Preferences;
-=======
 import com.voipgrid.vialer.User;
->>>>>>> 0be2efa... Refactored all shared preference interactions to be via a User object, rather than having to import ambiguous classes like JsonStorage. This creates a much more fluent, readable api throughout the code.
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.call.NativeCallManager;

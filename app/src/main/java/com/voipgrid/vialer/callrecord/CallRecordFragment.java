@@ -10,11 +10,6 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
-<<<<<<< HEAD
-import com.voipgrid.vialer.Preferences;
-=======
-import com.voipgrid.vialer.EmptyView;
->>>>>>> 0be2efa... Refactored all shared preference interactions to be via a User object, rather than having to import ambiguous classes like JsonStorage. This creates a much more fluent, readable api throughout the code.
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;

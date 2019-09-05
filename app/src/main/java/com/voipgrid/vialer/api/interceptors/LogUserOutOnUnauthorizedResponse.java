@@ -7,12 +7,7 @@ import android.content.Intent;
 import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.onboarding.Onboarder;
-<<<<<<< HEAD
 import com.voipgrid.vialer.onboarding.OnboardingActivity;
-import com.voipgrid.vialer.util.AccountHelper;
-import com.voipgrid.vialer.util.JsonStorage;
-=======
->>>>>>> 0be2efa... Refactored all shared preference interactions to be via a User object, rather than having to import ambiguous classes like JsonStorage. This creates a much more fluent, readable api throughout the code.
 
 import java.io.IOException;
 

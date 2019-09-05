@@ -42,12 +42,6 @@ import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
-<<<<<<< HEAD
-import com.voipgrid.vialer.util.AccountHelper;
-=======
-import com.voipgrid.vialer.t9.T9DatabaseHelper;
-import com.voipgrid.vialer.t9.T9ViewBinder;
->>>>>>> 0be2efa... Refactored all shared preference interactions to be via a User object, rather than having to import ambiguous classes like JsonStorage. This creates a much more fluent, readable api throughout the code.
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ColorHelper;

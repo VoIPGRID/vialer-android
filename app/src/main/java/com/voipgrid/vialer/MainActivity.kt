@@ -66,29 +66,6 @@ class MainActivity : NavigationDrawerActivity() {
     }
 
     /**
-<<<<<<< HEAD
-    * If we do not currently have an api token stored, fetch one from the server.
-    *
-    */
-    private fun fetchApiTokenIfDoesNotExist() {
-        if (hasApiToken()) return
-
-        logger.i("There is no api-key currently stored, will attempt to fetch one")
-
-        ApiTokenFetcher.usingSavedCredentials(this).setListener(ApiTokenListener()).fetch()
-=======
-     * Schedule a task to update the contacts when there are changes.
-     *
-     */
-    private fun observeContacts() {
-        if (!ContactsPermission.hasPermission(this)) return
-
-        ImportContactsForT9Search.run()
-        ImportContactsForT9Search.schedule()
->>>>>>> 0be2efa... Refactored all shared preference interactions to be via a User object, rather than having to import ambiguous classes like JsonStorage. This creates a much more fluent, readable api throughout the code.
-    }
-
-    /**
      * End immediately and return to the onboarding screen to let tthe user login
      * again.
      *
@@ -145,27 +122,6 @@ class MainActivity : NavigationDrawerActivity() {
 
         view_pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tab_layout))
         view_pager.adapter = TabAdapter(supportFragmentManager)
-    }
-
-    /**
-     * Listen for the api token request and display a dialog to enter the two-factor token
-     * if one is required.
-     *
-     */
-    private inner class ApiTokenListener : ApiTokenFetcher.ApiTokenListener {
-        override fun twoFactorCodeRequired() {
-            if (isFinishing) {
-                return
-            }
-
-            logger.i("Prompting the user to enter a two-factor code")
-
-            SingleOnboardingStepActivity.launch(this@MainActivity, TwoFactorStep::class.java)
-        }
-
-        override fun onSuccess(apiToken: String) {}
-
-        override fun onFailure() {}
     }
 
     /**

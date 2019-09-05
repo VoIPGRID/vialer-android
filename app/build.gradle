@@ -163,12 +163,8 @@ ext {
     mockitoCoreVersion = "2.23.0"
     butterKnifeVersion = "9.0.0-rc1"
     daggerVersion = "2.18"
-<<<<<<< HEAD
     workVersion = "2.1.0"
-=======
-    workVersion = "2.0.1"
     kotPrefVersion = "2.8.0"
->>>>>>> 0be2efa... Refactored all shared preference interactions to be via a User object, rather than having to import ambiguous classes like JsonStorage. This creates a much more fluent, readable api throughout the code.
     room_version = "2.2.0-alpha02"
 }
 
@@ -250,20 +246,17 @@ dependencies {
     implementation "androidx.core:core-ktx:1.0.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "androidx.work:work-runtime-ktx:$workVersion"
-<<<<<<< HEAD
     implementation 'androidx.viewpager2:viewpager2:1.0.0-beta03'
 
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
-=======
     implementation 'androidx.viewpager2:viewpager2:1.0.0-alpha06'
 
     implementation "com.chibatching.kotpref:kotpref:$kotPrefVersion"
     implementation "com.chibatching.kotpref:initializer:$kotPrefVersion"
     implementation "com.chibatching.kotpref:enum-support:$kotPrefVersion"
     implementation "com.chibatching.kotpref:gson-support:$kotPrefVersion"
->>>>>>> 0be2efa... Refactored all shared preference interactions to be via a User object, rather than having to import ambiguous classes like JsonStorage. This creates a much more fluent, readable api throughout the code.
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.
