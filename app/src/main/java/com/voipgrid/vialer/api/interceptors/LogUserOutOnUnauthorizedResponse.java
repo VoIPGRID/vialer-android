@@ -4,11 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.onboarding.Onboarder;
 import com.voipgrid.vialer.onboarding.OnboardingActivity;
-import com.voipgrid.vialer.util.AccountHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 
 import java.io.IOException;
 
@@ -80,7 +79,6 @@ public class LogUserOutOnUnauthorizedResponse implements Interceptor {
      *
      */
     private void clearAllCredentials() {
-        new JsonStorage(mContext).clear();
-        new AccountHelper(mContext).clearCredentials();
+        User.INSTANCE.clear();
     }
 }

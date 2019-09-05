@@ -3,10 +3,10 @@ package com.voipgrid.vialer.api;
 import android.content.Context;
 import android.util.Log;
 
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.api.models.ApiTokenRequest;
 import com.voipgrid.vialer.api.models.ApiTokenResponse;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.util.AccountHelper;
 
 import java.io.IOException;
 
@@ -19,16 +19,14 @@ public class ApiTokenFetcher {
     private final String mUsername;
     private final String mPassword;
     private final VoipgridApi mVoipgridApi;
-    private final AccountHelper mAccountHelper;
     private final Logger mLogger;
 
     private ApiTokenListener mListener;
 
-    private ApiTokenFetcher(String username, String password, VoipgridApi voipgridApi, AccountHelper accountHelper, Logger logger) {
+    private ApiTokenFetcher(String username, String password, VoipgridApi voipgridApi, Logger logger) {
         mUsername = username;
         mPassword = password;
         mVoipgridApi = voipgridApi;
-        mAccountHelper = accountHelper;
         mLogger = logger;
     }
 
@@ -54,24 +52,7 @@ public class ApiTokenFetcher {
         return new ApiTokenFetcher(
                 username,
                 password,
-                ServiceGenerator.createApiService(context, null, null, null),
-                new AccountHelper(context),
-                new Logger(ApiTokenFetcher.class)
-        );
-    }
-
-    /**
-     * Fetch the api token using the credentials saved in AccountHelper.
-     *
-     */
-    public static ApiTokenFetcher usingSavedCredentials(Context context) {
-        AccountHelper accountHelper = new AccountHelper(context);
-
-        return new ApiTokenFetcher(
-                accountHelper.getEmail(),
-                accountHelper.getPassword(),
-                ServiceGenerator.createApiService(context, null, null, null),
-                new AccountHelper(context),
+                ServiceGenerator.createApiService(context),
                 new Logger(ApiTokenFetcher.class)
         );
     }
@@ -158,7 +139,7 @@ public class ApiTokenFetcher {
             if (response.isSuccessful()) {
                 mLogger.i("Successfully retrieved an api-key");
                 ApiTokenResponse apiTokenResponse = response.body();
-                mAccountHelper.setApiToken(apiTokenResponse.getApiToken());
+                User.setLoginToken(apiTokenResponse.getApiToken());
                 mListener.onSuccess(apiTokenResponse.getApiToken());
                 return;
             }

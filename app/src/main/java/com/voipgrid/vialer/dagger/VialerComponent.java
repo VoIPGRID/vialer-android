@@ -4,7 +4,6 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.ForgottenPasswordActivity;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.NavigationDrawerActivity;
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.SettingsActivity;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.CallRecord;
@@ -60,8 +59,6 @@ public interface VialerComponent {
     void inject(CallRecordAdapter callRecordAdapter);
 
     void inject(NetworkConnectivity networkConnectivity);
-
-    Preferences getPreferences();
 
     void inject(CallRecordFragment fragment);
 

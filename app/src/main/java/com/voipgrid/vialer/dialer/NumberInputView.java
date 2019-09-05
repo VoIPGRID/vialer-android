@@ -15,8 +15,8 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.ActivityLifecycleTracker;
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.SecureCalling;
 
@@ -42,7 +42,6 @@ public class NumberInputView extends RelativeLayout implements
 
     private OnInputChangedListener mListener;
     private SecureCalling secureCalling;
-    @Inject Preferences mPreferences;
 
     public NumberInputView(Context context) {
         super(context);
@@ -133,7 +132,7 @@ public class NumberInputView extends RelativeLayout implements
                     secureCalling.enable(new SecureCalling.Callback() {
                         @Override
                         public void onSuccess() {
-                            mPreferences.setTlsEnabled(true);
+                            User.voip.setHasTlsEnabled(true);
                             encryptionDisabledWarning.setImageResource(R.drawable.ic_lock);
                             encryptionDisabledWarning.setColorFilter(ContextCompat.getColor(getContext(), R.color.color_primary));
                             ActivityLifecycleTracker.removeEncryptionNotification();

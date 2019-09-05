@@ -2,10 +2,7 @@ package com.voipgrid.vialer.onboarding.steps
 
 import android.os.Bundle
 import android.view.View
-import com.voipgrid.vialer.Preferences
-import com.voipgrid.vialer.R
-import com.voipgrid.vialer.VialerApplication
-import com.voipgrid.vialer.WebActivityHelper
+import com.voipgrid.vialer.*
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.PhoneAccountHelper
@@ -17,15 +14,12 @@ import javax.inject.Inject
 
 class MissingVoipAccountStep : Step() {
 
-    @Inject lateinit var preferences: Preferences
-
     override val layout = R.layout.onboarding_missing_voip_account
 
     private val logger = Logger(this)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        VialerApplication.get().component().inject(this)
 
         continueButton.setOnClickListener {
             logger.i("User has decided not to set a voip account despite not having one")
@@ -61,7 +55,7 @@ class MissingVoipAccountStep : Step() {
         GlobalScope.launch {
             PhoneAccountHelper(onboarding).linkedPhoneAccount?.let {
                 launch(Dispatchers.Main) {
-                    preferences.setSipEnabled(true)
+                    User.voip.hasEnabledSip = true
                     onboarding?.progress()
                 }
             }

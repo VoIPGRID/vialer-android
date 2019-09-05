@@ -7,8 +7,9 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
 
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.User;
+import com.voipgrid.vialer.persistence.UserPreferences;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -186,9 +187,8 @@ public class ConnectivityHelper {
      * @return
      */
     public boolean hasFastData() {
-        Preferences pref = new Preferences(mContext);
         Connection connectionType = getConnectionType();
-        return sFastDataTypes.contains(connectionType) || (sFast3GDataTypes.contains(connectionType) && pref.has3GEnabled());
+        return sFastDataTypes.contains(connectionType) || (sFast3GDataTypes.contains(connectionType) && User.voip.getWantsToUse3GForCalls());
     }
 
     public static ConnectivityHelper get(Context context) {
@@ -210,16 +210,13 @@ public class ConnectivityHelper {
      */
     public void waitForLTE(final Context context, int timeout, final int interval) {
         final int remainingTime = timeout - interval;
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Keep waiting until the remaining time is less then the interval.
-                if(remainingTime > interval) {
-                    waitForLTE(context, remainingTime, interval);
-                } else if(getConnectionType() != Connection.LTE) {
-                    // Turn wifi back on if we don't succeed in connecting with LTE before the timeout.
-                    useWifi(context, true);
-                }
+        new Handler().postDelayed(() -> {
+            // Keep waiting until the remaining time is less then the interval.
+            if(remainingTime > interval) {
+                waitForLTE(context, remainingTime, interval);
+            } else if(getConnectionType() != Connection.LTE) {
+                // Turn wifi back on if we don't succeed in connecting with LTE before the timeout.
+                useWifi(context, true);
             }
         }, interval);
     }
@@ -236,23 +233,24 @@ public class ConnectivityHelper {
      * One way conversion to charsequence from preference (long) because bidirectional maps
      * are not nativly supported in java.
      */
-    public static long converseToPreference(CharSequence connectionPreference, Context context) {
+    public static UserPreferences.ConnectionPreference converseToPreference(CharSequence connectionPreference, Context context) {
         if (connectionPreference.equals(context.getString(R.string.call_connection_only_cellular))) {
-            return Preferences.CONNECTION_PREFERENCE_LTE;
+            return UserPreferences.ConnectionPreference.LTE;
         } else if (connectionPreference.equals(context.getString(R.string.call_connection_use_wifi_cellular))) {
-            return Preferences.CONNECTION_PREFERENCE_WIFI;
+            return UserPreferences.ConnectionPreference.WIFI;
         }
-        return Preferences.CONNECTION_PREFERENCE_NONE;
+        return UserPreferences.ConnectionPreference.NONE;
     }
 
     /**
      * One way conversion to preference (long) from charsequence because bidirectional maps
      * are not nativly supported in java.
      */
-    public static CharSequence converseFromPreference(long preference, Context context) {
-        if (preference == Preferences.CONNECTION_PREFERENCE_LTE) {
+    public static CharSequence converseFromPreference(
+            UserPreferences.ConnectionPreference preference, Context context) {
+        if (preference == UserPreferences.ConnectionPreference.LTE) {
             return context.getString(R.string.call_connection_only_cellular);
-        } else if (preference == Preferences.CONNECTION_PREFERENCE_WIFI) {
+        } else if (preference == UserPreferences.ConnectionPreference.WIFI) {
             return context.getString(R.string.call_connection_use_wifi_cellular);
         }
         return context.getString(R.string.call_connection_optional);

@@ -1,22 +1,18 @@
 package com.voipgrid.vialer.onboarding
 
 import android.content.Context
-import com.voipgrid.vialer.Preferences
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.ApiTokenFetcher
 import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.api.VoipgridApi
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.util.AccountHelper
-import com.voipgrid.vialer.util.JsonStorage
-import kotlinx.android.synthetic.main.onboarding_step_login.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import javax.inject.Inject
 
-class VoipgridLogin(private val accountHelper: AccountHelper, private val preferences: Preferences, private val jsonStorage: JsonStorage<Any>, private val context: Context): Callback<SystemUser>, ApiTokenFetcher.ApiTokenListener {
+class VoipgridLogin(private val context: Context): Callback<SystemUser>, ApiTokenFetcher.ApiTokenListener {
 
     private val logger = Logger(this)
     private val voipgridApi: VoipgridApi
@@ -63,9 +59,8 @@ class VoipgridLogin(private val accountHelper: AccountHelper, private val prefer
             logger.d("The user does not have an outgoing cli")
         }
 
-        preferences.setSipPermission(true)
-        accountHelper.setCredentials(username, password)
-        jsonStorage.save(user)
+        User.voip.isAccountSetupForSip = true
+        User.voipgridUser = user
         onLoggedIn?.invoke()
     }
 
@@ -78,7 +73,9 @@ class VoipgridLogin(private val accountHelper: AccountHelper, private val prefer
     }
 
     override fun onSuccess(apiToken: String?) {
-        accountHelper.setCredentials(username, password, apiToken)
+        if (username != null) {
+            User.username = username as String
+        }
         voipgridApi.systemUser().enqueue(this)
     }
 

@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,12 +37,12 @@ import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.VoipDisabledNotification;
 import com.voipgrid.vialer.onboarding.SingleOnboardingStepActivity;
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
+import com.voipgrid.vialer.persistence.VoipSettings;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -88,8 +89,6 @@ public class SettingsActivity extends LoginRequiredActivity {
 
     private PhoneAccount mPhoneAccount;
     private PhoneAccountHelper mPhoneAccountHelper;
-    private Preferences mPreferences;
-    private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
     private VoipgridApi mVoipgridApi;
     private Logger mLogger;
@@ -113,9 +112,7 @@ public class SettingsActivity extends LoginRequiredActivity {
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
 
-        mJsonStorage = new JsonStorage(this);
         mPhoneAccountHelper = new PhoneAccountHelper(this);
-        mPreferences = new Preferences(this);
         mVoipgridApi = ServiceGenerator.createApiService(this);
         mLogger = new Logger(this.getClass());
         mClipboardHelper =  ClipboardHelper.fromContext(this);
@@ -175,7 +172,7 @@ public class SettingsActivity extends LoginRequiredActivity {
                 R.array.connection_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mConnectionSpinner.setAdapter(adapter);
-        mConnectionSpinner.setSelection(adapter.getPosition(converseFromPreference((mPreferences.getConnectionPreference()), this)));
+        mConnectionSpinner.setSelection(adapter.getPosition(converseFromPreference((User.userPreferences.getConnectionPreference()), this)));
     }
 
     private void initCodecSpinner() {
@@ -183,11 +180,11 @@ public class SettingsActivity extends LoginRequiredActivity {
                 R.array.codec_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCodecSpinner.setAdapter(adapter);
-        mCodecSpinner.setSelection(mPreferences.getAudioCodec() - 1);
+        mCodecSpinner.setSelection(User.voip.getAudioCodec() == VoipSettings.AudioCodec.iLBC ? 0 : 1);
     }
 
     private void initRemoteLoggingSwitch() {
-        mRemoteLoggingSwitch.setChecked(mPreferences.remoteLoggingIsActive());
+        mRemoteLoggingSwitch.setChecked(User.remoteLogging.isEnabled());
         mRemoteLogIdEditText.setInputType(InputType.TYPE_NULL);
         mRemoteLogIdEditText.setTextIsSelectable(true);
         mRemoteLogIdEditText.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
@@ -212,14 +209,14 @@ public class SettingsActivity extends LoginRequiredActivity {
             Toast.makeText(SettingsActivity.this,R.string.remote_logging_id_copied , Toast.LENGTH_SHORT).show();
             return true;
         });
-        if (mPreferences.remoteLoggingIsActive()) {
+        if (User.remoteLogging.isEnabled()) {
             mRemoteLogIdContainer.setVisibility(View.VISIBLE);
-            mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
+            mRemoteLogIdEditText.setText(User.remoteLogging.getId());
         }
     }
 
     private void initUse3GSwitch() {
-        mUse3GSwitch.setChecked(mPreferences.has3GEnabled());
+        mUse3GSwitch.setChecked(User.voip.getWantsToUse3GForCalls());
     }
 
     private void initIgnoreBatteryOptimizationSwitch() {
@@ -247,7 +244,7 @@ public class SettingsActivity extends LoginRequiredActivity {
 
     @OnCheckedChanged(R.id.account_sip_switch)
     public void onSipCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (mPreferences.hasSipEnabled() == isChecked) return;
+        if (User.voip.getHasEnabledSip() == isChecked) return;
 
         boolean shouldLoadMissingVoip = !enableSipOnNextLoad;
         enableSipOnNextLoad = false;
@@ -258,7 +255,7 @@ public class SettingsActivity extends LoginRequiredActivity {
             // Stop the sipservice.
             stopService(new Intent(this, SipService.class));
             mSipIdContainer.setVisibility(View.GONE);
-            mPreferences.setSipEnabled(false);
+            User.voip.setHasEnabledSip(false);
         } else {
             enableProgressBar(true);
             new Thread(() -> {
@@ -267,7 +264,7 @@ public class SettingsActivity extends LoginRequiredActivity {
                 runOnUiThread(() -> {
                     if (phoneAccount != null) {
                         mPhoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
-                        mPreferences.setSipEnabled(true);
+                        User.voip.setHasEnabledSip(true);
                     } else {
                         if (shouldLoadMissingVoip) {
                             enableSipOnNextLoad = true;
@@ -287,33 +284,33 @@ public class SettingsActivity extends LoginRequiredActivity {
 
     @OnCheckedChanged(R.id.use_3g_switch)
     void on3GCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-        if (mPreferences.has3GEnabled() == isChecked) {
+        if (User.voip.getWantsToUse3GForCalls() == isChecked) {
             return;
         }
-        mPreferences.set3GEnabled(isChecked);
+        User.voip.setWantsToUse3GForCalls(isChecked);
     }
 
     @OnItemSelected(R.id.call_connection_spinner)
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         String selected = parent.getItemAtPosition(pos).toString();
-        mPreferences.setConnectionPreference(converseToPreference(selected, this));
+        User.userPreferences.setConnectionPreference(converseToPreference(selected, this));
     }
 
     @OnItemSelected(R.id.codec_spinner)
     public void onCodecSelected(AdapterView<?> parent, View view, int pos, long id) {
-        mPreferences.setAudioCodec(pos + 1);
+        User.voip.setAudioCodec(pos == 0 ? VoipSettings.AudioCodec.iLBC : VoipSettings.AudioCodec.OPUS);
         SecureCalling.fromContext(this).updateApiBasedOnCurrentPreferenceSetting();
     }
 
     @OnCheckedChanged(R.id.remote_logging_switch)
     void onRemoteLoggingCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-        if (mPreferences.remoteLoggingIsActive() == isChecked) {
+        if (User.remoteLogging.isEnabled() == isChecked) {
             return;
         }
-        mPreferences.setRemoteLogging(isChecked);
+        User.remoteLogging.setEnabled(isChecked);
         if (isChecked) {
             mRemoteLogIdContainer.setVisibility(View.VISIBLE);
-            mRemoteLogIdEditText.setText(mPreferences.getLoggerIdentifier());
+            mRemoteLogIdEditText.setText(User.remoteLogging.getId());
         } else {
             mRemoteLogIdContainer.setVisibility(View.GONE);
         }
@@ -343,21 +340,21 @@ public class SettingsActivity extends LoginRequiredActivity {
     @OnCheckedChanged(R.id.stun_switch)
     void stunSwitchChanged(CompoundButton compoundButton, boolean b) {
         if (!mIsSetupComplete) return;
-        mPreferences.setStunEnabled(b);
+        User.voip.setHasStunEnabled(b);
         mLogger.i("STUN has been set to: " + b);
         initializeAdvancedSettings();
     }
 
     private void updateAndPopulate() {
-        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
-        mPhoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
+        mSystemUser = User.getVoipgridUser();
+        mPhoneAccount = User.getPhoneAccount();
 
         populate();
     }
 
     private void populate() {
-        if (mPreferences.hasSipPermission()) {
-            mVoipSwitch.setChecked(mPreferences.hasSipEnabled());
+        if (User.voip.isAccountSetupForSip()) {
+            mVoipSwitch.setChecked(User.voip.getHasEnabledSip());
             if (mPhoneAccount != null) {
                 mSipIdEditText.setText(mPhoneAccount.getAccountId());
             }
@@ -365,7 +362,7 @@ public class SettingsActivity extends LoginRequiredActivity {
             mVoipSwitch.setVisibility(View.GONE);
         }
 
-        mSipIdContainer.setVisibility(mPreferences.hasSipEnabled() ? View.VISIBLE : View.GONE);
+        mSipIdContainer.setVisibility(User.voip.getHasEnabledSip() ? View.VISIBLE : View.GONE);
         enableProgressBar(false);
 
         if (mSystemUser == null) {
@@ -469,8 +466,8 @@ public class SettingsActivity extends LoginRequiredActivity {
         if (isFinishing()) return;
         mIsSetupComplete = false;
         enableProgressBar(false);
-        tlsSwitch.setChecked(mPreferences.hasTlsEnabled());
-        stunSwitch.setChecked(mPreferences.hasStunEnabled());
+        tlsSwitch.setChecked(User.voip.getHasTlsEnabled());
+        stunSwitch.setChecked(User.voip.getHasTlsEnabled());
         mIsSetupComplete = true;
     }
 
@@ -522,7 +519,7 @@ public class SettingsActivity extends LoginRequiredActivity {
 
             mSystemUser.setMobileNumber(mNumber);
 
-            mJsonStorage.save(mSystemUser);
+            User.setVoipgridUser(mSystemUser);
 
             populate();
         }
@@ -559,7 +556,7 @@ public class SettingsActivity extends LoginRequiredActivity {
 
         @Override
         public void onSuccess() {
-            mPreferences.setTlsEnabled(mSwitchEnabled);
+            User.voip.setHasTlsEnabled(mSwitchEnabled);
             mLogger.i("TLS switch has been set to: " + mSwitchEnabled);
             initializeAdvancedSettings();
             ActivityLifecycleTracker.removeEncryptionNotification();

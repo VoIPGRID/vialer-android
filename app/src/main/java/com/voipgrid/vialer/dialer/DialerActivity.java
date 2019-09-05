@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.dialer;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,12 +9,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.DialHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -29,9 +28,7 @@ public class DialerActivity extends LoginRequiredActivity implements
         Dialer.Listener,
         T9Fragment.Listener {
 
-    @Inject SharedPreferences mSharedPreferences;
     @Inject ConnectivityHelper mConnectivityHelper;
-    @Inject JsonStorage mJsonStorage;
 
     @BindView(R.id.button_call) CallButton callButton;
     @BindView(R.id.bottom) Dialer mDialer;
@@ -182,7 +179,7 @@ public class DialerActivity extends LoginRequiredActivity implements
             Toast.makeText(this, getString(R.string.dialer_invalid_number), Toast.LENGTH_LONG).show();
         } else {
             dialHelper.callNumber(phoneNumberToCall, contactName);
-            mSharedPreferences.edit().putString(LAST_DIALED, number).apply();
+            User.internal.setLastDialledNumber(phoneNumberToCall);
         }
     }
 
@@ -194,7 +191,7 @@ public class DialerActivity extends LoginRequiredActivity implements
             onCallNumber(PhoneNumberUtils.format(phoneNumber), null);
         } else {
             // Set last dialed number on call button clicked when number is empty.
-            String last_dialed = mSharedPreferences.getString(LAST_DIALED, "");
+            String last_dialed = User.internal.getLastDialledNumber();
             mDialer.setNumber(last_dialed);
         }
     }

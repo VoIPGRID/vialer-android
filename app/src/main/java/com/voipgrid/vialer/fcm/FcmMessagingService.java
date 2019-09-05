@@ -1,6 +1,6 @@
 package com.voipgrid.vialer.fcm;
 
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
+
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +11,7 @@ import android.telephony.TelephonyManager;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.call.NativeCallManager;
@@ -141,13 +141,11 @@ public class FcmMessagingService extends FirebaseMessagingService {
             return;
         }
 
-        Preferences preferences = new Preferences(this);
-
-        if (preferences.hasSipEnabled()) {
+        if (User.voip.getHasEnabledSip()) {
             new VoipDisabledNotification().display();
         }
 
-        new Preferences(this).setSipEnabled(false);
+        User.voip.setHasEnabledSip(false);
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(VOIP_HAS_BEEN_DISABLED));
     }
 
@@ -329,7 +327,8 @@ public class FcmMessagingService extends FirebaseMessagingService {
     public void onNewToken(final String s) {
         super.onNewToken(s);
         mRemoteLogger.d("onTokenRefresh");
-        MiddlewareHelper.setRegistrationStatus(this, STATUS_UNREGISTERED);
+        MiddlewareHelper.setRegistrationStatus(
+                com.voipgrid.vialer.persistence.Middleware.RegistrationStatus.UNREGISTERED);
         MiddlewareHelper.registerAtMiddleware(this);
     }
 }

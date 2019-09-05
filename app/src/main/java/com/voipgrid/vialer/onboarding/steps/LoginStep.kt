@@ -13,7 +13,6 @@ import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.VoipgridLogin
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.core.onTextChanged
-import com.voipgrid.vialer.util.AccountHelper
 import com.voipgrid.vialer.util.ConnectivityHelper
 import kotlinx.android.synthetic.main.onboarding_step_login.*
 import javax.inject.Inject
@@ -23,7 +22,6 @@ class LoginStep : Step() {
     override val layout = R.layout.onboarding_step_login
 
     @Inject lateinit var connectivityHelper: ConnectivityHelper
-    @Inject lateinit var accountHelper: AccountHelper
     @Inject lateinit var login: VoipgridLogin
 
     private val logger = Logger(this)

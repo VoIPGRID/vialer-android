@@ -1,5 +1,9 @@
 package com.voipgrid.vialer.api.interceptors;
 
+import android.util.Log;
+
+import com.voipgrid.vialer.User;
+
 import java.io.IOException;
 
 import okhttp3.Credentials;
@@ -14,55 +18,16 @@ public class AddAuthorizationCredentialsToRequest implements Interceptor {
      */
     private static final String AUTHORIZATION_HEADER_NAME = "Authorization";
 
-    private String mUsername;
-    private String mPassword;
-    private String mToken;
-
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request original = chain.request();
         Request.Builder requestBuilder = original.newBuilder();
 
-        if (hasApiToken() && !chain.request().url().toString().contains("call-response")) {
+        if (!chain.request().url().toString().contains("call-response")) {
             requestBuilder.header(AUTHORIZATION_HEADER_NAME, createApiTokenAuthHeader());
-        }
-        else if (hasUsernameAndPassword()) {
-            requestBuilder.header(AUTHORIZATION_HEADER_NAME, createUsernameAndPasswordAuthHeader());
         }
 
         return chain.proceed(requestBuilder.build());
-    }
-
-    /**
-     * Update the credentials on this interceptor, this is so the interceptor can provide
-     * the latest credentials without creating a new okhttp client.
-     *
-     * @param username
-     * @param password
-     * @param token
-     */
-    public void setCredentials(String username, String password, String token) {
-        mUsername = username;
-        mPassword = password;
-        mToken = token;
-    }
-
-    /**
-     * Check if the AccountHelper has an api token.
-     *
-     * @return TRUE if the AccountHelper has an api token.
-     */
-    private boolean hasApiToken() {
-        return mToken != null && ! mToken.isEmpty();
-    }
-
-    /**
-     * Check if the AccountHelper has a username/password to use.
-     *
-     * @return TRUE if the AccountHelper has a stored username/password.
-     */
-    private boolean hasUsernameAndPassword() {
-        return mUsername != null && mPassword != null;
     }
 
     /**
@@ -71,15 +36,6 @@ public class AddAuthorizationCredentialsToRequest implements Interceptor {
      * @return The header body as a string
      */
     private String createApiTokenAuthHeader() {
-        return "Token " + mUsername + ":" + mToken;
-    }
-
-    /**
-     * Generates the appropriate authorization header to use with a username/password.
-     *
-     * @return The header body as a string
-     */
-    private String createUsernameAndPasswordAuthHeader() {
-        return Credentials.basic(mUsername, mPassword);
+        return "Token " + User.getUsername() + ":" + User.getLoginToken();
     }
 }
