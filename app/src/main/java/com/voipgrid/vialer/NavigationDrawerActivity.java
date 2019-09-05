@@ -294,7 +294,14 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     @Override
     public void onResponse(@NonNull Call call, @NonNull Response response) {
-        if (!response.isSuccessful()) {
+        if (response.isSuccessful()) {
+            if (mNoConnectionText.getVisibility() == View.VISIBLE) {
+                mNoConnectionText.setVisibility(View.GONE);
+                if (mSpinner != null) {
+                    mSpinner.setVisibility(View.VISIBLE);
+                }
+            }
+        } else {
             if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
                 Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
             }
