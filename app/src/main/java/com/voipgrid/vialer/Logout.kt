@@ -2,16 +2,12 @@ package com.voipgrid.vialer
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import com.voipgrid.vialer.middleware.MiddlewareHelper
-import com.voipgrid.vialer.util.AccountHelper
 import com.voipgrid.vialer.util.ConnectivityHelper
-import com.voipgrid.vialer.util.JsonStorage
 
-class Logout(private val context: Context, private val jsonStorage: JsonStorage<Any>, private val accountHelper: AccountHelper, private val sharedPreferences: SharedPreferences, private val connectivityHelper: ConnectivityHelper) {
+class Logout(private val context: Context, private val sharedPreferences: SharedPreferences, private val connectivityHelper: ConnectivityHelper) {
 
     fun perform(force: Boolean = false) {
         if (!connectivityHelper.hasNetworkConnection() && !force) {
@@ -23,8 +19,7 @@ class Logout(private val context: Context, private val jsonStorage: JsonStorage<
             MiddlewareHelper.unregister(context)
         }
 
-        jsonStorage.clear()
-        accountHelper.clearCredentials()
+        User.clear()
         sharedPreferences.edit().clear().apply()
 
         context.startActivity(Intent(context, MainActivity::class.java).apply {

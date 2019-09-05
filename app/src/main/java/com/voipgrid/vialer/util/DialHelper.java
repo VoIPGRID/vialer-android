@@ -2,20 +2,17 @@ package com.voipgrid.vialer.util;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.models.PhoneAccount;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
+import com.voipgrid.vialer.persistence.UserPreferences;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -32,33 +29,30 @@ public class DialHelper {
     private Context mContext;
 
     private ConnectivityHelper mConnectivityHelper;
-    private final Preferences mPreferences;
-    private JsonStorage mJsonStorage;
 
     private int mMaximumNetworkSwitchDelay = 3000;
     private static String sNumberAttemptedToCall;
 
-    private DialHelper(Context context, JsonStorage jsonStorage,
-            ConnectivityHelper connectivityHelper) {
+    private DialHelper(Context context, ConnectivityHelper connectivityHelper) {
         mContext = context;
-        mJsonStorage = jsonStorage;
         mConnectivityHelper = connectivityHelper;
-        mPreferences = new Preferences(context);
     }
 
     public static DialHelper fromActivity (Activity activity) {
-        JsonStorage jsonStorage = new JsonStorage(activity);
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(activity);
-        return new DialHelper(activity, jsonStorage, connectivityHelper);
+        return new DialHelper(activity, connectivityHelper);
     }
 
     public void callNumber(final String number, final String contactName) {
-        if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.Connection.WIFI && mPreferences.hasSipEnabled()) {
-            if(mPreferences.hasConnectionPreference(ConnectivityHelper.Connection.LTE.toInt())) {
+        if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.Connection.WIFI && User.voip.getHasEnabledSip()) {
+            if(User.userPreferences.hasConnectionPreference(
+                    UserPreferences.ConnectionPreference.LTE)) {
                 switchNetworkAndCallNumber(number, contactName);
-            } else if(mPreferences.hasConnectionPreference(Preferences.CONNECTION_PREFERENCE_NONE)) {
+            } else if(User.userPreferences.hasConnectionPreference(
+                    UserPreferences.ConnectionPreference.NONE)) {
                 showConnectionPickerDialog(number, contactName);
-            } else if(mPreferences.hasConnectionPreference(Preferences.CONNECTION_PREFERENCE_WIFI)) {
+            } else if(User.userPreferences.hasConnectionPreference(
+                    UserPreferences.ConnectionPreference.WIFI)) {
                 makeCall(number, contactName);
             }
         } else {
@@ -82,18 +76,14 @@ public class DialHelper {
         builder.setTitle(mContext.getString(R.string.connection_preference_dialog_title));
         builder.setMessage(mContext.getString(R.string.connection_preference_dialog_message));
         builder.setPositiveButton(mContext.getString(R.string.yes),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                        switchNetworkAndCallNumber(number, contactName);
-                    }
+                (dialog, id) -> {
+                    dialog.cancel();
+                    switchNetworkAndCallNumber(number, contactName);
                 });
         builder.setNegativeButton(mContext.getString(R.string.no),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                        makeCall(number, contactName);
-                    }
+                (dialog, id) -> {
+                    dialog.cancel();
+                    makeCall(number, contactName);
                 });
         builder.setCancelable(false);
         AlertDialog dialog = builder.create();
@@ -111,8 +101,8 @@ public class DialHelper {
     public void makeCall(String number, String contactName) {
         // We need internet for both type of calls.
         if (mConnectivityHelper.hasNetworkConnection()) {
-            if (mPreferences.canUseSip()
-                    && mJsonStorage.has(PhoneAccount.class)
+            if (User.voip.getCanUseSip()
+                    && User.getHasPhoneAccount()
                     && mConnectivityHelper.hasFastData()) {
                 // Check if we have permission to use the microphone. If not, request it.
                 if (!MicrophonePermission.hasPermission((Activity) mContext)) {

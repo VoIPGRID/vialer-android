@@ -1,17 +1,16 @@
 package com.voipgrid.vialer.util;
 
-import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UPDATE_NEEDED;
-
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
+import com.voipgrid.vialer.persistence.Middleware;
 
 import java.io.IOException;
 
@@ -26,15 +25,11 @@ public class PhoneAccountHelper {
 
     private VoipgridApi mVoipgridApi;
     private Context mContext;
-    private Preferences mPreferences;
-    private JsonStorage mJsonStorage;
     private SecureCalling mSecureCalling;
 
     public PhoneAccountHelper(Context context) {
         mContext = context;
 
-        mPreferences = new Preferences(context);
-        mJsonStorage = new JsonStorage(context);
         mSecureCalling = SecureCalling.fromContext(context);
 
         mVoipgridApi = ServiceGenerator.createApiService(mContext);
@@ -46,7 +41,7 @@ public class PhoneAccountHelper {
      */
     public SystemUser getAndUpdateSystemUser() {
         Call<SystemUser> call = mVoipgridApi.systemUser();
-        SystemUser systemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        SystemUser systemUser = User.getVoipgridUser();
         if (systemUser == null) {
             systemUser = null;
         }
@@ -66,13 +61,13 @@ public class PhoneAccountHelper {
      * Function to update the systemuser information.
      */
     private void updateSystemUser(SystemUser systemUser) {
-        SystemUser currentSystemuser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        SystemUser currentSystemuser = User.getVoipgridUser();
         currentSystemuser.setOutgoingCli(systemUser.getOutgoingCli());
         currentSystemuser.setMobileNumber(systemUser.getMobileNumber());
         currentSystemuser.setClient(systemUser.getClient());
         currentSystemuser.setAppAccountUri(systemUser.getAppAccountUri());
 
-        mJsonStorage.save(currentSystemuser);
+        User.setVoipgridUser(currentSystemuser);
     }
 
 
@@ -82,20 +77,16 @@ public class PhoneAccountHelper {
      */
     public PhoneAccount getLinkedPhoneAccount() {
         SystemUser systemUser = getAndUpdateSystemUser();
-        PhoneAccount phoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
-        if (phoneAccount == null) {
-            phoneAccount = null;
-        }
+        PhoneAccount phoneAccount = User.getPhoneAccount();
 
         if (systemUser != null) {
-            mPreferences.setSipPermission(true);
+            User.voip.setAccountSetupForSip(true);
             String phoneAccountId = systemUser.getPhoneAccountId();
 
             // Get phone account from API if one is provided in the systemuser API.
             if (phoneAccountId != null) {
 
-                // If no PhoneAccountId is returned, remove current PhoneAccount information from jsonstorage.
-                new JsonStorage(mContext).remove(PhoneAccount.class);
+                User.setPhoneAccount(null);
 
                 Call<PhoneAccount> phoneAccountCall = mVoipgridApi.phoneAccount(phoneAccountId);
                 try {
@@ -118,18 +109,18 @@ public class PhoneAccountHelper {
         }
 
         // Get the phone account currently saved in the local storage.
-        PhoneAccount existingPhoneAccount = ((PhoneAccount) mJsonStorage.get(PhoneAccount.class));
+        PhoneAccount existingPhoneAccount = User.getPhoneAccount();
         // Save the linked phone account in the local storage.
-        mJsonStorage.save(phoneAccount);
+        User.setPhoneAccount(phoneAccount);
 
         // Check if the user can use sip and if the phone account changed or unregistered.
-        if (mPreferences.canUseSip()) {
+        if (User.voip.getCanUseSip()) {
             boolean register = false;
             if (!phoneAccount.equals(existingPhoneAccount)) {
                 // New registration because phone account changed.
-                MiddlewareHelper.setRegistrationStatus(mContext, STATUS_UPDATE_NEEDED);
+                MiddlewareHelper.setRegistrationStatus(Middleware.RegistrationStatus.UPDATE_NEEDED);
                 register = true;
-            } else if (MiddlewareHelper.needsRegistration(mContext)) {
+            } else if (MiddlewareHelper.needsRegistration()) {
                 // New registration because we need a registration.
                 register = true;
             }
@@ -159,7 +150,7 @@ public class PhoneAccountHelper {
             mSecureCalling.updateApiBasedOnCurrentPreferenceSetting(null);
         } else {
             // User has no phone account linked so remove it from the local storage.
-            mJsonStorage.remove(PhoneAccount.class);
+            User.setPhoneAccount(null);
         }
     }
 

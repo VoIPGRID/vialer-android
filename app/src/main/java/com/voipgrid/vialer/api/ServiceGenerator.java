@@ -10,7 +10,6 @@ import com.voipgrid.vialer.api.interceptors.AddUserAgentToHeader;
 import com.voipgrid.vialer.api.interceptors.LogResponsesToConsole;
 import com.voipgrid.vialer.api.interceptors.LogUserOutOnUnauthorizedResponse;
 import com.voipgrid.vialer.api.interceptors.ModifyCacheLifetimeBasedOnConnectivity;
-import com.voipgrid.vialer.util.AccountHelper;
 
 import java.util.HashMap;
 
@@ -58,21 +57,11 @@ public class ServiceGenerator {
     }
 
     public static VoipgridApi createApiService(Context context) {
-        AccountHelper accountHelper = new AccountHelper(context);
-        return createApiService(context, accountHelper.getEmail(), accountHelper.getPassword(), accountHelper.getApiToken());
-    }
-
-    public static VoipgridApi createApiService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
-        return ServiceGenerator.createService(context, VoipgridApi.class, username, password, token, getVgApiUrl(context));
-    }
-
-    public static Middleware createRegistrationService(Context context, @Nullable String username, @Nullable String password, @Nullable String token) {
-        return ServiceGenerator.createService(context, Middleware.class, username, password, token, getRegistrationUrl(context));
+        return ServiceGenerator.createService(context, VoipgridApi.class, getVgApiUrl(context));
     }
 
     public static Middleware createRegistrationService(Context context) {
-        AccountHelper accountHelper = new AccountHelper(context);
-        return createRegistrationService(context, accountHelper.getEmail(), accountHelper.getPassword(), accountHelper.getApiToken());
+        return ServiceGenerator.createService(context, Middleware.class, getRegistrationUrl(context));
     }
 
     /**
@@ -82,9 +71,7 @@ public class ServiceGenerator {
      * @param <S>
      * @return
      */
-    private static <S> S createService(final Context context, Class<S> serviceClass, @Nullable String username, @Nullable String password, @Nullable String token, String url) {
-        sAuthorizationInterceptor.setCredentials(username, password, token);
-
+    private static <S> S createService(final Context context, Class<S> serviceClass, String url) {
         if (sRetrofit.get(url) == null) {
             sRetrofit.put(url, builder.baseUrl(url)
                     .client(getHttpClient(context))

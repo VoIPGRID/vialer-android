@@ -1,15 +1,12 @@
 package com.voipgrid.vialer.onboarding.steps
 
 import android.app.AlertDialog
-import android.os.Bundle
 import android.text.Editable
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
-import com.voipgrid.vialer.Preferences
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.VialerApplication
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.api.models.SystemUser
@@ -17,26 +14,18 @@ import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.core.onTextChanged
-import com.voipgrid.vialer.util.JsonStorage
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.onboarding_step_mobile_number.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import javax.inject.Inject
 
 class MobileNumberStep : Step(), View.OnClickListener {
 
     override val layout = R.layout.onboarding_step_mobile_number
 
-    @Inject lateinit var systemUserStorage: JsonStorage<SystemUser>
-    @Inject lateinit var phoneAccountStorage: JsonStorage<PhoneAccount>
-    @Inject lateinit var preferences: Preferences
-
-    private lateinit var user: SystemUser
-
     private val outgoingNumber: String?
-        get() = if (user.outgoingCli == "suppressed") onboarding?.getString(R.string.supressed_number) else user.outgoingCli
+        get() = if (User.voipgridUser?.outgoingCli == "suppressed") onboarding?.getString(R.string.supressed_number) else User.voipgridUser?.outgoingCli
 
     private val mobileNumber: String
         get() = PhoneNumberUtils.format(mobileNumberTextDialog.text.toString())
@@ -51,21 +40,18 @@ class MobileNumberStep : Step(), View.OnClickListener {
 
     override fun onResume() {
         super.onResume()
-        VialerApplication.get().component().inject(this)
 
-        if (!systemUserStorage.has(SystemUser::class.java)) {
+        if (!User.isLoggedIn) {
             logger.e("The user has made it to mobile number without a successful login, restart onboarding")
             onboarding?.restart()
             return
         }
 
-        user = systemUserStorage.get(SystemUser::class.java)
-
         val enableContinueButton: (_: Editable?) -> Unit = {
             button_configure.isEnabled = mobileNumberTextDialog.text.isNotEmpty()
         }
 
-        mobileNumberTextDialog.setText(user.mobileNumber)
+        mobileNumberTextDialog.setText(User.voipgridUser?.mobileNumber)
         mobileNumberTextDialog.setRightDrawableOnClickListener {
             alert(R.string.phonenumber_info_text_title, R.string.phonenumber_info_text)
         }
@@ -119,17 +105,18 @@ class MobileNumberStep : Step(), View.OnClickListener {
 
             logger.i("Received a successful mobile number response, looking for a linked phone account")
 
-            val systemUser = user
-            systemUser.mobileNumber = mobileNumber
-            systemUser.outgoingCli = outgoingNumber
-            systemUserStorage.save(user)
+            User.voipgridUser?.let {
+                it.mobileNumber = mobileNumber
+                it.outgoingCli = outgoingNumber
+                User.voipgridUser = it
+            }
 
-            if (systemUser.phoneAccountId != null) {
+            if (User.voipgridUser?.phoneAccountId != null) {
                 onboarding?.isLoading = true
-                voipgridApi.phoneAccount(systemUser.phoneAccountId).enqueue(configureCallback)
+                voipgridApi.phoneAccount(User.voipgridUser?.phoneAccountId).enqueue(configureCallback)
             } else {
                 logger.w("There is no linked voip account, prompt user to configure one")
-                preferences.setSipEnabled(false)
+                User.voip.hasEnabledSip = false
                 state.hasVoipAccount = false
                 onboarding?.progress()
             }
@@ -149,9 +136,9 @@ class MobileNumberStep : Step(), View.OnClickListener {
 
             logger.i("Successfully found a linked phone account")
 
-            phoneAccountStorage.save(response.body() as PhoneAccount)
+            User.phoneAccount = response.body() as PhoneAccount
 
-            if (preferences.hasSipPermission()) {
+            if (User.voip.isAccountSetupForSip) {
                 MiddlewareHelper.registerAtMiddleware(onboarding)
             }
 

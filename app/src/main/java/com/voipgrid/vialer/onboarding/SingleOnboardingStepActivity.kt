@@ -4,12 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.OnboardingState
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep
 import com.voipgrid.vialer.onboarding.steps.TwoFactorStep
-import com.voipgrid.vialer.util.AccountHelper
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
 /**
@@ -23,11 +23,8 @@ class SingleOnboardingStepActivity: Onboarder() {
     private var step: Step? = null
 
     override val state: OnboardingState by lazy {
-        val accountHelper = AccountHelper(this)
-
         OnboardingState().apply {
-            username = accountHelper.email
-            password = accountHelper.password
+            username = User.username
         }
     }
 

@@ -4,8 +4,8 @@ import android.content.Context;
 import androidx.annotation.StringDef;
 import android.util.Log;
 
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.logging.file.LogFileCreator;
 import com.voipgrid.vialer.logging.formatting.LogFormatter;
@@ -56,11 +56,11 @@ public class Logger {
         mLogFormatter = new LogFormatter();
         mLogComposer = new LogComposer(
                 new DeviceInformation(mContext),
-                new Preferences(mContext).getLoggerIdentifier(),
+                User.remoteLogging.getId(),
                 VialerApplication.getAppVersion()
         );
         mCallerLocator = new CallerLocator();
-        mRemoteLoggingEnabled = new Preferences(mContext).remoteLoggingIsActive();
+        mRemoteLoggingEnabled = User.remoteLogging.isEnabled();
         tag = thisClass.getSimpleName();
     }
 
