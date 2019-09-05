@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.github.anrwatchdog.ANRWatchDog;
 import com.github.tamir7.contacts.Contacts;
+import com.segment.analytics.Analytics;
 import com.voipgrid.vialer.dagger.DaggerVialerComponent;
 import com.voipgrid.vialer.dagger.VialerComponent;
 import com.voipgrid.vialer.dagger.VialerModule;
@@ -36,6 +37,13 @@ public class VialerApplication extends Application {
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         new ANRWatchDog().start();
         Contacts.initialize(this);
+        initializeSegmentAnalytics();
+    }
+
+    private void initializeSegmentAnalytics() {
+        Analytics analytics = new Analytics.Builder(this, getString(R.string.segment_write_key)).build();
+        Analytics.setSingletonInstance(analytics);
+        Analytics.with(this).track("Application started. Segment implemented successfully!");
     }
 
     public static String getAppVersion() {
