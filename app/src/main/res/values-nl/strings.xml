@@ -272,4 +272,8 @@
         ingeschakeld. Anderen kunnen mogelijk jouw gesprekken opvangen en meeluisteren.
     </string>
     <string name="call_icon">Bel icoon</string>
+    <string name="exclamation_mark">!</string>
+    <string name="help_icon">Help icoon</string>
+    <string name="missed_call">Oproep gemist (%1$s).</string>
+    <string name="answered_elsewhere">Oproep (%1$s) elders opgenomen.</string>
 </resources>

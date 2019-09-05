@@ -40,13 +40,15 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_FAI
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_SUCCESSFUL;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_GSM_CALL_IN_PROGRESS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_INSUFFICIENT_NETWORK;
-import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_NO_CALL_RECEIVED_FROM_ASTERISK;
+import static com.voipgrid.vialer.statistics.StatsConstants
+        .VALUE_FAILED_NO_CALL_RECEIVED_FROM_ASTERISK;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_COMPLETED_ELSEWHERE;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_DECLINED;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_NO_AUDIO;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_NO_AUDIO_RECEIVED;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_NO_AUDIO_SENT;
-import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_ORIGINATOR_CANCELLED;
+import static com.voipgrid.vialer.statistics.StatsConstants
+        .VALUE_FAILED_REASON_ORIGINATOR_CANCELLED;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_VIALER_CALL_IN_PROGRESS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_REMOTE;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_USER;
@@ -57,6 +59,7 @@ import android.content.Context;
 
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.GsonBuilder;
+import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.SecureCalling;
@@ -66,6 +69,7 @@ import com.voipgrid.vialer.media.monitoring.PacketStats;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
 import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
+import com.voipgrid.vialer.util.JsonStorage;
 
 import java.math.BigDecimal;
 import java.util.HashMap;

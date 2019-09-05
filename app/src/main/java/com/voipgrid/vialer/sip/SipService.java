@@ -34,6 +34,7 @@ import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
+import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -698,6 +699,12 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
             if (mCurrentCall == null) {
                 mLogger.i("No active calls stop the service");
                 stopSelf();
+                if (mIncomingCallDetails != null) {
+                    String number = mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
+                    if (number != null && !number.isEmpty()) {
+                        new MissedCallNotification(number).display();
+                    }
+                }
             }
         }
     }
