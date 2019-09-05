@@ -10,11 +10,16 @@ import androidx.test.rule.ActivityTestRule
  * test.
  *
  */
-class VialerActivityTestRule<A : Activity>(a: Class<A>, val resetStateAfterEachTest: Boolean = false) : ActivityTestRule<A>(a) {
+class VialerActivityTestRule<A : Activity>(a: Class<A>, private val vialerTest: VialerTest, val resetStateAfterEachTest: Boolean = false, private val loginAutomatically: Boolean = true) : ActivityTestRule<A>(a) {
 
     override fun afterActivityLaunched() {
         super.afterActivityLaunched()
         Thread.sleep(1000)
+        if (!loginAutomatically) return
+
+        if (vialerTest.onboard(skipIfLoggedIn = true)) {
+            launchActivity(activity.intent)
+        }
     }
 
     override fun afterActivityFinished() {

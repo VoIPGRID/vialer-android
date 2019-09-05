@@ -128,6 +128,7 @@ android {
             manifestPlaceholders = [enableCrashReporting:"false"]
             buildConfigField("String", "TEST_USERNAME", "\"${testUsername}\"")
             buildConfigField("String", "TEST_PASSWORD", "\"${testPassword}\"")
+            buildConfigField("String", "TEST_END_NUMBER", "\"${testEndNumber}\"")
         }
         debug {
             versionNameSuffix '-DEBUG'
@@ -231,6 +232,7 @@ dependencies {
     androidTestImplementation "androidx.test:rules:${androidTestVersion}"
     implementation "androidx.test.ext:junit:1.1.0"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.1.1"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:3.1.1"
     androidTestImplementation 'androidx.annotation:annotation:1.0.2'
 
     // Automated screenshots for instrumented tests.
