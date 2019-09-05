@@ -44,10 +44,6 @@ import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
-<<<<<<< HEAD
-=======
-import com.voipgrid.vialer.util.AccountHelper;
->>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ColorHelper;
@@ -166,17 +162,6 @@ public class VialerModule {
         return new CachedContacts(contacts);
     }
 
-<<<<<<< HEAD
-    @Provides MissedCalls provideMissedCalls(VoipgridApi voipgridApi) {
-        return new MissedCalls(voipgridApi);
-    }
-
-    @Provides MissedCallsAdapter provideMissedCallsAdapter(CachedContacts cachedContacts) {
-        return new MissedCallsAdapter(cachedContacts);
-    }
-
-=======
->>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
     @Provides
     ColorHelper provideColorHelper() {
         return new ColorHelper();
@@ -286,7 +271,7 @@ public class VialerModule {
 
     @Provides
     CallRecordDao provideCallRecordDao() {
-        return mVialerApplication.db().callRecordDao();
+        return VialerApplication.getDb().callRecordDao();
     }
 
     @Provides

@@ -63,12 +63,6 @@ public interface VialerComponent {
 
     void inject(NetworkConnectivity networkConnectivity);
 
-<<<<<<< HEAD
-    void inject(CallRecordFragment fragment);
-=======
-    Preferences getPreferences();
->>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
-
     void inject(CallRecord callRecord);
 
     @Nullable

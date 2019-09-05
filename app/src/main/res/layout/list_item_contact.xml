@@ -3,15 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-<<<<<<< HEAD
-    android:paddingStart="@dimen/list_item_contact_padding_left"
-=======
-    android:paddingRight="5dp"
-    android:paddingLeft="5dp"
->>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
+    android:paddingRight="@dimen/list_item_contact_padding_right"
+    android:paddingLeft="@dimen/list_item_contact_padding_left"
     android:paddingTop="@dimen/list_item_contact_padding_top"
-    android:paddingEnd="@dimen/list_item_contact_padding_right"
     android:paddingBottom="@dimen/list_item_contact_padding_bottom">
+
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/text_view_contact_icon"

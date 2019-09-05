@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-<<<<<<< HEAD
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:visibility="gone" />
@@ -31,19 +30,6 @@
             android:text="@string/permission_contact_title"
             android:textSize="18sp" />
 
-=======
-        android:visibility="gone"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:text="@string/dialer_no_contacts_found_message"/>
-
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:orientation="vertical"
-                  android:gravity="center"
-                  android:id="@+id/no_contact_permission_warning"
-                  android:visibility="gone">
->>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
         <TextView
             android:id="@+id/permission_contact_description"
             android:layout_width="wrap_content"

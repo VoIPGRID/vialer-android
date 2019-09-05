@@ -45,12 +45,8 @@
             <fragment
                 android:name="com.voipgrid.vialer.callrecord.CallRecordFragment"
                 android:layout_width="match_parent"
-<<<<<<< HEAD
-                android:layout_height="match_parent" />
-=======
                 android:layout_height="match_parent"
                 android:id="@+id/call_record_fragment" />
->>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/floating_action_button"

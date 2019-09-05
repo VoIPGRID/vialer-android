@@ -69,21 +69,6 @@ class MainActivity : NavigationDrawerActivity() {
     }
 
     /**
-<<<<<<< HEAD
-=======
-    * If we do not currently have an api token stored, fetch one from the server.
-    *
-    */
-    private fun fetchApiTokenIfDoesNotExist() {
-        if (hasApiToken()) return
-
-        logger.i("There is no api-key currently stored, will attempt to fetch one")
-
-        ApiTokenFetcher.usingSavedCredentials(this).setListener(ApiTokenListener()).fetch()
-    }
-
-    /**
->>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
      * End immediately and return to the onboarding screen to let tthe user login
      * again.
      *
@@ -144,44 +129,5 @@ class MainActivity : NavigationDrawerActivity() {
                 }
             })
         }
-    }
-
-    /**
-<<<<<<< HEAD
-     * Tab adapter to handle tabs in the ViewPager
-     */
-    private inner class TabAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
-
-        override fun getItem(position: Int): Fragment {
-            return when(position) {
-                0 -> CallRecordFragment.mine()
-                1 -> CallRecordFragment.all()
-                else -> TabFragment.newInstance("")
-            }
-        }
-
-        override fun getCount(): Int {
-            return 2
-        }
-=======
-     * Listen for the api token request and display a dialog to enter the two-factor token
-     * if one is required.
-     *
-     */
-    private inner class ApiTokenListener : ApiTokenFetcher.ApiTokenListener {
-        override fun twoFactorCodeRequired() {
-            if (isFinishing) {
-                return
-            }
-
-            logger.i("Prompting the user to enter a two-factor code")
-
-            SingleOnboardingStepActivity.launch(this@MainActivity, TwoFactorStep::class.java)
-        }
-
-        override fun onSuccess(apiToken: String) {}
-
-        override fun onFailure() {}
->>>>>>> 98d8075... Overhaul for how call records are fetched, filtered and rendered.
     }
 }
