@@ -2,7 +2,9 @@ package com.voipgrid.vialer.fcm;
 
 import static com.voipgrid.vialer.middleware.MiddlewareConstants.STATUS_UNREGISTERED;
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
@@ -19,6 +21,7 @@ import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.VoipDisabledNotification;
+import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -114,6 +117,12 @@ public class FcmMessagingService extends FirebaseMessagingService {
             return;
         }
 
+        if (isInNativeCall(this)) {
+            rejectDueToInNativeCall(remoteMessage, remoteMessageData);
+            new MissedCallNotification(remoteMessageData.getPhoneNumber()).display();
+            return;
+        }
+
         sLastHandledCall = remoteMessageData.getRequestToken();
 
         mRemoteLogger.d("Payload processed, calling startService method");
@@ -182,6 +191,16 @@ public class FcmMessagingService extends FirebaseMessagingService {
     }
 
     /**
+     * Check to see if this phone is in a native call.
+     * @param context The app context.
+     * @return TRUE if phone is in native call.
+     */
+    private static boolean isInNativeCall(Context context) {
+        AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        return manager.getMode() == AudioManager.MODE_IN_CALL;
+    }
+
+    /**
      * Check if we have reached or exceeded the maximum number of attempts that we
      * accept from the middleware.
      *
@@ -208,6 +227,21 @@ public class FcmMessagingService extends FirebaseMessagingService {
     }
 
     /**
+     * Performs various tasks that are necessary when rejecting a call based on the fact that there is
+     * already a native call in progress.
+     *
+     * @param remoteMessage The remote message that we are handling.
+     * @param remoteMessageData The remote message data that we are handling.
+     */
+    private void rejectDueToInNativeCall(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
+        mRemoteLogger.d("Reject due to phone currently in native call");
+
+        replyServer(remoteMessageData, false);
+
+        sendCallFailedDueToOngoingNativeCallMetric(remoteMessage, remoteMessageData.getRequestToken());
+    }
+
+    /**
      * Send the vialer metric for ongoing call if appropriate.
      *
      * @param remoteMessage
@@ -220,6 +254,21 @@ public class FcmMessagingService extends FirebaseMessagingService {
         }
 
         VialerStatistics.incomingCallFailedDueToOngoingVialerCall(remoteMessage);
+    }
+
+    /**
+     * Send the native metric for ongoing call if appropriate.
+     *
+     * @param remoteMessage
+     * @param requestToken
+     */
+    private void sendCallFailedDueToOngoingNativeCallMetric(RemoteMessage remoteMessage, String requestToken) {
+        if (sLastHandledCall != null && sLastHandledCall.equals(requestToken)) {
+            mRemoteLogger.i("Push notification (" + sLastHandledCall + ") is being rejected because there is a native call already in progress but not sending metric because it was already handled successfully");
+            return;
+        }
+
+        VialerStatistics.incomingCallFailedDueToOngoingNativeCall(remoteMessage);
     }
 
     /**

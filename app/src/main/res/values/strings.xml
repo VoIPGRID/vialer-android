@@ -287,4 +287,6 @@
     <string name="call_icon">Call icon</string>
     <string name="exclamation_mark">!</string>
     <string name="help_icon">Help icon</string>
+    <string name="missed_call">Call missed (%1$s).</string>
+    <string name="answered_elsewhere">Call (%1$s) answered elsewhere.</string>
 </resources>

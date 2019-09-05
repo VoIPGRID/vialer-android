@@ -139,6 +139,14 @@ abstract class AbstractCallNotification : AbstractNotification() {
         ActiveCallNotification(call).display()
     }
 
+    fun missed(number: String) {
+        MissedCallNotification(number).display()
+    }
+
+    fun answeredElsewhere(number: String) {
+        AnsweredElsewhereNotification(number).display()
+    }
+
     companion object {
         const val CHANNEL_ID: String = "vialer_calls"
     }
