@@ -258,6 +258,10 @@ dependencies {
     implementation "com.chibatching.kotpref:initializer:$kotPrefVersion"
     implementation "com.chibatching.kotpref:enum-support:$kotPrefVersion"
     implementation "com.chibatching.kotpref:gson-support:$kotPrefVersion"
+    implementation "androidx.paging:paging-runtime-ktx:2.1.0"
+    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

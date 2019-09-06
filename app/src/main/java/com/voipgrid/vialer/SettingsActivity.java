@@ -209,9 +209,9 @@ public class SettingsActivity extends LoginRequiredActivity {
             Toast.makeText(SettingsActivity.this,R.string.remote_logging_id_copied , Toast.LENGTH_SHORT).show();
             return true;
         });
+        mRemoteLogIdEditText.setText(User.remoteLogging.getId());
         if (User.remoteLogging.isEnabled()) {
             mRemoteLogIdContainer.setVisibility(View.VISIBLE);
-            mRemoteLogIdEditText.setText(User.remoteLogging.getId());
         }
     }
 

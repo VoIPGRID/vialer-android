@@ -12,7 +12,7 @@ public class TimeUtils {
      *
      * @param datetime The timestamp to convert
      */
-    public static long convertToSystemTime(String datetime) {
+    public static long convertToSystemTime(long datetime) {
         return convertToSystemTime(datetime, "Europe/Amsterdam");
     }
 
@@ -22,7 +22,7 @@ public class TimeUtils {
      * @param datetime The timestamp to convert
      * @param initialTimezone The timezone that the timestamp has been provided in
      */
-    public static long convertToSystemTime(String datetime, String initialTimezone) {
+    public static long convertToSystemTime(long datetime, String initialTimezone) {
         return new DateTime(datetime, DateTimeZone.forID(initialTimezone))
                 .withZone(DateTimeZone.forID(TimeZone.getDefault().getID()))
                 .getMillis();

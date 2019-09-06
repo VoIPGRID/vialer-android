@@ -12,6 +12,7 @@ import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.PhoneAccountFetcher
 import com.voipgrid.vialer.api.models.CallRecord
 import com.voipgrid.vialer.api.models.PhoneAccount
+import com.voipgrid.vialer.callrecord.database.CallRecordEntity
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.util.DialHelper
 import com.voipgrid.vialer.util.IconHelper
@@ -21,7 +22,7 @@ import javax.inject.Inject
 
 class CallRecordViewHolder(private val view : View) : RecyclerView.ViewHolder(view), View.OnClickListener {
 
-    private lateinit var callRecord: CallRecord
+    private lateinit var callRecord: CallRecordEntity
     private lateinit var activity: Activity
     private var callAlreadySetup = false
 
@@ -42,7 +43,7 @@ class CallRecordViewHolder(private val view : View) : RecyclerView.ViewHolder(vi
      *
      * @param callRecord
      */
-    fun update(callRecord: CallRecord) {
+    fun bindTo(callRecord: CallRecordEntity) {
         this.callRecord = callRecord
         val number = callRecord.thirdPartyNumber
         val contact = contacts.getContact(number)
@@ -51,16 +52,18 @@ class CallRecordViewHolder(private val view : View) : RecyclerView.ViewHolder(vi
         view.subtitle.setCompoundDrawablesWithIntrinsicBounds(getIcon(callRecord), 0, 0, 0)
         view.subtitle.text = createContactInformationString()
 
-        if (callRecord.wasAnsweredElsewhere()) {
+        if (callRecord.wasAnsweredElsewhere) {
             view.subtitle.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_call_record_answered_elsewhere, 0, 0, 0)
-            phoneAccountFetcher.fetch(callRecord.destinationAccount, PhoneAccountFetcherCallback())
+            callRecord.destinationAccount?.let {
+                phoneAccountFetcher.fetch(it, PhoneAccountFetcherCallback())
+            }
         }
     }
 
     private fun createContactInformationString(suffix: String = ""): String {
         val result = DateUtils.getRelativeDateTimeString(
                 activity,
-                TimeUtils.convertToSystemTime(callRecord.callDate),
+                TimeUtils.convertToSystemTime(callRecord.callTime),
                 DateUtils.SECOND_IN_MILLIS,
                 DateUtils.YEAR_IN_MILLIS,
                 DateUtils.FORMAT_ABBREV_TIME
@@ -69,8 +72,8 @@ class CallRecordViewHolder(private val view : View) : RecyclerView.ViewHolder(vi
         return if (suffix.isEmpty()) result else "$result - $suffix"
     }
 
-    private fun setNumberAndCallButtonVisibility(callRecord: CallRecord, contact: Contact?) {
-        if (callRecord.isAnonymous) {
+    private fun setNumberAndCallButtonVisibility(callRecord: CallRecordEntity, contact: Contact?) {
+        if (callRecord.isAnonymous()) {
             view.title.text = activity.getString(R.string.supressed_number)
             view.call_button.visibility = View.GONE
             return
@@ -111,8 +114,8 @@ class CallRecordViewHolder(private val view : View) : RecyclerView.ViewHolder(vi
      * @param callRecord
      * @return
      */
-    private fun getIcon(callRecord: CallRecord): Int {
-        if (callRecord.direction == CallRecord.DIRECTION_OUTBOUND) {
+    private fun getIcon(callRecord: CallRecordEntity): Int {
+        if (callRecord.direction == CallRecordEntity.DIRECTION.OUTBOUND) {
             return R.drawable.ic_call_record_outgoing_call
         }
 

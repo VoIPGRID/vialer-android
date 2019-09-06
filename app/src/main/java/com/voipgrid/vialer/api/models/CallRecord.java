@@ -29,6 +29,9 @@ public class CallRecord {
     @SerializedName("call_date")
     private String callDate;
 
+    @SerializedName("callerid")
+    private String callerId;
+
     @SerializedName("dialed_number")
     private String dialedNumber;
 
@@ -172,6 +175,10 @@ public class CallRecord {
         return id;
     }
 
+    public String getCallerId() {
+        return callerId;
+    }
+
     /**
      * Get the number of the third party, this will be based on the direction.
      *
@@ -181,12 +188,7 @@ public class CallRecord {
         return getDirection().equals(CallRecord.DIRECTION_OUTBOUND) ? getDialedNumber() : getCaller();
     }
 
-    /**
-     * Return true if this is a call from an anonymous number.
-     *
-     * @return
-     */
-    public boolean isAnonymous() {
-        return PhoneNumberUtils.isAnonymousNumber(getCaller());
+    public String getFirstPartyNumber() {
+        return getDirection().equals(CallRecord.DIRECTION_OUTBOUND) ? getCaller() : getDialedNumber();
     }
 }

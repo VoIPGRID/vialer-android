@@ -5,6 +5,7 @@ import android.view.View
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.models.SystemUser
+import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.AutoContinuingStep
 import kotlinx.android.synthetic.main.onboarding_step_welcome.*
@@ -21,6 +22,7 @@ class WelcomeStep : AutoContinuingStep() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        activity?.let { HistoricCallRecordsImporter.Worker.start(it) }
         logger.i("Welcome ${user.fullName} to the app and completing onboarding")
         subtitle_label.text = user.fullName
     }

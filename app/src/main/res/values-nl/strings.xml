@@ -249,8 +249,8 @@
     <string name="call_codec_standard_quality">Standaard audio</string>
     <string name="call_codec_high_quality">Hogere audio kwaliteit</string>
     <string name="tab_title_recents">mijn gesprekken</string>
-    <string name="tab_title_missed">alle gesprekken</string>
-    <string name="call_records_show_all">Laat alleen gemiste gesprekken zien</string>
+    <string name="tab_title_missed"></string>
+    <string name="call_records_show_all"></string>
     <string name="call_connection_setting_not_supported">Jouw Android versie staat het aanpassen van
         deze instelling niet toe
     </string>
