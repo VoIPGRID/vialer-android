@@ -7,14 +7,18 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.Step
 
-class OnboardingAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(fragmentManager, lifecycle) {
+class OnboardingAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle, vararg steps: Step) : FragmentStateAdapter(fragmentManager, lifecycle) {
 
     private var steps = arrayListOf<Step>()
 
     private val logger = Logger(this)
 
-    fun addStep(step: Step) {
-        if (!step.shouldThisStepBeSkipped()) {
+    init {
+        steps.forEach { addStep(it) }
+    }
+
+    private fun addStep(step: Step) {
+        if (step.shouldThisStepBeAddedToOnboarding()) {
             logger.i("Adding ${step.javaClass.simpleName} to onboarder")
             steps.add(step)
         } else {
@@ -22,15 +26,11 @@ class OnboardingAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) 
         }
     }
 
-    override fun getItemCount(): Int {
-        return steps.size
-    }
+    override fun getItemCount(): Int = steps.size
 
-    override fun createFragment(position: Int): Fragment {
-        return steps[position]
-    }
+    override fun createFragment(position: Int): Fragment = steps[position]
 
-    fun getStep(position: Int): Step {
-        return createFragment(position) as Step
-    }
+    fun getStep(position: Int) = createFragment(position) as Step
+
+    fun findCurrentStep(callerStep: Step) = steps.indexOf(callerStep)
 }

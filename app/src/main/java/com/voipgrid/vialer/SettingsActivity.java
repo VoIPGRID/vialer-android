@@ -6,11 +6,10 @@ import static com.voipgrid.vialer.util.ConnectivityHelper.converseToPreference;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,14 +22,14 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.UserSynchronizer;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.MobileNumber;
-import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
@@ -44,7 +43,6 @@ import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import javax.inject.Inject;
@@ -54,6 +52,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnItemSelected;
+import kotlin.Unit;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -61,6 +60,7 @@ import retrofit2.Response;
 public class SettingsActivity extends LoginRequiredActivity {
 
     @Inject BatteryOptimizationManager batteryOptimizationManager;
+    @Inject UserSynchronizer userSynchronizer;
 
     @BindView(R.id.container) View mContainer;
     @BindView(R.id.progressBar) ProgressBar mProgressBar;
@@ -82,14 +82,13 @@ public class SettingsActivity extends LoginRequiredActivity {
     @BindView(R.id.remote_logging_id_container) View mRemoteLogIdContainer;
     @BindView(R.id.remote_logging_id_edit_text) EditText mRemoteLogIdEditText;
     @BindView(R.id.ignore_battery_optimization_switch) CompoundButton ignoreBatteryOptimizationSwitch;
+    @BindView(R.id.use_phones_ringtone_switch) CompoundButton usePhoneRingtoneSwitch;
+    @BindView(R.id.use_phones_ringtone_switch_description) TextView usePhoneRingtoneSwitchDescription;
 
     @BindView(R.id.advanced_settings_layout) LinearLayout advancedSettings;
     @BindView(R.id.tls_switch) Switch tlsSwitch;
     @BindView(R.id.stun_switch) Switch stunSwitch;
 
-    private PhoneAccount mPhoneAccount;
-    private PhoneAccountHelper mPhoneAccountHelper;
-    private SystemUser mSystemUser;
     private VoipgridApi mVoipgridApi;
     private Logger mLogger;
     private ClipboardHelper mClipboardHelper;
@@ -100,10 +99,9 @@ public class SettingsActivity extends LoginRequiredActivity {
     private BroadcastReceiver mVoipDisabledReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateAndPopulate();
+            updateUi();
         }
     };
-    private boolean enableSipOnNextLoad = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +110,6 @@ public class SettingsActivity extends LoginRequiredActivity {
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
 
-        mPhoneAccountHelper = new PhoneAccountHelper(this);
         mVoipgridApi = ServiceGenerator.createApiService(this);
         mLogger = new Logger(this.getClass());
         mClipboardHelper =  ClipboardHelper.fromContext(this);
@@ -130,23 +127,22 @@ public class SettingsActivity extends LoginRequiredActivity {
     public void onResume() {
         super.onResume();
         initIgnoreBatteryOptimizationSwitch();
+        initUsePhoneRingtoneSwitch();
+        userSynchronizer.syncWithCallback(() -> {
+            runOnUiThread(() -> {
+                updateUi();
+                initializeAdvancedSettings();
+            });
+            return Unit.INSTANCE;
+        });
 
-        // Update and populate the fields.
-        updateAndPopulate();
-
-        // Update phone account and systemuser.
-        updateSystemUserAndPhoneAccount();
-
+        updateUi();
         initializeAdvancedSettings();
 
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mVoipDisabledReceiver, FcmMessagingService.VOIP_HAS_BEEN_DISABLED);
 
-        if (Build.VERSION.SDK_INT >= BuildConfig.ANDROID_Q_SDK_VERSION) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             mConnectionSpinner.setEnabled(false);
-        }
-
-        if (enableSipOnNextLoad) {
-            mVoipSwitch.setChecked(true);
         }
     }
 
@@ -209,9 +205,9 @@ public class SettingsActivity extends LoginRequiredActivity {
             Toast.makeText(SettingsActivity.this,R.string.remote_logging_id_copied , Toast.LENGTH_SHORT).show();
             return true;
         });
+        mRemoteLogIdEditText.setText(User.remoteLogging.getId());
         if (User.remoteLogging.isEnabled()) {
             mRemoteLogIdContainer.setVisibility(View.VISIBLE);
-            mRemoteLogIdEditText.setText(User.remoteLogging.getId());
         }
     }
 
@@ -224,6 +220,13 @@ public class SettingsActivity extends LoginRequiredActivity {
         ignoreBatteryOptimizationSwitch.setChecked(batteryOptimizationManager.isIgnoringBatteryOptimization());
         ignoreBatteryOptimizationSwitch.setOnClickListener(
                 view -> batteryOptimizationManager.prompt(SettingsActivity.this, false));
+    }
+
+    private void initUsePhoneRingtoneSwitch() {
+        usePhoneRingtoneSwitchDescription.setText(getString(R.string.use_phones_ringtone_switch_description, getString(R.string.app_name)));
+        usePhoneRingtoneSwitch.setOnClickListener(null);
+        usePhoneRingtoneSwitch.setChecked(User.userPreferences.getUsePhoneRingtone());
+        usePhoneRingtoneSwitch.setOnClickListener(view -> User.userPreferences.setUsePhoneRingtone(usePhoneRingtoneSwitch.isChecked()));
     }
 
     /**
@@ -243,43 +246,32 @@ public class SettingsActivity extends LoginRequiredActivity {
     }
 
     @OnCheckedChanged(R.id.account_sip_switch)
-    public void onSipCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (User.voip.getHasEnabledSip() == isChecked) return;
+    public void onSipCheckedChanged(CompoundButton button, boolean enable) {
+        if (!button.isPressed()) return;
 
-        boolean shouldLoadMissingVoip = !enableSipOnNextLoad;
-        enableSipOnNextLoad = false;
-
-        if (!isChecked) {
-            // Unregister at middleware.
+        if (!enable) {
             MiddlewareHelper.unregister(this);
-            // Stop the sipservice.
             stopService(new Intent(this, SipService.class));
             mSipIdContainer.setVisibility(View.GONE);
             User.voip.setHasEnabledSip(false);
-        } else {
-            enableProgressBar(true);
-            new Thread(() -> {
-                PhoneAccount phoneAccount = mPhoneAccountHelper.getLinkedPhoneAccount();
-
-                runOnUiThread(() -> {
-                    if (phoneAccount != null) {
-                        mPhoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
-                        User.voip.setHasEnabledSip(true);
-                    } else {
-                        if (shouldLoadMissingVoip) {
-                            enableSipOnNextLoad = true;
-                            SingleOnboardingStepActivity.Companion.launch(SettingsActivity.this,
-                                    MissingVoipAccountStep.class);
-                        }
-                    }
-
-                    updateAndPopulate();
-
-                    new VoipDisabledNotification().remove();
-                });
-
-            }).start();
+            return;
         }
+
+        enableProgressBar(true);
+        userSynchronizer.syncWithCallback(() -> {
+            if (!User.getHasVoipAccount()) {
+                runOnUiThread(() -> SingleOnboardingStepActivity.Companion.launch(SettingsActivity.this,
+                        MissingVoipAccountStep.class));
+                return Unit.INSTANCE;
+            }
+
+            runOnUiThread(() -> {
+                User.voip.setHasEnabledSip(true);
+                updateUi();
+                new VoipDisabledNotification().remove();
+            });
+            return Unit.INSTANCE;
+        });
     }
 
     @OnCheckedChanged(R.id.use_3g_switch)
@@ -345,18 +337,11 @@ public class SettingsActivity extends LoginRequiredActivity {
         initializeAdvancedSettings();
     }
 
-    private void updateAndPopulate() {
-        mSystemUser = User.getVoipgridUser();
-        mPhoneAccount = User.getPhoneAccount();
-
-        populate();
-    }
-
-    private void populate() {
+    private void updateUi() {
         if (User.voip.isAccountSetupForSip()) {
             mVoipSwitch.setChecked(User.voip.getHasEnabledSip());
-            if (mPhoneAccount != null) {
-                mSipIdEditText.setText(mPhoneAccount.getAccountId());
+            if (User.getHasVoipAccount()) {
+                mSipIdEditText.setText(User.getVoipAccount().getAccountId());
             }
         } else {
             mVoipSwitch.setVisibility(View.GONE);
@@ -365,13 +350,13 @@ public class SettingsActivity extends LoginRequiredActivity {
         mSipIdContainer.setVisibility(User.voip.getHasEnabledSip() ? View.VISIBLE : View.GONE);
         enableProgressBar(false);
 
-        if (mSystemUser == null) {
-            mLogger.e("Attempted to populate AccountActivity but there does not seem to be a SystemUser available");
+        if (!User.isLoggedIn()) {
+            mLogger.e("Attempted to updateUi AccountActivity but there does not seem to be a SystemUser available");
             return;
         }
 
-        mMobileNumberEditText.setText(mSystemUser.getMobileNumber());
-        mOutgoingNumberEditText.setText(mSystemUser.getOutgoingCli());
+        mMobileNumberEditText.setText(User.getVoipgridUser().getMobileNumber());
+        mOutgoingNumberEditText.setText(User.getVoipgridUser().getOutgoingCli());
     }
 
     @Override
@@ -467,28 +452,8 @@ public class SettingsActivity extends LoginRequiredActivity {
         mIsSetupComplete = false;
         enableProgressBar(false);
         tlsSwitch.setChecked(User.voip.getHasTlsEnabled());
-        stunSwitch.setChecked(User.voip.getHasTlsEnabled());
+        stunSwitch.setChecked(User.voip.getHasStunEnabled());
         mIsSetupComplete = true;
-    }
-
-    /**
-     * Function to update the systemuser and phone account. Update views after update.
-     */
-    private void updateSystemUserAndPhoneAccount() {
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                mPhoneAccountHelper.updatePhoneAccount();
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                updateAndPopulate();
-            }
-        }.execute();
     }
 
     private void enableProgressBar(boolean enabled) {
@@ -517,11 +482,10 @@ public class SettingsActivity extends LoginRequiredActivity {
 
             updateUiBasedOnCurrentEditMode();
 
-            mSystemUser.setMobileNumber(mNumber);
-
-            User.setVoipgridUser(mSystemUser);
-
-            populate();
+            userSynchronizer.syncWithCallback(() -> {
+                runOnUiThread(SettingsActivity.this::updateUi);
+                return Unit.INSTANCE;
+            });
         }
 
         @Override

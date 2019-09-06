@@ -72,7 +72,7 @@ public class SecureCalling {
         return new SecureCalling(
                 PreferenceManager.getDefaultSharedPreferences(context),
                 ServiceGenerator.createApiService(context),
-                systemUser != null ? systemUser.getPhoneAccountId() : "",
+                systemUser != null ? systemUser.getVoipAccountId() : "",
                 LocalBroadcastManager.getInstance(context),
                 logger
         );

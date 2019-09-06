@@ -15,7 +15,9 @@ import com.voipgrid.vialer.Logout;
 import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.PhoneAccountFetcher;
+import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.UserSynchronizer;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -50,7 +52,6 @@ import com.voipgrid.vialer.util.ColorHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.HtmlHelper;
 import com.voipgrid.vialer.util.NetworkUtil;
-import com.voipgrid.vialer.util.PhoneAccountHelper;
 
 import javax.inject.Singleton;
 
@@ -94,7 +95,7 @@ public class VialerModule {
     }
 
     @Provides @Nullable PhoneAccount providePhoneAccount() {
-        return User.getPhoneAccount();
+        return User.getVoipAccount();
     }
 
     @Provides @Nullable InternalNumbers provideInternalNumbers() {
@@ -259,12 +260,6 @@ public class VialerModule {
     }
 
     @Provides
-    @Singleton
-    PhoneAccountHelper providePhoneAccountHelper(Context context) {
-        return new PhoneAccountHelper(context);
-    }
-
-    @Provides
     CallRecordsFetcher provideCallRecordsFetcher() {
         return new CallRecordsFetcher();
     }
@@ -292,6 +287,16 @@ public class VialerModule {
     @Provides
     VialerApplication provideApplication() {
         return mVialerApplication;
+    }
+
+    @Provides
+    SecureCalling provideSecureCalling(Context context) {
+        return SecureCalling.fromContext(context);
+    }
+
+    @Provides
+    UserSynchronizer provideUserSync(Context context, VoipgridApi api, SecureCalling secureCalling) {
+        return new UserSynchronizer(api, context, secureCalling);
     }
 }
 

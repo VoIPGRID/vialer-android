@@ -235,11 +235,11 @@ public class ConnectivityHelper {
      */
     public static UserPreferences.ConnectionPreference converseToPreference(CharSequence connectionPreference, Context context) {
         if (connectionPreference.equals(context.getString(R.string.call_connection_only_cellular))) {
-            return UserPreferences.ConnectionPreference.LTE;
+            return UserPreferences.ConnectionPreference.ONLY_CELLULAR;
         } else if (connectionPreference.equals(context.getString(R.string.call_connection_use_wifi_cellular))) {
-            return UserPreferences.ConnectionPreference.WIFI;
+            return UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI;
         }
-        return UserPreferences.ConnectionPreference.NONE;
+        return UserPreferences.ConnectionPreference.SHOW_POPUP_BEFORE_EVERY_CALL;
     }
 
     /**
@@ -248,9 +248,9 @@ public class ConnectivityHelper {
      */
     public static CharSequence converseFromPreference(
             UserPreferences.ConnectionPreference preference, Context context) {
-        if (preference == UserPreferences.ConnectionPreference.LTE) {
+        if (preference == UserPreferences.ConnectionPreference.ONLY_CELLULAR) {
             return context.getString(R.string.call_connection_only_cellular);
-        } else if (preference == UserPreferences.ConnectionPreference.WIFI) {
+        } else if (preference == UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI) {
             return context.getString(R.string.call_connection_use_wifi_cellular);
         }
         return context.getString(R.string.call_connection_optional);

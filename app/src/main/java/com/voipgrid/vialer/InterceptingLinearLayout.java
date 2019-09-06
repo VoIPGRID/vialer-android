@@ -39,7 +39,7 @@ public class InterceptingLinearLayout extends LinearLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         super.onInterceptTouchEvent(ev);
 
-        if (Build.VERSION.SDK_INT >= BuildConfig.ANDROID_Q_SDK_VERSION) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             Toast.makeText(VialerApplication.get(), R.string.call_connection_setting_not_supported, Toast.LENGTH_LONG).show();
             return true;
         } else {

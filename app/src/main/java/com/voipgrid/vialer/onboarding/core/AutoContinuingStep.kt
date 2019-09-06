@@ -9,6 +9,6 @@ abstract class AutoContinuingStep : Step() {
     override fun onResume() {
         super.onResume()
 
-        Handler().postDelayed({ onboarding?.progress() }, delay.toLong())
+        Handler().postDelayed({ onboarding?.progress(this) }, delay.toLong())
     }
 }

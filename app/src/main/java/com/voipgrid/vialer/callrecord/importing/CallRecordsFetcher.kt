@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.callrecord.importing
 
 import android.util.Log
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.CallRecord
 import com.voipgrid.vialer.api.models.VoipGridResponse
 import com.voipgrid.vialer.callrecord.database.CallRecordEntity
@@ -30,7 +31,7 @@ class CallRecordsFetcher {
                     .also {
                         if (!it.isSuccessful) {
                             if (it.code() == 403) {
-                                throw PermissionDeniedException(request.url().toString().contains("personalized"))
+                                throw PermissionDeniedException(request.url.toString().contains("personalized"))
                             }
                             throw Exception("Failed to load records")
                         }
@@ -39,7 +40,7 @@ class CallRecordsFetcher {
                     ?.also { hasMoreRecords = it.meta?.next?.isNotBlank() ?: false }
                     ?.objects?.forEach { yield(it) }
             page++
-        } while(hasMoreRecords)
+        } while(hasMoreRecords && User.isLoggedIn)
     }
 
     private fun format(dateTime: DateTime): String = DateTimeFormat.forPattern(CallRecordEntity.DATE_PATERRN).print(dateTime)

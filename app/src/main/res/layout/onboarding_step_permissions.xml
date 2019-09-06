@@ -17,61 +17,80 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.300"
+        app:layout_constraintVertical_bias="0.01999998"
         tools:src="@drawable/ic_call_white" />
 
     <TextView
         android:id="@+id/titleTv"
-        style="@style/HeaderTitleTextViewStyle"
+        style="@style/HeaderSubTitleTextViewStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
+        android:gravity="center"
+        android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/iconIv"
-        tools:text="We need the following permissions" />
+        tools:text="Call \nPermission" />
 
     <TextView
         android:id="@+id/justificationTv"
-        style="@style/HeaderSubTitleTextViewStyle"
+        style="@style/DescriptionTitleTextViewStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+        android:layout_marginEnd="32dp"
+        android:paddingLeft="40sp"
+        android:paddingRight="40sp"
+        android:textAlignment="viewStart"
         android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titleTv"
-        tools:text="To let you call with the app." />
+        app:layout_constraintVertical_bias="0.100000024"
+        tools:text="@string/onboarding_permission_microphone_justification" />
 
-
-    <Button
-        android:id="@+id/denyButton"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/onboarding_skip"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/acceptButton"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/justificationTv"
-        app:layout_constraintVertical_bias="0.2" />
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="15sp"
+        android:paddingBottom="15sp"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <Button
-        android:id="@+id/acceptButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/onboarding_permission_accept"
-        app:layout_constraintBottom_toBottomOf="@+id/denyButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/denyButton"
-        app:layout_constraintTop_toTopOf="@+id/denyButton" />
+        <Button
+            android:id="@+id/denyButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/onboarding_deny"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/acceptButton"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/acceptButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/onboarding_permission_accept"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/denyButton"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

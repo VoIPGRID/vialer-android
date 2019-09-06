@@ -8,7 +8,7 @@ import com.voipgrid.vialer.onboarding.OnboardingActivity
 
 abstract class LoginRequiredActivity : VialerBaseActivity() {
 
-    private val logger = Logger(this)
+    override val logger = Logger(this)
 
     override fun onResume() {
         super.onResume()

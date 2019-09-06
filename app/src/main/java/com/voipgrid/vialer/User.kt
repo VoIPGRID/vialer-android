@@ -14,11 +14,11 @@ object User : DefaultKotPrefModel() {
     @JvmField val middleware = Middleware
     @JvmField val userPreferences = UserPreferences
 
-    @JvmStatic var voipgridUser by gsonNullablePref(SystemUser(), SystemUser::class.java.name)
-    @JvmStatic var phoneAccount by gsonNullablePref(PhoneAccount(), PhoneAccount::class.java.name)
+    @JvmStatic var voipgridUser by gsonNullablePref<SystemUser>(null, SystemUser::class.java.name)
+    @JvmStatic var voipAccount by gsonNullablePref<PhoneAccount>(null, PhoneAccount::class.java.name)
 
     @JvmStatic val isLoggedIn get() = voipgridUser != null
-    @JvmStatic val hasPhoneAccount get() = phoneAccount != null
+    @JvmStatic val hasVoipAccount get() = voipAccount != null
 
     @JvmStatic var loginToken by stringPref()
     @JvmStatic var username by stringPref()

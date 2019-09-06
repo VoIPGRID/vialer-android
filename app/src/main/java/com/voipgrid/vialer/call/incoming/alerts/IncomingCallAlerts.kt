@@ -6,7 +6,9 @@ class IncomingCallAlerts(vibration: IncomingCallVibration, ringer: IncomingCallR
 
     override fun start() {
         alerts.forEach {
-            it.start()
+            if (!it.isStarted()) {
+                it.start()
+            }
         }
     }
 
@@ -14,5 +16,9 @@ class IncomingCallAlerts(vibration: IncomingCallVibration, ringer: IncomingCallR
         alerts.forEach {
             it.stop()
         }
+    }
+
+    override fun isStarted(): Boolean {
+        return alerts.filter { !it.isStarted() }.none()
     }
 }

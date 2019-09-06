@@ -1,8 +1,10 @@
 package com.voipgrid.vialer.onboarding
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.WindowManager
@@ -12,13 +14,21 @@ import androidx.core.app.ActivityCompat
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.OnboardingState
+import com.voipgrid.vialer.onboarding.core.Step
+import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity
 import kotlinx.android.synthetic.main.activity_onboarding.*
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import com.voipgrid.vialer.logging.VialerBaseActivity
+import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity.Companion.PASSWORD_EXTRA
+import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity.Companion.USERNAME_EXTRA
+
 
 typealias PermissionCallback = () -> Unit
 
-abstract class Onboarder : AppCompatActivity() {
+abstract class Onboarder : VialerBaseActivity() {
 
-    protected val logger = Logger(this)
+    override val logger = Logger(this).forceRemoteLogging(true)
 
     private var permissionCallback: PermissionCallback? = null
 
@@ -30,11 +40,9 @@ abstract class Onboarder : AppCompatActivity() {
             progress.visibility = if (loading) VISIBLE else INVISIBLE
         }
 
-    abstract fun progress()
+    abstract fun progress(callerStep: Step)
 
     abstract fun restart()
-
-    abstract override fun onBackPressed()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +56,12 @@ abstract class Onboarder : AppCompatActivity() {
      */
     fun requestPermission(permission: String, callback: PermissionCallback) {
         logger.i("Requesting $permission")
-        permissionCallback = callback
+        setCallBack(callback)
         ActivityCompat.requestPermissions(this, arrayOf(permission), 1)
+    }
+
+    fun setCallBack(callback: PermissionCallback) {
+        permissionCallback = callback
     }
 
     /**
@@ -68,25 +80,23 @@ abstract class Onboarder : AppCompatActivity() {
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PasswordResetWebActivity.REQUEST_CODE) {
+            finish()
+            startActivity(Intent(this, OnboardingActivity::class.java).apply {
+                putExtra(USERNAME_EXTRA, data?.getStringExtra(USERNAME_EXTRA))
+                putExtra(PASSWORD_EXTRA, data?.getStringExtra(PASSWORD_EXTRA))
+            })
+            return
+        }
+
         logger.i("Received activity result, invoking callback")
         permissionCallback?.invoke()
     }
 
-    /**
-     * Hides the keyboard, this should be called every time a new fragment is loaded.
-     *
-     */
-    protected fun hideKeyboard() {
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
-        if (currentFocus != null) {
-            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-        }
-    }
-
     companion object {
-        fun start(context: Context) {
-            context.startActivity(Intent(context, OnboardingActivity::class.java))
+        fun start(activity: Activity) {
+            activity.startActivity(Intent(activity, OnboardingActivity::class.java))
         }
     }
-}
 
+}

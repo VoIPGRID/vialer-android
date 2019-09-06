@@ -84,6 +84,7 @@
         android:id="@+id/linearLayout_speaker"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:layout_marginStart="8dp"
         android:gravity="center"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="@+id/linearLayout_mute"

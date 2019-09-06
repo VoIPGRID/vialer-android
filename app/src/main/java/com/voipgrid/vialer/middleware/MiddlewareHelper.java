@@ -58,13 +58,13 @@ public class MiddlewareHelper {
 
         User.middleware.setLastRegistrationTime(System.currentTimeMillis());
 
-        if (!User.getHasPhoneAccount() || !User.isLoggedIn()) {
+        if (!User.getHasVoipAccount() || !User.isLoggedIn()) {
             return;
         }
 
         Middleware api = ServiceGenerator.createRegistrationService(context);
 
-        String sipUserId = User.getPhoneAccount().getAccountId();
+        String sipUserId = User.getVoipAccount().getAccountId();
         String fullName = User.getVoipgridUser().getFullName();
         String appName = context.getPackageName();
         Call<ResponseBody> call = api.register(
@@ -112,7 +112,7 @@ public class MiddlewareHelper {
             return;
         }
 
-        PhoneAccount phoneAccount = User.getPhoneAccount();
+        PhoneAccount phoneAccount = User.getVoipAccount();
 
         if (phoneAccount == null) {
             logger.d("No phone account so unregister");
