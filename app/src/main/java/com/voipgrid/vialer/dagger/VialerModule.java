@@ -30,9 +30,11 @@ import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.callrecord.CachedContacts;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
-import com.voipgrid.vialer.callrecord.CallRecordDataSourceFactory;
-import com.voipgrid.vialer.callrecord.MissedCalls;
-import com.voipgrid.vialer.callrecord.MissedCallsAdapter;
+import com.voipgrid.vialer.callrecord.database.CallRecordDao;
+import com.voipgrid.vialer.callrecord.database.CallRecordsInserter;
+import com.voipgrid.vialer.callrecord.importing.CallRecordsFetcher;
+import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter;
+import com.voipgrid.vialer.callrecord.importing.NewCallRecordsImporter;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
@@ -151,10 +153,6 @@ public class VialerModule {
         return ServiceGenerator.createApiService(context);
     }
 
-    @Provides CallRecordDataSourceFactory provideCallRecordDataSourceFactory(VoipgridApi voipgridApi) {
-        return new CallRecordDataSourceFactory(voipgridApi);
-    }
-
     @Provides
     CallRecordAdapter provideCallRecordAdapter() {
         return new CallRecordAdapter();
@@ -162,14 +160,6 @@ public class VialerModule {
 
     @Provides CachedContacts provideCachedContacts(Contacts contacts) {
         return new CachedContacts(contacts);
-    }
-
-    @Provides MissedCalls provideMissedCalls(VoipgridApi voipgridApi) {
-        return new MissedCalls(voipgridApi);
-    }
-
-    @Provides MissedCallsAdapter provideMissedCallsAdapter(CachedContacts cachedContacts) {
-        return new MissedCallsAdapter(cachedContacts);
     }
 
     @Provides
@@ -273,4 +263,35 @@ public class VialerModule {
     PhoneAccountHelper providePhoneAccountHelper(Context context) {
         return new PhoneAccountHelper(context);
     }
+
+    @Provides
+    CallRecordsFetcher provideCallRecordsFetcher() {
+        return new CallRecordsFetcher();
+    }
+
+    @Provides
+    CallRecordDao provideCallRecordDao() {
+        return VialerApplication.getDb().callRecordDao();
+    }
+
+    @Provides
+    CallRecordsInserter provideCallRecordInserter(CallRecordDao db) {
+        return new CallRecordsInserter(db);
+    }
+
+    @Provides
+    NewCallRecordsImporter provideNewCallRecordsImporter(CallRecordsFetcher fetcher, CallRecordsInserter inserter, VoipgridApi api, CallRecordDao db) {
+        return new NewCallRecordsImporter(fetcher, inserter, api, db);
+    }
+
+    @Provides
+    HistoricCallRecordsImporter provideHistoricCallRecordsImporter(CallRecordsFetcher fetcher, CallRecordsInserter inserter, VoipgridApi api, CallRecordDao db) {
+        return new HistoricCallRecordsImporter(fetcher, inserter, api);
+    }
+
+    @Provides
+    VialerApplication provideApplication() {
+        return mVialerApplication;
+    }
 }
+

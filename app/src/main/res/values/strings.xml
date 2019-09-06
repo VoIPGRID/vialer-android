@@ -184,8 +184,8 @@
     <string name="account_availability_switch_title">Availability</string>
     <string name="add_availability">Add availability</string>
     <string name="not_available">Not available</string>
-    <string name="tab_title_recents">my calls</string>
-    <string name="tab_title_missed">all calls</string>
+    <string name="tab_title_recents">all calls</string>
+    <string name="tab_title_missed">missed calls</string>
 
     <string name="navigation_name_placeholder_text">No outgoing number configured</string>
     <string name="supressed_number">Anonymous</string>
@@ -275,7 +275,7 @@
     <string name="choose_codec_text">Audio Quality</string>
     <string name="call_codec_standard_quality">Standard audio</string>
     <string name="call_codec_high_quality">Higher quality audio</string>
-    <string name="call_records_show_all">Show missed calls only</string>
+    <string name="call_records_show_all">Show my calls only</string>
     <string name="dialer_no_connectivity">No internet connection</string>
     <string name="dialer_no_connectivity_subtext">Calls cannot be made or received without a connection</string>
     <string name="call_records_answered_elsewhere" translatable="false">%1$s (%2$s)</string>
