@@ -2,8 +2,11 @@ package com.voipgrid.vialer
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -15,11 +18,11 @@ import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.Onboarder
 import com.voipgrid.vialer.onboarding.SingleOnboardingStepActivity
 import com.voipgrid.vialer.onboarding.steps.TwoFactorStep
-import com.voipgrid.vialer.permissions.ContactsPermission
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.PhoneAccountHelper
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_onboarding.view.*
 import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {
@@ -115,30 +118,16 @@ class MainActivity : NavigationDrawerActivity() {
                 }
 
                 override fun onTabSelected(tab: TabLayout.Tab?) {
-                    view_pager.currentItem = tab?.position ?: 0
+                    tab?.let {
+                        (call_record_fragment as CallRecordFragment).changeType(when(it.position) {
+                            0 -> CallRecordFragment.TYPE.ALL_CALLS
+                            1 -> CallRecordFragment.TYPE.MISSED_CALLS
+                            else -> CallRecordFragment.TYPE.ALL_CALLS
+                        })
+                    }
+
                 }
             })
-        }
-
-        view_pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tab_layout))
-        view_pager.adapter = TabAdapter(supportFragmentManager)
-    }
-
-    /**
-     * Tab adapter to handle tabs in the ViewPager
-     */
-    private inner class TabAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
-
-        override fun getItem(position: Int): Fragment {
-            return when(position) {
-                0 -> CallRecordFragment.mine()
-                1 -> CallRecordFragment.all()
-                else -> TabFragment.newInstance("")
-            }
-        }
-
-        override fun getCount(): Int {
-            return 2
         }
     }
 }

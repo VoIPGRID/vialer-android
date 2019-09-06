@@ -166,6 +166,7 @@ ext {
     workVersion = "2.1.0"
     kotPrefVersion = "2.8.0"
     room_version = "2.2.0-alpha02"
+    lifecycle_version = "1.1.1"
 }
 
 dependencies {
@@ -251,12 +252,17 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
+
     implementation 'androidx.viewpager2:viewpager2:1.0.0-alpha06'
 
     implementation "com.chibatching.kotpref:kotpref:$kotPrefVersion"
     implementation "com.chibatching.kotpref:initializer:$kotPrefVersion"
     implementation "com.chibatching.kotpref:enum-support:$kotPrefVersion"
     implementation "com.chibatching.kotpref:gson-support:$kotPrefVersion"
+    implementation "androidx.paging:paging-runtime-ktx:2.1.0"
+    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

@@ -3,10 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingStart="@dimen/list_item_contact_padding_left"
+    android:paddingRight="@dimen/list_item_contact_padding_right"
+    android:paddingLeft="@dimen/list_item_contact_padding_left"
     android:paddingTop="@dimen/list_item_contact_padding_top"
-    android:paddingEnd="@dimen/list_item_contact_padding_right"
     android:paddingBottom="@dimen/list_item_contact_padding_bottom">
+
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/text_view_contact_icon"
