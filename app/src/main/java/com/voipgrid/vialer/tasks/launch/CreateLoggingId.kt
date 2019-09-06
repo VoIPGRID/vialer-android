@@ -17,7 +17,7 @@ class CreateLoggingId : OnLaunchTask {
         }
     }
 
-    fun generate(): String {
+    private fun generate(): String {
         var uuid = UUID.randomUUID().toString()
         val stripIndex = uuid.indexOf("-")
         uuid = uuid.substring(0, stripIndex)
