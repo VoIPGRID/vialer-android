@@ -24,7 +24,7 @@ object UserPreferences : DefaultKotPrefModel() {
      */
     var connectionPreference : ConnectionPreference
         get() {
-            if (Build.VERSION.SDK_INT >= BuildConfig.ANDROID_Q_SDK_VERSION) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 return ConnectionPreference.WIFI
             }
 

@@ -141,7 +141,7 @@ public class SettingsActivity extends LoginRequiredActivity {
 
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mVoipDisabledReceiver, FcmMessagingService.VOIP_HAS_BEEN_DISABLED);
 
-        if (Build.VERSION.SDK_INT >= BuildConfig.ANDROID_Q_SDK_VERSION) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             mConnectionSpinner.setEnabled(false);
         }
 
