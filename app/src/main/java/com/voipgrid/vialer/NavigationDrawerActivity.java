@@ -2,13 +2,16 @@ package com.voipgrid.vialer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import androidx.annotation.IdRes;
@@ -74,6 +77,15 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     private String mSelectedUserDestinationId;
     private boolean mFirstTimeOnItemSelected = true;
+
+    private BroadcastReceiver networkStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo ni = manager.getActiveNetworkInfo();
+            onNetworkChange(ni);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +165,13 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     protected void onResume() {
         super.onResume();
         refreshCurrentAvailability();
+        registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(networkStateReceiver);
+        super.onPause();
     }
 
     /**
@@ -294,23 +313,9 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     @Override
     public void onResponse(@NonNull Call call, @NonNull Response response) {
-        if (response.isSuccessful()) {
-            if (mNoConnectionText.getVisibility() == View.VISIBLE) {
-                mNoConnectionText.setVisibility(View.GONE);
-                if (mSpinner != null) {
-                    mSpinner.setVisibility(View.VISIBLE);
-                }
-            }
-        } else {
+        if (!response.isSuccessful()) {
             if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
                 Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
-            }
-            if (!mConnectivityHelper.hasNetworkConnection()) {
-                // First check if there is a entry already to avoid duplicates.
-                if (mSpinner != null && mNoConnectionText != null) {
-                    mSpinner.setVisibility(View.GONE);
-                    mNoConnectionText.setVisibility(View.VISIBLE);
-                }
             }
         }
         if (response.body() instanceof VoipGridResponse) {
@@ -382,6 +387,23 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
         User.internal.setInternalNumbers(internalNumbers);
         User.internal.setPhoneAccounts(phoneAccounts);
+    }
+
+    private void onNetworkChange(NetworkInfo info) {
+        boolean connected = info != null && info.isConnected();
+        if (connected) {
+            if (mNoConnectionText.getVisibility() == View.VISIBLE) {
+                mNoConnectionText.setVisibility(View.GONE);
+                if (mSpinner != null) {
+                    mSpinner.setVisibility(View.VISIBLE);
+                }
+            }
+            return;
+        }
+        if (mSpinner != null && mNoConnectionText != null) {
+            mSpinner.setVisibility(View.GONE);
+            mNoConnectionText.setVisibility(View.VISIBLE);
+        }
     }
 
     private static class CustomFontSpinnerAdapter<D> extends ArrayAdapter {
