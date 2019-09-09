@@ -40,12 +40,11 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
      *
      */
     private fun relevantMonths() = sequence {
-        var start = DateTime(EARLIER_YEAR, EARLIEST_MONTH, 1, 0, 0)
+        var start = EARLIEST_DATE
 
         while (start.isBeforeNow) {
-            if (requiresQuerying(start)) {
-                yield(start)
-            }
+            if (requiresQuerying(start)) yield(start)
+
             start = start.plusMonths(1)
         }
     }
@@ -54,11 +53,14 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
      * Check if we have already successfully imported all the records for this month, if we have
      * we will skip it.
      *
+     * We will always check the current month, and the previous month, otherwise we only check months
+     * that haven't yet been imported
+     *
      */
     private fun requiresQuerying(date: DateTime): Boolean {
         val current = DateTime()
 
-        if (date.year == current.year && current.monthOfYear == date.monthOfYear) return true
+        if (date.isAfter(current.minusMonths(RECENT_MONTHS_TO_ALWAYS_IMPORT))) return true
 
         return !User.internal.callRecordMonthsImported.contains(date)
     }
@@ -76,18 +78,17 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
         const val DELAY_IF_RATE_LIMIT_IS_HIT : Long = 5 * 60 * 1000
 
         /**
-         * The earliest month that we will query, call records before this point
-         * will not be imported.
+         * The earliest date that will be imported, we will not try and find call records before
+         * this date.
          *
          */
-        const val EARLIEST_MONTH = 1
+         val EARLIEST_DATE = DateTime(2015, 1, 1, 0, 0)
 
         /**
-         * The earliest year that we will query, call records before this point
-         * will not be imported.
+         * We will always query all call records from this many months ago.
          *
          */
-        const val EARLIER_YEAR = 2015
+        const val RECENT_MONTHS_TO_ALWAYS_IMPORT = 3
     }
 
     /**
