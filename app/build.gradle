@@ -142,6 +142,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 repositories {
@@ -167,6 +170,7 @@ ext {
     workVersion = '2.2.0'
     kotPrefVersion = "2.8.0"
     room_version = '2.2.0-beta01'
+    lifecycle_version = "1.1.1"
 }
 
 dependencies {
