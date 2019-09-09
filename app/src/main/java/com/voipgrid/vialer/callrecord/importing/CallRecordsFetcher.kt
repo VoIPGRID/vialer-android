@@ -30,7 +30,7 @@ class CallRecordsFetcher {
                     .also {
                         if (!it.isSuccessful) {
                             if (it.code() == 403) {
-                                throw PermissionDeniedException(request.url().toString().contains("personalized"))
+                                throw PermissionDeniedException(request.url.toString().contains("personalized"))
                             }
                             throw Exception("Failed to load records")
                         }
