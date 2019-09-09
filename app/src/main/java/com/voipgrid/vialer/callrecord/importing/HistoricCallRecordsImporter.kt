@@ -26,9 +26,9 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
                     fetchAndInsert(type.key, type.value, date, toEndOfMonth(date))
                 }
                 User.internal.callRecordMonthsImported.add(date)
-                delay(30000)
+                delay(DELAY_BETWEEN_EACH_MONTH)
             } catch (e: Exception) {
-                delay(60000)
+                delay(DELAY_IF_RATE_LIMIT_IS_HIT)
             }
         }
     }
@@ -64,7 +64,29 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
     }
 
     companion object {
+
+        /**
+         * After each month we will wait a bit to prevent issues with rate limiting.
+         */
+        const val DELAY_BETWEEN_EACH_MONTH : Long = 10 * 1000
+
+        /**
+         * If we ever hit a rate limit, we will wait this long before continuing.
+         */
+        const val DELAY_IF_RATE_LIMIT_IS_HIT : Long = 5 * 60 * 1000
+
+        /**
+         * The earliest month that we will query, call records before this point
+         * will not be imported.
+         *
+         */
         const val EARLIEST_MONTH = 1
+
+        /**
+         * The earliest year that we will query, call records before this point
+         * will not be imported.
+         *
+         */
         const val EARLIER_YEAR = 2015
     }
 
