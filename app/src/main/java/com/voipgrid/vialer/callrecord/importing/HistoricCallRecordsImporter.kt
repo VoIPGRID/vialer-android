@@ -1,8 +1,8 @@
 package com.voipgrid.vialer.callrecord.importing
 
 import android.content.Context
-import android.util.Log
 import androidx.work.*
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.VoipgridApi
 import com.voipgrid.vialer.callrecord.database.CallRecordsInserter
@@ -25,7 +25,7 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
                 types.forEach { type ->
                     fetchAndInsert(type.key, type.value, date, toEndOfMonth(date))
                 }
-                queriedMonths.add(date)
+                User.internal.callRecordMonthsImported.add(date)
                 delay(30000)
             } catch (e: Exception) {
                 delay(60000)
@@ -60,14 +60,12 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
 
         if (date.year == current.year && current.monthOfYear == date.monthOfYear) return true
 
-        return !queriedMonths.contains(date)
+        return !User.internal.callRecordMonthsImported.contains(date)
     }
 
     companion object {
         const val EARLIEST_MONTH = 1
         const val EARLIER_YEAR = 2015
-
-        private val queriedMonths = mutableListOf<DateTime>()
     }
 
     /**
