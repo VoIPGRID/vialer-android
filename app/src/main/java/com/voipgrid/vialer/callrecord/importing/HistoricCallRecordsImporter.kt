@@ -1,8 +1,8 @@
 package com.voipgrid.vialer.callrecord.importing
 
 import android.content.Context
-import android.util.Log
 import androidx.work.*
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.VoipgridApi
 import com.voipgrid.vialer.callrecord.database.CallRecordsInserter
@@ -25,10 +25,10 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
                 types.forEach { type ->
                     fetchAndInsert(type.key, type.value, date, toEndOfMonth(date))
                 }
-                queriedMonths.add(date)
-                delay(30000)
+                User.internal.callRecordMonthsImported.add(date)
+                delay(DELAY_BETWEEN_EACH_MONTH)
             } catch (e: Exception) {
-                delay(60000)
+                delay(DELAY_IF_RATE_LIMIT_IS_HIT)
             }
         }
     }
@@ -40,12 +40,11 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
      *
      */
     private fun relevantMonths() = sequence {
-        var start = DateTime(EARLIER_YEAR, EARLIEST_MONTH, 1, 0, 0)
+        var start = EARLIEST_DATE
 
         while (start.isBeforeNow) {
-            if (requiresQuerying(start)) {
-                yield(start)
-            }
+            if (requiresQuerying(start)) yield(start)
+
             start = start.plusMonths(1)
         }
     }
@@ -54,20 +53,42 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
      * Check if we have already successfully imported all the records for this month, if we have
      * we will skip it.
      *
+     * We will always check the current month, and the previous month, otherwise we only check months
+     * that haven't yet been imported
+     *
      */
     private fun requiresQuerying(date: DateTime): Boolean {
         val current = DateTime()
 
-        if (date.year == current.year && current.monthOfYear == date.monthOfYear) return true
+        if (date.isAfter(current.minusMonths(RECENT_MONTHS_TO_ALWAYS_IMPORT))) return true
 
-        return !queriedMonths.contains(date)
+        return !User.internal.callRecordMonthsImported.contains(date)
     }
 
     companion object {
-        const val EARLIEST_MONTH = 1
-        const val EARLIER_YEAR = 2015
 
-        private val queriedMonths = mutableListOf<DateTime>()
+        /**
+         * After each month we will wait a bit to prevent issues with rate limiting.
+         */
+        const val DELAY_BETWEEN_EACH_MONTH : Long = 10 * 1000
+
+        /**
+         * If we ever hit a rate limit, we will wait this long before continuing.
+         */
+        const val DELAY_IF_RATE_LIMIT_IS_HIT : Long = 5 * 60 * 1000
+
+        /**
+         * The earliest date that will be imported, we will not try and find call records before
+         * this date.
+         *
+         */
+         val EARLIEST_DATE = DateTime(2015, 1, 1, 0, 0)
+
+        /**
+         * We will always query all call records from this many months ago.
+         *
+         */
+        const val RECENT_MONTHS_TO_ALWAYS_IMPORT = 3
     }
 
     /**
