@@ -20,6 +20,9 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
      *
      */
     suspend fun import() = withContext(Dispatchers.IO) {
+
+        if (!User.isLoggedIn) return@withContext
+
         relevantMonths().toList().reversed().forEach { date ->
             try {
                 types.forEach { type ->

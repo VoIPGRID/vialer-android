@@ -12,10 +12,14 @@ import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration
+import com.voipgrid.vialer.calling.AbstractCallActivity
+import com.voipgrid.vialer.calling.CallingConstants
 import com.voipgrid.vialer.calling.IncomingCallActivity
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator
 import com.voipgrid.vialer.notifications.AbstractNotification
 import com.voipgrid.vialer.sip.SipCall
+import com.voipgrid.vialer.sip.SipUri
+import com.voipgrid.vialer.util.PhoneNumberUtils
 import javax.inject.Inject
 
 
@@ -98,8 +102,15 @@ abstract class AbstractCallNotification : AbstractNotification() {
      * Create a pending intent to open the incoming call activity screen.
      *
      */
-    protected fun createIncomingCallActivityPendingIntent(): PendingIntent {
-        return createPendingIntent(Intent(context, IncomingCallActivity::class.java))
+    protected fun createIncomingCallActivityPendingIntent(number: String, callerId: String): PendingIntent {
+        return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
+                context,
+                IncomingCallActivity::class.java,
+                SipUri.sipAddressUri(context, PhoneNumberUtils.format(number)),
+                CallingConstants.TYPE_INCOMING_CALL,
+                callerId,
+                number
+        ))
     }
 
     /**
