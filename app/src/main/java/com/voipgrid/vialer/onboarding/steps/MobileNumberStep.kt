@@ -14,6 +14,7 @@ import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.core.onTextChanged
+import com.voipgrid.vialer.setRightDrawableOnClickListener
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.onboarding_step_mobile_number.*
 import retrofit2.Call
@@ -148,25 +149,5 @@ class MobileNumberStep : Step(), View.OnClickListener {
         override fun onFailure(call: Call<PhoneAccount>, t: Throwable) {
             error()
         }
-    }
-}
-
-/**
- * Listens for a click on the drawable on the right hand side of the edit text
- * and executes the callback.
- *
- */
-private fun EditText.setRightDrawableOnClickListener(callback: () -> Unit) {
-    setOnTouchListener { _: View, event: MotionEvent -> Boolean
-        val right = 2
-
-        if (event.action == MotionEvent.ACTION_UP) {
-            if (event.rawX >= (this.right - compoundDrawables[right].bounds.width())) {
-                callback()
-                return@setOnTouchListener true
-            }
-        }
-
-        return@setOnTouchListener false
     }
 }
