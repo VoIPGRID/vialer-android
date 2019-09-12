@@ -4,12 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import com.voipgrid.vialer.User
-import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.OnboardingState
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep
-import com.voipgrid.vialer.onboarding.steps.TwoFactorStep
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
 /**
@@ -22,11 +19,7 @@ class SingleOnboardingStepActivity: Onboarder() {
 
     private var step: Step? = null
 
-    override val state: OnboardingState by lazy {
-        OnboardingState().apply {
-            username = User.username
-        }
-    }
+    override val state: OnboardingState = OnboardingState()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +30,6 @@ class SingleOnboardingStepActivity: Onboarder() {
         fragmentContainer.visibility = View.VISIBLE
 
         step = when(intent.getStringExtra(ONBOARDING_STEP)) {
-            TwoFactorStep::class.java.name -> TwoFactorStep()
             MissingVoipAccountStep::class.java.name -> MissingVoipAccountStep()
             else -> null
         }

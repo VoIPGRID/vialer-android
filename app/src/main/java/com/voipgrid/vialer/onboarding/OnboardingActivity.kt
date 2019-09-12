@@ -33,7 +33,6 @@ class OnboardingActivity : Onboarder() {
         adapter = OnboardingAdapter(supportFragmentManager, lifecycle).apply {
             addStep(LogoStep())
             addStep(LoginStep())
-            addStep(TwoFactorStep())
             addStep(MobileNumberStep())
             addStep(MissingVoipAccountStep())
             addStep(ContactsPermissionStep())

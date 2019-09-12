@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.work.*
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter
@@ -37,5 +38,6 @@ class WelcomeStep : AutoContinuingStep() {
         }
         logger.i("Welcome ${user.fullName} to the app and completing onboarding")
         subtitle_label.text = user.fullName
+        User.hasCompletedOnboarding = true
     }
 }
