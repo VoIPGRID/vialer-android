@@ -1,6 +1,5 @@
 package com.voipgrid.vialer.persistence
 
-import android.util.Log
 import com.voipgrid.vialer.persistence.core.DefaultKotPrefModel
 import java.util.*
 
@@ -44,7 +43,6 @@ object RemoteLogging : DefaultKotPrefModel() {
      *
      */
     private fun generate(): String {
-        Log.e("TEST123", "Generating..")
         var uuid = UUID.randomUUID().toString()
         val stripIndex = uuid.indexOf("-")
         uuid = uuid.substring(0, stripIndex)
