@@ -1,13 +1,10 @@
 package com.voipgrid.vialer.calling;
 
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_ACTIVE;
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_BLUETOOTH_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 
 import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -16,12 +13,10 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.contacts.Contacts;
-import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 
 import javax.inject.Inject;
 
-import androidx.annotation.NonNull;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -114,14 +109,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (!allPermissionsGranted(permissions, grantResults)) {
-            return;
-        }
-
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         ringingIsPaused = true;
@@ -151,15 +138,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @Override
     public void sipServiceHasConnected(SipService sipService) {
         super.sipServiceHasConnected(sipService);
-        SipCall call = sipService.getFirstCall();
-
-        if (call == null) {
-            finish();
-            return;
-        }
-
-        call.setCallerId(getCallerIdFromIntent());
-        call.setPhoneNumber(getPhoneNumberFromIntent());
+        if (sipService.getFirstCall() == null) finish();
     }
 
     @Override
