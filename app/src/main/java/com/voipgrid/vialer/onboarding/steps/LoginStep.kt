@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.onboarding.steps
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -7,14 +8,25 @@ import android.text.Editable
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
-import com.voipgrid.vialer.*
+import com.voipgrid.vialer.ForgottenPasswordActivity
+import com.voipgrid.vialer.R
+import com.voipgrid.vialer.VialerApplication
+import com.voipgrid.vialer.WebActivity
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.VoipgridLogin
+import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult
+import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult.*
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.core.onTextChanged
 import com.voipgrid.vialer.util.ConnectivityHelper
+import com.voipgrid.vialer.util.TwoFactorFragmentHelper
 import kotlinx.android.synthetic.main.onboarding_step_login.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class LoginStep : Step() {
@@ -25,6 +37,8 @@ class LoginStep : Step() {
     @Inject lateinit var login: VoipgridLogin
 
     private val logger = Logger(this)
+    private var twoFactorHelper: TwoFactorFragmentHelper? = null
+    private var twoFactorDialog: AlertDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,45 +55,91 @@ class LoginStep : Step() {
             actionId == EditorInfo.IME_ACTION_DONE && button_login.performClick()
         }
 
-        button_login.setOnClickListener {
-            state.username = emailTextDialog.text.toString()
-            state.password = passwordTextDialog.text.toString()
+        button_login.setOnClickListener { attemptLogin() }
+        button_forgot_password.setOnClickListener { launchForgottenPasswordActivity() }
+        button_info.setOnClickListener { launchApplicationInfoPage() }
+    }
 
-            onboarding?.isLoading = true
+    override fun onResume() {
+        super.onResume()
+        twoFactorHelper?.pasteCodeFromClipboard()
+    }
 
-            logger.i("Attempting login...")
+    /**
+     * Attempt to log the user into VoIPGRID by launching a co-routine.
+     *
+     */
+    private fun attemptLogin(code: String? = null) = GlobalScope.launch(Dispatchers.Main) {
+        onboarding?.isLoading = true
+        logger.i("Attempting to log the user into VoIPGRID, with the following 2FA code: $code")
+        val result = login.attempt(emailTextDialog.text.toString(), passwordTextDialog.text.toString(), code)
+        onboarding?.isLoading = false
+        handleLoginResult(result)
+    }
 
-            login.attempt(state.username, state.password)
+    /**
+     * Perform different actions based on the result of an attempted login.
+     *
+     */
+    private fun handleLoginResult(result: LoginResult) = when(result) {
+        FAIL -> {
+            logger.w("User failed to login to VoIPGRID")
+            login.lastError?.let { error(it.title, it.description) }
         }
-
-        button_forgot_password.setOnClickListener {
-            logger.i("Detected forgot password click, launching activity")
-
-            ForgottenPasswordActivity.launchForEmail(onboarding as Context, emailTextDialog.text.toString())
-        }
-
-        button_info.setOnClickListener {
-            logger.i("Launching app info page")
-            val intent = Intent(activity, WebActivity::class.java)
-            intent.putExtra(WebActivity.PAGE, getString(R.string.url_app_info))
-            intent.putExtra(WebActivity.TITLE, getString(R.string.info_menu_item_title))
-            startActivity(intent)
-        }
-
-        login.onRequiresTwoFactor = {
-            logger.i("This user requires a two-factor code to be entered")
-            state.requiresTwoFactor = true
+        SUCCESS -> {
+            logger.i("Login to VoIPGRID was successful, progressing the user in onboarding")
+            twoFactorDialog?.dismiss()
             onboarding?.progress()
         }
-
-        login.onLoggedIn = {
-            logger.i("Logged in successfully!")
-            onboarding?.progress()
+        TWO_FACTOR_REQUIRED -> {
+            logger.i("User logged into VoIPGRID with the correct username/password but is now required to input a valid 2FA code")
+            showTwoFactorDialog()
         }
+    }
 
-        login.onError = { title: Int, description: Int ->
-            logger.w("Error logging in $title - $description")
-            error(title, description)
+    /**
+     * Create and show a dialog for the user to enter a two-factor token.
+     *
+     */
+    private fun showTwoFactorDialog() {
+        activity?.let {
+            val twoFactorDialog = AlertDialog.Builder(it)
+                    .setView(R.layout.onboarding_dialog_two_factor)
+                    .show()
+
+            val codeField = (twoFactorDialog.findViewById(R.id.two_factor_code_field) as EditText)
+            twoFactorHelper = TwoFactorFragmentHelper(it, codeField).apply {
+                focusOnTokenField()
+                pasteCodeFromClipboard()
+            }
+
+            (twoFactorDialog.findViewById(R.id.button_continue) as Button).setOnClickListener {
+                onboarding?.isLoading = true
+                attemptLogin(codeField.text.toString())
+            }
+
+            this.twoFactorDialog = twoFactorDialog
         }
+    }
+
+    /**
+     * Launches an activity to allow the user to reset their password.
+     *
+     */
+    private fun launchForgottenPasswordActivity() {
+        logger.i("Detected forgot password click, launching activity")
+        ForgottenPasswordActivity.launchForEmail(onboarding as Context, emailTextDialog.text.toString())
+    }
+
+    /**
+     * Launches a web view to show various information about Vialer.
+     *
+     */
+    private fun launchApplicationInfoPage() {
+        logger.i("Launching app info page")
+        val intent = Intent(activity, WebActivity::class.java)
+        intent.putExtra(WebActivity.PAGE, getString(R.string.url_app_info))
+        intent.putExtra(WebActivity.TITLE, getString(R.string.info_menu_item_title))
+        startActivity(intent)
     }
 }
