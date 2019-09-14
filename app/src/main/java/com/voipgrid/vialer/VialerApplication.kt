@@ -5,7 +5,6 @@ import com.voipgrid.vialer.dagger.DaggerVialerComponent
 import com.voipgrid.vialer.dagger.VialerComponent
 import com.voipgrid.vialer.dagger.VialerModule
 import com.voipgrid.vialer.tasks.launch.ConvertApiToken
-import com.voipgrid.vialer.tasks.launch.CreateLoggingId
 import com.voipgrid.vialer.tasks.launch.RegisterLibraries
 import com.voipgrid.vialer.tasks.launch.RegisterPeriodicTasks
 import com.voipgrid.vialer.database.AppDatabase
@@ -25,7 +24,6 @@ class VialerApplication : Application() {
      *
      */
     private val launchTasks = listOf(
-            CreateLoggingId(),
             RegisterLibraries(),
             ConvertApiToken(),
             RegisterPeriodicTasks()
