@@ -5,8 +5,5 @@ package com.voipgrid.vialer.onboarding.core
  *
  */
 class OnboardingState {
-    var username: String = ""
-    var password = ""
-    var requiresTwoFactor = false
     var hasVoipAccount = true
 }

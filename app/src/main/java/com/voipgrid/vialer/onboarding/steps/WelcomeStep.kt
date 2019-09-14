@@ -3,6 +3,7 @@ package com.voipgrid.vialer.onboarding.steps
 import android.os.Bundle
 import android.view.View
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.SecureCalling
 import com.voipgrid.vialer.api.models.SystemUser
@@ -25,7 +26,6 @@ class WelcomeStep : AutoContinuingStep() {
         super.onViewCreated(view, savedInstanceState)
         logger.i("Welcome ${user.fullName} to the app and completing onboarding")
         subtitle_label.text = user.fullName
-
         activity?.let {
             HistoricCallRecordsImporter.Worker.start(it)
             SecureCalling.fromContext(it).updateApiBasedOnCurrentPreferenceSetting()
