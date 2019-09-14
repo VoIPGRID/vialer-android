@@ -46,14 +46,14 @@ public class DialHelper {
     public void callNumber(final String number, final String contactName) {
         if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.Connection.WIFI && User.voip.getHasEnabledSip()) {
             if(User.userPreferences.hasConnectionPreference(
-                    UserPreferences.ConnectionPreference.LTE)) {
+                    UserPreferences.ConnectionPreference.ONLY_CELLULAR)) {
                 switchNetworkAndCallNumber(number, contactName);
             } else if(User.userPreferences.hasConnectionPreference(
-                    UserPreferences.ConnectionPreference.NONE)) {
-                showConnectionPickerDialog(number, contactName);
-            } else if(User.userPreferences.hasConnectionPreference(
-                    UserPreferences.ConnectionPreference.WIFI)) {
+                    UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI)) {
                 makeCall(number, contactName);
+            } else if(User.userPreferences.hasConnectionPreference(
+                    UserPreferences.ConnectionPreference.SHOW_POPUP_BEFORE_EVERY_CALL)) {
+                showConnectionPickerDialog(number, contactName);
             }
         } else {
             makeCall(number, contactName);
@@ -63,12 +63,7 @@ public class DialHelper {
     private void switchNetworkAndCallNumber(final String number, final String contactName) {
         mConnectivityHelper.attemptUsingLTE(mContext, mMaximumNetworkSwitchDelay);
         Toast.makeText(mContext, mContext.getString(R.string.connection_preference_switch_toast), Toast.LENGTH_LONG).show();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                makeCall(number, contactName);
-            }
-        }, mMaximumNetworkSwitchDelay);
+        new Handler().postDelayed(() -> makeCall(number, contactName), mMaximumNetworkSwitchDelay);
     }
 
     private void showConnectionPickerDialog(final String number, final String contactName) {

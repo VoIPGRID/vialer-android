@@ -8,7 +8,7 @@ import com.voipgrid.vialer.persistence.core.DefaultKotPrefModel
 object UserPreferences : DefaultKotPrefModel() {
 
     enum class ConnectionPreference {
-        NONE, WIFI, LTE
+        ONLY_CELLULAR, CEULLAR_AND_WIFI, SHOW_POPUP_BEFORE_EVERY_CALL
     }
 
     /**
@@ -16,7 +16,7 @@ object UserPreferences : DefaultKotPrefModel() {
      * the return value easily for different android sdks.
      *
      */
-    private var internalConnectionPreference by enumValuePref(ConnectionPreference.NONE)
+    private var internalConnectionPreference by enumValuePref(ConnectionPreference.CEULLAR_AND_WIFI)
 
     /**
      * The connection preference, whether or not to prompt to change networks when calling.
@@ -25,7 +25,7 @@ object UserPreferences : DefaultKotPrefModel() {
     var connectionPreference : ConnectionPreference
         get() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                return ConnectionPreference.WIFI
+                return ConnectionPreference.CEULLAR_AND_WIFI
             }
 
             return internalConnectionPreference
@@ -41,11 +41,5 @@ object UserPreferences : DefaultKotPrefModel() {
     fun hasConnectionPreference(preference: ConnectionPreference): Boolean {
         return preference == connectionPreference
     }
-
-    /**
-     * Whether the user has decided to only show missed calls on their call records screen.
-     *
-     */
-    var displayMissedCallsOnly by booleanPref(key = "PREF_DISPLAY_MISSED_CALLS_ONLY", default = false)
 }
 
