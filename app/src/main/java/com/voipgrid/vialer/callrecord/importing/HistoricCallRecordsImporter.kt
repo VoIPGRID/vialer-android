@@ -6,6 +6,7 @@ import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.VoipgridApi
 import com.voipgrid.vialer.callrecord.database.CallRecordsInserter
+import com.voipgrid.vialer.logging.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -15,22 +16,32 @@ import javax.inject.Inject
 
 class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRecordsInserter, api: VoipgridApi) : CallRecordsImporter(fetcher, inserter, api) {
 
+    private val logger = Logger(this)
+
     /**
      * Import all historic call records into the database, this includes all months that we can find calls for.
      *
      */
     suspend fun import() = withContext(Dispatchers.IO) {
 
-        if (!User.isLoggedIn) return@withContext
+        if (!User.isLoggedIn) {
+
+            logger.i("Not beginning historic import as user is not yet logged in")
+            return@withContext
+        }
 
         relevantMonths().toList().reversed().forEach { date ->
+            logger.i("Importing call records for $date")
+
             try {
                 types.forEach { type ->
                     fetchAndInsert(type.key, type.value, date, toEndOfMonth(date))
                 }
                 User.internal.callRecordMonthsImported.add(date)
+                logger.i("Completed import for $date, starting next month in ${DELAY_BETWEEN_EACH_MONTH}ms")
                 delay(DELAY_BETWEEN_EACH_MONTH)
             } catch (e: Exception) {
+                logger.i("We have hit a rate limit, delaying for ${DELAY_IF_RATE_LIMIT_IS_HIT}ms")
                 delay(DELAY_IF_RATE_LIMIT_IS_HIT)
             }
         }
@@ -111,8 +122,6 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
         companion object {
             private val constraints = Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .setRequiresStorageNotLow(true)
-                    .setRequiresBatteryNotLow(true)
                     .build()
 
             private val oneTime = OneTimeWorkRequestBuilder<Worker>()
@@ -128,7 +137,7 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
              * Begin working to import historic call records immediately.
              *
              */
-            fun start(context: Context) = WorkManager.getInstance(context).enqueueUniqueWork(Worker::class.java.name, ExistingWorkPolicy.KEEP, oneTime)
+            fun start(context: Context) = WorkManager.getInstance(context).enqueueUniqueWork(Worker::class.java.name, ExistingWorkPolicy.REPLACE, oneTime)
 
             /**
              * Schedule the call records to be imported at regular intervals.
