@@ -474,6 +474,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 if (incomingCallDetails != null) {
                     callerId = incomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME);
                     number = incomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
+                    setCallerId(callerId);
+                    setPhoneNumber(number);
                 }
 
                 mSipService.informUserAboutIncomingCall(number, callerId);
