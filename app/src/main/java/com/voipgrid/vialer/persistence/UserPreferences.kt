@@ -41,5 +41,11 @@ object UserPreferences : DefaultKotPrefModel() {
     fun hasConnectionPreference(preference: ConnectionPreference): Boolean {
         return preference == connectionPreference
     }
+
+    /**
+     * If enabled, will take the ringtone from the device rather than the Vialer ringtone.
+     *
+     */
+    var usePhoneRingtone by booleanPref(key = "use_phone_ringtone", default = false)
 }
 

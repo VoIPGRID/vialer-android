@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.api.SecureCalling;
@@ -82,6 +83,8 @@ public class SettingsActivity extends LoginRequiredActivity {
     @BindView(R.id.remote_logging_id_container) View mRemoteLogIdContainer;
     @BindView(R.id.remote_logging_id_edit_text) EditText mRemoteLogIdEditText;
     @BindView(R.id.ignore_battery_optimization_switch) CompoundButton ignoreBatteryOptimizationSwitch;
+    @BindView(R.id.use_phones_ringtone_switch) CompoundButton usePhoneRingtoneSwitch;
+    @BindView(R.id.use_phones_ringtone_switch_description) TextView usePhoneRingtoneSwitchDescription;
 
     @BindView(R.id.advanced_settings_layout) LinearLayout advancedSettings;
     @BindView(R.id.tls_switch) Switch tlsSwitch;
@@ -130,6 +133,7 @@ public class SettingsActivity extends LoginRequiredActivity {
     public void onResume() {
         super.onResume();
         initIgnoreBatteryOptimizationSwitch();
+        initUsePhoneRingtoneSwitch();
 
         // Update and populate the fields.
         updateAndPopulate();
@@ -224,6 +228,13 @@ public class SettingsActivity extends LoginRequiredActivity {
         ignoreBatteryOptimizationSwitch.setChecked(batteryOptimizationManager.isIgnoringBatteryOptimization());
         ignoreBatteryOptimizationSwitch.setOnClickListener(
                 view -> batteryOptimizationManager.prompt(SettingsActivity.this, false));
+    }
+
+    private void initUsePhoneRingtoneSwitch() {
+        usePhoneRingtoneSwitchDescription.setText(getString(R.string.use_phones_ringtone_switch_description, getString(R.string.app_name)));
+        usePhoneRingtoneSwitch.setOnClickListener(null);
+        usePhoneRingtoneSwitch.setChecked(User.userPreferences.getUsePhoneRingtone());
+        usePhoneRingtoneSwitch.setOnClickListener(view -> User.userPreferences.setUsePhoneRingtone(usePhoneRingtoneSwitch.isChecked()));
     }
 
     /**
