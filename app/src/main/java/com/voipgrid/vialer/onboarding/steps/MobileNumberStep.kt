@@ -14,6 +14,7 @@ import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.core.onTextChanged
+import com.voipgrid.vialer.setOnClickListenerAndDisable
 import com.voipgrid.vialer.setRightDrawableOnClickListener
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.onboarding_step_mobile_number.*
@@ -61,7 +62,7 @@ class MobileNumberStep : Step(), View.OnClickListener {
         outgoingNumberTextDialog.setText(outgoingNumber)
         outgoingNumberTextDialog.onTextChanged(enableContinueButton)
 
-        button_configure.setOnClickListener(this)
+        button_configure.setOnClickListenerAndDisable(this)
         enableContinueButton.invoke(null)
     }
 
@@ -70,8 +71,6 @@ class MobileNumberStep : Step(), View.OnClickListener {
             error(R.string.invalid_mobile_number_message, R.string.invalid_mobile_number_message)
             return
         }
-
-        button_configure.isEnabled = false
 
         if (hasOutgoingNumber) {
             processMobileAndOutgoingNumber(mobileNumber)
@@ -84,6 +83,7 @@ class MobileNumberStep : Step(), View.OnClickListener {
                 .setPositiveButton(android.R.string.yes) { _, _ -> processMobileAndOutgoingNumber(mobileNumber) }
                 .setNegativeButton(android.R.string.no, null)
                 .show()
+        button_configure.isEnabled = true
     }
 
     private fun processMobileAndOutgoingNumber(mobileNumber: String) {

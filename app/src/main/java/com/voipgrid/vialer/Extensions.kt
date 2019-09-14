@@ -2,6 +2,7 @@ package com.voipgrid.vialer
 
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 
 /**
@@ -21,5 +22,27 @@ fun EditText.setRightDrawableOnClickListener(callback: () -> Unit) {
         }
 
         return@setOnTouchListener false
+    }
+}
+
+/**
+ * Set an onClick listener but will automatically disable the button after it has been clicked once.
+ *
+ */
+fun Button.setOnClickListenerAndDisable(function: (View) -> Unit) {
+    setOnClickListener {
+        it.isEnabled = false
+        function.invoke(it)
+    }
+}
+
+/**
+ * Set an onClick listener but will automatically disable the button after it has been clicked once.
+ *
+ */
+fun Button.setOnClickListenerAndDisable(listener: View.OnClickListener) {
+    setOnClickListener {
+        it.isEnabled = false
+        listener.onClick(it)
     }
 }

@@ -11,10 +11,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.voipgrid.vialer.ForgottenPasswordActivity
-import com.voipgrid.vialer.R
-import com.voipgrid.vialer.VialerApplication
-import com.voipgrid.vialer.WebActivity
+import com.voipgrid.vialer.*
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.VoipgridLogin
 import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult
@@ -55,7 +52,7 @@ class LoginStep : Step() {
             actionId == EditorInfo.IME_ACTION_DONE && button_login.performClick()
         }
 
-        button_login.setOnClickListener { attemptLogin() }
+        button_login.setOnClickListenerAndDisable { attemptLogin() }
         button_forgot_password.setOnClickListener { launchForgottenPasswordActivity() }
         button_info.setOnClickListener { launchApplicationInfoPage() }
     }
@@ -85,6 +82,7 @@ class LoginStep : Step() {
         FAIL -> {
             logger.w("User failed to login to VoIPGRID")
             login.lastError?.let { error(it.title, it.description) }
+            button_login.isEnabled = true
         }
         SUCCESS -> {
             logger.i("Login to VoIPGRID was successful, progressing the user in onboarding")
@@ -93,6 +91,7 @@ class LoginStep : Step() {
         }
         TWO_FACTOR_REQUIRED -> {
             logger.i("User logged into VoIPGRID with the correct username/password but is now required to input a valid 2FA code")
+            button_login.isEnabled = true
             showTwoFactorDialog()
         }
     }
