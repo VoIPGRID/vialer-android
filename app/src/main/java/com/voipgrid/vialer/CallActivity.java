@@ -221,7 +221,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @Override
     public void onBackPressed() {
-        mLogger.d("onBackPressed");
+        getLogger().d("onBackPressed");
 
         if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
             super.onBackPressed();
@@ -266,7 +266,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
-        mLogger.d("toggleSpeaker");
+        getLogger().d("toggleSpeaker");
         if (!getAudioRouter().isCurrentlyRoutingAudioViaSpeaker()) {
             getAudioRouter().routeAudioViaSpeaker();
         } else {
@@ -277,7 +277,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     // Toggle the hold the call when the user presses the button.
     private void toggleOnHold() {
-        mLogger.d("toggleOnHold");
+        getLogger().d("toggleOnHold");
         if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
             return;
         }
@@ -377,7 +377,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     @Override
     @OnClick(R.id.button_hangup)
     protected void onDeclineButtonClicked() {
-        mLogger.i("Hangup the call");
+        getLogger().i("Hangup the call");
         hangup();
     }
 
