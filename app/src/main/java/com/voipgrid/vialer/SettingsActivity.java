@@ -467,7 +467,7 @@ public class SettingsActivity extends LoginRequiredActivity {
         mIsSetupComplete = false;
         enableProgressBar(false);
         tlsSwitch.setChecked(User.voip.getHasTlsEnabled());
-        stunSwitch.setChecked(User.voip.getHasTlsEnabled());
+        stunSwitch.setChecked(User.voip.getHasStunEnabled());
         mIsSetupComplete = true;
     }
 
