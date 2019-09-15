@@ -52,7 +52,6 @@ class IncomingCallRinger(private val context : Context, private val focus: Audio
     private fun MediaPlayer.findRingtone() : MediaPlayer? {
         try {
             logger.i("Attempting to use the ringtone uri: $ringtone")
-            R.raw.ringtone
             setDataSource(context, ringtone)
             return this
         } catch (e: Exception) {
