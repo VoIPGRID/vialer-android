@@ -100,11 +100,6 @@ fragments for each type of data being displayed, when a different tab is
 selected or a toggle is changed that fragment will just be told to
 update its data.
 
-### Vialer Ringtone
-
-Vialer will now, by default, use the same ringtones as the webphone. It is
-possible to switch back to using the phone's default ringtone in the settings
-menu.
 
 ### Android 10
 
@@ -138,6 +133,10 @@ a final implementation of incoming call flow.
 - Several improvements have been made to the XML layout files to make
   them cleaner and easier to work with. The actual design presented to
   the user should remain unchanged.
+
+- Vialer will now, by default, use the same ringtones as the webphone. It is
+  possible to switch back to using the phone's default ringtone in the settings
+  menu.
 
 ### Fixed
  - There was an issue where the sound played when the third party ended
