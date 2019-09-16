@@ -100,6 +100,12 @@ fragments for each type of data being displayed, when a different tab is
 selected or a toggle is changed that fragment will just be told to
 update its data.
 
+### Vialer Ringtone
+
+Vialer will now, by default, use the same ringtones as the webphone. It is
+possible to switch back to using the phone's default ringtone in the settings
+menu.
+
 ### Android 10
 
 Android 10 support has continued to improve with what can be considered
@@ -113,6 +119,14 @@ a final implementation of incoming call flow.
   to the incoming call screen.
 - If the user has locked their phone, they will see the incoming call
   screen.
+
+### Added
+- Before a call is made we will now perform a check to see if the phone is 
+  actually able to connect to the internet, if it not we will display an alert 
+  instead of letting the call proceed. This gives a little better feedback
+  to users if they are in a situation where they do have a network connection
+  but that network doesn't have internet access (e.g. if their phone has run
+  out of credit or they are connected to WiFi that requires login via a browser).
 
 ### Changed
 - The error message displayed when there is an issue with call records
