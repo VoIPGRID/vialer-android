@@ -1,7 +1,5 @@
 package com.voipgrid.vialer.media.monitoring;
 
-import android.util.Log;
-
 import com.voipgrid.vialer.logging.InternetConnectionDiagnosticsLogger;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipCall;

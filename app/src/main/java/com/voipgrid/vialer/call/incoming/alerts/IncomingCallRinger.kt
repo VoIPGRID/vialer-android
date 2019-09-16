@@ -90,4 +90,8 @@ class IncomingCallRinger(private val context : Context, private val focus: Audio
             logger.e("Unable to stop ringer: " + e.message)
         }
     }
+
+    override fun isStarted(): Boolean {
+        return player?.isPlaying ?: false
+    }
 }

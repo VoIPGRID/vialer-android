@@ -9,6 +9,8 @@ class IncomingCallVibration(private val audioManager: AudioManager, private val 
 
     private val pattern = longArrayOf(0, 1000L, 1000L)
 
+    private var isVibrating = false
+
     override fun start() {
         if (audioManager.ringerMode == AudioManager.RINGER_MODE_SILENT) return
 
@@ -17,9 +19,13 @@ class IncomingCallVibration(private val audioManager: AudioManager, private val 
         } else {
             vibrator.vibrate(pattern, 0)
         }
+
+        isVibrating = true
     }
 
     override fun stop() {
         vibrator.cancel()
     }
+
+    override fun isStarted() = isVibrating
 }
