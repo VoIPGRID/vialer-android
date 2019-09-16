@@ -20,7 +20,7 @@ class MainActivity : NavigationDrawerActivity() {
     @Inject lateinit var phoneAccountHelper: PhoneAccountHelper
     @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
 
-    private val logger = Logger(this)
+    override val logger = Logger(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

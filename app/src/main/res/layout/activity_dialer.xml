@@ -14,7 +14,7 @@
                   android:layout_marginTop="4dp"
                   android:layout_marginBottom="16dp"
                   android:orientation="vertical"
-                  app:layout_constraintBottom_toTopOf="@+id/bottom"
+                  app:layout_constraintBottom_toTopOf="@+id/dialer"
                   app:layout_constraintEnd_toEndOf="parent"
                   app:layout_constraintHeight_percent="1"
                   app:layout_constraintHorizontal_bias="0.2"
@@ -35,31 +35,6 @@
                   android:layout_weight="1"
                   tools:layout="@layout/fragment_t9_search"
         />
-
-
-        <LinearLayout
-            android:id="@+id/contact_processing_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp"
-            android:visibility="visible">
-
-            <com.voipgrid.vialer.dialer.ContactsProgressBar
-                android:id="@+id/progress_bar"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/progress_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/dialer_contacts_not_processed"
-                android:paddingTop="10dp"/>
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/no_connectivity_container"
@@ -100,7 +75,7 @@
 
 
     <com.voipgrid.vialer.calling.Dialer
-        android:id="@+id/bottom"
+        android:id="@+id/dialer"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -53,7 +53,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
     @OnClick(R.id.button_decline)
     public void onDeclineButtonClicked() {
-        mLogger.d("decline");
+        getLogger().d("decline");
 
         disableAllButtons();
 
@@ -97,7 +97,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
         intent.setClass(this, CallActivity.class);
         intent.putExtra(CALL_IS_CONNECTED, true);
         startActivity(intent);
-        mLogger.d("callVisibleForUser");
+        getLogger().d("callVisibleForUser");
     }
 
     /**
