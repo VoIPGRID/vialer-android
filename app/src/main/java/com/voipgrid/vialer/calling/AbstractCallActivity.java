@@ -142,7 +142,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @Override
     public void finish() {
         if (isTaskRoot() && VialerApplication.get().isApplicationVisible()) {
-            mLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
+            getLogger().i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

@@ -56,8 +56,6 @@ public interface VialerComponent {
 
     void inject(PendingCallActivity pendingCallActivity);
 
-    void inject(DialerActivity dialerActivity);
-
     void inject(CallRecordAdapter callRecordAdapter);
 
     void inject(NetworkConnectivity networkConnectivity);
@@ -105,4 +103,6 @@ public interface VialerComponent {
     void inject(CallRecordFragment callRecordFragment);
 
     void inject(HistoricCallRecordsImporter.Worker worker);
+
+    void inject(DialerActivity dialerActivity);
 }
