@@ -119,7 +119,7 @@ class MobileNumberStep : Step(), View.OnClickListener {
                 logger.w("There is no linked voip account, prompt user to configure one")
                 User.voip.hasEnabledSip = false
                 state.hasVoipAccount = false
-                onboarding?.progress()
+                onboarding?.progress(this@MobileNumberStep)
             }
         }
 
@@ -143,7 +143,7 @@ class MobileNumberStep : Step(), View.OnClickListener {
                 MiddlewareHelper.registerAtMiddleware(onboarding)
             }
 
-            onboarding?.progress()
+            onboarding?.progress(this@MobileNumberStep)
         }
 
         override fun onFailure(call: Call<PhoneAccount>, t: Throwable) {

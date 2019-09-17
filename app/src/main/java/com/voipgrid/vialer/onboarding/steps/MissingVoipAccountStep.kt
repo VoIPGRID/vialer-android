@@ -24,7 +24,7 @@ class MissingVoipAccountStep : Step() {
         continueButton.setOnClickListener {
             logger.i("User has decided not to set a voip account despite not having one")
 
-            onboarding?.progress()
+            onboarding?.progress(this)
         }
 
         setVoipAccountButton.setOnClickListener {
@@ -56,7 +56,7 @@ class MissingVoipAccountStep : Step() {
             PhoneAccountHelper(onboarding).linkedPhoneAccount?.let {
                 launch(Dispatchers.Main) {
                     User.voip.hasEnabledSip = true
-                    onboarding?.progress()
+                    onboarding?.progress(this@MissingVoipAccountStep)
                 }
             }
         }

@@ -17,6 +17,7 @@ import kotlinx.android.synthetic.main.activity_onboarding.*
  */
 class SingleOnboardingStepActivity: Onboarder() {
 
+
     private var step: Step? = null
 
     override val state: OnboardingState = OnboardingState()
@@ -41,7 +42,7 @@ class SingleOnboardingStepActivity: Onboarder() {
         supportFragmentManager.beginTransaction().add(fragmentContainer.id, step as Step).commit()
     }
 
-    override fun progress() {
+    override fun progress(callerStep: Step) {
         finish()
     }
 

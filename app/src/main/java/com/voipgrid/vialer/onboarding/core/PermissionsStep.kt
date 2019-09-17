@@ -24,7 +24,7 @@ abstract class PermissionsStep : Step() {
         iconIv?.setImageResource(icon)
 
         denyButton.setOnClickListener {
-            onboarding?.progress()
+            onboarding?.progress(this)
         }
 
         acceptButton.setOnClickListener {
@@ -39,7 +39,7 @@ abstract class PermissionsStep : Step() {
      */
     protected open fun performPermissionRequest() {
         onboarding?.requestPermission(permission) {
-            onboarding?.progress()
+            onboarding?.progress(this)
         }
     }
 

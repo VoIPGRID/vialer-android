@@ -17,6 +17,9 @@ class OptimizationWhitelistStep: PermissionsStep() {
     }
 
     override fun performPermissionRequest() {
+        onboarding?.setCallBack {
+            onboarding?.progress(this)
+        }
         batteryOptimizationManager.prompt(onboarding as Activity, onlyDisplayPrompt = true)
     }
 

@@ -12,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.OnboardingState
+import com.voipgrid.vialer.onboarding.core.Step
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
 typealias PermissionCallback = () -> Unit
@@ -30,7 +31,7 @@ abstract class Onboarder : AppCompatActivity() {
             progress.visibility = if (loading) VISIBLE else INVISIBLE
         }
 
-    abstract fun progress()
+    abstract fun progress(callerStep: Step)
 
     abstract fun restart()
 
@@ -48,8 +49,12 @@ abstract class Onboarder : AppCompatActivity() {
      */
     fun requestPermission(permission: String, callback: PermissionCallback) {
         logger.i("Requesting $permission")
-        permissionCallback = callback
+        setCallBack(callback)
         ActivityCompat.requestPermissions(this, arrayOf(permission), 1)
+    }
+
+    fun setCallBack(callback: PermissionCallback) {
+        permissionCallback = callback
     }
 
     /**
@@ -88,5 +93,6 @@ abstract class Onboarder : AppCompatActivity() {
             context.startActivity(Intent(context, OnboardingActivity::class.java))
         }
     }
+
 }
 

@@ -46,24 +46,43 @@ class OnboardingActivity : Onboarder() {
         viewPager.isUserInputEnabled = false
     }
 
-    override fun progress() {
+    /**
+     * This is called whenever we should be progressing to the next step in onboarding.
+     *
+     */
+    override fun progress(callerStep: Step) {
         isLoading = false
 
         if (isLastItem()) {
-            logger.i("Onboarding has been completed, forwarding to the main activity")
-
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
+            completeOnboarding()
             return
         }
 
         logger.i("Progressing the onboarder from ${currentStep.javaClass.simpleName}")
 
+        val currentStep = adapter.getStep(viewPager.currentItem)
+
+        if (currentStep != callerStep) {
+            logger.i("Caller step (${callerStep::class.java.simpleName}) does not match current step (${currentStep::class.java.simpleName}) so not progressing")
+            return
+        }
+
         runOnUiThread {
             viewPager.setCurrentItem(viewPager.currentItem + 1, true)
         }
+    }
+
+    /**
+     * Perform the actions we need to do now that the user has completed onboarding,
+     * this involves launching the MainActivity.
+     *
+     */
+    private fun completeOnboarding() {
+        logger.i("Onboarding has been completed, forwarding to the main activity")
+        startActivity(Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+        })
+        finish()
     }
 
     private fun isLastItem(): Boolean {

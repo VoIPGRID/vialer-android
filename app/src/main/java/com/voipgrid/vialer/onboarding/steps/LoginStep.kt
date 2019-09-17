@@ -87,7 +87,7 @@ class LoginStep : Step() {
         SUCCESS -> {
             logger.i("Login to VoIPGRID was successful, progressing the user in onboarding")
             twoFactorDialog?.dismiss()
-            onboarding?.progress()
+            onboarding?.progress(this)
         }
         TWO_FACTOR_REQUIRED -> {
             logger.i("User logged into VoIPGRID with the correct username/password but is now required to input a valid 2FA code")
