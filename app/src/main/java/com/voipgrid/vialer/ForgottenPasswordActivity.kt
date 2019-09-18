@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.voipgrid.vialer.api.VoipgridApi
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.models.PasswordResetParams
-import com.voipgrid.vialer.onboarding.core.onTextChanged
 import kotlinx.android.synthetic.main.activity_forgotten_password.*
 import retrofit2.Call
 import retrofit2.Callback

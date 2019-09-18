@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.onboarding
 
 import android.content.Context
+import android.util.Log
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.ServiceGenerator
@@ -56,7 +57,10 @@ class VoipgridLogin(private val context: Context) {
 
         if (!response.isSuccessful) {
             lastError = Error(R.string.onboarding_login_failed_title, R.string.onboarding_login_failed_message)
-            return LoginResult.FAIL
+            return when(responseIndicatesThatPasswordChangeIsRequired(response.errorBody()?.string() ?: "")) {
+                true  -> LoginResult.MUST_CHANGE_PASSWORD
+                false -> LoginResult.FAIL
+            }
         }
 
         val user = response.body() as SystemUser
@@ -70,6 +74,17 @@ class VoipgridLogin(private val context: Context) {
         User.voipgridUser = user
 
         return LoginResult.SUCCESS
+    }
+
+    /**
+     * Check the response to see if the reason for failure is due to the user needing to
+     * change their password in the portal.
+     *
+     * @param errorString The response body as a string
+     * @return TRUE if the responses is stating the the two-factor code is missing
+     */
+    private fun responseIndicatesThatPasswordChangeIsRequired(errorString: String): Boolean {
+        return errorString.contains("You need to change your password in the portal")
     }
 
     /**
@@ -99,7 +114,7 @@ class VoipgridLogin(private val context: Context) {
      *
      */
     enum class LoginResult {
-        FAIL, SUCCESS, TWO_FACTOR_REQUIRED
+        FAIL, SUCCESS, TWO_FACTOR_REQUIRED, MUST_CHANGE_PASSWORD
     }
 
     /**

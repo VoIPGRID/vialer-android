@@ -126,6 +126,13 @@
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_battery_optimization_whitelist_title">Battery Optimization</string>
     <string name="onboarding_battery_optimization_whitelist_justification">We ask to be whitelisted against battery optimization to prevent certain Android operating systems for silently killing the app, preventing incoming calls. Even when whitelisted we are aware of how important battery is and use it very conservatively.</string>
+    <string name="password_reset_title">Password Reset</string>
+    <string name="password_reset_subtitle">Required</string>
+    <string name="password_reset_description_top">You must create a new password before you are able to login.</string>
+    <string name="password_reset_description_bottom">Your password must be at least 6 characters long and contain at least 1 non-alphabetical character.</string>
+    <string name="password_reset_hint">Password</string>
+    <string name="password_reset_hint_2">Confirm Password</string>
+
 
     <!-- strings empty view call records -->
     <string name="call_records_default_title">No call records found</string>

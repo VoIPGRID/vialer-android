@@ -31,11 +31,7 @@ class MissingVoipAccountStep : Step() {
             logger.i("Loading a web view to let user set their missing voip account")
 
             onboarding?.let {
-                WebActivityHelper(onboarding).startWebActivity(
-                        getString(R.string.user_change_title),
-                        getString(R.string.web_user_change),
-                        getString(R.string.analytics_user_change)
-                )
+                VoIPGRIDPortalWebActivity.launchForChangeUser(context)
             }
         }
     }

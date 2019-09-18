@@ -124,7 +124,7 @@
         </receiver>
 
         <activity
-            android:name=".WebActivity"
+            android:name=".VoIPGRIDPortalWebActivity"
             android:label="@string/title_activity_web"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" >
@@ -176,6 +176,7 @@
 
         <activity android:name=".onboarding.SingleOnboardingStepActivity"
                   android:theme="@style/OnboardingTheme"/>
+        <activity android:name=".voipgrid.PasswordResetWebActivity" />
     </application>
 
 </manifest>

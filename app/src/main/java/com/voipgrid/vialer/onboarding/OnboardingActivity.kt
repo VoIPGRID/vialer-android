@@ -102,7 +102,7 @@ class OnboardingActivity : Onboarder() {
         logger.i("Restarting onboarding procedure")
         logout.perform(true)
         finish()
-        startActivity(intent)
+        startActivity(Intent(this, OnboardingActivity::class.java))
     }
 
     private inner class OnPageChangeCallback : ViewPager2.OnPageChangeCallback() {

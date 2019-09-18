@@ -214,25 +214,13 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         int itemId = menuItem.getItemId();
         switch (itemId) {
             case R.id.navigation_item_statistics:
-                startWebActivity(
-                        getString(R.string.statistics_menu_item_title),
-                        getString(R.string.web_statistics),
-                        getString(R.string.analytics_statistics_title)
-                );
+                VoIPGRIDPortalWebActivity.launchForUserDestinations(this);
                 break;
             case R.id.navigation_item_dial_plan:
-                startWebActivity(
-                        getString(R.string.dial_plan_menu_item_title),
-                        getString(R.string.web_dial_plan),
-                        getString(R.string.analytics_dial_plan_title)
-                );
+                VoIPGRIDPortalWebActivity.launchForDialPlan(this);
                 break;
             case R.id.navigation_item_info:
-                startWebActivity(
-                        getString(R.string.info_menu_item_title),
-                        getString(R.string.url_app_info),
-                        getString(R.string.analytics_info_title)
-                );
+                VoIPGRIDPortalWebActivity.launchForAppInfo(this);
                 break;
             case R.id.navigation_item_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -269,21 +257,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     private void performLogout() {
         logout.perform(false);
     }
-
-    /**
-     * Start a new WebActivity to display the page
-     *
-     * @param title
-     * @param page
-     */
-    private void startWebActivity(String title, String page, String gaTitle) {
-        Intent intent = new Intent(this, WebActivity.class);
-        intent.putExtra(WebActivity.PAGE, page);
-        intent.putExtra(WebActivity.TITLE, title);
-        intent.putExtra(WebActivity.GA_TITLE, gaTitle);
-        startActivity(intent);
-    }
-
 
     @Override
     public void onFailure(@NonNull Call call, @NonNull Throwable t) {
@@ -423,11 +396,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             mFirstTimeOnItemSelected = false;
         } else {
             if (parent.getCount() - 1 == position) {
-                startWebActivity(
-                        getString(R.string.add_destination_title),
-                        getString(R.string.web_add_destination),
-                        getString(R.string.analytics_add_destination_title)
-                );
+                VoIPGRIDPortalWebActivity.launchForUserDestinations(this);
             } else {
                 Destination destination = (Destination) parent.getAdapter().getItem(position);
                 if (destination.getDescription().equals(getString(R.string.not_available))) {

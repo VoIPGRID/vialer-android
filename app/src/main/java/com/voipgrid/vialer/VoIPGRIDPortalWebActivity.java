@@ -1,5 +1,7 @@
 package com.voipgrid.vialer;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -28,14 +30,10 @@ import retrofit2.Response;
 /**
  * Activity to display the web pages within the app.
  */
-public class WebActivity extends LoginRequiredActivity implements Callback<AutoLoginToken> {
+public class VoIPGRIDPortalWebActivity extends LoginRequiredActivity implements Callback<AutoLoginToken> {
 
     public static final String PAGE = "key-page";
     public static final String TITLE = "key-title";
-    public static final String USERNAME = "key-username";
-    public static final String PASSWORD = "key-password";
-    public static final String API_TOKEN = "key-api-token";
-    public static final String GA_TITLE = "ga-title";
 
     private ProgressBar mProgressBar;
     private WebView mWebView;
@@ -165,5 +163,40 @@ public class WebActivity extends LoginRequiredActivity implements Callback<AutoL
                     Toast.LENGTH_SHORT
             ).show();
         });
+    }
+
+    public static void launchForPasswordChange(Context context) {
+        launch(context, R.string.password_change_title, R.string.web_password_change);
+    }
+
+    public static void launchForUserDestinations(Context context) {
+        launch(context, R.string.add_destination_title, R.string.web_add_destination);
+    }
+
+    public static void launchForStats(Context context) {
+        launch(context, R.string.statistics_menu_item_title, R.string.web_statistics);
+    }
+
+    public static void launchForDialPlan(Context context) {
+        launch(context, R.string.dial_plan_menu_item_title, R.string.web_dial_plan);
+    }
+
+    public static void launchForAppInfo(Context context) {
+        launch(context, R.string.info_menu_item_title, R.string.url_app_info);
+    }
+
+    public static void launchForChangeUser(Context context) {
+        launch(context, R.string.user_change_title, R.string.web_user_change);
+    }
+
+    public static void launchForChangePassword(Context context) {
+        launch(context, R.string.password_change_title, R.string.web_password_change);
+    }
+
+    private static void launch(Context context, int title, int page) {
+        Intent intent = new Intent(context, VoIPGRIDPortalWebActivity.class);
+        intent.putExtra(VoIPGRIDPortalWebActivity.TITLE, context.getString(title));
+        intent.putExtra(VoIPGRIDPortalWebActivity.PAGE, context.getString(page));
+        context.startActivity(intent);
     }
 }

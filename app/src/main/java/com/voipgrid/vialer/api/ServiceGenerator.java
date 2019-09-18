@@ -34,8 +34,6 @@ public class ServiceGenerator {
     private static Retrofit.Builder builder = new Retrofit.Builder();
     private static final AddAuthorizationCredentialsToRequest sAuthorizationInterceptor = new AddAuthorizationCredentialsToRequest();
 
-    private static final boolean LOG_ALL_HTTP_RESPONSES = false;
-
     private static HashMap<String, Retrofit> sRetrofit = new HashMap<>();
 
     private ServiceGenerator() {
@@ -51,9 +49,7 @@ public class ServiceGenerator {
         httpClient.addInterceptor(new AddUserAgentToHeader(context));
         httpClient.addInterceptor(new ModifyCacheLifetimeBasedOnConnectivity(context));
         httpClient.addInterceptor(new LogUserOutOnUnauthorizedResponse(context));
-        if (LOG_ALL_HTTP_RESPONSES) {
-            httpClient.addInterceptor(new LogResponsesToConsole());
-        }
+        httpClient.addInterceptor(new LogResponsesToConsole());
 
         httpClient.cache(getCache(context));
 

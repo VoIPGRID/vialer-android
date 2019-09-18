@@ -17,9 +17,9 @@ import com.voipgrid.vialer.onboarding.VoipgridLogin
 import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult
 import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult.*
 import com.voipgrid.vialer.onboarding.core.Step
-import com.voipgrid.vialer.onboarding.core.onTextChanged
 import com.voipgrid.vialer.util.ConnectivityHelper
 import com.voipgrid.vialer.util.TwoFactorFragmentHelper
+import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity
 import kotlinx.android.synthetic.main.onboarding_step_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -55,6 +55,20 @@ class LoginStep : Step() {
         button_login.setOnClickListenerAndDisable { attemptLogin() }
         button_forgot_password.setOnClickListener { launchForgottenPasswordActivity() }
         button_info.setOnClickListener { launchApplicationInfoPage() }
+
+        automaticallyLogInIfWeHaveCredentials()
+    }
+
+    private fun automaticallyLogInIfWeHaveCredentials() {
+        val activity = activity ?: return
+
+        if (!activity.intent.hasExtra(PasswordResetWebActivity.USERNAME_EXTRA) || !activity.intent.hasExtra(PasswordResetWebActivity.PASSWORD_EXTRA)) {
+            return
+        }
+
+        emailTextDialog.setText(activity.intent.getStringExtra(PasswordResetWebActivity.USERNAME_EXTRA))
+        passwordTextDialog.setText(activity.intent.getStringExtra(PasswordResetWebActivity.PASSWORD_EXTRA))
+        if (button_login.isEnabled) button_login.performClick()
     }
 
     override fun onResume() {
@@ -93,6 +107,12 @@ class LoginStep : Step() {
             logger.i("User logged into VoIPGRID with the correct username/password but is now required to input a valid 2FA code")
             button_login.isEnabled = true
             showTwoFactorDialog()
+        }
+        MUST_CHANGE_PASSWORD -> {
+            logger.i("User must change their password before we can login")
+            activity?.let {
+                PasswordResetWebActivity.launch(it, emailTextDialog.text.toString(), passwordTextDialog.text.toString())
+            }
         }
     }
 
@@ -136,9 +156,9 @@ class LoginStep : Step() {
      */
     private fun launchApplicationInfoPage() {
         logger.i("Launching app info page")
-        val intent = Intent(activity, WebActivity::class.java)
-        intent.putExtra(WebActivity.PAGE, getString(R.string.url_app_info))
-        intent.putExtra(WebActivity.TITLE, getString(R.string.info_menu_item_title))
+        val intent = Intent(activity, VoIPGRIDPortalWebActivity::class.java)
+        intent.putExtra(VoIPGRIDPortalWebActivity.PAGE, getString(R.string.url_app_info))
+        intent.putExtra(VoIPGRIDPortalWebActivity.TITLE, getString(R.string.info_menu_item_title))
         startActivity(intent)
     }
 }

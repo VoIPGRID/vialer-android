@@ -10,6 +10,8 @@ import android.net.ConnectivityManager.EXTRA_NO_CONNECTIVITY
 import android.net.Network
 import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.voipgrid.vialer.VialerApplication
@@ -56,6 +58,13 @@ abstract class VialerBaseActivity : AppCompatActivity() {
             networkCallback?.let { connectivityManager.unregisterNetworkCallback(it) }
         } else {
             broadcastReceiverManager.unregisterReceiver(networkChangeReceiver)
+        }
+    }
+
+    protected fun hideKeyboard() {
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+        if (currentFocus != null) {
+            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
         }
     }
 
