@@ -169,6 +169,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
             return true;
         }
         else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
+            incomingCallAlerts.stop();
             mCurrentCall.decline();
         }
         else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
@@ -178,6 +179,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
                 return false;
             }
 
+            incomingCallAlerts.stop();
             mCurrentCall.answer();
         }
         else if (Actions.END_CALL.equals(action)) {
