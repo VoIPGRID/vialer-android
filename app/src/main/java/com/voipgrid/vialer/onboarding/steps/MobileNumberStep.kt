@@ -34,7 +34,7 @@ class MobileNumberStep : Step(), View.OnClickListener {
     private val mobileNumberCallback = MobileNumberCallback()
     private val configureCallback = ConfigureCallback()
 
-    private val logger = Logger(this)
+    private val logger = Logger(this).forceRemoteLogging(true)
 
     override fun onResume() {
         super.onResume()

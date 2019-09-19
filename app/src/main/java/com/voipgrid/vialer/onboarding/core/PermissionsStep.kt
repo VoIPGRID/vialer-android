@@ -6,6 +6,7 @@ import android.view.View
 import androidx.core.content.PermissionChecker
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
+import com.voipgrid.vialer.logging.Logger
 import kotlinx.android.synthetic.main.onboarding_step_permissions.*
 
 abstract class PermissionsStep : Step() {
@@ -17,17 +18,23 @@ abstract class PermissionsStep : Step() {
     abstract val permission: String
     abstract val icon: Int
 
+    private val logger = Logger(this).forceRemoteLogging(true)
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         titleTv?.text = onboarding?.getText(title)
         justificationTv.text = onboarding?.getText(justification)
         iconIv?.setImageResource(icon)
 
+        logger.i("Prompting user for the $permission permission")
+
         denyButton.setOnClickListener {
+            logger.i("User chose to skip $permission permission")
             onboarding?.progress(this)
         }
 
         acceptButton.setOnClickListener {
+            logger.i("User chose to accept $permission permission, launching Android permission prompt")
             performPermissionRequest()
         }
     }
@@ -39,6 +46,7 @@ abstract class PermissionsStep : Step() {
      */
     protected open fun performPermissionRequest() {
         onboarding?.requestPermission(permission) {
+            logger.i("User has completed Android permission prompt for $permission, continuing with onboarding...")
             onboarding?.progress(this)
         }
     }

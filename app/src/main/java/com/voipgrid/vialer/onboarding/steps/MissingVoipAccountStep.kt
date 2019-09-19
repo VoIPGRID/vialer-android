@@ -16,7 +16,7 @@ class MissingVoipAccountStep : Step() {
 
     override val layout = R.layout.onboarding_missing_voip_account
 
-    private val logger = Logger(this)
+    private val logger = Logger(this).forceRemoteLogging(true)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

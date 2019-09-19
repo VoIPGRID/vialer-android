@@ -33,7 +33,7 @@ class LoginStep : Step() {
     @Inject lateinit var connectivityHelper: ConnectivityHelper
     @Inject lateinit var login: VoipgridLogin
 
-    private val logger = Logger(this)
+    private val logger = Logger(this).forceRemoteLogging(true)
     private var twoFactorHelper: TwoFactorFragmentHelper? = null
     private var twoFactorDialog: AlertDialog? = null
 
@@ -59,21 +59,25 @@ class LoginStep : Step() {
         automaticallyLogInIfWeHaveCredentials()
     }
 
-    private fun automaticallyLogInIfWeHaveCredentials() {
-        val activity = activity ?: return
-
-        if (!activity.intent.hasExtra(PasswordResetWebActivity.USERNAME_EXTRA) || !activity.intent.hasExtra(PasswordResetWebActivity.PASSWORD_EXTRA)) {
-            return
-        }
-
-        emailTextDialog.setText(activity.intent.getStringExtra(PasswordResetWebActivity.USERNAME_EXTRA))
-        passwordTextDialog.setText(activity.intent.getStringExtra(PasswordResetWebActivity.PASSWORD_EXTRA))
-        if (button_login.isEnabled) button_login.performClick()
-    }
-
     override fun onResume() {
         super.onResume()
         twoFactorHelper?.pasteCodeFromClipboard()
+    }
+
+    /**
+     * If this activity has been started with an intent containing credentials, log in with them automatically.
+     *
+     */
+    private fun automaticallyLogInIfWeHaveCredentials() {
+        val intent = activity?.intent ?: return
+
+        if (!intent.hasExtra(PasswordResetWebActivity.USERNAME_EXTRA) || !intent.hasExtra(PasswordResetWebActivity.PASSWORD_EXTRA)) {
+            return
+        }
+
+        emailTextDialog.setText(intent.getStringExtra(PasswordResetWebActivity.USERNAME_EXTRA))
+        passwordTextDialog.setText(intent.getStringExtra(PasswordResetWebActivity.PASSWORD_EXTRA))
+        if (button_login.isEnabled) button_login.performClick()
     }
 
     /**

@@ -27,7 +27,7 @@ typealias PermissionCallback = () -> Unit
 
 abstract class Onboarder : VialerBaseActivity() {
 
-    override val logger = Logger(this)
+    override val logger = Logger(this).forceRemoteLogging(true)
 
     private var permissionCallback: PermissionCallback? = null
 

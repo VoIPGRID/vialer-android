@@ -16,7 +16,7 @@ class WelcomeStep : AutoContinuingStep() {
     override val delay = 3000
     override val layout = R.layout.onboarding_step_welcome
 
-    private val logger = Logger(this)
+    private val logger = Logger(this).forceRemoteLogging(true)
 
     private val user: SystemUser by lazy {
         VialerApplication.get().component().systemUser
