@@ -172,7 +172,8 @@
 
         <activity android:name=".onboarding.OnboardingActivity"
                   android:theme="@style/OnboardingTheme"
-                  android:exported="true"/>
+                  android:exported="true"
+                  android:launchMode="singleTask"/>
 
         <activity android:name=".onboarding.SingleOnboardingStepActivity"
                   android:theme="@style/OnboardingTheme"/>

@@ -2,13 +2,10 @@ package com.voipgrid.vialer.onboarding.steps
 
 import android.app.AlertDialog
 import android.text.Editable
-import android.view.MotionEvent
 import android.view.View
-import android.widget.EditText
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.api.models.PhoneAccount
-import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.onboarding.core.Step
@@ -72,6 +69,9 @@ class MobileNumberStep : Step(), View.OnClickListener {
             processMobileAndOutgoingNumber(mobileNumber)
             return
         }
+
+        outgoingNumberTextDialog.clearFocus()
+        mobileNumberTextDialog.clearFocus()
 
         AlertDialog.Builder(onboarding)
                 .setTitle(R.string.onboarding_account_configure_no_outgoing_number_title)

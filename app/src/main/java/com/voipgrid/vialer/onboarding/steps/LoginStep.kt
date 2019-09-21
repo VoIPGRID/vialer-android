@@ -52,7 +52,11 @@ class LoginStep : Step() {
             actionId == EditorInfo.IME_ACTION_DONE && button_login.performClick()
         }
 
-        button_login.setOnClickListenerAndDisable { attemptLogin() }
+        button_login.setOnClickListenerAndDisable {
+            emailTextDialog.clearFocus()
+            passwordTextDialog.clearFocus()
+            attemptLogin()
+        }
         button_forgot_password.setOnClickListener { launchForgottenPasswordActivity() }
         button_info.setOnClickListener { launchApplicationInfoPage() }
 

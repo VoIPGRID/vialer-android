@@ -17,9 +17,19 @@ import javax.inject.Inject
 
 class OnboardingActivity : Onboarder() {
 
-    @Inject lateinit var logout: Logout
+    private val adapter = OnboardingAdapter(supportFragmentManager, lifecycle,
+        LogoStep(),
+        LoginStep(),
+        MobileNumberStep(),
+        MissingVoipAccountStep(),
+        ContactsPermissionStep(),
+        PhoneStatePermissionStep(),
+        MicrophonePermissionStep(),
+        OptimizationWhitelistStep(),
+        WelcomeStep()
+    )
 
-    private lateinit var adapter: OnboardingAdapter
+    @Inject lateinit var logout: Logout
 
     private val currentStep : Step
         get() = adapter.getStep(viewPager.currentItem)
@@ -27,23 +37,11 @@ class OnboardingActivity : Onboarder() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         VialerApplication.get().component().inject(this)
-
-        viewPager.registerOnPageChangeCallback(OnPageChangeCallback())
-
-        adapter = OnboardingAdapter(supportFragmentManager, lifecycle).apply {
-            addStep(LogoStep())
-            addStep(LoginStep())
-            addStep(MobileNumberStep())
-            addStep(MissingVoipAccountStep())
-            addStep(ContactsPermissionStep())
-            addStep(PhoneStatePermissionStep())
-            addStep(MicrophonePermissionStep())
-            addStep(OptimizationWhitelistStep())
-            addStep(WelcomeStep())
+        viewPager.apply {
+            registerOnPageChangeCallback(OnPageChangeCallback())
+            adapter = this@OnboardingActivity.adapter
+            isUserInputEnabled = false
         }
-
-        viewPager.adapter = adapter
-        viewPager.isUserInputEnabled = false
     }
 
     /**
@@ -58,18 +56,19 @@ class OnboardingActivity : Onboarder() {
             return
         }
 
-        logger.i("Progressing the onboarder from ${currentStep.javaClass.simpleName}")
-
-        val currentStep = adapter.getStep(viewPager.currentItem)
-
         if (currentStep != callerStep) {
             logger.i("Caller step (${callerStep::class.java.simpleName}) does not match current step (${currentStep::class.java.simpleName}) so not progressing")
             return
         }
 
-        runOnUiThread {
-            viewPager.setCurrentItem(viewPager.currentItem + 1, true)
-        }
+        logger.i("Progressing the onboarder from ${currentStep.javaClass.simpleName}")
+
+        progressViewPager(callerStep)
+    }
+
+    private fun progressViewPager(callerStep: Step) = runOnUiThread {
+        hideKeyboard()
+        viewPager.setCurrentItem(adapter.findCurrentStep(callerStep) + 1, false)
     }
 
     /**
@@ -106,10 +105,8 @@ class OnboardingActivity : Onboarder() {
     }
 
     private inner class OnPageChangeCallback : ViewPager2.OnPageChangeCallback() {
-
         override fun onPageSelected(currentPage: Int) {
             super.onPageSelected(currentPage)
-            hideKeyboard()
 
             viewPager.postDelayed({
                 val currentStep = adapter.getStep(currentPage)
