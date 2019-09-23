@@ -230,6 +230,7 @@
 
     <string name="t9helper_title">Tip</string>
     <string name="t9helper_text">Je kunt zoeken op %1$s door de volgende nummers op het toetsenbord in te drukken.</string>
+    <string name="t9_search_numbers">%d nummbers</string>
     <string name="notification_channel_voip_disabled">Je VoIP account is geregistreerd op een ander
         apparaat. Je kunt VoIP weer activeren bij instellingen
     </string>
