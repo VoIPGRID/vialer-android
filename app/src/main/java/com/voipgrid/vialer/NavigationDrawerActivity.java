@@ -2,25 +2,14 @@ package com.voipgrid.vialer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-
-import androidx.annotation.IdRes;
-import androidx.annotation.NonNull;
-import com.google.android.material.navigation.NavigationView;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -32,8 +21,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.api.VoipgridApi;
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.Destination;
 import com.voipgrid.vialer.api.models.FixedDestination;
 import com.voipgrid.vialer.api.models.InternalNumbers;
@@ -43,9 +40,9 @@ import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
 import java.util.List;
 
@@ -77,15 +74,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     private String mSelectedUserDestinationId;
     private boolean mFirstTimeOnItemSelected = true;
-
-    private BroadcastReceiver networkStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo ni = manager.getActiveNetworkInfo();
-            onNetworkChange(ni);
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,13 +153,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     protected void onResume() {
         super.onResume();
         refreshCurrentAvailability();
-        registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
-    }
-
-    @Override
-    protected void onPause() {
-        unregisterReceiver(networkStateReceiver);
-        super.onPause();
     }
 
     /**
@@ -389,20 +370,21 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         User.internal.setPhoneAccounts(phoneAccounts);
     }
 
-    private void onNetworkChange(NetworkInfo info) {
-        boolean connected = info != null && info.isConnected();
-        if (connected) {
-            if (mNoConnectionText.getVisibility() == View.VISIBLE) {
-                mNoConnectionText.setVisibility(View.GONE);
-                if (mSpinner != null) {
-                    mSpinner.setVisibility(View.VISIBLE);
-                }
-            }
-            return;
-        }
+    @Override
+    protected void onInternetConnectivityLost() {
         if (mSpinner != null && mNoConnectionText != null) {
             mSpinner.setVisibility(View.GONE);
             mNoConnectionText.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    protected void onInternetConnectivityGained() {
+        if (mNoConnectionText != null && mNoConnectionText.getVisibility() == View.VISIBLE) {
+            mNoConnectionText.setVisibility(View.GONE);
+            if (mSpinner != null) {
+                mSpinner.setVisibility(View.VISIBLE);
+            }
         }
     }
 
