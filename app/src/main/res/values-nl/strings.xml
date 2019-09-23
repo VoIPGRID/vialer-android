@@ -272,4 +272,9 @@
     </string>
     <string name="call_icon">Bel icoon</string>
     <string name="help_icon">Help icoon</string>
+
+    <string name="start_call">Bel</string>
+    <string name="add_to_contacts">Voeg to aan contacten</string>
+    <string name="copy_number">Kopieer nummer</string>
+    <string name="number_copied">Nummer gekopieerd: %1$s</string>
 </resources>
