@@ -8,7 +8,9 @@ import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.Log;
 
-import com.voipgrid.vialer.R;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
+
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
@@ -41,9 +43,6 @@ import org.pjsip.pjsua2.pjsua_call_media_status;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.UUID;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
 
 
 /**

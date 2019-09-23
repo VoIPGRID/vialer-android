@@ -92,7 +92,7 @@ class ForgottenPasswordActivity : AppCompatActivity() {
     companion object {
         private const val EMAIL_EXTRA = "com.voipgrid.vialer.ForgottenPasswordActivity.EMAIL"
 
-        fun launchForEmail(context: Context, email: String) {
+        fun launchForRequestEmail(context: Context, email: String) {
             val intent = Intent(context, ForgottenPasswordActivity::class.java).apply {
                 putExtra(EMAIL_EXTRA, email)
                 flags = FLAG_ACTIVITY_NEW_TASK

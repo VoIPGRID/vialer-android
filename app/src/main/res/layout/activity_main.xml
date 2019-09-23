@@ -41,12 +41,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-
-            <fragment
-                android:name="com.voipgrid.vialer.callrecord.CallRecordFragment"
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/view_pager"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/call_record_fragment" />
+                android:layout_height="match_parent" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/floating_action_button"
@@ -58,7 +56,7 @@
                 app:backgroundTint="@color/dialer_button"
                 app:borderWidth="@dimen/fab_border_width"
                 app:elevation="@dimen/fab_elevation"
-                app:layout_anchor="@id/call_record_fragment"
+                app:layout_anchor="@id/view_pager"
                 app:layout_anchorGravity="bottom|end" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>

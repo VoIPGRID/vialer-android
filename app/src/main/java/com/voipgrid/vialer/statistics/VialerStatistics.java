@@ -63,7 +63,8 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_FAI
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_SUCCESSFUL;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_GSM_CALL_IN_PROGRESS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_INSUFFICIENT_NETWORK;
-import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_NO_CALL_RECEIVED_FROM_ASTERISK;
+import static com.voipgrid.vialer.statistics.StatsConstants
+        .VALUE_FAILED_NO_CALL_RECEIVED_FROM_ASTERISK;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_COMPLETED_ELSEWHERE;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_DECLINED;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_NO_AUDIO;
