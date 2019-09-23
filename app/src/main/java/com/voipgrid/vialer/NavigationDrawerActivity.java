@@ -10,14 +10,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-
-import androidx.annotation.IdRes;
-import androidx.annotation.NonNull;
-import com.google.android.material.navigation.NavigationView;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -29,8 +21,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.api.VoipgridApi;
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.Destination;
 import com.voipgrid.vialer.api.models.FixedDestination;
 import com.voipgrid.vialer.api.models.InternalNumbers;
@@ -40,9 +40,9 @@ import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
 import java.util.List;
 
@@ -298,13 +298,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
                 Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
             }
-            if (!mConnectivityHelper.hasNetworkConnection()) {
-                // First check if there is a entry already to avoid duplicates.
-                if (mSpinner != null && mNoConnectionText != null) {
-                    mSpinner.setVisibility(View.GONE);
-                    mNoConnectionText.setVisibility(View.VISIBLE);
-                }
-            }
         }
         if (response.body() instanceof VoipGridResponse) {
             List<UserDestination> userDestinationObjects = ((VoipGridResponse<UserDestination>) response.body()).getObjects();
@@ -375,6 +368,24 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
         User.internal.setInternalNumbers(internalNumbers);
         User.internal.setPhoneAccounts(phoneAccounts);
+    }
+
+    @Override
+    protected void onInternetConnectivityLost() {
+        if (mSpinner != null && mNoConnectionText != null) {
+            mSpinner.setVisibility(View.GONE);
+            mNoConnectionText.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    protected void onInternetConnectivityGained() {
+        if (mNoConnectionText != null && mNoConnectionText.getVisibility() == View.VISIBLE) {
+            mNoConnectionText.setVisibility(View.GONE);
+            if (mSpinner != null) {
+                mSpinner.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     private static class CustomFontSpinnerAdapter<D> extends ArrayAdapter {
