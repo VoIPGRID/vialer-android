@@ -310,7 +310,6 @@
     <string name="missed_call">Oproep gemist (%1$s).</string>
     <string name="answered_elsewhere">Oproep (%1$s) elders opgenomen.</string>
     <string name="call_back">Bel terug</string>
-
     <string name="start_call">Bel</string>
     <string name="add_to_contacts">Voeg to aan contacten</string>
     <string name="copy_number">Kopieer nummer</string>
