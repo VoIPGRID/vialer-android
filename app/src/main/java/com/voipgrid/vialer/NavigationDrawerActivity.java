@@ -155,11 +155,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         refreshCurrentAvailability();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
     /**
      * Perform a request to refresh the current availability stats. This happens asynchronously.
      *
@@ -373,24 +368,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
         User.internal.setInternalNumbers(internalNumbers);
         User.internal.setPhoneAccounts(phoneAccounts);
-    }
-
-    @Override
-    protected void onInternetConnectivityLost() {
-        if (mSpinner != null && mNoConnectionText != null) {
-            mSpinner.setVisibility(View.GONE);
-            mNoConnectionText.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    protected void onInternetConnectivityGained() {
-        if (mNoConnectionText != null && mNoConnectionText.getVisibility() == View.VISIBLE) {
-            mNoConnectionText.setVisibility(View.GONE);
-            if (mSpinner != null) {
-                mSpinner.setVisibility(View.VISIBLE);
-            }
-        }
     }
 
     @Override
