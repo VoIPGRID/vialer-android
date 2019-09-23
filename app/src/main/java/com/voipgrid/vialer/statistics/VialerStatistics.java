@@ -63,8 +63,7 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_FAI
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_CALL_SETUP_SUCCESSFUL;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_GSM_CALL_IN_PROGRESS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_INSUFFICIENT_NETWORK;
-import static com.voipgrid.vialer.statistics.StatsConstants
-        .VALUE_FAILED_NO_CALL_RECEIVED_FROM_ASTERISK;
+import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_NO_CALL_RECEIVED_FROM_ASTERISK;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_COMPLETED_ELSEWHERE;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_DECLINED;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_FAILED_REASON_NO_AUDIO;
@@ -133,11 +132,9 @@ public class VialerStatistics {
 
         if (!hasReceivedAudio && !hasSentAudio) {
             failedReason = VALUE_FAILED_REASON_NO_AUDIO;
-        }
-        else if (!hasReceivedAudio) {
+        } else if (!hasReceivedAudio) {
             failedReason = VALUE_FAILED_REASON_NO_AUDIO_RECEIVED;
-        }
-        else {
+        } else {
             failedReason = VALUE_FAILED_REASON_NO_AUDIO_SENT;
         }
 
@@ -281,7 +278,7 @@ public class VialerStatistics {
     private VialerStatistics withMiddlewareInformation(String requestToken, String messageStartTime, String attempt) {
         addValue(KEY_MIDDLEWARE_KEY, requestToken);
         addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(messageStartTime)));
-        addValue(KEY_MIDDLEWARE_ATTEMPTS,attempt);
+        addValue(KEY_MIDDLEWARE_ATTEMPTS, attempt);
 
         return this;
     }
@@ -391,10 +388,10 @@ public class VialerStatistics {
 
         mLogger.i(
                 new GsonBuilder()
-                .disableHtmlEscaping()
-                .setPrettyPrinting()
-                .create()
-                .toJson(payload)
+                        .disableHtmlEscaping()
+                        .setPrettyPrinting()
+                        .create()
+                        .toJson(payload)
         );
     }
 
