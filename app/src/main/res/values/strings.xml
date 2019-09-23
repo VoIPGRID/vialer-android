@@ -307,4 +307,8 @@
     <string name="missed_call">Call missed (%1$s).</string>
     <string name="answered_elsewhere">Call (%1$s) answered elsewhere.</string>
     <string name="call_back">Call back</string>
+    <string name="start_call">Start call</string>
+    <string name="add_to_contacts">Add to contacts</string>
+    <string name="copy_number">Copy number</string>
+    <string name="number_copied">Number has been copied: %1$s</string>
 </resources>
