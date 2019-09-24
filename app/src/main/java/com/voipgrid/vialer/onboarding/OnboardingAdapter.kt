@@ -18,7 +18,7 @@ class OnboardingAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle, 
     }
 
     private fun addStep(step: Step) {
-        if (!step.shouldThisStepBeSkipped()) {
+        if (step.shouldThisStepBeAddedToOnboarding()) {
             logger.i("Adding ${step.javaClass.simpleName} to onboarder")
             steps.add(step)
         } else {

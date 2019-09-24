@@ -114,7 +114,7 @@ class MobileNumberStep : Step(), View.OnClickListener {
             } else {
                 logger.w("There is no linked voip account, prompt user to configure one")
                 User.voip.hasEnabledSip = false
-                state.hasVoipAccount = false
+                state?.hasVoipAccount = false
                 onboarding?.progress(this@MobileNumberStep)
             }
         }

@@ -2,7 +2,7 @@ package com.voipgrid.vialer.onboarding
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.viewpager2.widget.ViewPager2
+import android.util.Log
 import com.voipgrid.vialer.Logout
 import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.VialerApplication
@@ -38,7 +38,6 @@ class OnboardingActivity : Onboarder() {
         super.onCreate(savedInstanceState)
         VialerApplication.get().component().inject(this)
         viewPager.apply {
-            registerOnPageChangeCallback(OnPageChangeCallback())
             adapter = this@OnboardingActivity.adapter
             isUserInputEnabled = false
         }
@@ -66,9 +65,27 @@ class OnboardingActivity : Onboarder() {
         progressViewPager(callerStep)
     }
 
+    /**
+     * The view pager will be progressed to the next available step
+     * that should not be skipped.
+     *
+     */
     private fun progressViewPager(callerStep: Step) = runOnUiThread {
         hideKeyboard()
-        viewPager.setCurrentItem(adapter.findCurrentStep(callerStep) + 1, false)
+
+        val currentPosition = adapter.findCurrentStep(callerStep)
+
+        for (i in (currentPosition + 1) until adapter.itemCount) {
+            if (adapter.getStep(i).shouldThisStepBeSkipped(state)) {
+                continue
+            }
+
+            viewPager.setCurrentItem(i, false)
+
+            return@runOnUiThread
+        }
+
+        throw Exception("There is no onboarding step left to progress to")
     }
 
     /**
@@ -90,7 +107,10 @@ class OnboardingActivity : Onboarder() {
 
     override fun onBackPressed() {
         logger.i("Back pressed, restarting onboarding")
-        restart()
+        when (viewPager.currentItem == 0) {
+            true -> super.onBackPressed()
+            false -> restart()
+        }
     }
 
     /**
@@ -99,24 +119,7 @@ class OnboardingActivity : Onboarder() {
      */
     override fun restart() {
         logger.i("Restarting onboarding procedure")
-        logout.perform(true)
         finish()
-        startActivity(Intent(this, OnboardingActivity::class.java))
-    }
-
-    private inner class OnPageChangeCallback : ViewPager2.OnPageChangeCallback() {
-        override fun onPageSelected(currentPage: Int) {
-            super.onPageSelected(currentPage)
-
-            viewPager.postDelayed({
-                val currentStep = adapter.getStep(currentPage)
-                val nextPage = currentPage + 1
-
-                if (currentStep.shouldThisStepBeSkipped()) {
-                    logger.i("Skipping ${currentStep.javaClass.simpleName} at {$currentPage} and moving to {$nextPage}")
-                    viewPager.setCurrentItem(nextPage, false)
-                }
-            }, 10)
-        }
+        logout.perform(true)
     }
 }

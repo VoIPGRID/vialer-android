@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.onboarding.core
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.core.content.PermissionChecker
 import com.voipgrid.vialer.R
@@ -60,7 +59,11 @@ abstract class PermissionsStep : Step() {
         return PermissionChecker.checkSelfPermission(VialerApplication.get(), permission) == PermissionChecker.PERMISSION_GRANTED
     }
 
-    override fun shouldThisStepBeSkipped(): Boolean {
+    override fun shouldThisStepBeAddedToOnboarding(): Boolean {
+        return !alreadyHasPermission()
+    }
+
+    override fun shouldThisStepBeSkipped(state: OnboardingState): Boolean {
         return alreadyHasPermission()
     }
 }

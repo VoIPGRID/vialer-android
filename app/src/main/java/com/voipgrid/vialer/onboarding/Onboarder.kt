@@ -43,8 +43,6 @@ abstract class Onboarder : VialerBaseActivity() {
 
     abstract fun restart()
 
-    abstract override fun onBackPressed()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)

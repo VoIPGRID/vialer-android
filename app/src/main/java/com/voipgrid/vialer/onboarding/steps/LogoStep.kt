@@ -14,8 +14,8 @@ class LogoStep : AutoContinuingStep() {
         hasDisplayedLogoAlready = true
     }
 
-    override fun shouldThisStepBeSkipped(): Boolean {
-        return hasDisplayedLogoAlready
+    override fun shouldThisStepBeAddedToOnboarding(): Boolean {
+        return !hasDisplayedLogoAlready
     }
 
     companion object {
