@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import com.voipgrid.vialer.middleware.MiddlewareHelper
+import com.voipgrid.vialer.onboarding.OnboardingActivity
 import com.voipgrid.vialer.util.ConnectivityHelper
 
 class Logout(private val context: Context, private val sharedPreferences: SharedPreferences, private val connectivityHelper: ConnectivityHelper) {
@@ -22,7 +23,7 @@ class Logout(private val context: Context, private val sharedPreferences: Shared
         User.clear()
         sharedPreferences.edit().clear().apply()
 
-        context.startActivity(Intent(context, MainActivity::class.java).apply {
+        context.startActivity(Intent(context, OnboardingActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         })
     }
