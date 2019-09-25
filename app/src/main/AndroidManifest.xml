@@ -163,21 +163,25 @@
                   android:screenOrientation="portrait"
                   android:exported="true"
                   android:launchMode="singleTop"/>
+
         <activity android:name=".calling.PendingCallActivity"
                   android:screenOrientation="portrait"
                   android:exported="true"
                   android:launchMode="singleTop"/>
 
-        <activity android:name=".ForgottenPasswordActivity"/>
+        <activity android:name=".ForgottenPasswordActivity"
+                  android:theme="@style/OnboardingTheme"
+                  android:launchMode="singleTask"/>
 
         <activity android:name=".onboarding.OnboardingActivity"
                   android:theme="@style/OnboardingTheme"
-                  android:exported="true"
                   android:launchMode="singleTask"/>
 
         <activity android:name=".onboarding.SingleOnboardingStepActivity"
                   android:theme="@style/OnboardingTheme"/>
-        <activity android:name=".voipgrid.PasswordResetWebActivity" />
+
+        <activity android:name=".voipgrid.PasswordResetWebActivity"
+                  android:theme="@style/OnboardingTheme"/>
     </application>
 
 </manifest>

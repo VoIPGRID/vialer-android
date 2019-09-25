@@ -59,10 +59,10 @@
 
     <!-- Login fragment values -->
     <string name="login_header_label_text">Business</string>
-    <string name="login_header_label_subtext">calls in the cloud</string>
+    <string name="login_header_label_subtext">in the cloud</string>
     <string name="email_edittext_hint">Email address</string>
     <string name="password_edittext_hint">Password</string>
-    <string name="forgot_password_button_title">Forgot password?</string>
+    <string name="forgot_password_button_title">Forgot password</string>
     <string name="login_button_title">login</string>
     <string name="login_missing_field_title">Warning</string>
     <string name="login_missing_field_message">Please fill in all fields before login!</string>
@@ -70,7 +70,7 @@
 
 
     <!-- Forgot password fragment values -->
-    <string name="header_forgot_password_title">Forgot password?</string>
+    <string name="header_forgot_password_title">Forgot your password?</string>
     <string name="forgot_password_button_text">Send</string>
     <string name="forgot_password_description">Please enter your email address and we will send you instructions on setting a new password.</string>
     <string name="forgot_password_missing_field_title">Warning</string>
@@ -83,9 +83,10 @@
     <string name="forgot_password_success_message">You should receive an email shortly, containing instructions for resetting your password.</string>
 
     <!-- Configure fragment values. -->
-    <string name="configure_button_title">Configure</string>
-    <string name="configure_header_label_text">Vialer is configuring</string>
-    <string name="configure_header_label_subtext">your account</string>
+    <string name="configure_button_title">Continue</string>
+    <string name="configure_header_label_text">Account \nconfiguration</string>
+    <string name="configure_mobile_number_text">Enter your mobile phone number below:</string>
+    <string name="outgoing_number_description">The following number will be displayed when calling someone:</string>
     <string name="phonenumber_edittext_hint">Mobile number</string>
     <string name="outgoingnumber_edittext_hint">Outgoing number</string>
     <string name="phonenumber_info_text_title">Mobile phone number</string>
@@ -95,7 +96,8 @@
     <string name="set_voip_account_button_text">Set VoIP account</string>
     <string name="user_change_title">Change user</string>
     <string name="password_change_title">Change password</string>
-    <string name="voip_account_missing_text">To setup a phone call via the VoIP function, a VoIP account has to be set in your user profile.\n\nAt this moment there is no VoIP account linked to your account.</string>
+    <string name="voip_account_missing_title">Missing \n VoIP Account</string>
+    <string name="voip_account_missing_text">You do not currently have a VoIP account linked to your user, this is necessary to be able to make and receive calls via VoIP.\n\nIf you do not intend to use VoIP and only wish to use the management and/or two-step calling features then you may skip this step.</string>
 
     <!-- Welcome fragment values -->
     <string name="welcome_text">Welcome</string>
@@ -117,15 +119,16 @@
     <string name="two_factor_authentication_header_label_text">Two-factor</string>
     <string name="two_factor_authentication_header_label_subtext">Authentication</string>
     <string name="onboarding_permission_contacts_title">Contacts Permission</string>
-    <string name="onboarding_permission_contacts_justification">This permission is used to display your contact\'s information (name, image) against call records, it also allows you to search through your contacts for a number to dial. Your contact data will never be uploaded or leave your phone in any way.</string>
-    <string name="onboarding_permission_call_state_title">Call State Permission</string>
-    <string name="onboarding_permission_call_state_justification">This permission enables allows us to check the status of native calls and allows us to handle VoIP calls appropriately. For example, if you accept a native call, your VoIP call will automatically be put on hold.</string>
+    <string name="onboarding_permission_contacts_justification">This permission allows Vialer to display information (contacts book &amp; call activity) and to search through your contacts.\n\nThe data will be solely used for display and search purposes.</string>
+    <string name="onboarding_permission_call_state_title">Call \nPermission</string>
+    <string name="onboarding_permission_call_state_justification">This permission is required to allow Vialer to receive Voice over IP and cellular calls at the same time.\n\nWithout this permission, you might not be notified of incoming VoIP calls when a cellular one is ongoing.</string>
     <string name="onboarding_permission_microphone_title">Microphone Permission</string>
-    <string name="onboarding_permission_microphone_justification">This permission is required to transmit your voice when making or receiving calls, calls are not possible without this permission enabled. We do not access the microphone at any other time other than when there is a call in progress.</string>
-    <string name="onboarding_permission_accept">Accept</string>
+    <string name="onboarding_permission_microphone_justification">This permission is required to use the microphone during calls. Without this permission Vialer cannot make or receive calls.\n\nThe app will only access the microphone when you start a call.</string>
+    <string name="onboarding_permission_accept">Allow</string>
+    <string name="onboarding_deny">Deny</string>
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_battery_optimization_whitelist_title">Battery Optimization</string>
-    <string name="onboarding_battery_optimization_whitelist_justification">We ask to be whitelisted against battery optimization to prevent certain Android operating systems for silently killing the app, preventing incoming calls. Even when whitelisted we are aware of how important battery is and use it very conservatively.</string>
+    <string name="onboarding_battery_optimization_whitelist_justification">Battery optimization may silently shut down the app, block incoming calls and notifications, etc.\n\nThis permission will whitelist Vialer to prevent such issues. \n\nWe are aware how important battery is and use it very conservatively.</string>
     <string name="password_reset_title">Password Reset</string>
     <string name="password_reset_subtitle">Required</string>
     <string name="password_reset_description_top">You must create a new password before you are able to login.</string>

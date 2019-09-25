@@ -25,9 +25,6 @@ class MobileNumberStep : Step(), View.OnClickListener {
     private val mobileNumber: String
         get() = PhoneNumberUtils.format(mobileNumberTextDialog.text.toString())
 
-    private val hasOutgoingNumber: Boolean
-        get() = outgoingNumberTextDialog.text.isNotEmpty()
-
     private val mobileNumberCallback = MobileNumberCallback()
     private val configureCallback = ConfigureCallback()
 
@@ -42,21 +39,16 @@ class MobileNumberStep : Step(), View.OnClickListener {
             return
         }
 
-        val enableContinueButton: (_: Editable?) -> Unit = {
-            button_configure.isEnabled = mobileNumberTextDialog.text.isNotEmpty()
-        }
-
         mobileNumberTextDialog.setText(User.voipgridUser?.mobileNumber)
         mobileNumberTextDialog.setRightDrawableOnClickListener {
             alert(R.string.phonenumber_info_text_title, R.string.phonenumber_info_text)
         }
-        mobileNumberTextDialog.onTextChanged(enableContinueButton)
-
-        outgoingNumberTextDialog.setText(outgoingNumber)
-        outgoingNumberTextDialog.onTextChanged(enableContinueButton)
-
+        mobileNumberTextDialog.onTextChanged {
+            button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false
+        }
+        outgoingNumberTv.text = outgoingNumber
         button_configure.setOnClickListenerAndDisable(this)
-        enableContinueButton.invoke(null)
+        button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false
     }
 
     override fun onClick(view: View?) {
@@ -65,13 +57,13 @@ class MobileNumberStep : Step(), View.OnClickListener {
             return
         }
 
-        if (hasOutgoingNumber) {
+        outgoingNumberTv.clearFocus()
+        mobileNumberTextDialog.clearFocus()
+
+        if (hasOutgoingNumber()) {
             processMobileAndOutgoingNumber(mobileNumber)
             return
         }
-
-        outgoingNumberTextDialog.clearFocus()
-        mobileNumberTextDialog.clearFocus()
 
         AlertDialog.Builder(onboarding)
                 .setTitle(R.string.onboarding_account_configure_no_outgoing_number_title)
@@ -81,6 +73,8 @@ class MobileNumberStep : Step(), View.OnClickListener {
                 .show()
         button_configure.isEnabled = true
     }
+
+    private fun hasOutgoingNumber() = outgoingNumberTv.text.isNotEmpty()
 
     private fun processMobileAndOutgoingNumber(mobileNumber: String) {
         if (!PhoneNumberUtils.isValidMobileNumber(mobileNumber)) return

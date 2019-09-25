@@ -58,7 +58,6 @@ class LoginStep : Step() {
             attemptLogin()
         }
         button_forgot_password.setOnClickListener { launchForgottenPasswordActivity() }
-        button_info.setOnClickListener { launchApplicationInfoPage() }
 
         automaticallyLogInIfWeHaveCredentials()
     }
@@ -156,17 +155,5 @@ class LoginStep : Step() {
     private fun launchForgottenPasswordActivity() {
         logger.i("Detected forgot password click, launching activity")
         ForgottenPasswordActivity.launchForEmail(onboarding as Context, emailTextDialog.text.toString())
-    }
-
-    /**
-     * Launches a web view to show various information about Vialer.
-     *
-     */
-    private fun launchApplicationInfoPage() {
-        logger.i("Launching app info page")
-        val intent = Intent(activity, VoIPGRIDPortalWebActivity::class.java)
-        intent.putExtra(VoIPGRIDPortalWebActivity.PAGE, getString(R.string.url_app_info))
-        intent.putExtra(VoIPGRIDPortalWebActivity.TITLE, getString(R.string.info_menu_item_title))
-        startActivity(intent)
     }
 }

@@ -33,7 +33,7 @@ class ForgottenPasswordActivity : AppCompatActivity() {
 
     private fun setData() {
         edit_text_email.setText(intent.getStringExtra(EMAIL_EXTRA) ?: "")
-        button_send_password_email.isEnabled = edit_text_email.text.isNotEmpty()
+        button_send_password_email.isEnabled = edit_text_email.text?.isNotEmpty() ?: false
     }
 
     private fun setListeners() {

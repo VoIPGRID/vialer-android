@@ -66,7 +66,6 @@
     <string name="change_password_webview_toast">Om gebruik van de app te kunnen maken moet je eenmalig inloggen en je wachtwoord wijzigen</string>
 
     <!-- Forgot password fragment values -->
-    <string name="header_forgot_password_title">Wachtwoord vergeten</string>
     <string name="forgot_password_button_text">Verzenden</string>
     <string name="forgot_password_description">Voer uw e-mailadres in en wij sturen je instructies om je wachtwoord te herstellen.</string>
     <string name="forgot_password_missing_field_title">Let op</string>
