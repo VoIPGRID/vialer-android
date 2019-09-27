@@ -35,7 +35,7 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
     private lateinit var t9Fragment: T9Fragment
 
     private val isContactsExpanded: Boolean
-        get() = bottom.visibility != View.VISIBLE
+        get() = dialer.visibility != View.VISIBLE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -174,7 +174,7 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
 
     @OnClick(R.id.button_dialpad)
     internal fun showKeypad() {
-        bottom.visibility = View.VISIBLE
+        dialer.visibility = View.VISIBLE
         findViewById<View>(R.id.button_dialpad).visibility = View.INVISIBLE
         findViewById<View>(R.id.button_call).visibility = View.VISIBLE
     }
@@ -220,8 +220,8 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
     }
 
     override fun onExpandRequested() {
-        if (bottom.visibility != View.VISIBLE) return
-        bottom.visibility = View.GONE
+        if (dialer.visibility != View.VISIBLE) return
+        dialer.visibility = View.GONE
         findViewById<View>(R.id.button_dialpad).visibility = View.VISIBLE
         findViewById<View>(R.id.button_call).visibility = View.GONE
     }
