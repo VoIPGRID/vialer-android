@@ -7,4 +7,9 @@
 
     <string name="info_button_title">How does Voys work?</string>
 
+    <string name="onboarding_battery_optimization_whitelist_justification">Battery optimization may silently shut down the app, block incoming calls and notifications, etc.\n\nThis permission will whitelist Voys to prevent such issues. \n\nWe are aware how important battery is and use it very conservatively.</string>
+    <string name="onboarding_permission_microphone_justification">This permission is required to use the microphone during calls. Without this permission Voys cannot make or receive calls.\n\nThe app will only access the microphone when you start a call.</string>
+    <string name="onboarding_permission_call_state_justification">This permission is required to allow Voys to receive Voice over IP and cellular calls at the same time.\n\nWithout this permission, you might not be notified of incoming VoIP calls when a cellular one is ongoing.</string>
+    <string name="onboarding_permission_contacts_justification">This permission allows Voys to display information (contacts book &amp; call activity) and to search through your contacts.\n\nThe data will be solely used for display and search purposes.</string>
+
 </resources>

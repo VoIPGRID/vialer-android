@@ -8,4 +8,9 @@
 
     <string name="info_button_title">Hoe werkt bellen via Voys?</string>
 
+    <string name="onboarding_permission_contacts_justification">"Deze toestemming zorgt ervoor dat Voys informatie zoals de contactenlijst en gespreksactiviteit inzichtelijk maakt.\n\nDeze data wordt enkel gebruikt voor het tonen en doorzoeken hiervan. "</string>
+    <string name="onboarding_permission_call_state_justification">Deze toestemming is nodig om Voys toe te staan VoIP en mobiele gesprekken tegelijkertijd te ontvangen. Zonder deze toestemming zou je tijdens een mobiel gesprek geen melding kunnen ontvangen wanneer een VoIP gesprek binnenkomt.</string>
+    <string name="onboarding_permission_microphone_justification">Deze toestemming is nodig om de microfoon te gebruiken tijdens telefoongesprekken.\n\nZonder deze toestemming kan Voys geen gesprekken opzetten of ontvangen. \n\nDe app gebruikt de microfoon enkel wanneer een gesprek wordt opgezet.</string>
+    <string name="onboarding_battery_optimization_whitelist_justification">"Batterij-optimalisatie kan ervoor zorgen dat de app langzaam wordt gestopt, gesprekken en notificaties worden geblokkeerd etc.\n\nDeze toestemming zorgt ervoor dat Voys als veilig wordt gemarkeerd, waardoor dit gedrag zich niet voor zal doen.\n\nWe zijn ons ervan bewust hoe belangrijk je batterij is en gaan hier dan ook zuinig mee om. "</string>
+
 </resources>
