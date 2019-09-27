@@ -20,18 +20,18 @@ public class ActivityLifecycleTracker implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityCreated(Activity activity, Bundle bundle) {
-        new Logger(activity.getClass()).d("onCreate");
+        logActivityEvent(activity, "onCreate");
     }
 
     @Override
     public void onActivityStarted(Activity activity) {
-        new Logger(activity.getClass()).d("onStart");
+        logActivityEvent(activity, "onStart");
     }
 
     @Override
     public void onActivityResumed(Activity activity) {
         isApplicationVisible = true;
-        new Logger(activity.getClass()).d("onResume");
+        logActivityEvent(activity, "onResume");
 
         if (activity instanceof Onboarder) return;
 
@@ -48,14 +48,14 @@ public class ActivityLifecycleTracker implements Application.ActivityLifecycleCa
     @Override
     public void onActivityPaused(Activity activity) {
         isApplicationVisible = false;
-        new Logger(activity.getClass()).d("onPause");
+        logActivityEvent(activity, "onPause");
 
         new Handler().postDelayed(cancelEncryptionNotification, 1000);
     }
 
     @Override
     public void onActivityStopped(Activity activity) {
-        new Logger(activity.getClass()).d("onStop");
+        logActivityEvent(activity, "onStop");
     }
 
     @Override
@@ -65,7 +65,11 @@ public class ActivityLifecycleTracker implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-        new Logger(activity.getClass()).d("onDestroy");
+        logActivityEvent(activity, "onDestroy");
+    }
+
+    private void logActivityEvent(Activity activity, String event) {
+        new Logger(activity.getClass()).d(activity.getClass().getName() + " - " + event);
     }
 
     public boolean isApplicationVisible() {
