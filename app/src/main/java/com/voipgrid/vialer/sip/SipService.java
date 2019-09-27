@@ -68,6 +68,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      */
     public static boolean sipServiceActive = false;
 
+    public boolean incomingAlertsMuted = false;
+
     private Intent mIncomingCallDetails = null;
     private SipCall mCurrentCall;
     private SipCall mInitialCall;
@@ -569,6 +571,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     public void onTic() {
         if (getCurrentCall() == null) return;
 
+        if (incomingAlertsMuted) return;
+
         SipCall call = getCurrentCall();
 
         if (SipConstants.CALL_INCOMING_RINGING.equals(call.getCurrentCallState())) {
@@ -645,6 +649,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
             mLogger.i("Detected screen off event, disabling call alert");
 
             incomingCallAlerts.stop();
+            incomingAlertsMuted = true;
         }
     }
 

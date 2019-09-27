@@ -35,8 +35,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @BindView(R.id.button_pickup) ImageButton mButtonPickup;
     @BindView(R.id.call_buttons) View mCallButtons;
 
-    private boolean ringingIsPaused = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,8 +65,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
         SipService.performActionOnSipService(this, SipService.Actions.DECLINE_INCOMING_CALL);
 
-        endRinging();
-
+        finish();
     }
 
     @OnClick(R.id.button_pickup)
@@ -100,20 +97,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         getLogger().d("callVisibleForUser");
     }
 
-    /**
-     * Ends the incoming calling.
-     *
-     */
-    private void endRinging() {
-        finish();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        ringingIsPaused = true;
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -122,10 +105,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
             mCallButtons.setVisibility(View.VISIBLE);
         } else {
             mCallButtons.setVisibility(View.VISIBLE);
-        }
-
-        if (ringingIsPaused) {
-            ringingIsPaused = false;
         }
     }
 
@@ -155,7 +134,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @Override
     public void onCallDisconnected() {
         mSipServiceConnection.disconnect(true);
-        endRinging();
+        finish();
     }
 
     @Override
