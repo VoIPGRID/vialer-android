@@ -79,8 +79,7 @@
 
     <!-- Configure fragment values. -->
     <string name="configure_button_title">Instellen</string>
-    <string name="configure_header_label_text">Vialer stelt</string>
-    <string name="configure_header_label_subtext">je account in</string>
+    <string name="configure_header_label_text">Account \nconfiguratie</string>
     <string name="phonenumber_edittext_hint">Mobiel nummer</string>
     <string name="outgoingnumber_edittext_hint">Uitgaand nummer</string>
     <string name="phonenumber_info_text_title">Mobiele telefoonnummer</string>
@@ -249,7 +248,7 @@
     <string name="call_codec_high_quality">Hogere audio kwaliteit</string>
     <string name="tab_title_recents">mijn gesprekken</string>
     <string name="tab_title_missed">gemiste gesprekken</string>
-    <string name="call_records_show_all"></string>
+    <string name="call_records_show_all">fix</string>
     <string name="call_connection_setting_not_supported">Jouw Android versie staat het aanpassen van
         deze instelling niet toe
     </string>

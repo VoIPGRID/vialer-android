@@ -1,7 +1,6 @@
 <resources>
 
     <string name="app_name">ANNAbel</string>
-    <string name="configure_header_label_text">ANNAbel is configuring</string>
 
     <string name="url_app_info">https://bellenmetannabel.nl/hoe-werkt-de-annabel-app/</string>
 
