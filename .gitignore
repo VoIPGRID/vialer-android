@@ -37,3 +37,6 @@ fastlane/**/builds/
 # snapshot generated screenshots
 fastlane/**/screenshots/**/*.png
 fastlane/**/screenshots/screenshots.html
+
+# Private log strings
+app/src/main/res/values/log_strings.xml

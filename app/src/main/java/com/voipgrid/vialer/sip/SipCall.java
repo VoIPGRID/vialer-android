@@ -8,6 +8,9 @@ import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
+
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
@@ -41,9 +44,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.UUID;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
-
 
 /**
  * Call class used to interact with a call.
@@ -63,6 +63,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     private boolean mCallIsConnected = false;
     private boolean mIsOnHold;
     private boolean mUserHangup = false;
+    private boolean mCallDeclined = false;
+    private boolean mCallCompletedElsewhere = false;
     private boolean mCallIsTransferred = false;
     private boolean mRingbackStarted = false;
     @CallDirection private String mCallDirection;
@@ -105,6 +107,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 } else if (packet.contains(CallMissedReason.CALL_COMPLETED_ELSEWHERE.toString())) {
                     reason = CallMissedReason.CALL_COMPLETED_ELSEWHERE;
                     VialerStatistics.incomingCallWasCompletedElsewhere(this);
+                    mCallCompletedElsewhere = true;
                 }
 
                 if (reason != CallMissedReason.UNKNOWN) {
@@ -212,6 +215,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public void decline() throws Exception {
+        mCallDeclined = true;
         hangupWithStatusCode(pjsip_status_code.PJSIP_SC_BUSY_HERE);
         VialerStatistics.userDeclinedIncomingCall(this);
     }
@@ -333,8 +337,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                     mLogger.d("Network switch during ringing phase.");
                 }
 
+                boolean wasInCall = mCallIsConnected;
                 onCallStopRingback();
                 onCallDisconnected();
+                if (mCallCompletedElsewhere) {
+                    mSipService.getNotification().answeredElsewhere(mPhoneNumber);
+                } else if (!wasInCall && !mUserHangup && !mCallDeclined && isIncoming()) {
+                    mSipService.getNotification().missed(mPhoneNumber);
+                }
                 delete();
             }
 
@@ -451,6 +461,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         if (mSipService.getCurrentCall() != null || mSipService.getNativeCallManager().isBusyWithNativeCall()) {
             code = pjsip_status_code.PJSIP_SC_BUSY_HERE;
             LogHelper.using(mLogger).logBusyReason(mSipService);
+        }
+
+        if (mSipService.getCurrentCall() != null) {
+            VialerStatistics.incomingCallFailedDueToOngoingVialerCall(this);
+        }
+
+        if (mSipService.getNativeCallManager().isBusyWithNativeCall()) {
+            VialerStatistics.incomingCallFailedDueToOngoingGsmCall(this);
         }
 
         mCurrentCallState = SipConstants.CALL_INCOMING_RINGING;
