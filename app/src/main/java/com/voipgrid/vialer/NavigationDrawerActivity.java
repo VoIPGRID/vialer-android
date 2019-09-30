@@ -376,6 +376,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             mSpinner.setVisibility(View.GONE);
             mNoConnectionText.setVisibility(View.VISIBLE);
         }
+        super.onInternetConnectivityLost();
     }
 
     @Override

@@ -12,6 +12,7 @@ import android.net.Network;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.voipgrid.vialer.VialerApplication;
@@ -103,6 +104,10 @@ public abstract class VialerBaseActivity extends AppCompatActivity {
      *
      */
     protected void onInternetConnectivityLost() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Intent panelIntent = new Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY);
+            startActivity(panelIntent);
+        }
     }
 
     /**
