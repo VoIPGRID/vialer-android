@@ -82,9 +82,8 @@ class OnboardingActivity : Onboarder() {
      */
     override fun restart() {
         logger.i("Restarting onboarding procedure")
-        logout.perform(true)
+        logout.perform(true, this)
         finish()
-        startActivity(intent)
     }
 
     private inner class OnPageChangeCallback : ViewPager2.OnPageChangeCallback() {

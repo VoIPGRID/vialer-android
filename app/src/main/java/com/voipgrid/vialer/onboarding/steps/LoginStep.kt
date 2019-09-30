@@ -37,7 +37,7 @@ class LoginStep : Step() {
         emailTextDialog.onTextChanged(enableSubmitButton)
         passwordTextDialog.onTextChanged(enableSubmitButton)
 
-        passwordTextDialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent ->
+        passwordTextDialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
             actionId == EditorInfo.IME_ACTION_DONE && button_login.performClick()
         }
 

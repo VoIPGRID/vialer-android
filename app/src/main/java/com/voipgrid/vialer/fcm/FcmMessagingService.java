@@ -1,13 +1,14 @@
 package com.voipgrid.vialer.fcm;
 
-
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 import android.telephony.TelephonyManager;
+
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -19,6 +20,7 @@ import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.VoipDisabledNotification;
+import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -26,8 +28,6 @@ import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
-import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -120,6 +120,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
         if (nativeCallManager.isBusyWithNativeCall()) {
             rejectDueToNativeCallAlreadyInProgress(remoteMessage, remoteMessageData);
+            new MissedCallNotification(remoteMessageData.getPhoneNumber()).display();
             return;
         }
 

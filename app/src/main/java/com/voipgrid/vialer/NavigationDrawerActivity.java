@@ -267,7 +267,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
      * Perform logout; Remove the stored SystemUser and PhoneAccount and show the login view
      */
     private void performLogout() {
-        logout.perform(false);
+        logout.perform(false, this);
     }
 
     /**
@@ -376,6 +376,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             mSpinner.setVisibility(View.GONE);
             mNoConnectionText.setVisibility(View.VISIBLE);
         }
+        super.onInternetConnectivityLost();
     }
 
     @Override
