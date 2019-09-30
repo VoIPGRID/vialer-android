@@ -150,8 +150,8 @@ abstract class AbstractCallNotification : AbstractNotification() {
         ActiveCallNotification(call).display()
     }
 
-    fun missed(number: String) {
-        MissedCallNotification(number).display()
+    fun missed(number: String, contactName: String?) {
+        MissedCallNotification(number, contactName).display()
     }
 
     fun answeredElsewhere(number: String) {

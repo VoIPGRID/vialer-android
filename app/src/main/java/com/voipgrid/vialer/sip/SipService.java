@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
@@ -633,8 +634,26 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * @return The complete pending intent
      */
     public static PendingIntent createSipServiceAction(@Actions.Valid String action) {
+        return createSipServiceAction(action, null, null);
+    }
+
+    /**
+     * Create an action for the SipService, specifying a valid action, the URI data and extras bundle.
+     *
+     * @param action The action the SipService should perform when resolved
+     * @param data The URI data the intent is operating on.
+     * @param bundle The extras bundle to pass additional data to the intent.
+     * @return The complete pending intent
+     */
+    public static PendingIntent createSipServiceAction(@Actions.Valid String action, @Nullable Uri data, @Nullable Bundle bundle) {
         Intent intent = new Intent(VialerApplication.get(), SipService.class);
         intent.setAction(action);
+        if (data != null) {
+            intent.setData(data);
+        }
+        if (bundle != null) {
+            intent.putExtras(bundle);
+        }
         return PendingIntent.getService(VialerApplication.get(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -701,8 +720,9 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
                 stopSelf();
                 if (mIncomingCallDetails != null) {
                     String number = mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
+                    String contactName = mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME);
                     if (number != null && !number.isEmpty()) {
-                        new MissedCallNotification(number).display();
+                        new MissedCallNotification(number, contactName).display();
                     }
                 }
             }
