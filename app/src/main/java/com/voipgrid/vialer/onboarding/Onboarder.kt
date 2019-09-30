@@ -11,12 +11,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.logging.VialerBaseActivity
 import com.voipgrid.vialer.onboarding.core.OnboardingState
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
 typealias PermissionCallback = () -> Unit
 
-abstract class Onboarder : AppCompatActivity() {
+abstract class Onboarder : VialerBaseActivity() {
 
     protected val logger = Logger(this)
 
