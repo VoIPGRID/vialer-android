@@ -1,6 +1,29 @@
 package com.voipgrid.vialer.statistics;
 
 
+import android.content.Context;
+
+import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.GsonBuilder;
+import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.api.Middleware;
+import com.voipgrid.vialer.api.SecureCalling;
+import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.media.monitoring.PacketStats;
+import com.voipgrid.vialer.sip.SipCall;
+import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
+import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import static com.voipgrid.vialer.fcm.RemoteMessageData.ATTEMPT;
 import static com.voipgrid.vialer.fcm.RemoteMessageData.MESSAGE_START_TIME;
 import static com.voipgrid.vialer.fcm.RemoteMessageData.REQUEST_TOKEN;
@@ -52,29 +75,6 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_USER;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_WIFI;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_OS;
-
-import android.content.Context;
-
-import com.google.firebase.messaging.RemoteMessage;
-import com.google.gson.GsonBuilder;
-import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.Middleware;
-import com.voipgrid.vialer.api.SecureCalling;
-import com.voipgrid.vialer.api.ServiceGenerator;
-import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.media.monitoring.PacketStats;
-import com.voipgrid.vialer.sip.SipCall;
-import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
-import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class VialerStatistics {
 
@@ -132,11 +132,9 @@ public class VialerStatistics {
 
         if (!hasReceivedAudio && !hasSentAudio) {
             failedReason = VALUE_FAILED_REASON_NO_AUDIO;
-        }
-        else if (!hasReceivedAudio) {
+        } else if (!hasReceivedAudio) {
             failedReason = VALUE_FAILED_REASON_NO_AUDIO_RECEIVED;
-        }
-        else {
+        } else {
             failedReason = VALUE_FAILED_REASON_NO_AUDIO_SENT;
         }
 
@@ -280,7 +278,7 @@ public class VialerStatistics {
     private VialerStatistics withMiddlewareInformation(String requestToken, String messageStartTime, String attempt) {
         addValue(KEY_MIDDLEWARE_KEY, requestToken);
         addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(messageStartTime)));
-        addValue(KEY_MIDDLEWARE_ATTEMPTS,attempt);
+        addValue(KEY_MIDDLEWARE_ATTEMPTS, attempt);
 
         return this;
     }
@@ -390,10 +388,10 @@ public class VialerStatistics {
 
         mLogger.i(
                 new GsonBuilder()
-                .disableHtmlEscaping()
-                .setPrettyPrinting()
-                .create()
-                .toJson(payload)
+                        .disableHtmlEscaping()
+                        .setPrettyPrinting()
+                        .create()
+                        .toJson(payload)
         );
     }
 
