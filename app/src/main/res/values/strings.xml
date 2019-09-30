@@ -302,7 +302,6 @@
     <string name="encrypted_calling_notification_title">Encrypted Calling is not enabled</string>
     <string name="encrypted_calling_notification_description">Encrypted calling is not currently enabled, third parties may be able to intercept and listen to your phone calls.</string>
     <string name="call_icon">Call icon</string>
-    <string name="exclamation_mark">!</string>
     <string name="help_icon">Help icon</string>
     <string name="missed_call">Call missed (%1$s).</string>
     <string name="answered_elsewhere">Call (%1$s) answered elsewhere.</string>
