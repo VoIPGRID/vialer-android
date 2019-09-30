@@ -294,4 +294,7 @@
     <string name="add_to_contacts">Add to contacts</string>
     <string name="copy_number">Copy number</string>
     <string name="number_copied">Number has been copied: %1$s</string>
+
+    <string name="missed_call">Call missed (%1$s).</string>
+    <string name="answered_elsewhere">Call (%1$s) answered elsewhere.</string>
 </resources>
