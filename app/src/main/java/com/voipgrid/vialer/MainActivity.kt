@@ -74,8 +74,7 @@ class MainActivity : NavigationDrawerActivity() {
      *
      */
     private fun returnUserToLoginScreen() {
-        logout.perform(true)
-        Onboarder.start(this)
+        logout.perform(true, this)
         finish()
     }
 
