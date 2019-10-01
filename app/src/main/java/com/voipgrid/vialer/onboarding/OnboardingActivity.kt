@@ -29,8 +29,6 @@ class OnboardingActivity : Onboarder() {
         WelcomeStep()
     )
 
-    @Inject lateinit var logout: Logout
-
     private val currentStep : Step
         get() = adapter.getStep(viewPager.currentItem)
 
@@ -120,6 +118,6 @@ class OnboardingActivity : Onboarder() {
     override fun restart() {
         logger.i("Restarting onboarding procedure")
         finish()
-        logout.perform(true)
+        logout(true)
     }
 }

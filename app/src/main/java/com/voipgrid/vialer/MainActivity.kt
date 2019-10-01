@@ -8,7 +8,6 @@ import com.google.android.material.tabs.TabLayout
 import com.voipgrid.vialer.callrecord.CallRecordFragment
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.onboarding.Onboarder
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.PhoneAccountHelper
@@ -64,8 +63,7 @@ class MainActivity : NavigationDrawerActivity() {
      *
      */
     private fun returnUserToLoginScreen() {
-        logout.perform(true)
-        Onboarder.start(this)
+        logout(true)
         finish()
     }
 

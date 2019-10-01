@@ -59,8 +59,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         implements Callback, AdapterView.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
 
-    @Inject Logout logout;
-
     private CustomFontSpinnerAdapter<Destination> mSpinnerAdapter;
     private DrawerLayout mDrawerLayout;
     private Spinner mSpinner;
@@ -226,36 +224,21 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.navigation_item_logout:
-                logout();
+                promptForLogout();
                 break;
         }
         return false;
     }
 
-    private void logout() {
+    private void promptForLogout() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(this.getString(R.string.logout_dialog_text));
         builder.setPositiveButton(this.getString(R.string.logout_dialog_positive),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        performLogout();
-                    }
-                });
+                (dialog, id) -> logout(false));
         builder.setNegativeButton(this.getString(R.string.logout_dialog_negative),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
+                (dialog, id) -> dialog.dismiss());
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
-
-    /**
-     * Perform logout; Remove the stored SystemUser and PhoneAccount and show the login view
-     */
-    private void performLogout() {
-        logout.perform(false);
     }
 
     @Override

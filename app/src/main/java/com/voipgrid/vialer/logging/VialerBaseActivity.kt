@@ -14,6 +14,7 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.voipgrid.vialer.Logout
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.ConnectivityHelper
@@ -28,6 +29,7 @@ abstract class VialerBaseActivity : AppCompatActivity() {
     @Inject protected lateinit var broadcastReceiverManager: BroadcastReceiverManager
     @Inject protected lateinit var connectivityHelper: ConnectivityHelper
     @Inject protected lateinit var connectivityManager: ConnectivityManager
+    @Inject protected lateinit var logout: Logout
 
     private val networkChangeReceiver = NetworkChangeReceiver()
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
@@ -66,6 +68,14 @@ abstract class VialerBaseActivity : AppCompatActivity() {
         if (currentFocus != null) {
             (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
         }
+    }
+
+    /**
+     * Log the current user out.
+     *
+     */
+    fun logout(force: Boolean = false) {
+        logout.perform(force, this)
     }
 
     /**

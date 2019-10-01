@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.onboarding
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -93,8 +94,8 @@ abstract class Onboarder : VialerBaseActivity() {
     }
 
     companion object {
-        fun start(context: Context) {
-            context.startActivity(Intent(context, OnboardingActivity::class.java))
+        fun start(activity: Activity) {
+            activity.startActivity(Intent(activity, OnboardingActivity::class.java))
         }
     }
 
