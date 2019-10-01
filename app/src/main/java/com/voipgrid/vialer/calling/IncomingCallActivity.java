@@ -45,10 +45,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent(), mContactImage);
     }
 
-    private boolean currentlyOnLockScreen() {
-        return mKeyguardManager.inKeyguardRestrictedInputMode();
-    }
-
     @OnClick(R.id.button_decline)
     public void onDeclineButtonClicked() {
         getLogger().d("decline");
@@ -95,17 +91,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         intent.putExtra(CALL_IS_CONNECTED, true);
         startActivity(intent);
         getLogger().d("callVisibleForUser");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (currentlyOnLockScreen()) {
-            mCallButtons.setVisibility(View.VISIBLE);
-        } else {
-            mCallButtons.setVisibility(View.VISIBLE);
-        }
     }
 
     @Override

@@ -13,7 +13,6 @@ import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
-import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.callrecord.CallRecordViewHolder;
@@ -54,8 +53,6 @@ public interface VialerComponent {
     void inject(NetworkAvailabilityActivity networkAvailabilityActivity);
 
     void inject(SipService sipService);
-
-    void inject(PendingCallActivity pendingCallActivity);
 
     void inject(CallRecordAdapter callRecordAdapter);
 

@@ -10,7 +10,6 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.User;
-import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.persistence.UserPreferences;
 import com.voipgrid.vialer.sip.SipConstants;
@@ -106,22 +105,10 @@ public class DialHelper {
                     return;
                 }
                 callWithSip(number, contactName);
-                startPendingCallActivity(number);
             } else {
                 callWithApi(number, contactName);
             }
         }
-    }
-
-    /**
-     * Start the pending call activity that is displayed while the call is being setup.
-     *
-     * @param number The number that will be displayed in the call activity
-     */
-    private void startPendingCallActivity(String number) {
-        Intent intent = new Intent(mContext, PendingCallActivity.class);
-        intent.putExtra(PendingCallActivity.EXTRA_DIALLED_NUMBER, number);
-        mContext.startActivity(intent);
     }
 
     /**

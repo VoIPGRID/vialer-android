@@ -44,7 +44,7 @@ public class KeyPadView extends LinearLayout
             );
             mToneGenerator = new ToneGenerator(
                     AudioManager.STREAM_DTMF,
-                    (int) (Math.floor(audioManager.getStreamVolume(AudioManager.STREAM_DTMF) * 5))
+                    (int) (Math.floor(audioManager.getStreamVolume(AudioManager.STREAM_DTMF) * 10))
             );
         }
 
