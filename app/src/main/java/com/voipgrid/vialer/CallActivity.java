@@ -180,7 +180,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
             updateUi();
         } else {
             mConnected = false;
-            finishAfterDelay();
+            finish();
         }
     }
 
@@ -204,7 +204,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     @Override
     public void onServiceStopped() {
         mConnected = false;
-        finishAfterDelay();
+        finish();
     }
 
     /**
@@ -308,12 +308,10 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         try {
             mSipServiceConnection.get().getCurrentCall().hangup(true);
             updateUi();
-        } catch (Exception e) {
+        } catch (Exception ignored) { }
+        finally {
             finish();
-            return;
         }
-
-        finishAfterDelay();
     }
 
     @OnClick(R.id.button_mute)
