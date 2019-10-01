@@ -75,13 +75,17 @@ public class NumberInputView extends RelativeLayout implements
         mRemoveButton.setOnClickListener(this);
         mRemoveButton.setOnLongClickListener(this);
 
-        mNumberInputEditText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.dialpad_number_input_text_size));
+        resetTextToDefaultSize();
 
         mExitButton.setOnClickListener(v -> {
             mListener.exitButtonWasPressed();
         });
 
-        encryptionDisabledWarning.setVisibility(secureCalling.isEnabled() ? GONE : VISIBLE);
+        encryptionDisabledWarning.setVisibility(secureCalling.isEnabled() ? INVISIBLE : VISIBLE);
+    }
+
+    private void resetTextToDefaultSize() {
+        mNumberInputEditText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.dialpad_number_input_text_size));
     }
 
     public void setOnInputChangedListener(OnInputChangedListener listener) {
@@ -202,6 +206,12 @@ public class NumberInputView extends RelativeLayout implements
 
     public void setCorrectFontSize() {
         int charCount = mNumberInputEditText.getText().length();
+
+        if (charCount == 0) {
+            resetTextToDefaultSize();
+            return;
+        }
+
         float charSize = getTextSize();
 
         int inputMaxScalingLength = getResources().getInteger(R.integer.dialpad_number_input_max_scaling_length);
@@ -258,6 +268,7 @@ public class NumberInputView extends RelativeLayout implements
     public void clear() {
         mNumberInputEditText.setCursorVisible(false);
         mNumberInputEditText.getText().clear();
+        setCorrectFontSize();
     }
 
     public void setNumber(String number) {
