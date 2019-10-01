@@ -3,6 +3,7 @@ package com.voipgrid.vialer.t9
 object T9 {
 
     private val keyMappings = mapOf(
+            '+' to charArrayOf(),
             '0' to charArrayOf(),
             '1' to charArrayOf(),
             '2' to charArrayOf('a', 'b', 'c'),
