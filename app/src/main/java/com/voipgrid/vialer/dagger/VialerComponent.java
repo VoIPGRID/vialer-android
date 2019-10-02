@@ -24,15 +24,13 @@ import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.onboarding.OnboardingActivity;
 import com.voipgrid.vialer.onboarding.steps.LoginStep;
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
-import com.voipgrid.vialer.onboarding.steps.MobileNumberStep;
+import com.voipgrid.vialer.onboarding.steps.AccountConfigurationStep;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.t9.T9HelperFragment;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity;
-
-import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
 
@@ -91,7 +89,7 @@ public interface VialerComponent {
 
     void inject(LoginStep loginStep);
 
-    void inject(MobileNumberStep mobileNumberStep);
+    void inject(AccountConfigurationStep accountConfigurationStep);
 
     void inject(NavigationDrawerActivity twoFactorStep);
 

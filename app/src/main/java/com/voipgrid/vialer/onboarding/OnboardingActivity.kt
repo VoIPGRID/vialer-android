@@ -2,8 +2,6 @@ package com.voipgrid.vialer.onboarding
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import com.voipgrid.vialer.Logout
 import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.onboarding.core.Step
@@ -13,14 +11,13 @@ import com.voipgrid.vialer.onboarding.steps.permissions.MicrophonePermissionStep
 import com.voipgrid.vialer.onboarding.steps.permissions.OptimizationWhitelistStep
 import com.voipgrid.vialer.onboarding.steps.permissions.PhoneStatePermissionStep
 import kotlinx.android.synthetic.main.activity_onboarding.*
-import javax.inject.Inject
 
 class OnboardingActivity : Onboarder() {
 
     private val adapter = OnboardingAdapter(supportFragmentManager, lifecycle,
         LogoStep(),
         LoginStep(),
-        MobileNumberStep(),
+        AccountConfigurationStep(),
         MissingVoipAccountStep(),
         ContactsPermissionStep(),
         PhoneStatePermissionStep(),
