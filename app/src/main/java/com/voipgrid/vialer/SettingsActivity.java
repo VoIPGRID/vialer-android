@@ -6,11 +6,10 @@ import static com.voipgrid.vialer.util.ConnectivityHelper.converseToPreference;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,8 +30,6 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.UserSynchronizer;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.MobileNumber;
-import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
@@ -91,8 +88,6 @@ public class SettingsActivity extends LoginRequiredActivity {
     @BindView(R.id.tls_switch) Switch tlsSwitch;
     @BindView(R.id.stun_switch) Switch stunSwitch;
 
-    private PhoneAccount mPhoneAccount;
-    private SystemUser mSystemUser;
     private VoipgridApi mVoipgridApi;
     private Logger mLogger;
     private ClipboardHelper mClipboardHelper;
@@ -103,7 +98,7 @@ public class SettingsActivity extends LoginRequiredActivity {
     private BroadcastReceiver mVoipDisabledReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateAndPopulate();
+            updateUi();
         }
     };
     private boolean enableSipOnNextLoad = false;
@@ -134,8 +129,8 @@ public class SettingsActivity extends LoginRequiredActivity {
         initIgnoreBatteryOptimizationSwitch();
         initUsePhoneRingtoneSwitch();
 
-        // Update and populate the fields.
-        updateAndPopulate();
+        // Update and updateUi the fields.
+        updateUi();
 
         // Update phone account and systemuser.
         userSynchronizer.sync();
@@ -282,7 +277,7 @@ public class SettingsActivity extends LoginRequiredActivity {
                         }
                     }
 
-                    updateAndPopulate();
+                    updateUi();
 
                     new VoipDisabledNotification().remove();
                 });
@@ -354,18 +349,11 @@ public class SettingsActivity extends LoginRequiredActivity {
         initializeAdvancedSettings();
     }
 
-    private void updateAndPopulate() {
-        mSystemUser = User.getVoipgridUser();
-        mPhoneAccount = User.getVoipAccount();
-
-        populate();
-    }
-
-    private void populate() {
+    private void updateUi() {
         if (User.voip.isAccountSetupForSip()) {
             mVoipSwitch.setChecked(User.voip.getHasEnabledSip());
-            if (mPhoneAccount != null) {
-                mSipIdEditText.setText(mPhoneAccount.getAccountId());
+            if (User.getHasVoipAccount()) {
+                mSipIdEditText.setText(User.getVoipAccount().getAccountId());
             }
         } else {
             mVoipSwitch.setVisibility(View.GONE);
@@ -374,13 +362,13 @@ public class SettingsActivity extends LoginRequiredActivity {
         mSipIdContainer.setVisibility(User.voip.getHasEnabledSip() ? View.VISIBLE : View.GONE);
         enableProgressBar(false);
 
-        if (mSystemUser == null) {
-            mLogger.e("Attempted to populate AccountActivity but there does not seem to be a SystemUser available");
+        if (!User.isLoggedIn()) {
+            mLogger.e("Attempted to updateUi AccountActivity but there does not seem to be a SystemUser available");
             return;
         }
 
-        mMobileNumberEditText.setText(mSystemUser.getMobileNumber());
-        mOutgoingNumberEditText.setText(mSystemUser.getOutgoingCli());
+        mMobileNumberEditText.setText(User.getVoipgridUser().getMobileNumber());
+        mOutgoingNumberEditText.setText(User.getVoipgridUser().getOutgoingCli());
     }
 
     @Override
@@ -506,11 +494,9 @@ public class SettingsActivity extends LoginRequiredActivity {
 
             updateUiBasedOnCurrentEditMode();
 
-            mSystemUser.setMobileNumber(mNumber);
+            userSynchronizer.sync();
 
-            User.setVoipgridUser(mSystemUser);
-
-            populate();
+            new Handler().postDelayed(SettingsActivity.this::updateUi, 2000);
         }
 
         @Override
