@@ -15,8 +15,8 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 165
-        versionName "6.4.0 beta 05"
+        versionCode 167
+        versionName "6.4.0 beta 07"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {

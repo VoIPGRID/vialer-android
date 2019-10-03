@@ -101,7 +101,6 @@ public class SettingsActivity extends LoginRequiredActivity {
             updateUi();
         }
     };
-    private boolean enableSipOnNextLoad = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,12 +127,9 @@ public class SettingsActivity extends LoginRequiredActivity {
         super.onResume();
         initIgnoreBatteryOptimizationSwitch();
         initUsePhoneRingtoneSwitch();
-
-        // Update and updateUi the fields.
-        updateUi();
-
-        // Update phone account and systemuser.
         userSynchronizer.sync();
+
+        updateUi();
 
         initializeAdvancedSettings();
 
@@ -143,9 +139,7 @@ public class SettingsActivity extends LoginRequiredActivity {
             mConnectionSpinner.setEnabled(false);
         }
 
-        if (enableSipOnNextLoad) {
-            mVoipSwitch.setChecked(true);
-        }
+        new Handler().postDelayed(SettingsActivity.this::updateUi, 2000);
     }
 
     @Override
@@ -248,42 +242,28 @@ public class SettingsActivity extends LoginRequiredActivity {
     }
 
     @OnCheckedChanged(R.id.account_sip_switch)
-    public void onSipCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (User.voip.getHasEnabledSip() == isChecked) return;
+    public void onSipCheckedChanged(CompoundButton button, boolean enable) {
+        if (!button.isPressed()) return;
 
-        boolean shouldLoadMissingVoip = !enableSipOnNextLoad;
-        enableSipOnNextLoad = false;
-
-        if (!isChecked) {
-            // Unregister at middleware.
+        if (!enable) {
             MiddlewareHelper.unregister(this);
-            // Stop the sipservice.
             stopService(new Intent(this, SipService.class));
             mSipIdContainer.setVisibility(View.GONE);
             User.voip.setHasEnabledSip(false);
-        } else {
-            enableProgressBar(true);
-            new Thread(() -> {
-                userSynchronizer.sync();
-
-                runOnUiThread(() -> {
-                    if (User.getHasVoipAccount()) {
-                        User.voip.setHasEnabledSip(true);
-                    } else {
-                        if (shouldLoadMissingVoip) {
-                            enableSipOnNextLoad = true;
-                            SingleOnboardingStepActivity.Companion.launch(SettingsActivity.this,
-                                    MissingVoipAccountStep.class);
-                        }
-                    }
-
-                    updateUi();
-
-                    new VoipDisabledNotification().remove();
-                });
-
-            }).start();
+            return;
         }
+
+        enableProgressBar(true);
+        userSynchronizer.sync();
+
+        if (!User.getHasVoipAccount()) {
+            SingleOnboardingStepActivity.Companion.launch(SettingsActivity.this, MissingVoipAccountStep.class);
+            return;
+        }
+
+        User.voip.setHasEnabledSip(true);
+        updateUi();
+        new VoipDisabledNotification().remove();
     }
 
     @OnCheckedChanged(R.id.use_3g_switch)
