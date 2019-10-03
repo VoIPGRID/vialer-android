@@ -6,9 +6,7 @@ import android.view.View
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.api.models.MobileNumber
-import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.onboarding_step_mobile_number.*

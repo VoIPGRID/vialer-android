@@ -52,6 +52,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnItemSelected;
+import kotlin.Unit;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -127,10 +128,15 @@ public class SettingsActivity extends LoginRequiredActivity {
         super.onResume();
         initIgnoreBatteryOptimizationSwitch();
         initUsePhoneRingtoneSwitch();
-        userSynchronizer.sync();
+        userSynchronizer.syncWithCallback(() -> {
+            runOnUiThread(() -> {
+                updateUi();
+                initializeAdvancedSettings();
+            });
+            return Unit.INSTANCE;
+        });
 
         updateUi();
-
         initializeAdvancedSettings();
 
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mVoipDisabledReceiver, FcmMessagingService.VOIP_HAS_BEEN_DISABLED);
@@ -138,8 +144,6 @@ public class SettingsActivity extends LoginRequiredActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             mConnectionSpinner.setEnabled(false);
         }
-
-        new Handler().postDelayed(SettingsActivity.this::updateUi, 2000);
     }
 
     @Override
@@ -254,16 +258,20 @@ public class SettingsActivity extends LoginRequiredActivity {
         }
 
         enableProgressBar(true);
-        userSynchronizer.sync();
+        userSynchronizer.syncWithCallback(() -> {
+            if (!User.getHasVoipAccount()) {
+                runOnUiThread(() -> SingleOnboardingStepActivity.Companion.launch(SettingsActivity.this,
+                        MissingVoipAccountStep.class));
+                return Unit.INSTANCE;
+            }
 
-        if (!User.getHasVoipAccount()) {
-            SingleOnboardingStepActivity.Companion.launch(SettingsActivity.this, MissingVoipAccountStep.class);
-            return;
-        }
-
-        User.voip.setHasEnabledSip(true);
-        updateUi();
-        new VoipDisabledNotification().remove();
+            runOnUiThread(() -> {
+                User.voip.setHasEnabledSip(true);
+                updateUi();
+                new VoipDisabledNotification().remove();
+            });
+            return Unit.INSTANCE;
+        });
     }
 
     @OnCheckedChanged(R.id.use_3g_switch)
@@ -474,9 +482,10 @@ public class SettingsActivity extends LoginRequiredActivity {
 
             updateUiBasedOnCurrentEditMode();
 
-            userSynchronizer.sync();
-
-            new Handler().postDelayed(SettingsActivity.this::updateUi, 2000);
+            userSynchronizer.syncWithCallback(() -> {
+                runOnUiThread(SettingsActivity.this::updateUi);
+                return Unit.INSTANCE;
+            });
         }
 
         @Override

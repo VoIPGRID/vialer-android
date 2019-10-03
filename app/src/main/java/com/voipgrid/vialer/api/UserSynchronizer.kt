@@ -5,7 +5,10 @@ import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.middleware.MiddlewareHelper
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * The responsibility of this is to make sure our local user information matches the information stored
@@ -20,14 +23,14 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
      * Sync our local user information with that on voipgrid.
      *
      */
-    fun sync() = GlobalScope.launch(Dispatchers.Main) {
+    suspend fun sync() {
         syncVoipgridUser()
 
-        val voipgridUser = User.voipgridUser ?: return@launch
+        val voipgridUser = User.voipgridUser ?: return
 
         if (!voipgridUser.hasVoipAccount()) {
             handleMissingVoipAccount()
-            return@launch
+            return
         }
 
         syncVoipAccount(voipgridUser)
@@ -36,6 +39,16 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
             secureCalling.updateApiBasedOnCurrentPreferenceSetting()
             MiddlewareHelper.registerAtMiddleware(context)
         }
+    }
+
+    /**
+     * Temporary method for java interop, to be removed after SettingsActivity has been
+     * reverted to Kotlin.
+     *
+     */
+    fun syncWithCallback(callback: () -> Unit) = GlobalScope.launch(Dispatchers.IO) {
+        sync()
+        callback.invoke()
     }
 
     /**
