@@ -25,12 +25,16 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
     suspend fun import() = withContext(Dispatchers.IO) {
 
         if (!User.isLoggedIn) {
-
             logger.i("Not beginning historic import as user is not yet logged in")
             return@withContext
         }
 
         relevantMonths().toList().reversed().forEach { date ->
+            if (!User.isLoggedIn) {
+                logger.i("User is no longer logged in, stopped importing.")
+                return@withContext
+            }
+
             logger.i("Importing call records for $date")
 
             try {

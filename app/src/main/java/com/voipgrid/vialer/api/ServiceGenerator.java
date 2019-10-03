@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.interceptors.AddAuthorizationCredentialsToRequest;
 import com.voipgrid.vialer.api.interceptors.AddUserAgentToHeader;
 import com.voipgrid.vialer.api.interceptors.LogResponsesToConsole;
@@ -12,6 +13,8 @@ import com.voipgrid.vialer.api.interceptors.LogUserOutOnUnauthorizedResponse;
 import com.voipgrid.vialer.api.interceptors.ModifyCacheLifetimeBasedOnConnectivity;
 
 import java.util.HashMap;
+
+import javax.inject.Inject;
 
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
@@ -48,7 +51,7 @@ public class ServiceGenerator {
         httpClient.addInterceptor(sAuthorizationInterceptor);
         httpClient.addInterceptor(new AddUserAgentToHeader(context));
         httpClient.addInterceptor(new ModifyCacheLifetimeBasedOnConnectivity(context));
-        httpClient.addInterceptor(new LogUserOutOnUnauthorizedResponse(context));
+        httpClient.addInterceptor(new LogUserOutOnUnauthorizedResponse(VialerApplication.get().component().provideLogout()));
         httpClient.addInterceptor(new LogResponsesToConsole());
 
         httpClient.cache(getCache(context));

@@ -14,7 +14,7 @@ class Logout(private val context: Context, private val sharedPreferences: Shared
      * Log the currently logged in user out, performing all the tasks we need to perform before they can be logged out.
      *
      */
-    fun perform(force: Boolean = false, activity: Activity) {
+    fun perform(force: Boolean = false, activity: Activity?) {
         if (!connectivityHelper.hasNetworkConnection() && !force) {
             showErrorDialog()
             return
@@ -27,7 +27,7 @@ class Logout(private val context: Context, private val sharedPreferences: Shared
         User.clear()
         sharedPreferences.edit().clear().apply()
 
-        Onboarder.start(activity)
+        activity?.let { Onboarder.start(it) }
     }
 
     private fun showErrorDialog() {

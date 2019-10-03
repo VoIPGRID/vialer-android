@@ -2,6 +2,7 @@ package com.voipgrid.vialer.dagger;
 
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.ForgottenPasswordActivity;
+import com.voipgrid.vialer.Logout;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.NavigationDrawerActivity;
 import com.voipgrid.vialer.SettingsActivity;
@@ -102,4 +103,6 @@ public interface VialerComponent {
     void inject(HistoricCallRecordsImporter.Worker worker);
 
     void inject(DialerActivity dialerActivity);
+
+    Logout provideLogout();
 }
