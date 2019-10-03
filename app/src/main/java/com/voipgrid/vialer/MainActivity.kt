@@ -13,6 +13,9 @@ import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
@@ -36,11 +39,7 @@ class MainActivity : NavigationDrawerActivity() {
             return
         }
 
-        if (connectivityHelper.hasNetworkConnection()) {
-            runBlocking {
-                userSynchronizer.sync()
-            }
-        }
+        syncUser()
 
         setupTabs()
         floating_action_button.setOnClickListener { openDialer() }
@@ -59,6 +58,16 @@ class MainActivity : NavigationDrawerActivity() {
     override fun onPause() {
         super.onPause()
         reachabilityReceiver.stopListening()
+    }
+
+    /**
+     * Updates the user and voip account information from the api.
+     *
+     */
+    private fun syncUser() = GlobalScope.launch(Dispatchers.Main) {
+        if (connectivityHelper.hasNetworkConnection()) return@launch
+
+        userSynchronizer.sync()
     }
 
     /**
