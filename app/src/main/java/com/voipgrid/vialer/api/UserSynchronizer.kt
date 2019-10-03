@@ -1,12 +1,10 @@
 package com.voipgrid.vialer.api
 
 import android.content.Context
-import android.util.Log
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.middleware.MiddlewareHelper
-import com.voipgrid.vialer.persistence.Middleware
 import kotlinx.coroutines.*
 
 /**
@@ -35,6 +33,7 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
         syncVoipAccount(voipgridUser)
 
         if (User.hasVoipAccount) {
+            secureCalling.updateApiBasedOnCurrentPreferenceSetting()
             MiddlewareHelper.registerAtMiddleware(context)
         }
     }
@@ -45,9 +44,9 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
      *
      */
     private fun handleMissingVoipAccount() {
+        logger.i("User does not have a VoIP account, disabling sip")
         User.voipAccount = null
         User.voip.hasEnabledSip = false
-        Log.e("TEST123", " Is voip account null? " + (User.voipAccount == null))
     }
 
     /**
@@ -58,7 +57,7 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
         val response = voipgridApi.systemUser().execute()
 
         if (!response.isSuccessful) {
-            logger.e("Unable to retrieve a system user....")
+            logger.e("Unable to retrieve a system user")
             return@withContext
         }
 
@@ -73,7 +72,10 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
     private suspend fun syncVoipAccount(voipgridUser: SystemUser) = withContext(Dispatchers.IO)  {
         val response = voipgridApi.phoneAccount(voipgridUser.voipAccountId).execute()
 
-        if (!response.isSuccessful) return@withContext
+        if (!response.isSuccessful) {
+            logger.e("Unable to retrieve voip account from api")
+            return@withContext
+        }
 
         val voipAccount = response.body() ?: return@withContext
 
@@ -83,6 +85,5 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
         }
 
         User.voipAccount = response.body()
-        secureCalling.updateApiBasedOnCurrentPreferenceSetting()
     }
 }
