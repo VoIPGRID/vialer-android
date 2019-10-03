@@ -1,16 +1,18 @@
 package com.voipgrid.vialer.onboarding.steps
 
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import com.voipgrid.vialer.*
+import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.OnboardingState
 import com.voipgrid.vialer.onboarding.core.Step
-import com.voipgrid.vialer.util.PhoneAccountHelper
 import kotlinx.android.synthetic.main.onboarding_missing_voip_account.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class MissingVoipAccountStep : Step() {
 
@@ -18,8 +20,11 @@ class MissingVoipAccountStep : Step() {
 
     private val logger = Logger(this).forceRemoteLogging(true)
 
+    @Inject lateinit var userSynchronizer: UserSynchronizer
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        VialerApplication.get().component().inject(this)
 
         continueButton.setOnClickListener {
             logger.i("User has decided not to set a voip account despite not having one")
@@ -47,15 +52,17 @@ class MissingVoipAccountStep : Step() {
      * account and automatically progress onboarding.
      *
      */
-    private fun progressIfLinkedPhoneAccountFound() {
-        GlobalScope.launch {
-            PhoneAccountHelper(onboarding).linkedPhoneAccount?.let {
-                launch(Dispatchers.Main) {
+    private fun progressIfLinkedPhoneAccountFound() = GlobalScope.launch(Dispatchers.Main) {
+        userSynchronizer.sync()
+
+        Handler().postDelayed({
+            if (User.hasVoipAccount) {
+                activity?.runOnUiThread {
                     User.voip.hasEnabledSip = true
                     onboarding?.progress(this@MissingVoipAccountStep)
                 }
             }
-        }
+        }, 1000)
     }
 
     override fun shouldThisStepBeSkipped(state: OnboardingState): Boolean {

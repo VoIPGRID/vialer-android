@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.api.UserSynchronizer;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -45,7 +46,6 @@ import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.PhoneAccountHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import javax.inject.Inject;
@@ -62,6 +62,7 @@ import retrofit2.Response;
 public class SettingsActivity extends LoginRequiredActivity {
 
     @Inject BatteryOptimizationManager batteryOptimizationManager;
+    @Inject UserSynchronizer userSynchronizer;
 
     @BindView(R.id.container) View mContainer;
     @BindView(R.id.progressBar) ProgressBar mProgressBar;
@@ -91,7 +92,6 @@ public class SettingsActivity extends LoginRequiredActivity {
     @BindView(R.id.stun_switch) Switch stunSwitch;
 
     private PhoneAccount mPhoneAccount;
-    private PhoneAccountHelper mPhoneAccountHelper;
     private SystemUser mSystemUser;
     private VoipgridApi mVoipgridApi;
     private Logger mLogger;
@@ -115,7 +115,6 @@ public class SettingsActivity extends LoginRequiredActivity {
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
 
-        mPhoneAccountHelper = new PhoneAccountHelper(this);
         mVoipgridApi = ServiceGenerator.createApiService(this);
         mLogger = new Logger(this.getClass());
         mClipboardHelper =  ClipboardHelper.fromContext(this);
@@ -139,7 +138,7 @@ public class SettingsActivity extends LoginRequiredActivity {
         updateAndPopulate();
 
         // Update phone account and systemuser.
-        updateSystemUserAndPhoneAccount();
+        userSynchronizer.sync();
 
         initializeAdvancedSettings();
 
@@ -270,11 +269,10 @@ public class SettingsActivity extends LoginRequiredActivity {
         } else {
             enableProgressBar(true);
             new Thread(() -> {
-                PhoneAccount phoneAccount = mPhoneAccountHelper.getLinkedPhoneAccount();
+                userSynchronizer.sync();
 
                 runOnUiThread(() -> {
-                    if (phoneAccount != null) {
-                        mPhoneAccountHelper.savePhoneAccountAndRegister(phoneAccount);
+                    if (User.getHasVoipAccount()) {
                         User.voip.setHasEnabledSip(true);
                     } else {
                         if (shouldLoadMissingVoip) {
@@ -358,7 +356,7 @@ public class SettingsActivity extends LoginRequiredActivity {
 
     private void updateAndPopulate() {
         mSystemUser = User.getVoipgridUser();
-        mPhoneAccount = User.getPhoneAccount();
+        mPhoneAccount = User.getVoipAccount();
 
         populate();
     }
@@ -480,26 +478,6 @@ public class SettingsActivity extends LoginRequiredActivity {
         tlsSwitch.setChecked(User.voip.getHasTlsEnabled());
         stunSwitch.setChecked(User.voip.getHasStunEnabled());
         mIsSetupComplete = true;
-    }
-
-    /**
-     * Function to update the systemuser and phone account. Update views after update.
-     */
-    private void updateSystemUserAndPhoneAccount() {
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                mPhoneAccountHelper.updatePhoneAccount();
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                updateAndPopulate();
-            }
-        }.execute();
     }
 
     private void enableProgressBar(boolean enabled) {

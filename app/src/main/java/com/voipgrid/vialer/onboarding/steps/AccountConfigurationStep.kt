@@ -1,8 +1,10 @@
 package com.voipgrid.vialer.onboarding.steps
 
 import android.app.AlertDialog
+import android.os.Bundle
 import android.view.View
 import com.voipgrid.vialer.*
+import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.logging.Logger
@@ -14,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class AccountConfigurationStep : Step(), View.OnClickListener {
 
@@ -23,6 +26,13 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
         get() = if (User.voipgridUser?.outgoingCli == "suppressed") onboarding?.getString(R.string.supressed_number) else User.voipgridUser?.outgoingCli
 
     private val logger = Logger(this).forceRemoteLogging(true)
+
+    @Inject lateinit var userSynchronizer: UserSynchronizer
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        VialerApplication.get().component().inject(this)
+    }
 
     override fun onResume() {
         super.onResume()
@@ -77,16 +87,15 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
         try {
             updateUserMobileNumber(mobileNumber)
 
-            if (User.voipgridUser?.phoneAccountId == null) {
+            userSynchronizer.sync()
+
+            if (!User.hasVoipAccount) {
                 logger.w("There is no linked voip account, prompt user to configure one")
-                User.voip.hasEnabledSip = false
                 state?.hasVoipAccount = false
                 onboarding?.progress(this@AccountConfigurationStep)
                 return@launch
             }
 
-            onboarding?.isLoading = true
-            findPhoneAccount()
             onboarding?.progress(this@AccountConfigurationStep)
         } catch (e: Exception) {
             logger.e("Failed to configure account: ${e.message}")
@@ -111,26 +120,6 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
             it.mobileNumber = mobileNumber
             it.outgoingCli = outgoingNumber
             User.voipgridUser = it
-        }
-    }
-
-    /**
-     * Find the phone account that is linked to this user and store it locally.
-     *
-     */
-    private suspend fun findPhoneAccount() = withContext(Dispatchers.IO) {
-        val response = voipgridApi.phoneAccount(User.voipgridUser?.phoneAccountId).execute()
-
-        if (!response.isSuccessful) {
-            throw Exception("Response failed when attempting to locate phone account")
-        }
-
-        logger.i("Successfully found a linked phone account")
-
-        User.phoneAccount = response.body() as PhoneAccount
-
-        if (User.voip.isAccountSetupForSip) {
-            MiddlewareHelper.registerAtMiddleware(onboarding)
         }
     }
 

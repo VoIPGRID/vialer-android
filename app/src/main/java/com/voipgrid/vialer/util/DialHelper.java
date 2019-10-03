@@ -96,7 +96,7 @@ public class DialHelper {
         // We need internet for both type of calls.
         if (mConnectivityHelper.hasNetworkConnection()) {
             if (User.voip.getCanUseSip()
-                    && User.getHasPhoneAccount()
+                    && User.getHasVoipAccount()
                     && mConnectivityHelper.hasFastData()) {
                 // Check if we have permission to use the microphone. If not, request it.
                 if (!MicrophonePermission.hasPermission((Activity) mContext)) {

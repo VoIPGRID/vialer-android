@@ -14,6 +14,6 @@ public class SelectedUserDestinationParams {
     public String phoneAccount;
 
     public String toString() {
-        return "fixeDdestination: " + fixedDestination + " phoneAccount: " + phoneAccount;
+        return "fixeDdestination: " + fixedDestination + " voipAccount: " + phoneAccount;
     }
 }

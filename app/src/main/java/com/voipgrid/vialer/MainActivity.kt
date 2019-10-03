@@ -5,18 +5,18 @@ import android.os.Bundle
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.tabs.TabLayout
+import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.callrecord.CallRecordFragment
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.util.PhoneAccountHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {
 
-    @Inject lateinit var phoneAccountHelper: PhoneAccountHelper
+    @Inject lateinit var userSynchronizer: UserSynchronizer
     @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
 
     override val logger = Logger(this)
@@ -35,7 +35,7 @@ class MainActivity : NavigationDrawerActivity() {
         }
 
         if (connectivityHelper.hasNetworkConnection()) {
-            phoneAccountHelper.executeUpdatePhoneAccountTask()
+            userSynchronizer.sync()
         }
 
         setupTabs()
