@@ -35,10 +35,8 @@ class CallRecordViewHolder(private val view: View) : RecyclerView.ViewHolder(vie
     private lateinit var activity: Activity
     private var callAlreadySetup = false
 
-    @Inject
-    lateinit var phoneAccountFetcher: PhoneAccountFetcher
-    @Inject
-    lateinit var contacts: CachedContacts
+    @Inject lateinit var phoneAccountFetcher: PhoneAccountFetcher
+    @Inject lateinit var contacts: CachedContacts
 
     init {
         VialerApplication.get().component().inject(this)
@@ -138,15 +136,9 @@ class CallRecordViewHolder(private val view: View) : RecyclerView.ViewHolder(vie
         popup.menuInflater.inflate(R.menu.menu_recent_call, popup.menu)
         popup.setOnMenuItemClickListener { item ->
             when (item.title) {
-                activity.getString(R.string.start_call) -> {
-                    startCall()
-                }
-                activity.getString(R.string.add_to_contacts) -> {
-                    addToContacts()
-                }
-                activity.getString(R.string.copy_number) -> {
-                    copyNumber()
-                }
+                activity.getString(R.string.start_call) -> startCall()
+                activity.getString(R.string.add_to_contacts) -> addToContacts()
+                activity.getString(R.string.copy_number) -> copyNumber()
             }
             true
         }
@@ -177,10 +169,10 @@ class CallRecordViewHolder(private val view: View) : RecyclerView.ViewHolder(vie
     }
 
     private fun copyNumber() {
-        val toCopy = callRecord.thirdPartyNumber;
-        val clipboard = activity.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
+        val toCopy = callRecord.thirdPartyNumber
+        val clipboard = activity.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText("number", toCopy)
-        clipboard!!.setPrimaryClip(clip)
+        clipboard.setPrimaryClip(clip)
         Toast.makeText(activity, activity.getString(R.string.number_copied, callRecord.thirdPartyNumber), Toast.LENGTH_SHORT).show()
     }
 
