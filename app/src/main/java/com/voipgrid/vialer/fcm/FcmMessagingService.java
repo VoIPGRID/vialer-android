@@ -120,7 +120,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
         if (nativeCallManager.isBusyWithNativeCall()) {
             rejectDueToNativeCallAlreadyInProgress(remoteMessage, remoteMessageData);
-            new MissedCallNotification(remoteMessageData.getPhoneNumber()).display();
+            new MissedCallNotification(remoteMessageData.getPhoneNumber(), remoteMessageData.getCallerId()).display();
             return;
         }
 

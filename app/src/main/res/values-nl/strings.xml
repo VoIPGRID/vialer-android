@@ -277,4 +277,5 @@
     <string name="help_icon">Help icoon</string>
     <string name="missed_call">Oproep gemist (%1$s).</string>
     <string name="answered_elsewhere">Oproep (%1$s) elders opgenomen.</string>
+    <string name="call_back">Bel terug</string>
 </resources>
