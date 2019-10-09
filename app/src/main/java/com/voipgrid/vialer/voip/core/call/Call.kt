@@ -6,8 +6,6 @@ interface Call {
 
     val state: State
 
-    val direction: Direction
-
     fun getDuration(unit: DurationUnit = DurationUnit.SECONDS): Int
 
     fun answer()

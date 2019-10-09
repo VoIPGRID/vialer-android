@@ -5,31 +5,36 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
+import com.voipgrid.vialer.audio.AudioRouter
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification
+import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.voip.core.*
 import com.voipgrid.vialer.voip.core.call.Call
+import com.voipgrid.vialer.voip.core.call.State
 import com.voipgrid.vialer.voip.providers.pjsip.core.PjsipCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 
-class VoipService : Service(), IncomingCallListener {
+class VoipService : Service(), CallListener {
 
     private val voipProvider: VoipProvider by inject()
     private val incomingCallHandler: IncomingCallHandler by inject()
+    private val audioRouter: AudioRouter by inject()
+    private val broadcastManager: LocalBroadcastManager by inject()
 
     private val notification = DefaultCallNotification()
 
-    private val callStack = CallStack()
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.e("TEST123", "onStartCommand")
-        voipProvider.initialize(generateConfiguration(), this)
-        return START_STICKY
+    override fun onCreate() {
+        super.onCreate()
+        callStack = CallStack()
     }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
 
     suspend fun call(number: String) = withContext(Dispatchers.IO) {
         val call = voipProvider.call(number)
@@ -37,11 +42,9 @@ class VoipService : Service(), IncomingCallListener {
         callStack.add(call)
     }
 
-    fun getCurrentCall(): Call = callStack.last()
+    fun getCurrentCall(): Call?  = try { callStack.last() } catch (_: Exception) { null }
 
-    fun canHandleIncomingCall(): Boolean {
-        return true
-    }
+    fun canHandleIncomingCall() = true
 
     suspend fun prepareForIncomingCall() {
         voipProvider.initialize(generateConfiguration(), this)
@@ -56,6 +59,30 @@ class VoipService : Service(), IncomingCallListener {
         callStack.add(call)
 
         this.incomingCallHandler.handle(call, notification)
+
+        if (audioRouter.isBluetoothRouteAvailable && !audioRouter.isCurrentlyRoutingAudioViaBluetooth) {
+            audioRouter.routeAudioViaBluetooth()
+        }
+    }
+
+    override fun onCallStateUpdate(call: Call, state: State) {
+        when(state.telephonyState) {
+            State.TelephonyState.INITIALIZING -> {}
+            State.TelephonyState.CALLING -> {}
+            State.TelephonyState.RINGING -> {}
+            State.TelephonyState.CONNECTED -> {}
+            State.TelephonyState.DISCONNECTED -> removeCallFromStack(call)
+        }
+
+        broadcastManager.sendBroadcast(Intent("CALL_STATE_WAS_UPDATED"))
+    }
+
+    private fun removeCallFromStack(call: Call) {
+        callStack.remove(call)
+
+        if (callStack.isEmpty()) {
+            stopSelf()
+        }
     }
 
     private fun generateConfiguration(): Configuration = Configuration(
@@ -74,6 +101,7 @@ class VoipService : Service(), IncomingCallListener {
 
 
     override fun onDestroy() {
+        Log.e("TEST123", "Destroying for some reason", Exception())
         this.voipProvider.destroy()
     }
 
@@ -84,5 +112,11 @@ class VoipService : Service(), IncomingCallListener {
 
     inner class LocalBinder : Binder() {
         fun getService(): VoipService = this@VoipService
+    }
+
+    companion object {
+        private var callStack = CallStack()
+
+        const val CALL_STATE_WAS_UPDATED = "CALL_STATE_WAS_UPDATED"
     }
 }

@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.voip.providers.pjsip.initialization.config
 
+import android.util.Log
 import com.voipgrid.vialer.voip.core.Configuration
 import com.voipgrid.vialer.voip.providers.pjsip.core.PjsipEndpoint
 
@@ -15,7 +16,7 @@ class CodecConfigurator {
 
         for (i in 0 until codecList.size().toInt()) {
             val codecId = codecList.get(i).codecId
-            val codec = codecMappings[codecId]
+            val codec = findMappedCodec(codecId)
 
             val isSelectedCodec = configuration.codec == codec
 
@@ -24,6 +25,16 @@ class CodecConfigurator {
                 false -> DISABLED
             })
         }
+    }
+
+    private fun findMappedCodec(codecId: String): Configuration.Codec? {
+        codecMappings.forEach {
+            if (codecId.startsWith(it.key) ) {
+                return it.value
+            }
+        }
+
+        return null
     }
 
     companion object {

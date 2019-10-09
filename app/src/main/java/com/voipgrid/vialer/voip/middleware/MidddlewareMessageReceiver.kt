@@ -55,7 +55,7 @@ class MidddlewareMessageReceiver : FirebaseMessagingService() {
         val token = message.data["unique_key"] ?: return
 
         if (handling.contains(token)) return
-        Log.e("TEST123", "middleware on ${Thread.currentThread().name}")
+        Log.e("TEST123", "middleware on ${message.data["phonenumber"]} and ${message.data["caller_id"]}")
         handling.add(token)
         val voip = this.voip ?: return
         this.message = message
@@ -64,6 +64,7 @@ class MidddlewareMessageReceiver : FirebaseMessagingService() {
             replyToMiddleware(false)
             return
         }
+        startService(Intent(this, VoipService::class.java))
 
         handleCall()
     }

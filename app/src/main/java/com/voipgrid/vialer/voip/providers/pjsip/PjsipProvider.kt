@@ -2,15 +2,16 @@ package com.voipgrid.vialer.voip.providers.pjsip
 
 import android.util.Log
 import com.voipgrid.vialer.sip.SipLogWriter
+import com.voipgrid.vialer.voip.core.CallListener
 import com.voipgrid.vialer.voip.core.Configuration
-import com.voipgrid.vialer.voip.core.IncomingCallListener
 import com.voipgrid.vialer.voip.core.VoipProvider
-import com.voipgrid.vialer.voip.providers.pjsip.core.PjsipCall
-import com.voipgrid.vialer.voip.providers.pjsip.core.PjsipEndpoint
+import com.voipgrid.vialer.voip.providers.pjsip.core.*
 import com.voipgrid.vialer.voip.providers.pjsip.initialization.Initializer
 import com.voipgrid.vialer.voip.providers.pjsip.initialization.config.AccountConfigurator
+import com.voipgrid.vialer.voip.providers.pjsip.packets.Invite
 import kotlinx.coroutines.*
 import org.pjsip.pjsua2.*
+import kotlin.Error
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -22,7 +23,7 @@ class PjsipProvider : VoipProvider {
     private lateinit var configuration: Configuration
     private val accountConfiguration = AccountConfigurator()
     private var account: Account? = null
-    private lateinit var listener: IncomingCallListener
+    private lateinit var listener: CallListener
 
     /**
      * This is a continuation so we can convert our account registration
@@ -31,7 +32,7 @@ class PjsipProvider : VoipProvider {
      */
     private var registerContinuation: Continuation<Account>? = null
 
-    override fun initialize(configuration: Configuration, listener: IncomingCallListener) {
+    override fun initialize(configuration: Configuration, listener: CallListener) {
         this.configuration = configuration
         this.listener = listener
         if (endpoint == null) {
@@ -46,14 +47,14 @@ class PjsipProvider : VoipProvider {
     override suspend fun call(number: String): PjsipCall = withContext(Dispatchers.IO) {
         register()
 
-        val call = PjsipCall(account!!)
+        val account = account ?: throw Exception("No account to place a call with")
+
+        val call = OutgoingCall(account, listener, ThirdParty(number = number, name = ""))
 
         call.makeCall(configuration.host.withAccount(number))
 
         return@withContext call
     }
-
-
 
     /**
      * Register the account that has been provided by the configuration.
@@ -94,26 +95,27 @@ class PjsipProvider : VoipProvider {
         override fun onRegState(prm: OnRegStateParam) {
             super.onRegState(prm)
 
+            val continuation = registerContinuation
             Log.e("TEST123", "onRegState: ${prm.reason} hasContinuation: " + (registerContinuation != null))
+            registerContinuation = null
             when(info.regIsActive) {
-                true -> registerContinuation?.resume(this)
+                true -> continuation?.resume(this)
             }
         }
 
         override fun onIncomingCall(prm: OnIncomingCallParam) {
             super.onIncomingCall(prm)
-            Log.e("TEST123", "call id= ${prm.callId}")
-
-                val call = PjsipCall(this@Account, 0)
+            try {
+                val call = IncomingCall(this@Account, 0, listener, Invite(prm.rdata.wholeMsg).findThirdParty())
                 Log.e("TEST123", "reason:  ${Thread.currentThread().name}")
 
+                call.acknowledge()
+                listener.onIncomingCall(call)
 
-             call.answerAsRinging()
+            } catch (e: Throwable) {
+                Log.e("TEST123", " ERRROR " , e)
+            }
 
-
-            listener.onIncomingCall(call)
-
-            call.answer()
         }
     }
 

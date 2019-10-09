@@ -1,22 +1,30 @@
 package com.voipgrid.vialer.voip.providers.pjsip.core
 
 import android.util.Log
+import com.voipgrid.vialer.voip.core.CallListener
 import com.voipgrid.vialer.voip.core.call.Call
 import com.voipgrid.vialer.voip.core.call.Metadata
 import com.voipgrid.vialer.voip.core.call.State
+import com.voipgrid.vialer.voip.providers.pjsip.packets.Invite
 import org.pjsip.pjsua2.*
 import org.pjsip.pjsua2.pjsip_inv_state.*
 
-class PjsipCall : org.pjsip.pjsua2.Call, Call {
+abstract class PjsipCall : org.pjsip.pjsua2.Call, Call {
 
-    override val metaData = Metadata()
+    private val listener: CallListener
+
     override val state = State()
+    final override val metaData: Metadata
 
-    override val direction = Call.Direction.OUTGOING
+    constructor(account: Account, listener: CallListener, thirdParty: ThirdParty, direction: Call.Direction) : super(account) {
+        this.listener = listener
+        this.metaData = Metadata(thirdParty.number, thirdParty.name, direction)
+    }
 
-    constructor(account: Account) : super(account)
-
-    constructor(account: Account, callId: Int) : super(account, callId)
+    constructor(account: Account, callId: Int, listener: CallListener, thirdParty: ThirdParty, direction: Call.Direction) : super(account, callId) {
+        this.listener = listener
+        this.metaData = Metadata(thirdParty.number, thirdParty.name, direction)
+    }
 
     override fun getDuration(unit: Call.DurationUnit): Int = when(unit) {
         Call.DurationUnit.SECONDS -> info.connectDuration.sec
@@ -24,16 +32,13 @@ class PjsipCall : org.pjsip.pjsua2.Call, Call {
     }
 
     override fun answer() {
+        Log.e("TEST123", "IN SIP CALL ANSWERING")
         super.answer(param(pjsip_status_code.PJSIP_SC_ACCEPTED))
     }
 
-    override fun decline() {
-        super.hangup(param(pjsip_status_code.PJSIP_SC_BUSY_HERE))
-    }
+    override fun decline() = super.hangup(param(pjsip_status_code.PJSIP_SC_BUSY_HERE))
 
-    override fun hangup() {
-        super.hangup(param(pjsip_status_code.PJSIP_SC_DECLINE))
-    }
+    override fun hangup() = super.hangup(param(pjsip_status_code.PJSIP_SC_DECLINE))
 
     override fun hold() {
         super.setHold(CallOpParam(true))
@@ -49,38 +54,41 @@ class PjsipCall : org.pjsip.pjsua2.Call, Call {
 
     internal fun makeCall(dst_uri: String) = super.makeCall(dst_uri, param(pjsip_status_code.PJSIP_SC_RINGING))
 
-    private fun param(code: pjsip_status_code) = CallOpParam().apply {
+    protected fun param(code: pjsip_status_code) = CallOpParam().apply {
         statusCode = code
     }
 
     override fun onCallTsxState(prm: OnCallTsxStateParam?) {
         super.onCallTsxState(prm)
-        Log.e("TEST123", "tsx state")
+        Log.e("TEST123", "tsx state: ${prm.toString()}")
     }
 
     override fun onCallState(prm: OnCallStateParam?) {
         super.onCallState(prm)
-        metaData.callerId = "A test caller id"
-        metaData.number = "08001696000"
-        Log.e("TEST123", "Call state: ${info.state}")
+        updateState()
+        updateMetadata()
+    }
+
+    private fun updateMetadata() {
+
+    }
+
+    override fun onCallMediaState(prm: OnCallMediaStateParam?) {
+        super.onCallMediaState(prm)
+        Log.e("TEST123", "onCallMediaStateParam: ${prm.toString()}")
+    }
+
+    private fun updateState() {
         state.telephonyState = when(info.state) {
             PJSIP_INV_STATE_NULL -> State.TelephonyState.INITIALIZING
             PJSIP_INV_STATE_CALLING -> State.TelephonyState.CALLING
             PJSIP_INV_STATE_INCOMING -> State.TelephonyState.RINGING
             PJSIP_INV_STATE_CONFIRMED -> State.TelephonyState.CONNECTED
+            PJSIP_INV_STATE_DISCONNECTED -> State.TelephonyState.DISCONNECTED
             else -> state.telephonyState
         }
-    }
 
-    fun answerAsRinging() {
-        Log.e("TEST123", "Answering as ringing..")
-        try {
-        super.answer(param(pjsip_status_code.PJSIP_SC_RINGING))
-
-        } catch (e: Exception) {
-            Log.e("TEST123", "Failed to answer ans ringing", e)
-        }
-
-        Log.e("TEST123", "Answered as ringing..")
+        Log.e("TEST123", "Update state ${info.state} broadcasting ${state.telephonyState}")
+        this.listener.onCallStateUpdate(this, state)
     }
 }

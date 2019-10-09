@@ -1,6 +1,4 @@
 package com.voipgrid.vialer.voip.core.call
 
-class Metadata {
-    var number: String? = null
-    var callerId: String? = null
+class Metadata(val number: String, val callerId: String, val direction: Call.Direction) {
 }

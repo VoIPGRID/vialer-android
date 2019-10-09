@@ -4,7 +4,7 @@ import com.voipgrid.vialer.voip.core.call.Call
 
 interface VoipProvider {
 
-    fun initialize(configuration: Configuration, listener: IncomingCallListener)
+    fun initialize(configuration: Configuration, listener: CallListener)
 
     fun destroy()
 

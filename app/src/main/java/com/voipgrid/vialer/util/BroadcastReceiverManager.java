@@ -35,8 +35,10 @@ public class BroadcastReceiverManager {
      * @param broadcastReceiver The receiver that will be listening for the events..
      * @param events The events to listen for.
      */
-    public void registerReceiverViaLocalBroadcastManager(BroadcastReceiver broadcastReceiver, String... events) {
+    public BroadcastReceiver registerReceiverViaLocalBroadcastManager(BroadcastReceiver broadcastReceiver, String... events) {
         mLocalBroadcastManager.registerReceiver(broadcastReceiver, eventsToIntentFilter(events, null));
+
+        return broadcastReceiver;
     }
 
     /**

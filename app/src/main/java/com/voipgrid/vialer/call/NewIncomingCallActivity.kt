@@ -1,47 +1,51 @@
 package com.voipgrid.vialer.call
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.util.Log
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.LoginRequiredActivity
 import com.voipgrid.vialer.voip.VoipService
 import kotlinx.android.synthetic.main.activity_incoming_call.*
+import org.koin.android.ext.android.inject
 
 class NewIncomingCallActivity : LoginRequiredActivity() {
-
-    private var voip: VoipService? = null
-
-    private val connection = object : ServiceConnection {
-        private var bound = false
-
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            val binder = service as VoipService.LocalBinder
-            voip = binder.getService()
-        }
-
-        override fun onServiceDisconnected(name: ComponentName) {
-            bound = false
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Intent(this, VoipService::class.java).also { intent ->
-            bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        setContentView(R.layout.activity_incoming_call)
+
+        button_decline.setOnClickListener {
+            try {
+            voip?.getCurrentCall()?.decline()
+
+            } catch (e: Throwable) {
+                Log.e("TEST123", "e", e)
+            }
         }
 
-        setContentView(R.layout.activity_incoming_call)
-        incoming_caller_title.text = voip?.getCurrentCall()?.metaData?.number
-        incoming_caller_title.text = voip?.getCurrentCall()?.metaData?.callerId
+        button_pickup.setOnClickListener {
+            Log.e("TEST123", "Answering..")
+            voip?.getCurrentCall()?.answer()
+        }
+
+        render()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unbindService(connection)
+    private fun render() {
+        incoming_caller_title.text = voip?.getCurrentCall()?.metaData?.callerId
+        incoming_caller_subtitle.text = voip?.getCurrentCall()?.metaData?.number
+    }
+
+    override fun voipServiceIsAvailable() {
+        render()
+    }
+
+    override fun voipStateWasUpdated() {
+        render()
     }
 }

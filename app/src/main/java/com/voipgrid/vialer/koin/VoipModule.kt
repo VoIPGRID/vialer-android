@@ -2,14 +2,17 @@ package com.voipgrid.vialer.koin
 
 import android.content.Context
 import android.os.Vibrator
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.Middleware
 import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.api.VoipgridApi
 import com.voipgrid.vialer.audio.AudioFocus
+import com.voipgrid.vialer.audio.AudioRouter
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration
+import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.voip.IncomingCallHandler
 import com.voipgrid.vialer.voip.core.VoipProvider
 import com.voipgrid.vialer.voip.providers.pjsip.PjsipProvider
@@ -36,4 +39,10 @@ val voipModule = module {
     single { IncomingCallRinger(androidContext(), get() )}
 
     single { IncomingCallHandler(get(), get()) }
+
+    single { AudioRouter(get(), get(), get(), get()) }
+
+    single { BroadcastReceiverManager(get(), get()) }
+
+    single { LocalBroadcastManager.getInstance(get()) }
 }
