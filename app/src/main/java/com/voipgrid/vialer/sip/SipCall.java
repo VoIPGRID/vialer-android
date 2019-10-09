@@ -516,6 +516,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         CallOpParam callOpParam = new CallOpParam();
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_RINGING);
         try {
+            Log.e("TEST123", "phone number:" + phoneNumber.toString());
             super.makeCall(phoneNumber.toString(), callOpParam);
 
             mSipService.setCurrentCall(this);

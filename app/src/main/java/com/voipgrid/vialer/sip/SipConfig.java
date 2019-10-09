@@ -107,9 +107,9 @@ public class SipConfig implements AccountStatus {
     void initLibrary() throws Exception {
         if (mEndpoint != null) return;
 
-        loadPjsip();
-        mEndpoint = createEndpoint();
-        setCodecPrio();
+        loadPjsip(); //
+        mEndpoint = createEndpoint(); //
+        setCodecPrio(); //
         mSipAccount = createSipAccount();
         startNetworkingListener();
 
@@ -180,18 +180,18 @@ public class SipConfig implements AccountStatus {
      * @param endpointConfig
      * @return
      */
-    private MediaConfig createMediaConfig(EpConfig endpointConfig) {
-        MediaConfig mediaConfig = endpointConfig.getMedConfig();
-        mediaConfig.setEcOptions(SipConstants.WEBRTC_ECHO_CANCELLATION);
-        mediaConfig.setEcTailLen(SipConstants.ECHO_CANCELLATION_TAIL_LENGTH);
-        return mediaConfig;
+    private MediaConfig createMediaConfig(EpConfig endpointConfig) { //
+        MediaConfig mediaConfig = endpointConfig.getMedConfig();//
+        mediaConfig.setEcOptions(SipConstants.WEBRTC_ECHO_CANCELLATION);//
+        mediaConfig.setEcTailLen(SipConstants.ECHO_CANCELLATION_TAIL_LENGTH);//
+        return mediaConfig;//
     }
 
     /**
      * Configure the logger for the PJSIP library.
      * @param endpointConfig
      */
-    private void setSipLogging(EpConfig endpointConfig) {
+    private void setSipLogging(EpConfig endpointConfig) { //
         endpointConfig.getLogConfig().setLevel(SipConstants.SIP_LOG_LEVEL);
         endpointConfig.getLogConfig().setConsoleLevel(SipConstants.SIP_CONSOLE_LOG_LEVEL);
         LogConfig logConfig = endpointConfig.getLogConfig();
@@ -209,14 +209,14 @@ public class SipConfig implements AccountStatus {
      * @return
      * @throws LibraryInitFailedException
      */
-    private VialerEndpoint createEndpoint() throws LibraryInitFailedException {
+    private VialerEndpoint createEndpoint() throws LibraryInitFailedException { ////
         mLogger.d("createEndpoint");
-        VialerEndpoint endpoint = new VialerEndpoint();
-        EpConfig endpointConfig = new EpConfig();
+        VialerEndpoint endpoint = new VialerEndpoint();//
+        EpConfig endpointConfig = new EpConfig(); //
 
         // Set echo cancellation options for endpoint.
-        MediaConfig mediaConfig = createMediaConfig(endpointConfig);
-        endpointConfig.setMedConfig(mediaConfig);
+        MediaConfig mediaConfig = createMediaConfig(endpointConfig); //
+        endpointConfig.setMedConfig(mediaConfig); //
         try {
             endpoint.libCreate();
         } catch (Exception e) {
@@ -230,18 +230,18 @@ public class SipConfig implements AccountStatus {
             setSipLogging(endpointConfig);
         }
 
-        UaConfig uaConfig = endpointConfig.getUaConfig();
-        uaConfig.setUserAgent(new UserAgent(mSipService).generate());
-        uaConfig.setMainThreadOnly(true);
-        configureStunServer(uaConfig);
+        UaConfig uaConfig = endpointConfig.getUaConfig(); //
+        uaConfig.setUserAgent(new UserAgent(mSipService).generate()); //
+        uaConfig.setMainThreadOnly(true); //
+        configureStunServer(uaConfig); //
 
         try {
-            endpoint.libInit(endpointConfig);
+            endpoint.libInit(endpointConfig); //
         } catch (Exception e) {
-            mLogger.e("Unable to init the PJSIP library");
-            mLogger.e("" + Log.getStackTraceString(e));
-            e.printStackTrace();
-            throw new LibraryInitFailedException();
+            mLogger.e("Unable to init the PJSIP library"); //
+            mLogger.e("" + Log.getStackTraceString(e)); //
+            e.printStackTrace(); //
+            throw new LibraryInitFailedException(); //
         }
 
         TransportConfig transportConfig = createTransportConfig();
@@ -268,7 +268,7 @@ public class SipConfig implements AccountStatus {
                 mPhoneAccount.getAccountId(),
                 0,
                 mPhoneAccount.getPassword()
-        );
+        ); //
 
         String transportString = getTransportString();
         String sipAccountRegId = SipUri.sipAddress(mSipService, mPhoneAccount.getAccountId()) + transportString;
@@ -318,7 +318,8 @@ public class SipConfig implements AccountStatus {
         AccountConfig accountConfig = createAccountConfig();
         SipAccount sipAccount = null;
         try {
-            sipAccount = new SipAccount(mSipService, accountConfig, this);
+            sipAccount = new
+                    SipAccount(mSipService, accountConfig, this);
         } catch (Exception e) {
             mLogger.e("" + Log.getStackTraceString(e));
             e.printStackTrace();

@@ -266,6 +266,8 @@ dependencies {
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
 
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
+
+    implementation 'org.koin:koin-android:2.0.0-rc-1'
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.
