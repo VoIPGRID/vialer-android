@@ -9,18 +9,15 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.audio.AudioRouter
-import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification
-import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.voip.core.*
 import com.voipgrid.vialer.voip.core.call.Call
 import com.voipgrid.vialer.voip.core.call.State
-import com.voipgrid.vialer.voip.providers.pjsip.core.PjsipCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 
-class VoipService : Service(), CallListener {
+class VoipService : Service(), VoipListener {
 
     private val voipProvider: VoipProvider by inject()
     private val incomingCallHandler: IncomingCallHandler by inject()
@@ -46,7 +43,11 @@ class VoipService : Service(), CallListener {
 
     fun canHandleIncomingCall() = true
 
-    suspend fun prepareForIncomingCall() {
+    private var onPrepared: (() -> Unit)? = null
+
+    fun prepareForIncomingCall(onPrepared: () -> Unit) {
+        this.onPrepared = onPrepared
+
         voipProvider.initialize(generateConfiguration(), this)
         voipProvider.register()
     }
@@ -57,7 +58,7 @@ class VoipService : Service(), CallListener {
      */
     override fun onIncomingCall(call: Call) {
         callStack.add(call)
-
+Log.e("TEST123", "Creating call on ${Thread.currentThread().name}")
         this.incomingCallHandler.handle(call, notification)
 
         if (audioRouter.isBluetoothRouteAvailable && !audioRouter.isCurrentlyRoutingAudioViaBluetooth) {
@@ -74,7 +75,9 @@ class VoipService : Service(), CallListener {
             State.TelephonyState.DISCONNECTED -> removeCallFromStack(call)
         }
 
-        broadcastManager.sendBroadcast(Intent("CALL_STATE_WAS_UPDATED"))
+        broadcastManager.sendBroadcast(Intent("CALL_STATE_WAS_UPDATED").apply {
+            putExtra(CALL_STATE_EXTRA, state.telephonyState)
+        })
     }
 
     private fun removeCallFromStack(call: Call) {
@@ -101,8 +104,11 @@ class VoipService : Service(), CallListener {
 
 
     override fun onDestroy() {
-        Log.e("TEST123", "Destroying for some reason", Exception())
         this.voipProvider.destroy()
+    }
+
+    override fun onRegister() {
+        onPrepared?.invoke()
     }
 
 
@@ -118,5 +124,6 @@ class VoipService : Service(), CallListener {
         private var callStack = CallStack()
 
         const val CALL_STATE_WAS_UPDATED = "CALL_STATE_WAS_UPDATED"
+        const val CALL_STATE_EXTRA = "CALL_STATE_EXTRA"
     }
 }

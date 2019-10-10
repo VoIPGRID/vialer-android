@@ -1,27 +1,26 @@
 package com.voipgrid.vialer.voip.providers.pjsip.core
 
 import android.util.Log
-import com.voipgrid.vialer.voip.core.CallListener
+import com.voipgrid.vialer.voip.core.VoipListener
 import com.voipgrid.vialer.voip.core.call.Call
 import com.voipgrid.vialer.voip.core.call.Metadata
 import com.voipgrid.vialer.voip.core.call.State
-import com.voipgrid.vialer.voip.providers.pjsip.packets.Invite
 import org.pjsip.pjsua2.*
 import org.pjsip.pjsua2.pjsip_inv_state.*
 
 abstract class PjsipCall : org.pjsip.pjsua2.Call, Call {
 
-    private val listener: CallListener
+    private val listener: VoipListener
 
     override val state = State()
     final override val metaData: Metadata
 
-    constructor(account: Account, listener: CallListener, thirdParty: ThirdParty, direction: Call.Direction) : super(account) {
+    constructor(account: Account, listener: VoipListener, thirdParty: ThirdParty, direction: Call.Direction) : super(account) {
         this.listener = listener
         this.metaData = Metadata(thirdParty.number, thirdParty.name, direction)
     }
 
-    constructor(account: Account, callId: Int, listener: CallListener, thirdParty: ThirdParty, direction: Call.Direction) : super(account, callId) {
+    constructor(account: Account, callId: Int, listener: VoipListener, thirdParty: ThirdParty, direction: Call.Direction) : super(account, callId) {
         this.listener = listener
         this.metaData = Metadata(thirdParty.number, thirdParty.name, direction)
     }
@@ -36,7 +35,11 @@ abstract class PjsipCall : org.pjsip.pjsua2.Call, Call {
         super.answer(param(pjsip_status_code.PJSIP_SC_ACCEPTED))
     }
 
-    override fun decline() = super.hangup(param(pjsip_status_code.PJSIP_SC_BUSY_HERE))
+    override fun decline() {
+        Log.e("TEST123", "Starting decline  on: ${Thread.currentThread().name}")
+        super.hangup(param(pjsip_status_code.PJSIP_SC_BUSY_HERE))
+        Log.e("TEST123", "Finished decline")
+    }
 
     override fun hangup() = super.hangup(param(pjsip_status_code.PJSIP_SC_DECLINE))
 
@@ -82,7 +85,7 @@ abstract class PjsipCall : org.pjsip.pjsua2.Call, Call {
         state.telephonyState = when(info.state) {
             PJSIP_INV_STATE_NULL -> State.TelephonyState.INITIALIZING
             PJSIP_INV_STATE_CALLING -> State.TelephonyState.CALLING
-            PJSIP_INV_STATE_INCOMING -> State.TelephonyState.RINGING
+            PJSIP_INV_STATE_INCOMING, PJSIP_INV_STATE_CONNECTING -> State.TelephonyState.RINGING
             PJSIP_INV_STATE_CONFIRMED -> State.TelephonyState.CONNECTED
             PJSIP_INV_STATE_DISCONNECTED -> State.TelephonyState.DISCONNECTED
             else -> state.telephonyState

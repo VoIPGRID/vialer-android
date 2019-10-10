@@ -2,7 +2,7 @@ package com.voipgrid.vialer.voip.providers.pjsip
 
 import android.util.Log
 import com.voipgrid.vialer.sip.SipLogWriter
-import com.voipgrid.vialer.voip.core.CallListener
+import com.voipgrid.vialer.voip.core.VoipListener
 import com.voipgrid.vialer.voip.core.Configuration
 import com.voipgrid.vialer.voip.core.VoipProvider
 import com.voipgrid.vialer.voip.providers.pjsip.core.*
@@ -11,10 +11,6 @@ import com.voipgrid.vialer.voip.providers.pjsip.initialization.config.AccountCon
 import com.voipgrid.vialer.voip.providers.pjsip.packets.Invite
 import kotlinx.coroutines.*
 import org.pjsip.pjsua2.*
-import kotlin.Error
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class PjsipProvider : VoipProvider {
 
@@ -23,16 +19,9 @@ class PjsipProvider : VoipProvider {
     private lateinit var configuration: Configuration
     private val accountConfiguration = AccountConfigurator()
     private var account: Account? = null
-    private lateinit var listener: CallListener
+    private lateinit var listener: VoipListener
 
-    /**
-     * This is a continuation so we can convert our account registration
-     * callbacks into a coroutine.
-     *
-     */
-    private var registerContinuation: Continuation<Account>? = null
-
-    override fun initialize(configuration: Configuration, listener: CallListener) {
+    override fun initialize(configuration: Configuration, listener: VoipListener) {
         this.configuration = configuration
         this.listener = listener
         if (endpoint == null) {
@@ -44,7 +33,7 @@ class PjsipProvider : VoipProvider {
      * Place a call to a phone number.
      *
      */
-    override suspend fun call(number: String): PjsipCall = withContext(Dispatchers.IO) {
+    override fun call(number: String): PjsipCall  {
         register()
 
         val account = account ?: throw Exception("No account to place a call with")
@@ -53,22 +42,20 @@ class PjsipProvider : VoipProvider {
 
         call.makeCall(configuration.host.withAccount(number))
 
-        return@withContext call
+        return call
     }
 
     /**
      * Register the account that has been provided by the configuration.
      *
      */
-    override suspend fun register() = withContext(Dispatchers.IO) {
+    override fun register() {
         if (account == null || account?.info?.regIsActive == false) {
-            suspendCoroutine<Account> {
-                registerContinuation = it
-                account = Account().apply {
-                    Log.e("TEST123", "Attempting registration")
-                    create(accountConfiguration.configure(configuration))
-                }
+            account = Account().apply {
+                create(accountConfiguration.configure(configuration))
             }
+        } else {
+            listener.onRegister()
         }
     }
 
@@ -87,35 +74,20 @@ class PjsipProvider : VoipProvider {
      *
      */
     private inner class Account : org.pjsip.pjsua2.Account() {
-        override fun onRegStarted(prm: OnRegStartedParam?) {
-            super.onRegStarted(prm)
-            Log.e("TEST123", "onRegStarted")
-        }
 
         override fun onRegState(prm: OnRegStateParam) {
             super.onRegState(prm)
 
-            val continuation = registerContinuation
-            Log.e("TEST123", "onRegState: ${prm.reason} hasContinuation: " + (registerContinuation != null))
-            registerContinuation = null
             when(info.regIsActive) {
-                true -> continuation?.resume(this)
+                true -> listener.onRegister()
             }
         }
 
         override fun onIncomingCall(prm: OnIncomingCallParam) {
             super.onIncomingCall(prm)
-            try {
-                val call = IncomingCall(this@Account, 0, listener, Invite(prm.rdata.wholeMsg).findThirdParty())
-                Log.e("TEST123", "reason:  ${Thread.currentThread().name}")
-
-                call.acknowledge()
-                listener.onIncomingCall(call)
-
-            } catch (e: Throwable) {
-                Log.e("TEST123", " ERRROR " , e)
-            }
-
+            val call = IncomingCall(this@Account, prm.callId, listener, Invite(prm.rdata.wholeMsg).findThirdParty())
+            call.acknowledge()
+            listener.onIncomingCall(call)
         }
     }
 

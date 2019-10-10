@@ -16,7 +16,7 @@ class IncomingCallHandler(private val incomingCallAlerts: IncomingCallAlerts, pr
 //        notification.incoming(call.metaData.number ?: "", call.metaData.callerId ?: "")
         Log.e("TEST123", "launching activity!")
         context.startActivity(Intent(context, NewIncomingCallActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
         })
     }
 }

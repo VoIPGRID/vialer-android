@@ -11,7 +11,7 @@ class UAConfigurator : EndpointConfigurator {
     override fun configure(config: Configuration, endpointConfig: EpConfig) {
         val uaConfig = endpointConfig.uaConfig
         uaConfig.userAgent = config.userAgent
-        uaConfig.mainThreadOnly = false
+        uaConfig.mainThreadOnly = true
 
         if (config.stun) {
             val stun = StringVector()

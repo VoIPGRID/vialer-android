@@ -69,14 +69,16 @@ class MidddlewareMessageReceiver : FirebaseMessagingService() {
         handleCall()
     }
 
-    private fun handleCall() = GlobalScope.launch {
+    private fun handleCall() = GlobalScope.launch(Dispatchers.Main) {
         voip?.let {
-            it.prepareForIncomingCall()
-            replyToMiddleware(true)
+            Log.e("TEST123", "Name: ${Thread.currentThread().name}")
+            it.prepareForIncomingCall {
+                replyToMiddleware(true)
+            }
         }
     }
 
-    private fun replyToMiddleware(isAvailable: Boolean) = GlobalScope.launch(Dispatchers.IO) {
+    private fun replyToMiddleware(isAvailable: Boolean) = GlobalScope.launch {
         middleware.reply(message.data["unique_key"], isAvailable, message.data["message_start_time"]).execute()
     }
 

@@ -3,13 +3,12 @@ package com.voipgrid.vialer.util
 import android.content.*
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.logging.VialerBaseActivity
 import com.voipgrid.vialer.onboarding.OnboardingActivity
 import com.voipgrid.vialer.voip.VoipService
-import kotlinx.android.synthetic.main.activity_incoming_call.*
+import com.voipgrid.vialer.voip.core.call.State
 
 abstract class LoginRequiredActivity : VialerBaseActivity() {
 
@@ -19,19 +18,7 @@ abstract class LoginRequiredActivity : VialerBaseActivity() {
     override val logger = Logger(this)
 
     private var bound = false
-
-    private val connection = object : ServiceConnection {
-
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            val binder = service as VoipService.LocalBinder
-            voip = binder.getService()
-            voipServiceIsAvailable()
-        }
-
-        override fun onServiceDisconnected(name: ComponentName) {
-            bound = false
-        }
-    }
+    private val connection = VoipServiceConnection()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,8 +40,8 @@ abstract class LoginRequiredActivity : VialerBaseActivity() {
         }
 
         receiver = broadcastReceiverManager.registerReceiverViaLocalBroadcastManager(object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                voipStateWasUpdated()
+            override fun onReceive(context: Context, intent: Intent) {
+                voipStateWasUpdated(intent.getSerializableExtra(VoipService.CALL_STATE_EXTRA) as State.TelephonyState)
             }
 
         }, VoipService.CALL_STATE_WAS_UPDATED)
@@ -72,5 +59,17 @@ abstract class LoginRequiredActivity : VialerBaseActivity() {
 
     protected open fun voipServiceIsAvailable() {}
 
-    protected open fun voipStateWasUpdated() {}
+    protected open fun voipStateWasUpdated(state: State.TelephonyState) {}
+
+    inner class VoipServiceConnection : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+            val binder = service as VoipService.LocalBinder
+            voip = binder.getService()
+            voipServiceIsAvailable()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {
+            bound = false
+        }
+    }
 }

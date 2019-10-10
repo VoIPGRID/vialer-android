@@ -4,11 +4,11 @@ import com.voipgrid.vialer.voip.core.call.Call
 
 interface VoipProvider {
 
-    fun initialize(configuration: Configuration, listener: CallListener)
+    fun initialize(configuration: Configuration, listener: VoipListener)
 
     fun destroy()
 
-    suspend fun register()
+    fun call(number: String): Call
 
-    suspend fun call(number: String): Call
+    fun register()
 }

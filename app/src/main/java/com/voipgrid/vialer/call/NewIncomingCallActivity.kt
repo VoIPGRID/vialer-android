@@ -1,16 +1,11 @@
 package com.voipgrid.vialer.call
 
-import android.content.*
 import android.os.Bundle
-import android.os.Handler
-import android.os.IBinder
 import android.util.Log
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.LoginRequiredActivity
-import com.voipgrid.vialer.voip.VoipService
+import com.voipgrid.vialer.voip.core.call.State
 import kotlinx.android.synthetic.main.activity_incoming_call.*
-import org.koin.android.ext.android.inject
 
 class NewIncomingCallActivity : LoginRequiredActivity() {
 
@@ -20,12 +15,7 @@ class NewIncomingCallActivity : LoginRequiredActivity() {
         setContentView(R.layout.activity_incoming_call)
 
         button_decline.setOnClickListener {
-            try {
             voip?.getCurrentCall()?.decline()
-
-            } catch (e: Throwable) {
-                Log.e("TEST123", "e", e)
-            }
         }
 
         button_pickup.setOnClickListener {
@@ -45,7 +35,11 @@ class NewIncomingCallActivity : LoginRequiredActivity() {
         render()
     }
 
-    override fun voipStateWasUpdated() {
-        render()
+    override fun voipStateWasUpdated(state: State.TelephonyState) {
+        Log.e("TEST123", "Activity got state! $state")
+        when(state) {
+            State.TelephonyState.RINGING -> render()
+            else -> finish()
+        }
     }
 }
