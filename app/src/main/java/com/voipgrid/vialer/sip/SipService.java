@@ -192,27 +192,19 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         else if (Actions.ANSWER_OR_HANGUP.equals(action)) {
             if (mCurrentCall.isCallRinging()) {
                 mCurrentCall.answer();
-                break;
-            case Actions.END_CALL:
+            } else if (mCurrentCall.isConnected()) {
                 mCurrentCall.hangup(true);
-                break;
-            case Actions.ANSWER_OR_HANGUP:
-                if (mCurrentCall.isCallRinging()) {
-                    mCurrentCall.answer();
-                } else if (mCurrentCall.isConnected()) {
-                    mCurrentCall.hangup(true);
-                }
-                break;
-            case Actions.DISPLAY_CALL_IF_AVAILABLE:
-                if (getCurrentCall() != null) {
-                    startCallActivityForCurrentCall();
-                } else {
-                    stopSelf();
-                }
-                break;
-            default:
-                mLogger.e("SipService received an invalid action: " + action);
-                break;
+            }
+        }
+        else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
+            if (getCurrentCall() != null) {
+                startCallActivityForCurrentCall();
+            } else {
+                stopSelf();
+            }
+        }
+        else {
+            mLogger.e("SipService received an invalid action: " + action);
         }
 
         return false;

@@ -224,11 +224,9 @@
     <string name="advanced_settings_stun_switch">Gebruik STUN om te bellen</string>
     <string name="advanced_settings_stun_description">STUN kan de connectie met het netwerk verbeteren als je NAT problemen hebt.
     </string>
-    <string name="call_not_encrypted_warning_bar_text">Gesprek niet versleuteld</string>
 
     <string name="t9helper_title">Tip</string>
     <string name="t9helper_text">Je kunt zoeken op %1$s door de volgende nummers op het toetsenbord in te drukken.</string>
-    <string name="t9_search_numbers">%d nummbers</string>
     <string name="notification_channel_voip_disabled">Je VoIP account is geregistreerd op een ander
         apparaat. Je kunt VoIP weer activeren bij instellingen
     </string>
