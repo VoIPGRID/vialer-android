@@ -19,6 +19,7 @@ import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
 import com.voipgrid.vialer.statistics.CallCompletionStatsDispatcher;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+import com.voipgrid.vialer.util.PhoneNumberUtils;
 import com.voipgrid.vialer.util.StringUtil;
 
 import org.pjsip.pjsua2.AudDevManager;
@@ -413,7 +414,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public String getPhoneNumber() {
-        return getAppropriateCallerInformationHeader().number;
+        return PhoneNumberUtils.maskAnonymousNumber(getAppropriateCallerInformationHeader().number);
     }
 
     public void setPhoneNumber(String phoneNumber) {
@@ -456,11 +457,9 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mLogger.d("onCallIncoming");
         mCallDirection = CALL_DIRECTION_INCOMING;
 
-        // Determine whether we can accept the incoming call.
-        pjsip_status_code code = pjsip_status_code.PJSIP_SC_RINGING;
-        if (mSipService.getCurrentCall() != null || mSipService.getNativeCallManager().isBusyWithNativeCall()) {
-            code = pjsip_status_code.PJSIP_SC_BUSY_HERE;
-            LogHelper.using(mLogger).logBusyReason(mSipService);
+        if (!canHandleIncomingCall()) {
+            answerWithCode(pjsip_status_code.PJSIP_SC_BUSY_HERE);
+            return;
         }
 
         if (mSipService.getCurrentCall() != null) {
@@ -472,33 +471,55 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         }
 
         mCurrentCallState = SipConstants.CALL_INCOMING_RINGING;
+        mSipService.setCurrentCall(this);
 
-        // If we send back a ringing set the current call.
-        if (code.equals(pjsip_status_code.PJSIP_SC_RINGING)) {
-            mSipService.setCurrentCall(this);
-        }
         try {
-            CallOpParam callOpParam = new CallOpParam();
-            callOpParam.setStatusCode(code);
-            this.answer(callOpParam);
-
-            // If we sent a ringing setup the CallActivity for a incoming call. This is always
-            // the first call because we do not support incoming calls when there is a call
-            // active.
-            if (code.equals(pjsip_status_code.PJSIP_SC_RINGING)) {
-                Intent incomingCallDetails = mSipService.getIncomingCallDetails();
-                String callerId = "";
-                String number = "";
-                if (incomingCallDetails != null) {
-                    callerId = incomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME);
-                    number = incomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
-                }
-
-                mSipService.informUserAboutIncomingCall(number, callerId);
-            }
+            answerWithCode(pjsip_status_code.PJSIP_SC_RINGING);
         } catch (Exception e) {
             onCallInvalidState(e);
+            return;
         }
+
+        Intent incomingCallDetails = mSipService.getIncomingCallDetails();
+
+        if (incomingCallDetails == null) {
+            throw new RuntimeException("We have no incoming call details and are therefore unable to start this call");
+        }
+
+        setCallerId(incomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME));
+        setPhoneNumber(incomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER));
+        mSipService.informUserAboutIncomingCall(getPhoneNumber(), getCallerId());
+    }
+
+    /**
+     * Answer the current call with a code, throwing a runtime exception if it fails.
+     *
+     * @param code
+     * @return
+     */
+    private void answerWithCode(pjsip_status_code code) {
+        CallOpParam callOpParam = new CallOpParam();
+        callOpParam.setStatusCode(code);
+        try {
+            this.answer(callOpParam);
+            mLogger.i("Answered call with code: " + code);
+        } catch (Exception e) {
+            mLogger.e("Failed to answer call with code " + code);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Check to see if we have any other calls in progress currently, if so we cannot handle an incoming call.
+     *
+     * @return
+     */
+    private boolean canHandleIncomingCall() {
+        boolean result = mSipService.getCurrentCall() == null && !mSipService.getNativeCallManager().isBusyWithNativeCall();
+
+        if (!result) LogHelper.using(mLogger).logBusyReason(mSipService);
+
+        return result;
     }
 
     /**

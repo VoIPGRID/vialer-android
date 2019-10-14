@@ -3,7 +3,6 @@ package com.voipgrid.vialer
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.onboarding.Onboarder
@@ -11,7 +10,11 @@ import com.voipgrid.vialer.util.ConnectivityHelper
 
 class Logout(private val context: Context, private val sharedPreferences: SharedPreferences, private val connectivityHelper: ConnectivityHelper) {
 
-    fun perform(force: Boolean = false, activity: Activity) {
+    /**
+     * Log the currently logged in user out, performing all the tasks we need to perform before they can be logged out.
+     *
+     */
+    fun perform(force: Boolean = false, activity: Activity?) {
         if (!connectivityHelper.hasNetworkConnection() && !force) {
             showErrorDialog()
             return
@@ -24,7 +27,7 @@ class Logout(private val context: Context, private val sharedPreferences: Shared
         User.clear()
         sharedPreferences.edit().clear().apply()
 
-        Onboarder.start(activity)
+        activity?.let { Onboarder.start(it) }
     }
 
     private fun showErrorDialog() {

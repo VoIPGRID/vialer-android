@@ -1,7 +1,5 @@
 package com.voipgrid.vialer.util;
 
-import android.util.Log;
-
 public class HtmlHelper {
 
     /**
@@ -20,7 +18,11 @@ public class HtmlHelper {
 
         color = formatColorHexCode(color);
 
-        return str.substring(0, start) + wrapInColorTags(str.substring(start, end), color) + str.substring(end);
+        try {
+            return str.substring(0, start) + wrapInColorTags(str.substring(start, end), color) + str.substring(end);
+        } catch (StringIndexOutOfBoundsException e) {
+            return "";
+        }
     }
 
     /**

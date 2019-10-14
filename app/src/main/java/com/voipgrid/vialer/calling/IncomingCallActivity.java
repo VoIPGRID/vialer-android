@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.calling;
 
+import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
+
 import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +15,6 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.contacts.Contacts;
-import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 
 import javax.inject.Inject;
@@ -38,8 +39,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @BindView(R.id.button_pickup) ImageButton mButtonPickup;
     @BindView(R.id.call_buttons) View mCallButtons;
 
-    private boolean ringingIsPaused = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,13 +49,9 @@ public class IncomingCallActivity extends AbstractCallActivity {
         mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent(), mContactImage);
     }
 
-    private boolean currentlyOnLockScreen() {
-        return mKeyguardManager.inKeyguardRestrictedInputMode();
-    }
-
     @OnClick(R.id.button_decline)
     public void onDeclineButtonClicked() {
-        mLogger.d("decline");
+        getLogger().d("decline");
 
         disableAllButtons();
 
@@ -70,8 +65,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
         SipService.performActionOnSipService(this, SipService.Actions.DECLINE_INCOMING_CALL);
 
-        endRinging();
-
+        finish();
     }
 
     @OnClick(R.id.button_pickup)
@@ -100,40 +94,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
         intent.setClass(this, CallActivity.class);
         intent.putExtra(CALL_IS_CONNECTED, true);
         startActivity(intent);
-        mLogger.d("callVisibleForUser");
-    }
-
-    /**
-     * Ends the incoming calling.
-     *
-     */
-    private void endRinging() {
-        finish();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (!allPermissionsGranted(permissions, grantResults)) {
-            return;
-        }
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        ringingIsPaused = true;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        mCallButtons.setVisibility(View.VISIBLE);
-
-        if (ringingIsPaused) {
-            ringingIsPaused = false;
-        }
+        getLogger().d("callVisibleForUser");
     }
 
     @Override
@@ -145,15 +106,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @Override
     public void sipServiceHasConnected(SipService sipService) {
         super.sipServiceHasConnected(sipService);
-        SipCall call = sipService.getFirstCall();
-
-        if (call == null) {
-            finish();
-            return;
-        }
-
-        call.setCallerId(getCallerIdFromIntent());
-        call.setPhoneNumber(getPhoneNumberFromIntent());
+        if (sipService.getFirstCall() == null) finish();
     }
 
     @Override
@@ -171,7 +124,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
     public void onCallDisconnected() {
         //TODO: Seems like this is the scenario 1 of missed call.
         mSipServiceConnection.disconnect(true);
-        endRinging();
+        finish();
     }
 
     @Override

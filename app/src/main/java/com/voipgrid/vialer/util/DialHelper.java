@@ -10,7 +10,6 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.User;
-import com.voipgrid.vialer.calling.PendingCallActivity;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.persistence.UserPreferences;
 import com.voipgrid.vialer.sip.SipConstants;
@@ -46,14 +45,14 @@ public class DialHelper {
     public void callNumber(final String number, final String contactName) {
         if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.Connection.WIFI && User.voip.getHasEnabledSip()) {
             if(User.userPreferences.hasConnectionPreference(
-                    UserPreferences.ConnectionPreference.LTE)) {
+                    UserPreferences.ConnectionPreference.ONLY_CELLULAR)) {
                 switchNetworkAndCallNumber(number, contactName);
             } else if(User.userPreferences.hasConnectionPreference(
-                    UserPreferences.ConnectionPreference.NONE)) {
-                showConnectionPickerDialog(number, contactName);
-            } else if(User.userPreferences.hasConnectionPreference(
-                    UserPreferences.ConnectionPreference.WIFI)) {
+                    UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI)) {
                 makeCall(number, contactName);
+            } else if(User.userPreferences.hasConnectionPreference(
+                    UserPreferences.ConnectionPreference.SHOW_POPUP_BEFORE_EVERY_CALL)) {
+                showConnectionPickerDialog(number, contactName);
             }
         } else {
             makeCall(number, contactName);
@@ -63,12 +62,7 @@ public class DialHelper {
     private void switchNetworkAndCallNumber(final String number, final String contactName) {
         mConnectivityHelper.attemptUsingLTE(mContext, mMaximumNetworkSwitchDelay);
         Toast.makeText(mContext, mContext.getString(R.string.connection_preference_switch_toast), Toast.LENGTH_LONG).show();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                makeCall(number, contactName);
-            }
-        }, mMaximumNetworkSwitchDelay);
+        new Handler().postDelayed(() -> makeCall(number, contactName), mMaximumNetworkSwitchDelay);
     }
 
     private void showConnectionPickerDialog(final String number, final String contactName) {
@@ -102,7 +96,7 @@ public class DialHelper {
         // We need internet for both type of calls.
         if (mConnectivityHelper.hasNetworkConnection()) {
             if (User.voip.getCanUseSip()
-                    && User.getHasPhoneAccount()
+                    && User.getHasVoipAccount()
                     && mConnectivityHelper.hasFastData()) {
                 // Check if we have permission to use the microphone. If not, request it.
                 if (!MicrophonePermission.hasPermission((Activity) mContext)) {
@@ -111,22 +105,10 @@ public class DialHelper {
                     return;
                 }
                 callWithSip(number, contactName);
-                startPendingCallActivity(number);
             } else {
                 callWithApi(number, contactName);
             }
         }
-    }
-
-    /**
-     * Start the pending call activity that is displayed while the call is being setup.
-     *
-     * @param number The number that will be displayed in the call activity
-     */
-    private void startPendingCallActivity(String number) {
-        Intent intent = new Intent(mContext, PendingCallActivity.class);
-        intent.putExtra(PendingCallActivity.EXTRA_DIALLED_NUMBER, number);
-        mContext.startActivity(intent);
     }
 
     /**

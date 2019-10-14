@@ -3,8 +3,6 @@ package com.voipgrid.vialer.t9
 object T9 {
 
     private val keyMappings = mapOf(
-            '0' to charArrayOf(),
-            '1' to charArrayOf(),
             '2' to charArrayOf('a', 'b', 'c'),
             '3' to charArrayOf('d', 'e', 'f'),
             '4' to charArrayOf('g', 'h', 'i'),
@@ -47,7 +45,7 @@ object T9 {
      *
      */
     fun getLettersThatMapToKey(key: Char) : String? {
-        val chars = keyMappings[key] ?: throw RuntimeException("Unable to locate mapping for $key")
+        val chars = keyMappings[key] ?: charArrayOf()
 
         return chars.joinToString("")
     }

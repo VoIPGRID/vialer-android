@@ -36,7 +36,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingBottom="@dimen/activity_vertical_margin">
 
@@ -173,6 +172,25 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="0dp"
                 android:text="@string/ignore_battery_optimization_description" />
+
+            <Switch
+                android:id="@+id/use_phones_ringtone_switch"
+                style="@style/AccountTextInputLayoutStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="4dp"
+                android:paddingEnd="0dp"
+                android:paddingBottom="4dp"
+                android:text="@string/use_phones_ringtone_switch_switch" />
+
+            <TextView
+                android:id="@+id/use_phones_ringtone_switch_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.5"
+                android:paddingStart="4dp"
+                android:paddingEnd="0dp"
+                android:text="@string/use_phones_ringtone_switch_description" />
 
             <Switch
                 android:id="@+id/remote_logging_switch"

@@ -14,9 +14,9 @@ android {
     defaultConfig {
         applicationId "com.voipgrid.app"
         minSdkVersion 23
-        targetSdkVersion 29
-        versionCode 150
+        versionCode 173
         versionName "6.4.0"
+        targetSdkVersion 29
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -127,11 +127,9 @@ android {
         }
         debug {
             manifestPlaceholders = [enableCrashReporting:"false"]
-            buildConfigField("String", "TEST_USERNAME", "\"${testUsername}\"")
-            buildConfigField("String", "TEST_PASSWORD", "\"${testPassword}\"")
-            buildConfigField("String", "TEST_END_NUMBER", "\"${testEndNumber}\"")
-        }
-        debug {
+            buildConfigField("String", "TEST_USERNAME", "\"${project.properties['testUsername'] ?: ""}\"")
+            buildConfigField("String", "TEST_PASSWORD", "\"${project.properties['testPassword'] ?: ""}\"")
+            buildConfigField("String", "TEST_END_NUMBER", "\"${project.properties['testEndNumber'] ?: ""}\"")
             versionNameSuffix '-DEBUG'
         }
     }

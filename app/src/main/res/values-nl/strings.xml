@@ -66,7 +66,6 @@
     <string name="change_password_webview_toast">Om gebruik van de app te kunnen maken moet je eenmalig inloggen en je wachtwoord wijzigen</string>
 
     <!-- Forgot password fragment values -->
-    <string name="header_forgot_password_title">Wachtwoord vergeten</string>
     <string name="forgot_password_button_text">Verzenden</string>
     <string name="forgot_password_description">Voer uw e-mailadres in en wij sturen je instructies om je wachtwoord te herstellen.</string>
     <string name="forgot_password_missing_field_title">Let op</string>
@@ -80,8 +79,7 @@
 
     <!-- Configure fragment values. -->
     <string name="configure_button_title">Instellen</string>
-    <string name="configure_header_label_text">Vialer stelt</string>
-    <string name="configure_header_label_subtext">je account in</string>
+    <string name="configure_header_label_text">Account \nconfiguratie</string>
     <string name="phonenumber_edittext_hint">Mobiel nummer</string>
     <string name="outgoingnumber_edittext_hint">Uitgaand nummer</string>
     <string name="phonenumber_info_text_title">Mobiele telefoonnummer</string>
@@ -250,9 +248,9 @@
     <string name="choose_codec_text">Audio Kwaliteit</string>
     <string name="call_codec_standard_quality">Standaard audio</string>
     <string name="call_codec_high_quality">Hogere audio kwaliteit</string>
+    <string name="call_records_show_all">Toon alleen mijn gesprekken</string>
     <string name="tab_title_recents">mijn gesprekken</string>
-    <string name="tab_title_missed">alle gesprekken</string>
-    <string name="call_records_show_all">Laat alleen gemiste gesprekken zien</string>
+    <string name="tab_title_missed">gemiste gesprekken</string>
     <string name="call_connection_setting_not_supported">Jouw Android versie staat het aanpassen van
         deze instelling niet toe
     </string>
@@ -275,6 +273,43 @@
     <string name="call_icon">Bel icoon</string>
     <string name="exclamation_mark">!</string>
     <string name="help_icon">Help icoon</string>
+    <string name="password_reset_hint_2">Bevestig wachtwoord</string>
+    <string name="call_records_default_title">Geen gespreksdetails gevonden</string>
+    <string name="call_records_default_message">Gespreksopnames vinden niet mogelijk</string>
+    <string name="call_records_unauthorized_title">Toestemming vereist</string>
+    <string name="call_records_unauthorized_message">Jouw account heeft toestemming nodig om gespreksopnames in te kunnen zien</string>
+    <string name="call_records_no_internet_title">Geen internetverbinding</string>
+    <string name="call_records_no_internet_message">Voor het inzien van gespreksopnames is een internetverbinding vereist</string>
+    <string name="call_records_no_missed_message">Geen gemiste gesprekken</string>
+    <string name="call_records_no_missed_title">Momenteel zijn er geen gemiste gesprekken</string>
+    <string name="notification_channel_incoming_calls">Inkomende gesprekken</string>
+    <string name="dialer_no_internet_connectivity">Geen internetverbinding beschikbaar</string>
+    <string name="dialer_no_internet_connectivity_subtext">Je bent met een netwerk verbonden maar er is geen internetverbinding, waardoor er geen gesprek opgezet kan worden.</string>
+    <string name="use_phones_ringtone_switch_switch">Gebruik ringtone van het toestel</string>
+    <string name="header_forgot_password_title">Wachtwoord vergeten?</string>
+    <string name="configure_mobile_number_text">Voer onderstaand je mobiele telefoonnummer in:</string>
+    <string name="outgoing_number_description">Het volgende nummer wordt getoond bij uitgaande gesprekken:</string>
+    <string name="voip_account_missing_title">VoIP account\nontbreekt</string>
+    <string name="onboarding_login_failed_too_many_attempts_title">Teveel inlogpogingen</string>
+    <string name="onboarding_login_failed_too_many_attempts_message">Probeer het later opnieuw.</string>
+    <string name="onboarding_permission_contacts_title">Toestemming contactenlijst</string>
+    <string name="onboarding_permission_contacts_justification">"Deze toestemming zorgt ervoor dat Vialer informatie zoals de contactenlijst en gespreksactiviteit inzichtelijk maakt.\n\nDeze data wordt enkel gebruikt voor het tonen en doorzoeken hiervan. "</string>
+    <string name="onboarding_permission_call_state_title">Gesprekstoegangen</string>
+    <string name="onboarding_permission_call_state_justification">Deze toestemming is nodig om Vialer toe te staan VoIP en mobiele gesprekken tegelijkertijd te ontvangen. Zonder deze toestemming zou je tijdens een mobiel gesprek geen melding kunnen ontvangen wanneer een VoIP gesprek binnenkomt.</string>
+    <string name="onboarding_permission_microphone_title">Microfoon\ntoestemming</string>
+    <string name="onboarding_permission_microphone_justification">Deze toestemming is nodig om de microfoon te gebruiken tijdens telefoongesprekken.\n\nZonder deze toestemming kan Vialer geen gesprekken opzetten of ontvangen. \n\nDe app gebruikt de microfoon enkel wanneer een gesprek wordt opgezet.</string>
+    <string name="onboarding_permission_accept">Toestaan</string>
+    <string name="onboarding_deny">Afwijzen</string>
+    <string name="onboarding_skip">Overslaan</string>
+    <string name="onboarding_battery_optimization_whitelist_title">Batterij-optimalisatie</string>
+    <string name="onboarding_battery_optimization_whitelist_justification">"Batterij-optimalisatie kan ervoor zorgen dat de app langzaam wordt gestopt, gesprekken en notificaties worden geblokkeerd etc.\n\nDeze toestemming zorgt ervoor dat Vialer als veilig wordt gemarkeerd, waardoor dit gedrag zich niet voor zal doen.\n\nWe zijn ons ervan bewust hoe belangrijk je batterij is en gaan hier dan ook zuinig mee om. "</string>
+    <string name="password_reset_title">Wachtwoord reset</string>
+    <string name="password_reset_subtitle">Verplicht</string>
+    <string name="password_reset_description_top">Je zult een nieuw wachtwoord moeten aanmaken voordat er opnieuw ingelogd kan worden.</string>
+    <string name="password_reset_description_bottom">Je wachtwoord moet uit minimaal 6 karakters bestaan en bevalt minimaal 1 niet-alfabetisch karakter.</string>
+    <string name="password_reset_hint">Wachtwoord</string>
+    <string name="t9_search_numbers">%d nummers</string>
+    <string name="use_phones_ringtone_switch_description">Indien ingeschakeld wordt de ringtone welke nu op het toestel staat ingesteld verkozen boven de %1$s ringtone.</string>
     <string name="missed_call">Oproep gemist (%1$s).</string>
     <string name="answered_elsewhere">Oproep (%1$s) elders opgenomen.</string>
     <string name="call_back">Bel terug</string>

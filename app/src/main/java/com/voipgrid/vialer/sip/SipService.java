@@ -27,6 +27,7 @@ import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
+
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
@@ -55,7 +56,8 @@ import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
  * provides a persistent interface to SIP services throughout the app.
  *
  */
-public class SipService extends Service implements CallStatusReceiver.Listener {
+public class SipService extends Service implements CallStatusReceiver.Listener,
+        SipServiceTic.TicListener {
     /**
      * This will track whether this instance of SipService has ever handled a call,
      * if this is the case we can shut down the sip service immediately if we don't
@@ -67,6 +69,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * Set when the SipService is active. This is used to respond to the middleware.
      */
     public static boolean sipServiceActive = false;
+
+    public boolean incomingAlertsMuted = false;
 
     private Intent mIncomingCallDetails = null;
     private SipCall mCurrentCall;
@@ -84,6 +88,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     private AbstractCallNotification callNotification = new DefaultCallNotification();
     private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
+    private SipServiceTic tic = new SipServiceTic(this);
 
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
@@ -115,6 +120,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
         mCheckService.start();
         startForeground(callNotification.getNotificationId(), callNotification.build());
+        tic.begin();
     }
 
     @Override
@@ -158,23 +164,33 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
         mLogger.i("Performing action: " + action);
 
-        switch (action) {
-            case Actions.HANDLE_INCOMING_CALL:
-                initialiseIncomingCall();
-                return true;
-            case Actions.HANDLE_OUTGOING_CALL:
-                initialiseOutgoingCall(intent);
-                return true;
-            case Actions.DECLINE_INCOMING_CALL:
-                mCurrentCall.decline();
-                break;
-            case Actions.ANSWER_INCOMING_CALL:
-                if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
-                    Toast.makeText(this, getString(R.string.permission_microphone_missing_message), Toast.LENGTH_LONG).show();
-                    mLogger.e("Unable to answer incoming call as we do not have microphone permission");
-                    return false;
-                }
+        if (Actions.HANDLE_INCOMING_CALL.equals(action)) {
+            initialiseIncomingCall();
+            return true;
+        }
+        else if (Actions.HANDLE_OUTGOING_CALL.equals(action)) {
+            initialiseOutgoingCall(intent);
+            return true;
+        }
+        else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
+            incomingCallAlerts.stop();
+            mCurrentCall.decline();
+        }
+        else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
+            if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
+                Toast.makeText(this, getString(R.string.permission_microphone_missing_message), Toast.LENGTH_LONG).show();
+                mLogger.e("Unable to answer incoming call as we do not have microphone permission");
+                return false;
+            }
 
+            incomingCallAlerts.stop();
+            mCurrentCall.answer();
+        }
+        else if (Actions.END_CALL.equals(action)) {
+            mCurrentCall.hangup(true);
+        }
+        else if (Actions.ANSWER_OR_HANGUP.equals(action)) {
+            if (mCurrentCall.isCallRinging()) {
                 mCurrentCall.answer();
                 break;
             case Actions.END_CALL:
@@ -277,6 +293,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
         audioRouter.destroy();
         incomingCallAlerts.stop();
+        tic.stop();
 
         // If no phoneaccount was found in the onCreate there won't be a sipconfig either.
         // Check to avoid nullpointers.
@@ -557,6 +574,24 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     }
 
     /**
+     * This method will be called every "tic"
+     *
+     */
+    @Override
+    public void onTic() {
+        if (getCurrentCall() == null) return;
+
+        if (incomingAlertsMuted) return;
+
+        SipCall call = getCurrentCall();
+
+        if (SipConstants.CALL_INCOMING_RINGING.equals(call.getCurrentCallState())) {
+            callNotification.incoming(call.getPhoneNumber(), call.getCallerId());
+            incomingCallAlerts.start();
+        }
+    }
+
+    /**
      * Class the be able to bind a activity to this service.
      */
     public class SipServiceBinder extends Binder {
@@ -624,6 +659,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
             mLogger.i("Detected screen off event, disabling call alert");
 
             incomingCallAlerts.stop();
+            incomingAlertsMuted = true;
         }
     }
 

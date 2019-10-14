@@ -6,6 +6,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.HashSet;
 
+import androidx.annotation.Nullable;
+
 /**
  * Model for storing SystemUser info and parsing of JSON to model.
  */
@@ -117,12 +119,17 @@ public class SystemUser {
         return getFirstName() + " " + getPreposition() + " " + getLastName();
     }
 
-    public String getPhoneAccountId() {
+    @Nullable
+    public String getVoipAccountId() {
         if(appAccountUri != null) {
             Uri uri = Uri.parse(appAccountUri);
             return uri.getLastPathSegment();
         }
         return null;
+    }
+
+    public boolean hasVoipAccount() {
+        return getVoipAccountId() != null;
     }
 
     public void setClient(String client) {

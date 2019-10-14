@@ -100,7 +100,6 @@ fragments for each type of data being displayed, when a different tab is
 selected or a toggle is changed that fragment will just be told to
 update its data.
 
-
 ### Android 10
 
 Android 10 support has continued to improve with what can be considered
@@ -115,14 +114,6 @@ a final implementation of incoming call flow.
 - If the user has locked their phone, they will see the incoming call
   screen.
 
-### Added
-- Before a call is made we will now perform a check to see if the phone is 
-  actually able to connect to the internet, if it not we will display an alert 
-  instead of letting the call proceed. This gives a little better feedback
-  to users if they are in a situation where they do have a network connection
-  but that network doesn't have internet access (e.g. if their phone has run
-  out of credit or they are connected to WiFi that requires login via a browser).
-
 ### Changed
 - The error message displayed when there is an issue with call records
   (no internet/permissions) has been made much more readable and
@@ -133,10 +124,6 @@ a final implementation of incoming call flow.
 - Several improvements have been made to the XML layout files to make
   them cleaner and easier to work with. The actual design presented to
   the user should remain unchanged.
-
-- Vialer will now, by default, use the same ringtones as the webphone. It is
-  possible to switch back to using the phone's default ringtone in the settings
-  menu.
 
 ### Fixed
  - There was an issue where the sound played when the third party ended

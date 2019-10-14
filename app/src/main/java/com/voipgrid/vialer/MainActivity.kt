@@ -2,35 +2,29 @@ package com.voipgrid.vialer
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.get
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
-import com.voipgrid.vialer.api.ApiTokenFetcher
+import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.callrecord.CallRecordFragment
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.onboarding.Onboarder
-import com.voipgrid.vialer.onboarding.SingleOnboardingStepActivity
-import com.voipgrid.vialer.onboarding.steps.TwoFactorStep
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.util.PhoneAccountHelper
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_onboarding.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {
 
-    @Inject lateinit var phoneAccountHelper: PhoneAccountHelper
+    @Inject lateinit var userSynchronizer: UserSynchronizer
     @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
 
-    private val logger = Logger(this)
+    override val logger = Logger(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +39,7 @@ class MainActivity : NavigationDrawerActivity() {
             return
         }
 
-        if (connectivityHelper.hasNetworkConnection()) {
-            phoneAccountHelper.executeUpdatePhoneAccountTask()
-        }
+        syncUser()
 
         setupTabs()
         floating_action_button.setOnClickListener { openDialer() }
@@ -66,6 +58,16 @@ class MainActivity : NavigationDrawerActivity() {
     override fun onPause() {
         super.onPause()
         reachabilityReceiver.stopListening()
+    }
+
+    /**
+     * Updates the user and voip account information from the api.
+     *
+     */
+    private fun syncUser() = GlobalScope.launch(Dispatchers.Main) {
+        if (connectivityHelper.hasNetworkConnection()) return@launch
+
+        userSynchronizer.sync()
     }
 
     /**

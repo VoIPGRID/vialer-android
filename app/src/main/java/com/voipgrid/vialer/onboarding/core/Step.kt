@@ -2,12 +2,9 @@ package com.voipgrid.vialer.onboarding.core
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import androidx.fragment.app.Fragment
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.api.ServiceGenerator
@@ -24,15 +21,12 @@ abstract class Step: Fragment() {
     protected val voipgridApi: VoipgridApi
         get() = ServiceGenerator.createApiService(onboarding)
 
-    protected val state: OnboardingState
-        get() = onboarding?.state ?: OnboardingState()
+    protected val state: OnboardingState?
+        get() = onboarding?.state
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(layout, container, false)
     }
-
-    protected val isActiveScreen: Boolean
-        get() = onboarding != null
 
     /**
      * Return TRUE to skip this step, this is checked twice, when first
@@ -40,8 +34,17 @@ abstract class Step: Fragment() {
      * to be shown.
      *
      */
-    open fun shouldThisStepBeSkipped(): Boolean {
+    open fun shouldThisStepBeSkipped(state: OnboardingState): Boolean {
         return false
+    }
+
+    /**
+     * Return TRUE if this step should be skipped completely and never added
+     * to the onboarder.
+     *
+     */
+    open fun shouldThisStepBeAddedToOnboarding(): Boolean {
+        return true
     }
 
     /**
@@ -66,18 +69,4 @@ abstract class Step: Fragment() {
         onboarding?.isLoading = false
         alert(title, description)
     }
-}
-
-fun EditText.onTextChanged(callback: (Editable?) -> Unit) {
-    addTextChangedListener(object : TextWatcher {
-        override fun afterTextChanged(p0: Editable?) {
-            callback(p0)
-        }
-
-        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-        }
-
-        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-        }
-    })
 }

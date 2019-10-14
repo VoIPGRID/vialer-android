@@ -13,7 +13,8 @@
         android:gravity="center"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:text="@string/dialer_no_contacts_found_message"/>
 
     <LinearLayout
         android:id="@+id/no_contact_permission_warning"
