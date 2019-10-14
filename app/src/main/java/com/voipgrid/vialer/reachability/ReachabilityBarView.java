@@ -13,10 +13,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 
 /**
  * Class that handles the network state view and allows the updating of the view
@@ -25,8 +24,6 @@ import com.voipgrid.vialer.util.JsonStorage;
 public class ReachabilityBarView extends RelativeLayout implements View.OnClickListener, ReachabilityInterface {
     private Context mContext;
     private ConnectivityHelper mConnectivityHelper;
-    private JsonStorage mJsonStorage;
-    private Preferences mPreferences;
     private TextView mReachabilityBarTextView;
     private ImageView mReachabilityInfoImageView;
     private RelativeLayout mReachabilityBarView;
@@ -65,7 +62,6 @@ public class ReachabilityBarView extends RelativeLayout implements View.OnClickL
 
         if (!isInEditMode()) {
             mConnectivityHelper = ConnectivityHelper.get(mContext);
-            mPreferences = new Preferences(mContext);
         } else {
             mReachabilityBarTextView.setText(R.string.dialer_warning_voip_disabled);
         }
@@ -86,7 +82,7 @@ public class ReachabilityBarView extends RelativeLayout implements View.OnClickL
         } else if (!mConnectivityHelper.hasFastData()) {
             // The connection is not fast enough.
             // SIP is enabled and allowed to use, show the click-to-dial message.
-            if (mPreferences.hasSipEnabled() && mPreferences.hasSipPermission()) {
+            if (User.voip.getHasEnabledSip() && User.voip.isAccountSetupForSip()) {
                 mReachabilityBarTextView.setText(R.string.dialer_warning_a_b_connect);
                 showInfoImageView = true;
             } else {
@@ -95,7 +91,7 @@ public class ReachabilityBarView extends RelativeLayout implements View.OnClickL
             }
         } else if (mConnectivityHelper.hasFastData()) {
             // The user has fast enough connection for SIP calling
-            if (!(mPreferences.hasSipEnabled() && mPreferences.hasSipPermission())) {
+            if (!(User.voip.getHasEnabledSip() && User.voip.isAccountSetupForSip())) {
                 // The user has disabled the VoIP switch.
                 mReachabilityBarTextView.setText(R.string.dialer_warning_voip_disabled);
             } else {

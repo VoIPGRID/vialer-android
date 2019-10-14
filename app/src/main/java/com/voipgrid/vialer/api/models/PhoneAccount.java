@@ -79,6 +79,7 @@ public class PhoneAccount implements Destination {
 
         PhoneAccount that = (PhoneAccount) o;
 
+        if (getAccountId() == null) return false;
         if (!getAccountId().equals(that.getAccountId())) return false;
         if (!getPassword().equals(that.getPassword())) return false;
         return getNumber().equals(that.getNumber());

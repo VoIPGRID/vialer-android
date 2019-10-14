@@ -4,13 +4,6 @@
     android:layout_height="match_parent"
     android:background="@color/call_records_background">
 
-    <LinearLayout
-        android:id="@+id/empty_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,7 +21,7 @@
             android:layout_marginTop="10dp">
 
             <Switch
-                android:id="@+id/show_missed_calls_only_switch"
+                android:id="@+id/show_my_calls_only"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -61,5 +54,14 @@
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     </LinearLayout>
+
+
+    <com.voipgrid.vialer.callrecord.CallRecordsUnavailableView
+        android:id="@+id/call_records_unavailable_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+    </com.voipgrid.vialer.callrecord.CallRecordsUnavailableView>
 
 </FrameLayout>

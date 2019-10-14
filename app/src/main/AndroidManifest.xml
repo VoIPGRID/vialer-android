@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <!-- Contact management -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -33,6 +34,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <uses-feature
         android:name="android.hardware.sensor.proximity"
@@ -64,24 +66,19 @@
         <!-- Activity responsible for choosing outgoing calls -->
         <activity
             android:name=".dialer.DialerActivity"
-            android:label="@string/title_activity_dialer"
+            android:label="@string/app_name"
             android:screenOrientation="portrait" >
-            <intent-filter tools:ignore="AppLinkUrlError">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <!-- Add the option to start a call from Contacts app. -->
-                <data android:mimeType="@string/profile_mimetype" />
+                <action android:name="android.intent.action.CALL"/>
+                <action android:name="android.intent.action.DIAL"/>
+                <action android:name="android.intent.action.CALL_PRIVILEGED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="tel"/>
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".CallActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" >
-        </activity>
+
         <activity
             android:name=".calling.NetworkAvailabilityActivity"
             android:label="@string/app_name"
@@ -93,14 +90,6 @@
             android:name=".fcm.FcmMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-            </intent-filter>
-        </service>
-
-        <service
-            android:name=".fcm.FcmInstanceIdListenerService"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
         </service>
 
@@ -130,19 +119,7 @@
         </receiver>
 
         <activity
-            android:name=".util.UpdateActivity"
-            android:label="@string/title_activity_update"
-            android:screenOrientation="portrait"
-            android:theme="@style/OnboardingTheme" >
-        </activity>
-        <activity
-            android:name=".onboarding.SetupActivity"
-            android:label="@string/title_activity_setup"
-            android:screenOrientation="portrait"
-            android:theme="@style/OnboardingTheme">
-        </activity>
-        <activity
-            android:name=".WebActivity"
+            android:name=".VoIPGRIDPortalWebActivity"
             android:label="@string/title_activity_web"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" >
@@ -150,26 +127,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.voipgrid.vialer.MainActivity" />
         </activity>
-        <activity
-            android:name=".WarningActivity"
-            android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.voipgrid.vialer.MainActivity" />
-        </activity>
-
-        <!--
-             Optionally, register AnalyticsReceiver and AnalyticsService to support background
-             dispatching on non-Google Play devices
-        -->
-        <receiver
-            android:name="com.google.android.gms.analytics.AnalyticsReceiver"
-            android:enabled="true" >
-            <intent-filter>
-                <action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" />
-            </intent-filter>
-        </receiver>
 
         <receiver android:name="androidx.media.session.MediaButtonReceiver" >
             <intent-filter>
@@ -184,12 +141,6 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name="com.google.android.gms.analytics.AnalyticsService"
-            android:enabled="true"
-            android:exported="false" />
-
-
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_account"
@@ -202,14 +153,34 @@
         <activity
             android:name=".twostepcall.TwoStepCallActivity"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".CallActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity">
+        </activity>
+
         <activity android:name=".calling.IncomingCallActivity"
                   android:screenOrientation="portrait"
                   android:exported="true"
-                  android:launchMode="singleTop"/>
-        <activity android:name=".calling.PendingCallActivity"
-                  android:screenOrientation="portrait"
-                  android:exported="true"
-                  android:launchMode="singleTop"/>
+                  android:launchMode="singleTop"
+                  android:parentActivityName=".MainActivity"/>
+
+        <activity android:name=".ForgottenPasswordActivity"
+                  android:theme="@style/OnboardingTheme"
+                  android:launchMode="singleTask"/>
+
+        <activity android:name=".onboarding.OnboardingActivity"
+                  android:theme="@style/OnboardingTheme"
+                  android:launchMode="singleTask"/>
+
+        <activity android:name=".onboarding.SingleOnboardingStepActivity"
+                  android:theme="@style/OnboardingTheme"/>
+
+        <activity android:name=".voipgrid.PasswordResetWebActivity"
+                  android:theme="@style/OnboardingTheme"/>
     </application>
 
 </manifest>

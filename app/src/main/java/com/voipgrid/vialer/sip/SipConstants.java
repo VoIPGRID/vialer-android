@@ -124,4 +124,10 @@ public interface SipConstants {
     int SIP_LOG_LEVEL = 10;
     // For PJSIP debugging purpose 4 is a reasonable value.
     int SIP_CONSOLE_LOG_LEVEL = 4;
+
+    /**
+     * The duration of the tone to play when the remote party hangs up the call.
+     *
+     */
+    int BUSY_TONE_DURATION = 2000;
 }

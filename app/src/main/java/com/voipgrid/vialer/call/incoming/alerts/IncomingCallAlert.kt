@@ -5,4 +5,6 @@ interface IncomingCallAlert {
     fun start()
 
     fun stop()
+
+    fun isStarted(): Boolean
 }

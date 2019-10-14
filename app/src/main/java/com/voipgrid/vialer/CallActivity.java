@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -180,7 +179,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
             updateUi();
         } else {
             mConnected = false;
-            finishAfterDelay();
+            finish();
         }
     }
 
@@ -204,7 +203,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     @Override
     public void onServiceStopped() {
         mConnected = false;
-        finishAfterDelay();
+        finish();
     }
 
     /**
@@ -221,7 +220,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @Override
     public void onBackPressed() {
-        mLogger.d("onBackPressed");
+        getLogger().d("onBackPressed");
 
         if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
             super.onBackPressed();
@@ -266,7 +265,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
-        mLogger.d("toggleSpeaker");
+        getLogger().d("toggleSpeaker");
         if (!getAudioRouter().isCurrentlyRoutingAudioViaSpeaker()) {
             getAudioRouter().routeAudioViaSpeaker();
         } else {
@@ -277,7 +276,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     // Toggle the hold the call when the user presses the button.
     private void toggleOnHold() {
-        mLogger.d("toggleOnHold");
+        getLogger().d("toggleOnHold");
         if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
             return;
         }
@@ -308,12 +307,10 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         try {
             mSipServiceConnection.get().getCurrentCall().hangup(true);
             updateUi();
-        } catch (Exception e) {
+        } catch (Exception ignored) { }
+        finally {
             finish();
-            return;
         }
-
-        finishAfterDelay();
     }
 
     @OnClick(R.id.button_mute)
@@ -377,7 +374,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     @Override
     @OnClick(R.id.button_hangup)
     protected void onDeclineButtonClicked() {
-        mLogger.i("Hangup the call");
+        getLogger().i("Hangup the call");
         hangup();
     }
 
@@ -551,11 +548,11 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
      *
      */
     private void showCallTransferCompletedDialog() {
-        if (isFinishing()) {
+        if (isFinishing() || mInitialCallDetail == null) {
             return;
         }
 
-        if (mInitialCallDetail != null && mTransferCallDetail != null) {
+        if (mTransferCallDetail != null && mTransferCompleteDialog == null) {
             mTransferCompleteDialog = TransferCompleteDialog.createAndShow(this, mInitialCallDetail.getPhoneNumber(), mTransferCallDetail.getPhoneNumber());
         }
     }
@@ -576,6 +573,25 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         return getAudioRouter().isCurrentlyRoutingAudioViaSpeaker();
     }
 
+    @Override
+    public void finish() {
+        if (mTransferCompleteDialog != null && mTransferCompleteDialog.isShowing()) {
+            finishAfterTransferDialogIsComplete();
+            return;
+        }
+
+        super.finish();
+    }
+
+    private void finishAfterTransferDialogIsComplete() {
+        new Handler().postDelayed(() -> {
+            if (mTransferCompleteDialog != null) {
+                mTransferCompleteDialog.cancel();
+                mTransferCompleteDialog = null;
+            }
+            finish();
+        }, 3000);
+    }
 
     public CallDetail getInitialCallDetail() {
         return mInitialCallDetail;

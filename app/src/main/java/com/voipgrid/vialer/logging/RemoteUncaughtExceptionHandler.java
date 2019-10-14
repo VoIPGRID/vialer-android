@@ -4,6 +4,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
+import com.voipgrid.vialer.User;
 
 /**
  * Class that sends the uncaught exceptions to remote an presents the regular crash screen
@@ -27,7 +28,7 @@ public class RemoteUncaughtExceptionHandler implements Thread.UncaughtExceptionH
         Logger logger = new Logger(RemoteUncaughtExceptionHandler.class).forceRemoteLogging(true);
         logger.logBufferToRemote();
         String stackTrace = Log.getStackTraceString(exception);
-        String traceID = LogUuidGenerator.generate();
+        String traceID = User.remoteLogging.getId();
 
         logger.e("*************************************");
         logger.e("************ BEGIN CRASH ************");

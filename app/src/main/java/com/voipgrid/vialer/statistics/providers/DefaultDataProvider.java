@@ -14,35 +14,22 @@ import android.os.Build;
 import android.telephony.TelephonyManager;
 
 import com.voipgrid.vialer.BuildConfig;
-import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.statistics.AppState;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 
 public class DefaultDataProvider {
 
-    private final Preferences mPreferences;
-    private final JsonStorage mJsonStorage;
-
-    public DefaultDataProvider(Preferences preferences, JsonStorage jsonStorage) {
-        mPreferences = preferences;
-        mJsonStorage = jsonStorage;
-    }
-
     public String getLogId() {
-        return mPreferences.getLoggerIdentifier();
+        return User.remoteLogging.getId();
     }
 
     public String getClientCountry() {
-        PhoneAccount phoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
-
-        if (phoneAccount == null) {
+        if (!User.getHasVoipAccount()) {
             return null;
         }
 
-        return phoneAccount.getCountry();
+        return User.getVoipAccount().getCountry();
     }
 
     public String getNetworkOperator() {
@@ -110,12 +97,10 @@ public class DefaultDataProvider {
     }
 
     public String getSipUserId() {
-        PhoneAccount phoneAccount = (PhoneAccount) mJsonStorage.get(PhoneAccount.class);
-
-        if (phoneAccount == null) {
+        if (!User.getHasVoipAccount()) {
             return null;
         }
 
-        return phoneAccount.getAccountId();
+        return User.getVoipAccount().getAccountId();
     }
 }

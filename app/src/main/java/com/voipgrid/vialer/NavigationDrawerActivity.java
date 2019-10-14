@@ -10,7 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import com.google.android.material.navigation.NavigationView;
@@ -20,7 +20,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,13 +40,13 @@ import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
-import com.voipgrid.vialer.util.AccountHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
-import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,7 +68,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     private VoipgridApi mVoipgridApi;
     private ConnectivityHelper mConnectivityHelper;
-    private JsonStorage mJsonStorage;
     private SystemUser mSystemUser;
 
     private String mSelectedUserDestinationId;
@@ -78,13 +76,13 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        VialerApplication.get().component().inject(this);
         mConnectivityHelper = new ConnectivityHelper(
                 (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE),
                 (TelephonyManager) getSystemService(TELEPHONY_SERVICE)
         );
 
-        mJsonStorage = new JsonStorage(this);
-        mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+        mSystemUser = User.getVoipgridUser();
         refreshCurrentAvailability();
     }
 
@@ -160,7 +158,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
      *
      */
     private void refreshCurrentAvailability() {
-        if (mSystemUser == null || !hasApiToken()) {
+        if (mSystemUser == null) {
             return;
         }
 
@@ -214,104 +212,34 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         int itemId = menuItem.getItemId();
         switch (itemId) {
             case R.id.navigation_item_statistics:
-                startWebActivity(
-                        getString(R.string.statistics_menu_item_title),
-                        getString(R.string.web_statistics),
-                        getString(R.string.analytics_statistics_title)
-                );
+                VoIPGRIDPortalWebActivity.launchForStats(this);
                 break;
             case R.id.navigation_item_dial_plan:
-                startWebActivity(
-                        getString(R.string.dial_plan_menu_item_title),
-                        getString(R.string.web_dial_plan),
-                        getString(R.string.analytics_dial_plan_title)
-                );
+                VoIPGRIDPortalWebActivity.launchForDialPlan(this);
                 break;
             case R.id.navigation_item_info:
-                startWebActivity(
-                        getString(R.string.info_menu_item_title),
-                        getString(R.string.url_app_info),
-                        getString(R.string.analytics_info_title)
-                );
+                VoIPGRIDPortalWebActivity.launchForAppInfo(this);
                 break;
             case R.id.navigation_item_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.navigation_item_logout:
-                logout();
+                promptForLogout();
                 break;
         }
         return false;
     }
 
-    private void logout() {
+    private void promptForLogout() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(this.getString(R.string.logout_dialog_text));
         builder.setPositiveButton(this.getString(R.string.logout_dialog_positive),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        performLogout();
-                    }
-                });
+                (dialog, id) -> logout(false));
         builder.setNegativeButton(this.getString(R.string.logout_dialog_negative),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
+                (dialog, id) -> dialog.dismiss());
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
-    /**
-     * Perform logout; Remove the stored SystemUser and PhoneAccount and show the login view
-     */
-    private void performLogout() {
-        if (mConnectivityHelper.hasNetworkConnection()) {
-            MiddlewareHelper.unregister(this);
-
-            // Delete our account information.
-            mJsonStorage.clear();
-            new AccountHelper(this).clearCredentials();
-            // Mark ourselves as unregistered.
-            PreferenceManager.getDefaultSharedPreferences(this).edit().clear().apply();
-            // Start a new session.
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        } else {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-            alertDialogBuilder.setTitle(getText(R.string.cannot_logout_error_title));
-            alertDialogBuilder
-                    .setMessage(getText(R.string.cannot_logout_error_text))
-                    .setCancelable(false)
-                    .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.dismiss();
-                        }
-                    });
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
-        }
-    }
-
-    /**
-     * Start a new WebActivity to display the page
-     *
-     * @param title
-     * @param page
-     */
-    private void startWebActivity(String title, String page, String gaTitle) {
-        Intent intent = new Intent(this, WebActivity.class);
-        intent.putExtra(WebActivity.PAGE, page);
-        intent.putExtra(WebActivity.TITLE, title);
-        intent.putExtra(WebActivity.USERNAME, getEmail());
-        intent.putExtra(WebActivity.PASSWORD, getPassword());
-        intent.putExtra(WebActivity.API_TOKEN, getApiToken());
-        intent.putExtra(WebActivity.GA_TITLE, gaTitle);
-        startActivity(intent);
-    }
-
 
     @Override
     public void onFailure(@NonNull Call call, @NonNull Throwable t) {
@@ -323,7 +251,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     @Override
     public void onResponse(@NonNull Call call, @NonNull Response response) {
         if (!response.isSuccessful()) {
-            if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
+            if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START) && User.isLoggedIn()) {
                 Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
             }
             if (!mConnectivityHelper.hasNetworkConnection()) {
@@ -401,8 +329,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             }
         }
 
-        mJsonStorage.save(internalNumbers);
-        mJsonStorage.save(phoneAccounts);
+        User.internal.setInternalNumbers(internalNumbers);
+        User.internal.setPhoneAccounts(phoneAccounts);
     }
 
     private static class CustomFontSpinnerAdapter<D> extends ArrayAdapter {
@@ -451,11 +379,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             mFirstTimeOnItemSelected = false;
         } else {
             if (parent.getCount() - 1 == position) {
-                startWebActivity(
-                        getString(R.string.add_destination_title),
-                        getString(R.string.web_add_destination),
-                        getString(R.string.analytics_add_destination_title)
-                );
+                VoIPGRIDPortalWebActivity.launchForUserDestinations(this);
             } else {
                 Destination destination = (Destination) parent.getAdapter().getItem(position);
                 if (destination.getDescription().equals(getString(R.string.not_available))) {
@@ -466,7 +390,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                 params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
                 Call<Object> call = mVoipgridApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
                 call.enqueue(this);
-                if (!MiddlewareHelper.isRegistered(this)) {
+                if (!MiddlewareHelper.isRegistered()) {
                     // If the previous destination was not available, or if we're not registered
                     // for another reason, register again.
                     MiddlewareHelper.registerAtMiddleware(this);
@@ -498,7 +422,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             if (mSpinner != null) {
                 refreshCurrentAvailability();
                 // Make sure the systemuser info shown is up-to-date.
-                mSystemUser = (SystemUser) mJsonStorage.get(SystemUser.class);
+                mSystemUser = User.getVoipgridUser();
                 setSystemUserInfo();
             }
         }

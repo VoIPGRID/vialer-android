@@ -22,8 +22,10 @@ public class LogResponsesToConsole implements Interceptor {
         String body = response.body().string();
 
         try {
-            JSONObject jsonObject = new JSONObject(body);
-            Log.d("HTTP", "Response from " + request.url() + ": " + jsonObject.toString(2));
+            if (shouldLog(request)) {
+                JSONObject jsonObject = new JSONObject(body);
+                Log.d("HTTP", "Response from " + request.url() + ": " + jsonObject.toString(2));
+            }
         } catch (JSONException e) {
             if (body != null && body.length() > 10) {
                 Log.e("HTTP", "Unable to format JSON from " + request.url() + ", with body: " + body);
@@ -34,5 +36,9 @@ public class LogResponsesToConsole implements Interceptor {
 
         return response.newBuilder()
                 .body(ResponseBody.create(response.body().contentType(), body)).build();
+    }
+
+    private boolean shouldLog(Request request) {
+        return !request.url().toString().contains("cdr");
     }
 }

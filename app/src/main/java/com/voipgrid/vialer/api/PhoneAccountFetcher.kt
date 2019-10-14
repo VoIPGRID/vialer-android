@@ -1,7 +1,7 @@
 package com.voipgrid.vialer.api
 
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.PhoneAccount
-import com.voipgrid.vialer.util.JsonStorage
 import org.joda.time.DateTime
 import retrofit2.Call
 import retrofit2.Response
@@ -12,7 +12,7 @@ import retrofit2.Response
  * being retrieved rarely changes, so we do not want to perform the same request very often.
  *
  */
-class PhoneAccountFetcher(private val api : VoipgridApi, private val storage : JsonStorage<PhoneAccountsCache>) {
+class PhoneAccountFetcher(private val api : VoipgridApi) {
 
     private var cache: PhoneAccountsCache = PhoneAccountsCache()
 
@@ -46,7 +46,8 @@ class PhoneAccountFetcher(private val api : VoipgridApi, private val storage : J
      */
     private fun invalidateCache() {
         cache = PhoneAccountsCache()
-        storage.remove(PhoneAccountsCache::class.java)
+        User.internal.phoneAccounts = null
+        User.internal.phoneAccountsCache = null
     }
 
     /**
@@ -56,7 +57,7 @@ class PhoneAccountFetcher(private val api : VoipgridApi, private val storage : J
     private fun loadCacheFromSharedPreferences() : PhoneAccountsCache {
         if (!cache.isEmpty()) return cache
 
-        val storedCache : PhoneAccountsCache? = storage.get(PhoneAccountsCache::class.java)
+        val storedCache : PhoneAccountsCache? = User.internal.phoneAccountsCache
 
         if (storedCache != null) {
             return storedCache
@@ -85,7 +86,7 @@ class PhoneAccountFetcher(private val api : VoipgridApi, private val storage : J
 
             callback.onSuccess(account)
 
-            storage.save(cache)
+            User.internal.phoneAccountsCache = cache
         }
 
     }

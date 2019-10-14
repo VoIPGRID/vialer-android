@@ -2,7 +2,7 @@
 <resources>
 
     <!-- colors -->
-    <color name="empty_view_tint_color">#D2D2D2</color>
+    <color name="empty_view_tint_color">#707070</color>
     <color name="empty_view_text_color">@color/empty_view_tint_color</color>
 
     <!-- dimens -->

@@ -6,11 +6,10 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UpdateVoIPAccountParameters;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.util.JsonStorage;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -38,7 +37,6 @@ public class SecureCalling {
     private SharedPreferences mSharedPreferences;
     private VoipgridApi mVoipgridApi;
     private Logger mLogger;
-    private Preferences mPreferences;
     private String mIdentifier;
     private LocalBroadcastManager mLocalBroadcastManager;
 
@@ -47,12 +45,11 @@ public class SecureCalling {
      *                   preference, this should uniquely identify the current VoIP account and
      *                   be updated when the VoIP account is switched.
      */
-    public SecureCalling(SharedPreferences sharedPreferences, VoipgridApi voipgridApi, Preferences preferences,
+    public SecureCalling(SharedPreferences sharedPreferences, VoipgridApi voipgridApi,
             String identifier, LocalBroadcastManager localBroadcastManager, Logger logger) {
         mSharedPreferences = sharedPreferences;
         mVoipgridApi = voipgridApi;
         mIdentifier = identifier;
-        mPreferences = preferences;
         mLocalBroadcastManager = localBroadcastManager;
         mLogger = logger;
     }
@@ -64,11 +61,10 @@ public class SecureCalling {
      */
     public static SecureCalling fromContext(Context context) {
         SystemUser systemUser = null;
-        JsonStorage jsonStorage = new JsonStorage(context);
         Logger logger = new Logger(SecureCalling.class);
 
-        if (jsonStorage.has(SystemUser.class)) {
-            systemUser = (SystemUser) jsonStorage.get(SystemUser.class);
+        if (User.isLoggedIn()) {
+            systemUser = User.getVoipgridUser();
         } else {
             logger.e("Attempted to use SecureCalling with no SystemUser available");
         }
@@ -76,8 +72,7 @@ public class SecureCalling {
         return new SecureCalling(
                 PreferenceManager.getDefaultSharedPreferences(context),
                 ServiceGenerator.createApiService(context),
-                new Preferences(context),
-                systemUser != null ? systemUser.getPhoneAccountId() : "",
+                systemUser != null ? systemUser.getVoipAccountId() : "",
                 LocalBroadcastManager.getInstance(context),
                 logger
         );
@@ -109,7 +104,7 @@ public class SecureCalling {
      * set to.
      */
     public void updateApiBasedOnCurrentPreferenceSetting(Callback callback) {
-        if (mPreferences.hasTlsEnabled()) {
+        if (User.voip.getHasTlsEnabled()) {
             enable(callback);
         } else {
             disable(callback);
@@ -117,7 +112,7 @@ public class SecureCalling {
     }
 
     public void updateApiBasedOnCurrentPreferenceSetting() {
-        if (mPreferences.hasTlsEnabled()) {
+        if (User.voip.getHasTlsEnabled()) {
             enable(new EmptyCallback());
         } else {
             disable(new EmptyCallback());
@@ -135,7 +130,7 @@ public class SecureCalling {
      * matches the TLS switch in advanced settings.
      */
     public boolean isSetCorrectly() {
-        return isEnabled() == mPreferences.hasTlsEnabled();
+        return isEnabled() == User.voip.getHasTlsEnabled();
     }
 
     /**
@@ -145,6 +140,17 @@ public class SecureCalling {
      */
     public boolean isEnabled() {
         return mSharedPreferences.getBoolean(getSharedPreferencesKey(), false);
+    }
+
+    /**
+     * Check if secure calling has been specifically disabled, unlike the isEnabled() method
+     * this will not return TRUE unless we know it has been disabled rather than just not
+     * having information yet.
+     *
+     * @return TRUE if it has been disabled, otherwise FALSE
+     */
+    public boolean hasBeenDisabled() {
+        return mSharedPreferences.contains(getSharedPreferencesKey()) && !isEnabled();
     }
 
     /**

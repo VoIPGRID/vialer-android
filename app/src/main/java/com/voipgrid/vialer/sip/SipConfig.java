@@ -11,10 +11,9 @@ import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.voipgrid.vialer.BuildConfig;
-import com.voipgrid.vialer.Preferences;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
@@ -62,7 +61,6 @@ public class SipConfig implements AccountStatus {
     private SipAccount mSipAccount;
     private SipLogWriter mSipLogWriter;
     private SipService mSipService;
-    private Preferences mPreferences;
 
     private boolean shouldResponseToMiddlewareOnRegistration = false;
     private boolean mHasRespondedToMiddleware = false;
@@ -72,11 +70,9 @@ public class SipConfig implements AccountStatus {
     private static final String TRANSPORT_TYPE_SECURE = "tls";
     private static final String TRANSPORT_TYPE_STANDARD = "tcp";
 
-    public SipConfig(Preferences preferences, IpSwitchMonitor ipSwitchMonitor,
-            BroadcastReceiverManager broadcastReceiverManager) {
+    public SipConfig(IpSwitchMonitor ipSwitchMonitor, BroadcastReceiverManager broadcastReceiverManager) {
         mBroadcastReceiverManager = broadcastReceiverManager;
         mLogger = new Logger(this);
-        mPreferences = preferences;
         mIpSwitchMonitor = ipSwitchMonitor;
     }
 
@@ -230,7 +226,7 @@ public class SipConfig implements AccountStatus {
             throw new LibraryInitFailedException();
         }
 
-        if (BuildConfig.DEBUG || mSipService.getPreferences().remoteLoggingIsActive()) {
+        if (BuildConfig.DEBUG || User.remoteLogging.isEnabled()) {
             setSipLogging(endpointConfig);
         }
 
@@ -465,7 +461,7 @@ public class SipConfig implements AccountStatus {
      * @param uaConfig
      */
     private void configureStunServer(UaConfig uaConfig) {
-        if (!mPreferences.hasStunEnabled()) {
+        if (!User.voip.getHasTlsEnabled()) {
             mLogger.i("User has disabled using STUN via settings menu");
             return;
         }

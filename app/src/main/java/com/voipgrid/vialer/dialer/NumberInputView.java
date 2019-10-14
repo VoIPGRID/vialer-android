@@ -1,18 +1,31 @@
 package com.voipgrid.vialer.dialer;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.voipgrid.vialer.ActivityLifecycleTracker;
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.User;
+import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.api.SecureCalling;
+
+import javax.inject.Inject;
+
+import androidx.core.content.ContextCompat;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Custom NumberInput for the dialer.
@@ -22,11 +35,13 @@ public class NumberInputView extends RelativeLayout implements
         View.OnLongClickListener,
         TextWatcher {
 
-    private EditText mNumberInputEditText;
-    private ImageButton mRemoveButton;
+    @BindView(R.id.edit_text) EditText mNumberInputEditText;
+    @BindView(R.id.remove_button) ImageButton mRemoveButton;
+    @BindView(R.id.exit_button) ImageButton mExitButton;
+    @BindView(R.id.encryption_disabled) ImageButton encryptionDisabledWarning;
+
     private OnInputChangedListener mListener;
-    private ImageButton mExitButton;
-    private boolean showRemoveButton = true;
+    private SecureCalling secureCalling;
 
     public NumberInputView(Context context) {
         super(context);
@@ -44,27 +59,33 @@ public class NumberInputView extends RelativeLayout implements
     }
 
     private void init() {
+        secureCalling = SecureCalling.fromContext(getContext());
         LayoutInflater inflater = (LayoutInflater) getContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_number_input, this);
+        ButterKnife.bind(this);
+        VialerApplication.get().component().inject(this);
 
         // Find the number input field and add a TextChangedListener to handle text changes.
-        mNumberInputEditText = findViewById(R.id.edit_text);
         mNumberInputEditText.addTextChangedListener(this);
         mNumberInputEditText.setOnClickListener(this);
         mNumberInputEditText.setOnLongClickListener(this);
 
         // Find the remove button and add an OnClickListener.
-        mRemoveButton = findViewById(R.id.remove_button);
         mRemoveButton.setOnClickListener(this);
         mRemoveButton.setOnLongClickListener(this);
 
-        mNumberInputEditText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.dialpad_number_input_text_size));
-        mExitButton = findViewById(R.id.exit_button);
+        resetTextToDefaultSize();
 
         mExitButton.setOnClickListener(v -> {
             mListener.exitButtonWasPressed();
         });
+
+        encryptionDisabledWarning.setVisibility(secureCalling.isEnabled() ? INVISIBLE : VISIBLE);
+    }
+
+    private void resetTextToDefaultSize() {
+        mNumberInputEditText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.dialpad_number_input_text_size));
     }
 
     public void setOnInputChangedListener(OnInputChangedListener listener) {
@@ -102,6 +123,43 @@ public class NumberInputView extends RelativeLayout implements
                 return false;
         }
         return false;
+    }
+
+    @OnClick(R.id.encryption_disabled)
+    public void encryptionDisabledWarningWasClicked() {
+
+        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    encryptionDisabledWarning.setClickable(false);
+
+                    secureCalling.enable(new SecureCalling.Callback() {
+                        @Override
+                        public void onSuccess() {
+                            User.voip.setHasTlsEnabled(true);
+                            encryptionDisabledWarning.setImageResource(R.drawable.ic_lock);
+                            encryptionDisabledWarning.setColorFilter(ContextCompat.getColor(getContext(), R.color.color_primary));
+                            ActivityLifecycleTracker.removeEncryptionNotification();
+                        }
+
+                        @Override
+                        public void onFail() {
+                            encryptionDisabledWarning.setClickable(true);
+                            Toast.makeText(getContext(), R.string.dialer_enable_encryption_failed, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+        };
+
+        new AlertDialog.Builder(getContext())
+                .setMessage(R.string.dialer_no_encryption_dialog)
+                .setPositiveButton(R.string.yes, dialogClickListener)
+                .setNegativeButton(R.string.no, dialogClickListener)
+                .show();
     }
 
     @Override
@@ -148,6 +206,12 @@ public class NumberInputView extends RelativeLayout implements
 
     public void setCorrectFontSize() {
         int charCount = mNumberInputEditText.getText().length();
+
+        if (charCount == 0) {
+            resetTextToDefaultSize();
+            return;
+        }
+
         float charSize = getTextSize();
 
         int inputMaxScalingLength = getResources().getInteger(R.integer.dialpad_number_input_max_scaling_length);
@@ -204,6 +268,7 @@ public class NumberInputView extends RelativeLayout implements
     public void clear() {
         mNumberInputEditText.setCursorVisible(false);
         mNumberInputEditText.getText().clear();
+        setCorrectFontSize();
     }
 
     public void setNumber(String number) {
@@ -221,7 +286,6 @@ public class NumberInputView extends RelativeLayout implements
     }
 
     public void enableRemoveButton() {
-        showRemoveButton = true;
         mRemoveButton.setVisibility(VISIBLE);
     }
 

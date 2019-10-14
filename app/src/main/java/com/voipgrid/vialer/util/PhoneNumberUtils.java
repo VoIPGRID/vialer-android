@@ -1,5 +1,10 @@
 package com.voipgrid.vialer.util;
 
+import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.VialerApplication;
+
+import androidx.annotation.NonNull;
+
 /**
  * Utils class for PhoneNumber
  */
@@ -48,4 +53,13 @@ public class PhoneNumberUtils {
         return number.endsWith("x");
     }
 
+    /**
+     * If the number appears to be anonymous, a mask will be applied, otherwise returns the original number.
+     *
+     * @param number
+     * @return
+     */
+    public static @NonNull String maskAnonymousNumber(String number) {
+        return isAnonymousNumber(number) ? VialerApplication.get().getString(R.string.supressed_number) : number;
+    }
 }

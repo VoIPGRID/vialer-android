@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:orientation="horizontal">
 
     <ImageButton
         android:id="@+id/exit_button"
@@ -13,18 +15,31 @@
         android:contentDescription="@null"
         android:padding="10dp"
         android:tint="@color/color_primary"
-        app:srcCompat="@drawable/ic_close"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_close" />
+
+    <ImageButton
+        android:id="@+id/encryption_disabled"
+        style="@style/DialpadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:background="@android:color/transparent"
+        android:contentDescription="@null"
+        android:padding="10dp"
+        android:tint="@color/dial_button_chars_color"
+        android:visibility="visible"
+        app:srcCompat="@drawable/ic_lock_open" />
 
     <com.voipgrid.vialer.dialer.DialerEditText
         android:id="@+id/edit_text"
         style="@style/DialpadNumberInput"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:background="@android:color/transparent"
-        android:layout_marginEnd="@dimen/remove_button_width"
-        android:layout_marginLeft="@dimen/remove_button_width"
-        android:layout_marginRight="@dimen/remove_button_width"
-        android:layout_marginStart="@dimen/remove_button_width"
         android:inputType="none"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:textIsSelectable="true" />
 
     <ImageButton
@@ -32,14 +47,13 @@
         style="@style/DialpadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_centerInParent="true"
+        android:layout_weight="0"
         android:background="@android:color/transparent"
         android:contentDescription="@null"
         android:padding="10dp"
-        app:srcCompat="@drawable/ic_backspace"
         android:tint="@color/color_primary"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_backspace"
+        tools:visibility="visible" />
 
-</RelativeLayout>
+</LinearLayout>

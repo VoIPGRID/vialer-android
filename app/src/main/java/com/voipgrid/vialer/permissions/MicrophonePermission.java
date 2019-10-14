@@ -11,6 +11,7 @@ import android.provider.Settings;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.PermissionChecker;
 
 import com.voipgrid.vialer.R;
 
@@ -36,6 +37,10 @@ public class MicrophonePermission {
      */
     public static boolean hasPermission(Activity activity) {
         return getPermissionStatus(activity, mPermissionToCheck) == GRANTED;
+    }
+
+    public static boolean hasPermission(Context context) {
+        return PermissionChecker.checkSelfPermission(context, mPermissionToCheck) == PermissionChecker.PERMISSION_GRANTED;
     }
 
     private static int getPermissionStatus(Activity activity, String androidPermissionName) {

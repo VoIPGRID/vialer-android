@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/call_records_item_background"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingRight="@dimen/list_item_contact_padding_right"
-    android:paddingLeft="@dimen/list_item_contact_padding_left"
+    android:paddingStart="@dimen/list_item_contact_padding_left"
     android:paddingTop="@dimen/list_item_contact_padding_top"
-    android:paddingBottom="@dimen/list_item_contact_padding_bottom"
-    android:background="@color/call_records_item_background">
+    android:paddingEnd="@dimen/list_item_contact_padding_right"
+    android:paddingBottom="@dimen/list_item_contact_padding_bottom">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/icon"
         android:layout_width="@dimen/contact_icon_width"
-        android:layout_height="@dimen/contact_icon_height" />
+        android:layout_height="@dimen/contact_icon_height"
+        android:layout_weight="0"/>
 
     <LinearLayout
-        android:layout_width="295dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_toStartOf="@+id/call_button"
-        android:layout_toLeftOf="@+id/call_button"
-        android:layout_toRightOf="@id/icon"
+        android:layout_marginStart="@dimen/list_item_contact_padding_top"
+        android:layout_marginEnd="@dimen/list_item_contact_padding_top"
         android:orientation="vertical"
-        android:paddingLeft="@dimen/list_item_contact_padding_top">
+        android:layout_weight="1">
 
         <TextView
             android:id="@+id/title"
@@ -33,7 +34,8 @@
             android:fontFamily="sans-serif"
             android:textColor="@color/contact_name_text_color"
             android:textIsSelectable="true"
-            android:textSize="@dimen/contact_name_text_size"/>
+            android:textSize="@dimen/contact_name_text_size"
+            tools:text="Title" />
 
         <TextView
             android:id="@+id/subtitle"
@@ -43,19 +45,18 @@
             android:fontFamily="sans-serif"
             android:singleLine="true"
             android:textColor="@color/contact_information_text_color"
-            android:textSize="@dimen/contact_information_text_size"/>
+            android:textSize="@dimen/contact_information_text_size"
+            tools:text="Subtitle" />
     </LinearLayout>
 
     <ImageButton
         android:id="@+id/call_button"
-        android:contentDescription="@null"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_centerInParent="true"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@null"
         android:padding="@dimen/list_item_call_button_padding"
-        app:srcCompat="@drawable/ic_phone"
         android:tint="@color/tint_color_backspace"
-        android:background="?selectableItemBackgroundBorderless"/>
-</RelativeLayout>
+        app:srcCompat="@drawable/ic_phone"
+        android:layout_weight="0" />
+</LinearLayout>

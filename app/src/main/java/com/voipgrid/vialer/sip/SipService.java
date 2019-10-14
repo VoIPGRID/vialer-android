@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.sip;
 
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
+import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -14,16 +15,18 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
+import android.widget.Toast;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
-import com.voipgrid.vialer.Preferences;
+import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
+
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
@@ -32,6 +35,7 @@ import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
+import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -50,7 +54,8 @@ import androidx.annotation.StringDef;
  * provides a persistent interface to SIP services throughout the app.
  *
  */
-public class SipService extends Service implements CallStatusReceiver.Listener {
+public class SipService extends Service implements CallStatusReceiver.Listener,
+        SipServiceTic.TicListener {
     /**
      * This will track whether this instance of SipService has ever handled a call,
      * if this is the case we can shut down the sip service immediately if we don't
@@ -62,6 +67,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * Set when the SipService is active. This is used to respond to the middleware.
      */
     public static boolean sipServiceActive = false;
+
+    public boolean incomingAlertsMuted = false;
 
     private Intent mIncomingCallDetails = null;
     private SipCall mCurrentCall;
@@ -79,11 +86,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     private AbstractCallNotification callNotification = new DefaultCallNotification();
     private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
+    private SipServiceTic tic = new SipServiceTic(this);
 
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
     @Inject protected Handler mHandler;
-    @Inject protected Preferences mPreferences;
     @Inject protected ToneGenerator mToneGenerator;
     @Inject protected NetworkConnectivity mNetworkConnectivity;
     @Inject protected NativeCallManager mNativeCallManager;
@@ -111,6 +118,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
         mCheckService.start();
         startForeground(callNotification.getNotificationId(), callNotification.build());
+        tic.begin();
     }
 
     @Override
@@ -163,9 +171,17 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
             return true;
         }
         else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
+            incomingCallAlerts.stop();
             mCurrentCall.decline();
         }
         else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
+            if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
+                Toast.makeText(this, getString(R.string.permission_microphone_missing_message), Toast.LENGTH_LONG).show();
+                mLogger.e("Unable to answer incoming call as we do not have microphone permission");
+                return false;
+            }
+
+            incomingCallAlerts.stop();
             mCurrentCall.answer();
         }
         else if (Actions.END_CALL.equals(action)) {
@@ -267,6 +283,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
         audioRouter.destroy();
         incomingCallAlerts.stop();
+        tic.stop();
 
         // If no phoneaccount was found in the onCreate there won't be a sipconfig either.
         // Check to avoid nullpointers.
@@ -288,7 +305,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * Play the busy tone used when a call get's disconnected by the recipient.
      */
     public void playBusyTone() {
-        mToneGenerator.startTone(ToneGenerator.Constants.TONE_CDMA_NETWORK_BUSY, 1500);
+        try {
+            mToneGenerator.startTone(ToneGenerator.Constants.TONE_CDMA_NETWORK_BUSY, BUSY_TONE_DURATION);
+            Thread.sleep(BUSY_TONE_DURATION);
+        } catch (InterruptedException ignored) {
+        }
     }
 
     /**
@@ -463,10 +484,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         return mLogger;
     }
 
-    public Preferences getPreferences() {
-        return mPreferences;
-    }
-
     public NativeCallManager getNativeCallManager() {
         return mNativeCallManager;
     }
@@ -547,6 +564,24 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     }
 
     /**
+     * This method will be called every "tic"
+     *
+     */
+    @Override
+    public void onTic() {
+        if (getCurrentCall() == null) return;
+
+        if (incomingAlertsMuted) return;
+
+        SipCall call = getCurrentCall();
+
+        if (SipConstants.CALL_INCOMING_RINGING.equals(call.getCurrentCallState())) {
+            callNotification.incoming(call.getPhoneNumber(), call.getCallerId());
+            incomingCallAlerts.start();
+        }
+    }
+
+    /**
      * Class the be able to bind a activity to this service.
      */
     public class SipServiceBinder extends Binder {
@@ -568,23 +603,23 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
                 // When the native call has been picked up and there is a current call in the ringing state
                 // Then decline the current call.
-                mLogger.e("Native call is picked up.");
-                mLogger.e("Is there an active call: " + (mCurrentCall != null));
+                mLogger.i("Native call is picked up.");
+                mLogger.i("Is there an active call: " + (mCurrentCall != null));
 
                 if (mCurrentCall == null) {
                     return;
                 }
 
-                mLogger.e("Current call state: " + mCurrentCall.getCurrentCallState());
+                mLogger.i("Current call state: " + mCurrentCall.getCurrentCallState());
 
                 if (mCurrentCall.isCallRinging() || mCurrentCall.getCurrentCallState().equals(SipConstants.CALL_INVALID_STATE)) {
-                    mLogger.e("Our call is still ringing. So decline it.");
+                    mLogger.i("Our call is still ringing. So decline it.");
                     mCurrentCall.decline();
                     return;
                 }
 
                 if (mCurrentCall.isConnected() && !mCurrentCall.isOnHold()) {
-                    mLogger.e("Call was not on hold already. So put call on hold.");
+                    mLogger.i("Call was not on hold already. So put call on hold.");
                     mCurrentCall.toggleHold();
                 }
             } catch(Exception e) {
@@ -614,6 +649,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
             mLogger.i("Detected screen off event, disabling call alert");
 
             incomingCallAlerts.stop();
+            incomingAlertsMuted = true;
         }
     }
 

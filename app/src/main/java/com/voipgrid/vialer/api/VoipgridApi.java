@@ -58,16 +58,17 @@ public interface VoipgridApi {
 
     @POST("api/permission/password_reset/")
     Call<Void> resetPassword(@Body PasswordResetParams params);
-
     @GET("api/cdr/record/")
     Call<VoipGridResponse<CallRecord>> getRecentCalls(@Query("limit") int limit,
-                                                      @Query("offset") int offset,
-                                                      @Query("call_date__gt") String date);
+            @Query("offset") int offset,
+            @Query("call_date__gt") String from,
+            @Query("call_date__lt") String to);
 
     @GET("api/cdr/record/personalized/")
     Call<VoipGridResponse<CallRecord>> getRecentCallsForLoggedInUser(@Query("limit") int limit,
             @Query("offset") int offset,
-            @Query("call_date__gt") String date);
+            @Query("call_date__gt") String from,
+            @Query("call_date__lt") String to);
 
     @GET("api/userdestination/")
     Call<VoipGridResponse<UserDestination>> getUserDestination();

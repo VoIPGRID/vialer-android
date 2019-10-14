@@ -41,7 +41,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected String mCurrentCallId;
     protected CallDurationTracker mCallDurationTracker;
     protected CallStatusReceiver mCallStatusReceiver;
-    protected DelayedFinish mDelayedFinish;
 
     @Nullable @BindView(R.id.duration_text_view) TextView mCallDurationView;
 
@@ -56,7 +55,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mSipServiceConnection = new SipServiceConnection(this);
         mCallDurationTracker = new CallDurationTracker(mSipServiceConnection);
         mCallStatusReceiver = new CallStatusReceiver(this);
-        mDelayedFinish = new DelayedFinish(this, new Handler(), mSipServiceConnection);
         mProximityHelper = new ProximitySensorHelper(this);
 
         requestMicrophonePermissionIfNecessary();
@@ -97,7 +95,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         if (sipService.getFirstCall() != null) {
             mCurrentCallId = sipService.getFirstCall().getIdentifier();
         } else {
-            finishAfterDelay();
+            finish();
         }
     }
 
@@ -122,33 +120,12 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
     }
 
-    /**
-     * Attempt to shutdown the activity after a few seconds giving the services enough
-     * time to clean up.
-     *
-     */
-    protected void finishAfterDelay() {
-        mDelayedFinish.begin();
-    }
-
     protected void onPickupButtonClicked() {
 
     }
 
     protected void onDeclineButtonClicked() {
 
-    }
-
-    @Override
-    public void finish() {
-        if (isTaskRoot() && VialerApplication.get().isApplicationVisible()) {
-            mLogger.i("There are no more activities, to counter an loop of starting CallActivity, start the MainActivity");
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        }
-
-        super.finish();
     }
 
     protected String getPhoneNumberFromIntent() {
@@ -190,7 +167,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
     public static Intent createIntentForCallActivity(Context caller, Class<?> activity, Uri sipAddressUri, String type, String callerId, String number) {
         Intent intent = new Intent(caller, activity);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setDataAndType(sipAddressUri, type);
         intent.putExtra(CallingConstants.CONTACT_NAME, callerId);
         intent.putExtra(CallingConstants.PHONE_NUMBER, number);

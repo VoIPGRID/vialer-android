@@ -1,13 +1,14 @@
 package com.voipgrid.vialer.sip;
 
-import com.voipgrid.vialer.Preferences;
-import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.User;
+import com.voipgrid.vialer.persistence.VoipSettings;
 
 import java.util.HashMap;
 
 public class CodecPriorityMap extends HashMap<String, Short> {
 
-    static final short CODEC_DISABLED = (short) 0, CODEC_PRIORITY_MAX = (short) 255;
+    static final short CODEC_DISABLED = (short) 0;
+    static final short CODEC_PRIORITY_MAX = (short) 255;
 
     private CodecPriorityMap() {
     }
@@ -18,10 +19,10 @@ public class CodecPriorityMap extends HashMap<String, Short> {
      * @return
      */
     public static CodecPriorityMap get() {
-        Preferences preferences = VialerApplication.get().component().getPreferences();
+        VoipSettings voipSettings = User.voip;
         CodecPriorityMap codecPriorityMap = new CodecPriorityMap();
-        codecPriorityMap.put("opus/48000", preferences.getAudioCodec() == Preferences.AUDIO_CODEC_OPUS ? CODEC_PRIORITY_MAX : CODEC_DISABLED);
-        codecPriorityMap.put("ilbc/8000", preferences.getAudioCodec() == Preferences.AUDIO_CODEC_ILBC ? CODEC_PRIORITY_MAX : CODEC_DISABLED);
+        codecPriorityMap.put("opus/48000", voipSettings.getAudioCodec() == VoipSettings.AudioCodec.OPUS ? CODEC_PRIORITY_MAX : CODEC_DISABLED);
+        codecPriorityMap.put("ilbc/8000", voipSettings.getAudioCodec() == VoipSettings.AudioCodec.iLBC ? CODEC_PRIORITY_MAX : CODEC_DISABLED);
         return codecPriorityMap;
     }
 

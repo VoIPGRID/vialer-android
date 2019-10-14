@@ -8,14 +8,13 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.analytics.AnalyticsApplication;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.models.ClickToDialParams;
-import com.voipgrid.vialer.util.JsonStorage;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 
 import java.io.IOException;
@@ -42,7 +41,7 @@ public class TwoStepCallActivity extends LoginRequiredActivity implements View.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_two_step_call);
 
-        mSystemUser = (SystemUser) new JsonStorage(this).get(SystemUser.class);
+        mSystemUser = User.getVoipgridUser();
 
         mVoipgridApi = ServiceGenerator.createApiService(this);
 
