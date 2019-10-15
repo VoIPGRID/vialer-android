@@ -183,6 +183,7 @@
         <activity android:name=".voipgrid.PasswordResetWebActivity"
                   android:theme="@style/OnboardingTheme"/>
         <activity android:name=".call.NewIncomingCallActivity" />
+        <activity android:name=".call.NewCallActivity" />
     </application>
 
 </manifest>

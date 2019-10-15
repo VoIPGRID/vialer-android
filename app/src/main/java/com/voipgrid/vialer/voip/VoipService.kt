@@ -9,12 +9,13 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.audio.AudioRouter
+import com.voipgrid.vialer.call.NewCallActivity
+import com.voipgrid.vialer.call.NewIncomingCallActivity
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification
 import com.voipgrid.vialer.voip.core.*
 import com.voipgrid.vialer.voip.core.call.Call
 import com.voipgrid.vialer.voip.core.call.State
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 
 class VoipService : Service(), VoipListener {
@@ -29,6 +30,7 @@ class VoipService : Service(), VoipListener {
     override fun onCreate() {
         super.onCreate()
         callStack = CallStack()
+        beginTic()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
@@ -71,11 +73,15 @@ Log.e("TEST123", "Creating call on ${Thread.currentThread().name}")
             State.TelephonyState.INITIALIZING -> {}
             State.TelephonyState.CALLING -> {}
             State.TelephonyState.RINGING -> {}
-            State.TelephonyState.CONNECTED -> {}
+            State.TelephonyState.CONNECTED -> {
+                startActivity(Intent(this, NewCallActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                })
+            }
             State.TelephonyState.DISCONNECTED -> removeCallFromStack(call)
         }
 
-        broadcastManager.sendBroadcast(Intent("CALL_STATE_WAS_UPDATED").apply {
+        broadcastManager.sendBroadcast(Intent(ACTION_CALL_STATE_WAS_UPDATED).apply {
             putExtra(CALL_STATE_EXTRA, state.telephonyState)
         })
     }
@@ -85,6 +91,17 @@ Log.e("TEST123", "Creating call on ${Thread.currentThread().name}")
 
         if (callStack.isEmpty()) {
             stopSelf()
+        }
+    }
+
+    private fun onTic() {
+        broadcastManager.sendBroadcast(Intent(ACTION_VOIP_UPDATE))
+    }
+
+    private fun beginTic() = GlobalScope.launch(Dispatchers.Main) {
+        while (true) {
+            onTic()
+            delay(500)
         }
     }
 
@@ -123,7 +140,8 @@ Log.e("TEST123", "Creating call on ${Thread.currentThread().name}")
     companion object {
         private var callStack = CallStack()
 
-        const val CALL_STATE_WAS_UPDATED = "CALL_STATE_WAS_UPDATED"
+        const val ACTION_CALL_STATE_WAS_UPDATED = "CALL_STATE_WAS_UPDATED"
         const val CALL_STATE_EXTRA = "CALL_STATE_EXTRA"
+        const val ACTION_VOIP_UPDATE = "ACTION_VOIP_UPDATE"
     }
 }

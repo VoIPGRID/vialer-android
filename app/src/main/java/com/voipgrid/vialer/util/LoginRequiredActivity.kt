@@ -41,10 +41,14 @@ abstract class LoginRequiredActivity : VialerBaseActivity() {
 
         receiver = broadcastReceiverManager.registerReceiverViaLocalBroadcastManager(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                voipStateWasUpdated(intent.getSerializableExtra(VoipService.CALL_STATE_EXTRA) as State.TelephonyState)
+                
+                when (intent.action) {
+                    VoipService.ACTION_CALL_STATE_WAS_UPDATED -> voipStateWasUpdated(intent.getSerializableExtra(VoipService.CALL_STATE_EXTRA) as State.TelephonyState)
+                    VoipService.ACTION_VOIP_UPDATE -> voipUpdate()
+                }
             }
 
-        }, VoipService.CALL_STATE_WAS_UPDATED)
+        }, VoipService.ACTION_CALL_STATE_WAS_UPDATED, VoipService.ACTION_VOIP_UPDATE)
     }
 
     override fun onPause() {
@@ -60,6 +64,8 @@ abstract class LoginRequiredActivity : VialerBaseActivity() {
     protected open fun voipServiceIsAvailable() {}
 
     protected open fun voipStateWasUpdated(state: State.TelephonyState) {}
+
+    protected open fun voipUpdate() {}
 
     inner class VoipServiceConnection : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {

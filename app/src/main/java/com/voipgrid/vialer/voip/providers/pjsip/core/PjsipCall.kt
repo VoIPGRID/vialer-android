@@ -36,9 +36,7 @@ abstract class PjsipCall : org.pjsip.pjsua2.Call, Call {
     }
 
     override fun decline() {
-        Log.e("TEST123", "Starting decline  on: ${Thread.currentThread().name}")
         super.hangup(param(pjsip_status_code.PJSIP_SC_BUSY_HERE))
-        Log.e("TEST123", "Finished decline")
     }
 
     override fun hangup() = super.hangup(param(pjsip_status_code.PJSIP_SC_DECLINE))

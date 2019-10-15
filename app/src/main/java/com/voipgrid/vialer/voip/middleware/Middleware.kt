@@ -2,6 +2,7 @@ package com.voipgrid.vialer.voip.middleware
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import com.google.firebase.messaging.RemoteMessage
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.MiddlewareApi
@@ -37,13 +38,14 @@ class Middleware(private val api: MiddlewareApi, private val user: User, private
      *
      */
     private suspend fun makeRegisterRequest(token: String) = withContext(Dispatchers.IO) {
+        Log.e("TEST123", "Attempting to register with $token")
         val response = createRegisterRequest(token).execute()
 
         if (!response.isSuccessful) {
             logger.e("Registration with the middleware failed")
             return@withContext
         }
-
+Log.e("TEST123", "Registration successss")
         User.middleware.currentToken = token
     }
 
@@ -64,7 +66,7 @@ class Middleware(private val api: MiddlewareApi, private val user: User, private
      *
      */
     fun replyToIncomingCall(pushMessage: RemoteMessage, isAvailable: Boolean) {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.IO) {
             api.reply(pushMessage.data["unique_key"], isAvailable, pushMessage.data["message_start_time"]).execute()
         }
     }

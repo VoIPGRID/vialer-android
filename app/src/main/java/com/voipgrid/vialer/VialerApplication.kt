@@ -9,6 +9,9 @@ import com.voipgrid.vialer.tasks.launch.RegisterLibraries
 import com.voipgrid.vialer.tasks.launch.RegisterPeriodicTasks
 import com.voipgrid.vialer.database.AppDatabase
 import androidx.room.Room
+import com.voipgrid.vialer.koin.voipModule
+import com.voipgrid.vialer.tasks.launch.RegisterWithMiddleware
+import org.koin.android.ext.android.getKoin
 
 class VialerApplication : Application() {
 
@@ -26,7 +29,8 @@ class VialerApplication : Application() {
     private val launchTasks = listOf(
             RegisterLibraries(),
             ConvertApiToken(),
-            RegisterPeriodicTasks()
+            RegisterPeriodicTasks(),
+            RegisterWithMiddleware()
     )
 
     override fun onCreate() {

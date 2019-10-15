@@ -48,7 +48,7 @@ public class ServiceGenerator {
         httpClient.addInterceptor(sAuthorizationInterceptor);
         httpClient.addInterceptor(new AddUserAgentToHeader(context));
         httpClient.addInterceptor(new ModifyCacheLifetimeBasedOnConnectivity(context));
-        httpClient.addInterceptor(new LogUserOutOnUnauthorizedResponse(VialerApplication.get().component().provideLogout()));
+        httpClient.addInterceptor(new LogUserOutOnUnauthorizedResponse());
         httpClient.addInterceptor(new LogResponsesToConsole());
 
         httpClient.cache(getCache(context));

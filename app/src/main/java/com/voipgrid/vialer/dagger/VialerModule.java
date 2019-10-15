@@ -257,6 +257,7 @@ public class VialerModule {
     }
 
     @Provides
+    @Singleton
     Logout provideLogout(Context context, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper, Middleware middleware) {
         return new Logout(context, sharedPreferences, connectivityHelper, middleware);
     }
@@ -312,6 +313,7 @@ public class VialerModule {
     }
 
     @Provides
+    @Singleton
     MiddlewareApi provideMiddlewareApi(Context context) {
         return ServiceGenerator.createRegistrationService(context);
     }

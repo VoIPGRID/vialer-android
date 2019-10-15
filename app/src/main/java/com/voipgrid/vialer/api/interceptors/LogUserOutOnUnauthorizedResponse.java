@@ -2,6 +2,7 @@ package com.voipgrid.vialer.api.interceptors;
 
 import com.voipgrid.vialer.Logout;
 import com.voipgrid.vialer.User;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
@@ -15,13 +16,8 @@ import okhttp3.Response;
 public class LogUserOutOnUnauthorizedResponse implements Interceptor {
 
     private static final int UNAUTHORIZED_HTTP_CODE = 401;
-    private final Logout logout;
 
     private Logger mLogger = new Logger(this);
-
-    public LogUserOutOnUnauthorizedResponse(@NonNull Logout logout) {
-        this.logout = logout;
-    }
 
     @NotNull
     @Override
@@ -34,7 +30,7 @@ public class LogUserOutOnUnauthorizedResponse implements Interceptor {
 
         mLogger.w("Logged out on 401 API response");
 
-        logout.perform(true, null);
+        VialerApplication.get().component().provideLogout().perform(true, null);
 
         return response;
     }
