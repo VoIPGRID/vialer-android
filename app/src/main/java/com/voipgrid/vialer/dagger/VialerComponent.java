@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.dagger;
 
+import androidx.annotation.Nullable;
+
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.ForgottenPasswordActivity;
 import com.voipgrid.vialer.Logout;
@@ -28,14 +30,15 @@ import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
 import com.voipgrid.vialer.onboarding.steps.AccountConfigurationStep;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.sync.ContactSyncAdapter;
 import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.t9.T9HelperFragment;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity;
 
+
 import javax.inject.Singleton;
 
-import androidx.annotation.Nullable;
 import dagger.Component;
 
 @Singleton
@@ -105,4 +108,6 @@ public interface VialerComponent {
     void inject(DialerActivity dialerActivity);
 
     Logout provideLogout();
+
+    void inject(ContactSyncAdapter adapter);
 }

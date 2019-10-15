@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="profile_mimetype" translatable="false">vnd.android.cursor.item/com.voipgrid.vialer.profile</string>
-    <string name="account_type" translatable="false">com.voipgrid.vialer.contacts</string>
+    <string name="account_name" translatable="false">Vialer</string>
+    <string name="account_type" translatable="false">com.voipgrid.vialer</string>
+    <string name="call_mime_type" translatable="false">vnd.android.cursor.item/com.voipgrid.vialer.call</string>
 
     <!-- <app> call <number> -->
     <string name="contacts_app_name" translatable="false">@string/app_name</string>
