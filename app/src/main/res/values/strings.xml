@@ -120,6 +120,7 @@
     <string name="two_factor_authentication_header_label_subtext">Authentication</string>
     <string name="onboarding_permission_contacts_title">Contacts Permission</string>
     <string name="onboarding_permission_contacts_justification">This permission allows Vialer to display information (contacts book &amp; call activity) and to search through your contacts.\n\nThe data will be solely used for display and search purposes.</string>
+    <string name="onboarding_permission_contacts_write_justification">This permission allows Vialer to write data into your contacts. This will make you able to call using Vialer from your contacts book.</string>
     <string name="onboarding_permission_call_state_title">Call \nPermission</string>
     <string name="onboarding_permission_call_state_justification">This permission is required to allow Vialer to receive Voice over IP and cellular calls at the same time.\n\nWithout this permission, you might not be notified of incoming VoIP calls when a cellular one is ongoing.</string>
     <string name="onboarding_permission_microphone_title">Microphone Permission</string>

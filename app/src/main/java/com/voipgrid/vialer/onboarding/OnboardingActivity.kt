@@ -6,27 +6,25 @@ import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.steps.*
-import com.voipgrid.vialer.onboarding.steps.permissions.ContactsPermissionStep
-import com.voipgrid.vialer.onboarding.steps.permissions.MicrophonePermissionStep
-import com.voipgrid.vialer.onboarding.steps.permissions.OptimizationWhitelistStep
-import com.voipgrid.vialer.onboarding.steps.permissions.PhoneStatePermissionStep
+import com.voipgrid.vialer.onboarding.steps.permissions.*
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
 class OnboardingActivity : Onboarder() {
 
     private val adapter = OnboardingAdapter(supportFragmentManager, lifecycle,
-        LogoStep(),
-        LoginStep(),
-        AccountConfigurationStep(),
-        MissingVoipAccountStep(),
-        ContactsPermissionStep(),
-        PhoneStatePermissionStep(),
-        MicrophonePermissionStep(),
-        OptimizationWhitelistStep(),
-        WelcomeStep()
+            LogoStep(),
+            LoginStep(),
+            AccountConfigurationStep(),
+            MissingVoipAccountStep(),
+            ContactsPermissionStep(),
+            ContactsWritePermissionStep(),
+            PhoneStatePermissionStep(),
+            MicrophonePermissionStep(),
+            OptimizationWhitelistStep(),
+            WelcomeStep()
     )
 
-    private val currentStep : Step
+    private val currentStep: Step
         get() = adapter.getStep(viewPager.currentItem)
 
     override fun onCreate(savedInstanceState: Bundle?) {
