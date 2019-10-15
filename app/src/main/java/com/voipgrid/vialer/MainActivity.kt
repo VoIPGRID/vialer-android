@@ -1,7 +1,9 @@
 package com.voipgrid.vialer
 
+import android.Manifest
 import android.content.ContentResolver
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.ContactsContract
 import androidx.core.app.ActivityOptionsCompat
@@ -23,8 +25,10 @@ import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {
 
-    @Inject lateinit var userSynchronizer: UserSynchronizer
-    @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
+    @Inject
+    lateinit var userSynchronizer: UserSynchronizer
+    @Inject
+    lateinit var reachabilityReceiver: ReachabilityReceiver
 
     override val logger = Logger(this)
 
@@ -50,6 +54,10 @@ class MainActivity : NavigationDrawerActivity() {
     }
 
     private fun setupContactsSync() {
+        if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+                checkSelfPermission(Manifest.permission.WRITE_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
         val account = ContactSyncAdapter.createSyncAccount(this) ?: return
         val authority = ContactsContract.AUTHORITY
         ContentResolver.setIsSyncable(account, authority, 1)
@@ -136,7 +144,7 @@ class MainActivity : NavigationDrawerActivity() {
 
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     tab?.let {
-                        (call_record_fragment as CallRecordFragment).changeType(when(it.position) {
+                        (call_record_fragment as CallRecordFragment).changeType(when (it.position) {
                             0 -> CallRecordFragment.TYPE.ALL_CALLS
                             1 -> CallRecordFragment.TYPE.MISSED_CALLS
                             else -> CallRecordFragment.TYPE.ALL_CALLS

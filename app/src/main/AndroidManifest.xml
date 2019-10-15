@@ -17,7 +17,6 @@
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- Necessary for Google Analytics -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -182,6 +181,14 @@
 
         <activity android:name=".voipgrid.PasswordResetWebActivity"
                   android:theme="@style/OnboardingTheme"/>
+
+        <activity android:name=".sync.RawContactCallActivity">
+            <intent-filter tools:ignore="AppLinkUrlError">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="@string/call_mime_type" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name=".sync.ContactSyncService"
