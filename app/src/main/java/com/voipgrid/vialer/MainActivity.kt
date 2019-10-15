@@ -45,9 +45,11 @@ class MainActivity : NavigationDrawerActivity() {
 
         setupTabs()
         floating_action_button.setOnClickListener { openDialer() }
+
+        setupContactsSync()
     }
 
-    private fun setupSync() {
+    private fun setupContactsSync() {
         val account = ContactSyncAdapter.createSyncAccount(this) ?: return
         val authority = ContactsContract.AUTHORITY
         ContentResolver.setIsSyncable(account, authority, 1)
