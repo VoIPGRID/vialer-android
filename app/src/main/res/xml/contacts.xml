@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ContactsSource xmlns:android="http://schemas.android.com/apk/res/android">
+<ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android">
     <ContactsDataKind
-        android:mimeType="vnd.android.cursor.item/com.voipgrid.vialer.profile"
-        android:icon="@mipmap/ic_launcher"
-        android:summaryColumn="data2"
         android:detailColumn="data3"
         android:detailSocialSummary="true"
-        />
-    <ContactsAccountType
-        />
-</ContactsSource>
+        android:icon="@mipmap/ic_launcher"
+        android:mimeType="vnd.android.cursor.item/com.voipgrid.vialer.call"
+        android:summaryColumn="data2" />
+</ContactsAccountType>

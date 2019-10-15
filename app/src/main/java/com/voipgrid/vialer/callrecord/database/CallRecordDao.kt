@@ -22,4 +22,7 @@ interface CallRecordDao {
 
     @Query("UPDATE call_records SET was_personal = 1 WHERE id = :id")
     fun flagCallAsPersonal(id: Long)
+
+    @Query("SELECT DISTINCT third_party_number FROM call_records")
+    fun listThirdPartyNumber(): List<String>
 }

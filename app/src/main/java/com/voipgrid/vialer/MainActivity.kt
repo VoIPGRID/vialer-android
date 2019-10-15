@@ -1,7 +1,9 @@
 package com.voipgrid.vialer
 
+import android.content.ContentResolver
 import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
@@ -12,6 +14,9 @@ import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
+import com.voipgrid.vialer.sync.ContactObserver
+import com.voipgrid.vialer.sync.ContactSyncAdapter
+import com.voipgrid.vialer.util.PhoneAccountHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -43,6 +48,18 @@ class MainActivity : NavigationDrawerActivity() {
 
         setupTabs()
         floating_action_button.setOnClickListener { openDialer() }
+    }
+
+    private fun setupSync() {
+        val account = ContactSyncAdapter.createSyncAccount(this) ?: return
+        val authority = ContactsContract.AUTHORITY
+        ContentResolver.setIsSyncable(account, authority, 1)
+        ContentResolver.setSyncAutomatically(account, authority, true)
+        val observer = ContactObserver(null, this)
+        contentResolver.registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, observer)
+        //it's currently only possible to access the last sync time using reflection :(
+        //so just always sync at startup
+        ContentResolver.requestSync(account, authority, Bundle())
     }
 
     override fun onResume() {
