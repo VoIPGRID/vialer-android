@@ -1,26 +1,37 @@
 package com.voipgrid.vialer.sync
 
 import android.os.Bundle
-import com.voipgrid.vialer.sip.SipConstants
-import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.sip.SipUri
+import android.provider.ContactsContract
+import com.voipgrid.vialer.R
+import com.voipgrid.vialer.util.DialHelper
 import com.voipgrid.vialer.util.LoginRequiredActivity
-import com.voipgrid.vialer.util.PhoneNumberUtils
 
 class RawContactCallActivity : LoginRequiredActivity() {
 
+    companion object {
+        private const val THIRD_PARTY_ACTION = "third_party_action"
+        private const val CONTENT_SCHEME = "content"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val contactName = "REEEEEEEE"
-        val number = "521"
-        val uri = SipUri.sipAddressUri(
-                this,
-                PhoneNumberUtils.format(number)
-        )
-        val bundle = Bundle()
-        bundle.putString(SipConstants.EXTRA_PHONE_NUMBER, number)
-        bundle.putString(SipConstants.EXTRA_CONTACT_NAME, contactName)
-        SipService.createSipServiceAction(SipService.Actions.HANDLE_OUTGOING_CALL, uri, bundle)
+        val extras = intent.extras ?: return
+        val action = extras.getString(THIRD_PARTY_ACTION)
+        if (action == null || action != getString(R.string.call_mime_type)) {
+            return
+        }
+        val data = intent.data ?: return
+        if (data.scheme != CONTENT_SCHEME) {
+            return
+        }
+        val cursor = contentResolver.query(data, null, null, null, null) ?: return
+        if (!cursor.moveToNext()) {
+            cursor.close()
+            return
+        }
+        val number = cursor.getString(cursor.getColumnIndex(ContactsContract.RawContacts.Data.DATA1))
+        cursor.close()
+        DialHelper.fromActivity(this).callNumber(number, "REEEEE")
     }
 
 }
