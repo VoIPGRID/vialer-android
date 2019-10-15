@@ -14,6 +14,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.voipgrid.vialer.Logout;
 import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.api.MiddlewareApi;
 import com.voipgrid.vialer.api.PhoneAccountFetcher;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
@@ -52,6 +53,7 @@ import com.voipgrid.vialer.util.ColorHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.HtmlHelper;
 import com.voipgrid.vialer.util.NetworkUtil;
+import com.voipgrid.vialer.voip.middleware.Middleware;
 
 import javax.inject.Singleton;
 
@@ -255,8 +257,8 @@ public class VialerModule {
     }
 
     @Provides
-    Logout provideLogout(Context context, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper) {
-        return new Logout(context, sharedPreferences, connectivityHelper);
+    Logout provideLogout(Context context, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper, Middleware middleware) {
+        return new Logout(context, sharedPreferences, connectivityHelper, middleware);
     }
 
     @Provides
@@ -295,8 +297,23 @@ public class VialerModule {
     }
 
     @Provides
-    UserSynchronizer provideUserSync(Context context, VoipgridApi api, SecureCalling secureCalling) {
-        return new UserSynchronizer(api, context, secureCalling);
+    UserSynchronizer provideUserSync(Context context, VoipgridApi api, SecureCalling secureCalling, Middleware middleware) {
+        return new UserSynchronizer(api, context, secureCalling, middleware);
+    }
+
+    @Provides
+    User provideUser() {
+        return User.INSTANCE;
+    }
+
+    @Provides
+    Middleware provideMiddleware(MiddlewareApi middlewareApi, User user, Context context) {
+        return new Middleware(middlewareApi, user, context);
+    }
+
+    @Provides
+    MiddlewareApi provideMiddlewareApi(Context context) {
+        return ServiceGenerator.createRegistrationService(context);
     }
 }
 

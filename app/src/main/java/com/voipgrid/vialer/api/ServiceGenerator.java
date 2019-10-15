@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.api;
 
 import android.content.Context;
-import androidx.annotation.Nullable;
 
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
@@ -13,8 +12,6 @@ import com.voipgrid.vialer.api.interceptors.LogUserOutOnUnauthorizedResponse;
 import com.voipgrid.vialer.api.interceptors.ModifyCacheLifetimeBasedOnConnectivity;
 
 import java.util.HashMap;
-
-import javax.inject.Inject;
 
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
@@ -63,8 +60,8 @@ public class ServiceGenerator {
         return ServiceGenerator.createService(context, VoipgridApi.class, getVgApiUrl(context));
     }
 
-    public static Middleware createRegistrationService(Context context) {
-        return ServiceGenerator.createService(context, Middleware.class, getRegistrationUrl(context));
+    public static MiddlewareApi createRegistrationService(Context context) {
+        return ServiceGenerator.createService(context, MiddlewareApi.class, getRegistrationUrl(context));
     }
 
     /**

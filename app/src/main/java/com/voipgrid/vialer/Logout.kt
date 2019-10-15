@@ -4,11 +4,11 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
-import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.onboarding.Onboarder
 import com.voipgrid.vialer.util.ConnectivityHelper
+import com.voipgrid.vialer.voip.middleware.Middleware
 
-class Logout(private val context: Context, private val sharedPreferences: SharedPreferences, private val connectivityHelper: ConnectivityHelper) {
+class Logout(private val context: Context, private val sharedPreferences: SharedPreferences, private val connectivityHelper: ConnectivityHelper, private val middleware: Middleware) {
 
     /**
      * Log the currently logged in user out, performing all the tasks we need to perform before they can be logged out.
@@ -21,7 +21,7 @@ class Logout(private val context: Context, private val sharedPreferences: Shared
         }
 
         if (connectivityHelper.hasNetworkConnection()) {
-            MiddlewareHelper.unregister(context)
+            middleware.unregister()
         }
 
         User.clear()

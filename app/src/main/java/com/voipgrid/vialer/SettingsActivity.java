@@ -32,7 +32,6 @@ import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.fcm.FcmMessagingService;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.VoipDisabledNotification;
 import com.voipgrid.vialer.onboarding.SingleOnboardingStepActivity;
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
@@ -44,6 +43,7 @@ import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
+import com.voipgrid.vialer.voip.middleware.Middleware;
 
 import javax.inject.Inject;
 
@@ -61,6 +61,7 @@ public class SettingsActivity extends LoginRequiredActivity {
 
     @Inject BatteryOptimizationManager batteryOptimizationManager;
     @Inject UserSynchronizer userSynchronizer;
+    @Inject Middleware middleware;
 
     @BindView(R.id.container) View mContainer;
     @BindView(R.id.progressBar) ProgressBar mProgressBar;
@@ -250,7 +251,7 @@ public class SettingsActivity extends LoginRequiredActivity {
         if (!button.isPressed()) return;
 
         if (!enable) {
-            MiddlewareHelper.unregister(this);
+            middleware.unregister();
             stopService(new Intent(this, SipService.class));
             mSipIdContainer.setVisibility(View.GONE);
             User.voip.setHasEnabledSip(false);
@@ -309,7 +310,7 @@ public class SettingsActivity extends LoginRequiredActivity {
 
         // If the remote logging setting is changed we want to re-register with the middleware to make sure that
         // the token is configured correctly.
-        MiddlewareHelper.registerAtMiddleware(this);
+        middleware.register();
     }
 
     @OnCheckedChanged(R.id.tls_switch)

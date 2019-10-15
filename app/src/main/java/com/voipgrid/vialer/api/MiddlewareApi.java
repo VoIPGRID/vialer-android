@@ -15,7 +15,7 @@ import retrofit2.http.POST;
  *
  * API calls for registration on the VoipGrid middleware
  */
-public interface Middleware {
+public interface MiddlewareApi {
 
 
     @FormUrlEncoded

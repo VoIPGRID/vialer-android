@@ -14,17 +14,15 @@ import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.Middleware;
+import com.voipgrid.vialer.api.MiddlewareApi;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.fcm.RemoteMessageData;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
-import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.UserAgent;
 
 import org.pjsip.pjsua2.Account;
@@ -394,7 +392,7 @@ public class SipConfig implements AccountStatus {
         // onAccountRegistered calls in a row.
         mHasRespondedToMiddleware = true;
 
-        Middleware middlewareApi = ServiceGenerator.createRegistrationService(mSipService);
+        MiddlewareApi middlewareApi = ServiceGenerator.createRegistrationService(mSipService);
 
         retrofit2.Call<ResponseBody> call = middlewareApi.reply(token, true, messageStartTime);
         call.enqueue(new Callback<ResponseBody>() {

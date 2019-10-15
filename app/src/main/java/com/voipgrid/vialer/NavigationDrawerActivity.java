@@ -42,7 +42,7 @@ import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.middleware.MiddlewareHelper;
+import com.voipgrid.vialer.voip.middleware.Middleware;
 
 import java.util.List;
 
@@ -58,6 +58,8 @@ import retrofit2.Response;
 public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         implements Callback, AdapterView.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
+
+    @Inject Middleware middleware;
 
     private CustomFontSpinnerAdapter<Destination> mSpinnerAdapter;
     private DrawerLayout mDrawerLayout;
@@ -383,18 +385,14 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             } else {
                 Destination destination = (Destination) parent.getAdapter().getItem(position);
                 if (destination.getDescription().equals(getString(R.string.not_available))) {
-                    MiddlewareHelper.unregister(this);
+                    middleware.unregister();
                 }
                 SelectedUserDestinationParams params = new SelectedUserDestinationParams();
                 params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
                 params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
                 Call<Object> call = mVoipgridApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
                 call.enqueue(this);
-                if (!MiddlewareHelper.isRegistered()) {
-                    // If the previous destination was not available, or if we're not registered
-                    // for another reason, register again.
-                    MiddlewareHelper.registerAtMiddleware(this);
-                }
+                middleware.register();
             }
         }
     }

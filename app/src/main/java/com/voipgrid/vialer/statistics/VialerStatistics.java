@@ -58,7 +58,7 @@ import android.content.Context;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.Middleware;
+import com.voipgrid.vialer.api.MiddlewareApi;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.logging.Logger;
@@ -81,7 +81,7 @@ public class VialerStatistics {
     private final DefaultDataProvider mDefaultDataProvider;
     private final BluetoothDataProvider mBluetoothDataProvider;
     private final Logger mLogger;
-    private final Middleware mMiddleware;
+    private final MiddlewareApi mMiddlewareApi;
 
     private Map<String, String> payload;
 
@@ -91,8 +91,8 @@ public class VialerStatistics {
         return new VialerStatistics(ServiceGenerator.createRegistrationService(context));
     }
 
-    private VialerStatistics(Middleware middleware) {
-        mMiddleware = middleware;
+    private VialerStatistics(MiddlewareApi middlewareApi) {
+        mMiddlewareApi = middlewareApi;
         mLogger = new Logger(this.getClass());
         mDefaultDataProvider = new DefaultDataProvider();
         mBluetoothDataProvider = new BluetoothDataProvider();
@@ -370,7 +370,7 @@ public class VialerStatistics {
     }
 
     private void send() {
-        mMiddleware.metrics(payload).enqueue(new VialerStatisticsRequestCallback(mLogger));
+        mMiddlewareApi.metrics(payload).enqueue(new VialerStatisticsRequestCallback(mLogger));
         log();
         resetPayload();
     }

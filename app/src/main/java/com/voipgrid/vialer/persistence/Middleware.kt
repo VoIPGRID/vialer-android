@@ -9,7 +9,5 @@ object Middleware : DefaultKotPrefModel() {
     }
 
     var currentToken by stringPref()
-    var registrationStatus by enumValuePref(default = RegistrationStatus.UNREGISTERED)
-    var lastRegistrationTime by longPref()
 }
 

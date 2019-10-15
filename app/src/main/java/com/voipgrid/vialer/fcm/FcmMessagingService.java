@@ -12,12 +12,11 @@ import android.telephony.TelephonyManager;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.voipgrid.vialer.User;
-import com.voipgrid.vialer.api.Middleware;
+import com.voipgrid.vialer.api.MiddlewareApi;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.VoipDisabledNotification;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
@@ -252,7 +251,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      */
     private void replyServer(RemoteMessageData remoteMessageData, boolean isAvailable) {
         mRemoteLogger.d("replyServer");
-        Middleware middlewareApi = ServiceGenerator.createRegistrationService(this);
+        MiddlewareApi middlewareApi = ServiceGenerator.createRegistrationService(this);
 
         Call<ResponseBody> call = middlewareApi.reply(remoteMessageData.getRequestToken(), isAvailable, remoteMessageData.getMessageStartTime());
         call.enqueue(new Callback<ResponseBody>() {
@@ -327,8 +326,5 @@ public class FcmMessagingService extends FirebaseMessagingService {
     public void onNewToken(final String s) {
         super.onNewToken(s);
         mRemoteLogger.d("onTokenRefresh");
-        MiddlewareHelper.setRegistrationStatus(
-                com.voipgrid.vialer.persistence.Middleware.RegistrationStatus.UNREGISTERED);
-        MiddlewareHelper.registerAtMiddleware(this);
     }
 }

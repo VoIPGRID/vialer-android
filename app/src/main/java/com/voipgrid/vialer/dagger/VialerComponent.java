@@ -31,6 +31,7 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.t9.T9HelperFragment;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
+import com.voipgrid.vialer.util.OnBootReceiver;
 import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity;
 
 import javax.inject.Singleton;
@@ -92,7 +93,7 @@ public interface VialerComponent {
 
     void inject(AccountConfigurationStep accountConfigurationStep);
 
-    void inject(NavigationDrawerActivity twoFactorStep);
+    void inject(NavigationDrawerActivity navigationDrawerActivity);
 
     void inject(OnboardingActivity onboardingActivity);
 
@@ -105,4 +106,6 @@ public interface VialerComponent {
     void inject(DialerActivity dialerActivity);
 
     Logout provideLogout();
+
+    void inject(OnBootReceiver onBootReceiver);
 }
