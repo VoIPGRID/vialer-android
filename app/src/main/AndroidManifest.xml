@@ -207,6 +207,11 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
+        <provider
+            android:name="androidx.work.impl.WorkManagerInitializer"
+            android:authorities="com.voipgrid.vialer.workmanager-init"
+            android:enabled="false"/>
     </application>
 
 </manifest>

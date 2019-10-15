@@ -9,6 +9,9 @@ import com.voipgrid.vialer.tasks.launch.RegisterLibraries
 import com.voipgrid.vialer.tasks.launch.RegisterPeriodicTasks
 import com.voipgrid.vialer.database.AppDatabase
 import androidx.room.Room
+import androidx.work.Configuration
+import androidx.work.WorkManager
+import com.chibatching.kotpref.Kotpref
 
 class VialerApplication : Application() {
 
@@ -31,6 +34,8 @@ class VialerApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        Kotpref.init(this)
+        WorkManager.initialize(this, Configuration.Builder().build())
         instance = this
         registerActivityLifecycleCallbacks(activityLifecycleTracker)
         launchTasks.forEach {
