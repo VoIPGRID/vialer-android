@@ -65,10 +65,11 @@ class ContactSyncAdapter : AbstractThreadedSyncAdapter {
             list.add(number)
         }
         for (vialerContact in vialerContacts) {
+            //this 'find' may take a bit long if you have a lot of contacts (like ~250)
             val existingLocalContact: RawContact? = localContacts.find {
                 it.contactId == vialerContact.contactId
             }
-            if (existingLocalContact != null) {
+            if (existingLocalContact?.mobileNumber != null) {
                 continue
             }
             contactManager.deleteVialerContact(context, vialerContact.rawContactId, vialerContact.contactId
