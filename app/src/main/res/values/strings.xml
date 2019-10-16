@@ -308,5 +308,5 @@
     <string name="missed_call">Call missed (%1$s).</string>
     <string name="answered_elsewhere">Call (%1$s) answered elsewhere.</string>
     <string name="call_back">Call back</string>
-    <string name="call_with">Call - %1$s</string>
+    <string name="call_with">Call %1$s</string>
 </resources>
