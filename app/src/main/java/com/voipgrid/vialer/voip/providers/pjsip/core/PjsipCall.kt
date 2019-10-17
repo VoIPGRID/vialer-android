@@ -5,6 +5,7 @@ import com.voipgrid.vialer.voip.core.VoipListener
 import com.voipgrid.vialer.voip.core.call.Call
 import com.voipgrid.vialer.voip.core.call.Metadata
 import com.voipgrid.vialer.voip.core.call.State
+import com.voipgrid.vialer.voip.providers.pjsip.core.PjsipCall.MicrophoneStatus.*
 import org.pjsip.pjsua2.*
 import org.pjsip.pjsua2.pjsip_inv_state.*
 
@@ -91,5 +92,40 @@ abstract class PjsipCall : org.pjsip.pjsua2.Call, Call {
 
         Log.e("TEST123", "Update state ${info.state} broadcasting ${state.telephonyState}")
         this.listener.onCallStateUpdate(this, state)
+    }
+
+    override fun mute() {
+        Log.e("TEST123", "muting..")
+        adjustMicrophoneVolume(MUTED)
+        state.isMuted = true
+    }
+
+    override fun unmute() {
+        adjustMicrophoneVolume(UNMUTED)
+        state.isMuted = false
+    }
+
+    override fun sendDtmf(digit: String) {
+        state.dtmfDialed = state.dtmfDialed.plus(digit)
+        dialDtmf(digit)
+    }
+
+    private fun adjustMicrophoneVolume(microphoneStatus: MicrophoneStatus) {
+        val callMediaInfoVector = this.info.media
+
+        for (i in 0 until callMediaInfoVector.size()) {
+            val callMediaInfo = callMediaInfoVector.get(i.toInt())
+
+            if (callMediaInfo.type != pjmedia_type.PJMEDIA_TYPE_AUDIO) continue
+
+            AudioMedia.typecastFromMedia(this.getMedia(i))?.adjustRxLevel(when (microphoneStatus) {
+                MUTED -> 0
+                UNMUTED -> 2
+            }.toFloat())
+        }
+    }
+
+    enum class MicrophoneStatus {
+        MUTED, UNMUTED
     }
 }

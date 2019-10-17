@@ -11,6 +11,7 @@ import com.voipgrid.vialer.audio.AudioRouter
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration
+import com.voipgrid.vialer.contacts.Contacts
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.voip.IncomingCallHandler
 import com.voipgrid.vialer.voip.core.VoipProvider
@@ -48,4 +49,6 @@ val voipModule = module {
     single { Middleware(get(), get(), get()) }
 
     single { User }
+
+    single { Contacts() }
 }

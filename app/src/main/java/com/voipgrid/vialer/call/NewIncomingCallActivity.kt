@@ -7,7 +7,7 @@ import com.voipgrid.vialer.util.LoginRequiredActivity
 import com.voipgrid.vialer.voip.core.call.State
 import kotlinx.android.synthetic.main.activity_incoming_call.*
 
-class NewIncomingCallActivity : LoginRequiredActivity() {
+class NewIncomingCallActivity : NewAbstractCallActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,19 +16,20 @@ class NewIncomingCallActivity : LoginRequiredActivity() {
 
         button_decline.setOnClickListener {
             voip?.getCurrentCall()?.decline()
+            finish()
         }
 
         button_pickup.setOnClickListener {
             Log.e("TEST123", "Answering..")
             voip?.getCurrentCall()?.answer()
+            finish()
         }
 
         render()
     }
 
     private fun render() {
-        incoming_caller_title.text = voip?.getCurrentCall()?.metaData?.callerId
-        incoming_caller_subtitle.text = voip?.getCurrentCall()?.metaData?.number
+       renderCallerInformation()
     }
 
     override fun voipServiceIsAvailable() {

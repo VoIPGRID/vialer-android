@@ -86,8 +86,8 @@ public class DialpadButton extends LinearLayout {
         digit.setLayoutParams(params);
         digit.setGravity(Gravity.CENTER);
         if(mDigit.equals("*") || mDigit.equals("#")) {
-            digit.setTextColor(getResources().getColor(R.color.dial_button_chars_color));
-            digit.setTextSize(getResources().getDimension(R.dimen.dialpad_button_star_text_size));
+            digit.setTextColor(getResources().getColor(R.color.dial_button_digit_color));
+            digit.setTextSize(getResources().getDimension(R.dimen.dialpad_button_digit_text_size));
         } else {
             digit.setTextColor(getResources().getColor(R.color.dial_button_digit_color));
             digit.setTextSize(getResources().getDimension(R.dimen.dialpad_button_digit_text_size));

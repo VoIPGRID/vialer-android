@@ -6,7 +6,8 @@
     android:paddingRight="@dimen/list_item_contact_padding_right"
     android:paddingLeft="@dimen/list_item_contact_padding_left"
     android:paddingTop="@dimen/list_item_contact_padding_top"
-    android:paddingBottom="@dimen/list_item_contact_padding_bottom">
+    android:paddingBottom="@dimen/list_item_contact_padding_bottom"
+    android:background="@drawable/bottom_border">
 
 
     <de.hdodenhof.circleimageview.CircleImageView

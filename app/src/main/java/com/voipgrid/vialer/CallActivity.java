@@ -58,7 +58,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
     @BindView(R.id.incoming_caller_title) TextView mTitle;
     @BindView(R.id.incoming_caller_subtitle) TextView mSubtitle;
-    @BindView(R.id.speaker_label) TextView mSpeakerLabel;
+    @BindView(R.id.label_audio_source) TextView mSpeakerLabel;
     @BindView(R.id.button_hangup) HangupButton mHangupButton;
     @BindView(R.id.call_actions) Group mCallActions;
     @BindView(R.id.dialer) Dialer mDialer;
@@ -73,7 +73,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     @BindView(R.id.button_onhold) CallActionButton mOnHoldButton;
     @BindView(R.id.button_mute) CallActionButton mMuteButton;
     @BindView(R.id.button_dialpad) CallActionButton mDialpadButton;
-    @BindView(R.id.button_speaker) CallActionButton mSpeakerButton;
+    @BindView(R.id.button_audio_source) CallActionButton mSpeakerButton;
 
     private CallPresenter mCallPresenter;
     private SweetAlertDialog mTransferCompleteDialog;
@@ -352,7 +352,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         }
     }
 
-    @OnClick(R.id.button_speaker)
+    @OnClick(R.id.button_audio_source)
     public void onAudioSourceButtonClick(View view) {
         if (!getAudioRouter().isBluetoothRouteAvailable()) {
             toggleSpeaker();

@@ -3,6 +3,7 @@ package com.voipgrid.vialer.voip
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -22,7 +23,7 @@ class VoipService : Service(), VoipListener {
 
     private val voipProvider: VoipProvider by inject()
     private val incomingCallHandler: IncomingCallHandler by inject()
-    private val audioRouter: AudioRouter by inject()
+    val audio: AudioRouter by inject()
     private val broadcastManager: LocalBroadcastManager by inject()
 
     private val notification = DefaultCallNotification()
@@ -30,12 +31,12 @@ class VoipService : Service(), VoipListener {
     override fun onCreate() {
         super.onCreate()
         callStack = CallStack()
-        beginTic()
+        onTic()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
 
-    suspend fun call(number: String) = withContext(Dispatchers.IO) {
+    fun call(number: String) {
         val call = voipProvider.call(number)
 
         callStack.add(call)
@@ -60,11 +61,11 @@ class VoipService : Service(), VoipListener {
      */
     override fun onIncomingCall(call: Call) {
         callStack.add(call)
-Log.e("TEST123", "Creating call on ${Thread.currentThread().name}")
+
         this.incomingCallHandler.handle(call, notification)
 
-        if (audioRouter.isBluetoothRouteAvailable && !audioRouter.isCurrentlyRoutingAudioViaBluetooth) {
-            audioRouter.routeAudioViaBluetooth()
+        if (audio.isBluetoothRouteAvailable && !audio.isCurrentlyRoutingAudioViaBluetooth) {
+            audio.routeAudioViaBluetooth()
         }
     }
 
@@ -90,19 +91,18 @@ Log.e("TEST123", "Creating call on ${Thread.currentThread().name}")
         callStack.remove(call)
 
         if (callStack.isEmpty()) {
+
+            Log.e("TEST123", " Call stack is empty stopSelf")
+            stopForeground(true)
             stopSelf()
         }
     }
 
     private fun onTic() {
         broadcastManager.sendBroadcast(Intent(ACTION_VOIP_UPDATE))
-    }
-
-    private fun beginTic() = GlobalScope.launch(Dispatchers.Main) {
-        while (true) {
+        Handler().postDelayed({
             onTic()
-            delay(500)
-        }
+        }, 500)
     }
 
     private fun generateConfiguration(): Configuration = Configuration(
@@ -121,13 +121,14 @@ Log.e("TEST123", "Creating call on ${Thread.currentThread().name}")
 
 
     override fun onDestroy() {
+        Log.e("TEST123", " onDestroy")
         this.voipProvider.destroy()
+        this.audio.destroy()
     }
 
     override fun onRegister() {
         onPrepared?.invoke()
     }
-
 
     private val binder = LocalBinder()
 

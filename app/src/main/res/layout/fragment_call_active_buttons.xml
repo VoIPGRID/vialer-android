@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.voipgrid.vialer.call.AudioSourceButton
+        android:id="@+id/button_audio_source"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="8dp"
+        app:image="@drawable/ic_speaker"
+        app:label="@string/speaker_label"
+        app:layout_constraintBottom_toBottomOf="@+id/button_mute"
+        app:layout_constraintEnd_toStartOf="@+id/button_mute"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/button_mute"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <com.voipgrid.vialer.call.CallActionButton
+        android:id="@+id/button_mute"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="35sp"
+        app:image="@drawable/ic_mic_off"
+        app:label="@string/mute_label"
+        app:layout_constraintBottom_toTopOf="@+id/button_hold"
+        app:layout_constraintEnd_toStartOf="@+id/button_dialpad"
+        app:layout_constraintStart_toEndOf="@+id/button_audio_source"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.74"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <com.voipgrid.vialer.call.CallActionButton
+        android:id="@+id/button_dialpad"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="8dp"
+        app:image="@drawable/ic_dialpad"
+        app:label="@string/dialpad_label"
+        app:layout_constraintBottom_toBottomOf="@+id/button_mute"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/button_mute"
+        app:layout_constraintTop_toTopOf="@+id/button_mute" />
+
+    <com.voipgrid.vialer.call.CallActionButton
+        android:id="@+id/button_transfer"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="32dp"
+        app:image="@drawable/ic_call_transfer"
+        app:label="@string/transfer_label"
+        app:layout_constraintBottom_toBottomOf="@+id/button_hold"
+        app:layout_constraintEnd_toStartOf="@+id/button_hold"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/button_hold" />
+
+    <com.voipgrid.vialer.call.CallActionButton
+        android:id="@+id/button_hold"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="32dp"
+        app:image="@drawable/ic_pause"
+        app:label="@string/onhold_label"
+        app:layout_constraintBottom_toTopOf="@+id/button_hangup"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_transfer"
+        app:layout_constraintTop_toBottomOf="@+id/button_mute" />
+
+    <com.voipgrid.vialer.call.HangupButton
+        android:id="@+id/button_hangup"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/call_decline_button"
+        android:backgroundTint="@color/call_fab_hangup_color"
+        android:padding="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.9"
+        app:srcCompat="@drawable/ic_call_end_white" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,6 +18,12 @@ interface Call {
 
     fun unhold()
 
+    fun mute()
+
+    fun unmute()
+
+    fun sendDtmf(digit: String)
+
     enum class DurationUnit {
         SECONDS, MILLISECONDS
     }

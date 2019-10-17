@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.voipgrid.vialer.calling.Dialer
+        android:id="@+id/dialer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:show_exit_button="true"
+        app:show_call_button="false"
+        app:show_remove_button="false"/>
+</LinearLayout>

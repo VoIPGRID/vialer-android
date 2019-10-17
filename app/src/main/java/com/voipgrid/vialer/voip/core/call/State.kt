@@ -4,6 +4,8 @@ import com.voipgrid.vialer.voip.core.Configuration
 
 class State {
     var isOnHold = false
+    var isMuted = false
+    var dtmfDialed = ""
 
     var telephonyState = TelephonyState.INITIALIZING
 

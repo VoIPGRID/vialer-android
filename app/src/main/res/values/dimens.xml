@@ -35,7 +35,8 @@
     <dimen name="list_item_contact_padding_right">@dimen/activity_horizontal_margin</dimen>
     <dimen name="list_item_contact_padding_left">@dimen/activity_horizontal_margin</dimen>
     <dimen name="list_item_contact_padding_top">@dimen/activity_vertical_item_padding</dimen>
-    <dimen name="list_item_contact_padding_bottom">@dimen/activity_vertical_item_padding</dimen>
+    <dimen name="list_item_call_record_padding_bottom">@dimen/activity_vertical_item_padding</dimen>
+    <dimen name="list_item_contact_padding_bottom">16dp</dimen>
 
     <dimen name="list_item_call_button_padding">6dp</dimen>
 

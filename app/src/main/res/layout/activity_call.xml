@@ -7,7 +7,7 @@
     tools:context="com.voipgrid.vialer.CallActivity">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/profile_image"
+        android:id="@+id/caller_image"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_marginStart="8dp"
@@ -25,13 +25,13 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:padding="15dp"
-        app:layout_constraintBottom_toBottomOf="@+id/profile_image"
-        app:layout_constraintEnd_toEndOf="@+id/profile_image"
+        app:layout_constraintBottom_toBottomOf="@+id/caller_image"
+        app:layout_constraintEnd_toEndOf="@+id/caller_image"
         android:background="@drawable/ic_blue_phone_icon"
         android:contentDescription="@string/call_icon" />
 
     <TextView
-        android:id="@+id/incoming_caller_title"
+        android:id="@+id/caller_title"
         style="@style/CallTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,19 +39,19 @@
         android:gravity="center"
         android:minHeight="43dp"
         android:textSize="30sp"
-        app:layout_constraintTop_toBottomOf="@+id/profile_image"
+        app:layout_constraintTop_toBottomOf="@+id/caller_image"
         tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="0dp"
         tools:text="Ghostbusters" />
 
     <TextView
-        android:id="@+id/incoming_caller_subtitle"
+        android:id="@+id/caller_subtitle"
         style="@style/CallTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@+id/incoming_caller_title"
+        app:layout_constraintTop_toBottomOf="@+id/caller_title"
         tools:ignore="MissingConstraints"
         tools:text="+31 50 446 7828" />
 
@@ -63,7 +63,7 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/incoming_caller_subtitle" />
+        app:layout_constraintTop_toBottomOf="@+id/caller_subtitle" />
 
     <TextView
         android:id="@+id/call_status"
@@ -94,8 +94,8 @@
         app:layout_constraintTop_toTopOf="@+id/linearLayout_mute"
         app:layout_constraintVertical_chainStyle="packed">
 
-        <com.voipgrid.vialer.call.CallActionButton
-            android:id="@+id/button_speaker"
+        <com.voipgrid.vialer.call.AudioSourceButton
+            android:id="@+id/button_audio_source"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:background="@drawable/layer_circular_shape"
@@ -103,7 +103,7 @@
             app:srcCompat="@drawable/ic_volume_on_enabled" />
 
         <TextView
-            android:id="@+id/speaker_label"
+            android:id="@+id/label_audio_source"
             style="@style/CallLabelTextViewStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

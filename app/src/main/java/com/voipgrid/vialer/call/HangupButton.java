@@ -15,13 +15,13 @@ public class HangupButton extends AppCompatImageButton {
 
     public void enable() {
         this.setActivated(true);
-        this.setAlpha(ENABLED_ALPHA);
+        this.setAlpha(CallActionButton.ENABLED_ALPHA);
         this.setClickable(true);
     }
 
     public void disable() {
         this.setActivated(false);
-        this.setAlpha(DISABLED_ALPHA);
+        this.setAlpha(CallActionButton.DISABLED_ALPHA);
         this.setClickable(false);
     }
 }

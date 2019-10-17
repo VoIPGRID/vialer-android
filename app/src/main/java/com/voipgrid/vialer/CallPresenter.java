@@ -111,7 +111,7 @@ public class CallPresenter {
             mActivity.mCallStatusTv.setText(mActivity.getString(R.string.call_on_hold, mActivity.getInitialCallDetail().getDisplayLabel()));
             mActivity.mCallStatusTv.setVisibility(View.VISIBLE);
 
-            mActivity.mTransferButton.setImageResource(R.drawable.ic_call_merge);
+//            mActivity.mTransferButton.setImageResource(R.drawable.ic_call_merge);
             mActivity.mTransferLabel.setText(R.string.transfer_connect);
 
             if (mActivity.hasSecondCall()) {
@@ -123,7 +123,7 @@ public class CallPresenter {
                 }
             }
         } else {
-            mActivity.mTransferButton.setImageResource(R.drawable.ic_call_transfer);
+//            mActivity.mTransferButton.setImageResource(R.drawable.ic_call_transfer);
             mActivity.mTransferLabel.setText(R.string.transfer_label);
             mActivity.mTransferButton.enable(state.equals(CALL_CONNECTED_MESSAGE));
             mActivity.mCallStatusTv.setVisibility(View.INVISIBLE);
@@ -163,7 +163,7 @@ public class CallPresenter {
         }
 
         mActivity.mSpeakerLabel.setText(mActivity.getString(text).toLowerCase());
-        mActivity.mSpeakerButton.setImageResource(image);
+//        mActivity.mSpeakerButton.setImageResource(image);
     }
 
     /**

@@ -13,7 +13,7 @@ import com.voipgrid.vialer.voip.core.call.State
 abstract class LoginRequiredActivity : VialerBaseActivity() {
 
     private var receiver: BroadcastReceiver? = null
-    protected var voip: VoipService? = null
+    var voip: VoipService? = null
 
     override val logger = Logger(this)
 

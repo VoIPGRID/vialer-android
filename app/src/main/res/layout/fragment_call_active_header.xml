@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/CallHeaderContainerStyle"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/third_party_title"
+        style="@style/CallHeaderTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ghostbusters" />
+
+    <TextView
+        android:id="@+id/third_party_subtitle"
+        style="@style/CallHeaderSubtitleTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="+31504467828" />
+
+    <TextView
+        android:id="@+id/call_duration"
+        style="@style/CallHeaderDurationTextViewStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:07" />
+</LinearLayout>

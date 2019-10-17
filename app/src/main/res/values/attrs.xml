@@ -17,4 +17,9 @@
         <attr name="show_remove_button" format="boolean" />
         <attr name="show_call_button" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="CallActionButton">
+        <attr name="image" format="reference" />
+        <attr name="label" format="string" />
+    </declare-styleable>
 </resources>

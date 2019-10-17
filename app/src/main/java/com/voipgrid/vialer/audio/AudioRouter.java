@@ -1,9 +1,5 @@
 package com.voipgrid.vialer.audio;
 
-import static com.voipgrid.vialer.audio.Constants.ROUTE_BT;
-import static com.voipgrid.vialer.audio.Constants.ROUTE_EARPIECE;
-import static com.voipgrid.vialer.audio.Constants.ROUTE_HEADSET;
-import static com.voipgrid.vialer.audio.Constants.ROUTE_SPEAKER;
 import static com.voipgrid.vialer.audio.Constants.STATE_WIRED_HS_INVALID;
 import static com.voipgrid.vialer.audio.Constants.STATE_WIRED_HS_PLUGGED;
 import static com.voipgrid.vialer.audio.Constants.STATE_WIRED_HS_UNPLUGGED;
@@ -24,6 +20,8 @@ import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
+
+import androidx.annotation.Nullable;
 
 /**
  * Responsible for setting up and managing the routing of audio for VoIP.
@@ -168,7 +166,7 @@ public class AudioRouter {
      * @return TRUE if audio is being routed over bluetooth, otherwise FALSE.
      */
     public boolean isCurrentlyRoutingAudioViaBluetooth() {
-        return getCurrentRoute() == ROUTE_BT;
+        return getCurrentRoute() == Routes.BLUETOOTH;
     }
 
     /**
@@ -177,7 +175,7 @@ public class AudioRouter {
      * @return TRUE if audio is being routed over the speaker, otherwise FALSE.
      */
     public boolean isCurrentlyRoutingAudioViaSpeaker() {
-        return getCurrentRoute() == ROUTE_SPEAKER;
+        return getCurrentRoute() == Routes.SPEAKER;
     }
 
     /**
@@ -186,7 +184,7 @@ public class AudioRouter {
      * @return TRUE if audio is being routed over the earpiece, otherwise FALSE.
      */
     public boolean isCurrentlyRoutingAudioViaEarpiece() {
-        return getCurrentRoute() == ROUTE_EARPIECE;
+        return getCurrentRoute() == Routes.EARPIECE;
     }
 
     /**
@@ -195,7 +193,7 @@ public class AudioRouter {
      * @return TRUE if audio is being routed through a wired headset, otherwise FALSE.
      */
     public boolean isCurrentlyRoutingAudioViaWiredHeadset() {
-        return getCurrentRoute() == ROUTE_HEADSET;
+        return getCurrentRoute() == Routes.HEASDSET;
     }
 
     /**
@@ -214,24 +212,24 @@ public class AudioRouter {
      *
      * @return
      */
-    private int getCurrentRoute() {
+    public Routes getCurrentRoute() {
         if (bluetooth.isOn()) {
-            return ROUTE_BT;
+            return Routes.BLUETOOTH;
         }
 
         if (audioManager.isSpeakerphoneOn()) {
-            return Constants.ROUTE_SPEAKER;
+            return Routes.SPEAKER;
         }
 
         if (audioManager.isWiredHeadsetOn()) {
-            return Constants.ROUTE_HEADSET;
+            return Routes.HEASDSET;
         }
 
         if (hasEarpiece()) {
-            return Constants.ROUTE_EARPIECE;
+            return Routes.EARPIECE;
         }
 
-        return Constants.ROUTE_INVALID;
+        return Routes.INVALID;
     }
 
     /**
@@ -240,7 +238,7 @@ public class AudioRouter {
      *
      * @return The last connected BluetoothDevice
      */
-    public BluetoothDevice getConnectedBluetoothHeadset() {
+    public @Nullable BluetoothDevice getConnectedBluetoothHeadset() {
         return connectedBluetoothHeadset;
     }
 

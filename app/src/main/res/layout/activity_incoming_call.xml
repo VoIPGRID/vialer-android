@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/incoming_caller_title"
+        android:id="@+id/caller_title"
         style="@style/CallTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,16 +27,16 @@
         app:layout_constraintTop_toBottomOf="@id/call_state" />
 
     <TextView
-        android:id="@+id/incoming_caller_subtitle"
+        android:id="@+id/caller_subtitle"
         style="@style/CallTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@+id/incoming_caller_title" />
+        app:layout_constraintTop_toBottomOf="@+id/caller_title" />
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/profile_image"
+        android:id="@+id/caller_image"
         android:layout_width="176dp"
         android:layout_height="176dp"
         android:background="@drawable/contact_picture_circle"
@@ -61,7 +61,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_image" />
+        app:layout_constraintTop_toBottomOf="@+id/caller_image" />
 
     <ImageButton
         android:id="@+id/button_decline"

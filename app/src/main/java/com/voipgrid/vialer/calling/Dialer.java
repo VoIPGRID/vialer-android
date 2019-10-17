@@ -60,7 +60,7 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
             mNumberInput.enableRemoveButton();
         }
         if (!showCallButton) {
-            mCallButton.setVisibility(INVISIBLE);
+            mCallButton.setVisibility(GONE);
         }
     }
 
