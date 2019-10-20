@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.audio.Routes
+import com.voipgrid.vialer.call.AudioSourceButton
 import com.voipgrid.vialer.call.CallActionButton
 import com.voipgrid.vialer.call.NewCallActivity
 import com.voipgrid.vialer.voip.core.call.State
@@ -14,13 +15,17 @@ import kotlinx.android.synthetic.main.fragment_call_active_buttons.*
 
 class ActiveCallButtons : VoipAwareFragment() {
 
+    private lateinit var buttons: Array<CallActionButton>
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View
             = inflater.inflate(R.layout.fragment_call_active_buttons, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        arrayOf<CallActionButton>(button_dialpad, button_mute, button_hold, button_transfer).forEach { button ->
+        buttons = arrayOf(button_hold, button_mute, button_transfer, button_audio_source, button_dialpad)
+
+        buttons.filter { it !is AudioSourceButton }.forEach { button ->
             button.setOnClickListener { handleCallAction(it) }
         }
 
@@ -62,13 +67,21 @@ class ActiveCallButtons : VoipAwareFragment() {
 
     override fun render() {
         val voip = voip ?: return
-        val call = voip.getCurrentCall() ?: return
+        val call = voip.getCurrentCall()
 
-        val buttons = arrayOf(button_hold, button_mute, button_transfer, button_audio_source, button_dialpad)
+        if (call == null) {
+            buttons.forEach { it.disable() }
+            button_hangup.disable()
+            return
+        }
+
         val disabledDuringDialling = arrayOf(button_hold, button_mute, button_transfer)
 
-        buttons.forEach { it.enable() }
-        disabledDuringDialling.forEach { it.enable(call.state.telephonyState == State.TelephonyState.CONNECTED) }
+        when (call.state.telephonyState) {
+            State.TelephonyState.OUTGOING_CALLING -> buttons.forEach { it.enable(!disabledDuringDialling.contains(it)) }
+            State.TelephonyState.CONNECTED -> buttons.forEach { it.enable() }
+            else -> buttons.forEach { it.disable() }
+        }
 
         if (voip.isTransferring()) {
             button_transfer.swapIconAndText(R.drawable.ic_call_merge, R.string.transfer_connect)

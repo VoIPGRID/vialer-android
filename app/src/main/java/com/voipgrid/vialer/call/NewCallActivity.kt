@@ -55,6 +55,7 @@ class NewCallActivity : NewAbstractCallActivity() {
         voip?.let {
             it.mergeTransfer()
             swapUpperSection(UpperSection.TRANSFER_COMPLETE)
+            render()
         }
     }
 
@@ -103,14 +104,7 @@ class NewCallActivity : NewAbstractCallActivity() {
     }
 
     private fun render() {
-        val voip = voip ?: return
-        val call = voip.getCurrentCall() ?: return
-
-        activeFragments().forEach { it.render() }
-    }
-
-    private fun activeFragments() : Array<VoipAwareFragment> {
-        return arrayOf(supportFragmentManager.findFragmentByTag("UPPER") as VoipAwareFragment, supportFragmentManager.findFragmentByTag("LOWER") as VoipAwareFragment)
+        supportFragmentManager.fragments.forEach { (it as? VoipAwareFragment)?.render() }
     }
 
     private fun shouldDelayFinish(): Boolean {
@@ -122,12 +116,24 @@ class NewCallActivity : NewAbstractCallActivity() {
     private fun swapLowerSection(section: LowerSection, backstack: Boolean = false) = swapFragment(section.fragment, call_lower_section, "LOWER", backstack)
 
     private fun swapFragment(fragment: Fragment, container: View, tag: String, backstack: Boolean) {
-        val transaction = supportFragmentManager.beginTransaction().replace(container.id, fragment, tag)
+        if (!fragment.isAdded) {
+            val transaction = supportFragmentManager.beginTransaction().add(container.id, fragment, tag)
+            if (backstack) transaction.addToBackStack(null)
+            transaction.commit()
+        }
 
-        if (backstack) transaction.addToBackStack(null)
+        val current = supportFragmentManager.findFragmentByTag(when(container) {
+            call_upper_section -> "UPPER"
+            call_lower_section -> "LOWER"
+            else -> ""
+        })
 
-        transaction.commit()
+        supportFragmentManager.beginTransaction()
+                .also { transaction -> current?.let { transaction.hide(it) } }
+                .show(fragment)
+                .commit()
+
+        (fragment as VoipAwareFragment).render()
     }
-
 
 }
