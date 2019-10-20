@@ -22,6 +22,7 @@ import javax.inject.Inject
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.voipgrid.vialer.util.*
+import com.voipgrid.vialer.voip.VoipService
 import kotlinx.android.synthetic.main.activity_dialer.*
 import kotlinx.android.synthetic.main.view_dialer.*
 import kotlinx.coroutines.Dispatchers
@@ -138,11 +139,14 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
         }
 
         val phoneNumberToCall = PhoneNumberUtils.format(number)
-
+Log.e("TEST123", "Calling $phoneNumberToCall")
         when(number.isEmpty()) {
             true -> Toast.makeText(this@DialerActivity, getString(R.string.dialer_invalid_number), Toast.LENGTH_LONG).show()
             false -> {
-                dialHelper.callNumber(phoneNumberToCall, contactName)
+//                dialHelper.callNumber(phoneNumberToCall, contactName)
+                startService(Intent(this@DialerActivity, VoipService::class.java))
+                voip?.call(phoneNumberToCall)
+                Log.e("TEST123", "voip.call ${voip == null}")
                 User.internal.lastDialledNumber = phoneNumberToCall
             }
         }

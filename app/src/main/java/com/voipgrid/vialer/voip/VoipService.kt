@@ -15,7 +15,6 @@ import com.voipgrid.vialer.notifications.call.DefaultCallNotification
 import com.voipgrid.vialer.voip.core.*
 import com.voipgrid.vialer.voip.core.call.Call
 import com.voipgrid.vialer.voip.core.call.State
-import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 
 class VoipService : Service(), VoipListener {
@@ -36,9 +35,16 @@ class VoipService : Service(), VoipListener {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
 
     fun call(number: String) {
-        val call = voipProvider.call(number)
 
-        callStack.add(call)
+        prepareForIncomingCall {
+            val call = voipProvider.call(number)
+Log.e("TEST123", "Got call with {${call.state.telephonyState} and {${call.metaData.number}")
+            callStack.add(call)
+
+            startActivity(Intent(this, NewCallActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+        }
     }
 
     fun getCurrentCall(): Call?  = try { callStack.last() } catch (_: Exception) { null }
@@ -71,8 +77,8 @@ class VoipService : Service(), VoipListener {
     override fun onCallStateUpdate(call: Call, state: State) {
         when(state.telephonyState) {
             State.TelephonyState.INITIALIZING -> {}
-            State.TelephonyState.CALLING -> {}
-            State.TelephonyState.RINGING -> {}
+            State.TelephonyState.OUTGOING_CALLING -> {}
+            State.TelephonyState.INCOMING_RINGING -> {}
             State.TelephonyState.CONNECTED -> { }
             State.TelephonyState.DISCONNECTED -> removeCallFromStack(call)
         }

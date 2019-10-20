@@ -14,6 +14,6 @@ class State {
     fun isConnected() = telephonyState == TelephonyState.CONNECTED
 
     enum class TelephonyState {
-        INITIALIZING, CALLING, RINGING, CONNECTED, DISCONNECTED
+        INITIALIZING, OUTGOING_CALLING, INCOMING_RINGING, CONNECTED, DISCONNECTED
     }
 }

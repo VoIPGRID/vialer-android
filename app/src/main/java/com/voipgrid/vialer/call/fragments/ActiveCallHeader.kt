@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.contacts.Contacts
 import com.voipgrid.vialer.voip.core.call.Call
+import com.voipgrid.vialer.voip.core.call.State
 import kotlinx.android.synthetic.main.activity_call.*
 import kotlinx.android.synthetic.main.fragment_call_active_header.*
 import org.koin.android.ext.android.inject
@@ -29,7 +30,7 @@ class ActiveCallHeader : VoipAwareFragment() {
         render()
     }
 
-    private fun render() {
+    override fun render() {
         val call = voip?.getCurrentCall() ?: return
 
         third_party_title.text = if (call.metaData.callerId.isNotBlank()) call.metaData.callerId else call.metaData.number
@@ -52,12 +53,17 @@ class ActiveCallHeader : VoipAwareFragment() {
             return
         }
 
-        call_duration.text = activity?.getString(R.string.call_duration_with_state, state, duration)
+        if (call.state.telephonyState == State.TelephonyState.CONNECTED) {
+            call_duration.text = activity?.getString(R.string.call_duration_with_state, state, duration)
+        } else {
+            call_duration.text = state
+        }
     }
 
     private fun findStateString(call: Call) = when {
         call.state.isOnHold -> getString(R.string.call_state_on_hold)
         call.state.isMuted -> getString(R.string.call_state_microphone_muted)
+        call.state.telephonyState == State.TelephonyState.OUTGOING_CALLING -> getString(R.string.call_state_calling)
         else -> ""
     }
 }

@@ -27,7 +27,7 @@ class IncomingCallHeader : VoipAwareFragment() {
         render()
     }
 
-    private fun render() {
+    override fun render() {
         val call = voip?.getCurrentCall() ?: return
 
         third_party_title.text = if (call.metaData.callerId.isNotBlank()) call.metaData.callerId else call.metaData.number

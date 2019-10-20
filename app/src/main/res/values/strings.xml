@@ -38,6 +38,7 @@
     <string name="call_duration_with_state" translatable="false">%1$s - %2$s</string>
     <string name="call_state_on_hold">On hold</string>
     <string name="call_state_microphone_muted">Microphone muted</string>
+    <string name="call_state_calling">Calling</string>
 
     <!-- UpdateHelper -->
     <string name="title_activity_update">Updating</string>

@@ -9,6 +9,7 @@ import com.voipgrid.vialer.R
 import com.voipgrid.vialer.audio.Routes
 import com.voipgrid.vialer.call.CallActionButton
 import com.voipgrid.vialer.call.NewCallActivity
+import com.voipgrid.vialer.voip.core.call.State
 import kotlinx.android.synthetic.main.fragment_call_active_buttons.*
 
 class ActiveCallButtons : VoipAwareFragment() {
@@ -59,9 +60,15 @@ class ActiveCallButtons : VoipAwareFragment() {
         render()
     }
 
-    private fun render() {
+    override fun render() {
         val voip = voip ?: return
         val call = voip.getCurrentCall() ?: return
+
+        val buttons = arrayOf(button_hold, button_mute, button_transfer, button_audio_source, button_dialpad)
+        val disabledDuringDialling = arrayOf(button_hold, button_mute, button_transfer)
+
+        buttons.forEach { it.enable() }
+        disabledDuringDialling.forEach { it.enable(call.state.telephonyState == State.TelephonyState.CONNECTED) }
 
         button_mute.activate(call.state.isMuted)
         button_hold.activate(call.state.isOnHold)

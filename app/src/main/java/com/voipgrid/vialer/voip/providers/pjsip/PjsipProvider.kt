@@ -34,8 +34,6 @@ class PjsipProvider : VoipProvider {
      *
      */
     override fun call(number: String): PjsipCall  {
-        register()
-
         val account = account ?: throw Exception("No account to place a call with")
 
         val call = OutgoingCall(account, listener, ThirdParty(number = number, name = ""))

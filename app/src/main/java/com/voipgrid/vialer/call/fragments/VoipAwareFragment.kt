@@ -56,4 +56,8 @@ abstract class VoipAwareFragment : Fragment() {
     open fun voipUpdate() {
     }
 
+    open fun render() {
+
+    }
+
 }

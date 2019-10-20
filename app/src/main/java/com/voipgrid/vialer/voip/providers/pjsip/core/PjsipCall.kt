@@ -83,9 +83,10 @@ abstract class PjsipCall : org.pjsip.pjsua2.Call, Call {
     private fun updateState() {
         state.telephonyState = when(info.state) {
             PJSIP_INV_STATE_NULL -> State.TelephonyState.INITIALIZING
-            PJSIP_INV_STATE_EARLY -> State.TelephonyState.RINGING
-            PJSIP_INV_STATE_CALLING -> State.TelephonyState.CALLING
-            PJSIP_INV_STATE_INCOMING, PJSIP_INV_STATE_CONNECTING -> State.TelephonyState.RINGING
+            PJSIP_INV_STATE_CALLING -> State.TelephonyState.OUTGOING_CALLING
+            PJSIP_INV_STATE_INCOMING,
+            PJSIP_INV_STATE_CONNECTING,
+            PJSIP_INV_STATE_EARLY -> if(metaData.direction == Call.Direction.INCOMING) State.TelephonyState.INCOMING_RINGING else State.TelephonyState.OUTGOING_CALLING
             PJSIP_INV_STATE_CONFIRMED -> State.TelephonyState.CONNECTED
             PJSIP_INV_STATE_DISCONNECTED -> State.TelephonyState.DISCONNECTED
             else -> state.telephonyState
