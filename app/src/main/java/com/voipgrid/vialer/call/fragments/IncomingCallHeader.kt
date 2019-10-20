@@ -5,20 +5,18 @@ import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.contacts.Contacts
 import com.voipgrid.vialer.voip.core.call.Call
-import kotlinx.android.synthetic.main.activity_call.*
 import kotlinx.android.synthetic.main.fragment_call_active_header.*
 import org.koin.android.ext.android.inject
 
-class ActiveCallHeader : VoipAwareFragment() {
+class IncomingCallHeader : VoipAwareFragment() {
 
     private val contacts: Contacts by inject()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View
-            = inflater.inflate(R.layout.fragment_call_active_header, container, false)
+            = inflater.inflate(R.layout.fragment_call_incoming_header, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,25 +37,5 @@ class ActiveCallHeader : VoipAwareFragment() {
             third_party_title.text = it
             third_party_subtitle.text = call.metaData.number
         }
-
-        renderCallDurationBox(call)
-    }
-
-    private fun renderCallDurationBox(call: Call) {
-        val duration = DateUtils.formatElapsedTime(call.getDuration(Call.DurationUnit.SECONDS).toLong())
-        val state = findStateString(call)
-
-        if (state.isBlank()) {
-            call_duration.text = duration
-            return
-        }
-
-        call_duration.text = activity?.getString(R.string.call_duration_with_state, state, duration)
-    }
-
-    private fun findStateString(call: Call) = when {
-        call.state.isOnHold -> getString(R.string.call_state_on_hold)
-        call.state.isMuted -> getString(R.string.call_state_microphone_muted)
-        else -> ""
     }
 }

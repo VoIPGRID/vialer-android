@@ -16,7 +16,7 @@
     <string name="auto_login_error">WebActivity: %s</string>
     <string name="login_error">Login failed: %s</string>
     <string name="call_incoming">Incoming call</string>
-    <string name="call_incoming_expanded">Incoming call from:</string>
+    <string name="call_incoming_expanded">Incoming call from</string>
     <string name="call_outgoing">Outgoing call</string>
     <string name="call_ended">Call ended</string>
     <string name="call_on_hold">On hold: %s</string>
@@ -35,6 +35,9 @@
     <string name="dialer_warning_voip_disabled">VoIP disabled, enable in settings</string>
     <string name="version_info">Version: %s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
+    <string name="call_duration_with_state" translatable="false">%1$s - %2$s</string>
+    <string name="call_state_on_hold">On hold</string>
+    <string name="call_state_microphone_muted">Microphone muted</string>
 
     <!-- UpdateHelper -->
     <string name="title_activity_update">Updating</string>

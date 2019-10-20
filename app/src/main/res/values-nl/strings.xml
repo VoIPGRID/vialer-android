@@ -32,6 +32,7 @@
     <string name="dialer_warning_voip_disabled">VoIP gedeactiveerd, activeer VoIP bij instellingen</string>
     <string name="version_info">Versie: %1$s</string>
     <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
+    <string name="call_state_on_hold">In de wacht</string>
 
     <!-- UpdateHelper -->
     <string name="title_activity_update">Updaten</string>
@@ -215,7 +216,7 @@
     <string name="remote_logging_send_crash_log">Zou u ons willen helpen met het verbeteren van onze diensten door het foutenrapport te versturen?</string>
 
     <string name="call_transfer_complete_success"> Succesvol doorverbonden %1$s en %2$s</string>
-    <string name="call_incoming_expanded">Inkomend gesprek van:</string>
+    <string name="call_incoming_expanded">Inkomend gesprek van</string>
     <string name="call_incoming_accept">Beantwoorden</string>
     <string name="call_incoming_decline">Weigeren</string>
     <string name="advanced_settings_title">Geavanceerde instellingen</string>

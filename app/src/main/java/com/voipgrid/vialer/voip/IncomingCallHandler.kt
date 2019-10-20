@@ -3,7 +3,7 @@ package com.voipgrid.vialer.voip
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.voipgrid.vialer.call.NewIncomingCallActivity
+import com.voipgrid.vialer.call.NewCallActivity
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts
 import com.voipgrid.vialer.calling.IncomingCallActivity
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification
@@ -15,7 +15,7 @@ class IncomingCallHandler(private val incomingCallAlerts: IncomingCallAlerts, pr
 //        incomingCallAlerts.start()
 //        notification.incoming(call.metaData.number ?: "", call.metaData.callerId ?: "")
         Log.e("TEST123", "launching activity!")
-        context.startActivity(Intent(context, NewIncomingCallActivity::class.java).apply {
+        context.startActivity(Intent(context, NewCallActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         })
     }

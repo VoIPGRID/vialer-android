@@ -4,6 +4,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.voipgrid.vialer.CallActivity
 import com.voipgrid.vialer.call.NewAbstractCallActivity
@@ -22,6 +25,11 @@ abstract class VoipAwareFragment : Fragment() {
         }
 
     private val broadcastReceiverManager: BroadcastReceiverManager by inject()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        retainInstance = true
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
 
     override fun onResume() {
         super.onResume()

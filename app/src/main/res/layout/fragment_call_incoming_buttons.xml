@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/caller_image"
+        android:layout_width="176dp"
+        android:layout_height="176dp"
+        android:background="@drawable/contact_picture_circle"
+        android:padding="40dp"
+        android:src="@drawable/no_user"
+        app:civ_border_color="@android:color/white"
+        app:civ_border_width="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/button_decline"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/call_decline_button"
+        android:backgroundTint="@color/call_fab_hangup_color"
+        android:contentDescription="@string/call_incoming_decline"
+        android:padding="15dp"
+        app:layout_constraintBottom_toTopOf="@+id/text_view_decline"
+        app:layout_constraintEnd_toEndOf="@+id/text_view_decline"
+        app:layout_constraintStart_toStartOf="@+id/text_view_decline"
+        app:srcCompat="@drawable/ic_call_end_white" />
+
+    <TextView
+        android:id="@+id/text_view_decline"
+        style="@style/CallTextViewStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:text="@string/call_incoming_decline"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_accept"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/button_pickup"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/call_pickup_button"
+        android:backgroundTint="@color/call_fab_pickup_color"
+        android:contentDescription="@string/call_incoming_accept"
+        android:padding="15dp"
+        app:layout_constraintBottom_toTopOf="@+id/text_view_accept"
+        app:layout_constraintEnd_toEndOf="@+id/text_view_accept"
+        app:layout_constraintStart_toStartOf="@+id/text_view_accept"
+        app:srcCompat="@drawable/ic_call_white" />
+
+    <TextView
+        android:id="@+id/text_view_accept"
+        style="@style/CallTextViewStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:text="@string/call_incoming_accept"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/text_view_decline" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

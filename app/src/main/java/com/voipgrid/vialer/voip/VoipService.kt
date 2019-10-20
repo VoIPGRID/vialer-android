@@ -11,7 +11,6 @@ import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.audio.AudioRouter
 import com.voipgrid.vialer.call.NewCallActivity
-import com.voipgrid.vialer.call.NewIncomingCallActivity
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification
 import com.voipgrid.vialer.voip.core.*
 import com.voipgrid.vialer.voip.core.call.Call
@@ -74,11 +73,7 @@ class VoipService : Service(), VoipListener {
             State.TelephonyState.INITIALIZING -> {}
             State.TelephonyState.CALLING -> {}
             State.TelephonyState.RINGING -> {}
-            State.TelephonyState.CONNECTED -> {
-                startActivity(Intent(this, NewCallActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                })
-            }
+            State.TelephonyState.CONNECTED -> { }
             State.TelephonyState.DISCONNECTED -> removeCallFromStack(call)
         }
 

@@ -7,7 +7,6 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.tabs.TabLayout
 import com.voipgrid.vialer.api.UserSynchronizer
-import com.voipgrid.vialer.call.NewIncomingCallActivity
 import com.voipgrid.vialer.callrecord.CallRecordFragment
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
