@@ -277,7 +277,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     /**
-     * Attended transfer to a second existing call. TODO: Not implemented yet.
+     * Attended initiateTransfer to a second existing call. TODO: Not implemented yet.
      * @param transferTo
      * @throws Exception
      */

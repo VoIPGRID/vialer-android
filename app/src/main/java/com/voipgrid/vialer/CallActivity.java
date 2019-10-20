@@ -528,7 +528,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     }
 
     /**
-     * Determine if there are currently two calls, this would suggest a transfer
+     * Determine if there are currently two calls, this would suggest a initiateTransfer
      * is in progress.
      *
      * @return TRUE if there is a second call, otherwise FALSE

@@ -31,17 +31,39 @@ class ActiveCallHeader : VoipAwareFragment() {
     }
 
     override fun render() {
-        val call = voip?.getCurrentCall() ?: return
+        val voip = voip ?: return
+        val call = voip.getCurrentCall() ?: return
 
-        third_party_title.text = if (call.metaData.callerId.isNotBlank()) call.metaData.callerId else call.metaData.number
-        third_party_subtitle.text = if (call.metaData.callerId.isNotBlank()) call.metaData.number else ""
-
-        contacts.getContactNameByPhoneNumber(call.metaData.number)?.let {
-            third_party_title.text = it
-            third_party_subtitle.text = call.metaData.number
+        if (voip.isTransferring()) {
+            val callerInformation = getAppropriateCallerTitles(voip.firstCall())
+            original_call_container.visibility = View.VISIBLE
+            if (callerInformation.subtitle.isNotBlank()) {
+                original_call_information.text = getString(R.string.call_transfer_in_progress_details, "${callerInformation.title} (${callerInformation.subtitle})")
+            } else {
+                original_call_information.text = getString(R.string.call_transfer_in_progress_details, callerInformation.title)
+            }
+        } else {
+            original_call_container.visibility = View.GONE
         }
 
+        val callerInformation = getAppropriateCallerTitles(call)
+
+        third_party_title.text = callerInformation.title
+        third_party_subtitle.text = callerInformation.subtitle
+
         renderCallDurationBox(call)
+    }
+
+    private fun getAppropriateCallerTitles(call: Call): CallerInformation {
+        if (call.metaData.callerId.isNotBlank()) {
+            return CallerInformation(call.metaData.callerId, call.metaData.number)
+        }
+
+        contacts.getContactNameByPhoneNumber(call.metaData.number)?.let {
+            return CallerInformation(it, call.metaData.number)
+        }
+
+        return CallerInformation(call.metaData.number, "")
     }
 
     private fun renderCallDurationBox(call: Call) {
@@ -66,4 +88,6 @@ class ActiveCallHeader : VoipAwareFragment() {
         call.state.telephonyState == State.TelephonyState.OUTGOING_CALLING -> getString(R.string.call_state_calling)
         else -> ""
     }
+
+    data class CallerInformation(val title: String, val subtitle: String)
 }

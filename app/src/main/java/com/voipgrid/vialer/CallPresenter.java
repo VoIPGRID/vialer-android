@@ -101,8 +101,8 @@ public class CallPresenter {
     }
 
     /**
-     * Update the call transfer button to change the text/icon depending on the state of the
-     * transfer.
+     * Update the call initiateTransfer button to change the text/icon depending on the state of the
+     * initiateTransfer.
      *
      * @param state The current call state of the primary call
      */

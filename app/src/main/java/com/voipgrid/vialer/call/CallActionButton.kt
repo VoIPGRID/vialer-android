@@ -14,6 +14,8 @@ import kotlinx.android.synthetic.main.call_button.view.*
 open class CallActionButton(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
     private val drawable: Drawable?
+    private val originalDrawable: Drawable
+    private val originalText: String
 
     init {
         inflate(context, R.layout.call_button, this)
@@ -22,6 +24,8 @@ open class CallActionButton(context: Context, attrs: AttributeSet?) : LinearLayo
         image.setImageDrawable(attributes.getDrawable(R.styleable.CallActionButton_image))
         drawable = attributes.getDrawable(R.styleable.CallActionButton_image)
         attributes.recycle()
+        originalDrawable = image.drawable
+        originalText = label.text.toString()
     }
 
     fun enable() {
@@ -44,6 +48,19 @@ open class CallActionButton(context: Context, attrs: AttributeSet?) : LinearLayo
         image.clearColorFilter()
         image.background.clearColorFilter()
         label.setTextColor(resources.getColor(R.color.call_color))
+    }
+
+    fun swapIconAndText(replacementImage: Int, replacementText: Int) {
+        image.setImageResource(replacementImage)
+        label.text = context.getString(replacementText)
+    }
+
+    fun resetIconAndText() {
+        if (image.drawable != originalDrawable) {
+            image.setImageDrawable(originalDrawable)
+        }
+
+        label.text = originalText
     }
 
     companion object {

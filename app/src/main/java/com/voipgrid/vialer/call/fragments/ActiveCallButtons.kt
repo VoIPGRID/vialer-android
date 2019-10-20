@@ -43,8 +43,8 @@ class ActiveCallButtons : VoipAwareFragment() {
             button_dialpad -> (activity as NewCallActivity).openDialer()
             button_mute -> if (!call.state.isMuted) call.mute() else call.unmute()
             button_hold -> if (!call.state.isOnHold) call.hold() else call.unhold()
-            button_transfer -> ""
-            else -> ""
+            button_transfer -> if (voip.isTransferring()) (activity as NewCallActivity).mergeTransfer() else (activity as NewCallActivity).openTransferSelector()
+            else -> {}
         }
 
         render()
@@ -69,6 +69,12 @@ class ActiveCallButtons : VoipAwareFragment() {
 
         buttons.forEach { it.enable() }
         disabledDuringDialling.forEach { it.enable(call.state.telephonyState == State.TelephonyState.CONNECTED) }
+
+        if (voip.isTransferring()) {
+            button_transfer.swapIconAndText(R.drawable.ic_call_merge, R.string.transfer_connect)
+        } else {
+            button_transfer.resetIconAndText()
+        }
 
         button_mute.activate(call.state.isMuted)
         button_hold.activate(call.state.isOnHold)

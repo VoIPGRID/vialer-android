@@ -5,6 +5,7 @@ import com.voipgrid.vialer.sip.SipLogWriter
 import com.voipgrid.vialer.voip.core.VoipListener
 import com.voipgrid.vialer.voip.core.Configuration
 import com.voipgrid.vialer.voip.core.VoipProvider
+import com.voipgrid.vialer.voip.core.call.Call
 import com.voipgrid.vialer.voip.providers.pjsip.core.*
 import com.voipgrid.vialer.voip.providers.pjsip.initialization.Initializer
 import com.voipgrid.vialer.voip.providers.pjsip.initialization.config.AccountConfigurator
@@ -64,6 +65,11 @@ class PjsipProvider : VoipProvider {
         }
         account = null
         endpoint = null
+    }
+
+    override fun mergeTransfer(first: Call, second: Call) {
+        (first as PjsipCall).xferReplaces(second as PjsipCall, CallOpParam(true))
+        first.hangup()
     }
 
     /**

@@ -438,7 +438,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     public void removeCallFromList(SipCall call) {
         mCallList.remove(call);
 
-        if (mCallList.isEmpty() || call.getCallIsTransferred()) {
+        if (mCallList.isEmpty() || call.getCallIsTransferred()) { // TODO this is where it ends <<
             setCurrentCall(null);
             stopSelf();
         } else {

@@ -11,4 +11,6 @@ interface VoipProvider {
     fun call(number: String): Call
 
     fun register()
+
+    fun mergeTransfer(first: Call, second: Call)
 }

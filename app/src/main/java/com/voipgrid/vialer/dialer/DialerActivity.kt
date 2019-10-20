@@ -246,7 +246,7 @@ Log.e("TEST123", "Calling $phoneNumberToCall")
         /**
          * If this extra is present, the dialed number will be returned as a result
          * from the activity rather than making a call. This can be used, for example,
-         * when you are trying to prompt the user to provide a transfer destination.
+         * when you are trying to prompt the user to provide a initiateTransfer destination.
          *
          */
         const val EXTRA_RETURN_AS_RESULT = "EXTRA_RETURN_AS_RESULT"

@@ -4,8 +4,48 @@
     style="@style/CallHeaderContainerStyle"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@drawable/background_gradient">
 
+    <LinearLayout
+        android:id="@+id/original_call_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginBottom="15dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingBottom="15dp">
+            <TextView
+                style="@style/CallHeaderSubtitleTextViewStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/call_transfer_in_progress"
+                android:layout_marginBottom="0dp"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                />
+            <TextView
+                android:id="@+id/original_call_information"
+                style="@style/CallHeaderSubtitleTextViewStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="0dp"
+                android:textSize="15sp"
+                />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#33000000" >
+        </View>
+    </LinearLayout>
+    
     <TextView
         android:id="@+id/third_party_title"
         style="@style/CallHeaderTextViewStyle"

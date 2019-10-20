@@ -10,7 +10,7 @@
         style="@style/CallHeaderContainerStyle"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="20"
+        android:layout_weight="25"
         android:background="@drawable/background_gradient" />
 
     <FrameLayout
@@ -18,6 +18,6 @@
         style="@style/CallHeaderContainerStyle"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="80"
+        android:layout_weight="75"
         android:background="#fff" />
 </LinearLayout>

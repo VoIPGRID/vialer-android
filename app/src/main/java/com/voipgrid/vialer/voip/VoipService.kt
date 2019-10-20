@@ -34,16 +34,18 @@ class VoipService : Service(), VoipListener {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
 
-    fun call(number: String) {
+    fun call(number: String, startActivity: Boolean = true) {
 
         prepareForIncomingCall {
             val call = voipProvider.call(number)
 Log.e("TEST123", "Got call with {${call.state.telephonyState} and {${call.metaData.number}")
             callStack.add(call)
 
-            startActivity(Intent(this, NewCallActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            })
+            if (startActivity) {
+                startActivity(Intent(this, NewCallActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                })
+            }
         }
     }
 
@@ -59,6 +61,24 @@ Log.e("TEST123", "Got call with {${call.state.telephonyState} and {${call.metaDa
         voipProvider.initialize(generateConfiguration(), this)
         voipProvider.register()
     }
+
+    fun initiateTransfer(number: String) {
+        if (callStack.isEmpty()) {
+            throw Exception("Cannot begin initiateTransfer without an active call")
+        }
+
+        call(number, false)
+    }
+
+    fun mergeTransfer() {
+        if (!isTransferring()) {
+            throw Exception("Unable to merge call transfer as not transferring calls")
+        }
+
+        voipProvider.mergeTransfer(callStack[0], callStack[1])
+    }
+
+    fun isTransferring() = callStack.size > 1
 
     /**
      * This is called when there is an actual call coming through via sip. TODO: make this obvious with method name
@@ -129,11 +149,16 @@ Log.e("TEST123", "Got call with {${call.state.telephonyState} and {${call.metaDa
 
     override fun onRegister() {
         onPrepared?.invoke()
+        onPrepared = null
     }
 
     private val binder = LocalBinder()
 
     override fun onBind(intent: Intent?): IBinder? = binder
+
+    fun firstCall(): Call {
+        return callStack[0]
+    }
 
     inner class LocalBinder : Binder() {
         fun getService(): VoipService = this@VoipService

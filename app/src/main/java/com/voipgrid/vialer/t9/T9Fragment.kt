@@ -48,7 +48,9 @@ class T9Fragment : Fragment(), CoroutineScope {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        childFragmentManager.beginTransaction().add(R.id.helper, helper).commit()
+        if (!helper.isAdded) {
+            childFragmentManager.beginTransaction().add(R.id.helper, helper).commit()
+        }
         job = Job()
 
         list_view.apply {

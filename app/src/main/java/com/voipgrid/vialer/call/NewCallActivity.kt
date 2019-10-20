@@ -1,6 +1,8 @@
 package com.voipgrid.vialer.call
 
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.voipgrid.vialer.R
@@ -13,13 +15,15 @@ class NewCallActivity : NewAbstractCallActivity() {
 
     enum class UpperSection(val fragment: Fragment) {
         CALL_DETAILS(ActiveCallHeader()),
-        INCOMING_CALL_HEADER(IncomingCallHeader())
+        INCOMING_CALL_HEADER(IncomingCallHeader()),
+        TRANSFER_COMPLETE(TransferComplete())
     }
 
     enum class LowerSection(val fragment: Fragment) {
         CALL_ACTION_BUTTONS(ActiveCallButtons()),
         DIALER(Dialer()),
-        INCOMING_CALL_BUTTONS(IncomingCallButtons())
+        INCOMING_CALL_BUTTONS(IncomingCallButtons()),
+        TRANSFER(TransferSelection())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,11 +35,27 @@ class NewCallActivity : NewAbstractCallActivity() {
     }
 
     fun openDialer() {
-        swapLowerSection(LowerSection.DIALER)
+        swapLowerSection(LowerSection.DIALER, true)
     }
 
     fun closeDialer() {
         swapLowerSection(LowerSection.CALL_ACTION_BUTTONS)
+    }
+
+    fun openTransferSelector() {
+        voip?.getCurrentCall()?.hold()
+        swapLowerSection(LowerSection.TRANSFER, true)
+    }
+
+    fun closeTransferSelector() {
+        swapLowerSection(LowerSection.TRANSFER, true)
+    }
+
+    fun mergeTransfer() {
+        voip?.let {
+            it.mergeTransfer()
+            swapUpperSection(UpperSection.TRANSFER_COMPLETE)
+        }
     }
 
     override fun voipServiceIsAvailable() {
@@ -61,12 +81,25 @@ class NewCallActivity : NewAbstractCallActivity() {
                 swapUpperSection(UpperSection.CALL_DETAILS)
                 swapLowerSection(LowerSection.CALL_ACTION_BUTTONS)
             }
-            DISCONNECTED -> finish()
+            DISCONNECTED -> if (voip?.getCurrentCall() == null) {
+                Log.e("TEST123", "Finishing...")
+                finish()
+            }
         }
     }
 
     override fun voipUpdate() {
         render()
+    }
+
+    override fun finish() {
+        if (shouldDelayFinish()) {
+            Handler().postDelayed({
+                super.finish()
+            }, 3000)
+        } else {
+            finish()
+        }
     }
 
     private fun render() {
@@ -80,11 +113,21 @@ class NewCallActivity : NewAbstractCallActivity() {
         return arrayOf(supportFragmentManager.findFragmentByTag("UPPER") as VoipAwareFragment, supportFragmentManager.findFragmentByTag("LOWER") as VoipAwareFragment)
     }
 
-    private fun swapUpperSection(section: UpperSection) = swapFragment(section.fragment, call_upper_section, "UPPER")
-
-    private fun swapLowerSection(section: LowerSection) = swapFragment(section.fragment, call_lower_section, "LOWER")
-
-    private fun swapFragment(fragment: Fragment, container: View, tag: String) {
-        supportFragmentManager.beginTransaction().replace(container.id, fragment, tag).commit()
+    private fun shouldDelayFinish(): Boolean {
+        return supportFragmentManager.findFragmentByTag("UPPER") is TransferComplete
     }
+
+    private fun swapUpperSection(section: UpperSection, backstack: Boolean = false) = swapFragment(section.fragment, call_upper_section, "UPPER", backstack)
+
+    private fun swapLowerSection(section: LowerSection, backstack: Boolean = false) = swapFragment(section.fragment, call_lower_section, "LOWER", backstack)
+
+    private fun swapFragment(fragment: Fragment, container: View, tag: String, backstack: Boolean) {
+        val transaction = supportFragmentManager.beginTransaction().replace(container.id, fragment, tag)
+
+        if (backstack) transaction.addToBackStack(null)
+
+        transaction.commit()
+    }
+
+
 }

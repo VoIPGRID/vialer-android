@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/CallHeaderContainerStyle"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="@drawable/background_gradient">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_check_circle"
+        android:layout_marginBottom="20dp"/>
+
+    <TextView
+        android:id="@+id/third_party_title"
+        style="@style/CallHeaderTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/call_transfer_complete_success" />
+
+    <TextView
+        android:id="@+id/third_party_subtitle"
+        style="@style/CallHeaderSubtitleTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/call_transfer_complete_success_subtitle" />
+
+</LinearLayout>

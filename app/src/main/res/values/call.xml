@@ -53,7 +53,7 @@
     <!-- TextView Style -->
     <style name="CallLabelTextViewStyle" parent="@style/CallTextViewStyle">
         <item name="android:textSize">@dimen/call_label_text_size</item>
-        <item name="android:textColor">#A4A4A4</item>
+        <item name="android:textColor">@color/call_color</item>
     </style>
 
     <!-- TextView Style -->
