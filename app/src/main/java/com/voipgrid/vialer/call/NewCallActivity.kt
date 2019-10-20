@@ -98,7 +98,7 @@ class NewCallActivity : NewAbstractCallActivity() {
                 super.finish()
             }, 3000)
         } else {
-            finish()
+            super.finish()
         }
     }
 
