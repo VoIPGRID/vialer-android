@@ -38,6 +38,7 @@
         <item name="android:paddingRight">15sp</item>
         <item name="android:paddingTop">1sp</item>
         <item name="android:paddingBottom">2sp</item>
+        <item name="android:layout_marginTop">10sp</item>
     </style>
 
 

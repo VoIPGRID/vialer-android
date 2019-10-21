@@ -30,7 +30,7 @@ import kotlinx.android.synthetic.main.list_item_contact.view.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
-class T9Fragment : Fragment(), CoroutineScope {
+class T9Fragment(private val showHelper: Boolean = true) : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -48,7 +48,7 @@ class T9Fragment : Fragment(), CoroutineScope {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (!helper.isAdded) {
+        if (!helper.isAdded && showHelper) {
             childFragmentManager.beginTransaction().add(R.id.helper, helper).commit()
         }
         job = Job()

@@ -48,7 +48,10 @@ class ActiveCallButtons : VoipAwareFragment() {
             button_dialpad -> (activity as NewCallActivity).openDialer()
             button_mute -> if (!call.state.isMuted) call.mute() else call.unmute()
             button_hold -> if (!call.state.isOnHold) call.hold() else call.unhold()
-            button_transfer -> if (voip.isTransferring()) (activity as NewCallActivity).mergeTransfer() else (activity as NewCallActivity).openTransferSelector()
+            button_transfer -> if (voip.isTransferring()) {
+                button_transfer.activate()
+                (activity as NewCallActivity).mergeTransfer()
+            } else (activity as NewCallActivity).openTransferSelector()
             else -> {}
         }
 

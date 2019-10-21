@@ -35,7 +35,7 @@ class NewCallActivity : NewAbstractCallActivity() {
     }
 
     fun openDialer() {
-        swapLowerSection(LowerSection.DIALER, true)
+        swapLowerSection(LowerSection.DIALER)
     }
 
     fun closeDialer() {
@@ -44,11 +44,11 @@ class NewCallActivity : NewAbstractCallActivity() {
 
     fun openTransferSelector() {
         voip?.getCurrentCall()?.hold()
-        swapLowerSection(LowerSection.TRANSFER, true)
+        swapLowerSection(LowerSection.TRANSFER)
     }
 
     fun closeTransferSelector() {
-        swapLowerSection(LowerSection.TRANSFER, true)
+        swapLowerSection(LowerSection.TRANSFER)
     }
 
     fun mergeTransfer() {
@@ -57,6 +57,15 @@ class NewCallActivity : NewAbstractCallActivity() {
             swapUpperSection(UpperSection.TRANSFER_COMPLETE)
             render()
         }
+    }
+
+    override fun onBackPressed() {
+        if (supportFragmentManager.findFragmentByTag("LOWER") !is ActiveCallButtons) {
+            swapLowerSection(LowerSection.CALL_ACTION_BUTTONS)
+            return
+        }
+
+        super.onBackPressed()
     }
 
     override fun voipServiceIsAvailable() {
@@ -111,27 +120,26 @@ class NewCallActivity : NewAbstractCallActivity() {
         return supportFragmentManager.findFragmentByTag("UPPER") is TransferComplete
     }
 
-    private fun swapUpperSection(section: UpperSection, backstack: Boolean = false) = swapFragment(section.fragment, call_upper_section, "UPPER", backstack)
+    private fun swapUpperSection(section: UpperSection) = swapFragment(section.fragment, call_upper_section, "UPPER")
 
-    private fun swapLowerSection(section: LowerSection, backstack: Boolean = false) = swapFragment(section.fragment, call_lower_section, "LOWER", backstack)
+    private fun swapLowerSection(section: LowerSection) = swapFragment(section.fragment, call_lower_section, "LOWER")
 
-    private fun swapFragment(fragment: Fragment, container: View, tag: String, backstack: Boolean) {
+    private fun swapFragment(fragment: Fragment, container: View, tag: String) {
         if (!fragment.isAdded) {
-            val transaction = supportFragmentManager.beginTransaction().add(container.id, fragment, tag)
-            if (backstack) transaction.addToBackStack(null)
-            transaction.commit()
+            supportFragmentManager.beginTransaction().add(container.id, fragment, tag).commit()
         }
 
-        val current = supportFragmentManager.findFragmentByTag(when(container) {
+        val relevantTag = when(container) {
             call_upper_section -> "UPPER"
             call_lower_section -> "LOWER"
             else -> ""
-        })
+        }
 
-        supportFragmentManager.beginTransaction()
-                .also { transaction -> current?.let { transaction.hide(it) } }
-                .show(fragment)
-                .commit()
+        val transaction = supportFragmentManager.beginTransaction()
+
+        supportFragmentManager.fragments.filter { it.tag == relevantTag }.forEach { transaction.hide(it) }
+
+        transaction.show(fragment).commit()
 
         (fragment as VoipAwareFragment).render()
     }

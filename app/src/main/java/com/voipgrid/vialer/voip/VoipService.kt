@@ -32,7 +32,11 @@ class VoipService : Service(), VoipListener {
         onTic()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startForeground(notification.notificationId, notification.build())
+        return START_NOT_STICKY
+    }
+
 
     fun call(number: String, startActivity: Boolean = true) {
 

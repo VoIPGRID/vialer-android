@@ -39,7 +39,7 @@ abstract class AbstractCallNotification : AbstractNotification() {
      * The small logo to display for all call notifications.
      *
      */
-    private val logo = R.drawable.ic_logo
+    private val logo = R.drawable.call_notification_icon
 
     @Inject protected lateinit var phoneNumberImageGenerator : PhoneNumberImageGenerator
 

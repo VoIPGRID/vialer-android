@@ -1,10 +1,13 @@
 package com.voipgrid.vialer.call.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.Toast
 import butterknife.OnClick
 import com.voipgrid.vialer.R
@@ -21,7 +24,7 @@ class TransferSelection : VoipAwareFragment(), Dialer.Listener, T9Fragment.Liste
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View
             = inflater.inflate(R.layout.fragment_transfer_selection, container, false)
 
-    private val t9Fragment = T9Fragment().apply { listener = this@TransferSelection }
+    private val t9Fragment = T9Fragment(false).apply { listener = this@TransferSelection }
 
     private val isContactsExpanded: Boolean
         get() = dialer.visibility != View.VISIBLE
@@ -32,6 +35,7 @@ class TransferSelection : VoipAwareFragment(), Dialer.Listener, T9Fragment.Liste
         if (!t9Fragment.isAdded) {
             childFragmentManager.beginTransaction().replace(R.id.t9_search, t9Fragment).commit()
         }
+
 
         preventKeyboardFromBeingDisplayed()
 
@@ -44,6 +48,12 @@ class TransferSelection : VoipAwareFragment(), Dialer.Listener, T9Fragment.Liste
                 dialer.number.isBlank() -> dialer.number = User.internal.lastDialledNumber
             }
         }
+
+        button_dialpad.setOnClickListener {
+            button_dialpad.visibility = View.GONE
+            Log.e("TEST123", "Adjusting for container with weightsum: ${container.weightSum}")
+            changeWeights(15f, 85f)
+        }
     }
 
     /**
@@ -54,7 +64,8 @@ class TransferSelection : VoipAwareFragment(), Dialer.Listener, T9Fragment.Liste
 
     override fun onResume() {
         super.onResume()
-        refreshUi()
+        dialer.fadeIn()
+        t9Fragment.show()
     }
 
     override fun numberWasChanged(phoneNumber: String) {
@@ -62,11 +73,9 @@ class TransferSelection : VoipAwareFragment(), Dialer.Listener, T9Fragment.Liste
     }
 
     override fun digitWasPressed(digit: String) {
-
     }
 
     override fun exitButtonWasPressed() {
-
     }
 
     /**
@@ -84,34 +93,27 @@ class TransferSelection : VoipAwareFragment(), Dialer.Listener, T9Fragment.Liste
         }
     }
 
-    @OnClick(R.id.button_dialpad)
-    internal fun showKeypad() {
-        dialer.visibility = View.VISIBLE
-//        findViewById<View>(R.id.button_dialpad).visibility = View.INVISIBLE
-//        findViewById<View>(R.id.button_call).visibility = View.VISIBLE
-    }
-
-    private fun refreshUi() {
-        dialer.fadeIn()
-        t9Fragment.show()
-        no_connectivity_container.visibility = View.GONE
-    }
-
     /**
-     * Hides various elements to display that there is no internet connectivity.
+     * Change the weights to adjust the amount of screen each element is taking up.
      *
      */
-    private fun updateUiForNoInternetConnectivity() {
-        no_connectivity_container.visibility = View.VISIBLE
-        t9Fragment.hide()
-        dialer.fadeOut()
+    private fun changeWeights(t9Weight: Float, dialerWeight: Float) {
+        t9_search.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+                t9Weight
+        )
+
+        dialer.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+                dialerWeight
+        )
     }
 
     override fun onExpandRequested() {
-//        if (dialer.visibility != View.VISIBLE) return
-//        dialer.visibility = View.GONE
-//        findViewById<View>(R.id.button_dialpad).visibility = View.VISIBLE
-//        findViewById<View>(R.id.button_call).visibility = View.GONE
+        changeWeights(100f, 0f)
+        button_dialpad.visibility = View.VISIBLE
     }
 
     override fun onContactSelected(number: String, name: String) {

@@ -49,7 +49,13 @@ class ActiveCallHeader : VoipAwareFragment() {
         val callerInformation = getAppropriateCallerTitles(call)
 
         third_party_title.text = callerInformation.title
-        third_party_subtitle.text = callerInformation.subtitle
+
+        if (callerInformation.subtitle.isNotBlank()) {
+            third_party_subtitle.text = callerInformation.subtitle
+            third_party_subtitle.visibility = View.VISIBLE
+        } else {
+            third_party_subtitle.visibility = View.GONE
+        }
 
         renderCallDurationBox(call)
     }

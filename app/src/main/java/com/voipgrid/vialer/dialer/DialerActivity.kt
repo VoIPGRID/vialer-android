@@ -144,7 +144,9 @@ Log.e("TEST123", "Calling $phoneNumberToCall")
             true -> Toast.makeText(this@DialerActivity, getString(R.string.dialer_invalid_number), Toast.LENGTH_LONG).show()
             false -> {
 //                dialHelper.callNumber(phoneNumberToCall, contactName)
-                startService(Intent(this@DialerActivity, VoipService::class.java))
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(Intent(this@DialerActivity, VoipService::class.java))
+                }
                 voip?.call(phoneNumberToCall)
                 Log.e("TEST123", "voip.call ${voip == null}")
                 User.internal.lastDialledNumber = phoneNumberToCall
