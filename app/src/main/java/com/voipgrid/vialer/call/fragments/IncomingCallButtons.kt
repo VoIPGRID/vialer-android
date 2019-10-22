@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.call.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +16,11 @@ class IncomingCallButtons : VoipAwareFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         button_decline.setOnClickListener {
-            voip?.getCurrentCall()?.decline()
+            voip?.calls?.active?.decline()
         }
 
         button_pickup.setOnClickListener {
-            voip?.getCurrentCall()?.answer()
+            voip?.calls?.active?.answer()
         }
     }
 }

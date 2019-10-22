@@ -1,34 +1,30 @@
 package com.voipgrid.vialer.voip
 
-import android.app.Service
 import android.content.Intent
-import android.os.Binder
 import android.os.Handler
-import android.os.IBinder
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.voipgrid.vialer.R
-import com.voipgrid.vialer.User
 import com.voipgrid.vialer.audio.AudioRouter
-import com.voipgrid.vialer.call.NewCallActivity
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification
+import com.voipgrid.vialer.voip.android.BindableService
 import com.voipgrid.vialer.voip.core.*
 import com.voipgrid.vialer.voip.core.call.Call
 import com.voipgrid.vialer.voip.core.call.State
 import org.koin.android.ext.android.inject
 
-class VoipService : Service(), VoipListener {
+class VoipService : BindableService<VoipService>(), VoipListener {
 
     private val voipProvider: VoipProvider by inject()
-    private val incomingCallHandler: IncomingCallHandler by inject()
     val audio: AudioRouter by inject()
     private val broadcastManager: LocalBroadcastManager by inject()
-
     private val notification = DefaultCallNotification()
+
+    private var onPrepared: (() -> Unit)? = null
+
+    val calls = CallStack()
 
     override fun onCreate() {
         super.onCreate()
-        callStack = CallStack()
         onTic()
     }
 
@@ -37,65 +33,89 @@ class VoipService : Service(), VoipListener {
         return START_NOT_STICKY
     }
 
+    /**
+     * Place a call to the given number, an event will be emitted upon setup
+     * success.
+     *
+     */
+    fun call(number: String) = call(number, false)
 
-    fun call(number: String, startActivity: Boolean = true) {
+    /**
+     * Place a call to the given number.
+     *
+     */
+    private fun call(number:String, isTransferTarget: Boolean)= prepare {
+        val call = voipProvider.call(number)
 
-        prepareForIncomingCall {
-            val call = voipProvider.call(number)
-Log.e("TEST123", "Got call with {${call.state.telephonyState} and {${call.metaData.number}")
-            callStack.add(call)
+        call.state.isTransferTarget = isTransferTarget
 
-            if (startActivity) {
-                startActivity(Intent(this, NewCallActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                })
-            }
+        calls.add(call)
+
+        this.broadcastManager.sendBroadcast(Intent(Events.OUTGOING_CALL_HAS_BEEN_SETUP.name))
+    }
+
+
+    /**
+     * Determine if the service is able to handle an incoming call.
+     *
+     */
+    fun isAvailableToHandleIncomingCall() = calls.isEmpty()
+
+    /**
+     * Prepare the library for a call to be made. The callback is invoked when the library has been prepared.
+     *
+     */
+    fun prepare(onPrepared: () -> Unit) {
+        this.onPrepared = onPrepared
+
+        voipProvider.apply {
+            initialize(configuration.invoke(), this@VoipService)
+            register(credentials.invoke())
         }
     }
 
-    fun getCurrentCall(): Call?  = try { callStack.last() } catch (_: Exception) { null }
-
-    fun canHandleIncomingCall() = true
-
-    private var onPrepared: (() -> Unit)? = null
-
-    fun prepareForIncomingCall(onPrepared: () -> Unit) {
-        this.onPrepared = onPrepared
-
-        voipProvider.initialize(generateConfiguration(), this)
-        voipProvider.register()
-    }
-
+    /**
+     * Initiate a transfer to the given number.
+     *
+     */
     fun initiateTransfer(number: String) {
-        if (callStack.isEmpty()) {
+        if (calls.isEmpty()) {
             throw Exception("Cannot begin initiateTransfer without an active call")
         }
 
-        call(number, false)
+        call(number, true)
     }
 
+    /**
+     * Merge the two calls that are currently queued for transfer.
+     *
+     */
     fun mergeTransfer() {
         if (!isTransferring()) {
             throw Exception("Unable to merge call transfer as not transferring calls")
         }
 
-        voipProvider.mergeTransfer(callStack[0], callStack[1])
+        voipProvider.mergeTransfer(calls.original ?: return, calls.original ?: return)
     }
 
-    fun isTransferring() = callStack.size > 1
+    /**
+     * Determine if there is a transfer in progress currently.
+     *
+     */
+    fun isTransferring() = calls.size > 1
 
     /**
      * This is called when there is an actual call coming through via sip. TODO: make this obvious with method name
      *
      */
-    override fun onIncomingCall(call: Call) {
-        callStack.add(call)
-
-        this.incomingCallHandler.handle(call, notification)
+    override fun onIncomingCallFromVoipProvider(call: Call) {
+        calls.add(call)
 
         if (audio.isBluetoothRouteAvailable && !audio.isCurrentlyRoutingAudioViaBluetooth) {
             audio.routeAudioViaBluetooth()
         }
+
+        this.broadcastManager.sendBroadcast(Intent(Events.INCOMING_CALL_IS_RINGING.name))
     }
 
     override fun onCallStateUpdate(call: Call, state: State) {
@@ -103,47 +123,46 @@ Log.e("TEST123", "Got call with {${call.state.telephonyState} and {${call.metaDa
             State.TelephonyState.INITIALIZING -> {}
             State.TelephonyState.OUTGOING_CALLING -> {}
             State.TelephonyState.INCOMING_RINGING -> {}
-            State.TelephonyState.CONNECTED -> { }
+            State.TelephonyState.CONNECTED -> {
+                this.audio.focus()
+            }
             State.TelephonyState.DISCONNECTED -> removeCallFromStack(call)
         }
 
-        broadcastManager.sendBroadcast(Intent(ACTION_CALL_STATE_WAS_UPDATED).apply {
-            putExtra(CALL_STATE_EXTRA, state.telephonyState)
+        broadcastManager.sendBroadcast(Intent(Events.CALL_STATE_HAS_CHANGED.name).apply {
+            putExtra(Extras.CALL_STATE.name, state.telephonyState)
         })
     }
 
+    /**
+     * Remove a call from the call stack, and stop the service if we have no
+     * more calls left.
+     *
+     */
     private fun removeCallFromStack(call: Call) {
-        callStack.remove(call)
+        calls.remove(call)
 
-        if (callStack.isEmpty()) {
-
-            Log.e("TEST123", " Call stack is empty stopSelf")
+        if (calls.isEmpty()) {
             stopForeground(true)
             stopSelf()
         }
     }
 
     private fun onTic() {
-        broadcastManager.sendBroadcast(Intent(ACTION_VOIP_UPDATE))
+        broadcastManager.sendBroadcast(Intent(Events.VOIP_TIC.name))
         Handler().postDelayed({
             onTic()
         }, 500)
+
+        val call = calls.original ?: return
+
+        when (call.state.telephonyState) {
+            State.TelephonyState.INCOMING_RINGING -> notification.incoming(call.metaData.number, call.metaData.callerId)
+            State.TelephonyState.OUTGOING_CALLING -> notification.outgoing(call)
+            State.TelephonyState.CONNECTED -> notification.active(call)
+            else -> {}
+        }
     }
-
-    private fun generateConfiguration(): Configuration = Configuration(
-            host = SipHost(getString(if (User.voip.hasTlsEnabled) R.string.sip_host_secure else R.string.sip_host)),
-            accountId = User.voipAccount?.accountId ?: "",
-            password = User.voipAccount?.password ?: "",
-            scheme = getString(R.string.sip_auth_scheme),
-            realm = getString(R.string.sip_auth_realm),
-            transport = if (User.voip.hasTlsEnabled) Configuration.Transport.TLS else Configuration.Transport.TCP,
-            stun = User.voip.hasStunEnabled,
-            userAgent = "vialer-test-ua",
-            echoCancellation = 3,
-            echoCancellationTailLength = 75,
-            codec = Configuration.Codec.OPUS
-    )
-
 
     override fun onDestroy() {
         Log.e("TEST123", " onDestroy")
@@ -156,23 +175,18 @@ Log.e("TEST123", "Got call with {${call.state.telephonyState} and {${call.metaDa
         onPrepared = null
     }
 
-    private val binder = LocalBinder()
-
-    override fun onBind(intent: Intent?): IBinder? = binder
-
-    fun firstCall(): Call {
-        return callStack[0]
-    }
-
-    inner class LocalBinder : Binder() {
-        fun getService(): VoipService = this@VoipService
-    }
+    override fun self(): VoipService = this
 
     companion object {
-        private var callStack = CallStack()
+        lateinit var configuration: () -> Configuration
+        lateinit var credentials: () -> Credentials
+    }
 
-        const val ACTION_CALL_STATE_WAS_UPDATED = "CALL_STATE_WAS_UPDATED"
-        const val CALL_STATE_EXTRA = "CALL_STATE_EXTRA"
-        const val ACTION_VOIP_UPDATE = "ACTION_VOIP_UPDATE"
+    enum class Events {
+        OUTGOING_CALL_HAS_BEEN_SETUP, INCOMING_CALL_IS_RINGING, CALL_STATE_HAS_CHANGED, VOIP_TIC
+    }
+
+    enum class Extras {
+        CALL_STATE
     }
 }

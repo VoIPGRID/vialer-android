@@ -38,12 +38,12 @@ abstract class VoipAwareFragment : Fragment() {
             override fun onReceive(context: Context, intent: Intent) {
 
                 when (intent.action) {
-                    VoipService.ACTION_CALL_STATE_WAS_UPDATED -> voipStateWasUpdated(intent.getSerializableExtra(VoipService.CALL_STATE_EXTRA) as State.TelephonyState)
-                    VoipService.ACTION_VOIP_UPDATE -> voipUpdate()
+                    VoipService.Events.CALL_STATE_HAS_CHANGED.name -> voipStateWasUpdated(intent.getSerializableExtra(VoipService.Extras.CALL_STATE.name) as State.TelephonyState)
+                    VoipService.Events.VOIP_TIC.name -> voipUpdate()
                 }
             }
 
-        }, VoipService.ACTION_CALL_STATE_WAS_UPDATED, VoipService.ACTION_VOIP_UPDATE)
+        }, VoipService.Events.CALL_STATE_HAS_CHANGED.name, VoipService.Events.VOIP_TIC.name)
     }
 
     override fun onPause() {

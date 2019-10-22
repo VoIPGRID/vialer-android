@@ -1,15 +1,19 @@
 package com.voipgrid.vialer.notifications.call
 
 import android.app.PendingIntent
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.CallActivity
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.call.NewCallActivity
 import com.voipgrid.vialer.calling.AbstractCallActivity
 import com.voipgrid.vialer.calling.CallingConstants
 import com.voipgrid.vialer.sip.SipCall
+import com.voipgrid.vialer.voip.core.call.Call
 
 
-class ActiveCallNotification(private val call : SipCall) : AbstractCallNotification() {
+class ActiveCallNotification(private val call : Call) : AbstractCallNotification() {
 
     /**
      * Build the active call notification, this includes the call duration so
@@ -20,21 +24,9 @@ class ActiveCallNotification(private val call : SipCall) : AbstractCallNotificat
         return builder
                 .setContentTitle(createNotificationTitle())
                 .setContentText(context.getString(R.string.callnotification_active_call))
-                .setContentIntent(createCallActivityPendingIntent())
-                .setSubText(call.prettyCallDuration)
+                .setSubText(call.getDuration(Call.DurationUnit.SECONDS).toString())
                 .setShowWhen(false)
-                .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(call.phoneNumber))
-    }
-
-    private fun createCallActivityPendingIntent(): PendingIntent? {
-        return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
-                context,
-                CallActivity::class.java,
-                call.phoneNumberUri,
-                CallingConstants.TYPE_OUTGOING_CALL,
-                call.callerId,
-                call.phoneNumber
-        ))
+                .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(call.metaData.number))
     }
 
     /**
@@ -43,10 +35,10 @@ class ActiveCallNotification(private val call : SipCall) : AbstractCallNotificat
      *
      */
     private fun createNotificationTitle() : String {
-        if (call.callerId == null || call.callerId.isEmpty()) {
-            return if (call.phoneNumber == null) " " else call.phoneNumber
+        if (call.metaData.callerId.isBlank()) {
+            return call.metaData.number
         }
 
-        return "${call.callerId} (${call.phoneNumber})"
+        return "${call.metaData.callerId} (${call.metaData.number})"
     }
 }

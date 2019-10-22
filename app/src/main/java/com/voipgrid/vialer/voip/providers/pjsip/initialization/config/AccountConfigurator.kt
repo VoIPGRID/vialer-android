@@ -1,7 +1,7 @@
 package com.voipgrid.vialer.voip.providers.pjsip.initialization.config
 
-import android.util.Log
 import com.voipgrid.vialer.voip.core.Configuration
+import com.voipgrid.vialer.voip.core.Credentials
 import org.pjsip.pjsua2.AccountConfig
 import org.pjsip.pjsua2.AuthCredInfo
 import org.pjsip.pjsua2.pj_constants_.PJ_TRUE
@@ -10,11 +10,11 @@ import org.pjsip.pjsua2.pjsua_call_flag.*
 
 class AccountConfigurator {
 
-    fun configure(configuration: Configuration): AccountConfig {
-        val credentialInformation = createCredentialInformation(configuration)
+    fun configure(configuration: Configuration, credentials: Credentials): AccountConfig {
+        val credentialInformation = createCredentialInformation(configuration, credentials)
 
         return AccountConfig().apply {
-            idUri = configuration.host.withAccount(configuration.accountId)
+            idUri = configuration.host.withAccount(credentials.accountId)
             regConfig.registrarUri = configuration.host.withTransport(configuration.transport)
             sipConfig.authCreds.add(credentialInformation)
             sipConfig.proxies.add(configuration.host.withTransport(configuration.transport))
@@ -25,18 +25,17 @@ class AccountConfigurator {
             natConfig.contactRewriteMethod = 4
 
             if (configuration.transport == Configuration.Transport.TLS) {
-                Log.e("TEST123", "SECURE!!!")
                 mediaConfig.srtpSecureSignaling = 1
                 mediaConfig.srtpUse = pjmedia_srtp_use.PJMEDIA_SRTP_MANDATORY
             }
         }
     }
 
-    private fun createCredentialInformation(configuration: Configuration) = AuthCredInfo(
+    private fun createCredentialInformation(configuration: Configuration, credentials: Credentials) = AuthCredInfo(
             configuration.scheme,
             configuration.realm,
-            configuration.accountId,
+            credentials.accountId,
             0,
-            configuration.password
+            credentials.password
     )
 }

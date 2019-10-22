@@ -2,16 +2,14 @@ package com.voipgrid.vialer.voip.core
 
 data class Configuration(
         val host: SipHost,
-        val accountId: String,
-        val password: String,
-        val scheme: String,
-        val realm: String,
         val transport: Transport,
         val stun: Boolean,
         val userAgent: String,
-        val echoCancellation: Long,
-        val echoCancellationTailLength: Long,
-        val codec: Codec
+        val codec: Codec,
+        val scheme: String = "digest",
+        val realm: String = "*",
+        val echoCancellation: Long = 3,
+        val echoCancellationTailLength: Long = 75
 ) {
     enum class Transport {
         UDP, TCP, TLS

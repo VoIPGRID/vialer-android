@@ -5,12 +5,10 @@ import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.contacts.Contacts
 import com.voipgrid.vialer.voip.core.call.Call
 import com.voipgrid.vialer.voip.core.call.State
-import kotlinx.android.synthetic.main.activity_call.*
 import kotlinx.android.synthetic.main.fragment_call_active_header.*
 import org.koin.android.ext.android.inject
 
@@ -32,10 +30,10 @@ class ActiveCallHeader : VoipAwareFragment() {
 
     override fun render() {
         val voip = voip ?: return
-        val call = voip.getCurrentCall() ?: return
+        val call = voip.calls.active ?: return
 
         if (voip.isTransferring()) {
-            val callerInformation = getAppropriateCallerTitles(voip.firstCall())
+            val callerInformation = getAppropriateCallerTitles(voip.calls.original ?: return)
             original_call_container.visibility = View.VISIBLE
             if (callerInformation.subtitle.isNotBlank()) {
                 original_call_information.text = getString(R.string.call_transfer_in_progress_details, "${callerInformation.title} (${callerInformation.subtitle})")

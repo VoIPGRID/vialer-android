@@ -14,7 +14,7 @@ import org.pjsip.pjsua2.OnRegStateParam;
  * Class that reflects a sip account and handles registration.
  */
 class SipAccount extends org.pjsip.pjsua2.Account {
-    // Callback handler for the onIncomingCall and onRegState events.
+    // Callback handler for the onIncomingCallFromVoipProvider and onRegState events.
     private final AccountStatus mAccountStatus;
     private SipService mSipService;
 

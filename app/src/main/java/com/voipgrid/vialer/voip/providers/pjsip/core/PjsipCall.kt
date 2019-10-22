@@ -9,7 +9,7 @@ import com.voipgrid.vialer.voip.providers.pjsip.core.PjsipCall.MicrophoneStatus.
 import org.pjsip.pjsua2.*
 import org.pjsip.pjsua2.pjsip_inv_state.*
 
-abstract class PjsipCall : org.pjsip.pjsua2.Call, Call {
+internal abstract class PjsipCall : org.pjsip.pjsua2.Call, Call {
 
     private val listener: VoipListener
 

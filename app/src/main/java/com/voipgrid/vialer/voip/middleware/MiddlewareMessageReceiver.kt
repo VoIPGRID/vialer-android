@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.voip.middleware
 
+import android.util.Log
 import com.google.firebase.messaging.RemoteMessage
 import com.voipgrid.vialer.voip.middleware.MiddlewareMessageReceiver.Type.*
 import kotlinx.coroutines.GlobalScope
@@ -13,6 +14,7 @@ class MiddlewareMessageReceiver : VoipBoundFcm() {
     private val middleware: Middleware by inject()
 
     override fun onMessageReceived(message: RemoteMessage) {
+        Log.e("TEST123", "Middleware has received push notification")
         val messageType = valueOf(message.data["type"]?.toUpperCase(Locale.ENGLISH) ?: return)
 
         when(messageType) {

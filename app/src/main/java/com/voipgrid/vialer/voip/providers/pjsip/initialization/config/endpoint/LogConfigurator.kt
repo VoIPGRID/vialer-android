@@ -7,7 +7,7 @@ import com.voipgrid.vialer.voip.providers.pjsip.logging.PjsipLogWriter
 import org.pjsip.pjsua2.EpConfig
 import org.pjsip.pjsua2.pj_log_decoration
 
-class LogConfigurator : EndpointConfigurator {
+internal class LogConfigurator : EndpointConfigurator {
 
     override fun configure(config: Configuration, endpointConfig: EpConfig) {
         endpointConfig.logConfig.apply {

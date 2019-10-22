@@ -1,19 +1,18 @@
 package com.voipgrid.vialer.voip.providers.pjsip
 
-import android.util.Log
 import com.voipgrid.vialer.sip.SipLogWriter
 import com.voipgrid.vialer.voip.core.VoipListener
 import com.voipgrid.vialer.voip.core.Configuration
+import com.voipgrid.vialer.voip.core.Credentials
 import com.voipgrid.vialer.voip.core.VoipProvider
 import com.voipgrid.vialer.voip.core.call.Call
 import com.voipgrid.vialer.voip.providers.pjsip.core.*
 import com.voipgrid.vialer.voip.providers.pjsip.initialization.Initializer
 import com.voipgrid.vialer.voip.providers.pjsip.initialization.config.AccountConfigurator
 import com.voipgrid.vialer.voip.providers.pjsip.packets.Invite
-import kotlinx.coroutines.*
 import org.pjsip.pjsua2.*
 
-class PjsipProvider : VoipProvider {
+internal class PjsipProvider : VoipProvider {
 
     private val initializer = Initializer()
     private var endpoint: PjsipEndpoint? = null
@@ -48,10 +47,10 @@ class PjsipProvider : VoipProvider {
      * Register the account that has been provided by the configuration.
      *
      */
-    override fun register() {
+    override fun register(credentials: Credentials) {
         if (account == null || account?.info?.regIsActive == false) {
             account = Account().apply {
-                create(accountConfiguration.configure(configuration))
+                create(accountConfiguration.configure(configuration, credentials))
             }
         } else {
             listener.onRegister()
@@ -91,7 +90,7 @@ class PjsipProvider : VoipProvider {
             super.onIncomingCall(prm)
             val call = IncomingCall(this@Account, prm.callId, listener, Invite(prm.rdata.wholeMsg).findThirdParty())
             call.acknowledge()
-            listener.onIncomingCall(call)
+            listener.onIncomingCallFromVoipProvider(call)
         }
     }
 

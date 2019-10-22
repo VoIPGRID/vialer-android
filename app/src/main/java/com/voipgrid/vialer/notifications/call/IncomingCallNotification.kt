@@ -19,42 +19,14 @@ import com.voipgrid.vialer.sip.SipService
 
 class IncomingCallNotification(private val number : String, private val callerId : String) : AbstractCallNotification() {
 
-    /**
-     * We are creating a new notification channel for incoming calls because they
-     * will have a different priority to the other notifications.
-     *
-     */
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun buildChannel(context: Context): NotificationChannel {
-        val channel = NotificationChannel(
-                CHANNEL_ID,
-                context.getString(string.notification_channel_incoming_calls),
-                NotificationManager.IMPORTANCE_HIGH
-        )
-
-        channel.enableVibration(false)
-        channel.setSound(null, null)
-
-        return channel
-    }
-
-    /**
-     * Create a custom notification builder as we use a custom channel for this
-     * notification.
-     *
-     */
-    override fun createNotificationBuilder(): NotificationCompat.Builder {
-        return NotificationCompat.Builder(context, CHANNEL_ID)
-    }
 
     override fun applyUniqueNotificationProperties(builder: NotificationCompat.Builder): NotificationCompat.Builder {
-        return builder.setSmallIcon(drawable.ic_logo)
+        return builder.setSmallIcon(drawable.call_notification_icon)
                 .setContentTitle(createNotificationTitle())
                 .setContentText(number)
-                .setContentIntent(createIncomingCallActivityPendingIntent(number, callerId))
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_CALL)
-                .setFullScreenIntent(createIncomingCallActivityPendingIntent(number, callerId), true)
+                .setFullScreenIntent(createCallActivityPendingIntent(), true)
                 .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(number))
                 .addAction(
                         drawable.ic_call_decline_normal,
@@ -73,9 +45,5 @@ class IncomingCallNotification(private val number : String, private val callerId
         val display = if (callerId.isEmpty()) number else callerId
 
         return "${context.getString(string.call_incoming_expanded)} $display"
-    }
-
-    companion object {
-        const val CHANNEL_ID: String = "vialer_incoming_calls"
     }
 }

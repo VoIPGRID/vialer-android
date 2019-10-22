@@ -13,7 +13,7 @@ import org.pjsip.pjsua2.EpConfig
 import org.pjsip.pjsua2.TransportConfig
 import org.pjsip.pjsua2.pjsip_transport_type_e
 
-class Initializer {
+internal class Initializer {
 
     private val endpointConfigurators = listOf(
             MediaConfigurator(),

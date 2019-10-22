@@ -4,14 +4,9 @@ import android.app.Application
 import com.voipgrid.vialer.dagger.DaggerVialerComponent
 import com.voipgrid.vialer.dagger.VialerComponent
 import com.voipgrid.vialer.dagger.VialerModule
-import com.voipgrid.vialer.tasks.launch.ConvertApiToken
-import com.voipgrid.vialer.tasks.launch.RegisterLibraries
-import com.voipgrid.vialer.tasks.launch.RegisterPeriodicTasks
 import com.voipgrid.vialer.database.AppDatabase
 import androidx.room.Room
-import com.voipgrid.vialer.koin.voipModule
-import com.voipgrid.vialer.tasks.launch.RegisterWithMiddleware
-import org.koin.android.ext.android.getKoin
+import com.voipgrid.vialer.tasks.launch.*
 
 class VialerApplication : Application() {
 
@@ -30,7 +25,8 @@ class VialerApplication : Application() {
             RegisterLibraries(),
             ConvertApiToken(),
             RegisterPeriodicTasks(),
-            RegisterWithMiddleware()
+            RegisterWithMiddleware(),
+            ConfigureVoip()
     )
 
     override fun onCreate() {

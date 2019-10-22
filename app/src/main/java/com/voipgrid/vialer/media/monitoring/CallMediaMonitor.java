@@ -76,7 +76,7 @@ public class CallMediaMonitor implements Runnable {
             calculateMos();
 
             if (mSipCall != null) {
-                mSipCall.getSipService().getNotification().active(mSipCall);
+//                mSipCall.getSipService().getNotification().active(mSipCall);
             }
 
             reinviteIfDue();

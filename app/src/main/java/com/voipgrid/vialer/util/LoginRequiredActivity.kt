@@ -8,6 +8,7 @@ import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.logging.VialerBaseActivity
 import com.voipgrid.vialer.onboarding.OnboardingActivity
 import com.voipgrid.vialer.voip.VoipService
+import com.voipgrid.vialer.voip.android.BindableService
 import com.voipgrid.vialer.voip.core.call.State
 
 abstract class LoginRequiredActivity : VialerBaseActivity() {
@@ -41,14 +42,14 @@ abstract class LoginRequiredActivity : VialerBaseActivity() {
 
         receiver = broadcastReceiverManager.registerReceiverViaLocalBroadcastManager(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                
+
                 when (intent.action) {
-                    VoipService.ACTION_CALL_STATE_WAS_UPDATED -> voipStateWasUpdated(intent.getSerializableExtra(VoipService.CALL_STATE_EXTRA) as State.TelephonyState)
-                    VoipService.ACTION_VOIP_UPDATE -> voipUpdate()
+                    VoipService.Events.CALL_STATE_HAS_CHANGED.name -> voipStateWasUpdated(intent.getSerializableExtra(VoipService.Extras.CALL_STATE.name) as State.TelephonyState)
+                    VoipService.Events.VOIP_TIC.name -> voipUpdate()
                 }
             }
 
-        }, VoipService.ACTION_CALL_STATE_WAS_UPDATED, VoipService.ACTION_VOIP_UPDATE)
+        }, VoipService.Events.CALL_STATE_HAS_CHANGED.name, VoipService.Events.VOIP_TIC.name)
     }
 
     override fun onPause() {
@@ -68,8 +69,10 @@ abstract class LoginRequiredActivity : VialerBaseActivity() {
     protected open fun voipUpdate() {}
 
     inner class VoipServiceConnection : ServiceConnection {
+
+        @Suppress("UNCHECKED_CAST")
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            val binder = service as VoipService.LocalBinder
+            val binder = service as BindableService<VoipService>.LocalBinder
             voip = binder.getService()
             voipServiceIsAvailable()
         }

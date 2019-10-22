@@ -5,7 +5,7 @@ import com.voipgrid.vialer.voip.core.call.Call
 import org.pjsip.pjsua2.Account
 import org.pjsip.pjsua2.pjsip_status_code
 
-class IncomingCall(account: Account, callId: Int, listener: VoipListener, thirdParty: ThirdParty) : PjsipCall(account, callId, listener, thirdParty, Call.Direction.INCOMING) {
+internal class IncomingCall(account: Account, callId: Int, listener: VoipListener, thirdParty: ThirdParty) : PjsipCall(account, callId, listener, thirdParty, Call.Direction.INCOMING) {
 
     /**
      * Acknowledge the incoming call so ringing will begin.

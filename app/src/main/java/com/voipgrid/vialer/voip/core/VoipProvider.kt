@@ -2,7 +2,7 @@ package com.voipgrid.vialer.voip.core
 
 import com.voipgrid.vialer.voip.core.call.Call
 
-interface VoipProvider {
+internal interface VoipProvider {
 
     fun initialize(configuration: Configuration, listener: VoipListener)
 
@@ -10,7 +10,7 @@ interface VoipProvider {
 
     fun call(number: String): Call
 
-    fun register()
+    fun register(credentials: Credentials)
 
     fun mergeTransfer(first: Call, second: Call)
 }

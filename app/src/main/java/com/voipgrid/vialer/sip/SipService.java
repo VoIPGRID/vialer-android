@@ -372,7 +372,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
                 CallActivity.class
         );
 
-        callNotification.outgoing(sipCall);
+//        callNotification.outgoing(sipCall);
     }
 
     /**
@@ -518,7 +518,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         mLogger.i("Call has connected, it is an inbound call so stop all incoming call notifications and change the audio focus");
 
         incomingCallAlerts.stop();
-        getNotification().active(getCurrentCall());
+//        getNotification().active(getActiveCall());
         startCallActivity(
                 SipUri.sipAddressUri(this, PhoneNumberUtils.format(getCurrentCall().getPhoneNumber())),
                 CallingConstants.TYPE_INCOMING_CALL,

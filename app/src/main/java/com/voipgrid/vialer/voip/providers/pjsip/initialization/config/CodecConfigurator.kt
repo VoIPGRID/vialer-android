@@ -4,7 +4,7 @@ import android.util.Log
 import com.voipgrid.vialer.voip.core.Configuration
 import com.voipgrid.vialer.voip.providers.pjsip.core.PjsipEndpoint
 
-class CodecConfigurator {
+internal class CodecConfigurator {
 
     private val codecMappings = mapOf(
             "opus/48000" to Configuration.Codec.OPUS,

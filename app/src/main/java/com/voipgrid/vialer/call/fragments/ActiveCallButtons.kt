@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.call.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,7 +29,7 @@ class ActiveCallButtons : VoipAwareFragment() {
         }
 
         button_hangup.setOnClickListener {
-            voip?.getCurrentCall()?.hangup()
+            voip?.calls?.active?.hangup()
         }
 
         voip?.audio?.let {
@@ -42,7 +41,7 @@ class ActiveCallButtons : VoipAwareFragment() {
 
     private fun handleCallAction(button: View) {
         val voip = voip ?: return
-        val call = voip.getCurrentCall() ?: return
+        val call = voip.calls.active ?: return
 
         when (button) {
             button_dialpad -> (activity as NewCallActivity).openDialer()
@@ -70,7 +69,7 @@ class ActiveCallButtons : VoipAwareFragment() {
 
     override fun render() {
         val voip = voip ?: return
-        val call = voip.getCurrentCall()
+        val call = voip.calls.active
 
         if (call == null) {
             buttons.forEach { it.disable() }

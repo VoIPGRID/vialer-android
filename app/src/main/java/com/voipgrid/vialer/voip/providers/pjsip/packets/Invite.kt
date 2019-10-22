@@ -2,7 +2,7 @@ package com.voipgrid.vialer.voip.providers.pjsip.packets
 
 import com.voipgrid.vialer.voip.providers.pjsip.core.ThirdParty
 
-class Invite(private val data: String) {
+internal class Invite(private val data: String) {
 
     val properties = mutableMapOf<String, String>()
 

@@ -1,11 +1,9 @@
 package com.voipgrid.vialer.call.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.call.NewCallActivity
 import com.voipgrid.vialer.calling.Dialer
@@ -26,7 +24,7 @@ class Dialer : VoipAwareFragment(), Dialer.Listener {
     }
 
     override fun digitWasPressed(digit: String) {
-        voip?.getCurrentCall()?.sendDtmf(digit)
+        voip?.calls?.active?.sendDtmf(digit)
     }
 
     override fun exitButtonWasPressed() {

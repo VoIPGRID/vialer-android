@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
+import com.voipgrid.vialer.call.NewCallActivity
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration
 import com.voipgrid.vialer.calling.AbstractCallActivity
 import com.voipgrid.vialer.calling.CallingConstants
@@ -20,6 +21,7 @@ import com.voipgrid.vialer.notifications.AbstractNotification
 import com.voipgrid.vialer.sip.SipCall
 import com.voipgrid.vialer.sip.SipUri
 import com.voipgrid.vialer.util.PhoneNumberUtils
+import com.voipgrid.vialer.voip.core.call.Call
 import javax.inject.Inject
 
 
@@ -39,7 +41,7 @@ abstract class AbstractCallNotification : AbstractNotification() {
      * The small logo to display for all call notifications.
      *
      */
-    private val logo = R.drawable.call_notification_icon
+    private val logo = R.drawable.ic_phone_white
 
     @Inject protected lateinit var phoneNumberImageGenerator : PhoneNumberImageGenerator
 
@@ -55,11 +57,16 @@ abstract class AbstractCallNotification : AbstractNotification() {
      */
     @RequiresApi(Build.VERSION_CODES.O)
     override fun buildChannel(context: Context): NotificationChannel {
-        return NotificationChannel(
+        val channel = NotificationChannel(
                 CHANNEL_ID,
-                context.getString(com.voipgrid.vialer.R.string.notification_channel_calls),
-                NotificationManager.IMPORTANCE_MIN
+                context.getString(R.string.notification_channel_incoming_calls),
+                NotificationManager.IMPORTANCE_HIGH
         )
+
+        channel.enableVibration(false)
+        channel.setSound(null, null)
+
+        return channel
     }
 
     /**
@@ -76,6 +83,7 @@ abstract class AbstractCallNotification : AbstractNotification() {
      */
     private fun applyCallNotificationDefaults(builder : NotificationCompat.Builder) : NotificationCompat.Builder {
         return builder.setColor(context.resources.getColor(R.color.color_primary_dark))
+                .setContentIntent(createCallActivityPendingIntent())
                 .setColorized(true)
                 .setSmallIcon(logo)
                 .setOngoing(true)
@@ -97,27 +105,11 @@ abstract class AbstractCallNotification : AbstractNotification() {
         return NotificationCompat.Builder(context, CHANNEL_ID)
     }
 
-
-    /**
-     * Create a pending intent to open the incoming call activity screen.
-     *
-     */
-    protected fun createIncomingCallActivityPendingIntent(number: String, callerId: String): PendingIntent {
-        return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
-                context,
-                IncomingCallActivity::class.java,
-                SipUri.sipAddressUri(context, PhoneNumberUtils.format(number)),
-                CallingConstants.TYPE_INCOMING_CALL,
-                callerId,
-                number
-        ))
-    }
-
     /**
      * Create a pending intent from an intent.
      *
      */
-    protected fun createPendingIntent(intent : Intent) : PendingIntent {
+    private fun createPendingIntent(intent : Intent) : PendingIntent {
         return PendingIntent.getActivity(
                 context,
                 0,
@@ -125,6 +117,10 @@ abstract class AbstractCallNotification : AbstractNotification() {
                 PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
+
+    protected fun createCallActivityPendingIntent(): PendingIntent = createPendingIntent(Intent(context, NewCallActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    })
 
     /**
      * Transform the call notification to an incoming call notification.
@@ -138,19 +134,15 @@ abstract class AbstractCallNotification : AbstractNotification() {
      * Transform the call notification to an ongoing call notification.
      *
      */
-    fun outgoing(call : SipCall) {
+    fun outgoing(call : Call) {
         OutgoingCallDiallingNotification(call).display()
     }
 
-    /**
-     * Transform the call notification to an active call notification.
-     *
-     */
-    fun active(call : SipCall) {
+    fun active(call : Call) {
         ActiveCallNotification(call).display()
     }
 
     companion object {
-        const val CHANNEL_ID: String = "vialer_calls"
+        const val CHANNEL_ID: String = "vialer_calling"
     }
 }

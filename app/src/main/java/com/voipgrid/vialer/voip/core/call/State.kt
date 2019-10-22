@@ -6,7 +6,7 @@ class State {
     var isOnHold = false
     var isMuted = false
     var dtmfDialed = ""
-
+    var isTransferTarget = false
     var telephonyState = TelephonyState.INITIALIZING
 
     var codec: Configuration.Codec? = null

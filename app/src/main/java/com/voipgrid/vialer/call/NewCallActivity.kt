@@ -43,7 +43,7 @@ class NewCallActivity : NewAbstractCallActivity() {
     }
 
     fun openTransferSelector() {
-        voip?.getCurrentCall()?.hold()
+        voip?.calls?.active?.hold()
         swapLowerSection(LowerSection.TRANSFER)
     }
 
@@ -71,12 +71,12 @@ class NewCallActivity : NewAbstractCallActivity() {
     override fun voipServiceIsAvailable() {
         super.voipServiceIsAvailable()
 
-        voip?.getCurrentCall()?.state?.telephonyState?.let { voipStateWasUpdated(it) }
+        voip?.calls?.active?.state?.telephonyState?.let { voipStateWasUpdated(it) }
     }
 
     override fun voipStateWasUpdated(state: State.TelephonyState) {
         super.voipStateWasUpdated(state)
-
+Log.e("TEST123", "voipStateWasUpdated ${state}")
         when (state) {
             INITIALIZING -> ""
             OUTGOING_CALLING -> {
@@ -91,7 +91,7 @@ class NewCallActivity : NewAbstractCallActivity() {
                 swapUpperSection(UpperSection.CALL_DETAILS)
                 swapLowerSection(LowerSection.CALL_ACTION_BUTTONS)
             }
-            DISCONNECTED -> if (voip?.getCurrentCall() == null) {
+            DISCONNECTED -> if (voip?.calls?.active == null) {
                 Log.e("TEST123", "Finishing...")
                 finish()
             }

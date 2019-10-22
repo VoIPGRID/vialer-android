@@ -7,8 +7,9 @@ import com.voipgrid.vialer.R
 import com.voipgrid.vialer.calling.AbstractCallActivity
 import com.voipgrid.vialer.calling.CallingConstants
 import com.voipgrid.vialer.sip.SipCall
+import com.voipgrid.vialer.voip.core.call.Call
 
-class OutgoingCallDiallingNotification(private val call : SipCall) : AbstractCallNotification() {
+class OutgoingCallDiallingNotification(private val call : Call) : AbstractCallNotification() {
 
     /**
      * Build an outgoing call notification for during dialling.
@@ -16,31 +17,18 @@ class OutgoingCallDiallingNotification(private val call : SipCall) : AbstractCal
      */
     override fun applyUniqueNotificationProperties(builder: NotificationCompat.Builder): NotificationCompat.Builder {
         return builder
-                .setOngoing(true)
                 .setContentTitle(createNotificationTitle())
-                .setContentText(context.getString(R.string.callnotification_active_call))
-                .setContentIntent(createCallActivityPendingIntent())
-                .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(call.phoneNumber))
+                .setContentText(context.getString(R.string.call_state_calling))
+                .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(call.metaData.number))
     }
 
     private fun createNotificationTitle() : String {
         val dialing = context.getString(R.string.callnotification_dialing)
 
-        if (!call.callerId.isNullOrEmpty()) {
-            return "$dialing ${call.callerId} (${call.phoneNumber})"
+        if (call.metaData.callerId.isNotBlank()) {
+            return "$dialing ${call.metaData.callerId} (${call.metaData.number})"
         }
 
-        return "$dialing ${call.phoneNumber}"
-    }
-
-    private fun createCallActivityPendingIntent(): PendingIntent? {
-        return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
-                context,
-                CallActivity::class.java,
-                call.phoneNumberUri,
-                CallingConstants.TYPE_OUTGOING_CALL,
-                call.callerId,
-                call.phoneNumber
-        ))
+        return "$dialing ${call.metaData.number}"
     }
 }

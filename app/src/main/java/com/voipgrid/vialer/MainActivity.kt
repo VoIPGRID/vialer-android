@@ -12,7 +12,6 @@ import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.voip.IncomingCallHandler
 import com.voipgrid.vialer.voip.VoipService
 import com.voipgrid.vialer.voip.core.call.Call
 import kotlinx.android.synthetic.main.activity_main.*

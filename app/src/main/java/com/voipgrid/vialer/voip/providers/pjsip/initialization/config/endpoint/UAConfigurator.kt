@@ -4,7 +4,7 @@ import com.voipgrid.vialer.voip.core.Configuration
 import org.pjsip.pjsua2.EpConfig
 import org.pjsip.pjsua2.StringVector
 
-class UAConfigurator : EndpointConfigurator {
+internal class UAConfigurator : EndpointConfigurator {
 
     private val stunHosts = arrayOf("stun.l.google.com:19302")
 

@@ -16,7 +16,7 @@ class CallPushHandler(private val context: Context, private val middleware: Midd
     override fun handle(pushMessage: RemoteMessage, voip: VoipService?) {
         this.voip = voip ?: return
 
-        if (!voip.canHandleIncomingCall()) {
+        if (!voip.isAvailableToHandleIncomingCall()) {
             middleware.replyToIncomingCall(pushMessage, false)
             return
         }
@@ -26,7 +26,8 @@ class CallPushHandler(private val context: Context, private val middleware: Midd
     }
 
     private fun handleCall(pushMessage: RemoteMessage) = GlobalScope.launch(Dispatchers.Main) {
-        voip.prepareForIncomingCall {
+        voip.prepare {
+            Log.e("TEST123", "replying to call...")
             middleware.replyToIncomingCall(pushMessage, true)
         }
     }

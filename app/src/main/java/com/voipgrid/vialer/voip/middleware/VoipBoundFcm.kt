@@ -4,6 +4,7 @@ import android.content.*
 import android.os.IBinder
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.voipgrid.vialer.voip.VoipService
+import com.voipgrid.vialer.voip.android.BindableService
 
 abstract class VoipBoundFcm : FirebaseMessagingService() {
 
@@ -11,8 +12,10 @@ abstract class VoipBoundFcm : FirebaseMessagingService() {
     private var bound = false
 
     private val connection = object : ServiceConnection {
+
+        @Suppress("UNCHECKED_CAST")
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            val binder = service as VoipService.LocalBinder
+            val binder = service as? BindableService<VoipService>.LocalBinder ?: return
             voip = binder.getService()
         }
 
