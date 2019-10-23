@@ -303,6 +303,14 @@
     <string name="encrypted_calling_notification_description">Encrypted calling is not currently enabled, third parties may be able to intercept and listen to your phone calls.</string>
     <string name="call_icon">Call icon</string>
     <string name="help_icon">Help icon</string>
+
+    <string name="exclamation_mark" translatable="false">!</string>
+
+    <string name="start_call">Start call</string>
+    <string name="add_to_contacts">Add to contacts</string>
+    <string name="copy_number">Copy number</string>
+    <string name="number_copied">Number has been copied: %1$s</string>
+
     <string name="missed_call">Call missed (%1$s).</string>
     <string name="answered_elsewhere">Call (%1$s) answered elsewhere.</string>
     <string name="call_back">Call back</string>
