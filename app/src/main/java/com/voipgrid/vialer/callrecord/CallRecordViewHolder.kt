@@ -21,6 +21,7 @@ import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.PhoneAccountFetcher
 import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.callrecord.database.CallRecordEntity
+import com.voipgrid.vialer.contacts.Contacts
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.util.DialHelper
 import com.voipgrid.vialer.util.IconHelper
@@ -134,11 +135,14 @@ class CallRecordViewHolder(private val view: View) : RecyclerView.ViewHolder(vie
     override fun onClick(view: View) {
         val popup = PopupMenu(activity, view.call_button)
         popup.menuInflater.inflate(R.menu.menu_recent_call, popup.menu)
+        if (Contacts().getContactByPhoneNumber(callRecord.thirdPartyNumber) != null) {
+            popup.menu.removeItem(R.id.add_to_contacts)
+        }
         popup.setOnMenuItemClickListener { item ->
-            when (item.title) {
-                activity.getString(R.string.start_call) -> startCall()
-                activity.getString(R.string.add_to_contacts) -> addToContacts()
-                activity.getString(R.string.copy_number) -> copyNumber()
+            when (item.itemId) {
+                R.id.start_call -> startCall()
+                R.id.add_to_contacts -> addToContacts()
+                R.id.copy_number -> copyNumber()
             }
             true
         }
@@ -146,7 +150,7 @@ class CallRecordViewHolder(private val view: View) : RecyclerView.ViewHolder(vie
     }
 
     private fun startCall() {
-        if (callRecord.thirdPartyNumber != null && !callAlreadySetup) {
+        if (!callAlreadySetup) {
             callAlreadySetup = true
             DialHelper.fromActivity(activity).callNumber(callRecord.thirdPartyNumber, "")
             PreferenceManager.getDefaultSharedPreferences(activity).edit().putString(
