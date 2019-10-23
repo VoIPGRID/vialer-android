@@ -16,12 +16,15 @@ class ContactManager(private val account: Account, private val contentResolver: 
 
     val vialerContacts: List<RawContact>
         get() {
-            return readRawContacts(getRawContactsUri(false))
+            val builder = RawContacts.CONTENT_URI.buildUpon()
+            builder.appendQueryParameter(RawContacts.ACCOUNT_NAME, account.name)
+            builder.appendQueryParameter(RawContacts.ACCOUNT_TYPE, account.type)
+            return readRawContacts(builder.build())
         }
 
     val rawContacts: List<RawContact>
         get() {
-            return readRawContacts(RawContacts.CONTENT_URI)
+            return readRawContacts(Contacts.CONTENT_URI)
         }
 
     public fun getRawContactsUri(synced: Boolean): Uri {
@@ -114,7 +117,7 @@ class ContactManager(private val account: Account, private val contentResolver: 
         }
     }
 
-    private fun insertVialerCallSupport(id: Long, number: String, context: Context) {
+    public fun insertVialerCallSupport(id: Long, number: String, context: Context) {
         val contentValues = ContentValues(5)
         contentValues.put(Data.RAW_CONTACT_ID, id)
         contentValues.put(Data.MIMETYPE, context.getString(R.string.call_mime_type))
@@ -122,6 +125,16 @@ class ContactManager(private val account: Account, private val contentResolver: 
         contentValues.put(Data.DATA2, context.getString(R.string.app_name))
         contentValues.put(Data.DATA3, context.getString(R.string.call_with, number))
         contentResolver.insert(Data.CONTENT_URI, contentValues)
+    }
+
+    public fun deleteVialerCallSupport(id: Long, number: String, context: Context) {
+        val where = java.lang.StringBuilder()
+        where.append(Data.RAW_CONTACT_ID).append(" = ").append(id)
+        where.append(" AND ")
+        where.append(Data.MIMETYPE).append(" = '").append(context.getString(R.string.call_mime_type)).append("'")
+        where.append(" AND ")
+        where.append(Data.DATA1).append(" = '").append(number).append("'")
+        contentResolver.delete(Data.CONTENT_URI, where.toString(), null)
     }
 
     private fun insertIMField(id: Long, title: String, content: String) {
@@ -134,6 +147,26 @@ class ContactManager(private val account: Account, private val contentResolver: 
         contentValues.put(Im.CUSTOM_PROTOCOL, title)
         contentValues.put(Im.DATA, content)
         contentResolver.insert(Data.CONTENT_URI, contentValues)
+    }
+
+    public fun hasVialerCallSupport(context: Context, number: String): Boolean {
+        val selection = Data.MIMETYPE + " = ? AND " + Data.DATA1 + " = ?"
+        val c = contentResolver.query(Data.CONTENT_URI, null, selection, arrayOf(context.getString(R.string.call_mime_type), number), null) ?: return false
+        if (c.count == 0) {
+            return false
+        }
+        return true
+    }
+
+    public fun getVialerCallSupportNumbers(rawContactId: Long, context: Context): List<String> {
+        val list = ArrayList<String>()
+        val selection = Data.MIMETYPE + " = ? AND " + Data.RAW_CONTACT_ID + " = ?"
+        val c = contentResolver.query(Data.CONTENT_URI, null, selection, arrayOf(context.getString(R.string.call_mime_type), rawContactId.toString()), null) ?: return list
+        while(c.moveToNext()) {
+            val number = c.getString(c.getColumnIndex(Data.DATA1))
+            list.add(number)
+        }
+        return list
     }
 
     private fun deleteRawContact(rawContactId: Long) {
@@ -160,10 +193,13 @@ class ContactManager(private val account: Account, private val contentResolver: 
     private fun readRawContacts(contentUri: Uri): List<RawContact> {
         val contacts = ArrayList<RawContact>()
         val cursor = contentResolver.query(contentUri, null, null, null, null) ?: return contacts
-        //read raw contact data
+        //read contact data
         while (cursor.moveToNext()) {
-            val rawContact = RawContact(cursor.getLong(cursor.getColumnIndex(RawContacts._ID)))
-            rawContact.readRawContactData(cursor)
+            val default = contentUri == Contacts.CONTENT_URI
+            val column = if (default) Contacts.NAME_RAW_CONTACT_ID else RawContacts._ID
+            val rawContactId = cursor.getLong(cursor.getColumnIndex(column))
+            val rawContact = RawContact(rawContactId)
+            rawContact.readRawContactData(cursor, default)
             contacts.add(rawContact)
         }
         cursor.close()
@@ -182,8 +218,8 @@ class ContactManager(private val account: Account, private val contentResolver: 
         val where = builder.append(")").toString()
         //read phone data
         readDataChunk(Phone.CONTENT_URI, where, contacts, RawContact::readPhoneData)
-        //read general data
-        readDataChunk(Data.CONTENT_URI, where + " AND " + Data.MIMETYPE + " = '" + StructuredName.CONTENT_ITEM_TYPE + "'", contacts, RawContact::readGeneralData)
+        //read name data
+        readDataChunk(Data.CONTENT_URI, where + " AND " + Data.MIMETYPE + " = '" + StructuredName.CONTENT_ITEM_TYPE + "'", contacts, RawContact::readNameData)
         return contacts
     }
 

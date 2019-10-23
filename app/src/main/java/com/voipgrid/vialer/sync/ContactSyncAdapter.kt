@@ -9,7 +9,6 @@ import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.callrecord.database.CallRecordDao
 import javax.inject.Inject
-import android.content.ContentResolver
 
 class ContactSyncAdapter : AbstractThreadedSyncAdapter {
 
@@ -37,7 +36,7 @@ class ContactSyncAdapter : AbstractThreadedSyncAdapter {
     }
 
     override fun onPerformSync(account: Account, extras: Bundle, authority: String, provider: ContentProviderClient, syncResult: SyncResult) {
-        if (account.name != context.getString(R.string.account_name)) {
+        if (account.type != context.getString(R.string.account_type)) {
             return
         }
         val contactManager = ContactManager(account, contentResolver)
@@ -50,26 +49,36 @@ class ContactSyncAdapter : AbstractThreadedSyncAdapter {
         val list = ArrayList<String>()
         //the real syncing part
         for (contact in localContacts) {
-            val number = contact.mobileNumber
-            if (number == null || number.isEmpty() || list.contains(number) || !uniqueNumbers.contains(number)) {
-                continue
+            for(number in contact.phoneNumbers) {
+                if (number == null || number.isEmpty() || list.contains(number) || !uniqueNumbers.contains(number)) {
+                    continue
+                }
+                list.add(number)
+                val existingVialerContact: RawContact? = vialerContacts.find {
+                    it.contactId == contact.contactId
+                }
+                if (existingVialerContact == null) {
+                    val rawContactId = contactManager.addContact(context, contact.firstName
+                            ?: "", contact.lastName ?: "", contact.displayName ?: "", number)
+                    contactManager.mergeContact(contact.rawContactId, rawContactId)
+                } else if (!contactManager.hasVialerCallSupport(context, number)) {
+                    contactManager.insertVialerCallSupport(existingVialerContact.rawContactId, number, context)
+                }
             }
-            val existingVialerContact: RawContact? = vialerContacts.find {
-                it.contactId == contact.contactId
-            }
-            if (existingVialerContact == null) {
-                val rawContactId = contactManager.addContact(context, contact.firstName
-                        ?: "", contact.lastName ?: "", contact.displayName ?: "", number)
-                contactManager.mergeContact(contact.rawContactId, rawContactId)
-            }
-            list.add(number)
         }
         for (vialerContact in vialerContacts) {
-            //this 'find' may take a bit long if you have a lot of contacts (like ~250)
+            //this 'find' may take a bit long (~3 sec) if you have a lot of contacts (like ~250)
             val existingLocalContact: RawContact? = localContacts.find {
                 it.contactId == vialerContact.contactId
             }
-            if (existingLocalContact?.mobileNumber != null) {
+            val vialerNumbers = contactManager.getVialerCallSupportNumbers(vialerContact.rawContactId, context)
+            for(number in vialerNumbers) {
+                if (vialerContact.phoneNumbers.contains(number)) {
+                    continue
+                }
+                contactManager.deleteVialerCallSupport(vialerContact.rawContactId, number, context)
+            }
+            if (vialerContact.phoneNumbers.isNotEmpty() && existingLocalContact?.phoneNumbers?.isNotEmpty() ?: continue) {
                 continue
             }
             contactManager.deleteVialerContact(context, vialerContact.rawContactId, vialerContact.contactId
