@@ -196,7 +196,9 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         }
         else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
             if (getCurrentCall() != null) {
-                startCallActivityForCurrentCall();
+                if (getCurrentCall().isConnected()) {
+                    startCallActivityForCurrentCall();
+                }
             } else {
                 stopSelf();
             }
