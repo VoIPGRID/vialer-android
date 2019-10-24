@@ -7,8 +7,8 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.call.fragments.*
-import com.voipgrid.vialer.voip.core.call.State
-import com.voipgrid.vialer.voip.core.call.State.TelephonyState.*
+import nl.voipgrid.vialer_voip.core.call.State
+import nl.voipgrid.vialer_voip.core.call.State.TelephonyState.*
 import kotlinx.android.synthetic.main.activity_call_new.*
 
 class NewCallActivity : NewAbstractCallActivity() {

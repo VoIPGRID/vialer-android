@@ -4,7 +4,7 @@ import android.content.Context
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.voip.middleware.Middleware
+import nl.voipgrid.vialer_voip.middleware.Middleware
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

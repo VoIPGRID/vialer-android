@@ -178,7 +178,6 @@ dependencies {
 
     // Modules.
     implementation files('libs/logentries-android.jar')
-    implementation(name: 'pjsip', ext: 'aar')
 
     implementation "androidx.appcompat:appcompat:${supportLibVersion}"
     implementation 'com.google.android.material:material:1.1.0-alpha10'
@@ -268,6 +267,8 @@ dependencies {
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 
     implementation 'org.koin:koin-android:2.0.0-rc-1'
+
+    implementation project(':vialer-voip')
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

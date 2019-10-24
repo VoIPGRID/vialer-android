@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.dialer
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -17,12 +16,10 @@ import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.calling.Dialer
 import com.voipgrid.vialer.t9.T9Fragment
 
-import javax.inject.Inject
-
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.voipgrid.vialer.util.*
-import com.voipgrid.vialer.voip.VoipService
+import nl.voipgrid.vialer_voip.VoipService
 import kotlinx.android.synthetic.main.activity_dialer.*
 import kotlinx.android.synthetic.main.view_dialer.*
 import kotlinx.coroutines.Dispatchers

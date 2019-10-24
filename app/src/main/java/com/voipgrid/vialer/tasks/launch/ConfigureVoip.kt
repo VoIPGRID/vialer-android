@@ -1,23 +1,19 @@
 package com.voipgrid.vialer.tasks.launch
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.call.NewCallActivity
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts
 import com.voipgrid.vialer.util.BroadcastReceiverManager
-import com.voipgrid.vialer.voip.VoipService
-import com.voipgrid.vialer.voip.VoipService.Events.*
-import com.voipgrid.vialer.voip.android.VoipEventReceiver
-import com.voipgrid.vialer.voip.core.Configuration
-import com.voipgrid.vialer.voip.core.Credentials
-import com.voipgrid.vialer.voip.core.SipHost
-import com.voipgrid.vialer.voip.core.call.Call
-import com.voipgrid.vialer.voip.core.call.State
+import nl.voipgrid.vialer_voip.Voip
+import nl.voipgrid.vialer_voip.android.Events
+import nl.voipgrid.vialer_voip.android.VoipEventReceiver
+import nl.voipgrid.vialer_voip.core.Configuration
+import nl.voipgrid.vialer_voip.core.Credentials
+import nl.voipgrid.vialer_voip.core.SipHost
 import org.koin.core.KoinComponent
 import org.koin.core.get
 import org.koin.core.inject
@@ -25,16 +21,20 @@ import org.koin.core.inject
 class ConfigureVoip : OnLaunchTask, KoinComponent {
 
     override fun execute(application: VialerApplication) {
-        get<BroadcastReceiverManager>().registerReceiverViaLocalBroadcastManager(globalVoipEventHandler, OUTGOING_CALL_HAS_BEEN_SETUP.name, INCOMING_CALL_IS_RINGING.name, CALL_STATE_HAS_CHANGED.name)
+        get<BroadcastReceiverManager>().registerReceiverViaLocalBroadcastManager(globalVoipEventHandler, Events.OUTGOING_CALL_HAS_BEEN_SETUP.name, Events.INCOMING_CALL_IS_RINGING.name, Events.CALL_STATE_HAS_CHANGED.name)
 
-        VoipService.credentials = {
+        Voip.notification = {
+
+        }
+
+        Voip.credentials = {
             Credentials(
                     accountId = User.voipAccount?.accountId ?: "",
                     password = User.voipAccount?.password ?: ""
             )
         }
 
-        VoipService.configuration = {
+        Voip.configuration = {
             Configuration(
                     host = SipHost(application.getString(if (User.voip.hasTlsEnabled) R.string.sip_host_secure else R.string.sip_host)),
                     scheme = application.getString(R.string.sip_auth_scheme),

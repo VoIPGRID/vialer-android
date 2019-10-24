@@ -7,9 +7,9 @@ import com.voipgrid.vialer.User
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.logging.VialerBaseActivity
 import com.voipgrid.vialer.onboarding.OnboardingActivity
-import com.voipgrid.vialer.voip.VoipService
-import com.voipgrid.vialer.voip.android.BindableService
-import com.voipgrid.vialer.voip.core.call.State
+import nl.voipgrid.vialer_voip.VoipService
+import nl.voipgrid.vialer_voip.android.BindableService
+import nl.voipgrid.vialer_voip.core.call.State
 
 abstract class LoginRequiredActivity : VialerBaseActivity() {
 

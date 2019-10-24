@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.voipgrid.vialer.onboarding.Onboarder
 import com.voipgrid.vialer.util.ConnectivityHelper
-import com.voipgrid.vialer.voip.middleware.Middleware
+import nl.voipgrid.vialer_voip.middleware.Middleware
 
 class Logout(private val context: Context, private val sharedPreferences: SharedPreferences, private val connectivityHelper: ConnectivityHelper, private val middleware: Middleware) {
 

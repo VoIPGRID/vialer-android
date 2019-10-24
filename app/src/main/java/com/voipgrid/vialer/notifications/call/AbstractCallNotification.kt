@@ -12,16 +12,9 @@ import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.call.NewCallActivity
-import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration
-import com.voipgrid.vialer.calling.AbstractCallActivity
-import com.voipgrid.vialer.calling.CallingConstants
-import com.voipgrid.vialer.calling.IncomingCallActivity
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator
 import com.voipgrid.vialer.notifications.AbstractNotification
-import com.voipgrid.vialer.sip.SipCall
-import com.voipgrid.vialer.sip.SipUri
-import com.voipgrid.vialer.util.PhoneNumberUtils
-import com.voipgrid.vialer.voip.core.call.Call
+import nl.voipgrid.vialer_voip.core.call.Call
 import javax.inject.Inject
 
 

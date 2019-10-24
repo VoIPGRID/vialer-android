@@ -6,7 +6,7 @@ import android.content.Intent;
 
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.voip.middleware.Middleware;
+import nl.voipgrid.vialer_voip.middleware.Middleware;
 
 import javax.inject.Inject;
 

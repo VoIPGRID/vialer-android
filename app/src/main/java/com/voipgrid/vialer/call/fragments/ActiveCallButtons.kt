@@ -9,7 +9,7 @@ import com.voipgrid.vialer.audio.Routes
 import com.voipgrid.vialer.call.AudioSourceButton
 import com.voipgrid.vialer.call.CallActionButton
 import com.voipgrid.vialer.call.NewCallActivity
-import com.voipgrid.vialer.voip.core.call.State
+import nl.voipgrid.vialer_voip.core.call.State
 import kotlinx.android.synthetic.main.fragment_call_active_buttons.*
 
 class ActiveCallButtons : VoipAwareFragment() {

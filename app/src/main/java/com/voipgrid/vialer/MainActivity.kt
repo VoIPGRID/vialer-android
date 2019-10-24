@@ -2,7 +2,6 @@ package com.voipgrid.vialer
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.tabs.TabLayout
@@ -12,14 +11,10 @@ import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.voip.VoipService
-import com.voipgrid.vialer.voip.core.call.Call
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.koin.android.ext.android.inject
 import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {

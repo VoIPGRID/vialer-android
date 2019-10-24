@@ -3,7 +3,6 @@ package com.voipgrid.vialer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -42,7 +41,7 @@ import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.voip.middleware.Middleware;
+import nl.voipgrid.vialer_voip.middleware.Middleware;
 
 import java.util.List;
 

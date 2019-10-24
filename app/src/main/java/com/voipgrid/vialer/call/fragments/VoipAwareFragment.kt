@@ -8,12 +8,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.voipgrid.vialer.CallActivity
-import com.voipgrid.vialer.call.NewAbstractCallActivity
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.LoginRequiredActivity
-import com.voipgrid.vialer.voip.VoipService
-import com.voipgrid.vialer.voip.core.call.State
+import nl.voipgrid.vialer_voip.VoipService
+import nl.voipgrid.vialer_voip.core.call.State
 import org.koin.android.ext.android.inject
 
 abstract class VoipAwareFragment : Fragment() {

@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.InputType;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -43,7 +42,7 @@ import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
-import com.voipgrid.vialer.voip.middleware.Middleware;
+import nl.voipgrid.vialer_voip.middleware.Middleware;
 
 import javax.inject.Inject;
 

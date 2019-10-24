@@ -7,7 +7,7 @@ import com.github.tamir7.contacts.Contacts
 import com.google.gson.GsonBuilder
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.koin.vialerModule
-import com.voipgrid.vialer.voip.voipModule
+import nl.voipgrid.vialer_voip.voipModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin

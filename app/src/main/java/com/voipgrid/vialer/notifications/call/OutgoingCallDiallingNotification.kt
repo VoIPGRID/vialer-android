@@ -1,13 +1,8 @@
 package com.voipgrid.vialer.notifications.call
 
-import android.app.PendingIntent
 import androidx.core.app.NotificationCompat
-import com.voipgrid.vialer.CallActivity
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.calling.AbstractCallActivity
-import com.voipgrid.vialer.calling.CallingConstants
-import com.voipgrid.vialer.sip.SipCall
-import com.voipgrid.vialer.voip.core.call.Call
+import nl.voipgrid.vialer_voip.core.call.Call
 
 class OutgoingCallDiallingNotification(private val call : Call) : AbstractCallNotification() {
 
