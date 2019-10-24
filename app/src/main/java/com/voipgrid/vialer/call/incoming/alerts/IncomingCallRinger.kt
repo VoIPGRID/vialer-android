@@ -79,9 +79,8 @@ class IncomingCallRinger(private val context : Context, private val focus: Audio
      */
     override fun stop() {
         try {
-            logger.i("Stopping ringer")
-
             player?.apply {
+                logger.i("Stopping ringer")
                 stop()
                 release()
             }

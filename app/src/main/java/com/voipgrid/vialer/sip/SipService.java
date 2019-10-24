@@ -573,13 +573,18 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     public void onTic() {
         if (getCurrentCall() == null) return;
 
-        if (incomingAlertsMuted) return;
+        if (incomingAlertsMuted) {
+            incomingCallAlerts.stop();
+            return;
+        }
 
         SipCall call = getCurrentCall();
 
         if (SipConstants.CALL_INCOMING_RINGING.equals(call.getCurrentCallState())) {
             callNotification.incoming(call.getPhoneNumber(), call.getCallerId());
             incomingCallAlerts.start();
+        } else {
+            incomingCallAlerts.stop();
         }
     }
 
