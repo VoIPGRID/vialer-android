@@ -10,11 +10,9 @@ import com.voipgrid.vialer.User
 import com.voipgrid.vialer.audio.AudioFocus
 import com.voipgrid.vialer.logging.Logger
 
-class IncomingCallRinger(private val context : Context, private val focus: AudioFocus) : IncomingCallAlert {
+class IncomingCallRinger(private val context : Context, private val focus: AudioFocus) : IncomingCallAlert, MediaPlayer.OnPreparedListener {
 
     private var logger = Logger(this)
-
-
 
     private val manager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
@@ -38,10 +36,17 @@ class IncomingCallRinger(private val context : Context, private val focus: Audio
         logger.i("Starting ringer")
 
         player?.findRingtone()?.apply {
+            setOnPreparedListener(this@IncomingCallRinger)
             setAudioStreamType(AudioManager.STREAM_RING)
             isLooping = true
-            prepare()
-            start()
+            prepareAsync()
+        }
+    }
+
+    override fun onPrepared(mp: MediaPlayer) {
+        try {
+            mp.start()
+        } catch (e: IllegalStateException) {
         }
     }
 
