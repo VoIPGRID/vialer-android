@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.BuildConfig;
@@ -34,7 +35,9 @@ import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
+import com.voipgrid.vialer.notifications.call.ActiveCallNotification;
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
+import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -84,6 +87,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     private final IBinder mBinder = new SipServiceBinder();
     private CheckServiceIsRunning mCheckService = new CheckServiceIsRunning();
     private AbstractCallNotification callNotification = new DefaultCallNotification();
+    private AbstractCallNotification activeNotification;
     private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
     private SipServiceTic tic = new SipServiceTic(this);
@@ -117,7 +121,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
         mCheckService.start();
-        startForeground(callNotification.getNotificationId(), callNotification.build());
+        changeNotification(callNotification);
         tic.begin();
     }
 
@@ -374,7 +378,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
                 CallActivity.class
         );
 
-        callNotification.outgoing(sipCall);
+        changeNotification(callNotification.outgoing(sipCall));
     }
 
     /**
@@ -383,20 +387,32 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      * @param callerId
      */
     public void informUserAboutIncomingCall(String number, String callerId) {
+        changeNotification(callNotification.incoming(number, callerId));
         incomingCallAlerts.start();
+    }
 
-        callNotification.incoming(
-                number,
-                callerId
-        );
+    /**
+     * Updates the notification and sets the active notification appropriately. All notification changes should be published
+     * via this method.
+     *
+     * @param notification
+     */
+    public void changeNotification(final AbstractCallNotification notification) {
+        if (!notification.getClass().equals(activeNotification != null ? activeNotification.getClass() : null) || notification.getClass().equals(ActiveCallNotification.class)) {
+            activeNotification = notification;
+            startForeground(notification.getNotificationId(), notification.build());
 
-        startCallActivity(
-                SipUri.sipAddressUri(this, PhoneNumberUtils.format(number)),
-                CallingConstants.TYPE_INCOMING_CALL,
-                callerId,
-                number,
-                IncomingCallActivity.class
-        );
+            if (notification.getClass().equals(IncomingCallNotification.class)) {
+                IncomingCallNotification incomingCallNotification = (IncomingCallNotification) notification;
+                try {
+                    if (VialerApplication.get().isApplicationVisible()) {
+                        incomingCallNotification.build().fullScreenIntent.send();
+                    }
+                } catch (PendingIntent.CanceledException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public void startCallActivity(Uri sipAddressUri, @CallingConstants.CallTypes String type, String callerId, String number, Class activity) {
@@ -520,7 +536,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         mLogger.i("Call has connected, it is an inbound call so stop all incoming call notifications and change the audio focus");
 
         incomingCallAlerts.stop();
-        getNotification().active(getCurrentCall());
+        changeNotification(callNotification.active(getCurrentCall()));
         startCallActivity(
                 SipUri.sipAddressUri(this, PhoneNumberUtils.format(getCurrentCall().getPhoneNumber())),
                 CallingConstants.TYPE_INCOMING_CALL,
@@ -594,7 +610,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         }
 
         if (SipConstants.CALL_INCOMING_RINGING.equals(call.getCurrentCallState())) {
-            callNotification.incoming(call.getPhoneNumber(), call.getCallerId());
+            changeNotification(callNotification.incoming(call.getPhoneNumber(), call.getCallerId()));
             incomingCallAlerts.start();
         } else {
             incomingCallAlerts.stop();

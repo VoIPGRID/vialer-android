@@ -19,6 +19,8 @@ import com.voipgrid.vialer.sip.SipService
 
 class IncomingCallNotification(private val number : String, private val callerId : String) : AbstractCallNotification() {
 
+    override val notificationId = 333
+
     /**
      * We are creating a new notification channel for incoming calls because they
      * will have a different priority to the other notifications.
@@ -34,7 +36,7 @@ class IncomingCallNotification(private val number : String, private val callerId
 
         channel.enableVibration(false)
         channel.setSound(null, null)
-
+        channel.lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
         return channel
     }
 
