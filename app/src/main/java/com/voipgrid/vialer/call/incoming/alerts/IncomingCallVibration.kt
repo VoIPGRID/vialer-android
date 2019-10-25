@@ -12,7 +12,7 @@ class IncomingCallVibration(private val audioManager: AudioManager, private val 
     private var isVibrating = false
 
     override fun start() {
-        if (audioManager.ringerMode == AudioManager.RINGER_MODE_SILENT) return
+        if (audioManager.ringerMode != AudioManager.RINGER_MODE_VIBRATE) return
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0))

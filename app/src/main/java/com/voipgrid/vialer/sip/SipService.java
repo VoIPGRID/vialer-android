@@ -398,19 +398,45 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      * @param notification
      */
     public void changeNotification(final AbstractCallNotification notification) {
-        if (!notification.getClass().equals(activeNotification != null ? activeNotification.getClass() : null) || notification.getClass().equals(ActiveCallNotification.class)) {
+        if (shouldUpdateNotification(notification)) {
             activeNotification = notification;
             startForeground(notification.getNotificationId(), notification.build());
+            launchIncomingCallActivityWhenAppIsVisible(notification);
+        }
+    }
 
-            if (notification.getClass().equals(IncomingCallNotification.class)) {
-                IncomingCallNotification incomingCallNotification = (IncomingCallNotification) notification;
-                try {
-                    if (VialerApplication.get().isApplicationVisible()) {
-                        incomingCallNotification.build().fullScreenIntent.send();
-                    }
-                } catch (PendingIntent.CanceledException e) {
-                    e.printStackTrace();
+    /**
+     * Check if the notification should be updated.
+     *
+     * @param notification
+     * @return
+     */
+    private boolean shouldUpdateNotification(AbstractCallNotification notification) {
+        if (activeNotification == null) return true;
+
+        if (!activeNotification.getClass().equals(notification.getClass())) return true;
+
+        if (notification.getClass().equals(ActiveCallNotification.class)) {
+            notification.display();
+        }
+
+        return false;
+    }
+
+    /**
+     * If the app is visible, launch the full screen intent from the activity.
+     *
+     * @param notification
+     */
+    private void launchIncomingCallActivityWhenAppIsVisible(AbstractCallNotification notification) {
+        if (notification.getClass().equals(IncomingCallNotification.class)) {
+            IncomingCallNotification incomingCallNotification = (IncomingCallNotification) notification;
+            try {
+                if (VialerApplication.get().isApplicationVisible()) {
+                    incomingCallNotification.build().fullScreenIntent.send();
                 }
+            } catch (PendingIntent.CanceledException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -465,6 +491,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     }
 
     private void startCallActivityForCurrentCall() {
+        Log.e("TEST123", "startCallActivity ====", new Exception());
         if (getCurrentCall() == null) {
             getLogger().e("Unable to start call activity for current call as there is no current call");
             return;
@@ -535,8 +562,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
 
         mLogger.i("Call has connected, it is an inbound call so stop all incoming call notifications and change the audio focus");
 
-        incomingCallAlerts.stop();
-        changeNotification(callNotification.active(getCurrentCall()));
         startCallActivity(
                 SipUri.sipAddressUri(this, PhoneNumberUtils.format(getCurrentCall().getPhoneNumber())),
                 CallingConstants.TYPE_INCOMING_CALL,
@@ -544,6 +569,9 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
                 getCurrentCall().getPhoneNumber(),
                 CallActivity.class
         );
+
+        incomingCallAlerts.stop();
+        changeNotification(callNotification.active(getCurrentCall()));
         audioRouter.focus();
     }
 
@@ -610,8 +638,10 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         }
 
         if (SipConstants.CALL_INCOMING_RINGING.equals(call.getCurrentCallState())) {
-            changeNotification(callNotification.incoming(call.getPhoneNumber(), call.getCallerId()));
-            incomingCallAlerts.start();
+            if (call.getPhoneNumber() != null && !call.getPhoneNumber().isEmpty()) {
+                changeNotification(callNotification.incoming(call.getPhoneNumber(), call.getCallerId()));
+                incomingCallAlerts.start();
+            }
         } else {
             incomingCallAlerts.stop();
         }

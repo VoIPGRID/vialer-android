@@ -6,7 +6,6 @@ import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.net.Uri
 import android.provider.Settings
-import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.audio.AudioFocus
 import com.voipgrid.vialer.logging.Logger
@@ -15,7 +14,7 @@ class IncomingCallRinger(private val context : Context, private val focus: Audio
 
     private var logger = Logger(this)
 
-    private var player: MediaPlayer? = null
+
 
     private val manager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
@@ -30,13 +29,15 @@ class IncomingCallRinger(private val context : Context, private val focus: Audio
      *
      */
     override fun start() {
-        if (manager.ringerMode != AudioManager.RINGER_MODE_NORMAL) return
+        if (manager.ringerMode != AudioManager.RINGER_MODE_NORMAL || player != null) return
+
+        player = MediaPlayer()
 
         focus.forRinger()
 
         logger.i("Starting ringer")
 
-        player = MediaPlayer().findRingtone()?.apply {
+        player?.findRingtone()?.apply {
             setAudioStreamType(AudioManager.STREAM_RING)
             isLooping = true
             prepare()
@@ -92,5 +93,9 @@ class IncomingCallRinger(private val context : Context, private val focus: Audio
 
     override fun isStarted(): Boolean {
         return player?.isPlaying ?: false
+    }
+
+    companion object {
+        private var player: MediaPlayer? = null
     }
 }
