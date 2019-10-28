@@ -87,7 +87,7 @@
         </activity>
 
         <service
-            android:name="nl.voipgrid.vialer_voip.middleware.MiddlewareMessageReceiver">
+            android:name="com.voipgrid.vialer.middleware.MiddlewareMessageReceiver">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>

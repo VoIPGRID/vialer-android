@@ -53,7 +53,7 @@ import com.voipgrid.vialer.util.ColorHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.HtmlHelper;
 import com.voipgrid.vialer.util.NetworkUtil;
-import nl.voipgrid.vialer_voip.middleware.Middleware;
+import com.voipgrid.vialer.middleware.Middleware;
 
 import javax.inject.Singleton;
 

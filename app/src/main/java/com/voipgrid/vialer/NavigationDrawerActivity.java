@@ -41,7 +41,7 @@ import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import nl.voipgrid.vialer_voip.middleware.Middleware;
+import com.voipgrid.vialer.middleware.Middleware;
 
 import java.util.List;
 

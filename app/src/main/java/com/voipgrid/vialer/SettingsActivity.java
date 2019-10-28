@@ -42,7 +42,7 @@ import com.voipgrid.vialer.util.ClipboardHelper;
 import com.voipgrid.vialer.util.DialogHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
-import nl.voipgrid.vialer_voip.middleware.Middleware;
+import com.voipgrid.vialer.middleware.Middleware;
 
 import javax.inject.Inject;
 

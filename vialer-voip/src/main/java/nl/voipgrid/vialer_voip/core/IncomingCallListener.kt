@@ -9,7 +9,7 @@ interface VoipListener {
      * The provider is notifying of an incoming voip call.
      *
      */
-    fun onIncomingCallFromVoipProvider(call: Call)
+    fun onIncomingCallFromVoipDriver(call: Call)
 
     /**
      * The state of this call has changed.

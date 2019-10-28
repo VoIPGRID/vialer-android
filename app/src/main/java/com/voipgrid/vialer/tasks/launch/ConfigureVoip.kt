@@ -9,8 +9,8 @@ import com.voipgrid.vialer.call.NewCallActivity
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import nl.voipgrid.vialer_voip.Voip
-import nl.voipgrid.vialer_voip.android.Events
-import nl.voipgrid.vialer_voip.android.VoipEventReceiver
+import nl.voipgrid.vialer_voip.core.eventing.Event
+import nl.voipgrid.vialer_voip.android.eventing.AndroidEventReceiver
 import nl.voipgrid.vialer_voip.core.Configuration
 import nl.voipgrid.vialer_voip.core.Credentials
 import nl.voipgrid.vialer_voip.core.SipHost
@@ -21,11 +21,9 @@ import org.koin.core.inject
 class ConfigureVoip : OnLaunchTask, KoinComponent {
 
     override fun execute(application: VialerApplication) {
-        get<BroadcastReceiverManager>().registerReceiverViaLocalBroadcastManager(globalVoipEventHandler, Events.OUTGOING_CALL_HAS_BEEN_SETUP.name, Events.INCOMING_CALL_IS_RINGING.name, Events.CALL_STATE_HAS_CHANGED.name)
+        get<BroadcastReceiverManager>().registerReceiverViaLocalBroadcastManager(globalVoipEventHandler, Event.OUTGOING_CALL_HAS_BEEN_SETUP.name, Event.INCOMING_CALL_IS_RINGING.name, Event.CALL_STATE_HAS_CHANGED.name)
 
-        Voip.notification = {
 
-        }
 
         Voip.credentials = {
             Credentials(
@@ -51,7 +49,7 @@ class ConfigureVoip : OnLaunchTask, KoinComponent {
         private val globalVoipEventHandler: GlobalVoipEventHandler by lazy { GlobalVoipEventHandler() }
     }
 
-    private class GlobalVoipEventHandler : VoipEventReceiver(), KoinComponent {
+    private class GlobalVoipEventHandler : AndroidEventReceiver(), KoinComponent {
 
         private val incomingCallAlerts: IncomingCallAlerts by inject()
         private val context: Context by inject()

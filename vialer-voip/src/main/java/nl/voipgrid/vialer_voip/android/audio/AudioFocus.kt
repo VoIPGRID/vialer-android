@@ -1,7 +1,6 @@
 package nl.voipgrid.vialer_voip.android.audio
 
 import android.media.AudioManager
-import com.voipgrid.vialer.logging.Logger
 
 /**
  * The class is completely responsible for controlling audio focus, all audio focus
@@ -10,7 +9,7 @@ import com.voipgrid.vialer.logging.Logger
  */
 class AudioFocus(private val manager: AudioManager) {
 
-    private val logger = Logger(this)
+//    private val logger = Logger(this)
     private val handler = AudioFocusHandler()
 
     /**
@@ -18,7 +17,7 @@ class AudioFocus(private val manager: AudioManager) {
      *
      */
     fun forRinger() {
-        logger.i("Setting audio focus for RINGER")
+//        logger.i("Setting audio focus for RINGER")
 
         manager.apply {
             requestAudioFocus(handler, AudioManager.STREAM_RING, AudioManager.AUDIOFOCUS_GAIN)
@@ -31,7 +30,7 @@ class AudioFocus(private val manager: AudioManager) {
      *
      */
     fun forCall() {
-        logger.i("Setting audio focus for CALL")
+//        logger.i("Setting audio focus for CALL")
 
         manager.apply {
             requestAudioFocus(handler, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN)
@@ -44,7 +43,7 @@ class AudioFocus(private val manager: AudioManager) {
      *
      */
     fun reset() {
-        logger.i("Resetting audio focus")
+//        logger.i("Resetting audio focus")
 
         manager.apply {
             mode = AudioManager.MODE_NORMAL
@@ -55,10 +54,10 @@ class AudioFocus(private val manager: AudioManager) {
 
     private class AudioFocusHandler: AudioManager.OnAudioFocusChangeListener {
 
-        private val logger = Logger(this)
+//        private val logger = Logger(this)
 
         override fun onAudioFocusChange(focusChange: Int) {
-            logger.i("Received audio focus change event: $focusChange")
+//            logger.i("Received audio focus change event: $focusChange")
         }
     }
 }
