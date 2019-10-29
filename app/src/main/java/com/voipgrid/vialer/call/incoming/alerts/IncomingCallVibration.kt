@@ -25,6 +25,7 @@ class IncomingCallVibration(private val audioManager: AudioManager, private val 
 
     override fun stop() {
         vibrator.cancel()
+        isVibrating = false
     }
 
     override fun isStarted() = isVibrating
