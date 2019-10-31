@@ -2,6 +2,8 @@ package com.voipgrid.vialer.api.interceptors;
 
 import android.util.Log;
 
+import com.voipgrid.vialer.logging.Logger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,9 +16,13 @@ import okhttp3.ResponseBody;
 
 public class LogResponsesToConsole implements Interceptor {
 
+    private Logger logger = new Logger(this);
+
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
+
+        logger.i("Making request to: " + request.url());
 
         Response response = chain.proceed(request);
         String body = response.body().string();

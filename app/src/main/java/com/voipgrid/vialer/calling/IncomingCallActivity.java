@@ -81,18 +81,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
         mButtonDecline.setEnabled(false);
     }
 
-    /**
-     * Start the call activity.
-     *
-     */
-    private void startCallActivity() {
-        Intent intent = getIntent();
-        intent.setClass(this, CallActivity.class);
-        intent.putExtra(CALL_IS_CONNECTED, true);
-        startActivity(intent);
-        getLogger().d("callVisibleForUser");
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -113,7 +101,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
     @Override
     public void onCallConnected() {
         mSipServiceConnection.disconnect(true);
-        startCallActivity();
     }
 
     @Override

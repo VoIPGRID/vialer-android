@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.api;
 
 import android.content.Context;
-import androidx.annotation.Nullable;
 
 import com.google.gson.GsonBuilder;
 import com.voipgrid.vialer.R;
@@ -10,13 +9,8 @@ import com.voipgrid.vialer.api.interceptors.AddAuthorizationCredentialsToRequest
 import com.voipgrid.vialer.api.interceptors.AddUserAgentToHeader;
 import com.voipgrid.vialer.api.interceptors.LogResponsesToConsole;
 import com.voipgrid.vialer.api.interceptors.LogUserOutOnUnauthorizedResponse;
-import com.voipgrid.vialer.api.interceptors.ModifyCacheLifetimeBasedOnConnectivity;
 
-import java.util.HashMap;
-
-import javax.inject.Inject;
-
-import okhttp3.Cache;
+import androidx.annotation.NonNull;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -33,70 +27,57 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class ServiceGenerator {
 
-    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-    private static Retrofit.Builder builder = new Retrofit.Builder();
-    private static final AddAuthorizationCredentialsToRequest sAuthorizationInterceptor = new AddAuthorizationCredentialsToRequest();
-
-    private static HashMap<String, Retrofit> sRetrofit = new HashMap<>();
+    private static VoipgridApi voipgridApi;
+    private static Middleware middleware;
 
     private ServiceGenerator() {
     }
 
+    @NonNull
+    public static VoipgridApi createApiService(@NonNull Context context) {
+        if (voipgridApi != null) return voipgridApi;
+
+        return voipgridApi = baseBuilder(context)
+                .baseUrl(context.getString(R.string.api_url))
+                .build()
+                .create(VoipgridApi.class);
+    }
+
+    @NonNull
+    public static Middleware createRegistrationService(@NonNull Context context) {
+        if (middleware != null) return middleware;
+
+        return middleware = baseBuilder(context)
+                .baseUrl(context.getString(R.string.registration_url))
+                .build()
+                .create(Middleware.class);
+    }
+
     /**
-     * Function to create the HttpClient to be used by retrofit for API calls.
-     * @param context
-     * @return
+     * Create the HTTP client and add all the tasks that must be performed while
+     * http requests are occurring.
+     *
      */
-    private static OkHttpClient getHttpClient(final Context context) {
-        httpClient.addInterceptor(sAuthorizationInterceptor);
+    private static OkHttpClient createHttpClient(final Context context) {
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        httpClient.addInterceptor(new AddAuthorizationCredentialsToRequest());
         httpClient.addInterceptor(new AddUserAgentToHeader(context));
-        httpClient.addInterceptor(new ModifyCacheLifetimeBasedOnConnectivity(context));
         httpClient.addInterceptor(new LogUserOutOnUnauthorizedResponse(VialerApplication.get().component().provideLogout()));
         httpClient.addInterceptor(new LogResponsesToConsole());
-
-        httpClient.cache(getCache(context));
-
         return httpClient.build();
     }
 
-    public static VoipgridApi createApiService(Context context) {
-        return ServiceGenerator.createService(context, VoipgridApi.class, getVgApiUrl(context));
-    }
-
-    public static Middleware createRegistrationService(Context context) {
-        return ServiceGenerator.createService(context, Middleware.class, getRegistrationUrl(context));
-    }
-
     /**
-     * Create a service for given api class and URL.
+     * Create the base builder, adding the HTTP client and the serialization library.
+     *
      * @param context
-     * @param serviceClass
-     * @param <S>
      * @return
      */
-    private static <S> S createService(final Context context, Class<S> serviceClass, String url) {
-        if (sRetrofit.get(url) == null) {
-            sRetrofit.put(url, builder.baseUrl(url)
-                    .client(getHttpClient(context))
-                    .addConverterFactory(
-                            GsonConverterFactory.create(new GsonBuilder().serializeNulls().create())
-                    )
-                    .build());
-        }
-
-        return sRetrofit.get(url).create(serviceClass);
+    private static Retrofit.Builder baseBuilder(final Context context) {
+        return new Retrofit.Builder()
+                .client(createHttpClient(context))
+                .addConverterFactory(
+                        GsonConverterFactory.create(new GsonBuilder().serializeNulls().create())
+                );
     }
-
-    private static Cache getCache(Context context) {
-        return new Cache(context.getCacheDir(), 1024 * 1024 * 10);
-    }
-
-    private static String getVgApiUrl(Context context) {
-        return context.getString(R.string.api_url);
-    }
-
-    private static String getRegistrationUrl(Context context) {
-        return context.getString(R.string.registration_url);
-    }
-
 }
