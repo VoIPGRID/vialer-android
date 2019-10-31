@@ -50,7 +50,7 @@ public class PhoneNumberUtils {
     }
 
     public static boolean isAnonymousNumber(String number) {
-        return number.endsWith("x");
+        return number != null && number.endsWith("x");
     }
 
     /**

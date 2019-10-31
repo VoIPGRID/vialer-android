@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
@@ -28,6 +29,7 @@ import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallScreenWake;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.callrecord.CachedContacts;
@@ -222,8 +224,20 @@ public class VialerModule {
 
     @Singleton
     @Provides
-    IncomingCallAlerts incomingCallAlerts(IncomingCallVibration vibration, IncomingCallRinger ringer) {
-        return new IncomingCallAlerts(vibration, ringer);
+    IncomingCallAlerts incomingCallAlerts(IncomingCallVibration vibration, IncomingCallRinger ringer, IncomingCallScreenWake incomingCallScreenWake) {
+        return new IncomingCallAlerts(vibration, ringer, incomingCallScreenWake);
+    }
+
+    @Singleton
+    @Provides
+    IncomingCallScreenWake provideIncomingCallScreenWake(PowerManager pm) {
+        return new IncomingCallScreenWake(pm);
+    }
+
+    @Singleton
+    @Provides
+    PowerManager providePowerManager(Context context) {
+        return (PowerManager) context.getSystemService(Context.POWER_SERVICE);
     }
 
     @Singleton

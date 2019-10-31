@@ -20,9 +20,14 @@ android {
         targetSdkVersion 29
 =======
         targetSdkVersion 29
+<<<<<<< HEAD
         versionCode 174
         versionName "6.4.1"
 >>>>>>> hotfix/6.4.1
+=======
+        versionCode 179
+        versionName "6.4.2"
+>>>>>>> hotfix/6.4.2
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {

@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.onboarding.core
 
 import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +20,7 @@ abstract class Step: Fragment() {
         get() = activity as Onboarder?
 
     protected val voipgridApi: VoipgridApi
-        get() = ServiceGenerator.createApiService(onboarding)
+        get() = ServiceGenerator.createApiService(onboarding as Context)
 
     protected val state: OnboardingState?
         get() = onboarding?.state

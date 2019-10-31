@@ -553,7 +553,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_CONNECTED_MESSAGE);
         mCallMediaMonitor = new CallMediaMonitor(this);
         new Thread(mCallMediaMonitor).start();
-        mSipService.getNotification().active(this);
+        mSipService.changeNotification(mSipService.getNotification().active(this));
     }
 
     /**
