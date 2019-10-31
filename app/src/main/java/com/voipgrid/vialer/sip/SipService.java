@@ -38,11 +38,8 @@ import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.ActiveCallNotification;
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
-<<<<<<< HEAD
 import com.voipgrid.vialer.notifications.call.MissedCallNotification;
-=======
 import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
->>>>>>> hotfix/6.4.2
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
