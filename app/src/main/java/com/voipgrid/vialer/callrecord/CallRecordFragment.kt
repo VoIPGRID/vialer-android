@@ -20,7 +20,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
-import com.voipgrid.vialer.callrecord.CallRecordFragment.TYPE.*
+import com.voipgrid.vialer.callrecord.CallRecordFragment.TYPE.ALL_CALLS
+import com.voipgrid.vialer.callrecord.CallRecordFragment.TYPE.MISSED_CALLS
 import com.voipgrid.vialer.callrecord.database.CallRecordDao
 import com.voipgrid.vialer.callrecord.database.CallRecordEntity
 import com.voipgrid.vialer.callrecord.importing.CallRecordsFetcher

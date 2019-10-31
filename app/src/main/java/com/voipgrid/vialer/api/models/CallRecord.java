@@ -1,13 +1,8 @@
 package com.voipgrid.vialer.api.models;
 
-import android.text.format.DateFormat;
-
 import com.google.gson.annotations.SerializedName;
 import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.util.StringUtil;
-
-import java.util.Calendar;
-import java.util.List;
 
 /**
  * Call record class
@@ -47,12 +42,6 @@ public class CallRecord {
     private String direction;
 
     private long id;
-
-    public static String getLimitDate() {
-        Calendar currentTime = Calendar.getInstance();
-        currentTime.add(Calendar.MONTH, -1);
-        return DateFormat.format(CallRecord.CALL_DATE_FORMAT, currentTime).toString();
-    }
 
     public int getAmount() {
         return amount;
@@ -101,18 +90,10 @@ public class CallRecord {
      * @return
      */
     public String getDirection() {
-        List<String> internalNumbers = User.internal.getPhoneNumbers();
+        if (isInternalCall()) {
+            if (User.internal.getPhoneNumbers().contains(caller)) return DIRECTION_OUTBOUND;
 
-        if (!isInternalCall()) {
-            return direction;
-        }
-
-        if (internalNumbers.contains(caller)) {
-             return DIRECTION_OUTBOUND;
-        }
-
-        if (internalNumbers.contains(dialedNumber)) {
-            return DIRECTION_INBOUND;
+            if (User.internal.getPhoneNumbers().contains(dialedNumber)) return DIRECTION_INBOUND;
         }
 
         return direction;
@@ -132,13 +113,9 @@ public class CallRecord {
     public boolean wasAnsweredElsewhere() {
         if (DIRECTION_OUTBOUND.equals(this.direction)) return false;
 
-        List<String> phoneAccounts = User.internal.getPhoneAccounts();
+        if (User.internal.getPhoneAccounts().isEmpty() || getDestinationAccount() == null) return false;
 
-        if (phoneAccounts == null || phoneAccounts.isEmpty()) return false;
-
-        if (getDestinationAccount() == null) return false;
-
-        return !phoneAccounts.contains(getDestinationAccount());
+        return !User.internal.getPhoneAccounts().contains(getDestinationAccount());
     }
 
     public void setDirection(String direction) {
