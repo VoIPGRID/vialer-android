@@ -21,8 +21,8 @@ class EncryptionDisabledNotification : AbstractNotification() {
     override fun buildChannel(context : Context): NotificationChannel {
         return NotificationChannel(
                 CHANNEL_ID,
-                context.getString(R.string.notification_channel_voip_disabled),
-                NotificationManager.IMPORTANCE_DEFAULT
+                context.getString(R.string.notification_channel_encryption_disabled),
+                NotificationManager.IMPORTANCE_LOW
         )
     }
 
@@ -30,10 +30,11 @@ class EncryptionDisabledNotification : AbstractNotification() {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_lock_open)
                 .setAutoCancel(false)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setContentTitle(context.getString(R.string.encrypted_calling_notification_title))
                 .setContentText(context.getString(R.string.encrypted_calling_notification_description))
                 .setOngoing(true)
+                .setVibrate(null)
 
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addParentStack(MainActivity::class.java)

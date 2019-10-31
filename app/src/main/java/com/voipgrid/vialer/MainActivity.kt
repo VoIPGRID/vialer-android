@@ -61,7 +61,7 @@ class MainActivity : NavigationDrawerActivity() {
      *
      */
     private fun syncUser() = GlobalScope.launch(Dispatchers.Main) {
-        if (connectivityHelper.hasNetworkConnection()) return@launch
+        if (!isConnectedToNetwork()) return@launch
 
         userSynchronizer.sync()
     }

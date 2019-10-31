@@ -150,6 +150,16 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         refreshCurrentAvailability();
     }
 
+    @Override
+    protected void onInternetConnectivityGained() {
+        refreshCurrentAvailability();
+    }
+
+    @Override
+    protected void onInternetConnectivityLost() {
+        refreshCurrentAvailability();
+    }
+
     /**
      * Perform a request to refresh the current availability stats. This happens asynchronously.
      *
@@ -158,6 +168,10 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         if (mSystemUser == null) {
             return;
         }
+
+        refresh();
+
+        if (!isConnectedToNetwork()) return;
 
         userSynchronizer.syncWithCallback(() -> {
             runOnUiThread(this::refresh);
@@ -247,6 +261,10 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     }
 
     private void refresh() {
+        if (mSpinner != null) {
+            mSpinner.setEnabled(isConnectedToNetwork());
+        }
+
         List<UserDestination> userDestinationObjects = User.internal.getDestinations();
 
         if (userDestinationObjects.size() <= 0 || mSpinnerAdapter == null) {
@@ -353,6 +371,13 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if (!isConnectedToNetwork()) {
+            refresh();
+            if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
+                Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
+            }
+        }
+
         if (mFirstTimeOnItemSelected) {
             mFirstTimeOnItemSelected = false;
         } else {
