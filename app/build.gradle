@@ -15,8 +15,8 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 179
-        versionName "6.4.2"
+        versionCode 180
+        versionName "6.4.3"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -27,6 +27,13 @@ android {
         // "pm clear" command after each test invocation. This command ensures
         // that the app's state is completely cleared between tests.
         testInstrumentationRunnerArguments clearPackageData: 'true'
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation":
+                                     "$projectDir/schemas".toString()]
+            }
+        }
     }
     signingConfigs {
         vialer {

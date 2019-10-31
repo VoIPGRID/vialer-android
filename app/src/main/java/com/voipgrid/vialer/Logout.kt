@@ -4,11 +4,14 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
+import com.voipgrid.vialer.callrecord.database.CallRecordDao
 import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.onboarding.Onboarder
 import com.voipgrid.vialer.util.ConnectivityHelper
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-class Logout(private val context: Context, private val sharedPreferences: SharedPreferences, private val connectivityHelper: ConnectivityHelper) {
+class Logout(private val context: Context, private val sharedPreferences: SharedPreferences, private val connectivityHelper: ConnectivityHelper, private val database: CallRecordDao) {
 
     /**
      * Log the currently logged in user out, performing all the tasks we need to perform before they can be logged out.
@@ -26,9 +29,11 @@ class Logout(private val context: Context, private val sharedPreferences: Shared
 
         User.clear()
         sharedPreferences.edit().clear().apply()
+        GlobalScope.launch { database.truncate() }
 
         activity?.let { Onboarder.start(it) }
     }
+
 
     private fun showErrorDialog() {
         AlertDialog.Builder(context)

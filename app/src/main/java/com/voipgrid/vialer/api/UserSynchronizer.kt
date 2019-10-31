@@ -39,6 +39,8 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
             secureCalling.updateApiBasedOnCurrentPreferenceSetting()
             MiddlewareHelper.registerAtMiddleware(context)
         }
+
+        syncUserDestinations()
     }
 
     /**
@@ -98,5 +100,18 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
         }
 
         User.voipAccount = response.body()
+    }
+
+    private suspend fun syncUserDestinations() = withContext(Dispatchers.IO) {
+        val response = voipgridApi.fetchDestinations().execute()
+
+        if (!response.isSuccessful) {
+            logger.e("Unable to retrieve sync user destinations")
+            return@withContext
+        }
+
+        val destinations = response.body()?.objects ?: return@withContext
+
+        User.internal.destinations = destinations
     }
 }

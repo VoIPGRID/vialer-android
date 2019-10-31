@@ -3,11 +3,11 @@ package com.voipgrid.vialer.api.models;
 import android.text.format.DateFormat;
 
 import com.google.gson.annotations.SerializedName;
-import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.util.PhoneNumberUtils;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.util.StringUtil;
 
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Call record class
@@ -101,9 +101,9 @@ public class CallRecord {
      * @return
      */
     public String getDirection() {
-        InternalNumbers internalNumbers = VialerApplication.get().component().getInternalNumbers();
+        List<String> internalNumbers = User.internal.getPhoneNumbers();
 
-        if (!isInternalCall() || internalNumbers == null) {
+        if (!isInternalCall()) {
             return direction;
         }
 
@@ -132,7 +132,7 @@ public class CallRecord {
     public boolean wasAnsweredElsewhere() {
         if (DIRECTION_OUTBOUND.equals(this.direction)) return false;
 
-        PhoneAccounts phoneAccounts = VialerApplication.get().component().getPhoneAccounts();
+        List<String> phoneAccounts = User.internal.getPhoneAccounts();
 
         if (phoneAccounts == null || phoneAccounts.isEmpty()) return false;
 
