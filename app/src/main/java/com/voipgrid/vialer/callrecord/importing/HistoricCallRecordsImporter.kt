@@ -138,7 +138,7 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
             private val oneTime = OneTimeWorkRequestBuilder<Worker>()
                     .setConstraints(constraints)
                     .setBackoffCriteria(BackoffPolicy.LINEAR, OneTimeWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
-                    .setInitialDelay(1, TimeUnit.MINUTES)
+                    .setInitialDelay(15, TimeUnit.SECONDS)
                     .build()
 
             private val periodic = PeriodicWorkRequestBuilder<Worker>(3, TimeUnit.HOURS)
