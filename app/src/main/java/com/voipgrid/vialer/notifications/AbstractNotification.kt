@@ -32,6 +32,10 @@ abstract class AbstractNotification {
      */
     fun build(): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            provideChannelsToDelete().forEach {
+                notificationManager.deleteNotificationChannel(it)
+            }
+
             notificationManager.createNotificationChannel(buildChannel(context))
         }
 
@@ -50,4 +54,10 @@ abstract class AbstractNotification {
 
     @RequiresApi(value = 26)
     protected abstract fun buildChannel(context: Context): NotificationChannel
+
+    /**
+     * Provide a list of channel ids that should be deleted.
+     *
+     */
+    protected open fun provideChannelsToDelete() = listOf<String>()
 }

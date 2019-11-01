@@ -45,7 +45,9 @@ class EncryptionDisabledNotification : AbstractNotification() {
         return builder.build()
     }
 
+    override fun provideChannelsToDelete() = listOf("vialer_encryption_disabled")
+
     companion object {
-        const val CHANNEL_ID: String = "vialer_encryption_disabled"
+        const val CHANNEL_ID: String = "vialer_encryption_disabled_notifications"
     }
 }

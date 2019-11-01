@@ -230,7 +230,7 @@
     <string name="notification_channel_voip_disabled">Je VoIP account is geregistreerd op een ander
         apparaat. Je kunt VoIP weer activeren bij instellingen
     </string>
-    <string name="notification_channel_encryption_disabled">Encryption Disabled</string>
+    <string name="notification_channel_encryption_disabled">Encryptie uitgeschakeld</string>
     <string name="audio_source_option_bluetooth">Bluetooth</string>
     <string name="audio_source_option_speaker">Luidspreker</string>
     <string name="pending_call_description">Bellen</string>
