@@ -65,6 +65,7 @@ class LoginStep : Step() {
     override fun onResume() {
         super.onResume()
         twoFactorHelper?.pasteCodeFromClipboard()
+        User.internal.hasCompletedOnBoarding = false
     }
 
     /**

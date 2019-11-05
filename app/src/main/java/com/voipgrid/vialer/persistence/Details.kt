@@ -15,4 +15,5 @@ object Internal : DefaultKotPrefModel() {
     var internalNumbers by gsonNullablePref(InternalNumbers(), InternalNumbers::class.java.name)
     var lastDialledNumber by stringPref(default = "")
     var callRecordMonthsImported by gsonPref(mutableListOf<DateTime>())
+    var hasCompletedOnBoarding by booleanPref(default = true)
 }
