@@ -2,13 +2,11 @@ package com.voipgrid.vialer.callrecord.importing
 
 import android.database.sqlite.SQLiteConstraintException
 import com.voipgrid.vialer.api.VoipgridApi
-import com.voipgrid.vialer.callrecord.CallRecordFragment
 import com.voipgrid.vialer.callrecord.database.CallRecordDao
 import com.voipgrid.vialer.callrecord.database.CallRecordsInserter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
-import java.lang.Exception
 
 class NewCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRecordsInserter, api: VoipgridApi, private val db: CallRecordDao) : CallRecordsImporter(fetcher, inserter, api) {
 
@@ -22,7 +20,7 @@ class NewCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRecordsI
     suspend fun import() = withContext(Dispatchers.IO) {
         types.forEach {
             try {
-                fetchAndInsert(it.key, it.value, findStartDate(it.value), DateTime(TIMEZONE))
+                fetchAndInsert(it.key, it.value, findStartDate(it.value), DateTime(TIMEZONE).dayOfMonth().withMaximumValue().hourOfDay().withMaximumValue().minuteOfHour().withMaximumValue().millisOfSecond().withMaximumValue())
             } catch (e: SQLiteConstraintException) { }
         }
     }

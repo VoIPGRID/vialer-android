@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +26,6 @@ import com.voipgrid.vialer.callrecord.CallRecordFragment.TYPE.MISSED_CALLS
 import com.voipgrid.vialer.callrecord.database.CallRecordDao
 import com.voipgrid.vialer.callrecord.database.CallRecordEntity
 import com.voipgrid.vialer.callrecord.importing.CallRecordsFetcher
-import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter
 import com.voipgrid.vialer.callrecord.importing.NewCallRecordsImporter
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.NetworkUtil
@@ -43,10 +43,20 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var type = ALL_CALLS
 
     @Inject lateinit var newCallRecordsImporter: NewCallRecordsImporter
-    @Inject lateinit var historicCallRecordsImporter: HistoricCallRecordsImporter
     @Inject lateinit var networkUtil: NetworkUtil
     @Inject lateinit var broadcastReceiverManager: BroadcastReceiverManager
     @Inject lateinit var db: CallRecordDao
+
+    /**
+     * Regularly refreshes the data set to keep timestamps relevant.
+     *
+     */
+    private val runnable: Runnable = object : Runnable {
+        override fun run() {
+            adapter.notifyDataSetChanged()
+            Handler().postDelayed(this, REFRESH_TIMEOUT)
+        }
+    }
 
     private val networkChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
@@ -75,11 +85,13 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onResume() {
         super.onResume()
         broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(networkChangeReceiver, ConnectivityManager.CONNECTIVITY_ACTION)
+        Handler().postDelayed(runnable, REFRESH_TIMEOUT)
     }
 
     override fun onPause() {
         super.onPause()
         broadcastReceiverManager.unregisterReceiver(networkChangeReceiver)
+        Handler().removeCallbacks(runnable)
     }
 
     private fun setupSwipeContainer() {
@@ -197,6 +209,10 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
      */
     enum class TYPE {
         ALL_CALLS, MISSED_CALLS
+    }
+
+    companion object {
+        const val REFRESH_TIMEOUT: Long = 5000
     }
 }
 
