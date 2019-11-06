@@ -19,7 +19,11 @@ data class RawContact(val rawContactId: Long) {
 
     public fun readRawContactData(cursor: Cursor, default: Boolean) {
         contactId = cursor.getLong(cursor.getColumnIndex(if (default) Contacts._ID else RawContacts.CONTACT_ID))
-        accountType = cursor.getString(cursor.getColumnIndex(RawContacts.ACCOUNT_TYPE))
+        val index = cursor.getColumnIndex(RawContacts.ACCOUNT_TYPE)
+        if (index == -1) {
+            return
+        }
+        accountType = cursor.getString(index)
     }
 
     public fun readPhoneData(cursor: Cursor) {
@@ -33,7 +37,7 @@ data class RawContact(val rawContactId: Long) {
     }
 
     public fun isVialerContact(context: Context): Boolean {
-        return accountType == context.getString(R.string.account_type)
+        return accountType != null && accountType == context.getString(R.string.account_type)
     }
 
 }

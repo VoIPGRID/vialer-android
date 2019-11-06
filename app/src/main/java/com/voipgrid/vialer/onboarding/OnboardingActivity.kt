@@ -16,7 +16,7 @@ class OnboardingActivity : Onboarder() {
             LoginStep(),
             AccountConfigurationStep(),
             MissingVoipAccountStep(),
-            ContactsPermissionStep(),
+            ContactsReadPermissionStep(),
             ContactsWritePermissionStep(),
             PhoneStatePermissionStep(),
             MicrophonePermissionStep(),
