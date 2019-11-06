@@ -269,7 +269,6 @@
         ingeschakeld. Anderen kunnen mogelijk jouw gesprekken opvangen en meeluisteren.
     </string>
     <string name="call_icon">Bel icoon</string>
-    <string name="exclamation_mark">!</string>
     <string name="help_icon">Help icoon</string>
     <string name="password_reset_hint_2">Bevestig wachtwoord</string>
     <string name="call_records_default_title">Geen gespreksdetails gevonden</string>
@@ -311,4 +310,8 @@
     <string name="missed_call">Oproep gemist (%1$s).</string>
     <string name="answered_elsewhere">Oproep (%1$s) elders opgenomen.</string>
     <string name="call_back">Bel terug</string>
+    <string name="start_call">Bel</string>
+    <string name="add_to_contacts">Voeg to aan contacten</string>
+    <string name="copy_number">Kopieer nummer</string>
+    <string name="number_copied">Nummer gekopieerd: %1$s</string>
 </resources>
