@@ -315,6 +315,5 @@
     <string name="add_to_contacts">Voeg to aan contacten</string>
     <string name="copy_number">Kopieer nummer</string>
     <string name="number_copied">Nummer gekopieerd: %1$s</string>
-    <string name="call_with">Bel - %1$s</string>
     <string name="call_with">Bel %1$s</string>
 </resources>
