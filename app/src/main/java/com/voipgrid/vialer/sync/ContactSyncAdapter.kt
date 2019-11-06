@@ -15,8 +15,7 @@ class ContactSyncAdapter : AbstractThreadedSyncAdapter {
     private val profileMimeType: String
     private val contentResolver: ContentResolver
 
-    @Inject
-    lateinit var dao: CallRecordDao
+    @Inject lateinit var dao: CallRecordDao
 
     constructor(context: Context, autoInitialize: Boolean) : super(context, autoInitialize) {
         contentResolver = context.contentResolver
@@ -40,45 +39,59 @@ class ContactSyncAdapter : AbstractThreadedSyncAdapter {
             return
         }
         val contactManager = ContactManager(account, contentResolver)
-        val localContacts = contactManager.rawContacts
-        if (localContacts.isEmpty()) {
+        val nativeContacts = contactManager.rawContacts
+        if (nativeContacts.isEmpty()) {
             return
         }
+
         val vialerContacts = contactManager.vialerContacts
         val uniqueNumbers = dao.listThirdPartyNumber()
-        val list = ArrayList<String>()
-        //the real syncing part
-        for (contact in localContacts) {
+        val processedNumbers = ArrayList<String>()
+        //sync the native contacts
+        for (contact in nativeContacts) {
+            //a native contact can have more than one phone number, sync all phone numbers
             for(number in contact.phoneNumbers) {
-                if (number == null || number.isEmpty() || list.contains(number) || !uniqueNumbers.contains(number)) {
+                //skip number if it's already processed or if you never called it with Vialer before
+                if (number == null || number.isEmpty() || processedNumbers.contains(number) || !uniqueNumbers.contains(number)) {
                     continue
                 }
-                list.add(number)
+                processedNumbers.add(number)
+                //find the vialer contact that's linked to the this native contact
                 val existingVialerContact: RawContact? = vialerContacts.find {
                     it.contactId == contact.contactId
                 }
                 if (existingVialerContact == null) {
+                    //if there's no vialer contact, create one and merge it with the native contact
                     val rawContactId = contactManager.addContact(context, contact.firstName
                             ?: "", contact.lastName ?: "", contact.displayName ?: "", number)
                     contactManager.mergeContact(contact.rawContactId, rawContactId)
                 } else if (!contactManager.hasVialerCallSupport(context, number)) {
+                    //if the vialer contact has no 'vialer call support' for the {@code number}
+                    //then insert it
                     contactManager.insertVialerCallSupport(existingVialerContact.rawContactId, number, context)
                 }
             }
         }
+        //it could be that a native contact got deleted, or that a number got deleted,
+        //however the Vialer contact and its data will still exist
+        //loop through all vialer contacts and check if the native contact still exists
         for (vialerContact in vialerContacts) {
             //this 'find' may take a bit long (~3 sec) if you have a lot of contacts (like ~250)
-            val existingLocalContact: RawContact? = localContacts.find {
+            val existingNativeContact: RawContact? = nativeContacts.find {
                 it.contactId == vialerContact.contactId
             }
             val vialerNumbers = contactManager.getVialerCallSupportNumbers(vialerContact.rawContactId, context)
+            //a user may delete a number at anytime and at any moment
+            //delete the vialer call support for the numbers that don't exist anymore
             for(number in vialerNumbers) {
                 if (vialerContact.phoneNumbers.contains(number)) {
                     continue
                 }
                 contactManager.deleteVialerCallSupport(vialerContact.rawContactId, number, context)
             }
-            if (vialerContact.phoneNumbers.isNotEmpty() && existingLocalContact?.phoneNumbers?.isNotEmpty() ?: continue) {
+            //check if the vialer contact has no phone numbers and the native contacts has no phone numbers
+            //in that case, delete the vialer contact
+            if (vialerContact.phoneNumbers.isNotEmpty() && existingNativeContact?.phoneNumbers?.isNotEmpty() ?: continue) {
                 continue
             }
             contactManager.deleteVialerContact(context, vialerContact.rawContactId, vialerContact.contactId

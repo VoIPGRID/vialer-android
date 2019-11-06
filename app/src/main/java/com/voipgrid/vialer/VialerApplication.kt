@@ -1,17 +1,12 @@
 package com.voipgrid.vialer
 
 import android.app.Application
+import androidx.room.Room
 import com.voipgrid.vialer.dagger.DaggerVialerComponent
 import com.voipgrid.vialer.dagger.VialerComponent
 import com.voipgrid.vialer.dagger.VialerModule
-import com.voipgrid.vialer.tasks.launch.ConvertApiToken
-import com.voipgrid.vialer.tasks.launch.RegisterLibraries
-import com.voipgrid.vialer.tasks.launch.RegisterPeriodicTasks
 import com.voipgrid.vialer.database.AppDatabase
-import androidx.room.Room
-import androidx.work.Configuration
-import androidx.work.WorkManager
-import com.chibatching.kotpref.Kotpref
+import com.voipgrid.vialer.tasks.launch.*
 
 class VialerApplication : Application() {
 
@@ -27,15 +22,15 @@ class VialerApplication : Application() {
      *
      */
     private val launchTasks = listOf(
+            InitKotPref(),
             RegisterLibraries(),
             ConvertApiToken(),
-            RegisterPeriodicTasks()
+            RegisterPeriodicTasks(),
+            SetupContactsSync()
     )
 
     override fun onCreate() {
         super.onCreate()
-        Kotpref.init(this)
-        WorkManager.initialize(this, Configuration.Builder().build())
         instance = this
         registerActivityLifecycleCallbacks(activityLifecycleTracker)
         launchTasks.forEach {
