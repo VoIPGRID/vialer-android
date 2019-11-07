@@ -15,6 +15,7 @@ import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.callrecord.CallRecordViewHolder;
+import com.voipgrid.vialer.callrecord.CallRecordViewModel;
 import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.dialer.NumberInputView;
@@ -30,6 +31,8 @@ import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.t9.T9HelperFragment;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity;
+
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
 
@@ -96,4 +99,6 @@ public interface VialerComponent {
     void inject(DialerActivity dialerActivity);
 
     Logout provideLogout();
+
+    void inject(@NotNull final CallRecordViewModel callRecordViewModel);
 }

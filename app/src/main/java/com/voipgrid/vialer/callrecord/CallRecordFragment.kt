@@ -10,10 +10,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagedList
-import androidx.paging.toLiveData
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,31 +21,30 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
-import com.voipgrid.vialer.callrecord.CallRecordFragment.TYPE.ALL_CALLS
-import com.voipgrid.vialer.callrecord.CallRecordFragment.TYPE.MISSED_CALLS
-import com.voipgrid.vialer.callrecord.database.CallRecordDao
 import com.voipgrid.vialer.callrecord.database.CallRecordEntity
 import com.voipgrid.vialer.callrecord.importing.CallRecordsFetcher
 import com.voipgrid.vialer.callrecord.importing.NewCallRecordsImporter
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.NetworkUtil
 import kotlinx.android.synthetic.main.fragment_call_records.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
-    private var liveData: LiveData<PagedList<CallRecordEntity>>? = null
+    private val callRecordViewModel by lazy {
+        activity?.run {
+            ViewModelProviders.of(this)[CallRecordViewModel::class.java]
+        } ?: throw Exception("No activity found")
+    }
+
     private val adapter = CallRecordAdapter()
-    private var type = ALL_CALLS
+    private var type = CallRecordViewModel.Type.ALL_CALLS
 
     @Inject lateinit var newCallRecordsImporter: NewCallRecordsImporter
     @Inject lateinit var networkUtil: NetworkUtil
     @Inject lateinit var broadcastReceiverManager: BroadcastReceiverManager
-    @Inject lateinit var db: CallRecordDao
 
     /**
      * Regularly refreshes the data set to keep timestamps relevant.
@@ -71,15 +70,23 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_call_records, null)
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        callRecordViewModel.calls.observe(this@CallRecordFragment, Observer<PagedList<CallRecordEntity>> {
+            adapter.submitList(it)
+        })
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter.activity = activity
         call_records.adapter = adapter
         setupSwipeContainer()
         setupRecyclerView()
-        findNewCalls()
-        queryDatabaseBasedOnCurrentType()
-        show_my_calls_only.setOnCheckedChangeListener { _, _ -> onRefresh() }
+        fetchCalls()
+        show_my_calls_only.setOnCheckedChangeListener { _, _ ->
+            callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
+        }
     }
 
     override fun onResume() {
@@ -95,8 +102,8 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun setupSwipeContainer() {
-        swipe_container.setColorSchemeColors(resources.getColor(R.color.color_refresh))
-        swipe_container.setOnRefreshListener(this)
+        swipe_container?.setColorSchemeColors(resources.getColor(R.color.color_refresh))
+        swipe_container?.setOnRefreshListener(this)
     }
 
     private fun setupRecyclerView() {
@@ -117,22 +124,16 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
      */
     override fun onRefresh() {
         if (!networkUtil.isOnline) {
-            swipe_container.isRefreshing = false
+            swipe_container?.isRefreshing = false
             displayError().noInternetConnection()
             return
         }
 
         hideError()
-        queryDatabaseBasedOnCurrentType()
-        findNewCalls()
+        fetchCalls()
     }
 
-    /**
-     * Perform a request to find any new records from the api and import them into the
-     * database.
-     *
-     */
-    private fun findNewCalls() = GlobalScope.launch(Dispatchers.Main) {
+    private fun fetchCalls() = lifecycleScope.launch {
         call_records.scrollToTop()
         try {
             newCallRecordsImporter.import()
@@ -148,7 +149,7 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         } catch (e: Exception) {}
         finally {
-            swipe_container.isRefreshing = false
+            swipe_container?.isRefreshing = false
         }
     }
 
@@ -173,42 +174,14 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     /**
-     * Perform the database query so our data is matching the type of call records we should
-     * be displaying.
-     *
-     */
-    private fun queryDatabaseBasedOnCurrentType() {
-        val personal = when(show_my_calls_only.isChecked) {
-            true  -> booleanArrayOf(true)
-            false -> booleanArrayOf(false, true)
-        }
-
-        liveData?.removeObservers(this)
-
-        when(type) {
-            ALL_CALLS -> db.callRecordsByDate(wasMissed = booleanArrayOf(false, true), wasPersonal = personal)
-            MISSED_CALLS -> db.callRecordsByDate(wasMissed = booleanArrayOf(true), wasPersonal = personal)
-        }.toLiveData(pageSize = 50).also { liveData = it }.observe(this, Observer<PagedList<CallRecordEntity>> {
-            adapter.submitList(it)
-        })
-    }
-
-    /**
      * Change the type of call records being displayed, this is so an external source can control
      * this fragment.
      *
      */
-    fun changeType(type: TYPE) {
+    fun changeType(type: CallRecordViewModel.Type) {
         this.type = type
+        callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
         onRefresh()
-    }
-
-    /**
-     * The type of call records to show.
-     *
-     */
-    enum class TYPE {
-        ALL_CALLS, MISSED_CALLS
     }
 
     companion object {

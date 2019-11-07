@@ -6,6 +6,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.tabs.TabLayout
 import com.voipgrid.vialer.callrecord.CallRecordFragment
+import com.voipgrid.vialer.callrecord.CallRecordViewModel
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
@@ -117,9 +118,9 @@ class MainActivity : NavigationDrawerActivity() {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     tab?.let {
                         (call_record_fragment as CallRecordFragment).changeType(when(it.position) {
-                            0 -> CallRecordFragment.TYPE.ALL_CALLS
-                            1 -> CallRecordFragment.TYPE.MISSED_CALLS
-                            else -> CallRecordFragment.TYPE.ALL_CALLS
+                            0 -> CallRecordViewModel.Type.ALL_CALLS
+                            1 -> CallRecordViewModel.Type.MISSED_CALLS
+                            else -> CallRecordViewModel.Type.ALL_CALLS
                         })
                     }
 
