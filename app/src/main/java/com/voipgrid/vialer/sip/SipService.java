@@ -49,6 +49,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
@@ -397,8 +398,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      *
      * @param notification
      */
-    public void changeNotification(final AbstractCallNotification notification) {
+    public void changeNotification(final @NonNull AbstractCallNotification notification) {
+        mLogger.i("Received change notification request from: " + notification.getClass().getSimpleName());
+
         if (shouldUpdateNotification(notification)) {
+            mLogger.i("Performing notification change to" + notification.getClass().getSimpleName());
             activeNotification = notification;
             startForeground(notification.getNotificationId(), notification.build());
             launchIncomingCallActivityWhenAppIsVisible(notification);
@@ -491,7 +495,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     }
 
     private void startCallActivityForCurrentCall() {
-        Log.e("TEST123", "startCallActivity ====", new Exception());
         if (getCurrentCall() == null) {
             getLogger().e("Unable to start call activity for current call as there is no current call");
             return;
