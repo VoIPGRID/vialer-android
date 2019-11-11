@@ -30,8 +30,8 @@ abstract class VialerTest {
     }
 
     protected fun login(username: String = BuildConfig.TEST_USERNAME, password: String = BuildConfig.TEST_PASSWORD) {
-        onView(withId(R.id.emailTextDialog)).perform(typeText(username))
-        onView(withId(R.id.passwordTextDialog)).perform(typeText(password))
+        onView(withId(R.id.username_text_dialog)).perform(typeText(username))
+        onView(withId(R.id.password_text_dialog)).perform(typeText(password))
         onView(withId(R.id.button_login)).perform(click())
         Thread.sleep(2000)
     }
@@ -39,7 +39,7 @@ abstract class VialerTest {
      fun onboard(skipIfLoggedIn: Boolean = false): Boolean {
          Thread.sleep(2000)
         try {
-            onView(withId(R.id.emailTextDialog)).check(matches(isDisplayed()))
+            onView(withId(R.id.username_text_dialog)).check(matches(isDisplayed()))
         } catch (e: Exception) {
             if (skipIfLoggedIn) {
                 return false

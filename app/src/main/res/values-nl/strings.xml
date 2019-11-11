@@ -55,10 +55,10 @@
     <string name="set_userdestination_api_fail">Aanpassen van bereikbaarheid mislukt. Probeer later opnieuw.</string>
 
     <!-- Login fragment values -->
-    <string name="login_header_label_text">Zakelijke</string>
-    <string name="login_header_label_subtext">telefonie in de cloud</string>
-    <string name="email_edittext_hint">E-mailadres</string>
+    <string name="login_header_label_text">Zakelijke telefonie</string>
+    <string name="login_header_label_subtext">in de cloud</string>
     <string name="password_edittext_hint">Wachtwoord</string>
+    <string name="username_edittext_hint">Gebruikersnaam</string>
     <string name="forgot_password_button_title">Wachtwoord vergeten?</string>
     <string name="login_button_title">Inloggen</string>
     <string name="login_missing_field_title">Let op</string>
@@ -66,8 +66,10 @@
     <string name="change_password_webview_toast">Om gebruik van de app te kunnen maken moet je eenmalig inloggen en je wachtwoord wijzigen</string>
 
     <!-- Forgot password fragment values -->
-    <string name="forgot_password_button_text">Verzenden</string>
-    <string name="forgot_password_description">Voer uw e-mailadres in en wij sturen je instructies om je wachtwoord te herstellen.</string>
+    <string name="email_edittext_hint">Voer uw e-mailadres in</string>
+    <string name="header_forgot_password_title">Wachtwoord vergeten</string>
+    <string name="forgot_password_button_text">Verzend herstelemail</string>
+    <string name="forgot_password_description">Verzend link om wachtwoord te herstellen naar:</string>
     <string name="forgot_password_missing_field_title">Let op</string>
     <string name="forgot_password_missing_field_message">Vul alstublieft alle velden in</string>
     <string name="forgot_password_alert_title">Wachtwoord herstellen</string>
@@ -284,9 +286,8 @@
     <string name="dialer_no_internet_connectivity">Geen internetverbinding beschikbaar</string>
     <string name="dialer_no_internet_connectivity_subtext">Je bent met een netwerk verbonden maar er is geen internetverbinding, waardoor er geen gesprek opgezet kan worden.</string>
     <string name="use_phones_ringtone_switch_switch">Gebruik ringtone van het toestel</string>
-    <string name="header_forgot_password_title">Wachtwoord vergeten?</string>
     <string name="configure_mobile_number_text">Voer onderstaand je mobiele telefoonnummer in:</string>
-    <string name="outgoing_number_description">Het volgende nummer wordt getoond bij uitgaande gesprekken:</string>
+    <string name="outgoing_number_description">Vialer zal het volgende nummer weergeven wanneer u iemand belt:</string>
     <string name="voip_account_missing_title">VoIP account\nontbreekt</string>
     <string name="onboarding_login_failed_too_many_attempts_title">Teveel inlogpogingen</string>
     <string name="onboarding_login_failed_too_many_attempts_message">Probeer het later opnieuw.</string>
@@ -315,4 +316,5 @@
     <string name="add_to_contacts">Voeg to aan contacten</string>
     <string name="copy_number">Kopieer nummer</string>
     <string name="number_copied">Nummer gekopieerd: %1$s</string>
+    <string name="back">Terug</string>
 </resources>
