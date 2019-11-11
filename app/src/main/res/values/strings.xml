@@ -83,7 +83,6 @@
     <string name="login_missing_field_message">Please fill in all fields before login!</string>
     <string name="change_password_webview_toast">To make use of the app, you need to login once and change your password</string>
 
-
     <!-- Forgot password fragment values -->
     <string name="email_edittext_hint">Enter your email</string>
     <string name="header_forgot_password_title">Forgot password</string>
