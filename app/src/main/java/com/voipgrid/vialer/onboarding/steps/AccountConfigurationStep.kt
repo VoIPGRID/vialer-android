@@ -5,13 +5,14 @@ import android.os.Bundle
 import android.view.View
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber
-import com.voipgrid.vialer.*
+import com.voipgrid.vialer.R
+import com.voipgrid.vialer.User
+import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.PhoneNumberUtils
-import kotlinx.android.synthetic.main.onboarding_step_mobile_number.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

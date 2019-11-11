@@ -8,7 +8,10 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.voipgrid.vialer.*
+import com.voipgrid.vialer.ForgottenPasswordActivity
+import com.voipgrid.vialer.R
+import com.voipgrid.vialer.User
+import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.OnboardingActivity
 import com.voipgrid.vialer.onboarding.VoipgridLogin
@@ -17,7 +20,6 @@ import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult.*
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.ConnectivityHelper
 import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity
-import kotlinx.android.synthetic.main.onboarding_step_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
