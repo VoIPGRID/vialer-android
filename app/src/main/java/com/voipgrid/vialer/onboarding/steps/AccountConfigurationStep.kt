@@ -11,7 +11,6 @@ import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.PhoneNumberUtils
-import kotlinx.android.synthetic.main.onboarding_step_mobile_number.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

@@ -59,7 +59,7 @@ class LoginStep : Step() {
             }
         }
 
-        passwordTextDialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
+        password_text_dialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
             actionId == EditorInfo.IME_ACTION_DONE && button_login.performClick()
         }
 
@@ -139,11 +139,30 @@ class LoginStep : Step() {
     }
 
     /**
+     * Create and show a dialog for the user to enter a two-factor token.
+     *
+     */
+    private fun showTwoFactorDialog() {
+        activity?.let {
+            val twoFactorDialog = AlertDialog.Builder(it)
+                    .setView(R.layout.onboarding_dialog_two_factor)
+                    .show()
+
+            val codeField = (twoFactorDialog.findViewById(R.id.two_factor_code_field) as EditText)
+            twoFactorHelper = TwoFactorFragmentHelper(it, codeField).apply {
+                focusOnTokenField()
+                pasteCodeFromClipboard()
+            }
+        }
+    }
+
+    /**
      * Launches an activity to allow the user to reset their password.
      *
      */
     private fun launchForgottenPasswordActivity() {
         logger.i("Detected forgot password click, launching activity")
+        ForgottenPasswordActivity.launchForEmail(onboarding as Context, username_text_dialog.text.toString())
         ForgottenPasswordActivity.launchForEmail(onboarding as Context, username_text_dialog.text.toString())
     }
 

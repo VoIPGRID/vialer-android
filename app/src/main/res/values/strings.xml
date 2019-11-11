@@ -103,9 +103,10 @@
     <string name="configure_header_label_text">Account \nconfiguration</string>
     <string name="configure_mobile_number_text">Enter your mobile phone number below:</string>
     <string name="outgoing_number_description">Vialer will display the following number when calling someone:</string>
-    <string name="phonenumber_prefix_edittext_hint">Prefix</string>
-    <string name="phonenumber_edittext_hint">Phone number</string>
-    <string name="outgoingnumber_edittext_hint">Outgoing number</string>
+    <string name="phonenumber_edittext_hint">Prefix</string>
+    <string name="outgoingnumber_edittext_hint">Phone number</string>
+    <string name="phonenumber_info_text_title">Mobile phone number</string>
+    <string name="phonenumber_info_text">To make two step calling possible, we need to have your mobile phone number.</string>
 
     <!-- Missing voip account fragment values -->
     <string name="set_voip_account_button_text">Set VoIP account</string>
