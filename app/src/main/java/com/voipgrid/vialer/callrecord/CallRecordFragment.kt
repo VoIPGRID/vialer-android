@@ -84,6 +84,7 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         setupSwipeContainer()
         setupRecyclerView()
         fetchCalls()
+        callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
         show_my_calls_only.setOnCheckedChangeListener { _, _ ->
             callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
         }
@@ -93,6 +94,7 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         super.onResume()
         broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(networkChangeReceiver, ConnectivityManager.CONNECTIVITY_ACTION)
         Handler().postDelayed(runnable, REFRESH_TIMEOUT)
+        call_records?.scrollToTop()
     }
 
     override fun onPause() {
