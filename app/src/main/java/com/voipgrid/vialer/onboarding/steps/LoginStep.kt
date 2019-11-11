@@ -2,7 +2,6 @@ package com.voipgrid.vialer.onboarding.steps
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.view.KeyEvent
@@ -43,29 +42,27 @@ class LoginStep : Step() {
         VialerApplication.get().component().inject(this)
 
         val enableSubmitButton: (_: Editable?) -> Unit = {
-            button_login.isEnabled = emailTextDialog.length() > 0 && passwordTextDialog.length() > 0
+            button_login.isEnabled = username_text_dialog.length() > 0 && password_text_dialog.length() > 0
         }
 
-        emailTextDialog.onTextChanged(enableSubmitButton)
-        passwordTextDialog.onTextChanged(enableSubmitButton)
+        username_text_dialog.onTextChanged(enableSubmitButton)
+        password_text_dialog.onTextChanged(enableSubmitButton)
 
         KeyboardVisibilityEvent.setEventListener(activity) { keyboardIsVisible ->
             if (keyboardIsVisible) {
                 title_label.visibility = View.GONE
-                subtitle_label.visibility = View.GONE
             } else {
                 title_label.visibility = View.VISIBLE
-                subtitle_label.visibility = View.VISIBLE
             }
         }
 
-        passwordTextDialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
+        password_text_dialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
             actionId == EditorInfo.IME_ACTION_DONE && button_login.performClick()
         }
 
         button_login.setOnClickListenerAndDisable {
-            emailTextDialog.clearFocus()
-            passwordTextDialog.clearFocus()
+            username_text_dialog.clearFocus()
+            password_text_dialog.clearFocus()
             attemptLogin()
         }
         button_forgot_password.setOnClickListener { launchForgottenPasswordActivity() }
@@ -92,8 +89,8 @@ class LoginStep : Step() {
             return
         }
 
-        emailTextDialog.setText(intent.getStringExtra(PasswordResetWebActivity.USERNAME_EXTRA))
-        passwordTextDialog.setText(intent.getStringExtra(PasswordResetWebActivity.PASSWORD_EXTRA))
+        username_text_dialog.setText(intent.getStringExtra(PasswordResetWebActivity.USERNAME_EXTRA))
+        password_text_dialog.setText(intent.getStringExtra(PasswordResetWebActivity.PASSWORD_EXTRA))
         if (button_login.isEnabled) button_login.performClick()
     }
 
@@ -104,7 +101,7 @@ class LoginStep : Step() {
     private fun attemptLogin(code: String? = null) = GlobalScope.launch(Dispatchers.Main) {
         onboarding?.isLoading = true
         logger.i("Attempting to log the user into VoIPGRID, with the following 2FA code: $code")
-        val result = login.attempt(emailTextDialog.text.toString(), passwordTextDialog.text.toString(), code)
+        val result = login.attempt(username_text_dialog.text.toString(), password_text_dialog.text.toString(), code)
         onboarding?.isLoading = false
         handleLoginResult(result)
     }
@@ -132,7 +129,7 @@ class LoginStep : Step() {
         MUST_CHANGE_PASSWORD -> {
             logger.i("User must change their password before we can login")
             activity?.let {
-                PasswordResetWebActivity.launch(it, emailTextDialog.text.toString(), passwordTextDialog.text.toString())
+                PasswordResetWebActivity.launch(it, username_text_dialog.text.toString(), password_text_dialog.text.toString())
             }
         }
     }
@@ -168,6 +165,6 @@ class LoginStep : Step() {
      */
     private fun launchForgottenPasswordActivity() {
         logger.i("Detected forgot password click, launching activity")
-        ForgottenPasswordActivity.launchForEmail(onboarding as Context, emailTextDialog.text.toString())
+        ForgottenPasswordActivity.launchForEmail(onboarding as Context, username_text_dialog.text.toString())
     }
 }
