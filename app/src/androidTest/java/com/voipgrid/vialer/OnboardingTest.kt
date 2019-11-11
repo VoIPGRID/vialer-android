@@ -23,8 +23,8 @@ class OnboardingTest : VialerTest() {
     @Test
     fun loginFailsWithInvalidCredentials() {
         onView(withText("calls in the cloud")).check(matches(isDisplayed()))
-        onView(withId(R.id.emailTextDialog)).perform(typeText("Invalid email"))
-        onView(withId(R.id.passwordTextDialog)).perform(typeText("Invalid password"))
+        onView(withId(R.id.username_text_dialog)).perform(typeText("Invalid email"))
+        onView(withId(R.id.password_text_dialog)).perform(typeText("Invalid password"))
         onView(withId(R.id.button_login)).perform(click())
 
         Thread.sleep(2000)
@@ -33,13 +33,13 @@ class OnboardingTest : VialerTest() {
 
     @Test
     fun loginButtonCannotBeClickedIfEmailAddressIsNotFilledIn() {
-        onView(withId(R.id.passwordTextDialog)).perform(typeText("apassword"))
+        onView(withId(R.id.password_text_dialog)).perform(typeText("apassword"))
         onView(withId(R.id.button_login)).check(matches(not(isEnabled())))
     }
 
     @Test
     fun loginButtonCannotBeClickedIfPasswordIsNotFilledIn() {
-        onView(withId(R.id.emailTextDialog)).perform(typeText("anemail"))
+        onView(withId(R.id.username_text_dialog)).perform(typeText("anemail"))
         onView(withId(R.id.button_login)).check(matches(not(isEnabled())))
     }
 

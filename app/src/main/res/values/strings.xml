@@ -58,21 +58,22 @@
     <string name="set_userdestination_api_fail">Editing of availability has failed. Please try again later.</string>
 
     <!-- Login fragment values -->
-    <string name="login_header_label_text">Business</string>
+    <string name="login_header_label_text">Business calls</string>
     <string name="login_header_label_subtext">in the cloud</string>
-    <string name="email_edittext_hint">Email address</string>
     <string name="password_edittext_hint">Password</string>
+    <string name="username_edittext_hint">Username</string>
     <string name="forgot_password_button_title">Forgot password</string>
-    <string name="login_button_title">login</string>
+    <string name="login_button_title">log in</string>
     <string name="login_missing_field_title">Warning</string>
     <string name="login_missing_field_message">Please fill in all fields before login!</string>
     <string name="change_password_webview_toast">To make use of the app, you need to login once and change your password</string>
 
 
     <!-- Forgot password fragment values -->
-    <string name="header_forgot_password_title">Forgot your password?</string>
-    <string name="forgot_password_button_text">Send</string>
-    <string name="forgot_password_description">Please enter your email address and we will send you instructions on setting a new password.</string>
+    <string name="email_edittext_hint">Enter your email</string>
+    <string name="header_forgot_password_title">Forgot password</string>
+    <string name="forgot_password_button_text">Send reset email</string>
+    <string name="forgot_password_description">Send password reset link to:</string>
     <string name="forgot_password_missing_field_title">Warning</string>
     <string name="forgot_password_missing_field_message">Please fill in all fields before login!</string>
     <string name="forgot_password_alert_title">Password reset</string>
@@ -86,7 +87,7 @@
     <string name="configure_button_title">Continue</string>
     <string name="configure_header_label_text">Account \nconfiguration</string>
     <string name="configure_mobile_number_text">Enter your mobile phone number below:</string>
-    <string name="outgoing_number_description">The following number will be displayed when calling someone:</string>
+    <string name="outgoing_number_description">Vialer will display the following number when calling someone:</string>
     <string name="phonenumber_edittext_hint">Mobile number</string>
     <string name="outgoingnumber_edittext_hint">Outgoing number</string>
     <string name="phonenumber_info_text_title">Mobile phone number</string>
@@ -313,4 +314,5 @@
     <string name="add_to_contacts">Add to contacts</string>
     <string name="copy_number">Copy number</string>
     <string name="number_copied">Number has been copied: %1$s</string>
+    <string name="back">Back</string>
 </resources>
