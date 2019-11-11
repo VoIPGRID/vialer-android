@@ -68,7 +68,7 @@
 
     <dimen name="onboarding_header_padding">50dp</dimen>
     <dimen name="onboarding_button_text_size">14sp</dimen>
-    <dimen name="onboarding_button_padding">10dp</dimen>
+    <dimen name="onboarding_button_padding">20dp</dimen>
     <dimen name="onboarding_text_size_button">14sp</dimen>
     <dimen name="onboarding_text_size_edit_text">16sp</dimen>
     <dimen name="onboarding_text_size_text_view">18sp</dimen>

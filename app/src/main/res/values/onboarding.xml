@@ -51,6 +51,7 @@
         <item name="android:textColorHint">@color/onboarding_edittext_hint_color</item>
         <item name="android:textColor">@color/onboarding_edittext_text_color</item>
         <item name="android:fontFamily">sans-serif</item>
+        <item name="android:drawableTint">@color/onboarding_edittext_hint_color</item>
         <item name="android:drawablePadding">10dp</item>
         <item name="android:paddingBottom">15dp</item>
         <item name="android:textSize">@dimen/onboarding_text_size_edit_text</item>
@@ -67,6 +68,7 @@
         <item name="android:paddingEnd">@dimen/activity_vertical_item_padding</item>
         <item name="android:background">@drawable/rounded_edges</item>
         <item name="android:textColorHint">@color/onboarding_edittext_hint_color</item>
+        <item name="android:textColor">@color/onboarding_edittext_text_color</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:padding">15dp</item>
         <item name="android:textSize">@dimen/onboarding_text_size_edit_text</item>
