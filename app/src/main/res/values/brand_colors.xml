@@ -5,8 +5,8 @@
     <color name="color_primary_dark">#DE531B</color>
     <color name="color_highlight">#3E50B4</color>
 
-    <color name="background_gradient_start">#FF8D07</color>
-    <color name="background_gradient_end">#FF742F</color>
+    <color name="background_gradient_start">#E94E1B</color>
+    <color name="background_gradient_end">#FF8213</color>
 
     <!-- Dial buttons colors -->
     <color name="dial_button_digit_color">#ffffff</color>

@@ -48,7 +48,7 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
         mobileNumberTextDialog.onTextChanged {
             button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false
         }
-        outgoingNumberTv.text = outgoingNumber
+        outgoing_number_tv.text = outgoingNumber
         button_configure.setOnClickListenerAndDisable(this)
         button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false
     }
@@ -140,5 +140,5 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
                 .show()
     }
 
-    private fun hasOutgoingNumber() = outgoingNumberTv.text.isNotEmpty()
+    private fun hasOutgoingNumber() = outgoing_number_tv.text.isNotEmpty()
 }
