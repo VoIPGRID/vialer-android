@@ -6,10 +6,7 @@ import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.onboarding.steps.*
-import com.voipgrid.vialer.onboarding.steps.permissions.ContactsPermissionStep
-import com.voipgrid.vialer.onboarding.steps.permissions.MicrophonePermissionStep
-import com.voipgrid.vialer.onboarding.steps.permissions.OptimizationWhitelistStep
-import com.voipgrid.vialer.onboarding.steps.permissions.PhoneStatePermissionStep
+import com.voipgrid.vialer.onboarding.steps.permissions.*
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
 class OnboardingActivity : Onboarder() {
@@ -19,6 +16,7 @@ class OnboardingActivity : Onboarder() {
         LoginStep(),
         AccountConfigurationStep(),
         MissingVoipAccountStep(),
+            PhonePermission(),
         ContactsPermissionStep(),
         PhoneStatePermissionStep(),
         MicrophonePermissionStep(),

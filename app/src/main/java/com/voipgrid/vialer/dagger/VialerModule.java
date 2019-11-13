@@ -207,8 +207,8 @@ public class VialerModule {
     }
 
     @Provides
-    AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager, AudioFocus audioFocus) {
-        return new AudioRouter(context, androidAudioManager, broadcastReceiverManager, audioFocus);
+    AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager, AudioFocus audioFocus, NativeCallManager nativeCallManager) {
+        return new AudioRouter(context, androidAudioManager, broadcastReceiverManager, audioFocus, nativeCallManager);
     }
 
     @Singleton

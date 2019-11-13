@@ -14,6 +14,10 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.telecom.Connection;
+import android.telecom.ConnectionRequest;
+import android.telecom.ConnectionService;
+import android.telecom.PhoneAccountHandle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -58,7 +62,7 @@ import androidx.annotation.StringDef;
  * provides a persistent interface to SIP services throughout the app.
  *
  */
-public class SipService extends Service implements CallStatusReceiver.Listener,
+public class SipService extends ConnectionService implements CallStatusReceiver.Listener,
         SipServiceTic.TicListener {
     /**
      * This will track whether this instance of SipService has ever handled a call,
@@ -104,11 +108,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     @Inject IncomingCallAlerts incomingCallAlerts;
 
     @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
-
-    @Override
     public void onCreate() {
         super.onCreate();
         mLogger = new Logger(SipService.class);
@@ -116,7 +115,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         VialerApplication.get().component().inject(this);
         AudioStateChangeReceiver.fetch();
         mLogger.d("onCreate");
-
+Log.e("TEST123", " sip service created");
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(phoneStateReceiver, TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
@@ -151,6 +150,39 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         }
 
         return START_NOT_STICKY;
+    }
+
+    @Override
+    public Connection onCreateOutgoingConnection(final PhoneAccountHandle connectionManagerPhoneAccount, final ConnectionRequest request) {
+
+        VialerConnection connection = new VialerConnection();
+        Log.e("TEST123", "number:" + request.getAddress());
+        loadSip();
+        makeCall(request.getAddress(), "", "244", true);
+        connection.setActive();
+
+        return connection;
+
+    }
+
+    @Override
+    public void onCreateOutgoingConnectionFailed(
+            final PhoneAccountHandle connectionManagerPhoneAccount,
+            final ConnectionRequest request) {
+        Log.e("TEST123", "onCreateOutgoingConnectionFailed");
+    }
+
+    @Override
+    public Connection onCreateIncomingConnection(
+            final PhoneAccountHandle connectionManagerPhoneAccount,
+            final ConnectionRequest request) {
+        return new VialerConnection();
+    }
+
+    @Override
+    public void onCreateIncomingConnectionFailed(
+            final PhoneAccountHandle connectionManagerPhoneAccount,
+            final ConnectionRequest request) {
     }
 
     /**
@@ -665,7 +697,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         public void onReceive(Context context, Intent intent) {
             try {
                 String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-
+Log.e("TEST123", "phone state:" + phoneState);
                 if (!phoneState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
                     return;
                 }

@@ -1,11 +1,21 @@
 package com.voipgrid.vialer.util;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.UserHandle;
+import android.telecom.PhoneAccount;
+import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
+import android.telecom.VideoProfile;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.R;
@@ -37,20 +47,21 @@ public class DialHelper {
         mConnectivityHelper = connectivityHelper;
     }
 
-    public static DialHelper fromActivity (Activity activity) {
+    public static DialHelper fromActivity(Activity activity) {
         ConnectivityHelper connectivityHelper = ConnectivityHelper.get(activity);
         return new DialHelper(activity, connectivityHelper);
     }
 
     public void callNumber(final String number, final String contactName) {
-        if(mConnectivityHelper.getConnectionType() == ConnectivityHelper.Connection.WIFI && User.voip.getHasEnabledSip()) {
-            if(User.userPreferences.hasConnectionPreference(
+        if (mConnectivityHelper.getConnectionType() == ConnectivityHelper.Connection.WIFI
+                && User.voip.getHasEnabledSip()) {
+            if (User.userPreferences.hasConnectionPreference(
                     UserPreferences.ConnectionPreference.ONLY_CELLULAR)) {
                 switchNetworkAndCallNumber(number, contactName);
-            } else if(User.userPreferences.hasConnectionPreference(
+            } else if (User.userPreferences.hasConnectionPreference(
                     UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI)) {
                 makeCall(number, contactName);
-            } else if(User.userPreferences.hasConnectionPreference(
+            } else if (User.userPreferences.hasConnectionPreference(
                     UserPreferences.ConnectionPreference.SHOW_POPUP_BEFORE_EVERY_CALL)) {
                 showConnectionPickerDialog(number, contactName);
             }
@@ -61,7 +72,8 @@ public class DialHelper {
 
     private void switchNetworkAndCallNumber(final String number, final String contactName) {
         mConnectivityHelper.attemptUsingLTE(mContext, mMaximumNetworkSwitchDelay);
-        Toast.makeText(mContext, mContext.getString(R.string.connection_preference_switch_toast), Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext, mContext.getString(R.string.connection_preference_switch_toast),
+                Toast.LENGTH_LONG).show();
         new Handler().postDelayed(() -> makeCall(number, contactName), mMaximumNetworkSwitchDelay);
     }
 
@@ -115,7 +127,7 @@ public class DialHelper {
      * Dial number requested before the first microphone permission.
      */
     public void callAttemptedNumber() {
-        if(sNumberAttemptedToCall == null) return;
+        if (sNumberAttemptedToCall == null) return;
         makeCall(sNumberAttemptedToCall, "");
         sNumberAttemptedToCall = null;
     }
@@ -126,24 +138,44 @@ public class DialHelper {
      * @param contactName
      */
     private void callWithSip(String number, String contactName) {
-        Intent intent = new Intent(mContext, SipService.class);
-        intent.setAction(SipService.Actions.HANDLE_OUTGOING_CALL);
+        TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
+        PhoneAccountHandle phoneAccountHandle = new PhoneAccountHandle(new ComponentName(mContext, SipService.class), "535353535");
+        Bundle extras = new Bundle();
+        extras.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false);
+        extras.putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE,
+                VideoProfile.STATE_AUDIO_ONLY);
+        extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle);
 
-        // set a phoneNumberUri as DATA for the intent to SipServiceOld.
-        Uri sipAddressUri = SipUri.sipAddressUri(
-                mContext,
-                PhoneNumberUtils.format(number)
-        );
-        intent.setData(sipAddressUri);
 
-        intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, number);
-        intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, contactName);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mContext.startForegroundService(intent);
-        } else {
-            mContext.startService(intent);
+        if (mContext.checkSelfPermission(Manifest.permission.CALL_PHONE)
+                == PackageManager.PERMISSION_GRANTED) {
+            telecomManager.registerPhoneAccount(PhoneAccount.builder(phoneAccountHandle, "Vialer").setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED).build());
+            telecomManager.placeCall(SipUri.sipAddressUri(mContext, PhoneNumberUtils.format(number)), extras);
+            Log.e("TEST123", "placed call.");
+            return;
         }
+
+
+
+
+//        Intent intent = new Intent(mContext, SipService.class);
+//        intent.setAction(SipService.Actions.HANDLE_OUTGOING_CALL);
+//
+//        // set a phoneNumberUri as DATA for the intent to SipServiceOld.
+//        Uri sipAddressUri = SipUri.sipAddressUri(
+//                mContext,
+//                PhoneNumberUtils.format(number)
+//        );
+//        intent.setData(sipAddressUri);
+//
+//        intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, number);
+//        intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, contactName);
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            mContext.startForegroundService(intent);
+//        } else {
+//            mContext.startService(intent);
+//        }
     }
 
     /**

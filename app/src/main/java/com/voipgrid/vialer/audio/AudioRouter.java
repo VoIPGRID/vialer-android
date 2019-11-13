@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.voipgrid.vialer.bluetooth.BluetoothMediaSessionService;
+import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
@@ -36,6 +37,7 @@ public class AudioRouter {
     private final Logger logger;
     private final AudioManager audioManager;
     private final AudioFocus audioFocus;
+    private final NativeCallManager nativeCallManager;
 
     private BluetoothDevice connectedBluetoothHeadset;
 
@@ -50,13 +52,14 @@ public class AudioRouter {
 
     private BluetoothHeadsetBroadcastReceiver bluetoothHeadsetReceiver = new BluetoothHeadsetBroadcastReceiver();
 
-    public AudioRouter(Context context, AudioManager audioManager, BroadcastReceiverManager broadcastReceiverManager, AudioFocus audioFocus) {
+    public AudioRouter(Context context, AudioManager audioManager, BroadcastReceiverManager broadcastReceiverManager, AudioFocus audioFocus, NativeCallManager nativeCallManager) {
         this.audioFocus = audioFocus;
         this.logger = new Logger(AudioRouter.class);
         this.context = context;
         this.broadcastReceiverManager = broadcastReceiverManager;
         this.audioManager = audioManager;
         this.bluetooth = new Bluetooth(audioManager);
+        this.nativeCallManager = nativeCallManager;
 
         broadcastReceiverManager.unregisterReceiver(bluetoothHeadsetReceiver);
         broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(bluetoothHeadsetReceiver, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
@@ -302,7 +305,7 @@ public class AudioRouter {
                 logger.i("Bluetooth headset detected with name: " + bluetoothDevice.getName() + ", address: " + bluetoothDevice.getAddress() + ", and class: " + bluetoothDevice.getBluetoothClass().toString());
             }
 
-            if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED && !bluetoothManuallyDisabled && isBluetoothRouteAvailable()) {
+            if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED && !bluetoothManuallyDisabled && isBluetoothRouteAvailable() && !nativeCallManager.isBusyWithNativeCall()) {
                 logger.i("This state suggests the user has pressed a button, reconnecting bluetooth and performing a single button action on the current call");
                 SipService.performActionOnSipService(context, SipService.Actions.ANSWER_OR_HANGUP);
                 routeAudioViaBluetooth();
