@@ -82,7 +82,8 @@
     <!-- Configure fragment values. -->
     <string name="configure_button_title">Instellen</string>
     <string name="configure_header_label_text">Account \nconfiguratie</string>
-    <string name="phonenumber_edittext_hint">Mobiel nummer</string>
+    <string name="phonenumber_prefix_edittext_hint">Kengetal</string>
+    <string name="phonenumber_edittext_hint">Telefoonnummer</string>
     <string name="outgoingnumber_edittext_hint">Uitgaand nummer</string>
     <string name="phonenumber_info_text_title">Mobiele telefoonnummer</string>
     <string name="phonenumber_info_text">Om Twee stap bellen mogelijk te maken, hebben we je mobiele nummer nodig.</string>
