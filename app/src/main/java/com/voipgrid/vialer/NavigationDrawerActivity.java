@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,7 +67,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     private SystemUser mSystemUser;
 
     private String mSelectedUserDestinationId;
-    private boolean mFirstTimeOnItemSelected = true;
 
     @Inject UserSynchronizer userSynchronizer;
 
@@ -168,8 +168,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         if (mSystemUser == null) {
             return;
         }
-
-        refresh();
 
         if (!isConnectedToNetwork()) return;
 
@@ -307,6 +305,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         mSpinnerAdapter.add(addDestination);
 
         mSpinnerAdapter.notifyDataSetChanged();
+        mSpinner.setTag(activeIndex);
         mSpinner.setSelection(activeIndex);
     }
 
@@ -371,6 +370,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if ((Integer) mSpinner.getTag() == position) return;
+
         if (!isConnectedToNetwork()) {
             refresh();
             if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
@@ -378,26 +379,23 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             }
         }
 
-        if (mFirstTimeOnItemSelected) {
-            mFirstTimeOnItemSelected = false;
+        if (parent.getCount() - 1 == position) {
+            VoIPGRIDPortalWebActivity.launchForUserDestinations(this);
         } else {
-            if (parent.getCount() - 1 == position) {
-                VoIPGRIDPortalWebActivity.launchForUserDestinations(this);
-            } else {
-                Destination destination = (Destination) parent.getAdapter().getItem(position);
-                if (destination.getDescription().equals(getString(R.string.not_available))) {
-                    MiddlewareHelper.unregister(this);
-                }
-                SelectedUserDestinationParams params = new SelectedUserDestinationParams();
-                params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
-                params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
-                Call<Object> call = ServiceGenerator.createApiService(this).setSelectedUserDestination(mSelectedUserDestinationId, params);
-                call.enqueue(this);
-                if (!MiddlewareHelper.isRegistered()) {
-                    // If the previous destination was not available, or if we're not registered
-                    // for another reason, register again.
-                    MiddlewareHelper.registerAtMiddleware(this);
-                }
+            Destination destination = (Destination) parent.getAdapter().getItem(position);
+            if (destination.getDescription().equals(getString(R.string.not_available))) {
+                MiddlewareHelper.unregister(this);
+            }
+            SelectedUserDestinationParams params = new SelectedUserDestinationParams();
+            params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
+            params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
+            Call<Object> call = ServiceGenerator.createApiService(this).setSelectedUserDestination(mSelectedUserDestinationId, params);
+            call.enqueue(this);
+            Log.e("TEST123", "SEnding request");
+            if (!MiddlewareHelper.isRegistered()) {
+                // If the previous destination was not available, or if we're not registered
+                // for another reason, register again.
+                MiddlewareHelper.registerAtMiddleware(this);
             }
         }
     }

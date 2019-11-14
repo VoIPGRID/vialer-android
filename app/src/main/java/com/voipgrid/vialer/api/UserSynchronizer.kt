@@ -106,7 +106,7 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
         val response = voipgridApi.fetchDestinations().execute()
 
         if (!response.isSuccessful) {
-            logger.e("Unable to retrieve sync user destinations")
+            logger.e("Unable to retrieve sync user destinations: " + response.code())
             return@withContext
         }
 
