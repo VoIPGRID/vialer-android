@@ -22,8 +22,8 @@ abstract class VialerTest {
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.READ_PHONE_STATE, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_CONTACTS)
 
     protected fun enterMobileNumber(number: String = "+447123463890") {
-        onView(withId(R.id.mobileNumberTextDialog)).perform(replaceText(""))
-        onView(withId(R.id.mobileNumberTextDialog)).perform(typeText(number))
+        onView(withId(R.id.mobile_number_text_dialog_prefix)).perform(replaceText(""))
+        onView(withId(R.id.mobile_number_text_dialog_prefix)).perform(typeText(number))
         onView(withId(R.id.button_configure)).check(matches(ViewMatchers.isEnabled()))
         onView(withId(R.id.button_configure)).perform(click())
         Thread.sleep(2000)
