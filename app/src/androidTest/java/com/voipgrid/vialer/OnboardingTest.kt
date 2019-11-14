@@ -52,7 +52,7 @@ class OnboardingTest : VialerTest() {
     @Test
     fun itWillNotAllowConfigurationWithoutAMobileNumber() {
         login()
-        onView(withId(R.id.mobileNumberTextDialog)).perform(replaceText(""))
+        onView(withId(R.id.mobile_number_text_dialog_prefix)).perform(replaceText(""))
         onView(withId(R.id.button_configure)).check(matches(not(isEnabled())))
     }
 
