@@ -41,27 +41,27 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
             return
         }
 
-        mobileNumberTextDialog.setText(User.voipgridUser?.mobileNumber)
-        mobileNumberTextDialog.setRightDrawableOnClickListener {
+        mobile_number_text_dialog.setText(User.voipgridUser?.mobileNumber)
+        mobile_number_text_dialog.setRightDrawableOnClickListener {
             alert(R.string.phonenumber_info_text_title, R.string.phonenumber_info_text)
         }
-        mobileNumberTextDialog.onTextChanged {
-            button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false
+        mobile_number_text_dialog.onTextChanged {
+            button_configure.isEnabled = mobile_number_text_dialog.text?.isNotEmpty() ?: false
         }
         outgoing_number_tv.text = outgoingNumber
         button_configure.setOnClickListenerAndDisable(this)
-        button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false
+        button_configure.isEnabled = mobile_number_text_dialog.text?.isNotEmpty() ?: false
     }
 
     override fun onClick(view: View?) {
-        val mobileNumber = mobileNumberTextDialog.text.toString()
+        val mobileNumber = mobile_number_text_dialog.text.toString()
 
         if (!PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
             error(R.string.invalid_mobile_number_message, R.string.invalid_mobile_number_message)
             return
         }
 
-        mobileNumberTextDialog.clearFocus()
+        mobile_number_text_dialog.clearFocus()
 
         val formattedMobileNumber = PhoneNumberUtils.format(mobileNumber)
 

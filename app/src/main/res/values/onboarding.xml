@@ -87,6 +87,8 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textSize">@dimen/onboarding_text_size_button</item>
+        <item name="android:paddingTop">@dimen/onboarding_button_padding</item>
+        <item name="android:paddingBottom">@dimen/onboarding_button_padding</item>
     </style>
 
     <!-- Style for Header TextViews -->
@@ -112,5 +114,13 @@
     <style name="DescriptionTextViewStyle" parent="@android:style/Widget.TextView">
         <item name="android:textColor">@color/onboarding_header_textview_color</item>
         <item name="android:textSize">20sp</item>
+    </style>
+
+    <!-- Style for Forgot password description TextView -->
+    <style name="HintTextStyle" parent="@android:style/Widget.TextView">
+        <item name="android:textColor">@color/onboarding_header_textview_color</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">sans-serif-light</item>
     </style>
 </resources>
