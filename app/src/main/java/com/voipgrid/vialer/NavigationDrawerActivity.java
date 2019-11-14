@@ -11,7 +11,6 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -253,9 +252,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     @Override
     public void onFailure(@NonNull Call call, @NonNull Throwable t) {
-        if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
-            Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
-        }
+
     }
 
     private void refresh() {
@@ -391,7 +388,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
             Call<Object> call = ServiceGenerator.createApiService(this).setSelectedUserDestination(mSelectedUserDestinationId, params);
             call.enqueue(this);
-            Log.e("TEST123", "SEnding request");
+
             if (!MiddlewareHelper.isRegistered()) {
                 // If the previous destination was not available, or if we're not registered
                 // for another reason, register again.
