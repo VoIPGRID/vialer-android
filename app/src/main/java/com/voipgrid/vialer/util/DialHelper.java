@@ -150,7 +150,8 @@ public class DialHelper {
         if (mContext.checkSelfPermission(Manifest.permission.CALL_PHONE)
                 == PackageManager.PERMISSION_GRANTED) {
             telecomManager.registerPhoneAccount(PhoneAccount.builder(phoneAccountHandle, "Vialer").setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED).build());
-            telecomManager.placeCall(SipUri.sipAddressUri(mContext, PhoneNumberUtils.format(number)), extras);
+            Uri uri = Uri.fromParts(PhoneAccount.SCHEME_SIP, number, null);
+            telecomManager.placeCall(uri, extras);
             Log.e("TEST123", "placed call.");
             return;
         }
