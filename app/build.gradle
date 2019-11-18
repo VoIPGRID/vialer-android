@@ -16,7 +16,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 187
-        versionName "6.4.3"
+        versionName "6.4.4"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {
