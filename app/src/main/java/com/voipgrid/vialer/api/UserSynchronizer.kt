@@ -28,6 +28,8 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
 
         val voipgridUser = User.voipgridUser ?: return
 
+        syncUserDestinations()
+
         if (!voipgridUser.hasVoipAccount()) {
             handleMissingVoipAccount()
             return
@@ -39,8 +41,6 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
             secureCalling.updateApiBasedOnCurrentPreferenceSetting()
             MiddlewareHelper.registerAtMiddleware(context)
         }
-
-        syncUserDestinations()
     }
 
     /**
