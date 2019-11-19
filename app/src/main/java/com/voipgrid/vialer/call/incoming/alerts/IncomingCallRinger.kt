@@ -7,10 +7,9 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.provider.Settings
 import com.voipgrid.vialer.User
-import com.voipgrid.vialer.audio.AudioFocus
 import com.voipgrid.vialer.logging.Logger
 
-class IncomingCallRinger(private val context : Context, private val focus: AudioFocus) : IncomingCallAlert, MediaPlayer.OnPreparedListener {
+class IncomingCallRinger(private val context : Context) : IncomingCallAlert, MediaPlayer.OnPreparedListener {
 
     private var logger = Logger(this)
 
@@ -30,8 +29,6 @@ class IncomingCallRinger(private val context : Context, private val focus: Audio
         if (manager.ringerMode != AudioManager.RINGER_MODE_NORMAL || player != null) return
 
         player = MediaPlayer()
-
-        focus.forRinger()
 
         logger.i("Starting ringer")
 

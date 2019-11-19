@@ -76,7 +76,7 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
         }
 
         try {
-            mSipServiceConnection.get().getCurrentCall().hangup(true);
+            mSipServiceConnection.get().getConnection().onDisconnect();
             mLogger.i("The user hang up from Network Availability Activity");
         } catch (Exception e) {
             mLogger.i("Failed to decline call "+e.getClass().getSimpleName()+e.getMessage());

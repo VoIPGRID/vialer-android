@@ -22,8 +22,6 @@ import com.voipgrid.vialer.api.UserSynchronizer;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.audio.AudioFocus;
-import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
@@ -206,11 +204,6 @@ public class VialerModule {
         return new IncomingCallVibration(audioManager, vibrator);
     }
 
-    @Provides
-    AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager, AudioFocus audioFocus, NativeCallManager nativeCallManager) {
-        return new AudioRouter(context, androidAudioManager, broadcastReceiverManager, audioFocus, nativeCallManager);
-    }
-
     @Singleton
     @Provides
     IncomingCallAlerts incomingCallAlerts(IncomingCallVibration vibration, IncomingCallRinger ringer, IncomingCallScreenWake incomingCallScreenWake) {
@@ -231,14 +224,8 @@ public class VialerModule {
 
     @Singleton
     @Provides
-    IncomingCallRinger provideRinger(Context context, AudioFocus audioFocus) {
-        return new IncomingCallRinger(context, audioFocus);
-    }
-
-    @Singleton
-    @Provides
-    AudioFocus provideAudioFocus(AudioManager audioManager) {
-        return new AudioFocus(audioManager);
+    IncomingCallRinger provideRinger(Context context) {
+        return new IncomingCallRinger(context);
     }
 
     @Provides

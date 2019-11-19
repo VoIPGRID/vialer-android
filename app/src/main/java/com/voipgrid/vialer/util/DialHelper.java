@@ -25,6 +25,7 @@ import com.voipgrid.vialer.persistence.UserPreferences;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
+import com.voipgrid.vialer.sip.TelecomService;
 import com.voipgrid.vialer.twostepcall.TwoStepCallActivity;
 
 import androidx.appcompat.app.AlertDialog;
@@ -139,7 +140,7 @@ public class DialHelper {
      */
     private void callWithSip(String number, String contactName) {
         TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
-        PhoneAccountHandle phoneAccountHandle = new PhoneAccountHandle(new ComponentName(mContext, SipService.class), "535353535");
+        PhoneAccountHandle phoneAccountHandle = new PhoneAccountHandle(new ComponentName(mContext, TelecomService.class), "535353535");
         Bundle extras = new Bundle();
         extras.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false);
         extras.putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE,
@@ -154,29 +155,9 @@ public class DialHelper {
             telecomManager.placeCall(uri, extras);
             Log.e("TEST123", "placed call.");
             return;
+        } else {
+            Log.e("TEST123", "No permissin!!!");
         }
-
-
-
-
-//        Intent intent = new Intent(mContext, SipService.class);
-//        intent.setAction(SipService.Actions.HANDLE_OUTGOING_CALL);
-//
-//        // set a phoneNumberUri as DATA for the intent to SipServiceOld.
-//        Uri sipAddressUri = SipUri.sipAddressUri(
-//                mContext,
-//                PhoneNumberUtils.format(number)
-//        );
-//        intent.setData(sipAddressUri);
-//
-//        intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, number);
-//        intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, contactName);
-//
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            mContext.startForegroundService(intent);
-//        } else {
-//            mContext.startService(intent);
-//        }
     }
 
     /**

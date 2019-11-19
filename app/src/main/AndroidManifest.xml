@@ -146,12 +146,6 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".bluetooth.BluetoothMediaSessionService" >
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </service>
-
 
         <activity
             android:name=".SettingsActivity"

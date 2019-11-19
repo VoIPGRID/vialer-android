@@ -1,9 +1,14 @@
 package com.voipgrid.vialer.sip;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Bundle;
+import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
+import android.telecom.VideoProfile;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -206,9 +211,8 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public void answer() throws Exception {
-        CallOpParam callOpParam = new CallOpParam(true);
-        callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_ACCEPTED);
-        super.answer(callOpParam);
+        Log.e("TEST123", "ANSWERED!!!");
+        answerWithCode(pjsip_status_code.PJSIP_SC_ACCEPTED);
         mCallIsConnected = true;
     }
 
@@ -224,22 +228,29 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public void toggleHold() throws Exception {
-        CallOpParam callOpParam = new CallOpParam(true);
         if (!this.isOnHold()) {
-            super.setHold(callOpParam);
-            this.setIsOnHold(true);
-
-            mCurrentCallState = SipConstants.CALL_PUT_ON_HOLD_ACTION;
-            mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_PUT_ON_HOLD_ACTION);
+            putOnHold();
         } else {
-            CallSetting callSetting = callOpParam.getOpt();
-            callSetting.setFlag(pjsua_call_flag.PJSUA_CALL_UNHOLD.swigValue());
-            super.reinvite(callOpParam);
-            this.setIsOnHold(false);
-
-            mCurrentCallState = SipConstants.CALL_UNHOLD_ACTION;
-            mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_UNHOLD_ACTION);
+            takeOffHold();
         }
+    }
+
+    public void putOnHold() throws Exception {
+        CallOpParam callOpParam = new CallOpParam(true);
+        super.setHold(callOpParam);
+        this.setIsOnHold(true);
+        mCurrentCallState = SipConstants.CALL_PUT_ON_HOLD_ACTION;
+        mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_PUT_ON_HOLD_ACTION);
+    }
+
+    public void takeOffHold() throws Exception {
+        CallOpParam callOpParam = new CallOpParam(true);
+        CallSetting callSetting = callOpParam.getOpt();
+        callSetting.setFlag(pjsua_call_flag.PJSUA_CALL_UNHOLD.swigValue());
+        super.reinvite(callOpParam);
+        this.setIsOnHold(false);
+        mCurrentCallState = SipConstants.CALL_UNHOLD_ACTION;
+        mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_UNHOLD_ACTION);
     }
 
     /**
@@ -470,7 +481,15 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
         setCallerId(incomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME));
         setPhoneNumber(incomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER));
-        mSipService.informUserAboutIncomingCall(getPhoneNumber(), getCallerId());
+
+        TelecomManager telecomManager = getSipService().getSystemService(TelecomManager.class);
+        PhoneAccountHandle phoneAccountHandle = new PhoneAccountHandle(new ComponentName(getSipService(), TelecomService.class), "535353535");
+        Bundle extras = new Bundle();
+        extras.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false);
+        extras.putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE,
+                VideoProfile.STATE_AUDIO_ONLY);
+        extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle);
+        telecomManager.addNewIncomingCall(phoneAccountHandle, extras);
     }
 
     /**
@@ -593,7 +612,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
             mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_MEDIA_AVAILABLE_MESSAGE);
         } catch (Exception e) {
-
             mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_MEDIA_FAILED);
             e.printStackTrace();
         }

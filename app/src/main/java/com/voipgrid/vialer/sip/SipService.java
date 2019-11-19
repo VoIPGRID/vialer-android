@@ -6,18 +6,19 @@ import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.telecom.Connection;
-import android.telecom.ConnectionRequest;
-import android.telecom.ConnectionService;
 import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
+import android.telecom.VideoProfile;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -27,7 +28,6 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
@@ -35,7 +35,6 @@ import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
-import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
@@ -87,7 +86,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
 
     private Logger mLogger;
     private SipBroadcaster mSipBroadcaster;
-    private final BroadcastReceiver phoneStateReceiver = new PhoneStateReceiver();
     private Runnable mRingbackRunnable = new OutgoingCallRinger();
     private final IBinder mBinder = new SipServiceBinder();
     private CheckServiceIsRunning mCheckService = new CheckServiceIsRunning();
@@ -97,7 +95,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
     private SipServiceTic tic = new SipServiceTic(this);
 
-    private PjsipConnection connection;
+    private VialerConnection connection;
 
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
@@ -106,7 +104,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     @Inject protected NetworkConnectivity mNetworkConnectivity;
     @Inject protected NativeCallManager mNativeCallManager;
     @Inject @Nullable protected PhoneAccount mPhoneAccount;
-    @Inject AudioRouter audioRouter;
     @Inject IncomingCallAlerts incomingCallAlerts;
 
     @Override
@@ -117,14 +114,14 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         VialerApplication.get().component().inject(this);
         AudioStateChangeReceiver.fetch();
         mLogger.d("onCreate");
-Log.e("TEST123", " sip service created");
-        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(phoneStateReceiver, TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
         mCheckService.start();
         changeNotification(callNotification);
         tic.begin();
+        VialerConnection.Companion.setVoip(this);
     }
 
     @Override
@@ -177,8 +174,7 @@ Log.e("TEST123", " sip service created");
             return true;
         }
         else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
-            incomingCallAlerts.stop();
-            mCurrentCall.decline();
+            connection.onReject();
         }
         else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
             if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
@@ -187,18 +183,10 @@ Log.e("TEST123", " sip service created");
                 return false;
             }
 
-            incomingCallAlerts.stop();
-            mCurrentCall.answer();
+            connection.onAnswer();
         }
         else if (Actions.END_CALL.equals(action)) {
-            mCurrentCall.hangup(true);
-        }
-        else if (Actions.ANSWER_OR_HANGUP.equals(action)) {
-            if (mCurrentCall.isCallRinging()) {
-                mCurrentCall.answer();
-            } else if (mCurrentCall.isConnected()) {
-                mCurrentCall.hangup(true);
-            }
+            connection.onDisconnect();
         }
         else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
             if (getCurrentCall() != null) {
@@ -224,7 +212,6 @@ Log.e("TEST123", " sip service created");
         mLogger.d("incomingCall");
         mIncomingCallDetails = intent;
         loadSip();
-        performPostCallCreationActions();
     }
 
     /**
@@ -246,17 +233,6 @@ Log.e("TEST123", " sip service created");
                 this.intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
                 true
         );
-        performPostCallCreationActions();
-    }
-
-    /**
-     * Actions to perform when a call has been created, that being outgoing or incoming.
-     *
-     */
-    private void performPostCallCreationActions() {
-        if (audioRouter.isBluetoothRouteAvailable() && !audioRouter.isCurrentlyRoutingAudioViaBluetooth()) {
-            audioRouter.routeAudioViaBluetooth();
-        }
     }
 
     /**
@@ -289,7 +265,6 @@ Log.e("TEST123", " sip service created");
     public void onDestroy() {
         mLogger.d("onDestroy");
 
-        audioRouter.destroy();
         incomingCallAlerts.stop();
         tic.stop();
 
@@ -301,7 +276,7 @@ Log.e("TEST123", " sip service created");
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
-        mBroadcastReceiverManager.unregisterReceiver(phoneStateReceiver, mNetworkConnectivity, callStatusReceiver, screenOffReceiver);
+        mBroadcastReceiverManager.unregisterReceiver(mNetworkConnectivity, callStatusReceiver, screenOffReceiver);
 
         mHandler.removeCallbacks(mCheckService);
 
@@ -351,14 +326,6 @@ Log.e("TEST123", " sip service created");
         makeCall(number, contactName, phoneNumber, false);
     }
 
-    public void makeCall(String phoneNumber, String contactName) {
-        makeCall(
-                SipUri.sipAddressUri(this, PhoneNumberUtils.format(phoneNumber)),
-                contactName,
-                phoneNumber
-        );
-    }
-
     /**
      * Function to make a call with or without starting a activity.
      * @param number
@@ -394,16 +361,6 @@ Log.e("TEST123", " sip service created");
         );
 
         changeNotification(callNotification.outgoing(sipCall));
-    }
-
-    /**
-     * Start the activity for a incoming call.
-     * @param number
-     * @param callerId
-     */
-    public void informUserAboutIncomingCall(String number, String callerId) {
-        changeNotification(callNotification.incoming(number, callerId));
-        incomingCallAlerts.start();
     }
 
     /**
@@ -461,6 +418,7 @@ Log.e("TEST123", " sip service created");
 
     public void startCallActivity(Uri sipAddressUri, @CallingConstants.CallTypes String type, String callerId, String number, Class activity) {
         mLogger.d("callVisibleForUser");
+        Log.e("TEST123", "Starting call activity");
         startActivity(AbstractCallActivity.createIntentForCallActivity(
                 this,
                 activity,
@@ -573,7 +531,6 @@ Log.e("TEST123", " sip service created");
 
         if (getCurrentCall().isOutgoing()) {
             mLogger.i("Call has connected, it is an outbound call so just changing audio focus");
-            audioRouter.focus();
             return;
         }
 
@@ -589,7 +546,6 @@ Log.e("TEST123", " sip service created");
 
         incomingCallAlerts.stop();
         changeNotification(callNotification.active(getCurrentCall()));
-        audioRouter.focus();
     }
 
     @Override
@@ -622,10 +578,6 @@ Log.e("TEST123", " sip service created");
 
     }
 
-    public AudioRouter getAudioRouter() {
-        return audioRouter;
-    }
-
     /**
      * This method will be called every "tic"
      *
@@ -637,10 +589,6 @@ Log.e("TEST123", " sip service created");
         SipCall call = getCurrentCall();
 
         refreshCallAlerts(call);
-
-        if (call.isConnected()) {
-            audioRouter.focus();
-        }
     }
 
     /**
@@ -664,6 +612,10 @@ Log.e("TEST123", " sip service created");
         }
     }
 
+    public VialerConnection getConnection() {
+        return connection;
+    }
+
     /**
      * Class the be able to bind a activity to this service.
      */
@@ -674,42 +626,6 @@ Log.e("TEST123", " sip service created");
         }
     }
 
-    private class PhoneStateReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            try {
-                String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-Log.e("TEST123", "phone state:" + phoneState);
-                if (!phoneState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
-                    return;
-                }
-
-                // When the native call has been picked up and there is a current call in the ringing state
-                // Then decline the current call.
-                mLogger.i("Native call is picked up.");
-                mLogger.i("Is there an active call: " + (mCurrentCall != null));
-
-                if (mCurrentCall == null) {
-                    return;
-                }
-
-                mLogger.i("Current call state: " + mCurrentCall.getCurrentCallState());
-
-                if (mCurrentCall.isCallRinging() || mCurrentCall.getCurrentCallState().equals(SipConstants.CALL_INVALID_STATE)) {
-                    mLogger.i("Our call is still ringing. So decline it.");
-                    mCurrentCall.decline();
-                    return;
-                }
-
-                if (mCurrentCall.isConnected() && !mCurrentCall.isOnHold()) {
-                    mLogger.i("Call was not on hold already. So put call on hold.");
-                    mCurrentCall.toggleHold();
-                }
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     private class OutgoingCallRinger implements Runnable {
         @Override
@@ -729,10 +645,10 @@ Log.e("TEST123", "phone state:" + phoneState);
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            mLogger.i("Detected screen off event, disabling call alert");
-
-            incomingCallAlerts.stop();
-            incomingAlertsMuted = true;
+//            mLogger.i("Detected screen off event, disabling call alert");
+//
+//            incomingCallAlerts.stop();
+//            incomingAlertsMuted = true;
         }
     }
 
@@ -780,7 +696,7 @@ Log.e("TEST123", "phone state:" + phoneState);
         stopSelf();
     }
 
-    public void setConnection(PjsipConnection connection) {
+    public void setConnection(VialerConnection connection) {
         this.connection = connection;
         Log.e("TEST123", "Set a connection!!!");
     }

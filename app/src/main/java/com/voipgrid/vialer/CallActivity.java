@@ -1,5 +1,9 @@
 package com.voipgrid.vialer;
 
+import static android.telecom.CallAudioState.ROUTE_BLUETOOTH;
+import static android.telecom.CallAudioState.ROUTE_SPEAKER;
+import static android.telecom.CallAudioState.ROUTE_WIRED_OR_EARPIECE;
+
 import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
@@ -16,6 +20,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.telecom.CallAudioState;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,6 +53,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import kotlin.Unit;
 
 
 /**
@@ -125,7 +132,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
           NetworkAvailabilityActivity.start();
         }
 
-        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(updateUiReceiver, BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED, Intent.ACTION_HEADSET_PLUG);
+        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(updateUiReceiver, "VialerConnection");
     }
 
     @Override
@@ -266,12 +273,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
         getLogger().d("toggleSpeaker");
-        if (!getAudioRouter().isCurrentlyRoutingAudioViaSpeaker()) {
-            getAudioRouter().routeAudioViaSpeaker();
-        } else {
-            getAudioRouter().routeAudioViaEarpiece();
-        }
-        updateUi();
+        mSipServiceConnection.get().getConnection().setAudioRoute(!isOnSpeaker() ? ROUTE_SPEAKER : ROUTE_WIRED_OR_EARPIECE);
     }
 
     // Toggle the hold the call when the user presses the button.
@@ -305,7 +307,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         }
 
         try {
-            mSipServiceConnection.get().getCurrentCall().hangup(true);
+            mSipServiceConnection.get().getConnection().onDisconnect();
             updateUi();
         } catch (Exception ignored) { }
         finally {
@@ -353,12 +355,16 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @OnClick(R.id.button_speaker)
     public void onAudioSourceButtonClick(View view) {
-        if (!getAudioRouter().isBluetoothRouteAvailable()) {
+        if (!isBluetoothRouteAvailable()) {
             toggleSpeaker();
             return;
         }
 
-        BluetoothDevice bluetoothDevice = getAudioRouter().getConnectedBluetoothHeadset();
+        BluetoothDevice bluetoothDevice = null;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            bluetoothDevice = getSipServiceConnection().get().getConnection().getCallAudioState().getActiveBluetoothDevice();
+        }
 
         PopupMenu popup = new PopupMenu(this, view);
         MenuInflater inflater = popup.getMenuInflater();
@@ -411,15 +417,15 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.audio_source_option_phone:
-                getAudioRouter().routeAudioViaEarpiece();
+                getSipServiceConnection().get().getConnection().setAudioRoute(ROUTE_WIRED_OR_EARPIECE);
                 break;
 
             case R.id.audio_source_option_speaker:
-                getAudioRouter().routeAudioViaSpeaker();
+                getSipServiceConnection().get().getConnection().setAudioRoute(ROUTE_SPEAKER);
                 break;
 
             case R.id.audio_source_option_bluetooth:
-                getAudioRouter().routeAudioViaBluetooth();
+                getSipServiceConnection().get().getConnection().setAudioRoute(ROUTE_BLUETOOTH);
                 break;
         }
 
@@ -570,7 +576,11 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     }
 
     public boolean isOnSpeaker() {
-        return getAudioRouter().isCurrentlyRoutingAudioViaSpeaker();
+        return getAudioRoute() == ROUTE_SPEAKER;
+    }
+
+    public int getAudioRoute() {
+        return getSipServiceConnection().get().getConnection().getCallAudioState().getRoute();
     }
 
     @Override
@@ -605,6 +615,15 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         return mForceDisplayedCallDetails;
     }
 
+
+    public boolean isBluetoothRouteAvailable() {
+        return (getSipServiceConnection().get().getConnection().getCallAudioState().getSupportedRouteMask() & ROUTE_BLUETOOTH) == ROUTE_BLUETOOTH;
+    }
+
+    public boolean isCurrentlyRoutingAudioViaBluetooth() {
+        return getAudioRoute() == ROUTE_BLUETOOTH;
+    }
+
     /**
      * Check if the primary call is on hold.
      *
@@ -626,6 +645,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
+            Log.e("TEST123", "Receive!");
             runOnUiThread(CallActivity.this::updateUi);
         }
     }

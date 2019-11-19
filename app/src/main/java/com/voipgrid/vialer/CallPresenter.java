@@ -142,12 +142,13 @@ public class CallPresenter {
 
         int image = R.drawable.ic_volume_on_enabled;
         int text = R.string.speaker_label;
-
-        if (mActivity.getAudioRouter().isBluetoothRouteAvailable()) {
+Log.e("TEST123", "isBluetoothRouteAvailable:" + mActivity.isBluetoothRouteAvailable());
+Log.e("TEST123", "Route:" + mActivity.getAudioRoute());
+        if (mActivity.isBluetoothRouteAvailable()) {
             if (mActivity.isOnSpeaker()) {
                 image = R.drawable.audio_source_dropdown_speaker;
                 text = R.string.speaker_label;
-            } else if (mActivity.getAudioRouter().isCurrentlyRoutingAudioViaBluetooth()) {
+            } else if (mActivity.isCurrentlyRoutingAudioViaBluetooth()) {
                 image = R.drawable.audio_source_dropdown_bluetooth;
                 text = R.string.audio_source_option_bluetooth;
             } else {
