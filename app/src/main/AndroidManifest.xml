@@ -55,8 +55,9 @@
         android:theme="@style/AppTheme">
         <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="${enableCrashReporting}" />
 
-        <service android:name=".sip.SipService"
-            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+        <service android:name=".sip.SipService"/>
+
+        <service android:name=".sip.TelecomService" android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
             <intent-filter>
                 <action android:name="android.telecom.ConnectionService" />
             </intent-filter>
@@ -150,6 +151,7 @@
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </service>
+
 
         <activity
             android:name=".SettingsActivity"

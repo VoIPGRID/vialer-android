@@ -62,7 +62,7 @@ import androidx.annotation.StringDef;
  * provides a persistent interface to SIP services throughout the app.
  *
  */
-public class SipService extends ConnectionService implements CallStatusReceiver.Listener,
+public class SipService extends Service implements CallStatusReceiver.Listener,
         SipServiceTic.TicListener {
     /**
      * This will track whether this instance of SipService has ever handled a call,
@@ -96,6 +96,8 @@ public class SipService extends ConnectionService implements CallStatusReceiver.
     private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
     private SipServiceTic tic = new SipServiceTic(this);
+
+    private PjsipConnection connection;
 
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
@@ -150,39 +152,6 @@ Log.e("TEST123", " sip service created");
         }
 
         return START_NOT_STICKY;
-    }
-
-    @Override
-    public Connection onCreateOutgoingConnection(final PhoneAccountHandle connectionManagerPhoneAccount, final ConnectionRequest request) {
-
-        VialerConnection connection = new VialerConnection();
-        Log.e("TEST123", "number:" + request.getAddress());
-        loadSip();
-        makeCall(request.getAddress(), "", "244", true);
-        connection.setActive();
-
-        return connection;
-
-    }
-
-    @Override
-    public void onCreateOutgoingConnectionFailed(
-            final PhoneAccountHandle connectionManagerPhoneAccount,
-            final ConnectionRequest request) {
-        Log.e("TEST123", "onCreateOutgoingConnectionFailed");
-    }
-
-    @Override
-    public Connection onCreateIncomingConnection(
-            final PhoneAccountHandle connectionManagerPhoneAccount,
-            final ConnectionRequest request) {
-        return new VialerConnection();
-    }
-
-    @Override
-    public void onCreateIncomingConnectionFailed(
-            final PhoneAccountHandle connectionManagerPhoneAccount,
-            final ConnectionRequest request) {
     }
 
     /**
@@ -340,6 +309,11 @@ Log.e("TEST123", " sip service created");
         super.onDestroy();
     }
 
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
     /**
      * Play the busy tone used when a call get's disconnected by the recipient.
      */
@@ -375,6 +349,14 @@ Log.e("TEST123", " sip service created");
      */
     public void makeCall(Uri number, String contactName, String phoneNumber) {
         makeCall(number, contactName, phoneNumber, false);
+    }
+
+    public void makeCall(String phoneNumber, String contactName) {
+        makeCall(
+                SipUri.sipAddressUri(this, PhoneNumberUtils.format(phoneNumber)),
+                contactName,
+                phoneNumber
+        );
     }
 
     /**
@@ -796,6 +778,11 @@ Log.e("TEST123", "phone state:" + phoneState);
         super.onTaskRemoved(rootIntent);
         mLogger.i("Stopping SipService as task has been removed");
         stopSelf();
+    }
+
+    public void setConnection(PjsipConnection connection) {
+        this.connection = connection;
+        Log.e("TEST123", "Set a connection!!!");
     }
 
     /**

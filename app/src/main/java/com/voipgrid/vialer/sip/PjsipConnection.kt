@@ -2,8 +2,11 @@ package com.voipgrid.vialer.sip
 
 import android.telecom.CallAudioState
 import android.telecom.Connection
+import com.voipgrid.vialer.notifications.call.AbstractCallNotification
+import com.voipgrid.vialer.notifications.call.IncomingCallNotification
 
-class VialerConnection : Connection() {
+class PjsipConnection : Connection() {
+
 
     init {
         connectionProperties = PROPERTY_SELF_MANAGED
@@ -11,12 +14,14 @@ class VialerConnection : Connection() {
     }
 
     override fun onShowIncomingCallUi() {
-        super.onShowIncomingCallUi()
+        IncomingCallNotification("123", "456").build()
     }
 
     override fun onCallAudioStateChanged(state: CallAudioState?) {
         super.onCallAudioStateChanged(state)
+        setAudioRoute()
     }
+
 
     override fun onHold() {
         super.onHold()
