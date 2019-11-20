@@ -34,6 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_user"
+                android:drawableEnd="@drawable/ic_danger"
                 android:hint="@string/username_edittext_hint"
                 android:inputType="textEmailAddress" />
 
@@ -52,10 +53,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_lock_on"
+                android:drawableEnd="@drawable/ic_danger"
                 android:hint="@string/password_edittext_hint"
                 android:inputType="textPassword" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/text_error"
+            style="@style/DescriptionTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/onboarding_activity_margin_bottom"
+            android:text="@string/username_password_wrong"
+            android:textSize="15sp"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
