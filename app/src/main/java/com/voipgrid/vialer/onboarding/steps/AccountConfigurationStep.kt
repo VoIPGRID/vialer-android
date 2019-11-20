@@ -3,6 +3,8 @@ package com.voipgrid.vialer.onboarding.steps
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
+import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.google.i18n.phonenumbers.Phonenumber
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.api.models.MobileNumber
@@ -24,6 +26,7 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
         get() = if (User.voipgridUser?.outgoingCli == "suppressed") onboarding?.getString(R.string.supressed_number) else User.voipgridUser?.outgoingCli
 
     private val logger = Logger(this).forceRemoteLogging(true)
+    private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
     @Inject lateinit var userSynchronizer: UserSynchronizer
 
@@ -41,21 +44,24 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
             return
         }
 
-        mobile_number_text_dialog.setText(User.voipgridUser?.mobileNumber)
-        mobile_number_text_dialog.setRightDrawableOnClickListener {
-            alert(R.string.phonenumber_info_text_title, R.string.phonenumber_info_text)
+        mobile_number_text_dialog_prefix.setText(getCountryCode())
+        mobile_number_text_dialog_prefix.onTextChanged {
+            button_configure.isEnabled = mobile_number_text_dialog.text?.isNotEmpty() ?: false && mobile_number_text_dialog_prefix.text?.isNotEmpty() ?: false
         }
+
+        mobile_number_text_dialog.setText(getNationalNumber())
         mobile_number_text_dialog.onTextChanged {
-            button_configure.isEnabled = mobile_number_text_dialog.text?.isNotEmpty() ?: false
+            button_configure.isEnabled = mobile_number_text_dialog.text?.isNotEmpty() ?: false && mobile_number_text_dialog_prefix.text?.isNotEmpty() ?: false
         }
-        outgoing_number_tv.text = outgoingNumber
+
+        outgoing_number_tv.text = getFormattedOutgoingNumber()
         button_configure.setOnClickListenerAndDisable(this)
-        button_configure.isEnabled = mobile_number_text_dialog.text?.isNotEmpty() ?: false
+        button_configure.isEnabled = mobile_number_text_dialog.text?.isNotEmpty() ?: false && mobile_number_text_dialog_prefix.text?.isNotEmpty() ?: false
+        button_back.setOnClickListener { activity?.onBackPressed() }
     }
 
     override fun onClick(view: View?) {
-        val mobileNumber = mobile_number_text_dialog.text.toString()
-
+        val mobileNumber = (mobile_number_text_dialog_prefix.text.toString() + mobile_number_text_dialog.text.toString()).replace(" ", "")
         if (!PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
             error(R.string.invalid_mobile_number_message, R.string.invalid_mobile_number_message)
             return
@@ -141,4 +147,38 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
     }
 
     private fun hasOutgoingNumber() = outgoing_number_tv.text.isNotEmpty()
+
+    /**
+     * Parse user's mobile number to formatted PhoneNumber object.
+     *
+     */
+    private fun getNumber(): Phonenumber.PhoneNumber {
+        return phoneNumberUtil.parse(User.voipgridUser?.mobileNumber, "ZZ")
+    }
+
+    /**
+     * Return country code from user's mobile number.
+     *
+     */
+    private fun getCountryCode(): String {
+        return "+" + getNumber().countryCode
+    }
+
+    /**
+     * Return formatted national number from user's mobile number.
+     *
+     */
+    private fun getNationalNumber(): String {
+        val internationalNumber = phoneNumberUtil.format(getNumber(), PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+        val countryCode = "+" + getNumber().countryCode
+        return internationalNumber.replace("$countryCode ", "")
+    }
+
+    /**
+     * Return formatted outgoing number.
+     *
+     */
+    private fun getFormattedOutgoingNumber(): String {
+        return phoneNumberUtil.format(phoneNumberUtil.parse(outgoingNumber, "ZZ"), PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+    }
 }
