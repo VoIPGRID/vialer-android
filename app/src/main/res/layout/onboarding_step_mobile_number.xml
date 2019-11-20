@@ -1,72 +1,18 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/cloud_background"
     android:fillViewport="true">
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingLeft="@dimen/onboarding_activity_horizontal_margin"
         android:paddingTop="@dimen/onboarding_header_padding"
         android:paddingRight="@dimen/onboarding_activity_horizontal_margin">
-
-        <Button
-            android:id="@+id/button_back"
-            style="@style/ButtonAnchorThickTextStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/activity_vertical_item_padding"
-            android:layout_marginBottom="@dimen/onboarding_activity_margin_bottom"
-            android:text="@string/back"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/button_configure" />
-
-        <Button
-            android:id="@+id/button_configure"
-            style="@style/OnboardingButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/activity_vertical_item_padding"
-            android:layout_marginBottom="@dimen/onboarding_activity_margin_bottom"
-            android:enabled="false"
-            android:text="@string/configure_button_title"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@+id/button_back"
-            app:layout_constraintRight_toRightOf="parent" />
-
-        <TextView
-            android:id="@+id/outgoing_number_description"
-            style="@style/DescriptionTextViewStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40sp"
-            android:layout_marginBottom="10sp"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/outgoing_number_description"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mobile_number_field_prefix" />
-
-        <TextView
-            android:id="@+id/outgoing_number_tv"
-            style="@style/DescriptionTextViewStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/activity_vertical_item_padding"
-            android:fontFamily="sans-serif-light"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/outgoing_number_description"
-            tools:text="012345678" />
 
         <TextView
             android:id="@+id/title_label"
@@ -91,6 +37,44 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/title_label" />
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/mobile_number_field_prefix"
+            android:layout_width="75dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/activity_vertical_item_padding"
+            android:padding="0dp"
+            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
+            app:layout_constraintEnd_toStartOf="@id/mobile_number_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/subtitle_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/mobile_number_text_dialog_prefix"
+                style="@style/EditTextWithBackgroundStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/mobile_number_field"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_vertical_item_padding"
+            android:padding="0dp"
+            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/mobile_number_field_prefix"
+            app:layout_constraintTop_toBottomOf="@+id/subtitle_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/mobile_number_text_dialog"
+                style="@style/EditTextWithBackgroundStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <TextView
             android:id="@+id/prefix"
             style="@style/HintTextStyle"
@@ -114,45 +98,61 @@
             app:layout_constraintStart_toEndOf="@id/prefix"
             app:layout_constraintTop_toBottomOf="@+id/mobile_number_field_prefix" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/mobile_number_field_prefix"
-            android:layout_width="75dp"
+        <TextView
+            android:id="@+id/outgoing_number_description"
+            style="@style/DescriptionTextViewStyle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/activity_vertical_item_padding"
-            android:padding="0dp"
-            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
-            app:layout_constraintEnd_toStartOf="@id/mobile_number_field"
+            android:layout_marginTop="40sp"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/outgoing_number_description"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/subtitle_label">
+            app:layout_constraintTop_toBottomOf="@+id/mobile_number_field_prefix" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/mobile_number_text_dialog_prefix"
-                style="@style/EditTextWithBackgroundStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableEnd="@drawable/ic_info_outline_white_24dp"
-                android:inputType="phone" />
-        </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+            android:id="@+id/outgoing_number_tv"
+            style="@style/DescriptionTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/activity_vertical_item_padding"
+            android:fontFamily="sans-serif-light"
+            android:paddingBottom="@dimen/onboarding_activity_margin_bottom"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/outgoing_number_description"
+            tools:text="012345678" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/mobile_number_field"
+        <Button
+            android:id="@+id/button_back"
+            style="@style/ButtonAnchorThickTextStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/activity_vertical_item_padding"
-            android:padding="0dp"
-            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/mobile_number_field_prefix"
-            app:layout_constraintTop_toBottomOf="@+id/subtitle_label">
+            android:layout_marginBottom="@dimen/onboarding_activity_margin_bottom"
+            android:text="@string/back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/button_configure"
+            app:layout_constraintTop_toBottomOf="@+id/outgoing_number_tv"
+            app:layout_constraintVertical_bias="1.0" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/mobile_number_text_dialog"
-                style="@style/EditTextWithBackgroundStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableEnd="@drawable/ic_info_outline_white_24dp"
-                android:inputType="phone" />
-        </com.google.android.material.textfield.TextInputLayout>
+        <Button
+            android:id="@+id/button_configure"
+            style="@style/OnboardingButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/onboarding_activity_margin_bottom"
+            android:enabled="false"
+            android:text="@string/configure_button_title"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/button_back"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/outgoing_number_tv"
+            app:layout_constraintVertical_bias="1.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
