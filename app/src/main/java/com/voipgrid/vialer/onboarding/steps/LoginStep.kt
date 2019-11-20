@@ -2,6 +2,8 @@ package com.voipgrid.vialer.onboarding.steps
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.content.res.ColorStateList
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
 import android.view.KeyEvent
@@ -9,6 +11,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.annotation.LayoutRes
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.OnboardingActivity
@@ -153,6 +156,13 @@ class LoginStep : Step() {
                 focusOnTokenField()
                 pasteCodeFromClipboard()
             }
+
+            (twoFactorDialog.findViewById(R.id.button_continue) as Button).setOnClickListener {
+                onboarding?.isLoading = true
+                attemptLogin(codeField.text.toString())
+            }
+
+            this.twoFactorDialog = twoFactorDialog
         }
     }
 
@@ -162,7 +172,6 @@ class LoginStep : Step() {
      */
     private fun launchForgottenPasswordActivity() {
         logger.i("Detected forgot password click, launching activity")
-        ForgottenPasswordActivity.launchForEmail(onboarding as Context, username_text_dialog.text.toString())
         ForgottenPasswordActivity.launchForEmail(onboarding as Context, username_text_dialog.text.toString())
     }
 
