@@ -1,7 +1,6 @@
 package com.voipgrid.vialer.onboarding.steps
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import android.text.Editable
 import android.view.KeyEvent
@@ -72,7 +71,6 @@ class LoginStep : Step() {
 
     override fun onResume() {
         super.onResume()
-        twoFactorHelper?.pasteCodeFromClipboard()
         User.internal.hasCompletedOnBoarding = false
     }
 
