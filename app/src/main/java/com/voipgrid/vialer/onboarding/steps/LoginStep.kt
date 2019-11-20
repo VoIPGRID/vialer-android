@@ -2,6 +2,8 @@ package com.voipgrid.vialer.onboarding.steps
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
 import android.view.KeyEvent
@@ -10,6 +12,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.annotation.LayoutRes
+import androidx.core.content.ContextCompat
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.VoipgridLogin
@@ -47,6 +51,9 @@ class LoginStep : Step() {
 
         username_text_dialog.onTextChanged(enableSubmitButton)
         password_text_dialog.onTextChanged(enableSubmitButton)
+        username_text_dialog.setOnFocusChangeListener { _, _ -> showDefaultInputs() }
+        password_text_dialog.setOnFocusChangeListener { _, _ -> showDefaultInputs() }
+        showDefaultInputs()
 
         KeyboardVisibilityEvent.setEventListener(activity) { keyboardIsVisible ->
             if (keyboardIsVisible) {
@@ -113,7 +120,7 @@ class LoginStep : Step() {
     private fun handleLoginResult(result: LoginResult) = when(result) {
         FAIL -> {
             logger.w("User failed to login to VoIPGRID")
-            login.lastError?.let { error(it.title, it.description) }
+            login.lastError?.let { showErrorInputs() }
             button_login.isEnabled = true
         }
         SUCCESS -> {
@@ -166,5 +173,33 @@ class LoginStep : Step() {
     private fun launchForgottenPasswordActivity() {
         logger.i("Detected forgot password click, launching activity")
         ForgottenPasswordActivity.launchForEmail(onboarding as Context, username_text_dialog.text.toString())
+    }
+
+    /**
+     * Sets the colors of the text and border of the input fields to red, displays an exclamation
+     * mark in the text fields and displays an error text.
+     */
+    private fun showErrorInputs() {
+        username_text_dialog.setTextColor(ContextCompat.getColor(onboarding as Context, R.color.error_color))
+        username_text_dialog.backgroundTintList = ContextCompat.getColorStateList(onboarding as Context, R.color.error_color)
+        username_text_dialog.compoundDrawablesRelative[2].alpha = 255
+        password_text_dialog.setTextColor(ContextCompat.getColor(onboarding as Context, R.color.error_color))
+        password_text_dialog.backgroundTintList = ContextCompat.getColorStateList(onboarding as Context, R.color.error_color)
+        password_text_dialog.compoundDrawablesRelative[2].alpha = 255
+        text_error.visibility = View.VISIBLE
+    }
+
+    /**
+     * Sets the colors of the text and border of the input fields to default, removes the
+     * exclamation mark from the text fields and hides the error text.
+     */
+    private fun showDefaultInputs() {
+        username_text_dialog.setTextColor(ContextCompat.getColor(onboarding as Context, R.color.onboarding_text_hint_color))
+        username_text_dialog.backgroundTintList = ContextCompat.getColorStateList(onboarding as Context, R.color.onboarding_text_hint_color)
+        username_text_dialog.compoundDrawablesRelative[2].alpha = 0
+        password_text_dialog.setTextColor(ContextCompat.getColor(onboarding as Context, R.color.onboarding_text_hint_color))
+        password_text_dialog.backgroundTintList = ContextCompat.getColorStateList(onboarding as Context, R.color.onboarding_text_hint_color)
+        password_text_dialog.compoundDrawablesRelative[2].alpha = 0
+        text_error.visibility = View.GONE
     }
 }
