@@ -52,6 +52,7 @@
     <color name="call_records_item_background">#fff</color>
     <color name="tab_content_color">#CCCCCC</color>
 
+    <color name="error_color">#8F0A06</color>
     <color name="onboarding_text_hint_color">#CCFFFFFF</color>
     <color name="onboarding_button_text_color">#555555</color>
 
