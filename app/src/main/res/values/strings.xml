@@ -74,8 +74,7 @@
     <string name="set_userdestination_api_fail">Editing of availability has failed. Please try again later.</string>
 
     <!-- Login fragment values -->
-    <string name="login_header_label_text">Business calls</string>
-    <string name="login_header_label_subtext">in the cloud</string>
+    <string name="login_header_label_text">Business calls in the cloud</string>
     <string name="password_edittext_hint">Password</string>
     <string name="username_edittext_hint">Username</string>
     <string name="forgot_password_button_title">Forgot password</string>
@@ -107,8 +106,6 @@
     <string name="phonenumber_prefix_edittext_hint">Prefix</string>
     <string name="phonenumber_edittext_hint">Phone number</string>
     <string name="outgoingnumber_edittext_hint">Outgoing number</string>
-    <string name="phonenumber_info_text_title">Mobile phone number</string>
-    <string name="phonenumber_info_text">To make two step calling possible, we need to have your mobile phone number.</string>
 
     <!-- Missing voip account fragment values -->
     <string name="set_voip_account_button_text">Set VoIP account</string>

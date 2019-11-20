@@ -21,18 +21,11 @@
             android:layout_height="wrap_content"
             android:text="@string/login_header_label_text" />
 
-        <TextView
-            android:id="@+id/subtitle_label"
-            style="@style/HeaderSubTitleTextViewStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:text="@string/login_header_label_subtext" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/username_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/onboarding_top_margin"
             app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle">
 
             <com.google.android.material.textfield.TextInputEditText
