@@ -315,4 +315,5 @@
     <string name="copy_number">Kopieer nummer</string>
     <string name="number_copied">Nummer gekopieerd: %1$s</string>
     <string name="back">Terug</string>
+    <string name="username_password_wrong">Deze combinatie van gebruikersnaam en wachtwoord komt niet overeen. Probeer het opnieuw.\nBeide velden zijn hoofdlettergevoelig</string>
 </resources>

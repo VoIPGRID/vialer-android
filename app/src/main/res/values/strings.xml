@@ -314,4 +314,5 @@
     <string name="copy_number">Copy number</string>
     <string name="number_copied">Number has been copied: %1$s</string>
     <string name="back">Back</string>
+    <string name="username_password_wrong">This combination of username and password does not match. Please try again.\nBoth fields are case-sensitive</string>
 </resources>
