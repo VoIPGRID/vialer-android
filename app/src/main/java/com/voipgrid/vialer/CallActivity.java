@@ -617,7 +617,9 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
 
     public boolean isBluetoothRouteAvailable() {
-        return (getSipServiceConnection().get().getConnection().getCallAudioState().getSupportedRouteMask() & ROUTE_BLUETOOTH) == ROUTE_BLUETOOTH;
+        if (getSipServiceConnection().get().getConnection() == null) return false;
+
+        return getSipServiceConnection().get().getConnection().isBluetoothRouteAvailable();
     }
 
     public boolean isCurrentlyRoutingAudioViaBluetooth() {

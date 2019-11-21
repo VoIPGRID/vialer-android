@@ -1,21 +1,11 @@
 package com.voipgrid.vialer.util;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.UserHandle;
-import android.telecom.PhoneAccount;
-import android.telecom.PhoneAccountHandle;
-import android.telecom.TelecomManager;
-import android.telecom.VideoProfile;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.R;
@@ -25,7 +15,6 @@ import com.voipgrid.vialer.persistence.UserPreferences;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
-import com.voipgrid.vialer.sip.TelecomService;
 import com.voipgrid.vialer.twostepcall.TwoStepCallActivity;
 
 import androidx.appcompat.app.AlertDialog;
@@ -139,24 +128,23 @@ public class DialHelper {
      * @param contactName
      */
     private void callWithSip(String number, String contactName) {
-        TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
-        PhoneAccountHandle phoneAccountHandle = new PhoneAccountHandle(new ComponentName(mContext, TelecomService.class), "535353535");
-        Bundle extras = new Bundle();
-        extras.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false);
-        extras.putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE,
-                VideoProfile.STATE_AUDIO_ONLY);
-        extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle);
+        Intent intent = new Intent(mContext, SipService.class);
+        intent.setAction(SipService.Actions.HANDLE_OUTGOING_CALL);
 
+        // set a phoneNumberUri as DATA for the intent to SipServiceOld.
+        Uri sipAddressUri = SipUri.sipAddressUri(
+                mContext,
+                PhoneNumberUtils.format(number)
+        );
+        intent.setData(sipAddressUri);
 
-        if (mContext.checkSelfPermission(Manifest.permission.CALL_PHONE)
-                == PackageManager.PERMISSION_GRANTED) {
-            telecomManager.registerPhoneAccount(PhoneAccount.builder(phoneAccountHandle, "Vialer").setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED).build());
-            Uri uri = Uri.fromParts(PhoneAccount.SCHEME_SIP, number, null);
-            telecomManager.placeCall(uri, extras);
-            Log.e("TEST123", "placed call.");
-            return;
+        intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, number);
+        intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, contactName);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mContext.startForegroundService(intent);
         } else {
-            Log.e("TEST123", "No permissin!!!");
+            mContext.startService(intent);
         }
     }
 

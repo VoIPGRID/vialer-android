@@ -1,14 +1,16 @@
-package com.voipgrid.vialer.sip
+package com.voipgrid.vialer.android.calling
 
-import android.content.Intent
 import android.telecom.CallAudioState
 import android.telecom.Connection
 import android.telecom.DisconnectCause
-import android.util.Log
-import com.voipgrid.vialer.VialerApplication
-import com.voipgrid.vialer.notifications.call.IncomingCallNotification
+import com.voipgrid.vialer.sip.SipService
 
-class VialerConnection : Connection() {
+/**
+ * A connection representing a call stream, used to hook into the Android call
+ * system.
+ *
+ */
+class AndroidCallConnection : Connection() {
 
     init {
         connectionProperties = PROPERTY_SELF_MANAGED
@@ -16,17 +18,16 @@ class VialerConnection : Connection() {
     }
 
     override fun onShowIncomingCallUi() {
-        voip.incomingCallAlerts.start()
-        IncomingCallNotification(voip.currentCall.phoneNumber, voip.currentCall.callerId).build()
+        voip.showIncomingCallToUser()
     }
 
     override fun onCallAudioStateChanged(state: CallAudioState?) {
-        super.onCallAudioStateChanged(state)
-        VialerApplication.get().sendBroadcast(Intent("VialerConnection"))
+        voip.onCallAudioStateChanged(state)
     }
 
     override fun onHold() {
         voip.currentCall.putOnHold()
+        setOnHold()
     }
 
     override fun onUnhold() {
@@ -45,14 +46,18 @@ class VialerConnection : Connection() {
     }
 
     override fun onDisconnect() {
-        voip.currentCall.hangup(true)
+        try {
+            voip.currentCall.hangup(true)
+        } catch (e: Exception) {}
         setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
         destroy()
     }
 
     override fun onSilence() {
-        voip.incomingCallAlerts.stop()
+        voip.silence()
     }
+
+    fun isBluetoothRouteAvailable(): Boolean = callAudioState.supportedRouteMask and CallAudioState.ROUTE_BLUETOOTH == CallAudioState.ROUTE_BLUETOOTH
 
     companion object {
         lateinit var voip: SipService

@@ -129,7 +129,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
      * @param sipService
      * @param sipAccount
      */
-    public SipCall(SipService sipService, SipAccount sipAccount) {
+    public SipCall(SipService sipService, SipService.SipAccount sipAccount) {
         super(sipAccount);
         mSipService = sipService;
         mLogger = mSipService.getLogger();
@@ -142,14 +142,14 @@ public class SipCall extends org.pjsip.pjsua2.Call {
      * @param sipAccount
      * @param callId
      */
-    public SipCall(SipService sipService, SipAccount sipAccount, int callId) {
+    public SipCall(SipService sipService, SipService.SipAccount sipAccount, int callId) {
         super(sipAccount, callId);
         mSipService = sipService;
         mLogger = mSipService.getLogger();
         mSipBroadcaster = mSipService.getSipBroadcaster();
     }
 
-    public SipCall(SipService sipService, SipAccount sipAccount, int callId, SipInvite invite) {
+    public SipCall(SipService sipService, SipService.SipAccount sipAccount, int callId, SipInvite invite) {
         this(sipService, sipAccount, callId);
         this.invite = invite;
     }
@@ -211,7 +211,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public void answer() throws Exception {
-        Log.e("TEST123", "ANSWERED!!!");
         answerWithCode(pjsip_status_code.PJSIP_SC_ACCEPTED);
         mCallIsConnected = true;
     }
@@ -481,15 +480,6 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
         setCallerId(incomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME));
         setPhoneNumber(incomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER));
-
-        TelecomManager telecomManager = getSipService().getSystemService(TelecomManager.class);
-        PhoneAccountHandle phoneAccountHandle = new PhoneAccountHandle(new ComponentName(getSipService(), TelecomService.class), "535353535");
-        Bundle extras = new Bundle();
-        extras.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false);
-        extras.putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE,
-                VideoProfile.STATE_AUDIO_ONLY);
-        extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle);
-        telecomManager.addNewIncomingCall(phoneAccountHandle, extras);
     }
 
     /**

@@ -3,18 +3,19 @@ package com.voipgrid.vialer.dagger;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.voipgrid.vialer.Logout;
 import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.android.calling.AndroidCallManager;
 import com.voipgrid.vialer.api.PhoneAccountFetcher;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
@@ -226,6 +227,12 @@ public class VialerModule {
     @Provides
     IncomingCallRinger provideRinger(Context context) {
         return new IncomingCallRinger(context);
+    }
+
+    @Singleton
+    @Provides
+    AndroidCallManager provideAndroidCallManager(Context context) {
+        return new AndroidCallManager(context, (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE));
     }
 
     @Provides

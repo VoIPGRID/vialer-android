@@ -58,7 +58,7 @@ public class SipConfig implements AccountStatus {
     private VialerEndpoint mEndpoint;
     private PhoneAccount mPhoneAccount;
     private Logger mLogger;
-    private SipAccount mSipAccount;
+    private SipService.SipAccount mSipAccount;
     private SipLogWriter mSipLogWriter;
     private SipService mSipService;
 
@@ -96,7 +96,7 @@ public class SipConfig implements AccountStatus {
         return mEndpoint;
     }
 
-    SipAccount getSipAccount() {
+    SipService.SipAccount getSipAccount() {
         return mSipAccount;
     }
 
@@ -313,17 +313,16 @@ public class SipConfig implements AccountStatus {
      * Create the SipAccount for the PhoneAccount.
      * @return
      */
-    private SipAccount createSipAccount() {
+    private SipService.SipAccount createSipAccount() {
         mLogger.d("createSipAccount");
-        AccountConfig accountConfig = createAccountConfig();
-        SipAccount sipAccount = null;
+
         try {
-            sipAccount = new SipAccount(mSipService, accountConfig, this);
+            return mSipService.createSipAccount(createAccountConfig());
         } catch (Exception e) {
             mLogger.e("" + Log.getStackTraceString(e));
             e.printStackTrace();
+            return null;
         }
-        return sipAccount;
     }
 
     /**
@@ -436,16 +435,6 @@ public class SipConfig implements AccountStatus {
         if (shouldResponseToMiddlewareOnRegistration && !mHasRespondedToMiddleware) {
             respondToMiddleware();
         }
-    }
-
-    @Override
-    public void onAccountUnregistered(Account account, OnRegStateParam param) {
-        mLogger.d("onAccountUnRegistered");
-    }
-
-    @Override
-    public void onAccountInvalidState(Account account, Throwable fault) {
-        mLogger.d("onAccountInvalidState");
     }
 
     /**

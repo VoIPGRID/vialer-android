@@ -57,7 +57,7 @@
 
         <service android:name=".sip.SipService"/>
 
-        <service android:name=".sip.TelecomService" android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+        <service android:name=".android.calling.AndroidCallService" android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
             <intent-filter>
                 <action android:name="android.telecom.ConnectionService" />
             </intent-filter>
