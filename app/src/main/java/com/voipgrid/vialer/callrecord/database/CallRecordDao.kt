@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 
+
 @Dao
 interface CallRecordDao {
 
@@ -22,4 +23,7 @@ interface CallRecordDao {
 
     @Query("UPDATE call_records SET was_personal = 1 WHERE id = :id")
     fun flagCallAsPersonal(id: Long)
+
+    @Query("DELETE FROM call_records")
+    suspend fun truncate()
 }

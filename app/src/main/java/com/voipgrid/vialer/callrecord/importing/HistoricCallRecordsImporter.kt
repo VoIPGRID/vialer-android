@@ -89,7 +89,7 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
         /**
          * After each month we will wait a bit to prevent issues with rate limiting.
          */
-        val DELAY_BETWEEN_EACH_MONTH : Long = Random.nextInt(10, 60).toLong() * 1000
+        val DELAY_BETWEEN_EACH_MONTH : Long = Random.nextInt(10 * 60, 60 * 60).toLong() * 1000
 
         /**
          * If we ever hit a rate limit, we will wait this long before continuing.
@@ -138,6 +138,7 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
             private val oneTime = OneTimeWorkRequestBuilder<Worker>()
                     .setConstraints(constraints)
                     .setBackoffCriteria(BackoffPolicy.LINEAR, OneTimeWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                    .setInitialDelay(1, TimeUnit.HOURS)
                     .build()
 
             private val periodic = PeriodicWorkRequestBuilder<Worker>(3, TimeUnit.HOURS)

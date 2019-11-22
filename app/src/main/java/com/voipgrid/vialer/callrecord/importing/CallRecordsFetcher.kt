@@ -1,6 +1,5 @@
 package com.voipgrid.vialer.callrecord.importing
 
-import android.util.Log
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.CallRecord
 import com.voipgrid.vialer.api.models.VoipGridResponse
@@ -9,7 +8,6 @@ import okhttp3.Request
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import retrofit2.Call
-import retrofit2.Response
 
 typealias CallRecordApiCall = (Int, Int, String, String) -> Call<VoipGridResponse<CallRecord>>
 
@@ -43,7 +41,7 @@ class CallRecordsFetcher {
         } while(hasMoreRecords && User.isLoggedIn)
     }
 
-    private fun format(dateTime: DateTime): String = DateTimeFormat.forPattern(CallRecordEntity.DATE_PATERRN).print(dateTime)
+    private fun format(dateTime: DateTime): String = DateTimeFormat.forPattern(CallRecordEntity.DATE_PATTERN).print(dateTime)
 
     companion object {
 
