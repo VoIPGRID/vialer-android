@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/start_call"
+        android:title="@string/start_call"/>
+
+    <item android:id="@+id/add_to_contacts"
+        android:title="@string/add_to_contacts"/>
+
+    <item android:id="@+id/copy_number"
+        android:title="@string/copy_number"/>
+</menu>
