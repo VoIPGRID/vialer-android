@@ -3,6 +3,7 @@ package com.voipgrid.vialer.android.calling
 import android.telecom.CallAudioState
 import android.telecom.Connection
 import android.telecom.DisconnectCause
+import android.util.Log
 import com.voipgrid.vialer.sip.SipService
 
 /**
@@ -10,7 +11,7 @@ import com.voipgrid.vialer.sip.SipService
  * system.
  *
  */
-class AndroidCallConnection : Connection() {
+class AndroidCallConnection(val voip: SipService) : Connection() {
 
     init {
         connectionProperties = PROPERTY_SELF_MANAGED
@@ -55,11 +56,8 @@ class AndroidCallConnection : Connection() {
 
     override fun onSilence() {
         voip.silence()
+        Log.e("TEST123", "Silence called!");
     }
 
-    fun isBluetoothRouteAvailable(): Boolean = callAudioState.supportedRouteMask and CallAudioState.ROUTE_BLUETOOTH == CallAudioState.ROUTE_BLUETOOTH
-
-    companion object {
-        lateinit var voip: SipService
-    }
+    fun isBluetoothRouteAvailable(): Boolean = callAudioState != null && callAudioState.supportedRouteMask and CallAudioState.ROUTE_BLUETOOTH == CallAudioState.ROUTE_BLUETOOTH
 }

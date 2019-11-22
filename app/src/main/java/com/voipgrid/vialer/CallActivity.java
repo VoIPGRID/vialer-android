@@ -580,7 +580,11 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     }
 
     public int getAudioRoute() {
-        return getSipServiceConnection().get().getConnection().getCallAudioState().getRoute();
+        CallAudioState callAudioState = getSipServiceConnection().get().getConnection().getCallAudioState();
+
+        if (callAudioState == null) return CallAudioState.ROUTE_EARPIECE;
+
+        return callAudioState.getRoute();
     }
 
     @Override

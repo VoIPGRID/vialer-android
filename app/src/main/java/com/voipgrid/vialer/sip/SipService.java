@@ -93,7 +93,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
 
-    private AndroidCallConnection connection;
+    private static AndroidCallConnection connection;
 
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
@@ -119,7 +119,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
         mCheckService.start();
         changeNotification(callNotification);
-        AndroidCallConnection.voip = this;
+        connection = new AndroidCallConnection(this);
     }
 
     @Override
@@ -598,10 +598,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         incomingCallAlerts.stop();
     }
 
-    public AndroidCallConnection getConnection() {
-        return connection;
-    }
-
     public void onIncomingCall(final OnIncomingCallParam incomingCallParam, SipAccount account) {
         SipCall sipCall = new SipCall(this, account, incomingCallParam.getCallId(), new SipInvite(incomingCallParam.getRdata().getWholeMsg()));
         sipCall.onCallIncoming();
@@ -645,7 +641,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     private class OutgoingCallRinger implements Runnable {
         @Override
         public void run() {
-            // Play a ring back tone to update a user that setup is ongoing.
             mToneGenerator.startTone(ToneGenerator.Constants.TONE_SUP_DIAL, 1000);
             mHandler.postDelayed(mRingbackRunnable, 4000);
         }
@@ -657,13 +652,12 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      *
      */
     private class ScreenOffReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(final Context context, final Intent intent) {
-//            mLogger.i("Detected screen off event, disabling call alert");
-//
-//            incomingCallAlerts.stop();
-//            incomingAlertsMuted = true;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                mLogger.i("Detected screen off event, disabling call alert");
+                incomingCallAlerts.stop();
+            }
         }
     }
 
@@ -709,11 +703,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         super.onTaskRemoved(rootIntent);
         mLogger.i("Stopping SipService as task has been removed");
         stopSelf();
-    }
-
-    public void setConnection(AndroidCallConnection connection) {
-        this.connection = connection;
-        Log.e("TEST123", "Set a connection!!!");
     }
 
     /**
