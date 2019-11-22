@@ -46,7 +46,6 @@ class PhoneAccountFetcher(private val api : VoipgridApi) {
      */
     private fun invalidateCache() {
         cache = PhoneAccountsCache()
-        User.internal.phoneAccounts = null
         User.internal.phoneAccountsCache = null
     }
 

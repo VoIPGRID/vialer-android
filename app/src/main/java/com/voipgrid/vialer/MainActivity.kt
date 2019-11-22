@@ -2,12 +2,11 @@ package com.voipgrid.vialer
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.tabs.TabLayout
-import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.callrecord.CallRecordFragment
+import com.voipgrid.vialer.callrecord.CallRecordViewModel
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
@@ -16,12 +15,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {
 
-    @Inject lateinit var userSynchronizer: UserSynchronizer
     @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
 
     override val logger = Logger(this)
@@ -65,7 +62,7 @@ class MainActivity : NavigationDrawerActivity() {
      *
      */
     private fun syncUser() = GlobalScope.launch(Dispatchers.Main) {
-        if (connectivityHelper.hasNetworkConnection()) return@launch
+        if (!isConnectedToNetwork()) return@launch
 
         userSynchronizer.sync()
     }
@@ -121,9 +118,9 @@ class MainActivity : NavigationDrawerActivity() {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     tab?.let {
                         (call_record_fragment as CallRecordFragment).changeType(when(it.position) {
-                            0 -> CallRecordFragment.TYPE.ALL_CALLS
-                            1 -> CallRecordFragment.TYPE.MISSED_CALLS
-                            else -> CallRecordFragment.TYPE.ALL_CALLS
+                            0 -> CallRecordViewModel.Type.ALL_CALLS
+                            1 -> CallRecordViewModel.Type.MISSED_CALLS
+                            else -> CallRecordViewModel.Type.ALL_CALLS
                         })
                     }
 

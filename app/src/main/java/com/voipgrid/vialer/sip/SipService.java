@@ -51,8 +51,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+<<<<<<< HEAD
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
 import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
+=======
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
+>>>>>>> hotfix/6.4.3
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -399,8 +405,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      *
      * @param notification
      */
-    public void changeNotification(final AbstractCallNotification notification) {
+    public void changeNotification(final @NonNull AbstractCallNotification notification) {
+        mLogger.i("Received change notification request from: " + notification.getClass().getSimpleName());
+
         if (shouldUpdateNotification(notification)) {
+            mLogger.i("Performing notification change to" + notification.getClass().getSimpleName());
             activeNotification = notification;
             startForeground(notification.getNotificationId(), notification.build());
             launchIncomingCallActivityWhenAppIsVisible(notification);
@@ -493,7 +502,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     }
 
     private void startCallActivityForCurrentCall() {
-        Log.e("TEST123", "startCallActivity ====", new Exception());
         if (getCurrentCall() == null) {
             getLogger().e("Unable to start call activity for current call as there is no current call");
             return;
