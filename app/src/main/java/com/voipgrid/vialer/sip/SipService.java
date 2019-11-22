@@ -19,13 +19,10 @@ import android.telecom.CallAudioState;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
-import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.android.calling.AndroidCallManager;
 import com.voipgrid.vialer.android.calling.AndroidCallConnection;
-import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
@@ -39,16 +36,15 @@ import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.ActiveCallNotification;
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
 import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
-import com.voipgrid.vialer.permissions.MicrophonePermission;
+import com.voipgrid.vialer.sip.core.Action;
+import com.voipgrid.vialer.sip.core.SipActionHandler;
+import com.voipgrid.vialer.sip.core.SipConfig;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import org.pjsip.pjsua2.AccountConfig;
 import org.pjsip.pjsua2.OnIncomingCallParam;
-import org.pjsip.pjsua2.OnRegStateParam;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +52,6 @@ import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -92,16 +87,15 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     private AbstractCallNotification activeNotification;
     private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
+    private SipActionHandler sipActionHandler = new SipActionHandler(this);
 
-    private static AndroidCallConnection connection;
+    public static AndroidCallConnection connection;
 
-    @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
     @Inject protected Handler mHandler;
     @Inject protected ToneGenerator mToneGenerator;
     @Inject protected NetworkConnectivity mNetworkConnectivity;
     @Inject protected NativeCallManager mNativeCallManager;
-    @Inject @Nullable protected PhoneAccount mPhoneAccount;
     @Inject IncomingCallAlerts incomingCallAlerts;
     @Inject AndroidCallManager androidCallManager;
 
@@ -155,58 +149,25 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      *
      * @param intent
      */
-    public boolean performActionBasedOnIntent(Intent intent) throws Exception {
+    public boolean performActionBasedOnIntent(Intent intent) {
         if (intent == null) return false;
 
         this.intent = intent;
-        final String action = this.intent.getAction();
 
-        mLogger.i("Performing action: " + action);
-
-        if (Actions.HANDLE_INCOMING_CALL.equals(action)) {
-            initialiseIncomingCall();
-            return true;
+        try {
+            Action action = Action.valueOf(this.intent.getAction());
+            sipActionHandler.handle(action);
+            return sipActionHandler.isForegroundAction(action);
+        } catch (Exception e) {
+            return false;
         }
-        else if (Actions.HANDLE_OUTGOING_CALL.equals(action)) {
-            initialiseOutgoingCall();
-            return true;
-        }
-        else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
-            connection.onReject();
-        }
-        else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
-            if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
-                Toast.makeText(this, getString(R.string.permission_microphone_missing_message), Toast.LENGTH_LONG).show();
-                mLogger.e("Unable to answer incoming call as we do not have microphone permission");
-                return false;
-            }
-
-            connection.onAnswer();
-        }
-        else if (Actions.END_CALL.equals(action)) {
-            connection.onDisconnect();
-        }
-        else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
-            if (getCurrentCall() != null) {
-                if (getCurrentCall().isConnected()) {
-                    startCallActivityForCurrentCall();
-                }
-            } else {
-                stopSelf();
-            }
-        }
-        else {
-            mLogger.e("SipService received an invalid action: " + action);
-        }
-
-        return false;
     }
 
     /**
      * Perform necessary steps to initialise an incoming call.
      *
      */
-    private void initialiseIncomingCall() {
+    public void initialiseIncomingCall() {
         mLogger.d("incomingCall");
         mIncomingCallDetails = intent;
         loadSip();
@@ -225,7 +186,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * Perform necessary steps to initialise an outgoing call.
      *
      */
-    private void initialiseOutgoingCall() {
+    public void initialiseOutgoingCall() {
         if (getCurrentCall() != null) {
             getLogger().i("Attempting to initialise a second outgoing call but this is not currently supported");
             startCallActivityForCurrentCall();
@@ -249,33 +210,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         );
     }
 
-
-    /**
-     * Begin the process of actually starting the SIP library so we can
-     * start/receive calls.
-     *
-     */
-    private void loadSip() {
-        if (mPhoneAccount == null) {
-            mLogger.w("No sip account when trying to create service");
-            stopSelf();
-            return;
-        }
-
-        try {
-            mLogger.i("Attempting to load sip lib");
-            mSipConfig = mSipConfig.init(
-                    this,
-                    mPhoneAccount,
-                    intent != null && Actions.HANDLE_INCOMING_CALL.equals(intent.getAction())
-            );
-            mSipConfig.initLibrary();
-        } catch (Exception e) {
-            mLogger.e("Failed to load pjsip, stopping the service");
-            stopSelf();
-        }
-    }
-
     @Override
     public void onDestroy() {
         mLogger.d("onDestroy");
@@ -285,9 +219,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         }
         silence();
 
-        if (mSipConfig != null) {
-            mSipConfig.cleanUp();
-        }
+        pjsip.destroy();
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
@@ -313,6 +245,10 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
             Thread.sleep(BUSY_TONE_DURATION);
         } catch (InterruptedException ignored) {
         }
+    }
+
+    public static AndroidCallConnection getConnection() {
+        return connection;
     }
 
     /**
@@ -481,7 +417,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         }
     }
 
-    private void startCallActivityForCurrentCall() {
+    public void startCallActivityForCurrentCall() {
         if (getCurrentCall() == null) {
             getLogger().e("Unable to start call activity for current call as there is no current call");
             return;
@@ -565,8 +501,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
     @Override
     public void onCallDisconnected() {
-        Log.e("TEST123", "onDisconnected");
-
     }
 
     @Override
@@ -667,9 +601,9 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * @param action The action the SipService should perform when resolved
      * @return The complete pending intent
      */
-    public static PendingIntent createSipServiceAction(@Actions.Valid String action) {
+    public static PendingIntent createSipServiceAction(Action action) {
         Intent intent = new Intent(VialerApplication.get(), SipService.class);
-        intent.setAction(action);
+        intent.setAction(action.toString());
         return PendingIntent.getService(VialerApplication.get(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -679,13 +613,13 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * @param context
      * @param action
      */
-    public static void performActionOnSipService(Context context, @Actions.Valid String action) {
-        if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action) && !SipService.sipServiceActive) {
+    public static void performActionOnSipService(Context context, Action action) {
+        if (Action.DISPLAY_CALL_IF_AVAILABLE.equals(action) && !SipService.sipServiceActive) {
             return;
         }
 
         Intent intent = new Intent(context, SipService.class);
-        intent.setAction(action);
+        intent.setAction(action.toString());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent);
         } else {
@@ -734,85 +668,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
             if (mCurrentCall == null) {
                 mLogger.i("No active calls stop the service");
                 stopSelf();
-            }
-        }
-    }
-
-    /**
-     * This contains the list of valid actions that the SipService can
-     * take. Whenever the SipService is started, the intent should contain
-     * one of these.
-     *
-     */
-    public interface Actions {
-        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL, END_CALL, DISPLAY_CALL_IF_AVAILABLE})
-        @Retention(RetentionPolicy.SOURCE)
-        @interface Valid {}
-
-        String PREFIX = BuildConfig.APPLICATION_ID + ".";
-
-        /**
-         * An action that should be received when first creating the SipService
-         * when there is an outgoing call being started.
-         *
-         */
-        String HANDLE_OUTGOING_CALL = PREFIX + "CALL_OUTGOING";
-
-        /**
-         * An action that should be received when first creating the SipService
-         * when there is an incoming call expected.
-         *
-         */
-        String HANDLE_INCOMING_CALL = PREFIX + "CALL_INCOMING";
-
-        /**
-         * An action that should be received when there is already an active
-         * call, this allows something like a notification to decline a call.
-         *
-         */
-        String DECLINE_INCOMING_CALL = PREFIX + "DECLINE_INCOMING_CALL";
-
-        /**
-         * An action that should be received when there is already an active
-         * call, this allows something like a notification to answer a call.
-         *
-         */
-        String ANSWER_INCOMING_CALL = PREFIX + "ANSWER_INCOMING_CALL";
-
-        /**
-         * End an already in progress call.
-         *
-         */
-        String END_CALL = PREFIX + "END_CALL";
-
-        /**
-         * Cause the SipService to create a call activity for the current call, if there is no call
-         * this action will have no affect.
-         *
-         */
-        String DISPLAY_CALL_IF_AVAILABLE = PREFIX + "DISPLAY_CALL_IF_AVAILABLE";
-    }
-
-    class SipAccount extends org.pjsip.pjsua2.Account {
-
-        private SipAccount(AccountConfig accountConfig) throws Exception {
-            super();
-            create(accountConfig);
-        }
-
-        @Override
-        public void onIncomingCall(OnIncomingCallParam incomingCallParam) {
-            SipService.this.onIncomingCall(incomingCallParam, this);
-        }
-
-
-        @Override
-        public void onRegState(OnRegStateParam regStateParam) {
-            try {
-                if (getInfo().getRegIsActive()) {
-                    getSipConfig().onAccountRegistered(this, regStateParam);
-                }
-            } catch (Exception exception) {
             }
         }
     }

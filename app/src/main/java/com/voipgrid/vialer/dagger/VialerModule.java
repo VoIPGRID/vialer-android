@@ -43,7 +43,7 @@ import com.voipgrid.vialer.onboarding.VoipgridLogin;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
-import com.voipgrid.vialer.sip.SipConfig;
+import com.voipgrid.vialer.sip.core.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;

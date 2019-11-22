@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.sip;
+package com.voipgrid.vialer.sip.core;
 
 import static org.pjsip.pjsua2.pj_constants_.PJ_TRUE;
 import static org.pjsip.pjsua2.pjsua_call_flag.PJSUA_CALL_REINIT_MEDIA;
@@ -18,13 +18,21 @@ import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.fcm.RemoteMessageData;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
+import com.voipgrid.vialer.sip.AccountStatus;
+import com.voipgrid.vialer.sip.CallSetupChecker;
+import com.voipgrid.vialer.sip.CodecPriorityMap;
+import com.voipgrid.vialer.sip.IpSwitchMonitor;
+import com.voipgrid.vialer.sip.SipCall;
+import com.voipgrid.vialer.sip.SipConstants;
+import com.voipgrid.vialer.sip.SipLogWriter;
+import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.sip.SipUri;
+import com.voipgrid.vialer.sip.VialerEndpoint;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
-import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.UserAgent;
 
 import org.pjsip.pjsua2.Account;
@@ -104,7 +112,7 @@ public class SipConfig implements AccountStatus {
      * Function to init the PJSIP library and setup all credentials.
      * @throws LibraryInitFailedException
      */
-    void initLibrary() throws Exception {
+    public voidinitLibrary() throws Exception {
         if (mEndpoint != null) return;
 
         loadPjsip();

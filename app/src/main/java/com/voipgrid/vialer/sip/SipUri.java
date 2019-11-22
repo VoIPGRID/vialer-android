@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.sip.core.SipConfig;
 
 /**
  * Class for creating the correct sip addresses.
