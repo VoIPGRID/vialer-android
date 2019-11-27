@@ -21,7 +21,6 @@ import kotlinx.android.synthetic.main.onboarding_step_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import javax.inject.Inject
 
 class LoginStep : Step() {

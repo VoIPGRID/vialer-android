@@ -30,7 +30,6 @@ class OnboardingActivity : Onboarder() {
         WelcomeStep()
     ))
 
-
     private val currentStep : Step
         get() = adapter.getStep(viewPager.currentItem)
 
