@@ -10,9 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="@dimen/onboarding_activity_horizontal_margin"
+        android:paddingStart="@dimen/onboarding_activity_horizontal_margin"
         android:paddingTop="@dimen/onboarding_header_padding"
-        android:paddingRight="@dimen/onboarding_activity_horizontal_margin">
+        android:paddingEnd="@dimen/onboarding_activity_horizontal_margin">
 
         <TextView
             android:id="@+id/title_label"
@@ -30,9 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/onboarding_top_margin"
-            android:fontFamily="sans-serif-light"
             android:text="@string/configure_mobile_number_text"
-            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/title_label" />
@@ -104,7 +102,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40sp"
-            android:fontFamily="sans-serif-light"
             android:text="@string/outgoing_number_description"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -135,8 +132,8 @@
             android:layout_marginBottom="@dimen/onboarding_activity_margin_bottom"
             android:text="@string/back"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/button_configure"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/button_configure"
             app:layout_constraintTop_toBottomOf="@+id/outgoing_number_tv"
             app:layout_constraintVertical_bias="1.0" />
 
@@ -149,8 +146,8 @@
             android:enabled="false"
             android:text="@string/configure_button_title"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@+id/button_back"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/button_back"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/outgoing_number_tv"
             app:layout_constraintVertical_bias="1.0" />
 

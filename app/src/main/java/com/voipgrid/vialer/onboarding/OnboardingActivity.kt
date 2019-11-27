@@ -10,13 +10,17 @@ import com.voipgrid.vialer.onboarding.steps.permissions.ContactsPermissionStep
 import com.voipgrid.vialer.onboarding.steps.permissions.MicrophonePermissionStep
 import com.voipgrid.vialer.onboarding.steps.permissions.OptimizationWhitelistStep
 import com.voipgrid.vialer.onboarding.steps.permissions.PhoneStatePermissionStep
+import com.voipgrid.vialer.onboarding.steps.TwoFactorStep
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
 class OnboardingActivity : Onboarder() {
+    private lateinit var username: String
+    private lateinit var password: String
 
     private val adapter = OnboardingAdapter(supportFragmentManager, lifecycle, listOf(
         LogoStep(),
         LoginStep(),
+        TwoFactorStep(),
         AccountConfigurationStep(),
         MissingVoipAccountStep(),
         ContactsPermissionStep(),
@@ -115,5 +119,18 @@ class OnboardingActivity : Onboarder() {
         logger.i("Restarting onboarding procedure")
         finish()
         logout(true)
+    }
+
+    fun setCredentialsForTfa(username: String, password: String) {
+        this.username = username
+        this.password = password
+    }
+
+    fun getUsername(): String {
+        return username
+    }
+
+    fun getPassword(): String {
+        return password
     }
 }
