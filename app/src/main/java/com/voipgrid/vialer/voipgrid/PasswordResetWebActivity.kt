@@ -1,16 +1,13 @@
 package com.voipgrid.vialer.voipgrid
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.View.GONE
-import android.view.inputmethod.InputMethodManager
 import android.webkit.CookieManager
 import android.webkit.WebStorage
 import android.webkit.WebView
@@ -42,17 +39,17 @@ class PasswordResetWebActivity : VialerBaseActivity() {
 
         button_continue.setOnClickListener {
             hideKeyboard()
-            loadPortal(username, password, password_field_2.text.toString())
+            loadPortal(username, password, password_repeat_edit_text.text.toString())
         }
 
-        password_field_1.addTextChangedListener(TextChangedListener())
-        password_field_2.addTextChangedListener(TextChangedListener())
+        password_edit_text.addTextChangedListener(TextChangedListener())
+        password_repeat_edit_text.addTextChangedListener(TextChangedListener())
         button_continue.isEnabled = userHasEnteredValidMatchingPasswords()
     }
 
     private fun userHasEnteredValidMatchingPasswords() : Boolean {
-        val password1 = password_field_1.text.toString()
-        val password2 = password_field_2.text.toString()
+        val password1 = password_edit_text.text.toString()
+        val password2 = password_repeat_edit_text.text.toString()
 
         when {
             password1 != password2  -> return false

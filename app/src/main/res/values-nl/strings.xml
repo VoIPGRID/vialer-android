@@ -298,8 +298,7 @@
     <string name="onboarding_skip">Overslaan</string>
     <string name="onboarding_battery_optimization_whitelist_title">Batterij-optimalisatie</string>
     <string name="onboarding_battery_optimization_whitelist_justification">"Batterij-optimalisatie kan ervoor zorgen dat de app langzaam wordt gestopt, gesprekken en notificaties worden geblokkeerd etc.\n\nDeze toestemming zorgt ervoor dat Vialer als veilig wordt gemarkeerd, waardoor dit gedrag zich niet voor zal doen.\n\nWe zijn ons ervan bewust hoe belangrijk je batterij is en gaan hier dan ook zuinig mee om. "</string>
-    <string name="password_reset_title">Wachtwoord reset</string>
-    <string name="password_reset_subtitle">Verplicht</string>
+    <string name="password_reset_title">Wachtwoord Reset Verplicht</string>
     <string name="password_reset_description_top">Je zult een nieuw wachtwoord moeten aanmaken voordat er opnieuw ingelogd kan worden.</string>
     <string name="password_reset_description_bottom">Je wachtwoord moet uit minimaal 6 karakters bestaan en bevat minimaal 1 niet-alfabetisch karakter.</string>
     <string name="password_reset_hint">Wachtwoord</string>
