@@ -142,31 +142,6 @@ class LoginStep : Step() {
     }
 
     /**
-     * Create and show a dialog for the user to enter a two-factor token.
-     *
-     */
-    private fun showTwoFactorDialog() {
-        activity?.let {
-            val twoFactorDialog = AlertDialog.Builder(it)
-                    .setView(R.layout.onboarding_dialog_two_factor)
-                    .show()
-
-            val codeField = (twoFactorDialog.findViewById(R.id.two_factor_code_field) as EditText)
-            twoFactorHelper = TwoFactorFragmentHelper(it, codeField).apply {
-                focusOnTokenField()
-                pasteCodeFromClipboard()
-            }
-
-            (twoFactorDialog.findViewById(R.id.button_continue) as Button).setOnClickListener {
-                onboarding?.isLoading = true
-                attemptLogin(codeField.text.toString())
-            }
-
-            this.twoFactorDialog = twoFactorDialog
-        }
-    }
-
-    /**
      * Launches an activity to allow the user to reset their password.
      *
      */
