@@ -143,8 +143,7 @@
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_battery_optimization_whitelist_title">Battery Optimization</string>
     <string name="onboarding_battery_optimization_whitelist_justification">Battery optimization may silently shut down the app, block incoming calls and notifications, etc.\n\nThis permission will whitelist Vialer to prevent such issues. \n\nWe are aware how important battery is and use it very conservatively.</string>
-    <string name="password_reset_title">Password Reset</string>
-    <string name="password_reset_subtitle">Required</string>
+    <string name="password_reset_title">Password Reset Required</string>
     <string name="password_reset_description_top">You must create a new password before you are able to login.</string>
     <string name="password_reset_description_bottom">Your password must be at least 6 characters long and contain at least 1 non-alphabetical character.</string>
     <string name="password_reset_hint">Password</string>
