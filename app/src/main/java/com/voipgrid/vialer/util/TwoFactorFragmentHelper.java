@@ -1,8 +1,8 @@
 package com.voipgrid.vialer.util;
 
 import android.content.Context;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
+
+import com.chaos.view.PinView;
 
 /**
  * There are multiple fragments that require nearly the exact same logic but they must extend different
@@ -10,24 +10,12 @@ import android.widget.EditText;
  */
 public class TwoFactorFragmentHelper {
 
-    private final EditText mCodeField;
-    private final ClipboardHelper mClipboardHelper;
-    private InputMethodManager mInputMethodManager;
+    private PinView mCodeField;
+    private ClipboardHelper mClipboardHelper;
 
-    public TwoFactorFragmentHelper(Context context, EditText codeField) {
+    public TwoFactorFragmentHelper(Context context, PinView codeField) {
         mCodeField = codeField;
         mClipboardHelper = ClipboardHelper.fromContext(context);
-        mInputMethodManager =  (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-    }
-
-    /**
-     * Requests focus from the 2fa field and prompts the keyboard to appear, this is so the user
-     * can begin typing in the field immediately (as there is only one field in the view).
-     *
-     */
-    public void focusOnTokenField() {
-        mCodeField.requestFocus();
-        mInputMethodManager.showSoftInput(mCodeField, InputMethodManager.SHOW_IMPLICIT);
     }
 
     /**
@@ -35,19 +23,20 @@ public class TwoFactorFragmentHelper {
      * code stored.
      *
      */
-    public void pasteCodeFromClipboard() {
+    public Boolean pasteCodeFromClipboard() {
         String pasteData = mClipboardHelper.getMostRecentString();
 
         if (pasteData == null) {
-            return;
+            return false;
         }
 
         if (!looksLike2faCode(pasteData)) {
-            return;
+            return false;
         }
 
         mCodeField.setText(pasteData);
         mCodeField.setSelection(pasteData.length());
+        return true;
     }
 
     /**

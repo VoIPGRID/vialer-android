@@ -122,9 +122,7 @@
     <string name="two_factor_authentication_button">Ga verder</string>
     <string name="two_factor_authentication_token_invalid_title">Twee-Staps Verificatie</string>
     <string name="two_factor_authentication_token_invalid_description">Ingevoerde token is niet geldig</string>
-    <string name="two_factor_authentication_header_label_text">Twee-Staps</string>
-    <string name="two_factor_authentication_header_label_subtext">Verificatie</string>
-
+    <string name="two_factor_authentication_header_label_text">Twee-Staps verificatie</string>
 
     <string name="title_activity_click_to_dial">ClickToDialActivity</string>
     <string name="title_activity_warning">Waarschuwing</string>
@@ -305,8 +303,8 @@
     <string name="voip_account_missing_title">VoIP account\nontbreekt</string>
     <string name="onboarding_login_failed_too_many_attempts_title">Teveel inlogpogingen</string>
     <string name="onboarding_login_failed_too_many_attempts_message">Probeer het later opnieuw.</string>
-    <string name="onboarding_permission_contacts_title">Toestemming contactenlijst</string>
-    <string name="onboarding_permission_contacts_justification">"Deze toestemming zorgt ervoor dat Vialer informatie zoals de contactenlijst en gespreksactiviteit inzichtelijk maakt.\n\nDeze data wordt enkel gebruikt voor het tonen en doorzoeken hiervan. "</string>
+    <string name="onboarding_permission_contacts_title">Importeer contacten</string>
+    <string name="onboarding_permission_contacts_justification">Deze toestemming zorgt ervoor dat Vialer informatie zoals de contactenlijst en gespreksactiviteit inzichtelijk maakt.\n\nDeze data wordt enkel gebruikt voor het tonen en doorzoeken hiervan.</string>
     <string name="onboarding_permission_call_state_title">Gesprekstoegangen</string>
     <string name="onboarding_permission_call_state_justification">Deze toestemming is nodig om Vialer toe te staan VoIP en mobiele gesprekken tegelijkertijd te ontvangen. Zonder deze toestemming zou je tijdens een mobiel gesprek geen melding kunnen ontvangen wanneer een VoIP gesprek binnenkomt.</string>
     <string name="onboarding_permission_microphone_title">Microfoon\ntoestemming</string>
@@ -332,4 +330,6 @@
     <string name="number_copied">Nummer gekopieerd: %1$s</string>
     <string name="back">Terug</string>
     <string name="username_password_wrong">Deze combinatie van gebruikersnaam en wachtwoord komt niet overeen. Probeer het opnieuw.\nBeide velden zijn hoofdlettergevoelig</string>
+    <string name="allow">Toestaan</string>
+    <string name="enter_token">Voer hier je tweestapsverificatietoken in.</string>
 </resources>

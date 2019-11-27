@@ -115,7 +115,7 @@
     <string name="voip_account_missing_text">You do not currently have a VoIP account linked to your user, this is necessary to be able to make and receive calls via VoIP.\n\nIf you do not intend to use VoIP and only wish to use the management and/or two-step calling features then you may skip this step.</string>
 
     <!-- Welcome fragment values -->
-    <string name="welcome_text">Welcome</string>
+    <string name="welcome_text">Welcome to your Vialer, %1$s!</string>
     <string name="placeholder_name">Nameless user</string>
     <string name="start_calling_button">Get started</string>
     <string name="onboarding_login_failed_title">Login failed</string>
@@ -131,10 +131,9 @@
     <string name="two_factor_authentication_button">Continue</string>
     <string name="two_factor_authentication_token_invalid_title">Two-factor Authentication</string>
     <string name="two_factor_authentication_token_invalid_description">The two-factor token is invalid</string>
-    <string name="two_factor_authentication_header_label_text">Two-factor</string>
-    <string name="two_factor_authentication_header_label_subtext">Authentication</string>
-    <string name="onboarding_permission_contacts_title">Contacts Permission</string>
-    <string name="onboarding_permission_contacts_justification">This permission allows Vialer to display information (contacts book &amp; call activity) and to search through your contacts.\n\nThe data will be solely used for display and search purposes.</string>
+    <string name="two_factor_authentication_header_label_text">Two-factor authentication</string>
+    <string name="onboarding_permission_contacts_title">Import contacts</string>
+    <string name="onboarding_permission_contacts_justification">This permission allows Vialer to display information and to list your phone\'s contacts. The data is solely used to display information in the Vialer app.\n\nFor example showing your contacts &amp; call activity.</string>
     <string name="onboarding_permission_call_state_title">Call \nPermission</string>
     <string name="onboarding_permission_call_state_justification">This permission is required to allow Vialer to receive Voice over IP and cellular calls at the same time.\n\nWithout this permission, you might not be notified of incoming VoIP calls when a cellular one is ongoing.</string>
     <string name="onboarding_permission_microphone_title">Microphone Permission</string>
@@ -331,4 +330,6 @@
     <string name="number_copied">Number has been copied: %1$s</string>
     <string name="back">Back</string>
     <string name="username_password_wrong">This combination of username and password does not match. Please try again.\nBoth fields are case-sensitive</string>
+    <string name="allow">Allow</string>
+    <string name="enter_token">Enter your two-factor authentication token below.</string>
 </resources>

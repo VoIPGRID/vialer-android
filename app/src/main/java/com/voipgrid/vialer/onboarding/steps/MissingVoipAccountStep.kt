@@ -26,13 +26,13 @@ class MissingVoipAccountStep : Step() {
         super.onViewCreated(view, savedInstanceState)
         VialerApplication.get().component().inject(this)
 
-        continueButton.setOnClickListener {
+        button_continue.setOnClickListener {
             logger.i("User has decided not to set a voip account despite not having one")
 
             onboarding?.progress(this)
         }
 
-        setVoipAccountButton.setOnClickListener {
+        button_set_voip_account.setOnClickListener {
             logger.i("Loading a web view to let user set their missing voip account")
 
             onboarding?.let {
