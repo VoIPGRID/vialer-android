@@ -61,6 +61,7 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
     }
 
     override fun onClick(view: View?) {
+        onboarding?.isLoading = true
         val mobileNumber = (mobile_number_text_dialog_prefix.text.toString() + mobile_number_text_dialog.text.toString()).replace(" ", "")
         if (!PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
             error(R.string.invalid_mobile_number_message, R.string.invalid_mobile_number_message)
@@ -85,6 +86,7 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
     private fun configureUserAccount(mobileNumber: String) = GlobalScope.launch(Dispatchers.Main) {
         if (!PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
             error()
+            onboarding?.isLoading = false
             return@launch
         }
 
@@ -100,9 +102,11 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
                 return@launch
             }
 
+            onboarding?.isLoading = false
             onboarding?.progress(this@AccountConfigurationStep)
         } catch (e: Exception) {
             logger.e("Failed to configure account: ${e.message}")
+            onboarding?.isLoading = false
             error()
         }
     }
@@ -137,6 +141,7 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
      *
      */
     private fun informUserTheyHaveNoOutgoingNumber(mobileNumber: String) = activity?.runOnUiThread {
+        onboarding?.isLoading = false
         button_configure.isEnabled = true
         AlertDialog.Builder(onboarding)
                 .setTitle(R.string.onboarding_account_configure_no_outgoing_number_title)
