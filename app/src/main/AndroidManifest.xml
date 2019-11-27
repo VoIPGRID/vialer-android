@@ -181,6 +181,9 @@
 
         <activity android:name=".voipgrid.PasswordResetWebActivity"
                   android:theme="@style/OnboardingTheme"/>
+
+        <activity android:name=".onboarding.steps.TwoFactorStep"
+            android:theme="@style/OnboardingTheme"/>
     </application>
 
 </manifest>

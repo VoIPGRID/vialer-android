@@ -225,6 +225,7 @@ dependencies {
     implementation 'javax.inject:javax.inject:1@jar'
     implementation 'com.github.lzyzsd.randomcolor:library:1.0.0'
     implementation 'com.googlecode.libphonenumber:libphonenumber:8.8.3'
+    implementation 'com.chaos.view:pinview:1.4.3'
 
     implementation 'com.github.f0ris.sweetalert:library:1.6.2'
     // Butter knife - Field and method binding for views

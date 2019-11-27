@@ -24,9 +24,7 @@
         <item name="colorControlNormal">@color/onboarding_color_accent</item>
         <item name="colorControlActivated">@color/onboarding_color_highlight</item>
         <item name="colorControlHighlight">@color/onboarding_color_accent</item>
-
         <item name="colorButtonNormal">@color/onboarding_button_normal_color</item>
-
         <item name="android:buttonStyle">@style/OnboardingButtonStyle</item>
         <item name="android:editTextStyle">@style/OnboardingEditTextStyle</item>
         <item name="android:textColorHint">@color/onboarding_edittext_hint_color</item>
@@ -77,7 +75,8 @@
     <!-- Style for the Forgot password button -->
     <style name="ButtonAnchorStyle" parent="@android:style/Widget.Holo.Button.Borderless">
         <item name="android:color">@color/onboarding_button_anchor_color</item>
-        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">@dimen/onboarding_text_size_button</item>
     </style>
 
     <style name="ButtonAnchorThickTextStyle" parent="@android:style/Widget.Holo.Button.Borderless">
@@ -106,6 +105,7 @@
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textStyle"/>
         <item name="android:lineSpacingExtra">4sp</item>
+        <item name="android:gravity">start</item>
     </style>
 
     <!-- Style for Forgot password description TextView -->

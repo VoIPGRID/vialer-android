@@ -6,7 +6,7 @@
     android:fillViewport="true"
     android:background="@drawable/cloud_background">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -19,14 +19,20 @@
             style="@style/HeaderTitleTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/login_header_label_text" />
+            android:text="@string/login_header_label_text"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/username_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/onboarding_top_margin"
-            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle">
+            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
+            app:layout_constraintTop_toBottomOf="@id/title_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/username_text_dialog"
@@ -36,7 +42,8 @@
                 android:drawableStart="@drawable/ic_user"
                 android:drawableEnd="@drawable/ic_danger"
                 android:hint="@string/username_edittext_hint"
-                android:inputType="textEmailAddress" />
+                android:inputType="textEmailAddress"
+                android:text="burg@coffeeit.nl"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -45,7 +52,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/activity_vertical_margin"
-            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle">
+            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
+            app:layout_constraintTop_toBottomOf="@id/username_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/password_text_dialog"
@@ -55,7 +65,8 @@
                 android:drawableStart="@drawable/ic_lock_on"
                 android:drawableEnd="@drawable/ic_danger"
                 android:hint="@string/password_edittext_hint"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:text="PfoKFx.R=,[]F{Gk6tE)"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -67,34 +78,35 @@
             android:paddingBottom="@dimen/onboarding_activity_margin_bottom"
             android:text="@string/username_password_wrong"
             android:textSize="15sp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/password_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-        <LinearLayout
+        <Button
+            android:id="@+id/button_login"
+            style="@style/OnboardingButtonStyle"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
+
+            android:text="@string/login_button_title"
+            app:layout_constraintBottom_toTopOf="@id/button_forgot_password"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_error"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <Button
+            android:id="@+id/button_forgot_password"
+            style="@style/ButtonAnchorStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/activity_vertical_item_padding"
-            android:layout_weight="1"
-            android:gravity="bottom"
-            android:orientation="vertical">
+            android:text="@string/forgot_password_button_title"
+            android:textAllCaps="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-            <Button
-                android:id="@+id/button_login"
-                style="@style/OnboardingButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:text="@string/login_button_title"/>
-
-            <Button
-                android:id="@+id/button_forgot_password"
-                style="@style/ButtonAnchorStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/forgot_password_button_title"
-                android:textAllCaps="true"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>
