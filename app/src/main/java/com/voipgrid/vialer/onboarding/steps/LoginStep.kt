@@ -1,27 +1,22 @@
 package com.voipgrid.vialer.onboarding.steps
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.res.ColorStateList
-import android.graphics.drawable.Drawable
+import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import android.text.Editable
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
-import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.onboarding.OnboardingActivity
 import com.voipgrid.vialer.onboarding.VoipgridLogin
 import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult
 import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult.*
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.ConnectivityHelper
-import com.voipgrid.vialer.util.TwoFactorFragmentHelper
 import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity
 import kotlinx.android.synthetic.main.onboarding_step_login.*
 import kotlinx.coroutines.Dispatchers
@@ -37,8 +32,6 @@ class LoginStep : Step() {
     @Inject lateinit var login: VoipgridLogin
 
     private val logger = Logger(this).forceRemoteLogging(true)
-    private var twoFactorHelper: TwoFactorFragmentHelper? = null
-    private var twoFactorDialog: AlertDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -66,11 +59,6 @@ class LoginStep : Step() {
         button_forgot_password.setOnClickListener { launchForgottenPasswordActivity() }
 
         automaticallyLogInIfWeHaveCredentials()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        twoFactorHelper?.pasteCodeFromClipboard()
     }
 
     /**
@@ -113,44 +101,20 @@ class LoginStep : Step() {
         }
         SUCCESS -> {
             logger.i("Login to VoIPGRID was successful, progressing the user in onboarding")
-            twoFactorDialog?.dismiss()
             onboarding?.progress(this)
         }
         TWO_FACTOR_REQUIRED -> {
             logger.i("User logged into VoIPGRID with the correct username/password but is now required to input a valid 2FA code")
             button_login.isEnabled = true
-            showTwoFactorDialog()
+            state?.skipTwoFactor = false
+            (onboarding as OnboardingActivity).setCredentialsForTfa(username_text_dialog.text.toString(), password_text_dialog.text.toString())
+            onboarding?.progress(this)
         }
         MUST_CHANGE_PASSWORD -> {
             logger.i("User must change their password before we can login")
             activity?.let {
                 PasswordResetWebActivity.launch(it, username_text_dialog.text.toString(), password_text_dialog.text.toString())
             }
-        }
-    }
-
-    /**
-     * Create and show a dialog for the user to enter a two-factor token.
-     *
-     */
-    private fun showTwoFactorDialog() {
-        activity?.let {
-            val twoFactorDialog = AlertDialog.Builder(it)
-                    .setView(R.layout.onboarding_dialog_two_factor)
-                    .show()
-
-            val codeField = (twoFactorDialog.findViewById(R.id.two_factor_code_field) as EditText)
-            twoFactorHelper = TwoFactorFragmentHelper(it, codeField).apply {
-                focusOnTokenField()
-                pasteCodeFromClipboard()
-            }
-
-            (twoFactorDialog.findViewById(R.id.button_continue) as Button).setOnClickListener {
-                onboarding?.isLoading = true
-                attemptLogin(codeField.text.toString())
-            }
-
-            this.twoFactorDialog = twoFactorDialog
         }
     }
 

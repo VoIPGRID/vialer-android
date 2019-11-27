@@ -1,0 +1,78 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/cloud_background"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/onboarding_activity_horizontal_margin"
+        android:paddingTop="@dimen/onboarding_header_padding"
+        android:paddingEnd="@dimen/onboarding_activity_horizontal_margin">
+
+        <TextView
+            android:id="@+id/title_label"
+            style="@style/HeaderTitleTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:text="@string/two_factor_authentication_header_label_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/subtitle_label"
+            style="@style/DescriptionTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/onboarding_top_margin"
+            android:text="@string/enter_token"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_label" />
+
+        <com.chaos.view.PinView
+            android:id="@+id/pin_view"
+            style="@style/PinWidget.PinView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/onboarding_top_margin"
+            android:cursorVisible="true"
+            android:fontFamily="sans-serif"
+            android:inputType="number"
+            android:itemBackground="@drawable/rounded_edges"
+            android:textSize="@dimen/onboarding_text_size_edit_text"
+            app:cursorColor="@color/onboarding_button_normal_text_color"
+            app:cursorWidth="1dp"
+            app:itemCount="6"
+            app:itemHeight="54dp"
+            app:itemRadius="4dp"
+            app:itemSpacing="7dp"
+            app:itemWidth="42dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/subtitle_label"
+            app:lineColor="@android:color/transparent"
+            app:lineWidth="2dp"
+            app:viewType="rectangle" />
+
+        <Button
+            android:id="@+id/button_back"
+            style="@style/ButtonAnchorThickTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/onboarding_activity_margin_bottom"
+            android:text="@string/back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pin_view"
+            app:layout_constraintVertical_bias="1.0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
