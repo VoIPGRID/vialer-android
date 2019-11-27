@@ -42,8 +42,7 @@
                 android:drawableStart="@drawable/ic_user"
                 android:drawableEnd="@drawable/ic_danger"
                 android:hint="@string/username_edittext_hint"
-                android:inputType="textEmailAddress"
-                android:text="burg@coffeeit.nl"/>
+                android:inputType="textEmailAddress"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -65,8 +64,7 @@
                 android:drawableStart="@drawable/ic_lock_on"
                 android:drawableEnd="@drawable/ic_danger"
                 android:hint="@string/password_edittext_hint"
-                android:inputType="textPassword"
-                android:text="PfoKFx.R=,[]F{Gk6tE)"/>
+                android:inputType="textPassword"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
