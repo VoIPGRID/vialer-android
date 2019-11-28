@@ -20,32 +20,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-<<<<<<< HEAD
-import androidx.annotation.IdRes;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import com.google.android.material.navigation.NavigationView;
-import com.voipgrid.vialer.api.ServiceGenerator;
-import com.voipgrid.vialer.api.VoipgridApi;
-=======
 import com.google.android.material.navigation.NavigationView;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.UserSynchronizer;
->>>>>>> hotfix/6.4.3
 import com.voipgrid.vialer.api.models.Destination;
 import com.voipgrid.vialer.api.models.FixedDestination;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
-<<<<<<< HEAD
-import com.voipgrid.vialer.api.models.VoipGridResponse;
-=======
->>>>>>> hotfix/6.4.3
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
@@ -272,18 +255,9 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     }
 
-<<<<<<< HEAD
-    @Override
-    public void onResponse(@NonNull Call call, @NonNull Response response) {
-        if (!response.isSuccessful()) {
-            if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START) && User.isLoggedIn()) {
-                Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
-            }
-=======
     private void refresh() {
         if (mSpinner != null) {
             mSpinner.setEnabled(isConnectedToNetwork());
->>>>>>> hotfix/6.4.3
         }
 
         List<UserDestination> userDestinationObjects = User.internal.getDestinations();
@@ -350,27 +324,6 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         refreshCurrentAvailability();
     }
 
-<<<<<<< HEAD
-    @Override
-    protected void onInternetConnectivityLost() {
-        if (mSpinner != null && mNoConnectionText != null) {
-            mSpinner.setVisibility(View.GONE);
-            mNoConnectionText.setVisibility(View.VISIBLE);
-        }
-        super.onInternetConnectivityLost();
-    }
-
-    @Override
-    protected void onInternetConnectivityGained() {
-        if (mNoConnectionText != null && mNoConnectionText.getVisibility() == View.VISIBLE) {
-            mNoConnectionText.setVisibility(View.GONE);
-            if (mSpinner != null) {
-                mSpinner.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-=======
->>>>>>> hotfix/6.4.3
 
     private static class CustomFontSpinnerAdapter<D> extends ArrayAdapter {
         // Initialise custom font, for example:
@@ -456,8 +409,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     private class CustomActionBarDrawerToggle extends ActionBarDrawerToggle {
 
         CustomActionBarDrawerToggle(Activity activity, DrawerLayout drawerLayout,
-                                           Toolbar toolbar, int openDrawerContentDescRes,
-                                           int closeDrawerContentDescRes) {
+                Toolbar toolbar, int openDrawerContentDescRes,
+                int closeDrawerContentDescRes) {
             super(activity, drawerLayout, toolbar, openDrawerContentDescRes, closeDrawerContentDescRes);
         }
 

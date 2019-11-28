@@ -1,5 +1,8 @@
 package com.voipgrid.vialer.sip;
 
+import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
+import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
+
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -13,11 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.widget.Toast;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
@@ -28,18 +27,16 @@ import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
-
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
-import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.ActiveCallNotification;
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
-import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
+import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -51,14 +48,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-<<<<<<< HEAD
-import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
-import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
-=======
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
->>>>>>> hotfix/6.4.3
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
