@@ -57,6 +57,6 @@
         android:contentDescription="@null"
         android:padding="@dimen/list_item_call_button_padding"
         android:tint="@color/tint_color_backspace"
-        app:srcCompat="@drawable/ic_phone"
+        app:srcCompat="@drawable/ic_dots_vertical"
         android:layout_weight="0" />
 </LinearLayout>

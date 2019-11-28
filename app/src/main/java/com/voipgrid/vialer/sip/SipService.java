@@ -12,10 +12,10 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.BuildConfig;
@@ -27,17 +27,16 @@ import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
-
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
-import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.ActiveCallNotification;
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
 import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
+import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -163,7 +162,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         if (intent == null) return false;
 
         this.intent = intent;
-        final String action = this.intent.getAction();
+        final String action = "" + this.intent.getAction();
 
         mLogger.i("Performing action: " + action);
 
@@ -729,8 +728,26 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      * @return The complete pending intent
      */
     public static PendingIntent createSipServiceAction(@Actions.Valid String action) {
+        return createSipServiceAction(action, null, null);
+    }
+
+    /**
+     * Create an action for the SipService, specifying a valid action, the URI data and extras bundle.
+     *
+     * @param action The action the SipService should perform when resolved
+     * @param data The URI data the intent is operating on.
+     * @param bundle The extras bundle to pass additional data to the intent.
+     * @return The complete pending intent
+     */
+    public static PendingIntent createSipServiceAction(@Actions.Valid String action, @Nullable Uri data, @Nullable Bundle bundle) {
         Intent intent = new Intent(VialerApplication.get(), SipService.class);
         intent.setAction(action);
+        if (data != null) {
+            intent.setData(data);
+        }
+        if (bundle != null) {
+            intent.putExtras(bundle);
+        }
         return PendingIntent.getService(VialerApplication.get(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -795,6 +812,13 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
             if (mCurrentCall == null) {
                 mLogger.i("No active calls stop the service");
                 stopSelf();
+                if (mIncomingCallDetails != null) {
+                    String number = mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
+                    String contactName = mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME);
+                    if (number != null && !number.isEmpty()) {
+                        new MissedCallNotification(number, contactName).display();
+                    }
+                }
             }
         }
     }

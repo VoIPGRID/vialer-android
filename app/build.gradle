@@ -272,6 +272,9 @@ dependencies {
     implementation "androidx.paging:paging-runtime-ktx:2.1.0"
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
 
+    // Segment analytics
+    implementation 'com.segment.analytics.android:analytics:4.3.1'
+
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 }
 

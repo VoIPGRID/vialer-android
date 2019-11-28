@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
@@ -21,6 +23,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 
 public class IncomingCallActivity extends AbstractCallActivity {
 
@@ -105,6 +109,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
     @Override
     public void onCallDisconnected() {
+        //TODO: Seems like this is the scenario 1 of missed call.
         mSipServiceConnection.disconnect(true);
         finish();
     }

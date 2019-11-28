@@ -409,8 +409,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     private class CustomActionBarDrawerToggle extends ActionBarDrawerToggle {
 
         CustomActionBarDrawerToggle(Activity activity, DrawerLayout drawerLayout,
-                                           Toolbar toolbar, int openDrawerContentDescRes,
-                                           int closeDrawerContentDescRes) {
+                Toolbar toolbar, int openDrawerContentDescRes,
+                int closeDrawerContentDescRes) {
             super(activity, drawerLayout, toolbar, openDrawerContentDescRes, closeDrawerContentDescRes);
         }
 

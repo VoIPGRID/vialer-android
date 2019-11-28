@@ -144,6 +144,14 @@ abstract class AbstractCallNotification : AbstractNotification() {
      */
     fun active(call : SipCall) : AbstractCallNotification = ActiveCallNotification(call)
 
+    fun missed(number: String, contactName: String?) {
+        MissedCallNotification(number, contactName).display()
+    }
+
+    fun answeredElsewhere(number: String) {
+        AnsweredElsewhereNotification(number).display()
+    }
+
     companion object {
         const val CHANNEL_ID: String = "vialer_calls"
     }

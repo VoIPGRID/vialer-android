@@ -73,7 +73,7 @@ class MainActivity : NavigationDrawerActivity() {
      *
      */
     private fun returnUserToLoginScreen() {
-        logout(true)
+        logout.perform(true, this)
         finish()
     }
 
