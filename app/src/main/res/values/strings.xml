@@ -315,4 +315,7 @@
     <string name="username_password_wrong">This combination of username and password does not match. Please try again.\nBoth fields are case-sensitive</string>
     <string name="allow">Allow</string>
     <string name="enter_token">Enter your two-factor authentication token below.</string>
+    <string name="invalid_token">Invalid token</string>
+    <string name="try_again_tfa">Try again or use your backup code</string>
+    <string name="backup_code_button">Enter backup code</string>
 </resources>
