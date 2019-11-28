@@ -331,4 +331,7 @@
     <string name="username_password_wrong">Deze combinatie van gebruikersnaam en wachtwoord komt niet overeen. Probeer het opnieuw.\nBeide velden zijn hoofdlettergevoelig</string>
     <string name="allow">Toestaan</string>
     <string name="enter_token">Voer hier je tweestapsverificatietoken in.</string>
+    <string name="invalid_token">Ongeldig token</string>
+    <string name="try_again_tfa">Probeer opnieuw of gebruik je backupcode</string>
+    <string name="backup_code_button">Voer backupcode in</string>
 </resources>

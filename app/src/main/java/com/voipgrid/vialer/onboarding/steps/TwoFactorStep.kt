@@ -34,8 +34,16 @@ class TwoFactorStep : Step() {
         super.onCreate(savedInstanceState)
         VialerApplication.get().component().inject(this)
 
-        username = (onboarding as OnboardingActivity).getUsername()
-        password = (onboarding as OnboardingActivity).getPassword()
+        val usernameCheck = (onboarding as OnboardingActivity).getUsername()
+        val passwordCheck = (onboarding as OnboardingActivity).getPassword()
+        if (usernameCheck == null || passwordCheck == null) {
+            logger.e("The user has made it to two factor authentication without passing values for e-mail or password, restart onboarding")
+            onboarding?.restart()
+            return
+        }
+
+        username = usernameCheck
+        password = passwordCheck
         (onboarding as OnboardingActivity).setCredentialsForTfa("", "")
 
         TwoFactorFragmentHelper(context, pin_view).apply {
@@ -97,19 +105,23 @@ class TwoFactorStep : Step() {
     }
 
     /**
-     * Sets the colors of the text and border of the input field to red.
+     * Sets the colors of the text of the input fields to red and shows error labels and button.
      */
     private fun showErrorInput() {
-        pin_view.setLineColor(ContextCompat.getColor((onboarding as Context), R.color.error_color))
         pin_view.setTextColor(ContextCompat.getColor((onboarding as Context), R.color.error_color))
+        error_label.visibility = View.VISIBLE
+        error_description_label.visibility = View.VISIBLE
+        button_enter_backup_code.visibility = View.VISIBLE
     }
 
     /**
-     * Sets the colors of the text and border of the input fields to default.
+     * Sets the colors of the text of the input fields to default and hides error labels and button.
      */
     private fun showDefaultInput() {
-        pin_view.setLineColor(ContextCompat.getColor((onboarding as Context), android.R.color.transparent))
         pin_view.setTextColor(ContextCompat.getColor((onboarding as Context), R.color.onboarding_button_text_color))
+        error_label.visibility = View.GONE
+        error_description_label.visibility = View.GONE
+        button_enter_backup_code.visibility = View.GONE
     }
 
     override fun shouldThisStepBeSkipped(state: OnboardingState): Boolean {
