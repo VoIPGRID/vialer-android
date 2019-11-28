@@ -14,8 +14,8 @@ import com.voipgrid.vialer.onboarding.steps.TwoFactorStep
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
 class OnboardingActivity : Onboarder() {
-    private lateinit var username: String
-    private lateinit var password: String
+    private var username: String? = null
+    private var password: String? = null
 
     private val adapter = OnboardingAdapter(supportFragmentManager, lifecycle,
         LogoStep(),
@@ -127,11 +127,11 @@ class OnboardingActivity : Onboarder() {
         this.password = password
     }
 
-    fun getUsername(): String {
+    fun getUsername(): String? {
         return username
     }
 
-    fun getPassword(): String {
+    fun getPassword(): String? {
         return password
     }
 }

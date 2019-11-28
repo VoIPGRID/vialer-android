@@ -60,6 +60,44 @@
             app:lineWidth="2dp"
             app:viewType="rectangle" />
 
+        <TextView
+            android:id="@+id/error_label"
+            style="@style/DescriptionTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/onboarding_top_margin"
+            android:gravity="center_horizontal"
+            android:text="@string/invalid_token"
+            android:textSize="24sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pin_view" />
+
+        <TextView
+            android:id="@+id/error_description_label"
+            style="@style/DescriptionTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_item_padding"
+            android:text="@string/try_again_tfa"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/error_label" />
+
+        <Button
+            android:id="@+id/button_enter_backup_code"
+            style="@style/OnboardingButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/onboarding_top_margin"
+            android:text="@string/backup_code_button"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/error_description_label" />
+
         <Button
             android:id="@+id/button_back"
             style="@style/ButtonAnchorThickTextStyle"
@@ -70,7 +108,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/pin_view"
+            app:layout_constraintTop_toBottomOf="@id/button_enter_backup_code"
             app:layout_constraintVertical_bias="1.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
