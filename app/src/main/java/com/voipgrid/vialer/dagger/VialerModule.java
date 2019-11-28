@@ -20,9 +20,7 @@ import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.UserSynchronizer;
 import com.voipgrid.vialer.api.VoipgridApi;
-import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.audio.AudioFocus;
 import com.voipgrid.vialer.audio.AudioRouter;
@@ -98,15 +96,6 @@ public class VialerModule {
 
     @Provides @Nullable PhoneAccount providePhoneAccount() {
         return User.getVoipAccount();
-    }
-
-    @Provides @Nullable InternalNumbers provideInternalNumbers() {
-        return User.internal.getInternalNumbers();
-    }
-
-    @Provides @Nullable
-    PhoneAccounts providePhoneAccounts() {
-        return User.internal.getPhoneAccounts();
     }
 
     @Provides LocalBroadcastManager provideLocalBroadcastManager(Context context) {
@@ -269,8 +258,8 @@ public class VialerModule {
     }
 
     @Provides
-    Logout provideLogout(Context context, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper) {
-        return new Logout(context, sharedPreferences, connectivityHelper);
+    Logout provideLogout(Context context, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper, CallRecordDao database) {
+        return new Logout(context, sharedPreferences, connectivityHelper, database);
     }
 
     @Provides

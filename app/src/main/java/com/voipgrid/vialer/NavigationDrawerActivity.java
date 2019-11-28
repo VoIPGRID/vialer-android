@@ -3,7 +3,6 @@ package com.voipgrid.vialer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -21,25 +20,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.IdRes;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-
 import com.google.android.material.navigation.NavigationView;
 import com.voipgrid.vialer.api.ServiceGenerator;
-import com.voipgrid.vialer.api.VoipgridApi;
+import com.voipgrid.vialer.api.UserSynchronizer;
 import com.voipgrid.vialer.api.models.Destination;
 import com.voipgrid.vialer.api.models.FixedDestination;
-import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
-import com.voipgrid.vialer.api.models.VoipGridResponse;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
@@ -48,6 +37,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import kotlin.Unit;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -66,12 +62,12 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     private TextView mNoConnectionText;
     private View mNavigationHeaderView;
 
-    private VoipgridApi mVoipgridApi;
     private ConnectivityHelper mConnectivityHelper;
     private SystemUser mSystemUser;
 
     private String mSelectedUserDestinationId;
-    private boolean mFirstTimeOnItemSelected = true;
+
+    @Inject UserSynchronizer userSynchronizer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +149,16 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         refreshCurrentAvailability();
     }
 
+    @Override
+    protected void onInternetConnectivityGained() {
+        refreshCurrentAvailability();
+    }
+
+    @Override
+    protected void onInternetConnectivityLost() {
+        refreshCurrentAvailability();
+    }
+
     /**
      * Perform a request to refresh the current availability stats. This happens asynchronously.
      *
@@ -162,9 +168,12 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             return;
         }
 
-        mVoipgridApi = ServiceGenerator.createApiService(this);
-        Call<VoipGridResponse<UserDestination>> call = mVoipgridApi.getUserDestination();
-        call.enqueue(this);
+        if (!isConnectedToNetwork()) return;
+
+        userSynchronizer.syncWithCallback(() -> {
+            runOnUiThread(this::refresh);
+            return Unit.INSTANCE;
+        });
     }
 
     private void setSystemUserInfo() {
@@ -243,9 +252,58 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     @Override
     public void onFailure(@NonNull Call call, @NonNull Throwable t) {
-        if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
-            Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
+
+    }
+
+    private void refresh() {
+        if (mSpinner != null) {
+            mSpinner.setEnabled(isConnectedToNetwork());
         }
+
+        List<UserDestination> userDestinationObjects = User.internal.getDestinations();
+
+        if (userDestinationObjects.size() <= 0 || mSpinnerAdapter == null) {
+            return;
+        }
+
+        UserDestination userDestination = userDestinationObjects.get(0);
+
+        // Create not available destination.
+        Destination notAvailableDestination = new FixedDestination();
+        notAvailableDestination.setDescription(getString(R.string.not_available));
+
+        // Clear old list and add the not available destination.
+        mSpinnerAdapter.clear();
+        mSpinnerAdapter.add(notAvailableDestination);
+
+        // Set current destination.
+        mSelectedUserDestinationId = userDestination.getSelectedUserDestination().getId();
+
+        Destination activeDestination = userDestination.getActiveDestination();
+
+        List<Destination> destinations = userDestination.getDestinations();
+        int activeIndex = 0;
+
+        // Add all possible destinations to array.
+        for (int i = 0, size = destinations.size(); i < size; i++) {
+            Destination destination = destinations.get(i);
+            mSpinnerAdapter.add(destination);
+            if (activeDestination != null &&
+                    destination.getId().equals(activeDestination.getId())) {
+                activeIndex = i + 1;
+            }
+        }
+
+        // Create add destination field.
+        Destination addDestination = new FixedDestination();
+        String addDestinationText = getString(R.string.fa_plus_circle) +
+                "   " + getString(R.string.add_availability);
+        addDestination.setDescription(addDestinationText);
+        mSpinnerAdapter.add(addDestination);
+
+        mSpinnerAdapter.notifyDataSetChanged();
+        mSpinner.setTag(activeIndex);
+        mSpinner.setSelection(activeIndex);
     }
 
     @Override
@@ -254,96 +312,18 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
             if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START) && User.isLoggedIn()) {
                 Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
             }
-        }
-        if (response.body() instanceof VoipGridResponse) {
-            List<UserDestination> userDestinationObjects = ((VoipGridResponse<UserDestination>) response.body()).getObjects();
-
-            if (userDestinationObjects == null || userDestinationObjects.size() <= 0 || mSpinnerAdapter == null) {
-                return;
-            }
-
-            storeInternalNumbers(userDestinationObjects);
-
-            UserDestination userDestination = userDestinationObjects.get(0);
-
-            // Create not available destination.
-            Destination notAvailableDestination = new FixedDestination();
-            notAvailableDestination.setDescription(getString(R.string.not_available));
-
-            // Clear old list and add the not available destination.
-            mSpinnerAdapter.clear();
-            mSpinnerAdapter.add(notAvailableDestination);
-
-            // Set current destination.
-            mSelectedUserDestinationId = userDestination.getSelectedUserDestination().getId();
-
-            Destination activeDestination = userDestination.getActiveDestination();
-
-            List<Destination> destinations = userDestination.getDestinations();
-            int activeIndex = 0;
-
-            // Add all possible destinations to array.
-            for (int i = 0, size = destinations.size(); i < size; i++) {
-                Destination destination = destinations.get(i);
-                mSpinnerAdapter.add(destination);
-                if (activeDestination != null &&
-                        destination.getId().equals(activeDestination.getId())) {
-                    activeIndex = i + 1;
+            if (!mConnectivityHelper.hasNetworkConnection()) {
+                // First check if there is a entry already to avoid duplicates.
+                if (mSpinner != null && mNoConnectionText != null) {
+                    mSpinner.setVisibility(View.GONE);
+                    mNoConnectionText.setVisibility(View.VISIBLE);
                 }
             }
-
-            // Create add destination field.
-            Destination addDestination = new FixedDestination();
-            String addDestinationText = getString(R.string.fa_plus_circle) +
-                    "   " + getString(R.string.add_availability);
-            addDestination.setDescription(addDestinationText);
-            mSpinnerAdapter.add(addDestination);
-
-            mSpinnerAdapter.notifyDataSetChanged();
-            mSpinner.setSelection(activeIndex);
-        }
-    }
-
-    /**
-     * Store a list of internal numbers to storage.
-     *
-     * @param userDestinationObjects
-     */
-    private void storeInternalNumbers(List<UserDestination> userDestinationObjects) {
-        InternalNumbers internalNumbers = new InternalNumbers();
-        PhoneAccounts phoneAccounts = new PhoneAccounts();
-
-        for (UserDestination userDestination : userDestinationObjects) {
-            internalNumbers.add(userDestination.getInternalNumber());
-
-            for (PhoneAccount phoneAccount : userDestination.getPhoneAccounts()) {
-                internalNumbers.add(phoneAccount.getNumber());
-                phoneAccounts.add(phoneAccount.getId());
-            }
         }
 
-        User.internal.setInternalNumbers(internalNumbers);
-        User.internal.setPhoneAccounts(phoneAccounts);
+        refreshCurrentAvailability();
     }
 
-    @Override
-    protected void onInternetConnectivityLost() {
-        if (mSpinner != null && mNoConnectionText != null) {
-            mSpinner.setVisibility(View.GONE);
-            mNoConnectionText.setVisibility(View.VISIBLE);
-        }
-        super.onInternetConnectivityLost();
-    }
-
-    @Override
-    protected void onInternetConnectivityGained() {
-        if (mNoConnectionText != null && mNoConnectionText.getVisibility() == View.VISIBLE) {
-            mNoConnectionText.setVisibility(View.GONE);
-            if (mSpinner != null) {
-                mSpinner.setVisibility(View.VISIBLE);
-            }
-        }
-    }
 
     private static class CustomFontSpinnerAdapter<D> extends ArrayAdapter {
         // Initialise custom font, for example:
@@ -387,26 +367,32 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if (mFirstTimeOnItemSelected) {
-            mFirstTimeOnItemSelected = false;
+        if ((Integer) mSpinner.getTag() == position) return;
+
+        if (!isConnectedToNetwork()) {
+            refresh();
+            if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
+                Toast.makeText(this, getString(R.string.set_userdestination_api_fail), Toast.LENGTH_LONG).show();
+            }
+        }
+
+        if (parent.getCount() - 1 == position) {
+            VoIPGRIDPortalWebActivity.launchForUserDestinations(this);
         } else {
-            if (parent.getCount() - 1 == position) {
-                VoIPGRIDPortalWebActivity.launchForUserDestinations(this);
-            } else {
-                Destination destination = (Destination) parent.getAdapter().getItem(position);
-                if (destination.getDescription().equals(getString(R.string.not_available))) {
-                    MiddlewareHelper.unregister(this);
-                }
-                SelectedUserDestinationParams params = new SelectedUserDestinationParams();
-                params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
-                params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
-                Call<Object> call = mVoipgridApi.setSelectedUserDestination(mSelectedUserDestinationId, params);
-                call.enqueue(this);
-                if (!MiddlewareHelper.isRegistered()) {
-                    // If the previous destination was not available, or if we're not registered
-                    // for another reason, register again.
-                    MiddlewareHelper.registerAtMiddleware(this);
-                }
+            Destination destination = (Destination) parent.getAdapter().getItem(position);
+            if (destination.getDescription().equals(getString(R.string.not_available))) {
+                MiddlewareHelper.unregister(this);
+            }
+            SelectedUserDestinationParams params = new SelectedUserDestinationParams();
+            params.fixedDestination = destination instanceof FixedDestination ? destination.getId() : null;
+            params.phoneAccount = destination instanceof PhoneAccount ? destination.getId() : null;
+            Call<Object> call = ServiceGenerator.createApiService(this).setSelectedUserDestination(mSelectedUserDestinationId, params);
+            call.enqueue(this);
+
+            if (!MiddlewareHelper.isRegistered()) {
+                // If the previous destination was not available, or if we're not registered
+                // for another reason, register again.
+                MiddlewareHelper.registerAtMiddleware(this);
             }
         }
     }
@@ -423,8 +409,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
     private class CustomActionBarDrawerToggle extends ActionBarDrawerToggle {
 
         CustomActionBarDrawerToggle(Activity activity, DrawerLayout drawerLayout,
-                                           Toolbar toolbar, int openDrawerContentDescRes,
-                                           int closeDrawerContentDescRes) {
+                Toolbar toolbar, int openDrawerContentDescRes,
+                int closeDrawerContentDescRes) {
             super(activity, drawerLayout, toolbar, openDrawerContentDescRes, closeDrawerContentDescRes);
         }
 
