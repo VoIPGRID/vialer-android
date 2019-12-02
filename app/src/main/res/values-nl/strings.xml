@@ -304,7 +304,7 @@
     <string name="password_reset_title">Wachtwoord reset</string>
     <string name="password_reset_subtitle">Verplicht</string>
     <string name="password_reset_description_top">Je zult een nieuw wachtwoord moeten aanmaken voordat er opnieuw ingelogd kan worden.</string>
-    <string name="password_reset_description_bottom">Je wachtwoord moet uit minimaal 6 karakters bestaan en bevalt minimaal 1 niet-alfabetisch karakter.</string>
+    <string name="password_reset_description_bottom">Je wachtwoord moet uit minimaal 6 karakters bestaan en bevat minimaal 1 niet-alfabetisch karakter.</string>
     <string name="password_reset_hint">Wachtwoord</string>
     <string name="t9_search_numbers">%d nummers</string>
     <string name="use_phones_ringtone_switch_description">Indien ingeschakeld wordt de ringtone welke nu op het toestel staat ingesteld verkozen boven de %1$s ringtone.</string>
