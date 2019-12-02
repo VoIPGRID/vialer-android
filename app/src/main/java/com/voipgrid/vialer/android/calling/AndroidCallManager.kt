@@ -12,7 +12,7 @@ import android.telecom.TelecomManager
 import android.telecom.VideoProfile
 import com.voipgrid.vialer.BuildConfig
 
-class AndroidCallManager(private val context: Context, private val telecomManager: TelecomManager) : CallManager {
+class AndroidCallManager(private val context: Context, private val telecomManager: TelecomManager) {
 
     private val phoneAccountHandle: PhoneAccountHandle by lazy {
         PhoneAccountHandle(ComponentName(context, AndroidCallService::class.java), PHONE_ACCOUNT_HANDLE_ID)
@@ -26,7 +26,7 @@ class AndroidCallManager(private val context: Context, private val telecomManage
      * Place a call via the android call system.
      *
      */
-    override fun call(number: String) {
+    fun call(number: String) {
         val extras = Bundle().apply {
             putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false)
             putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE, VideoProfile.STATE_AUDIO_ONLY)
@@ -47,7 +47,7 @@ class AndroidCallManager(private val context: Context, private val telecomManage
      * Make the android call system aware that there is an incoming call.
      *
      */
-    override fun incomingCall() {
+    fun incomingCall() {
         val extras = Bundle().apply {
             putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false)
             putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE, VideoProfile.STATE_AUDIO_ONLY)

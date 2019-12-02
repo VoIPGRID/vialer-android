@@ -132,7 +132,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
           NetworkAvailabilityActivity.start();
         }
 
-        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(updateUiReceiver, "VialerConnection");
+        broadcastReceiverManager.registerReceiverViaLocalBroadcastManager(updateUiReceiver, SipService.ACTION_CALL_UPDATED);
     }
 
     @Override
@@ -651,7 +651,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            Log.e("TEST123", "Receive!");
+            Log.e("TEST123", "Received update ui: " + intent.getAction());
             runOnUiThread(CallActivity.this::updateUi);
         }
     }

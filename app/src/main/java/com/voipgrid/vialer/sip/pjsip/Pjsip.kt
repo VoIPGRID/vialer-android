@@ -3,33 +3,35 @@ package com.voipgrid.vialer.sip.pjsip
 import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.sip.pjsip.PjsipConfigurator.LibraryInitFailedException
 import org.pjsip.pjsua2.*
 
 class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneAccount: PhoneAccount) {
 
     private val logger = Logger(this)
 
-    lateinit var endpoint: VialerEndpoint
-        private set
-
-    private lateinit var sipService: SipService
+    val endpoint by lazy { VialerEndpoint() }
 
     lateinit var account: SipAccount
         private set
 
+    private lateinit var sipService: SipService
+
+    init {
+        System.loadLibrary(LIBRARY_NAME)
+    }
+
     /**
-     * Begin the process of actually starting the SIP library so we can
-     * start/receive calls.
+     * Initialize the pjsip library and prepare it to receive or make calls.
      *
      */
     fun init(sipService: SipService) {
         this.sipService = sipService
 
+        if (endpoint.isInitialized) return
+
         try {
-            logger.i("Attempting to load sip lib")
-            loadPjsip()
-            endpoint = pjsipConfigurator.initializeEndpoint(VialerEndpoint())
+            logger.i("Attempting to initialize pjsip: ${endpoint.libVersion().full}")
+            pjsipConfigurator.initializeEndpoint(endpoint)
             account = SipAccount(pjsipConfigurator.createAccountConfig(phoneAccount))
         } catch (e: java.lang.Exception) {
             logger.e("Failed to load pjsip, stopping the service")
@@ -37,22 +39,18 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
         }
     }
 
-    fun destroy() {
-        pjsipConfigurator.cleanUp()
-        endpoint.libDestroy()
-        endpoint.delete()
-    }
-
-    @Throws(LibraryInitFailedException::class)
-    private fun loadPjsip() {
-        logger.d("Loading PJSIP")
-        System.loadLibrary("pjsua2")
-    }
-
     /**
-     * The pjsip account.
+     * Destroy and clean up pjsip.
      *
      */
+    fun destroy() {
+        pjsipConfigurator.cleanUp()
+        endpoint.apply {
+            libDestroy()
+            delete()
+        }
+    }
+
     inner class SipAccount(accountConfig: AccountConfig) : Account() {
 
         init {
@@ -75,6 +73,8 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
 
     inner class VialerEndpoint : Endpoint() {
 
+        var isInitialized = false
+
         override fun onTransportState(prm: OnTransportStateParam) {
             super.onTransportState(prm)
 
@@ -83,5 +83,9 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
                 sipService.reinvite()
             }
         }
+    }
+
+    companion object {
+        private const val LIBRARY_NAME = "pjsua2"
     }
 }

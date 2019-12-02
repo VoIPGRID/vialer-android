@@ -59,6 +59,8 @@ public class PjsipConfigurator {
      */
     @NonNull
     public Pjsip.VialerEndpoint initializeEndpoint(@NonNull Pjsip.VialerEndpoint endpoint) throws LibraryInitFailedException {
+        endpoint.setInitialized(true);
+
         logger.d("createEndpoint");
         EpConfig endpointConfig = new EpConfig();
 

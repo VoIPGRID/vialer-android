@@ -59,6 +59,7 @@ import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -103,9 +104,12 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     @Inject protected ToneGenerator mToneGenerator;
     @Inject protected NetworkConnectivity mNetworkConnectivity;
     @Inject protected NativeCallManager mNativeCallManager;
-    @Inject IncomingCallAlerts incomingCallAlerts;
-    @Inject AndroidCallManager androidCallManager;
-    @Inject Pjsip pjsip;
+    @Inject protected IncomingCallAlerts incomingCallAlerts;
+    @Inject protected AndroidCallManager androidCallManager;
+    @Inject protected Pjsip pjsip;
+    @Inject IpSwitchMonitor ipSwitchMonitor;
+
+    public static final String ACTION_CALL_UPDATED = "CALL_UPDATED";
 
     @Override
     public void onCreate() {
@@ -119,11 +123,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
-//        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
-//                mIpSwitchMonitor.init(mSipService, mEndpoint),
-//                ConnectivityManager.CONNECTIVITY_ACTION,
-//                SipLogHandler.NETWORK_UNAVAILABLE_BROADCAST
-//        );
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(ipSwitchMonitor, ConnectivityManager.CONNECTIVITY_ACTION, SipLogHandler.NETWORK_UNAVAILABLE_BROADCAST);
         mCheckService.start();
         changeNotification(callNotification);
         connection = new AndroidCallConnection(this);
@@ -184,7 +184,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     public void initialiseIncomingCall() {
         mLogger.d("incomingCall");
         mIncomingCallDetails = intent;
-        pjsip.init(this);
+        initialiseSipLibrary();
     }
 
     /**
@@ -215,13 +215,18 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      *
      */
     public void androidCallManagerIsReadyForOutgoingCall() {
-        pjsip.init(this);
+        initialiseSipLibrary();
         makeCall(
                 this.intent.getData(),
                 this.intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
                 this.intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
                 true
         );
+    }
+
+    private void initialiseSipLibrary() {
+        pjsip.init(this);
+        ipSwitchMonitor.init(this, pjsip.getEndpoint());
     }
 
     @Override
@@ -237,7 +242,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
-        mBroadcastReceiverManager.unregisterReceiver(mNetworkConnectivity, callStatusReceiver, screenOffReceiver); //TODO mIpSwitchMonitor
+        mBroadcastReceiverManager.unregisterReceiver(mNetworkConnectivity, callStatusReceiver, screenOffReceiver, ipSwitchMonitor);
 
         mHandler.removeCallbacks(mCheckService);
 
@@ -383,7 +388,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
     public void startCallActivity(Uri sipAddressUri, @CallingConstants.CallTypes String type, String callerId, String number, Class activity) {
         mLogger.d("callVisibleForUser");
-        Log.e("TEST123", "Starting call activity");
         startActivity(AbstractCallActivity.createIntentForCallActivity(
                 this,
                 activity,
@@ -556,16 +560,14 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         androidCallManager.incomingCall();
     }
 
-
     /**
      * Android has reported that the call audio state has changed.
      *
      * @param state
      */
     public void onCallAudioStateChanged(final CallAudioState state) {
-        Log.e("TEST123", state.toString());
         Toast.makeText(VialerApplication.get(), state.toString(), Toast.LENGTH_LONG).show();
-        sendBroadcast(new Intent("VialerConnection"));
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_CALL_UPDATED));
     }
 
     /**

@@ -22,6 +22,8 @@ class SipActionHandler(private val sipService: SipService) {
         ANSWER_INCOMING_CALL -> askForPermissionsThenAnswer()
         END_CALL -> SipService.connection.onDisconnect()
         DISPLAY_CALL_IF_AVAILABLE -> showCallIfAvailable()
+    }.also {
+        logger.i("Executing Sip Action: ${action.name}")
     }
 
     /**
