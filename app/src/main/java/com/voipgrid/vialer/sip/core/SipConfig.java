@@ -112,7 +112,7 @@ public class SipConfig implements AccountStatus {
      * Function to init the PJSIP library and setup all credentials.
      * @throws LibraryInitFailedException
      */
-    public voidinitLibrary() throws Exception {
+    public void initLibrary() throws Exception {
         if (mEndpoint != null) return;
 
         loadPjsip();
