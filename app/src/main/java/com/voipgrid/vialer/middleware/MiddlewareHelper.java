@@ -9,6 +9,7 @@ import android.os.Build;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.voipgrid.vialer.User;
+import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -143,6 +144,27 @@ public class MiddlewareHelper {
                 setRegistrationStatus(FAILED);
             }
         });
+    }
+
+    public static void respond(String token, String messageStartTime) {
+        Middleware middlewareApi = ServiceGenerator.createRegistrationService(VialerApplication.get());
+        Logger logger = new Logger(new MiddlewareHelper());
+
+        retrofit2.Call<ResponseBody> call = middlewareApi.reply(token, true, messageStartTime);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (!response.isSuccessful()) {
+                    logger.w("Unsuccessful response to middleware: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Throwable t) {
+                logger.w("Failed sending response to middleware");
+            }
+        });
+
     }
 
     /**

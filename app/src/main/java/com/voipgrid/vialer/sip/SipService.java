@@ -9,6 +9,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.usb.UsbInterface;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -31,19 +32,25 @@ import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.dialer.ToneGenerator;
+import com.voipgrid.vialer.fcm.RemoteMessageData;
 import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.logging.sip.SipLogHandler;
+import com.voipgrid.vialer.middleware.MiddlewareHelper;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.ActiveCallNotification;
 import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
 import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
 import com.voipgrid.vialer.sip.core.Action;
 import com.voipgrid.vialer.sip.core.SipActionHandler;
-import com.voipgrid.vialer.sip.core.SipConfig;
+import com.voipgrid.vialer.sip.pjsip.Pjsip;
+import com.voipgrid.vialer.sip.pjsip.PjsipConfigurator;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
 import org.pjsip.pjsua2.AccountConfig;
+import org.pjsip.pjsua2.CallOpParam;
 import org.pjsip.pjsua2.OnIncomingCallParam;
+import org.pjsip.pjsua2.pjsua_call_flag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +82,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     private SipCall mCurrentCall;
     private SipCall mInitialCall;
     private List<SipCall> mCallList = new ArrayList<>();
+    private boolean hasRespondedToMiddleware = false;
 
     @Nullable private Intent intent;
 
@@ -88,7 +96,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
     private SipActionHandler sipActionHandler = new SipActionHandler(this);
-
     public static AndroidCallConnection connection;
 
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
@@ -98,6 +105,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     @Inject protected NativeCallManager mNativeCallManager;
     @Inject IncomingCallAlerts incomingCallAlerts;
     @Inject AndroidCallManager androidCallManager;
+    @Inject Pjsip pjsip;
 
     @Override
     public void onCreate() {
@@ -111,9 +119,15 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
+//        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
+//                mIpSwitchMonitor.init(mSipService, mEndpoint),
+//                ConnectivityManager.CONNECTIVITY_ACTION,
+//                SipLogHandler.NETWORK_UNAVAILABLE_BROADCAST
+//        );
         mCheckService.start();
         changeNotification(callNotification);
         connection = new AndroidCallConnection(this);
+        hasRespondedToMiddleware = false;
     }
 
     @Override
@@ -170,7 +184,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
     public void initialiseIncomingCall() {
         mLogger.d("incomingCall");
         mIncomingCallDetails = intent;
-        loadSip();
+        pjsip.init(this);
     }
 
     /**
@@ -201,7 +215,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      *
      */
     public void androidCallManagerIsReadyForOutgoingCall() {
-        loadSip();
+        pjsip.init(this);
         makeCall(
                 this.intent.getData(),
                 this.intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
@@ -223,7 +237,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
-        mBroadcastReceiverManager.unregisterReceiver(mNetworkConnectivity, callStatusReceiver, screenOffReceiver);
+        mBroadcastReceiverManager.unregisterReceiver(mNetworkConnectivity, callStatusReceiver, screenOffReceiver); //TODO mIpSwitchMonitor
 
         mHandler.removeCallbacks(mCheckService);
 
@@ -285,7 +299,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
      * @param startActivity
      */
     public void makeCall(Uri number, String contactName, String phoneNumber, boolean startActivity) {
-        SipCall call = new SipCall(this, getSipConfig().getSipAccount());
+        SipCall call = new SipCall(this, pjsip.getAccount());
         call.setPhoneNumberUri(number);
         call.setCallerId(contactName);
         call.setPhoneNumber(phoneNumber);
@@ -459,10 +473,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         return mNativeCallManager;
     }
 
-    public SipConfig getSipConfig() {
-        return mSipConfig;
-    }
-
     public SipBroadcaster getSipBroadcaster() {
         return mSipBroadcaster;
     }
@@ -532,7 +542,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         incomingCallAlerts.stop();
     }
 
-    public void onIncomingCall(final OnIncomingCallParam incomingCallParam, SipAccount account) {
+    public void onIncomingCall(final OnIncomingCallParam incomingCallParam, Pjsip.SipAccount account) {
         SipCall sipCall = new SipCall(this, account, incomingCallParam.getCallId(), new SipInvite(incomingCallParam.getRdata().getWholeMsg()));
         sipCall.onCallIncoming();
 
@@ -546,9 +556,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         androidCallManager.incomingCall();
     }
 
-    public SipAccount createSipAccount(final AccountConfig accountConfig) throws Exception {
-        return new SipAccount(accountConfig);
-    }
 
     /**
      * Android has reported that the call audio state has changed.
@@ -559,6 +566,67 @@ public class SipService extends Service implements CallStatusReceiver.Listener {
         Log.e("TEST123", state.toString());
         Toast.makeText(VialerApplication.get(), state.toString(), Toast.LENGTH_LONG).show();
         sendBroadcast(new Intent("VialerConnection"));
+    }
+
+    /**
+     * Pjsip has successfully registered with the server.
+     *
+     */
+    public void onRegister() {
+        mLogger.d("onAccountRegistered");
+
+        respondToMiddleware();
+
+        if (getCurrentCall() != null) {
+            SipCall sipCall = getCurrentCall();
+            if (sipCall.isIpChangeInProgress() && sipCall.getCurrentCallState().equals(SipConstants.CALL_INCOMING_RINGING)) {
+                CallOpParam callOpParam = new CallOpParam();
+                callOpParam.setOptions(pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT.swigValue());
+                try {
+                    sipCall.reinvite(callOpParam);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Respond to the middleware with the details for the incoming call.
+     *
+     */
+    private void respondToMiddleware() {
+        if (hasRespondedToMiddleware) return;
+
+        Intent incomingCallDetails = getIncomingCallDetails();
+
+        if (incomingCallDetails == null) {
+            mLogger.w("Trying to respond to middleware with no details");
+            return;
+        }
+
+        MiddlewareHelper.respond(
+                incomingCallDetails.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN),
+                incomingCallDetails.getStringExtra(RemoteMessageData.MESSAGE_START_TIME)
+        );
+    }
+
+    /**
+     * Reinvite the current call.
+     *
+     */
+    public void reinvite() {
+        if (getCurrentCall() != null && !getCurrentCall().isIpChangeInProgress()) {
+            try {
+                getCurrentCall().reinvite(new CallOpParam(true));
+            } catch (Exception e) {
+                mLogger.e("Unable to reinvite call");
+            }
+        }
+    }
+
+    public Pjsip getPjsip() {
+        return pjsip;
     }
 
     /**

@@ -11,6 +11,7 @@ import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
+import com.voipgrid.vialer.sip.core.Action
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -49,7 +50,7 @@ class MainActivity : NavigationDrawerActivity() {
         // We currently only support a single call so any time this activity is opened, we will
         // request the SipService to display the current call. If there is no current call, this will have no
         // affect.
-        SipService.performActionOnSipService(this, SipService.Actions.DISPLAY_CALL_IF_AVAILABLE)
+        SipService.performActionOnSipService(this, Action.DISPLAY_CALL_IF_AVAILABLE)
     }
 
     override fun onPause() {

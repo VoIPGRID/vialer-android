@@ -43,7 +43,8 @@ import com.voipgrid.vialer.onboarding.VoipgridLogin;
 import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
-import com.voipgrid.vialer.sip.core.SipConfig;
+import com.voipgrid.vialer.sip.pjsip.Pjsip;
+import com.voipgrid.vialer.sip.pjsip.PjsipConfigurator;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
@@ -124,8 +125,8 @@ public class VialerModule {
     }
 
     @Provides
-    SipConfig provideSipConfig(IpSwitchMonitor ipSwitchMonitor, BroadcastReceiverManager broadcastReceiverManager) {
-        return new SipConfig(ipSwitchMonitor, broadcastReceiverManager);
+    PjsipConfigurator provideSipConfig(Context context) {
+        return new PjsipConfigurator(context);
     }
 
     @Provides SharedPreferences provideSharedPreferences(Context context) {
@@ -294,6 +295,11 @@ public class VialerModule {
     @Provides
     UserSynchronizer provideUserSync(Context context, VoipgridApi api, SecureCalling secureCalling) {
         return new UserSynchronizer(api, context, secureCalling);
+    }
+
+    @Provides
+    Pjsip providePjSip(PjsipConfigurator configurator) {
+        return new Pjsip(configurator, User.getVoipAccount());
     }
 }
 

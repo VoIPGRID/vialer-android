@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.sip;
+package com.voipgrid.vialer.sip.pjsip;
 
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
@@ -6,7 +6,7 @@ import com.voipgrid.vialer.logging.sip.SipLogHandler;
 import org.pjsip.pjsua2.LogEntry;
 import org.pjsip.pjsua2.LogWriter;
 
-public class SipLogWriter extends LogWriter {
+public class PjsipLogWriter extends LogWriter {
     private Logger mLogger;
 
     private SipLogHandler mSipLogHandler = new SipLogHandler();

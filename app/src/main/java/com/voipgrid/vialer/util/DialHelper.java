@@ -15,6 +15,7 @@ import com.voipgrid.vialer.persistence.UserPreferences;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
+import com.voipgrid.vialer.sip.core.Action;
 import com.voipgrid.vialer.twostepcall.TwoStepCallActivity;
 
 import androidx.appcompat.app.AlertDialog;
@@ -129,7 +130,7 @@ public class DialHelper {
      */
     private void callWithSip(String number, String contactName) {
         Intent intent = new Intent(mContext, SipService.class);
-        intent.setAction(SipService.Actions.HANDLE_OUTGOING_CALL);
+        intent.setAction(Action.HANDLE_OUTGOING_CALL.toString());
 
         // set a phoneNumberUri as DATA for the intent to SipServiceOld.
         Uri sipAddressUri = SipUri.sipAddressUri(

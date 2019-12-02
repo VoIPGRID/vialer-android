@@ -18,6 +18,7 @@ import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
 import com.voipgrid.vialer.media.monitoring.PacketStats;
 import com.voipgrid.vialer.sip.SipConstants.CallMissedReason;
+import com.voipgrid.vialer.sip.pjsip.Pjsip;
 import com.voipgrid.vialer.statistics.CallCompletionStatsDispatcher;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
@@ -47,6 +48,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
@@ -129,7 +131,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
      * @param sipService
      * @param sipAccount
      */
-    public SipCall(SipService sipService, SipService.SipAccount sipAccount) {
+    public SipCall(@NonNull SipService sipService, @NonNull Pjsip.SipAccount sipAccount) {
         super(sipAccount);
         mSipService = sipService;
         mLogger = mSipService.getLogger();
@@ -142,14 +144,15 @@ public class SipCall extends org.pjsip.pjsua2.Call {
      * @param sipAccount
      * @param callId
      */
-    public SipCall(SipService sipService, SipService.SipAccount sipAccount, int callId) {
+    public SipCall(@NonNull SipService sipService, @NonNull Pjsip.SipAccount sipAccount, int callId) {
         super(sipAccount, callId);
         mSipService = sipService;
         mLogger = mSipService.getLogger();
         mSipBroadcaster = mSipService.getSipBroadcaster();
     }
 
-    public SipCall(SipService sipService, SipService.SipAccount sipAccount, int callId, SipInvite invite) {
+    public SipCall(@NonNull SipService sipService, @NonNull Pjsip.SipAccount sipAccount, int callId,
+            @NonNull SipInvite invite) {
         this(sipService, sipAccount, callId);
         this.invite = invite;
     }
@@ -596,7 +599,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             onCallStopRingback();
 
             // Connect de audio device manager to the sip media.
-            AudDevManager audDevManager = mSipService.getSipConfig().getEndpoint().audDevManager();
+            AudDevManager audDevManager = mSipService.getPjsip().getEndpoint().audDevManager();
             media.startTransmit(audDevManager.getPlaybackDevMedia());
             audDevManager.getCaptureDevMedia().startTransmit(media);
 

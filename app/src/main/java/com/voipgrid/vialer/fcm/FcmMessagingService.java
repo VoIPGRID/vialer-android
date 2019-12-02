@@ -22,6 +22,7 @@ import com.voipgrid.vialer.notifications.VoipDisabledNotification;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
+import com.voipgrid.vialer.sip.core.Action;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
@@ -277,7 +278,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     private void startSipService(RemoteMessageData remoteMessageData) {
         mRemoteLogger.d("startSipService");
         Intent intent = new Intent(this, SipService.class);
-        intent.setAction(SipService.Actions.HANDLE_INCOMING_CALL);
+        intent.setAction(Action.HANDLE_INCOMING_CALL.toString());
 
         // Set a phoneNumberUri as DATA for the intent to SipServiceOld.
         Uri sipAddressUri = SipUri.sipAddressUri(

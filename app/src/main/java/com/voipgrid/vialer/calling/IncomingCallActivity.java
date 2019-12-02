@@ -14,6 +14,7 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.sip.SipService;
+import com.voipgrid.vialer.sip.core.Action;
 
 import javax.inject.Inject;
 
@@ -59,7 +60,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
             return;
         }
 
-        SipService.performActionOnSipService(this, SipService.Actions.DECLINE_INCOMING_CALL);
+        SipService.performActionOnSipService(this, Action.DECLINE_INCOMING_CALL);
 
         finish();
     }
@@ -73,7 +74,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
         disableAllButtons();
 
-        SipService.performActionOnSipService(this, SipService.Actions.ANSWER_INCOMING_CALL);
+        SipService.performActionOnSipService(this, Action.ANSWER_INCOMING_CALL);
     }
 
     private void disableAllButtons() {
