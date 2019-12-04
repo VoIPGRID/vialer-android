@@ -47,10 +47,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:orientation="horizontal"
             android:background="@color/call_records_item_background"
-            android:orientation="horizontal">
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp">
 
             <Switch
                 android:id="@+id/show_my_calls_only"
