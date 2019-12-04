@@ -166,7 +166,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
      *
      */
     fun placeOutgoingCall(number: String, isInvisible: Boolean = false) {
-        if (calls.current != null) {
+        if (calls.current != null && !isInvisible) {
             logger.i("Attempting to initialise a second outgoing call but this is not currently supported")
             startCallActivityForCurrentCall()
             return
@@ -187,6 +187,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
         }
 
         if (isInvisible) {
+            Log.e("TEST123", "Placing an invisible call to $number")
             callback.invoke()
             return
         }

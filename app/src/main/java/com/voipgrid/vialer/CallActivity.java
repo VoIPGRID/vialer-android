@@ -85,7 +85,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     private SweetAlertDialog mTransferCompleteDialog;
     private UpdateUiReceiver updateUiReceiver = new UpdateUiReceiver();
 
-    private boolean mConnected = false;
     private boolean mOnTransfer = false;
     private String mType;
     private boolean mCallIsTransferred = false;
@@ -113,13 +112,10 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
         mType = getIntent().getType();
 
-        mConnected = getIntent().getBooleanExtra(CALL_IS_CONNECTED, false);
-
         if (!TYPE_INCOMING_CALL.equals(mType) && !TYPE_OUTGOING_CALL.equals(mType)) {
             return;
         }
 
-        mForceDisplayedCallDetails = new DisplayCallDetail(getIntent().getStringExtra(PHONE_NUMBER), getIntent().getStringExtra(CONTACT_NAME));
         updateUi();
     }
 
@@ -153,8 +149,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @Override
     public void onCallConnected() {
-        mConnected = true;
-
         mForceDisplayedCallDetails = null;
 
         if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
@@ -182,10 +176,8 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
         if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
             mForceDisplayedCallDetails = null;
-            mConnected = true;
             updateUi();
         } else {
-            mConnected = false;
             finish();
         }
     }
@@ -209,7 +201,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @Override
     public void onServiceStopped() {
-        mConnected = false;
         finish();
     }
 
@@ -317,7 +308,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @OnClick(R.id.button_mute)
     public void onMuteButtonClick(View view) {
-        if ((mOnTransfer && getSipServiceConnection().get().getCurrentCall().isConnected()) || mConnected) {
+        if ((mOnTransfer && getSipServiceConnection().get().getCurrentCall().isConnected())) {
             if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
                 getSipServiceConnection().get().getCurrentCall().toggleMute();
             }
@@ -326,10 +317,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @OnClick(R.id.button_transfer)
     public void onTransferButtonClick(View view) {
-        if (!mConnected) {
-            return;
-        }
-
         if (mOnTransfer) {
             callTransferConnectTheCalls();
             return;
@@ -346,7 +333,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @OnClick(R.id.button_onhold)
     public void onHoldButtonClick(View view) {
-        if ((mOnTransfer && getSipServiceConnection().get().getCurrentCall().isConnected()) || mConnected) {
+        if ((mOnTransfer && getSipServiceConnection().get().getCurrentCall().isConnected())) {
             if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
                 toggleOnHold();
             }
@@ -404,7 +391,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     }
 
     public void callTransferMakeSecondCall(String numberToCall) {
-        getSipServiceConnection().get().placeOutgoingCall(numberToCall, false);
+        getSipServiceConnection().get().placeOutgoingCall(numberToCall, true);
     }
 
     @Override
