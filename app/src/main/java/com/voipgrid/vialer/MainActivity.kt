@@ -115,8 +115,8 @@ class MainActivity : NavigationDrawerActivity() {
                     ContextCompat.getColor(this@MainActivity, R.color.tab_inactive),
                     ContextCompat.getColor(this@MainActivity, R.color.tab_active)
             )
-            addTab(tab_layout.newTab().setText(R.string.tab_title_recents))
             addTab(tab_layout.newTab().setText(R.string.tab_title_missed))
+            addTab(tab_layout.newTab().setText(R.string.tab_title_recents))
             setOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabReselected(tab: TabLayout.Tab?) {
                 }
@@ -127,8 +127,8 @@ class MainActivity : NavigationDrawerActivity() {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     tab?.let {
                         (call_record_fragment as CallRecordFragment).changeType(when(it.position) {
-                            0 -> CallRecordViewModel.Type.ALL_CALLS
-                            1 -> CallRecordViewModel.Type.MISSED_CALLS
+                            0 -> CallRecordViewModel.Type.MISSED_CALLS
+                            1 -> CallRecordViewModel.Type.ALL_CALLS
                             else -> CallRecordViewModel.Type.ALL_CALLS
                         })
                     }

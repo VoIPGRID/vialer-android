@@ -1,55 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/call_records_background">
+    android:layout_height="match_parent">
 
 
     <LinearLayout
+        android:id="@+id/call_records_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:id="@+id/call_records_container"
-        >
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@color/call_records_item_background"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp">
+            android:background="@color/call_records_item_background"
+            android:orientation="horizontal">
 
             <Switch
                 android:id="@+id/show_my_calls_only"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingRight="@dimen/list_item_contact_padding_right"
+                android:fontFamily="sans-serif"
                 android:paddingLeft="@dimen/list_item_contact_padding_left"
                 android:paddingTop="15dp"
+                android:paddingRight="@dimen/list_item_contact_padding_right"
                 android:paddingBottom="15dp"
                 android:text="@string/call_records_show_all"
-                android:textSize="@dimen/contact_name_text_size"
-                android:fontFamily="sans-serif"
                 android:textColor="@color/contact_name_text_color"
-            />
+                android:textSize="@dimen/contact_name_text_size" />
 
         </LinearLayout>
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipe_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
+            android:layout_height="match_parent">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/call_records"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingBottom="90dp"
                 android:clipToPadding="false"
-                />
+                android:paddingBottom="90dp" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -60,8 +55,7 @@
         android:id="@+id/call_records_unavailable_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
-    </com.voipgrid.vialer.callrecord.CallRecordsUnavailableView>
+        android:gravity="center_horizontal"
+        android:orientation="vertical"></com.voipgrid.vialer.callrecord.CallRecordsUnavailableView>
 
 </FrameLayout>
