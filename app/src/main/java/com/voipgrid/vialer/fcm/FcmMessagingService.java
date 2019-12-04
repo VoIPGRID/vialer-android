@@ -186,7 +186,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * @return TRUE if there is an active call, otherwise FALSE
      */
     private boolean isAVialerCallAlreadyInProgress() {
-        return SipService.sipServiceActive;
+        return SipService.Companion.getSipServiceActive();
     }
 
     /**
@@ -288,11 +288,8 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
         intent.setData(sipAddressUri);
 
-        intent.putExtra(SipConstants.EXTRA_RESPONSE_URL, remoteMessageData.getResponseUrl());
-        intent.putExtra(SipConstants.EXTRA_REQUEST_TOKEN, remoteMessageData.getRequestToken());
-        intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, remoteMessageData.getPhoneNumber());
-        intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, remoteMessageData.getCallerId());
-        intent.putExtra(RemoteMessageData.MESSAGE_START_TIME, remoteMessageData.getMessageStartTime());
+        intent.putExtra(SipService.Extra.INCOMING_TOKEN.name(), remoteMessageData.getRequestToken());
+        intent.putExtra(SipService.Extra.INCOMING_CALL_START_TIME.name(), remoteMessageData.getMessageStartTime());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent);
@@ -319,7 +316,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * @param remoteMessageData
      */
     private void logCurrentState(RemoteMessageData remoteMessageData) {
-        mRemoteLogger.d("SipService Active: " + SipService.sipServiceActive);
+        mRemoteLogger.d("SipService Active: " + SipService.Companion.getSipServiceActive());
         mRemoteLogger.d("CurrentConnection: " + mConnectivityHelper.getConnectionTypeString());
         mRemoteLogger.d("Payload: " + remoteMessageData.getRawData().toString());
     }

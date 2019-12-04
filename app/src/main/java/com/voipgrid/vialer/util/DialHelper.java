@@ -139,8 +139,8 @@ public class DialHelper {
         );
         intent.setData(sipAddressUri);
 
-        intent.putExtra(SipConstants.EXTRA_PHONE_NUMBER, number);
-        intent.putExtra(SipConstants.EXTRA_CONTACT_NAME, contactName);
+        intent.putExtra(SipService.Extra.OUTGOING_PHONE_NUMBER.toString(), number);
+        intent.putExtra(SipService.Extra.OUTGOING_CONTACT_NAME.toString(), contactName);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mContext.startForegroundService(intent);

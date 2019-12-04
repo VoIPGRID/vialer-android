@@ -82,11 +82,6 @@ public interface SipConstants {
     String CALL_UNHOLD_ACTION = "UNHOLD_CALL";
 
     String CALL_INCOMING_RINGING = "CALL_RINGING";
-    String CALL_DECLINE_INCOMING_CALL = "CALL_DECLINE_CALL";
-    String CALL_ANSWER_INCOMING_CALL = "CALL_ANSWER_CALL";
-
-    String EXTRA_CONTACT_NAME = "EXTRA_CONTACT_NAME";
-    String EXTRA_PHONE_NUMBER = "EXTRA_PHONE_NUMBER";
 
     String EXTRA_RESPONSE_URL = "EXTRA_RESPONSE_URL";
     String EXTRA_REQUEST_TOKEN = "EXTRA_REQUEST_TOKEN";
@@ -124,10 +119,4 @@ public interface SipConstants {
     int SIP_LOG_LEVEL = 10;
     // For PJSIP debugging purpose 4 is a reasonable value.
     int SIP_CONSOLE_LOG_LEVEL = 4;
-
-    /**
-     * The duration of the tone to play when the remote party hangs up the call.
-     *
-     */
-    int BUSY_TONE_DURATION = 2000;
 }

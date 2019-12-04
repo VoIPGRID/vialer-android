@@ -63,20 +63,15 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
         }
     }
 
-    @Override
-    protected void onPickupButtonClicked() {
-
-    }
-
     @OnClick(R.id.button_hangup)
     protected void onDeclineButtonClicked() {
-        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
+        if (!getSipServiceConnection().isAvailableAndHasActiveCall()) {
             finish();
             return;
         }
 
         try {
-            mSipServiceConnection.get().getConnection().onDisconnect();
+            getSipServiceConnection().get().connection.onDisconnect();
             mLogger.i("The user hang up from Network Availability Activity");
         } catch (Exception e) {
             mLogger.i("Failed to decline call "+e.getClass().getSimpleName()+e.getMessage());
@@ -89,12 +84,12 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
     public void sipServiceHasConnected(SipService sipService) {
         super.sipServiceHasConnected(sipService);
 
-        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
+        if (!getSipServiceConnection().isAvailableAndHasActiveCall()) {
             finish();
             return;
         }
 
-        SipCall sipCall = mSipServiceConnection.get().getCurrentCall();
+        SipCall sipCall = getSipServiceConnection().get().getCurrentCall();
         mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle,sipCall.getPhoneNumber(), sipCall.getCallerId(), mContactImage);
     }
 

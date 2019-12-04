@@ -103,14 +103,7 @@ abstract class AbstractCallNotification : AbstractNotification() {
      *
      */
     protected fun createIncomingCallActivityPendingIntent(number: String, callerId: String): PendingIntent {
-        return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
-                context,
-                IncomingCallActivity::class.java,
-                SipUri.sipAddressUri(context, PhoneNumberUtils.format(number)),
-                CallingConstants.TYPE_INCOMING_CALL,
-                callerId,
-                number
-        ))
+        return createPendingIntent(AbstractCallActivity.createIntentForIncomingCallActivity(context))
     }
 
     /**

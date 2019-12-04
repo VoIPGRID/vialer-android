@@ -16,6 +16,8 @@ public class PjsipLogWriter extends LogWriter {
     }
 
     void disableRemoteLogging() {
+        if (mLogger == null) return;
+
         mLogger.i("Prematurely disable the remote logger");
         mLogger = null;
     }

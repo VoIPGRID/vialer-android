@@ -41,5 +41,7 @@ enum class Action {
      * this action will have no affect.
      *
      */
-    DISPLAY_CALL_IF_AVAILABLE
+    DISPLAY_CALL_IF_AVAILABLE,
+
+    SILENCE
 }

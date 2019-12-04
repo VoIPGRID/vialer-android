@@ -16,6 +16,7 @@ import com.voipgrid.vialer.R.drawable
 import com.voipgrid.vialer.R.string
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.sip.core.Action
+import com.voipgrid.vialer.sip.core.SipActionHandler
 
 
 class IncomingCallNotification(private val number : String, private val callerId : String) : AbstractCallNotification() {
@@ -62,12 +63,12 @@ class IncomingCallNotification(private val number : String, private val callerId
                 .addAction(
                         drawable.ic_call_decline_normal,
                         context.getString(string.call_incoming_decline),
-                        SipService.createSipServiceAction(Action.DECLINE_INCOMING_CALL)
+                        SipActionHandler.createSipServiceAction(Action.DECLINE_INCOMING_CALL)
                 )
                 .addAction(
                         drawable.ic_call_answer_normal,
                         context.getString(string.call_incoming_accept),
-                        SipService.createSipServiceAction(Action.ANSWER_INCOMING_CALL)
+                        SipActionHandler.createSipServiceAction(Action.ANSWER_INCOMING_CALL)
                 )
                 .setSound(null)
     }

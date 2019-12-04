@@ -132,7 +132,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
           NetworkAvailabilityActivity.start();
         }
 
-        broadcastReceiverManager.registerReceiverViaLocalBroadcastManager(updateUiReceiver, SipService.ACTION_CALL_UPDATED);
+        broadcastReceiverManager.registerReceiverViaLocalBroadcastManager(updateUiReceiver, SipService.Event.CALL_UPDATED.name());
     }
 
     @Override
@@ -157,16 +157,16 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
         mForceDisplayedCallDetails = null;
 
-        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
-            mInitialCallDetail = CallDetail.fromSipCall(mSipServiceConnection.get().getFirstCall());
+        if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
+            mInitialCallDetail = CallDetail.fromSipCall(getSipServiceConnection().get().getFirstCall());
         }
 
-        if (mOnTransfer && mSipServiceConnection.get().getCurrentCall() != null && mSipServiceConnection.get().getFirstCall() != null) {
-            mTransferCallDetail = CallDetail.fromSipCall(mSipServiceConnection.get().getCurrentCall());
+        if (mOnTransfer && getSipServiceConnection().get().getCurrentCall() != null && getSipServiceConnection().get().getFirstCall() != null) {
+            mTransferCallDetail = CallDetail.fromSipCall(getSipServiceConnection().get().getCurrentCall());
         }
 
-        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
-            VialerStatistics.callWasSuccessfullySetup(mSipServiceConnection.get().getCurrentCall());
+        if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
+            VialerStatistics.callWasSuccessfullySetup(getSipServiceConnection().get().getCurrentCall());
         }
 
         updateUi();
@@ -180,7 +180,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
             showCallTransferCompletedDialog();
         }
 
-        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
+        if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
             mForceDisplayedCallDetails = null;
             mConnected = true;
             updateUi();
@@ -229,18 +229,18 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     public void onBackPressed() {
         getLogger().d("onBackPressed");
 
-        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
+        if (!getSipServiceConnection().isAvailableAndHasActiveCall()) {
             super.onBackPressed();
             return;
         }
 
         if (mOnTransfer) {
-            if (mSipServiceConnection.get().getCurrentCall() == null || mSipServiceConnection.get().getFirstCall() == null) {
+            if (getSipServiceConnection().get().getCurrentCall() == null || getSipServiceConnection().get().getFirstCall() == null) {
                 super.onBackPressed();
             } else {
                 hangupViaBackButton();
             }
-        } else if (mHangupButton != null && mHangupButton.getVisibility() == View.VISIBLE && mSipServiceConnection.get().getCurrentCall() != null) {
+        } else if (mHangupButton != null && mHangupButton.getVisibility() == View.VISIBLE && getSipServiceConnection().get().getCurrentCall() != null) {
             hangupViaBackButton();
         } else if (isDialpadVisible()) {
             hideDialpad();
@@ -273,18 +273,18 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     // Toggle the call on speaker when the user presses the button.
     private void toggleSpeaker() {
         getLogger().d("toggleSpeaker");
-        mSipServiceConnection.get().getConnection().setAudioRoute(!isOnSpeaker() ? ROUTE_SPEAKER : ROUTE_WIRED_OR_EARPIECE);
+        getSipServiceConnection().get().connection.setAudioRoute(!isOnSpeaker() ? ROUTE_SPEAKER : ROUTE_WIRED_OR_EARPIECE);
     }
 
     // Toggle the hold the call when the user presses the button.
     private void toggleOnHold() {
         getLogger().d("toggleOnHold");
-        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
+        if (!getSipServiceConnection().isAvailableAndHasActiveCall()) {
             return;
         }
 
         try {
-            SipCall call = mOnTransfer ? mSipServiceConnection.get().getCurrentCall() : mSipServiceConnection.get().getFirstCall();
+            SipCall call = mOnTransfer ? getSipServiceConnection().get().getCurrentCall() : getSipServiceConnection().get().getFirstCall();
             call.toggleHold();
         } catch (Exception e) {
             e.printStackTrace();
@@ -296,7 +296,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
      *
      */
     public void hangup() {
-        if (!mSipServiceConnection.isAvailable()) {
+        if (!getSipServiceConnection().isAvailable()) {
             return;
         }
 
@@ -307,7 +307,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         }
 
         try {
-            mSipServiceConnection.get().getConnection().onDisconnect();
+            getSipServiceConnection().get().connection.onDisconnect();
             updateUi();
         } catch (Exception ignored) { }
         finally {
@@ -317,9 +317,9 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @OnClick(R.id.button_mute)
     public void onMuteButtonClick(View view) {
-        if ((mOnTransfer && mSipServiceConnection.get().getCurrentCall().isConnected()) || mConnected) {
-            if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
-                mSipServiceConnection.get().getCurrentCall().toggleMute();
+        if ((mOnTransfer && getSipServiceConnection().get().getCurrentCall().isConnected()) || mConnected) {
+            if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
+                getSipServiceConnection().get().getCurrentCall().toggleMute();
             }
         }
     }
@@ -346,8 +346,8 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @OnClick(R.id.button_onhold)
     public void onHoldButtonClick(View view) {
-        if ((mOnTransfer && mSipServiceConnection.get().getCurrentCall().isConnected()) || mConnected) {
-            if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
+        if ((mOnTransfer && getSipServiceConnection().get().getCurrentCall().isConnected()) || mConnected) {
+            if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
                 toggleOnHold();
             }
         }
@@ -363,7 +363,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         BluetoothDevice bluetoothDevice = null;
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-            bluetoothDevice = getSipServiceConnection().get().getConnection().getCallAudioState().getActiveBluetoothDevice();
+            bluetoothDevice = getSipServiceConnection().get().connection.getCallAudioState().getActiveBluetoothDevice();
         }
 
         PopupMenu popup = new PopupMenu(this, view);
@@ -377,7 +377,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
         popup.show();
     }
 
-    @Override
     @OnClick(R.id.button_hangup)
     protected void onDeclineButtonClicked() {
         getLogger().i("Hangup the call");
@@ -393,39 +392,34 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @Override
     public void digitWasPressed(String dtmf) {
-        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
+        if (!getSipServiceConnection().isAvailableAndHasActiveCall()) {
             return;
         }
 
         try {
-            mSipServiceConnection.get().getCurrentCall().dialDtmf(dtmf);
+            getSipServiceConnection().get().getCurrentCall().dialDtmf(dtmf);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void callTransferMakeSecondCall(String numberToCall) {
-        Uri sipAddressUri = SipUri.sipAddressUri(
-                getApplicationContext(),
-                PhoneNumberUtils.format(numberToCall)
-        );
-
-        mSipServiceConnection.get().makeCall(sipAddressUri, "", numberToCall);
+        getSipServiceConnection().get().placeOutgoingCall(numberToCall, false);
     }
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.audio_source_option_phone:
-                getSipServiceConnection().get().getConnection().setAudioRoute(ROUTE_WIRED_OR_EARPIECE);
+                getSipServiceConnection().get().connection.setAudioRoute(ROUTE_WIRED_OR_EARPIECE);
                 break;
 
             case R.id.audio_source_option_speaker:
-                getSipServiceConnection().get().getConnection().setAudioRoute(ROUTE_SPEAKER);
+                getSipServiceConnection().get().connection.setAudioRoute(ROUTE_SPEAKER);
                 break;
 
             case R.id.audio_source_option_bluetooth:
-                getSipServiceConnection().get().getConnection().setAudioRoute(ROUTE_BLUETOOTH);
+                getSipServiceConnection().get().connection.setAudioRoute(ROUTE_BLUETOOTH);
                 break;
         }
 
@@ -481,10 +475,10 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     public void callTransferHangupSecondCall() {
         mForceDisplayedCallDetails = null;
         try {
-            if (mSipServiceConnection.get().getFirstCall().isOnHold()) {
-                mSipServiceConnection.get().getCurrentCall().hangup(true);
+            if (getSipServiceConnection().get().getFirstCall().isOnHold()) {
+                getSipServiceConnection().get().getCurrentCall().hangup(true);
             } else {
-                mSipServiceConnection.get().getFirstCall().hangup(true);
+                getSipServiceConnection().get().getFirstCall().hangup(true);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -497,7 +491,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
      */
     public void callTransferConnectTheCalls() {
         try {
-            mSipServiceConnection.get().getFirstCall().xFerReplaces(mSipServiceConnection.get().getCurrentCall());
+            getSipServiceConnection().get().getFirstCall().xFerReplaces(getSipServiceConnection().get().getCurrentCall());
             mCallIsTransferred = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -539,12 +533,12 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
      * @return TRUE if there is a second call, otherwise FALSE
      */
     public boolean hasSecondCall() {
-        if (!mSipServiceConnection.isAvailableAndHasActiveCall()) {
+        if (!getSipServiceConnection().isAvailableAndHasActiveCall()) {
             return false;
         }
 
-        SipCall initialCall = mSipServiceConnection.get().getFirstCall();
-        SipCall transferCall = mSipServiceConnection.get().getCurrentCall();
+        SipCall initialCall = getSipServiceConnection().get().getFirstCall();
+        SipCall transferCall = getSipServiceConnection().get().getCurrentCall();
 
         return !initialCall.getIdentifier().equals(transferCall.getIdentifier());
     }
@@ -568,8 +562,8 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     }
 
     public boolean isMuted() {
-        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
-            return mSipServiceConnection.get().getCurrentCall().isMuted();
+        if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
+            return getSipServiceConnection().get().getCurrentCall().isMuted();
         }
 
         return false;
@@ -580,7 +574,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     }
 
     public int getAudioRoute() {
-        CallAudioState callAudioState = getSipServiceConnection().get().getConnection().getCallAudioState();
+        CallAudioState callAudioState = getSipServiceConnection().get().connection.getCallAudioState();
 
         if (callAudioState == null) return CallAudioState.ROUTE_EARPIECE;
 
@@ -621,9 +615,9 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
 
     public boolean isBluetoothRouteAvailable() {
-        if (getSipServiceConnection().get().getConnection() == null) return false;
+        if (getSipServiceConnection().get().connection == null) return false;
 
-        return getSipServiceConnection().get().getConnection().isBluetoothRouteAvailable();
+        return getSipServiceConnection().get().connection.isBluetoothRouteAvailable();
     }
 
     public boolean isCurrentlyRoutingAudioViaBluetooth() {
@@ -636,8 +630,8 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
      * @return TRUE if it is on hold, otherwise FALSE.
      */
     public boolean isCallOnHold() {
-        if (mSipServiceConnection.isAvailableAndHasActiveCall()) {
-            return mSipServiceConnection.get().getCurrentCall().isOnHold();
+        if (getSipServiceConnection().isAvailableAndHasActiveCall()) {
+            return getSipServiceConnection().get().getCurrentCall().isOnHold();
         }
 
         return false;

@@ -4,6 +4,7 @@ import android.telecom.CallAudioState
 import android.telecom.Connection
 import android.telecom.DisconnectCause
 import android.util.Log
+import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.sip.SipService
 
 /**
@@ -13,50 +14,58 @@ import com.voipgrid.vialer.sip.SipService
  */
 class AndroidCallConnection(val voip: SipService) : Connection() {
 
+    private val logger = Logger(this)
+
     init {
         connectionProperties = PROPERTY_SELF_MANAGED
         connectionCapabilities = CAPABILITY_HOLD or CAPABILITY_MUTE or CAPABILITY_SUPPORT_HOLD
     }
 
     override fun onShowIncomingCallUi() {
+        logger.i("Showing incoming call ui")
         voip.showIncomingCallToUser()
     }
 
-    override fun onCallAudioStateChanged(state: CallAudioState?) {
+    override fun onCallAudioStateChanged(state: CallAudioState) {
+        logger.i("Call audio state changed $state")
         voip.onCallAudioStateChanged(state)
     }
 
     override fun onHold() {
-        voip.currentCall.putOnHold()
+        logger.i("Putting call on hold")
+        voip.currentCall?.putOnHold()
         setOnHold()
     }
 
     override fun onUnhold() {
-        voip.currentCall.takeOffHold()
+        logger.i("Taking call off hold")
+        voip.currentCall?.takeOffHold()
         setActive()
     }
 
     override fun onAnswer() {
-        voip.currentCall.answer()
+        logger.i("Answering call")
+        voip.currentCall?.answer()
         setActive()
     }
 
     override fun onReject() {
-        voip.currentCall.decline()
+        voip.currentCall?.decline()
         destroy()
     }
 
     override fun onDisconnect() {
+        logger.i("Disconnecting call")
         try {
-            voip.currentCall.hangup(true)
+            voip.currentCall?.hangup(true)
         } catch (e: Exception) {}
         setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
         destroy()
     }
 
     override fun onSilence() {
+        logger.i("Silencing call ringer")
         voip.silence()
-        Log.e("TEST123", "Silence called!");
     }
 
     fun isBluetoothRouteAvailable(): Boolean = callAudioState != null && callAudioState.supportedRouteMask and CallAudioState.ROUTE_BLUETOOTH == CallAudioState.ROUTE_BLUETOOTH

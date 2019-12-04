@@ -35,12 +35,7 @@ class OutgoingCallDiallingNotification(private val call : SipCall) : AbstractCal
 
     private fun createCallActivityPendingIntent(): PendingIntent? {
         return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
-                context,
-                CallActivity::class.java,
-                call.phoneNumberUri,
-                CallingConstants.TYPE_OUTGOING_CALL,
-                call.callerId,
-                call.phoneNumber
+                context
         ))
     }
 }

@@ -9,7 +9,8 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
 
     private val logger = Logger(this)
 
-    val endpoint by lazy { VialerEndpoint() }
+    var endpoint: VialerEndpoint? = null
+        private set
 
     lateinit var account: SipAccount
         private set
@@ -27,11 +28,10 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
     fun init(sipService: SipService) {
         this.sipService = sipService
 
-        if (endpoint.isInitialized) return
-
         try {
-            logger.i("Attempting to initialize pjsip: ${endpoint.libVersion().full}")
-            pjsipConfigurator.initializeEndpoint(endpoint)
+            if (endpoint != null) return
+
+            endpoint = pjsipConfigurator.initializeEndpoint(VialerEndpoint())
             account = SipAccount(pjsipConfigurator.createAccountConfig(phoneAccount))
         } catch (e: java.lang.Exception) {
             logger.e("Failed to load pjsip, stopping the service")
@@ -45,10 +45,12 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
      */
     fun destroy() {
         pjsipConfigurator.cleanUp()
-        endpoint.apply {
+        account.delete()
+        endpoint?.apply {
             libDestroy()
             delete()
         }
+        endpoint = null
     }
 
     inner class SipAccount(accountConfig: AccountConfig) : Account() {
@@ -72,8 +74,6 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
     }
 
     inner class VialerEndpoint : Endpoint() {
-
-        var isInitialized = false
 
         override fun onTransportState(prm: OnTransportStateParam) {
             super.onTransportState(prm)
