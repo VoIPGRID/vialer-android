@@ -54,4 +54,7 @@
     <color name="error_color">#8F0A06</color>
     <color name="onboarding_text_hint_color">#CCFFFFFF</color>
     <color name="onboarding_button_text_color">#555555</color>
+
+    <color name="floating_action_button_color">#2491FF</color>
+    <color name="error_background_color">#FFADAD</color>
 </resources>

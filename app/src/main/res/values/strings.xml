@@ -31,7 +31,7 @@
     <string name="dialer_connect_a_b_info">Two step modus will setup a call to your phone first and will call the other party when you answer the call.</string>
     <string name="dialer_connect_a_b_info_title">Two step modus</string>
     <string name="dialer_warning_a_b_connect">Poor connection, Two step calling enabled</string>
-    <string name="dialer_warning_no_connection">No connection, cannot call</string>
+    <string name="dialer_warning_no_connection">No connection detected</string>
     <string name="dialer_warning_voip_disabled">VoIP disabled, enable in settings</string>
     <string name="version_info">Version: %s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>

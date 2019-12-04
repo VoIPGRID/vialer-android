@@ -5,7 +5,7 @@
     -->
     <integer name="logo_dismiss_delay_ms">1000</integer>
 
-    <dimen name="onboarding_text_input_layout_text_size_">16dp</dimen>
+    <dimen name="onboarding_text_input_layout_text_size">16sp</dimen>
 
     <!-- Onboarding colors -->
     <color name="onboarding_color_accent">@color/color_accent</color>
@@ -57,7 +57,7 @@
     </style>
     
     <style name="OnboardingTextInputLayoutStyle" parent="android:style/TextAppearance">
-        <item name="android:textSize">@dimen/onboarding_text_input_layout_text_size_</item>
+        <item name="android:textSize">@dimen/onboarding_text_input_layout_text_size</item>
         <item name="android:textColor">@color/onboarding_text_input_layout_text_color</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
