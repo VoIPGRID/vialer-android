@@ -2,6 +2,7 @@ package com.voipgrid.vialer.dialer;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.sip.SipService;
 
 
 /**
@@ -84,6 +86,24 @@ public class KeyPadView extends LinearLayout
 
     }
 
+    /**
+     * Whether the button should produce a tone when pressed.
+     *
+     * Will return true if in a call or when the 'Dial pad tones' setting is enabled, false if the
+     * setting is not found, not enabled or any other value that's not 1.
+     *
+     * @return True if a tone should be produced, false otherwise.
+     */
+    private boolean getUseTone() {
+        try {
+            return SipService.sipServiceActive || Settings.System.getInt(
+                    getContext().getContentResolver(),
+                    Settings.System.DTMF_TONE_WHEN_DIALING) == 1;
+        } catch (Settings.SettingNotFoundException e) {
+            return false;
+        }
+    }
+
     public void setOnKeyPadClickListener(OnKeyPadClickListener listener) {
         mListener = listener;
     }
@@ -92,7 +112,11 @@ public class KeyPadView extends LinearLayout
     public void onClick(View view) {
         if(view instanceof DialpadButton) {
             DialpadButton button = (DialpadButton) view;
-            mToneGenerator.startTone(button.getDtmfTone(), DTMF_TONE_DURATION);
+
+            if (getUseTone()) {
+                mToneGenerator.startTone(button.getDtmfTone(), DTMF_TONE_DURATION);
+            }
+
             String digit = button.getDigit();
 
             if (mListener != null) {
