@@ -40,7 +40,7 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private val adapter = CallRecordAdapter()
-    private var type = CallRecordViewModel.Type.ALL_CALLS
+    private var type = CallRecordViewModel.Type.MISSED_CALLS
 
     @Inject lateinit var newCallRecordsImporter: NewCallRecordsImporter
     @Inject lateinit var networkUtil: NetworkUtil

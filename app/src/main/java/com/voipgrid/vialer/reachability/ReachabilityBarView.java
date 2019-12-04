@@ -1,11 +1,7 @@
 package com.voipgrid.vialer.reachability;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Build;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +12,9 @@ import android.widget.TextView;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.util.ConnectivityHelper;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 /**
  * Class that handles the network state view and allows the updating of the view
@@ -79,6 +78,7 @@ public class ReachabilityBarView extends RelativeLayout implements View.OnClickL
         if(!mConnectivityHelper.hasNetworkConnection()) {
             // The user doesn't have any connection.
             mReachabilityBarTextView.setText(R.string.dialer_warning_no_connection);
+            showInfoImageView = true;
         } else if (!mConnectivityHelper.hasFastData()) {
             // The connection is not fast enough.
             // SIP is enabled and allowed to use, show the click-to-dial message.

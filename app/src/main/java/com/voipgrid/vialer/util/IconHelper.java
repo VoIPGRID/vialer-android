@@ -17,10 +17,11 @@ import com.voipgrid.vialer.VialerApplication;
  * Includes functions to retrieve either as bitmap or as TextDrawable.
  */
 public class IconHelper {
+    private static final int WHITE = 0xffffffff;
 
-    private static Bitmap drawableToBitmap (Drawable drawable) {
+    private static Bitmap drawableToBitmap(Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable)drawable).getBitmap();
+            return ((BitmapDrawable) drawable).getBitmap();
         }
 
         int width = drawable.getIntrinsicWidth();
@@ -44,13 +45,11 @@ public class IconHelper {
             color = ColorGenerator.MATERIAL.getColor(number);
         }
 
-        Bitmap bitmap = drawableToBitmap(getCallerIconTextDrawable(string, color));
-
         if (string == null || string.isEmpty()) {
-            return addPlaceholderPicture(bitmap, color);
+            return addPlaceholderPicture(drawableToBitmap(getCallerIconTextDrawable(string, WHITE)), WHITE);
+        } else {
+            return drawableToBitmap(getCallerIconTextDrawable(string, color));
         }
-
-        return bitmap;
     }
 
     private static Bitmap addPlaceholderPicture(Bitmap circle, int color) {
@@ -73,8 +72,8 @@ public class IconHelper {
         int g = Math.round(Color.green(color) * factor);
         int b = Math.round(Color.blue(color) * factor);
         return Color.argb(a,
-                Math.min(r,255),
-                Math.min(g,255),
-                Math.min(b,255));
+                Math.min(r, 255),
+                Math.min(g, 255),
+                Math.min(b, 255));
     }
 }
