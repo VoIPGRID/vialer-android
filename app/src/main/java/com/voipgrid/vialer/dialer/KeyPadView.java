@@ -17,9 +17,7 @@ import com.voipgrid.vialer.sip.SipService;
  * Custom KeyPadClass to extend the LinearLayout to show dial pad buttons.
  */
 public class KeyPadView extends LinearLayout
-        implements View.OnClickListener, View.OnLongClickListener {
-
-    public static final int DTMF_TONE_DURATION = 200;
+        implements View.OnLongClickListener, DialpadButton.OnTouchListener {
 
     private OnKeyPadClickListener mListener;
     private ToneGenerator mToneGenerator;
@@ -71,7 +69,7 @@ public class KeyPadView extends LinearLayout
                 if (dialpadButton.getDigit().equals("0")) {
                     dialpadButton.setOnLongClickListener(this);
                 }
-                dialpadButton.setOnClickListener(this);
+                dialpadButton.setOnTouchEndListener(this);
                 continue;
             }
 
@@ -99,12 +97,12 @@ public class KeyPadView extends LinearLayout
     }
 
     @Override
-    public void onClick(View view) {
+    public void onStartTouch(View view) {
         if(view instanceof DialpadButton) {
             DialpadButton button = (DialpadButton) view;
 
             if (shouldUseTone()) {
-                mToneGenerator.startTone(button.getDtmfTone(), DTMF_TONE_DURATION);
+                mToneGenerator.startTone(button.getDtmfTone());
             }
 
             String digit = button.getDigit();
@@ -123,10 +121,21 @@ public class KeyPadView extends LinearLayout
             if (mListener != null) {
                 if (digit.equals("0")) {
                     mListener.onKeyPadButtonClick(button.getChars(), button.getChars());
+                    mToneGenerator.stopTone();
                 }
             }
         }
+
         return true;
+    }
+
+
+
+    @Override
+    public void onEndTouch(View view) {
+        if (view instanceof DialpadButton) {
+            mToneGenerator.stopTone();
+        }
     }
 
     public interface OnKeyPadClickListener {

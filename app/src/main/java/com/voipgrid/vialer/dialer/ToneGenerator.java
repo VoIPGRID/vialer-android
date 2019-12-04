@@ -58,8 +58,23 @@ public class ToneGenerator {
     }
 
     /**
-     * Play a tone, recover without crash if the ToneGenerator cannot be created. If the ToneGenerator cannot
-     * be created then the tone will not be played but an exception will be logged.
+     * Play a tone, recover without crash if the ToneGenerator cannot be created. If the
+     * ToneGenerator cannot be created then the tone will not be played but an exception
+     * will be logged.
+     *
+     * Will play the tone until stopTone has been called.
+     *
+     * @see android.media.ToneGenerator#startTone(int, int)
+     * @return boolean TRUE if the tone was played successfully, otherwise FALSE.
+     */
+    public boolean startTone(int toneType) {
+        return startTone(toneType, -1);
+    }
+
+    /**
+     * Play a tone, recover without crash if the ToneGenerator cannot be created. If the
+     * ToneGenerator cannot be created then the tone will not be played but an exception
+     * will be logged.
      *
      * @see android.media.ToneGenerator#startTone(int, int)
      * @return boolean TRUE if the tone was played successfully, otherwise FALSE.
@@ -77,6 +92,18 @@ public class ToneGenerator {
         sHandler.postDelayed(mToneGeneratorDestroyer, durationMs + DESTROY_TONE_GENERATOR_AFTER_MS);
 
         return getAndroidToneGenerator().startTone(toneType, durationMs);
+    }
+
+    public void stopTone() {
+        android.media.ToneGenerator androidToneGenerator = getAndroidToneGenerator();
+
+        if(androidToneGenerator == null) {
+            mLogger.e("Attempted to stop tone but ToneGenerator could not be initialized," +
+                      "this tone was not stopped.");
+            return;
+        }
+
+        androidToneGenerator.stopTone();
     }
 
     /**
