@@ -57,5 +57,4 @@
 
     <color name="floating_action_button_color">#2491FF</color>
     <color name="error_background_color">#FFADAD</color>
-    <color name="error_color">#8F0A06</color>
 </resources>
