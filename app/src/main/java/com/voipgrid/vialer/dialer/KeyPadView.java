@@ -88,7 +88,7 @@ public class KeyPadView extends LinearLayout
      *
      * @return True if a tone should be produced, false otherwise.
      */
-    private boolean getUseTone() {
+    private boolean shouldUseTone() {
         try {
             return SipService.sipServiceActive || Settings.System.getInt(
                     getContext().getContentResolver(),
@@ -107,7 +107,7 @@ public class KeyPadView extends LinearLayout
         if(view instanceof DialpadButton) {
             DialpadButton button = (DialpadButton) view;
 
-            if (getUseTone()) {
+            if (shouldUseTone()) {
                 mToneGenerator.startTone(button.getDtmfTone(), DTMF_TONE_DURATION);
             }
 
