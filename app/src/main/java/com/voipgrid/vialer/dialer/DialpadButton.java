@@ -60,6 +60,8 @@ public class DialpadButton extends LinearLayout {
             a.recycle();
         }
 
+        setSoundEffectsEnabled(false);
+
         setDtmfTone(mDigit);
 
         // Container layout to fix the button is centered in the GridLayout element.
