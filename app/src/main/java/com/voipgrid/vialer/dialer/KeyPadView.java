@@ -83,19 +83,15 @@ public class KeyPadView extends LinearLayout
     /**
      * Whether the button should produce a tone when pressed.
      *
-     * Will return true if in a call or when the 'Dial pad tones' setting is enabled, false if the
-     * setting is not found, not enabled or any other value that's not 1.
+     * Will return true if in a call or when the 'Dial pad tones' setting is enabled or not found,
+     * false otherwise.
      *
      * @return True if a tone should be produced, false otherwise.
      */
     private boolean shouldUseTone() {
-        try {
-            return SipService.sipServiceActive || Settings.System.getInt(
-                    getContext().getContentResolver(),
-                    Settings.System.DTMF_TONE_WHEN_DIALING) == 1;
-        } catch (Settings.SettingNotFoundException e) {
-            return false;
-        }
+        return SipService.sipServiceActive || Settings.System.getInt(
+                getContext().getContentResolver(),
+                Settings.System.DTMF_TONE_WHEN_DIALING, 1) == 1;
     }
 
     public void setOnKeyPadClickListener(OnKeyPadClickListener listener) {
