@@ -40,7 +40,7 @@ public class KeyPadView extends LinearLayout
 
     private void init() {
         if (!isInEditMode()) {
-            mToneGenerator = new ToneGenerator(AudioManager.STREAM_RING, 100);
+            mToneGenerator = new ToneGenerator(AudioManager.STREAM_DTMF, 80);
         }
 
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
