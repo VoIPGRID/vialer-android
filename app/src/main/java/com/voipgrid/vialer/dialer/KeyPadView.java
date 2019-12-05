@@ -17,7 +17,7 @@ import com.voipgrid.vialer.sip.SipService;
  * Custom KeyPadClass to extend the LinearLayout to show dial pad buttons.
  */
 public class KeyPadView extends LinearLayout
-        implements View.OnLongClickListener, DialpadButton.OnTouchListener {
+        implements View.OnLongClickListener, DialpadButton.OnPressListener {
 
     private OnKeyPadClickListener mListener;
     private ToneGenerator mToneGenerator;
@@ -69,7 +69,7 @@ public class KeyPadView extends LinearLayout
                 if (dialpadButton.getDigit().equals("0")) {
                     dialpadButton.setOnLongClickListener(this);
                 }
-                dialpadButton.setOnTouchEndListener(this);
+                dialpadButton.setOnPressListener(this);
                 continue;
             }
 
@@ -97,23 +97,6 @@ public class KeyPadView extends LinearLayout
     }
 
     @Override
-    public void onStartTouch(View view) {
-        if(view instanceof DialpadButton) {
-            DialpadButton button = (DialpadButton) view;
-
-            if (shouldUseTone()) {
-                mToneGenerator.startTone(button.getDtmfTone());
-            }
-
-            String digit = button.getDigit();
-
-            if (mListener != null) {
-                mListener.onKeyPadButtonClick(digit, button.getChars());
-            }
-        }
-    }
-
-    @Override
     public boolean onLongClick(View view) {
         if(view instanceof DialpadButton) {
             DialpadButton button = (DialpadButton) view;
@@ -129,10 +112,25 @@ public class KeyPadView extends LinearLayout
         return true;
     }
 
+    @Override
+    public void onStartPress(View view) {
+        if (view instanceof DialpadButton) {
+            DialpadButton button = (DialpadButton) view;
 
+            if (shouldUseTone()) {
+                mToneGenerator.startTone(button.getDtmfTone());
+            }
+
+            String digit = button.getDigit();
+
+            if (mListener != null) {
+                mListener.onKeyPadButtonClick(digit, button.getChars());
+            }
+        }
+    }
 
     @Override
-    public void onEndTouch(View view) {
+    public void onEndPress(View view) {
         if (view instanceof DialpadButton) {
             mToneGenerator.stopTone();
         }

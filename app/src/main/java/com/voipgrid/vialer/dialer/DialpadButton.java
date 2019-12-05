@@ -17,14 +17,13 @@ import com.voipgrid.vialer.R;
 /**
  * Custom View widget used in the apps dialpad
  */
-public class DialpadButton extends LinearLayout
-        implements View.OnTouchListener, View.OnClickListener {
+public class DialpadButton extends LinearLayout {
 
     private String mChars;
     private String mDigit;
     private int mTone;
 
-    private OnTouchListener mOnTouchListener;
+    private OnPressListener mOnPressListener;
 
     /**
      * Constructor
@@ -71,8 +70,6 @@ public class DialpadButton extends LinearLayout
 
         setDtmfTone(mDigit);
 
-        setOnTouchListener(this);
-
         // Container layout to fix the button is centered in the GridLayout element.
         LinearLayout container = new LinearLayout(context);
         container.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -118,20 +115,20 @@ public class DialpadButton extends LinearLayout
     }
 
     /**
-     * Get the OnTouchListener, called when the press
+     * Get the OnPressListener, called when the press
      * has started or ended (no matter how short or long).
-     * @return The OnTouchListener.
+     * @return The OnPressListener.
      */
-    public OnTouchListener getOnTouchEndListener() {
-        return mOnTouchListener;
+    public OnPressListener getOnPressListener() {
+        return mOnPressListener;
     }
 
     /**
-     * Set the OnTouchEndListener, called when the press (no matter how short or long)
+     * Set the OnPressListener, called when the press (no matter how short or long)
      * has ended.
      */
-    public void setOnTouchEndListener(@Nullable OnTouchListener listener) {
-        mOnTouchListener = listener;
+    public void setOnPressListener(@Nullable OnPressListener listener) {
+        mOnPressListener = listener;
     }
 
     /**
@@ -175,34 +172,30 @@ public class DialpadButton extends LinearLayout
     }
 
     @Override
-    public boolean onTouch(View view, MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            mOnTouchListener.onStartTouch(view);
+    public void setPressed(boolean pressed) {
+        super.setPressed(pressed);
+
+        if (mOnPressListener != null) {
+            if (pressed) {
+                mOnPressListener.onStartPress(this);
+            } else {
+                mOnPressListener.onEndPress(this);
+            }
         }
 
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            mOnTouchListener.onEndTouch(view);
-        }
-
-        return false;
     }
 
-    @Override
-    public void onClick(View view) {
-        mOnTouchListener.onEndTouch(view);
-    }
-
-    interface OnTouchListener {
+    interface OnPressListener {
         /**
-         * Called when the touch has start.
-         * @param view The view which touch has ended.
+         * Called when the press has started.
+         * @param view The view which press has started.
          */
-        void onStartTouch(View view);
+        void onStartPress(View view);
 
         /**
-         * Called when the touch has ended.
+         * Called when the press has ended.
          * @param view The view which touch has ended.
          */
-        void onEndTouch(View view);
+        void onEndPress(View view);
     }
 }
