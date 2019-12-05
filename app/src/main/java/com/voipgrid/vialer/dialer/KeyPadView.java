@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -116,6 +117,8 @@ public class KeyPadView extends LinearLayout
     public void onStartPress(View view) {
         if (view instanceof DialpadButton) {
             DialpadButton button = (DialpadButton) view;
+
+            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
 
             if (shouldUseTone()) {
                 mToneGenerator.startTone(button.getDtmfTone());
