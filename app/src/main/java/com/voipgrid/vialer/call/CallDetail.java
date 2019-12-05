@@ -3,6 +3,8 @@ package com.voipgrid.vialer.call;
 import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.sip.SipCall;
 
+import androidx.annotation.Nullable;
+
 public class CallDetail {
 
     private String identifier, phoneNumber, sipCallerId, contactsCallerId;
@@ -14,7 +16,9 @@ public class CallDetail {
         this.contactsCallerId = contactsCallerId;
     }
 
-    public static CallDetail fromSipCall(SipCall sipCall) {
+    public static @Nullable CallDetail fromSipCall(@Nullable SipCall sipCall) {
+        if (sipCall == null) return null;
+
         return new CallDetail(sipCall.getIdentifier(), sipCall.getPhoneNumber(), sipCall.getCallerId(), new Contacts().getContactNameByPhoneNumber(sipCall.getPhoneNumber()));
     }
 

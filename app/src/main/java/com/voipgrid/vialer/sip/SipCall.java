@@ -322,7 +322,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
             pjsip_inv_state callState = mLastCallInfo.getState();
             logger.i("CallState changed!");
             logger.i(callState.toString());
-
+Log.e("TEST123", "call state changed" +callState.toString());
             if (callState == pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                 onCallStartRingback();
             }  else if (callState == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) {
@@ -341,6 +341,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
         } catch (Exception e) {
             e.printStackTrace();
+            Log.e("TEST123", "Invalid state!", e);
             this.onCallInvalidState(e);
         }
     }
@@ -352,6 +353,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
      */
     @Override
     public void onCallMediaState(OnCallMediaStateParam onCallMediaStateParam) {
+        Log.e("TEST123", "onCallMediaState");
         // Find suitable audio stream by looping.
         try {
             CallInfo ci = getInfo();
@@ -363,6 +365,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 boolean usableStatus = (cmi.getStatus() ==
                         pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE ||
                         cmi.getStatus() == pjsua_call_media_status.PJSUA_CALL_MEDIA_REMOTE_HOLD);
+
                 if (cmi.getType() == pjmedia_type.PJMEDIA_TYPE_AUDIO && usableStatus) {
                     Media m = getMedia(i);
                     AudioMedia audio = AudioMedia.typecastFromMedia(m);

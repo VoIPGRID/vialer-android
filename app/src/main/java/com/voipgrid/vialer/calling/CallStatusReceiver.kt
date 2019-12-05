@@ -14,7 +14,6 @@ class CallStatusReceiver(private val mListener: Listener) : BroadcastReceiver() 
     override fun onReceive(context: Context, intent: Intent) {
         val status = intent.getStringExtra(SipConstants.CALL_STATUS_KEY) ?: return
         val callId = intent.getStringExtra(SipConstants.CALL_IDENTIFIER_KEY) ?: return
-        mLogger.i("Dispatching call status " + status + " for call id " + callId + " to " + mListener.javaClass.simpleName)
 
         when (status) {
             SipConstants.CALL_CONNECTED_MESSAGE -> mListener.onCallConnected()
@@ -25,7 +24,7 @@ class CallStatusReceiver(private val mListener: Listener) : BroadcastReceiver() 
             SipConstants.CALL_RINGING_IN_MESSAGE -> mListener.onCallRingingIn()
             SipConstants.SERVICE_STOPPED -> mListener.onServiceStopped()
         }
-Log.e("TEST123", "listener class: " + mListener.javaClass.name)
+
         mListener.onCallStatusChanged(status, callId)
     }
 

@@ -3,11 +3,9 @@ package com.voipgrid.vialer.sip
 import android.app.Service
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
 import android.telecom.CallAudioState
-import android.telecom.PhoneAccount
 import android.util.Log
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -35,10 +33,12 @@ import com.voipgrid.vialer.sip.outgoing.OutgoingCallRinger
 import com.voipgrid.vialer.sip.pjsip.Pjsip
 import com.voipgrid.vialer.sip.pjsip.Pjsip.SipAccount
 import com.voipgrid.vialer.sip.service.SipServiceMonitor
+import com.voipgrid.vialer.sip.service.SipServiceNotificationManager
+import com.voipgrid.vialer.sip.service.SipServiceNotificationManager.Type.*
+import com.voipgrid.vialer.sip.transfer.CallTransferResult
 import com.voipgrid.vialer.sip.utils.BusyTone
 import com.voipgrid.vialer.sip.utils.ScreenOffReceiver
 import com.voipgrid.vialer.util.BroadcastReceiverManager
-import com.voipgrid.vialer.util.PhoneNumberUtils
 import org.koin.android.ext.android.inject
 import org.pjsip.pjsua2.CallOpParam
 import org.pjsip.pjsua2.OnIncomingCallParam
@@ -73,11 +73,9 @@ class SipService : Service(), CallStatusReceiver.Listener {
 
     private val mBinder: IBinder = SipServiceBinder()
 
-    var notification: AbstractCallNotification = DefaultCallNotification()
-        private set
-
     private val callStatusReceiver = CallStatusReceiver(this)
     private val sipActionHandler = SipActionHandler(this)
+    private val notification = SipServiceNotificationManager(this)
 
     private val logger = Logger(this)
     private val broadcastReceiverManager: BroadcastReceiverManager by inject()
@@ -98,7 +96,6 @@ class SipService : Service(), CallStatusReceiver.Listener {
         super.onCreate()
 
         monitor.start(this)
-        changeNotification(notification)
         connection = AndroidCallConnection(this)
 
         broadcastReceiverManager.apply {
@@ -125,7 +122,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
             val action = Action.valueOf(intent.action ?: throw Exception("Unable to find action"))
 
             if (sipActionHandler.isForegroundAction(action)) {
-                startForeground(notification.notificationId, notification.build())
+                startForeground(notification.active.notificationId, notification.active.build())
                 sipServiceActive = true
                 pjsip.init(this)
                 ipSwitchMonitor.init(this, pjsip.endpoint)
@@ -148,12 +145,10 @@ class SipService : Service(), CallStatusReceiver.Listener {
     fun showIncomingCallToUser() = calls.current?.let {
         incomingCallAlerts.start()
 
-        val incomingCallNotification = notification.incoming(it.phoneNumber, it.callerId) as IncomingCallNotification
-
-        changeNotification(incomingCallNotification)
+        notification.change(INCOMING)
 
         if (get().isApplicationVisible()) {
-            incomingCallNotification.build().fullScreenIntent.send()
+            notification.toNotification(INCOMING).build().fullScreenIntent.send()
         }
     }
 
@@ -161,48 +156,71 @@ class SipService : Service(), CallStatusReceiver.Listener {
      * Initialise an outgoing call and either route it via the android call manager or display it immediately
      *
      * @param number The phone number to call.
-     * @param isInvisible If set to true, the android call manager will be unaware of the call and no ui will be displayed. This is ideal
-     * for transfers.
      *
      */
-    fun placeOutgoingCall(number: String, isInvisible: Boolean = false) {
-        if (calls.current != null && !isInvisible) {
+    fun placeOutgoingCall(number: String) {
+        if (calls.current != null) {
             logger.i("Attempting to initialise a second outgoing call but this is not currently supported")
             startCallActivityForCurrentCall()
             return
         }
 
-        val callback: (() -> Unit) = {
-            val call = SipCall(this, pjsip.account).apply {
-                phoneNumber = number
-            }
-
-            if (call.startOutgoingCall(number)) {
-                this.calls.add(call)
-
-                if (!isInvisible) {
-                    showOutgoingCallToUser(call)
-                }
-            }
+        AndroidCallService.outgoingCallback = {
+            makeCall(number)
+            showOutgoingCallToUser()
         }
 
-        if (isInvisible) {
-            Log.e("TEST123", "Placing an invisible call to $number")
-            callback.invoke()
-            return
-        }
-
-        AndroidCallService.outgoingCallback = callback
         androidCallManager.call(number)
+    }
+
+    private fun makeCall(number: String) : SipCall {
+        val call = SipCall(this, pjsip.account).apply {
+            phoneNumber = number
+        }
+
+        if (call.startOutgoingCall(number)) {
+            this.calls.add(call)
+        } else {
+            throw Exception("Unable to create call")
+        }
+
+        return call
+    }
+
+    /**
+     * Start a transfer to the target number.
+     *
+     */
+    fun startTransfer(target: String) {
+        if (isTransferring()) throw Exception("Unable to start transfer when there is already one in progress")
+
+        makeCall(target)
+    }
+
+    /**
+     * Merge the current transfer.
+     *
+     */
+    fun mergeTransfer(): CallTransferResult {
+        if (!isTransferring()) throw Exception("Unable to merge transfer that has not started")
+
+        val firstCall = firstCall ?: throw Exception("Must have a first call to transfer")
+        val currentCall = currentCall ?: throw Exception("Must have a current call to transfer")
+
+        val result = CallTransferResult(firstCall.phoneNumber, currentCall.phoneNumber)
+
+        firstCall.xFerReplaces(currentCall)
+
+        return result
     }
 
     /**
      * Displaying the outgoing call ui to  the user.
      *
      */
-    private fun showOutgoingCallToUser(sipCall: SipCall) {
+    private fun showOutgoingCallToUser() {
         startActivity(AbstractCallActivity.createIntentForCallActivity(this))
-        changeNotification(notification.outgoing(sipCall))
+        notification.change(OUTGOING)
     }
 
     /**
@@ -218,37 +236,6 @@ class SipService : Service(), CallStatusReceiver.Listener {
         broadcastReceiverManager.unregisterReceiver(networkConnectivity, callStatusReceiver, screenOffReceiver, ipSwitchMonitor)
         sipServiceActive = false
         super.onDestroy()
-    }
-
-    /**
-     * Updates the notification and sets the active notification appropriately. All notification changes should be published
-     * via this method.
-     *
-     * @param notification
-     */
-    fun changeNotification(notification: AbstractCallNotification) {
-        logger.i("Received change notification request from: " + notification.javaClass.simpleName)
-        if (shouldUpdateNotification(notification)) {
-            logger.i("Performing notification change to" + notification.javaClass.simpleName)
-            this.notification = notification
-            startForeground(notification.notificationId, notification.build())
-        }
-    }
-
-    /**
-     * Check if the notification should be updated.
-     *
-     * @param notification
-     * @return
-     */
-    private fun shouldUpdateNotification(notification: AbstractCallNotification): Boolean {
-        if (this.notification.javaClass != notification.javaClass) return true
-
-        if (notification.javaClass == ActiveCallNotification::class.java) {
-            notification.display()
-        }
-
-        return false
     }
 
     /**
@@ -294,7 +281,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
         logger.i("Call has connected, it is an inbound call so stop all incoming call notifications")
         startCallActivityForCurrentCall()
         silence()
-        changeNotification(notification.active(call))
+        notification.change(ACTIVE)
     }
 
     /**
@@ -326,14 +313,29 @@ class SipService : Service(), CallStatusReceiver.Listener {
     }
 
     /**
+     * This will hangup the correct call.
+     *
+     */
+    fun hangup() {
+        if (isTransferring()) {
+            currentCall?.hangup(true)
+            return
+        }
+
+        connection.onDisconnect()
+    }
+
+    /**
      * Android has reported that the call audio state has changed.
      *
      * @param state
      */
     fun onCallAudioStateChanged(state: CallAudioState) {
         Toast.makeText(get(), state.toString(), Toast.LENGTH_LONG).show()
-        localBroadcastManager.sendBroadcast(Intent(Event.CALL_UPDATED.name))
+        broadcastCallUpdate()
     }
+
+    private fun broadcastCallUpdate() = localBroadcastManager.sendBroadcast(Intent(Event.CALL_UPDATED.name))
 
     /**
      * Pjsip has successfully registered with the server.
@@ -383,6 +385,13 @@ class SipService : Service(), CallStatusReceiver.Listener {
             }
         }
     }
+
+    /**
+     * Check to see if we are currently in the middle of a call transfer.
+     *
+     * @return TRUE if we are currently transferring, otherwise false.
+     */
+    fun isTransferring() : Boolean = calls.size > 1
 
     /**
      * Class the be able to bind a activity to this service.
