@@ -4,9 +4,13 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.voipgrid.vialer.R;
 
@@ -18,6 +22,8 @@ public class DialpadButton extends LinearLayout {
     private String mChars;
     private String mDigit;
     private int mTone;
+
+    private OnPressListener mOnPressListener;
 
     /**
      * Constructor
@@ -59,6 +65,8 @@ public class DialpadButton extends LinearLayout {
         } finally {
             a.recycle();
         }
+
+        setSoundEffectsEnabled(false);
 
         setDtmfTone(mDigit);
 
@@ -107,6 +115,23 @@ public class DialpadButton extends LinearLayout {
     }
 
     /**
+     * Get the OnPressListener, called when the press
+     * has started or ended (no matter how short or long).
+     * @return The OnPressListener.
+     */
+    public OnPressListener getOnPressListener() {
+        return mOnPressListener;
+    }
+
+    /**
+     * Set the OnPressListener, called when the press (no matter how short or long)
+     * has ended.
+     */
+    public void setOnPressListener(@Nullable OnPressListener listener) {
+        mOnPressListener = listener;
+    }
+
+    /**
      * Returns the buttons digit value
      *
      * @return String value of the buttons digit
@@ -144,5 +169,33 @@ public class DialpadButton extends LinearLayout {
             case "*" : mTone = ToneGenerator.Constants.TONE_DTMF_S; break;
             default : mTone = -1;
         }
+    }
+
+    @Override
+    public void setPressed(boolean pressed) {
+        super.setPressed(pressed);
+
+        if (mOnPressListener != null) {
+            if (pressed) {
+                mOnPressListener.onStartPress(this);
+            } else {
+                mOnPressListener.onEndPress(this);
+            }
+        }
+
+    }
+
+    interface OnPressListener {
+        /**
+         * Called when the press has started.
+         * @param view The view which press has started.
+         */
+        void onStartPress(View view);
+
+        /**
+         * Called when the press has ended.
+         * @param view The view which touch has ended.
+         */
+        void onEndPress(View view);
     }
 }

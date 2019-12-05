@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +18,7 @@ import com.voipgrid.vialer.sip.SipService;
  * Custom KeyPadClass to extend the LinearLayout to show dial pad buttons.
  */
 public class KeyPadView extends LinearLayout
-        implements View.OnClickListener, View.OnLongClickListener {
-
-    public static final int DTMF_TONE_DURATION = 200;
+        implements View.OnLongClickListener, DialpadButton.OnPressListener {
 
     private OnKeyPadClickListener mListener;
     private ToneGenerator mToneGenerator;
@@ -41,7 +40,7 @@ public class KeyPadView extends LinearLayout
 
     private void init() {
         if (!isInEditMode()) {
-            mToneGenerator = new ToneGenerator(AudioManager.STREAM_RING, 100);
+            mToneGenerator = new ToneGenerator(AudioManager.STREAM_DTMF, 80);
         }
 
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
@@ -71,7 +70,7 @@ public class KeyPadView extends LinearLayout
                 if (dialpadButton.getDigit().equals("0")) {
                     dialpadButton.setOnLongClickListener(this);
                 }
-                dialpadButton.setOnClickListener(this);
+                dialpadButton.setOnPressListener(this);
                 continue;
             }
 
@@ -83,19 +82,15 @@ public class KeyPadView extends LinearLayout
     /**
      * Whether the button should produce a tone when pressed.
      *
-     * Will return true if in a call or when the 'Dial pad tones' setting is enabled, false if the
-     * setting is not found, not enabled or any other value that's not 1.
+     * Will return true if in a call or when the 'Dial pad tones' setting is enabled or not found,
+     * false otherwise.
      *
      * @return True if a tone should be produced, false otherwise.
      */
     private boolean shouldUseTone() {
-        try {
-            return SipService.sipServiceActive || Settings.System.getInt(
-                    getContext().getContentResolver(),
-                    Settings.System.DTMF_TONE_WHEN_DIALING) == 1;
-        } catch (Settings.SettingNotFoundException e) {
-            return false;
-        }
+        return SipService.sipServiceActive || Settings.System.getInt(
+                getContext().getContentResolver(),
+                Settings.System.DTMF_TONE_WHEN_DIALING, 1) == 1;
     }
 
     public void setOnKeyPadClickListener(OnKeyPadClickListener listener) {
@@ -103,12 +98,30 @@ public class KeyPadView extends LinearLayout
     }
 
     @Override
-    public void onClick(View view) {
+    public boolean onLongClick(View view) {
         if(view instanceof DialpadButton) {
             DialpadButton button = (DialpadButton) view;
+            String digit = button.getDigit();
+            if (mListener != null) {
+                if (digit.equals("0")) {
+                    mListener.onKeyPadButtonClick(button.getChars(), button.getChars());
+                    mToneGenerator.stopTone();
+                }
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onStartPress(View view) {
+        if (view instanceof DialpadButton) {
+            DialpadButton button = (DialpadButton) view;
+
+            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
 
             if (shouldUseTone()) {
-                mToneGenerator.startTone(button.getDtmfTone(), DTMF_TONE_DURATION);
+                mToneGenerator.startTone(button.getDtmfTone());
             }
 
             String digit = button.getDigit();
@@ -120,17 +133,10 @@ public class KeyPadView extends LinearLayout
     }
 
     @Override
-    public boolean onLongClick(View view) {
-        if(view instanceof DialpadButton) {
-            DialpadButton button = (DialpadButton) view;
-            String digit = button.getDigit();
-            if (mListener != null) {
-                if (digit.equals("0")) {
-                    mListener.onKeyPadButtonClick(button.getChars(), button.getChars());
-                }
-            }
+    public void onEndPress(View view) {
+        if (view instanceof DialpadButton) {
+            mToneGenerator.stopTone();
         }
-        return true;
     }
 
     public interface OnKeyPadClickListener {

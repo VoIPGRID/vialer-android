@@ -82,7 +82,12 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
     public void onKeyPadButtonClick(String digit, String chars) {
         if (isFadedOut()) return;
 
-        mNumberInput.add(digit);
+        if (digit.equals("+")) {
+            mNumberInput.replaceLast(digit);
+        } else {
+            mNumberInput.add(digit);
+        }
+
         mNumberInput.setCorrectFontSize();
 
         if (listener != null) {
