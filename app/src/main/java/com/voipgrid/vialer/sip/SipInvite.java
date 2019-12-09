@@ -14,12 +14,14 @@ class SipInvite {
      */
     private static final String
             P_ASSERTED_IDENTITY_HEADER_NAME = "P-Asserted-Identity",
-            REMOTE_PARTY_ID_HEADER_NAME = "Remote-Party-ID";
+            REMOTE_PARTY_ID_HEADER_NAME = "Remote-Party-ID",
+            USER_AGENT_HEADER_NAME = "User-Agent";
 
     private final String packet;
 
     private CallerInformationHeader pAssertedIdentity;
     private CallerInformationHeader remotePartyId;
+    private String userAgent;
 
     /**
      * Initialise the SipInvite.
@@ -30,6 +32,9 @@ class SipInvite {
         this.packet = packet;
         this.pAssertedIdentity = extractFromLikeHeader(P_ASSERTED_IDENTITY_HEADER_NAME);
         this.remotePartyId = extractFromLikeHeader(REMOTE_PARTY_ID_HEADER_NAME);
+        this.userAgent = StringUtil.extractCaptureGroups(packet,
+                                                         USER_AGENT_HEADER_NAME + ": (.+)")
+                                                         .get(0);
     }
 
     private CallerInformationHeader extractFromLikeHeader(String header) {
@@ -62,6 +67,10 @@ class SipInvite {
 
     CallerInformationHeader getRemotePartyId() {
         return remotePartyId;
+    }
+
+    String getUserAgent() {
+        return userAgent;
     }
 
     /**

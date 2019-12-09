@@ -54,6 +54,8 @@ public class CallPresenter {
         SipCall call = mActivity.getSipServiceConnection().get().getCurrentCall();
         String state = call.getCurrentCallState();
 
+        mActivity.mUserAgent.setText(call.getUserAgent());
+
         updateTransferButton(state);
 
         switch (state) {

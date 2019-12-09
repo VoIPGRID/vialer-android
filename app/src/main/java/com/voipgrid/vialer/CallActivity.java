@@ -64,6 +64,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     @BindView(R.id.profile_image) ImageView mContactImage;
     @BindView(R.id.transfer_label) TextView mTransferLabel;
     @BindView(R.id.call_status) TextView mCallStatusTv;
+    @BindView(R.id.user_agent) TextView mUserAgent;
 
     @Inject NetworkUtil mNetworkUtil;
     @Inject BroadcastReceiverManager broadcastReceiverManager;

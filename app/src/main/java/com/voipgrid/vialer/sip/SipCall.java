@@ -208,6 +208,10 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         return mIdentifier;
     }
 
+    public String getUserAgent() {
+        return invite.getUserAgent();
+    }
+
     public void answer() throws Exception {
         CallOpParam callOpParam = new CallOpParam(true);
         callOpParam.setStatusCode(pjsip_status_code.PJSIP_SC_ACCEPTED);
