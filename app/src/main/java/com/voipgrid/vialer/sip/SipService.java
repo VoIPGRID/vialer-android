@@ -206,6 +206,9 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
             } else {
                 stopSelf();
             }
+        } else if (Actions.SEND_DTMF_DIGITS.equals(action)) {
+            final String digits = intent.getStringExtra(SipConstants.EXTRA_DTMF_DIGITS);
+            mCurrentCall.dialDtmf(digits);
         }
         else {
             mLogger.e("SipService received an invalid action: " + action);
@@ -832,7 +835,15 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     public interface Actions {
 
 
-        @StringDef({HANDLE_INCOMING_CALL, HANDLE_OUTGOING_CALL, DECLINE_INCOMING_CALL, ANSWER_INCOMING_CALL, END_CALL, ANSWER_OR_HANGUP, DISPLAY_CALL_IF_AVAILABLE})
+        @StringDef({
+                HANDLE_INCOMING_CALL,
+                HANDLE_OUTGOING_CALL,
+                DECLINE_INCOMING_CALL,
+                ANSWER_INCOMING_CALL, END_CALL,
+                ANSWER_OR_HANGUP,
+                DISPLAY_CALL_IF_AVAILABLE,
+                SEND_DTMF_DIGITS,
+        })
         @Retention(RetentionPolicy.SOURCE)
         @interface Valid {}
 
@@ -886,5 +897,10 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
          *
          */
         String DISPLAY_CALL_IF_AVAILABLE = PREFIX + "DISPLAY_CALL_IF_AVAILABLE";
+
+        /**
+         * Send DTMF digits
+         */
+        String SEND_DTMF_DIGITS = PREFIX + "SEND_DTMF_DIGITS";
     }
 }

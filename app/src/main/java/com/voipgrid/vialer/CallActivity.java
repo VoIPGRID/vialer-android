@@ -7,6 +7,7 @@ import static com.voipgrid.vialer.calling.CallingConstants.TYPE_INCOMING_CALL;
 import static com.voipgrid.vialer.calling.CallingConstants.TYPE_OUTGOING_CALL;
 
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.content.BroadcastReceiver;
@@ -33,6 +34,7 @@ import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.sip.SipCall;
+import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;
@@ -380,9 +382,20 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
 
     @OnClick(R.id.button_dialpad)
     void onDialpadButtonClick(View view) {
-        mCallActions.setVisibility(View.GONE);
-        mDialer.setListener(this);
-        mDialer.setVisibility(View.VISIBLE);
+        final Bundle bundle = new Bundle();
+        bundle.putString(SipConstants.EXTRA_DTMF_DIGITS, "1337");
+
+        final PendingIntent intent = SipService.createSipServiceAction(
+                SipService.Actions.SEND_DTMF_DIGITS,
+                null,
+                bundle
+        );
+
+        try {
+            intent.send();
+        } catch (PendingIntent.CanceledException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
