@@ -209,7 +209,11 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     public String getUserAgent() {
-        return invite.getUserAgent();
+        if (invite != null) {
+            return invite.getUserAgent();
+        }
+
+        return null;
     }
 
     public void answer() throws Exception {
