@@ -33,31 +33,31 @@ class AndroidCallConnection(val voip: SipService) : Connection() {
 
     override fun onHold() {
         logger.i("Putting call on hold")
-        voip.currentCall?.putOnHold()
+        voip.currentCall!!.putOnHold()
         setOnHold()
     }
 
     override fun onUnhold() {
         logger.i("Taking call off hold")
-        voip.currentCall?.takeOffHold()
+        voip.currentCall!!.takeOffHold()
         setActive()
     }
 
     override fun onAnswer() {
         logger.i("Answering call")
-        voip.currentCall?.answer()
+        voip.currentCall!!.answer()
         setActive()
     }
 
     override fun onReject() {
-        voip.currentCall?.decline()
+        voip.currentCall!!.decline()
         destroy()
     }
 
     override fun onDisconnect() {
         logger.i("Disconnecting call")
         try {
-            voip.currentCall?.hangup(true)
+            voip.currentCall!!.hangup(true)
         } catch (e: Exception) {}
         setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
         destroy()

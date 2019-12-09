@@ -278,7 +278,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
     }
 
     /**
-     * Attended transfer to a second existing call. TODO: Not implemented yet.
+     * Attended transfer to a second existing call.
      * @param transferTo
      * @throws Exception
      */
@@ -506,7 +506,6 @@ Log.e("TEST123", "call state changed" +callState.toString());
         mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_CONNECTED_MESSAGE);
         mCallMediaMonitor = new CallMediaMonitor(this);
         new Thread(mCallMediaMonitor).start();
-        mSipService.changeNotification(mSipService.getNotification().active(this));
     }
 
     /**

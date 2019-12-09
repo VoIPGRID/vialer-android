@@ -121,8 +121,10 @@ class SipService : Service(), CallStatusReceiver.Listener {
         try {
             val action = Action.valueOf(intent.action ?: throw Exception("Unable to find action"))
 
+
+            startForeground(notification.active.notificationId, notification.active.build())
             if (sipActionHandler.isForegroundAction(action)) {
-                startForeground(notification.active.notificationId, notification.active.build())
+//                startForeground(notification.active.notificationId, notification.active.build())
                 sipServiceActive = true
                 pjsip.init(this)
                 ipSwitchMonitor.init(this, pjsip.endpoint)
@@ -273,15 +275,14 @@ class SipService : Service(), CallStatusReceiver.Listener {
     override fun onCallConnected() {
         val call = calls.current ?: return
 
-        if (call.isOutgoing) {
-            connection.setActive()
-            return
-        }
-
-        logger.i("Call has connected, it is an inbound call so stop all incoming call notifications")
-        startCallActivityForCurrentCall()
-        silence()
+        logger.i("Call has connected")
         notification.change(ACTIVE)
+        silence()
+
+        when {
+            call.isOutgoing -> connection.setActive()
+            call.isIncoming -> startCallActivityForCurrentCall()
+        }
     }
 
     /**

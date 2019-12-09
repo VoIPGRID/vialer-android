@@ -55,7 +55,6 @@ class SipActionHandler(private val sipService: SipService) {
         if (sipService.currentCall != null && sipService.currentCall?.isConnected == true) {
             sipService.startCallActivityForCurrentCall()
         } else {
-            Log.e("TEST123", "showClalif")
             sipService.stopSelf()
         }
     }

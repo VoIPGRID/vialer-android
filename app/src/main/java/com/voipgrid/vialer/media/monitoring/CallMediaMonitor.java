@@ -75,10 +75,6 @@ public class CallMediaMonitor implements Runnable {
         while (shouldBeMonitoringMedia()) {
             calculateMos();
 
-            if (mSipCall != null) {
-                mSipCall.getSipService().changeNotification(mSipCall.getSipService().getNotification().active(mSipCall));
-            }
-
             reinviteIfDue();
 
             mMostRecentPacketStats = mSipCall.getMediaPacketStats();
