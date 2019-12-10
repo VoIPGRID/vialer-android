@@ -179,6 +179,7 @@ ext {
 }
 
 dependencies {
+
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // Modules.

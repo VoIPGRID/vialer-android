@@ -40,3 +40,6 @@ fastlane/**/screenshots/screenshots.html
 
 # Private log strings
 app/src/main/res/values/log_strings.xml
+.floo
+.flooignore
+

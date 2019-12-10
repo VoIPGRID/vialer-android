@@ -83,7 +83,7 @@ class MainActivity : NavigationDrawerActivity() {
      *
      */
     private fun userIsOnboarded(): Boolean {
-        return User.isLoggedIn && User.voipgridUser?.mobileNumber != null
+        return User.isLoggedIn && User.voipgridUser?.mobileNumber != null && User.internal.hasCompletedOnBoarding
     }
 
     /**
