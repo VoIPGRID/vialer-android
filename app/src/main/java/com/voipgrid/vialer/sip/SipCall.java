@@ -353,7 +353,6 @@ Log.e("TEST123", "call state changed" +callState.toString());
      */
     @Override
     public void onCallMediaState(OnCallMediaStateParam onCallMediaStateParam) {
-        Log.e("TEST123", "onCallMediaState");
         // Find suitable audio stream by looping.
         try {
             CallInfo ci = getInfo();
