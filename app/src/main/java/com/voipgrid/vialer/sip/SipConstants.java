@@ -20,42 +20,12 @@ public interface SipConstants {
      */
     String ACTION_BROADCAST_SERVICE_INFO = PACKAGE_NAME + ".SERVICE_INFO";
 
-    String ACTION_BROADCAST_CALL_MISSED = PACKAGE_NAME + ".CALL_MISSED";
-
     /**
      * CallInteraction broadcast key for sending service info.
      */
     String SERVICE_INFO_KEY = "SERVICE_INFO";
 
-    /**
-     * CallStatus interface messages for communication with activity when Media for a call becomes
-     * available.
-     */
-    String CALL_MEDIA_AVAILABLE_MESSAGE   = "MEDIA_AVAILABLE";
 
-    /**
-     * CallStatus interface messages for communication with activity when a call is Disconnected.
-     */
-    String CALL_DISCONNECTED_MESSAGE      = "DISCONNECTED";
-
-    /**
-     * CallStatus interface messages for communication with activity when a call is Connected.
-     */
-    String CALL_CONNECTED_MESSAGE         = "CONNECTED";
-
-    /**
-     * CallStatus interface messages for communication with activity when the app is ringing out.
-     */
-    String CALL_RINGING_OUT_MESSAGE       = "RINGING_OUT";
-
-    /**
-     * CallStatus interface messages for communication with activity when the app is ringing in.
-     */
-    String CALL_RINGING_IN_MESSAGE        = "RINGING_IN";
-
-    String CALL_MUTED                     = "MUTED";
-
-    String CALL_UNMUTED                   = "UNMUTED";
 
     /**
      * CallInteraction broadcast type for communicating a "Put on hold" to the SIP service through
@@ -73,7 +43,6 @@ public interface SipConstants {
      */
     String CALL_IDENTIFIER_KEY = "call_identifier";
 
-    String CALL_MISSED_KEY = "call_missed";
 
     /**
      * CallInteraction broadcast type for communicating a "UNHOLD" to the SIP service through
@@ -81,32 +50,9 @@ public interface SipConstants {
      */
     String CALL_UNHOLD_ACTION = "UNHOLD_CALL";
 
-    String CALL_INCOMING_RINGING = "CALL_RINGING";
-
-    String EXTRA_RESPONSE_URL = "EXTRA_RESPONSE_URL";
-    String EXTRA_REQUEST_TOKEN = "EXTRA_REQUEST_TOKEN";
 
     String SERVICE_STOPPED = "SERVICE_STOPPED";
 
-    String CALL_INVALID_STATE = "CALL_INVALID_STATE";
-    String CALL_MEDIA_FAILED = "CALL_MEDIA_FAILED";
-    String CALL_UPDATE_MICROPHONE_VOLUME_FAILED = "CALL_UPDATE_MICROPHONE_VOLUME_FAILED";
-
-    enum CallMissedReason {
-        UNKNOWN("UNKNOWN"),
-        CALL_ORIGINATOR_CANCEL("ORIGINATOR_CANCEL"),
-        CALL_COMPLETED_ELSEWHERE("Call completed elsewhere");
-
-        private String stringValue;
-        CallMissedReason(String toString) {
-            stringValue = toString;
-        }
-
-        @Override
-        public String toString() {
-            return stringValue;
-        }
-    }
 
     // Volume for the ringing tone on a scale of 0 - 100.
     int RINGING_VOLUME = 75;

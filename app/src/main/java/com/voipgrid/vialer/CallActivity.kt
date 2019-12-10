@@ -22,6 +22,7 @@ import com.voipgrid.vialer.calling.AbstractCallActivity
 import com.voipgrid.vialer.calling.Dialer
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity
 import com.voipgrid.vialer.dialer.DialerActivity
+import com.voipgrid.vialer.sip.SipCall
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.sip.transfer.CallTransferResult
 import com.voipgrid.vialer.util.NetworkUtil
@@ -71,7 +72,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
         broadcastReceiverManager.unregisterReceiver(updateUiReceiver)
     }
 
-    override fun onCallStatusChanged(status: String, callId: String) = updateUi()
+    override fun onCallStatusChanged(status: SipCall.TelephonyState) = updateUi()
 
     override fun onCallDisconnected() {
         if (sipServiceConnection.isAvailableAndHasActiveCall) {
@@ -176,7 +177,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
     private fun onHoldButtonClick(view: View?) {
         if (!sipServiceConnection.isAvailableAndHasActiveCall) return
 
-        when (sipServiceConnection.get().currentCall?.isOnHold) {
+        when (sipServiceConnection.get().currentCall?.state?.isOnHold) {
             true -> SipService.connection.onUnhold()
             false -> SipService.connection.onHold()
         }
@@ -315,7 +316,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
     val isMuted: Boolean
         get() = if (sipServiceConnection.isAvailableAndHasActiveCall) {
-            sipServiceConnection.get().currentCall!!.isMuted
+            sipServiceConnection.get().currentCall!!.state.isMuted
         } else false
 
     val isOnSpeaker: Boolean
@@ -335,7 +336,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
         get() = CallDetail.fromSipCall(sipServiceConnection.get()?.currentCall)
 
     val isBluetoothRouteAvailable: Boolean
-        get() = if (SipService.connection == null) false else SipService.connection.isBluetoothRouteAvailable()
+        get() = SipService.connection.isBluetoothRouteAvailable()
 
     val isCurrentlyRoutingAudioViaBluetooth: Boolean
         get() = audioRoute == CallAudioState.ROUTE_BLUETOOTH
@@ -346,5 +347,5 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      * @return TRUE if it is on hold, otherwise FALSE.
      */
     private val isCallOnHold: Boolean
-        get() = sipServiceConnection.get().currentCall?.isOnHold ?: false
+        get() = sipServiceConnection.get().currentCall?.state?.isOnHold ?: false
 }

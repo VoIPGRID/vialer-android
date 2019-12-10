@@ -102,37 +102,12 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
     }
 
     @Override
-    public void onCallStatusChanged(String status, String callId) {
-
-    }
-
-    @Override
     public void onCallConnected() {
 
     }
 
     @Override
     public void onCallDisconnected() {
-
-    }
-
-    @Override
-    public void onCallHold() {
-
-    }
-
-    @Override
-    public void onCallUnhold() {
-
-    }
-
-    @Override
-    public void onCallRingingOut() {
-
-    }
-
-    @Override
-    public void onCallRingingIn() {
 
     }
 

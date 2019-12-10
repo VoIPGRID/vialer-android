@@ -87,7 +87,7 @@ public class IpSwitchMonitor extends BroadcastReceiver {
         SipCall sipCall = null;
         if (mSipService != null && mSipService.getCurrentCall() != null) {
             sipCall = mSipService.getCurrentCall();
-            sipCall.setIsIPChangeInProgress(true);
+            sipCall.getState().setIpChangeInProgress(true);
         }
 
         if (sipCall == null) {

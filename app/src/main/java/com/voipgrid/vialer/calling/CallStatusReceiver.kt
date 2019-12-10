@@ -5,37 +5,28 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.sip.SipCall
+import com.voipgrid.vialer.sip.SipCall.TelephonyState.*
 import com.voipgrid.vialer.sip.SipConstants
 
-class CallStatusReceiver(private val mListener: Listener) : BroadcastReceiver() {
-
-    private val mLogger: Logger = Logger(this)
+class CallStatusReceiver(private val listener: Listener) : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val status = intent.getStringExtra(SipConstants.CALL_STATUS_KEY) ?: return
-        val callId = intent.getStringExtra(SipConstants.CALL_IDENTIFIER_KEY) ?: return
+        val status = valueOf(intent.getStringExtra(SipConstants.CALL_STATUS_KEY))
 
         when (status) {
-            SipConstants.CALL_CONNECTED_MESSAGE -> mListener.onCallConnected()
-            SipConstants.CALL_DISCONNECTED_MESSAGE -> mListener.onCallDisconnected()
-            SipConstants.CALL_PUT_ON_HOLD_ACTION -> mListener.onCallHold()
-            SipConstants.CALL_UNHOLD_ACTION -> mListener.onCallUnhold()
-            SipConstants.CALL_RINGING_OUT_MESSAGE -> mListener.onCallRingingOut()
-            SipConstants.CALL_RINGING_IN_MESSAGE -> mListener.onCallRingingIn()
-            SipConstants.SERVICE_STOPPED -> mListener.onServiceStopped()
+            CONNECTED -> listener.onCallConnected()
+            DISCONNECTED -> listener.onCallDisconnected()
+            else -> {}
         }
 
-        mListener.onCallStatusChanged(status, callId)
+        listener.onCallStatusChanged(status)
     }
 
     interface Listener {
-        fun onCallStatusChanged(status: String, callId: String) {}
+        fun onCallStatusChanged(status: SipCall.TelephonyState) {}
         fun onCallConnected() {}
         fun onCallDisconnected() {}
-        fun onCallHold() {}
-        fun onCallUnhold() {}
-        fun onCallRingingOut() {}
-        fun onCallRingingIn() {}
         fun onServiceStopped() {}
     }
 }

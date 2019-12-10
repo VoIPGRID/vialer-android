@@ -23,7 +23,6 @@ import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.sip.core.Action;
-import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -76,7 +75,6 @@ public class FcmMessagingService extends FirebaseMessagingService {
         mRemoteLogger.d("onMessageReceived");
         RemoteMessageData remoteMessageData = new RemoteMessageData(remoteMessage.getData());
         LogHelper.using(mRemoteLogger).logMiddlewareMessageReceived(remoteMessage, remoteMessageData.getRequestType());
-        VialerStatistics.pushNotificationWasReceived(remoteMessage);
 
         if (!remoteMessageData.hasRequestType()) {
             mRemoteLogger.e("No requestType");
@@ -158,10 +156,6 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * @param remoteMessageData The remote message data that we are handling.
      */
     private void handleInsufficientConnection(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
-        if (hasExceededMaximumAttempts(remoteMessageData)) {
-            VialerStatistics.incomingCallFailedDueToInsufficientNetwork(remoteMessage);
-        }
-
         if (isDeviceInIdleMode()) {
             mRemoteLogger.e("Device in idle mode and connection insufficient. For now do nothing wait for next middleware push.");
         }
@@ -226,8 +220,6 @@ public class FcmMessagingService extends FirebaseMessagingService {
         mRemoteLogger.d("Reject due to native call already in progress");
 
         replyServer(remoteMessageData, false);
-
-        VialerStatistics.incomingCallFailedDueToOngoingGsmCall(remoteMessage);
     }
 
     /**
@@ -241,8 +233,6 @@ public class FcmMessagingService extends FirebaseMessagingService {
             mRemoteLogger.i("Push notification (" + sLastHandledCall + ") is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully");
             return;
         }
-
-        VialerStatistics.incomingCallFailedDueToOngoingVialerCall(remoteMessage);
     }
 
     /**

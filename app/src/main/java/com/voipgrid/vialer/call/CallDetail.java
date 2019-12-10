@@ -7,10 +7,9 @@ import androidx.annotation.Nullable;
 
 public class CallDetail {
 
-    private String identifier, phoneNumber, sipCallerId, contactsCallerId;
+    private String phoneNumber, sipCallerId, contactsCallerId;
 
-    private CallDetail(String identifier, String phoneNumber, String sipCallerId, String contactsCallerId) {
-        this.identifier = identifier;
+    private CallDetail(String phoneNumber, String sipCallerId, String contactsCallerId) {
         this.phoneNumber = phoneNumber;
         this.sipCallerId = sipCallerId;
         this.contactsCallerId = contactsCallerId;
@@ -19,11 +18,7 @@ public class CallDetail {
     public static @Nullable CallDetail fromSipCall(@Nullable SipCall sipCall) {
         if (sipCall == null) return null;
 
-        return new CallDetail(sipCall.getIdentifier(), sipCall.getPhoneNumber(), sipCall.getCallerId(), new Contacts().getContactNameByPhoneNumber(sipCall.getPhoneNumber()));
-    }
-
-    public String getIdentifier() {
-        return identifier;
+        return new CallDetail(sipCall.getPhoneNumber(), sipCall.getCallerId(), new Contacts().getContactNameByPhoneNumber(sipCall.getPhoneNumber()));
     }
 
     public String getPhoneNumber() {

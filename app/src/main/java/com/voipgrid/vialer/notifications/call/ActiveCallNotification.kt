@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.notifications.call
 
 import android.app.PendingIntent
+import android.text.format.DateUtils
 import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.CallActivity
 import com.voipgrid.vialer.R
@@ -21,7 +22,7 @@ class ActiveCallNotification(private val call : SipCall) : AbstractCallNotificat
                 .setContentTitle(createNotificationTitle())
                 .setContentText(context.getString(R.string.callnotification_active_call))
                 .setContentIntent(createCallActivityPendingIntent())
-                .setSubText(call.prettyCallDuration)
+                .setSubText(DateUtils.formatElapsedTime(call.duration.toLong()))
                 .setShowWhen(false)
                 .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(call.phoneNumber))
     }
@@ -36,8 +37,8 @@ class ActiveCallNotification(private val call : SipCall) : AbstractCallNotificat
      *
      */
     private fun createNotificationTitle() : String {
-        if (call.callerId == null || call.callerId.isEmpty()) {
-            return if (call.phoneNumber == null) " " else call.phoneNumber
+        if (call.callerId.isEmpty()) {
+            return call.phoneNumber
         }
 
         return "${call.callerId} (${call.phoneNumber})"

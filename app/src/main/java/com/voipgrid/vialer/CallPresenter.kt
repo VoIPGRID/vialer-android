@@ -4,7 +4,10 @@ import android.util.Log
 import android.view.View
 import com.voipgrid.vialer.calling.CallActivityHelper
 import com.voipgrid.vialer.contacts.Contacts
+import com.voipgrid.vialer.sip.SipCall
+import com.voipgrid.vialer.sip.SipCall.TelephonyState.*
 import com.voipgrid.vialer.sip.SipConstants
+import com.voipgrid.vialer.sip.SipConstants.*
 import kotlinx.android.synthetic.main.activity_call.*
 
 /**
@@ -33,18 +36,18 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) {
             return
         }
         val call = mActivity.sipServiceConnection.get().currentCall
-        val state = call!!.currentCallState
+        val state = call!!.state.telephonyState
         updateTransferButton(state)
         when (state) {
-            SipConstants.CALL_INVALID_STATE -> enableOrDisableButtons(false, false, true, true, false, true)
-            SipConstants.CALL_CONNECTED_MESSAGE, SipConstants.CALL_UNHOLD_ACTION, SipConstants.CALL_PUT_ON_HOLD_ACTION -> enableOrDisableButtons(true, true, true, true, true, true)
-            SipConstants.CALL_DISCONNECTED_MESSAGE -> disableAllButtons()
+            INITIALIZING, INCOMING_RINGING, OUTGOING_RINGING  -> enableOrDisableButtons(false, false, true, true, false, true)
+            CONNECTED ->  enableOrDisableButtons(true, true, true, true, true, true)
+            DISCONNECTED -> disableAllButtons()
         }
-        mActivity.button_onhold.activate(call.isOnHold)
+        mActivity.button_onhold.activate(call.state.isOnHold)
         mActivity.button_mute.activate(mActivity.isMuted)
         mActivity.button_dialpad.activate(false)
         mActivity.button_transfer.activate(false)
-        if (state == SipConstants.CALL_CONNECTED_MESSAGE || state == SipConstants.CALL_UNHOLD_ACTION) {
+        if (state == CONNECTED) {
             showCallDuration()
         } else {
             hideCallDuration()
@@ -72,14 +75,14 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) {
      *
      * @param state The current call state of the primary call
      */
-    private fun updateTransferButton(state: String) {
+    private fun updateTransferButton(state: SipCall.TelephonyState) {
         if (mActivity.sipServiceConnection.get().isTransferring()) {
             mActivity.call_status.text = mActivity.getString(R.string.call_on_hold, mActivity.initialCallDetail?.displayLabel ?: "")
             mActivity.call_status.visibility = View.VISIBLE
             mActivity.button_transfer.setImageResource(R.drawable.ic_call_merge)
             mActivity.transfer_label.setText(R.string.transfer_connect)
             if (mActivity.hasSecondCall()) {
-                if (state == SipConstants.CALL_CONNECTED_MESSAGE) {
+                if (state == CONNECTED) {
                     mActivity.button_transfer.enable()
                 } else {
                     mActivity.button_transfer.disable()
@@ -88,7 +91,7 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) {
         } else {
             mActivity.button_transfer.setImageResource(R.drawable.ic_call_transfer)
             mActivity.transfer_label.setText(R.string.transfer_label)
-            mActivity.button_transfer.enable(state == SipConstants.CALL_CONNECTED_MESSAGE)
+            mActivity.button_transfer.enable(state == CONNECTED)
             mActivity.call_status.visibility = View.INVISIBLE
         }
     }

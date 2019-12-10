@@ -21,10 +21,7 @@ import com.voipgrid.vialer.logging.LogHelper
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.logging.sip.SipLogHandler
 import com.voipgrid.vialer.middleware.MiddlewareHelper
-import com.voipgrid.vialer.notifications.call.AbstractCallNotification
-import com.voipgrid.vialer.notifications.call.ActiveCallNotification
-import com.voipgrid.vialer.notifications.call.DefaultCallNotification
-import com.voipgrid.vialer.notifications.call.IncomingCallNotification
+import com.voipgrid.vialer.sip.SipCall.TelephonyState.*
 import com.voipgrid.vialer.sip.core.Action
 import com.voipgrid.vialer.sip.core.CallStack
 import com.voipgrid.vialer.sip.core.SipActionHandler
@@ -40,6 +37,7 @@ import com.voipgrid.vialer.sip.utils.BusyTone
 import com.voipgrid.vialer.sip.utils.ScreenOffReceiver
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import org.koin.android.ext.android.inject
+import org.pjsip.pjsua2.AudioMedia
 import org.pjsip.pjsua2.CallOpParam
 import org.pjsip.pjsua2.OnIncomingCallParam
 import org.pjsip.pjsua2.pjsua_call_flag
@@ -175,19 +173,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
         androidCallManager.call(number)
     }
 
-    private fun makeCall(number: String) : SipCall {
-        val call = SipCall(this, pjsip.account).apply {
-            phoneNumber = number
-        }
-
-        if (call.startOutgoingCall(number)) {
-            this.calls.add(call)
-        } else {
-            throw Exception("Unable to create call")
-        }
-
-        return call
-    }
+    private fun makeCall(number: String) = SipCall(this, pjsip.account, number).also { this.calls.add(it) }
 
     /**
      * Start a transfer to the target number.
@@ -245,10 +231,11 @@ class SipService : Service(), CallStatusReceiver.Listener {
      * the service.
      * @param call
      */
-    fun removeCallFromList(call: SipCall) {
+    private fun removeCallFromList(call: SipCall) {
         calls.remove(call)
+        call.delete()
 
-        if (calls.isEmpty() || call.callIsTransferred) {
+        if (calls.isEmpty()) { //todo  || call.state.callIsTransferred
             stopSelf()
         }
     }
@@ -268,21 +255,31 @@ class SipService : Service(), CallStatusReceiver.Listener {
         }
     }
 
-    /**
-     * Called when a call has connected.
-     *
-     */
-    override fun onCallConnected() {
-        val call = calls.current ?: return
-
-        logger.i("Call has connected")
-        notification.change(ACTIVE)
-        silence()
-
-        when {
-            call.isOutgoing -> connection.setActive()
-            call.isIncoming -> startCallActivityForCurrentCall()
+    fun onTelephonyStateChange(call: SipCall, state: SipCall.TelephonyState): Unit = when(state) {
+        INITIALIZING -> TODO()
+        INCOMING_RINGING -> TODO()
+        OUTGOING_RINGING -> outgoingCallRinger.start()
+        CONNECTED -> {
+            outgoingCallRinger.stop()
+            silence()
+            notification.change(ACTIVE)
+            when {
+                call.isOutgoing -> connection.setActive()
+                call.isIncoming -> startCallActivityForCurrentCall()
+                else -> {}
+            }
         }
+        DISCONNECTED -> {
+            if (!isTransferring() && !call.state.wasUserHangup) {
+                busyTone.play()
+            }
+
+            removeCallFromList(call)
+        }
+    }.also {
+        localBroadcastManager.sendBroadcast(Intent(SipConstants.ACTION_BROADCAST_CALL_STATUS).apply {
+            putExtra(SipConstants.CALL_STATUS_KEY, state.name)
+        })
     }
 
     /**
@@ -298,7 +295,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
             return
         }
 
-        call.setupAsIncomingCall()
+        call.beginIncomingRinging()
 
         calls.add(call)
 
@@ -348,7 +345,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
 
         val call = calls.current ?: return
 
-        if (call.isIpChangeInProgress && call.currentCallState == SipConstants.CALL_INCOMING_RINGING) {
+        if (call.state.isIpChangeInProgress && call.state.telephonyState == INCOMING_RINGING) {
             try {
                 call.reinvite(CallOpParam().apply {
                     options = pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT.swigValue().toLong()
@@ -378,7 +375,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
     fun reinvite() {
         val call = calls.current ?: return
 
-        if (!call.isIpChangeInProgress) {
+        if (!call.state.isIpChangeInProgress) {
             try {
                 call.reinvite(CallOpParam(true))
             } catch (e: Exception) {
@@ -424,6 +421,26 @@ class SipService : Service(), CallStatusReceiver.Listener {
 
     override fun onBind(intent: Intent): IBinder? {
         return mBinder
+    }
+
+    /**
+     * The call has let us know that its audio should be connected.
+     *
+     */
+    fun beginTransmittingAudio() {
+        outgoingCallRinger.stop()
+
+        val call = currentCall ?: throw Exception("Unable to begin trasnmitting audio with no call")
+        val endpoint = pjsip.endpoint ?: throw Exception("Unable to connect audio with no endpoint")
+
+        val media = AudioMedia.typecastFromMedia(call.getUsableAudio())
+        val audDevManager = endpoint.audDevManager()
+        media.startTransmit(audDevManager.playbackDevMedia)
+        audDevManager.captureDevMedia.startTransmit(media)
+    }
+
+    fun callWasMissed(sipCall: SipCall) {
+        logger.i("A call was missed...")
     }
 
     /**
