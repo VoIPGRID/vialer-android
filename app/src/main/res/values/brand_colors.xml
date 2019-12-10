@@ -18,4 +18,7 @@
     <!-- Internet connection warning bar colors -->
     <color name="dialer_warning_background">#B2B2B2</color>
     <color name="dialer_warning_text">@color/color_accent</color>
+
+    <!-- Rating stars -->
+    <color name="rating_star_background">#EEAE91</color>
 </resources>

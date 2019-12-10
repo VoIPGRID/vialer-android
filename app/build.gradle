@@ -230,6 +230,9 @@ dependencies {
     implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
     kapt "com.jakewharton:butterknife-compiler:${butterKnifeVersion}"
 
+    // App rating popup
+    implementation 'com.codemybrainsout.rating:ratingdialog:1.0.8'
+
     // Scytale -  Manage key generation
     implementation 'com.yakivmospan:scytale:1.0.1'
     implementation "com.github.nisrulz:easydeviceinfo-base:2.4.1"
