@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
@@ -19,15 +20,14 @@ import com.voipgrid.vialer.api.SecureCalling;
 import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.UserSynchronizer;
 import com.voipgrid.vialer.api.VoipgridApi;
-import com.voipgrid.vialer.api.models.InternalNumbers;
 import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.audio.AudioFocus;
 import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
+import com.voipgrid.vialer.call.incoming.alerts.IncomingCallScreenWake;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.callrecord.CachedContacts;
@@ -96,15 +96,6 @@ public class VialerModule {
 
     @Provides @Nullable PhoneAccount providePhoneAccount() {
         return User.getVoipAccount();
-    }
-
-    @Provides @Nullable InternalNumbers provideInternalNumbers() {
-        return User.internal.getInternalNumbers();
-    }
-
-    @Provides @Nullable
-    PhoneAccounts providePhoneAccounts() {
-        return User.internal.getPhoneAccounts();
     }
 
     @Provides LocalBroadcastManager provideLocalBroadcastManager(Context context) {
@@ -222,8 +213,20 @@ public class VialerModule {
 
     @Singleton
     @Provides
-    IncomingCallAlerts incomingCallAlerts(IncomingCallVibration vibration, IncomingCallRinger ringer) {
-        return new IncomingCallAlerts(vibration, ringer);
+    IncomingCallAlerts incomingCallAlerts(IncomingCallVibration vibration, IncomingCallRinger ringer, IncomingCallScreenWake incomingCallScreenWake) {
+        return new IncomingCallAlerts(vibration, ringer, incomingCallScreenWake);
+    }
+
+    @Singleton
+    @Provides
+    IncomingCallScreenWake provideIncomingCallScreenWake(PowerManager pm) {
+        return new IncomingCallScreenWake(pm);
+    }
+
+    @Singleton
+    @Provides
+    PowerManager providePowerManager(Context context) {
+        return (PowerManager) context.getSystemService(Context.POWER_SERVICE);
     }
 
     @Singleton
@@ -255,8 +258,8 @@ public class VialerModule {
     }
 
     @Provides
-    Logout provideLogout(Context context, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper) {
-        return new Logout(context, sharedPreferences, connectivityHelper);
+    Logout provideLogout(Context context, SharedPreferences sharedPreferences, ConnectivityHelper connectivityHelper, CallRecordDao database) {
+        return new Logout(context, sharedPreferences, connectivityHelper, database);
     }
 
     @Provides

@@ -230,6 +230,7 @@
     <string name="notification_channel_voip_disabled">Je VoIP account is geregistreerd op een ander
         apparaat. Je kunt VoIP weer activeren bij instellingen
     </string>
+    <string name="notification_channel_encryption_disabled">Encryptie uitgeschakeld</string>
     <string name="audio_source_option_bluetooth">Bluetooth</string>
     <string name="audio_source_option_speaker">Luidspreker</string>
     <string name="pending_call_description">Bellen</string>
@@ -269,7 +270,6 @@
         ingeschakeld. Anderen kunnen mogelijk jouw gesprekken opvangen en meeluisteren.
     </string>
     <string name="call_icon">Bel icoon</string>
-    <string name="exclamation_mark">!</string>
     <string name="help_icon">Help icoon</string>
     <string name="password_reset_hint_2">Bevestig wachtwoord</string>
     <string name="call_records_default_title">Geen gespreksdetails gevonden</string>
@@ -304,11 +304,15 @@
     <string name="password_reset_title">Wachtwoord reset</string>
     <string name="password_reset_subtitle">Verplicht</string>
     <string name="password_reset_description_top">Je zult een nieuw wachtwoord moeten aanmaken voordat er opnieuw ingelogd kan worden.</string>
-    <string name="password_reset_description_bottom">Je wachtwoord moet uit minimaal 6 karakters bestaan en bevalt minimaal 1 niet-alfabetisch karakter.</string>
+    <string name="password_reset_description_bottom">Je wachtwoord moet uit minimaal 6 karakters bestaan en bevat minimaal 1 niet-alfabetisch karakter.</string>
     <string name="password_reset_hint">Wachtwoord</string>
     <string name="t9_search_numbers">%d nummers</string>
     <string name="use_phones_ringtone_switch_description">Indien ingeschakeld wordt de ringtone welke nu op het toestel staat ingesteld verkozen boven de %1$s ringtone.</string>
     <string name="missed_call">Oproep gemist (%1$s).</string>
     <string name="answered_elsewhere">Oproep (%1$s) elders opgenomen.</string>
     <string name="call_back">Bel terug</string>
+    <string name="start_call">Bel</string>
+    <string name="add_to_contacts">Voeg to aan contacten</string>
+    <string name="copy_number">Kopieer nummer</string>
+    <string name="number_copied">Nummer gekopieerd: %1$s</string>
 </resources>

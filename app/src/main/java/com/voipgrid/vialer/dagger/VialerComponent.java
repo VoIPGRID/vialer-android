@@ -8,8 +8,6 @@ import com.voipgrid.vialer.NavigationDrawerActivity;
 import com.voipgrid.vialer.SettingsActivity;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.CallRecord;
-import com.voipgrid.vialer.api.models.InternalNumbers;
-import com.voipgrid.vialer.api.models.PhoneAccounts;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.IncomingCallActivity;
@@ -17,15 +15,16 @@ import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
 import com.voipgrid.vialer.callrecord.CallRecordViewHolder;
+import com.voipgrid.vialer.callrecord.CallRecordViewModel;
 import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.dialer.NumberInputView;
 import com.voipgrid.vialer.logging.VialerBaseActivity;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.onboarding.OnboardingActivity;
+import com.voipgrid.vialer.onboarding.steps.AccountConfigurationStep;
 import com.voipgrid.vialer.onboarding.steps.LoginStep;
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
-import com.voipgrid.vialer.onboarding.steps.AccountConfigurationStep;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.t9.T9Fragment;
@@ -33,9 +32,10 @@ import com.voipgrid.vialer.t9.T9HelperFragment;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.inject.Singleton;
 
-import androidx.annotation.Nullable;
 import dagger.Component;
 
 @Singleton
@@ -58,12 +58,6 @@ public interface VialerComponent {
     void inject(NetworkConnectivity networkConnectivity);
 
     void inject(CallRecord callRecord);
-
-    @Nullable
-    InternalNumbers getInternalNumbers();
-
-    @Nullable
-    PhoneAccounts getPhoneAccounts();
 
     SystemUser getSystemUser();
 
@@ -105,4 +99,6 @@ public interface VialerComponent {
     void inject(DialerActivity dialerActivity);
 
     Logout provideLogout();
+
+    void inject(@NotNull final CallRecordViewModel callRecordViewModel);
 }

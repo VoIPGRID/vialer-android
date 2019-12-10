@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.random.Random
 
 class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRecordsInserter, api: VoipgridApi) : CallRecordsImporter(fetcher, inserter, api) {
 
@@ -88,19 +89,25 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
         /**
          * After each month we will wait a bit to prevent issues with rate limiting.
          */
-        const val DELAY_BETWEEN_EACH_MONTH : Long = 10 * 1000
+        val DELAY_BETWEEN_EACH_MONTH : Long = Random.nextInt(10 * 60, 60 * 60).toLong() * 1000
 
         /**
          * If we ever hit a rate limit, we will wait this long before continuing.
          */
-        const val DELAY_IF_RATE_LIMIT_IS_HIT : Long = 5 * 60 * 1000
+        const val DELAY_IF_RATE_LIMIT_IS_HIT : Long = 15 * 60 * 1000
 
         /**
          * The earliest date that will be imported, we will not try and find call records before
          * this date.
          *
          */
-         val EARLIEST_DATE = DateTime(2015, 1, 1, 0, 0)
+         val EARLIEST_DATE: DateTime = DateTime()
+                .minusMonths(12)
+                .withDayOfMonth(1)
+                .withHourOfDay(0)
+                .withMinuteOfHour(0)
+                .withSecondOfMinute(0)
+                .withMillisOfSecond(0)
 
         /**
          * We will always query all call records from this many months ago.
@@ -131,6 +138,7 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
             private val oneTime = OneTimeWorkRequestBuilder<Worker>()
                     .setConstraints(constraints)
                     .setBackoffCriteria(BackoffPolicy.LINEAR, OneTimeWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                    .setInitialDelay(1, TimeUnit.HOURS)
                     .build()
 
             private val periodic = PeriodicWorkRequestBuilder<Worker>(3, TimeUnit.HOURS)

@@ -1,14 +1,15 @@
 package com.voipgrid.vialer
 
 import android.app.Application
+import androidx.room.Room
+import com.voipgrid.vialer.callrecord.database.MIGRATION_2_3
 import com.voipgrid.vialer.dagger.DaggerVialerComponent
 import com.voipgrid.vialer.dagger.VialerComponent
 import com.voipgrid.vialer.dagger.VialerModule
+import com.voipgrid.vialer.database.AppDatabase
 import com.voipgrid.vialer.tasks.launch.ConvertApiToken
 import com.voipgrid.vialer.tasks.launch.RegisterLibraries
 import com.voipgrid.vialer.tasks.launch.RegisterPeriodicTasks
-import com.voipgrid.vialer.database.AppDatabase
-import androidx.room.Room
 
 class VialerApplication : Application() {
 
@@ -62,7 +63,7 @@ class VialerApplication : Application() {
 
         @JvmStatic
         val db : AppDatabase by lazy {
-            Room.databaseBuilder(instance, AppDatabase::class.java, VialerApplication::class.java.name).build()
+            Room.databaseBuilder(instance, AppDatabase::class.java, VialerApplication::class.java.name).addMigrations(MIGRATION_2_3).build()
         }
 
         @JvmStatic

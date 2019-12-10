@@ -1,14 +1,12 @@
 package com.voipgrid.vialer.callrecord.database
 
 import android.database.sqlite.SQLiteConstraintException
-import android.util.Log
 import com.voipgrid.vialer.api.models.CallRecord
+import com.voipgrid.vialer.api.models.CallRecord.DIRECTION_OUTBOUND
 import com.voipgrid.vialer.callrecord.importing.CallRecordsImporter
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
-import org.joda.time.LocalDateTime
 import org.joda.time.format.DateTimeFormat
-import java.text.SimpleDateFormat
 
 class CallRecordsInserter(private val db: CallRecordDao) {
 
@@ -38,7 +36,7 @@ class CallRecordsInserter(private val db: CallRecordDao) {
         CallRecordEntity(
                 record.id,
                 convertCallTime(record.callDate),
-                CallRecordEntity.DIRECTION.INBOUND,
+                if (DIRECTION_OUTBOUND == record.direction) CallRecordEntity.DIRECTION.OUTBOUND else CallRecordEntity.DIRECTION.INBOUND,
                 record.duration,
                 record.firstPartyNumber,
                 record.thirdPartyNumber,
@@ -56,7 +54,7 @@ class CallRecordsInserter(private val db: CallRecordDao) {
      *
      */
     private fun convertCallTime(callDate: String): Long =
-        DateTime.parse(callDate, DateTimeFormat.forPattern(CallRecordEntity.DATE_PATERRN))
+        DateTime.parse(callDate, DateTimeFormat.forPattern(CallRecordEntity.DATE_PATTERN))
                 .withZoneRetainFields(CallRecordsImporter.TIMEZONE)
                 .toDateTime()
                 .withZone(DateTimeZone.UTC)

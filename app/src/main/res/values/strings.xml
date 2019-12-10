@@ -273,6 +273,7 @@
     <string name="t9helper_joining_character" translatable="false">+</string>
     <string name="t9_search_numbers">%d numbers</string>
     <string name="notification_channel_voip_disabled">Your VoIP account has been registered on another device. You can re-enable VoIP in Settings</string>
+    <string name="notification_channel_encryption_disabled">Encryption Disabled</string>
     <string name="pending_call_description">Setting up call with</string>
     <string name="pending_call_status">Establishing VoIP connection…</string>
     <string name="network_call_message">Call interrupted with</string>
@@ -302,9 +303,15 @@
     <string name="encrypted_calling_notification_title">Encrypted Calling is not enabled</string>
     <string name="encrypted_calling_notification_description">Encrypted calling is not currently enabled, third parties may be able to intercept and listen to your phone calls.</string>
     <string name="call_icon">Call icon</string>
-    <string name="exclamation_mark">!</string>
     <string name="help_icon">Help icon</string>
+
+    <string name="exclamation_mark" translatable="false">!</string>
+
     <string name="missed_call">Call missed (%1$s).</string>
     <string name="answered_elsewhere">Call (%1$s) answered elsewhere.</string>
     <string name="call_back">Call back</string>
+    <string name="start_call">Start call</string>
+    <string name="add_to_contacts">Add to contacts</string>
+    <string name="copy_number">Copy number</string>
+    <string name="number_copied">Number has been copied: %1$s</string>
 </resources>

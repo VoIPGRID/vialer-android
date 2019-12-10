@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.voipgrid.vialer.util.PhoneNumberUtils
-import java.util.*
 
 @Entity(tableName = "call_records")
 data class CallRecordEntity (
@@ -26,7 +25,7 @@ data class CallRecordEntity (
     }
 
     companion object {
-        const val DATE_PATERRN = "yyyy-MM-dd'T'HH:mm:ss"
+        const val DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss"
     }
 
 

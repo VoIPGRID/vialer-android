@@ -249,6 +249,20 @@ public class NumberInputView extends RelativeLayout implements
         inputText.insert(startCursorPosition, text);
     }
 
+    /**
+     * Replace last character of where the selection is with the given text.
+     * @param text The text to replace the last character with.
+     */
+    public void replaceLast(CharSequence text) {
+        final Editable inputText = mNumberInputEditText.getText();
+        final int startCursorPosition = mNumberInputEditText.getSelectionStart();
+        final int beforeStartCursorPosition = startCursorPosition - 1;
+
+        removeTextFromInput(beforeStartCursorPosition, startCursorPosition);
+
+        inputText.insert(beforeStartCursorPosition, text);
+    }
+
     private void removeTextFromInput(Integer startCursorPosition, Integer endCursorPosition) {
         // If there is a selection active delete the selected text.
         if ((endCursorPosition - startCursorPosition) > 0) {

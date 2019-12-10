@@ -1,14 +1,14 @@
 package com.voipgrid.vialer.api;
 
-import com.voipgrid.vialer.api.models.AutoLoginToken;
-import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.ApiTokenRequest;
 import com.voipgrid.vialer.api.models.ApiTokenResponse;
-import com.voipgrid.vialer.api.models.TwoStepCallStatus;
+import com.voipgrid.vialer.api.models.AutoLoginToken;
+import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.MobileNumber;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
+import com.voipgrid.vialer.api.models.TwoStepCallStatus;
 import com.voipgrid.vialer.api.models.UpdateVoIPAccountParameters;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.api.models.VoipGridResponse;
@@ -71,7 +71,7 @@ public interface VoipgridApi {
             @Query("call_date__lt") String to);
 
     @GET("api/userdestination/")
-    Call<VoipGridResponse<UserDestination>> getUserDestination();
+    Call<VoipGridResponse<UserDestination>> fetchDestinations();
 
     @PUT("api/selecteduserdestination/{id}/")
     Call<Object> setSelectedUserDestination(@Path("id") String id,

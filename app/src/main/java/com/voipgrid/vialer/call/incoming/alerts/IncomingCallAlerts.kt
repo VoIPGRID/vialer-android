@@ -1,8 +1,8 @@
 package com.voipgrid.vialer.call.incoming.alerts
 
-class IncomingCallAlerts(vibration: IncomingCallVibration, ringer: IncomingCallRinger) : IncomingCallAlert {
+class IncomingCallAlerts(vibration: IncomingCallVibration, ringer: IncomingCallRinger, wake: IncomingCallScreenWake) : IncomingCallAlert {
 
-    val alerts = listOf(vibration, ringer)
+    val alerts = listOf(vibration, ringer, wake)
 
     override fun start() {
         alerts.forEach {

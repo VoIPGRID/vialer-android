@@ -130,25 +130,19 @@ abstract class AbstractCallNotification : AbstractNotification() {
      * Transform the call notification to an incoming call notification.
      *
      */
-    fun incoming(number: String, callerId: String) {
-        IncomingCallNotification(number, callerId).display()
-    }
+    fun incoming(number: String, callerId: String) : AbstractCallNotification = IncomingCallNotification(number, callerId)
 
     /**
      * Transform the call notification to an ongoing call notification.
      *
      */
-    fun outgoing(call : SipCall) {
-        OutgoingCallDiallingNotification(call).display()
-    }
+    fun outgoing(call : SipCall) : AbstractCallNotification = OutgoingCallDiallingNotification(call)
 
     /**
      * Transform the call notification to an active call notification.
      *
      */
-    fun active(call : SipCall) {
-        ActiveCallNotification(call).display()
-    }
+    fun active(call : SipCall) : AbstractCallNotification = ActiveCallNotification(call)
 
     fun missed(number: String, contactName: String?) {
         MissedCallNotification(number, contactName).display()
