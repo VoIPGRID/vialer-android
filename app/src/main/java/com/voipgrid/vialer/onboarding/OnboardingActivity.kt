@@ -26,6 +26,7 @@ class OnboardingActivity : Onboarder() {
         WelcomeStep()
     )
 
+
     private val currentStep : Step
         get() = adapter.getStep(viewPager.currentItem)
 
@@ -50,7 +51,7 @@ class OnboardingActivity : Onboarder() {
             return
         }
 
-        if (currentStep != callerStep) {
+        if (currentStep isNotSameAs callerStep) {
             logger.i("Caller step (${callerStep::class.java.simpleName}) does not match current step (${currentStep::class.java.simpleName}) so not progressing")
             return
         }
@@ -68,10 +69,10 @@ class OnboardingActivity : Onboarder() {
     private fun progressViewPager(callerStep: Step) = runOnUiThread {
         hideKeyboard()
 
-        val currentPosition = adapter.findCurrentStep(callerStep)
+        val currentPosition = adapter.indexOfStep(callerStep)
 
         for (i in (currentPosition + 1) until adapter.itemCount) {
-            if (adapter.getStep(i).shouldThisStepBeSkipped(state)) {
+            if (adapter.getStep(i).shouldSkip(state)) {
                 continue
             }
 
@@ -96,9 +97,7 @@ class OnboardingActivity : Onboarder() {
         finish()
     }
 
-    private fun isLastItem(): Boolean {
-        return viewPager.currentItem == (adapter.itemCount - 1)
-    }
+    private fun isLastItem() = viewPager.currentItem == (adapter.itemCount - 1)
 
     override fun onBackPressed() {
         logger.i("Back pressed, restarting onboarding")
