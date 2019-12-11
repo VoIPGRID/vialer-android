@@ -6,6 +6,7 @@ import static com.voipgrid.vialer.persistence.Middleware.RegistrationStatus.UNRE
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.voipgrid.vialer.User;
@@ -156,12 +157,16 @@ public class MiddlewareHelper {
             public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (!response.isSuccessful()) {
                     logger.w("Unsuccessful response to middleware: " + response.code());
+                    Log.e("TEST123", "MIddleware failed... " + response.code());
+                } else {
+                    Log.e("TEST123", "Responded to middleware!");
                 }
             }
 
             @Override
             public void onFailure(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Throwable t) {
                 logger.w("Failed sending response to middleware");
+                Log.e("TEST123", "Middleware failed...");
             }
         });
 

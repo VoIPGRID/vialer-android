@@ -16,9 +16,6 @@ class SipServiceNotificationManager(private val sipService: SipService) {
     var notification: AbstractCallNotification = DefaultCallNotification()
         private set
 
-    val active: AbstractCallNotification
-        get() = notification
-
     /**
      * Updates the notification and sets the active notification appropriately. All notification changes should be published
      * via this method.

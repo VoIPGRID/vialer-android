@@ -120,9 +120,10 @@ class SipService : Service(), CallStatusReceiver.Listener {
             val action = Action.valueOf(intent.action ?: throw Exception("Unable to find action"))
 
 
-            startForeground(notification.active.notificationId, notification.active.build())
+            startForeground(notification.notification.notificationId, notification.notification.build())
+
             if (sipActionHandler.isForegroundAction(action)) {
-//                startForeground(notification.active.notificationId, notification.active.build())
+                Log.e("TEST123", "Is foreground action")
                 sipServiceActive = true
                 pjsip.init(this)
                 ipSwitchMonitor.init(this, pjsip.endpoint)
@@ -256,8 +257,8 @@ class SipService : Service(), CallStatusReceiver.Listener {
     }
 
     fun onTelephonyStateChange(call: SipCall, state: SipCall.TelephonyState): Unit = when(state) {
-        INITIALIZING -> TODO()
-        INCOMING_RINGING -> TODO()
+        INITIALIZING -> {}
+        INCOMING_RINGING -> {}
         OUTGOING_RINGING -> outgoingCallRinger.start()
         CONNECTED -> {
             outgoingCallRinger.stop()
@@ -287,6 +288,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
      *
      */
     fun onIncomingCall(incomingCallParam: OnIncomingCallParam, account: SipAccount) {
+        Log.e("TEST123", "SIP has an incoming call!")
         val call = SipCall(this, account, incomingCallParam.callId, SipInvite(incomingCallParam.rdata.wholeMsg))
 
         if (currentCall != null || nativeCallManager.isBusyWithNativeCall) {
@@ -294,7 +296,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
             call.busy()
             return
         }
-
+Log.e("TEST123", "Starting ringing...")
         call.beginIncomingRinging()
 
         calls.add(call)
@@ -342,14 +344,12 @@ class SipService : Service(), CallStatusReceiver.Listener {
     fun onRegister() {
         logger.d("onAccountRegistered")
         respondToMiddleware()
-
+Log.e("TEST123", "Registered!")
         val call = calls.current ?: return
 
         if (call.state.isIpChangeInProgress && call.state.telephonyState == INCOMING_RINGING) {
             try {
-                call.reinvite(CallOpParam().apply {
-                    options = pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT.swigValue().toLong()
-                })
+                call.reinvite(updateContact = true)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -377,7 +377,7 @@ class SipService : Service(), CallStatusReceiver.Listener {
 
         if (!call.state.isIpChangeInProgress) {
             try {
-                call.reinvite(CallOpParam(true))
+                call.reinvite()
             } catch (e: Exception) {
                 logger.e("Unable to reinvite call")
             }

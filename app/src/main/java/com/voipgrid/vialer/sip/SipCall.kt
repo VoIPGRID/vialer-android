@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.sip
 
+import android.util.Log
 import com.voipgrid.vialer.VialerApplication.Companion.get
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.sip.SipInvite.CallerInformationHeader
@@ -175,13 +176,13 @@ class SipCall : Call {
             pjsip_inv_state.PJSIP_INV_STATE_NULL -> TelephonyState.INITIALIZING
             pjsip_inv_state.PJSIP_INV_STATE_CALLING -> TelephonyState.OUTGOING_RINGING
             pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> TelephonyState.INCOMING_RINGING
-            pjsip_inv_state.PJSIP_INV_STATE_EARLY -> TelephonyState.CONNECTED
+            pjsip_inv_state.PJSIP_INV_STATE_EARLY -> TelephonyState.INCOMING_RINGING
             pjsip_inv_state.PJSIP_INV_STATE_CONNECTING -> TelephonyState.CONNECTED
             pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED -> TelephonyState.CONNECTED
             pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> TelephonyState.DISCONNECTED
             else -> TelephonyState.INITIALIZING
         }
-
+Log.e("TEST123", "Changing to state ${state.telephonyState} - pjsip state= ${pjsipState}")
         sipService.onTelephonyStateChange(this, state.telephonyState)
     }
 
@@ -235,6 +236,17 @@ class SipCall : Call {
     }
 
     fun busy() = answerWithCode(pjsip_status_code.PJSIP_SC_BUSY_HERE)
+
+    fun reinvite(updateContact: Boolean = false) {
+        val callOpParam = when (updateContact) {
+            true -> CallOpParam().apply {
+                options = pjsua_call_flag.PJSUA_CALL_UPDATE_CONTACT.swigValue().toLong()
+            }
+            false -> CallOpParam(true)
+        }
+
+        super.reinvite(callOpParam)
+    }
 
     enum class Direction {
         OUTGOING, INCOMING
