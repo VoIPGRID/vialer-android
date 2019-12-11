@@ -318,4 +318,7 @@
     <string name="invalid_token">Invalid token</string>
     <string name="try_again_tfa">Try again or use your backup code</string>
     <string name="backup_code_button">Enter backup code</string>
+    <string name="contacts_menu_item_title">Contacts</string>
+    <string name="recent_plan_menu_item_title">Recent</string>
+    <string name="options_menu_item_title">Options</string>
 </resources>
