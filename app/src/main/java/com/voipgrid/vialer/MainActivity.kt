@@ -1,23 +1,16 @@
 package com.voipgrid.vialer
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.tabs.TabLayout
 import com.voipgrid.vialer.api.UserSynchronizer
-import com.voipgrid.vialer.callrecord.CallRecordViewModel
 import com.voipgrid.vialer.callrecord.CallRecordsFragment
-import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.options.OptionsFragment
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.LoginRequiredActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_call_records.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
