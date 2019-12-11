@@ -112,8 +112,8 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
                     "NavigationDrawerActivity must have a valid resource ID to a DrawerLayout");
         }
 
-        NavigationView navigationView = (NavigationView) mDrawerLayout.findViewById(R.id.navigation_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        //NavigationView navigationView = (NavigationView) mDrawerLayout.findViewById(R.id.navigation_view);
+        //navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle drawerToggle = new CustomActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar,
@@ -126,13 +126,13 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
         // ListView) and the header is added as one of those elements. This means it is not
         // instantly available to call findViewById() - a layout pass is
         // needed before it is attached to the NavigationView.
-        mNavigationHeaderView = navigationView.getHeaderView(0);
+        //mNavigationHeaderView = navigationView.getHeaderView(0);
 
         // Set the email address and phone number of the logged in user.
         setSystemUserInfo();
 
         // Set which version of the app the user is using.
-        setVersionInfo((TextView) mDrawerLayout.findViewById(R.id.text_view_version));
+        //setVersionInfo((TextView) mDrawerLayout.findViewById(R.id.text_view_version));
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);

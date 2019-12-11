@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.voipgrid.vialer.api.UserSynchronizer
-import com.voipgrid.vialer.callrecord.RecentCallsFragment
+import com.voipgrid.vialer.callrecord.CallRecordsFragment
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
@@ -88,7 +88,7 @@ class MainActivity : LoginRequiredActivity(),
     /**
      * Is called when a user selects a tab in the bottom navigation view. Will load the
      * corresponding fragment into the container.
-     * 
+     *
      */
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         val itemId = menuItem.itemId
@@ -99,8 +99,8 @@ class MainActivity : LoginRequiredActivity(),
         when (itemId) {
             // TODO: Implement
             // R.id.navigation_item_contacts ->
-            R.id.navigation_item_recent -> supportFragmentManager.beginTransaction().replace(R.id.container, RecentCallsFragment()).commit()
-            //R.id.navigation_item_options -> //startActivity(Intent(this, NavigationDrawerActivity::class.java))
+            R.id.navigation_item_recent -> supportFragmentManager.beginTransaction().replace(R.id.container, CallRecordsFragment()).commit()
+            //R.id.navigation_item_options -> supportFragmentManager.beginTransaction().replace(R.id.container, OptionsFragment()).commit() //startActivity(Intent(this, NavigationDrawerActivity::class.java))
         }
         return false
     }

@@ -37,7 +37,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class RecentCallsFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+class CallRecordsFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private val callRecordViewModel by lazy {
         activity?.run {
             ViewModelProviders.of(this)[CallRecordViewModel::class.java]
@@ -84,7 +84,7 @@ class RecentCallsFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        callRecordViewModel.calls.observe(this@RecentCallsFragment, Observer<PagedList<CallRecordEntity>> {
+        callRecordViewModel.calls.observe(this@CallRecordsFragment, Observer<PagedList<CallRecordEntity>> {
             adapter.submitList(it)
         })
     }
