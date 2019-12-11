@@ -185,6 +185,8 @@
 
         <activity android:name=".onboarding.steps.TwoFactorStep"
             android:theme="@style/OnboardingTheme"/>
+
+        <activity android:name=".NavigationDrawerActivity" />
     </application>
 
 </manifest>
