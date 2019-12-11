@@ -32,7 +32,6 @@ import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
-import com.voipgrid.vialer.persistence.Statistics;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -182,8 +181,6 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
             mConnected = false;
             finish();
         }
-
-        Statistics.INSTANCE.setNumberOfCalls(Statistics.INSTANCE.getNumberOfCalls() + 1);
     }
 
     @Override

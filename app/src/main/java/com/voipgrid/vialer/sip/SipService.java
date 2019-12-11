@@ -38,6 +38,7 @@ import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
 import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
 import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
+import com.voipgrid.vialer.persistence.Statistics;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -579,7 +580,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
 
     @Override
     public void onCallDisconnected() {
-
+        Statistics.INSTANCE.setNumberOfCalls(Statistics.INSTANCE.getNumberOfCalls() + 1);
     }
 
     @Override
