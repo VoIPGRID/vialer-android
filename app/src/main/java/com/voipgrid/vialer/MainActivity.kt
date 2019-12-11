@@ -1,32 +1,38 @@
 package com.voipgrid.vialer
 
-import android.app.AlertDialog
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.ConfigurationCompat
-import com.codemybrainsout.ratingdialog.RatingDialog
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayout
-import com.voipgrid.vialer.callrecord.CallRecordFragment
+import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.callrecord.CallRecordViewModel
+import com.voipgrid.vialer.callrecord.CallRecordsFragment
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.persistence.RatingPopup
-import com.voipgrid.vialer.persistence.Statistics
+import com.voipgrid.vialer.options.OptionsFragment
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
+import com.voipgrid.vialer.util.LoginRequiredActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_call_records.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 
-class MainActivity : NavigationDrawerActivity() {
+class MainActivity : LoginRequiredActivity(),
+        BottomNavigationView.OnNavigationItemSelectedListener {
 
     @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
+
+    @Inject lateinit var userSynchronizer: UserSynchronizer
+
+    private var connectivityListener: ConnectivityListener? = null
+
+    private var currentNav: Int = 0
 
     override val logger = Logger(this)
 
@@ -34,8 +40,7 @@ class MainActivity : NavigationDrawerActivity() {
         super.onCreate(savedInstanceState)
         VialerApplication.get().component().inject(this)
         setContentView(R.layout.activity_main)
-        setActionBar(R.id.action_bar)
-        setNavigationDrawer(R.id.drawer_layout)
+        bottom_nav.setOnNavigationItemSelectedListener(this)
 
         if (!userIsOnboarded()) {
             logger.i("User has not properly onboarded, logging them out")
@@ -44,10 +49,6 @@ class MainActivity : NavigationDrawerActivity() {
         }
 
         syncUser()
-
-        setupTabs()
-        floating_action_button.setOnClickListener { openDialer() }
-
         lifecycle.addObserver(RatingPopupListener(this))
     }
 
@@ -96,45 +97,42 @@ class MainActivity : NavigationDrawerActivity() {
     }
 
     /**
-     * Show the dialer view
+     * Is called when a user selects a tab in the bottom navigation view. Will load the
+     * corresponding fragment into the container.
+     *
      */
-    private fun openDialer() {
-        startActivity(
-                Intent(this, DialerActivity::class.java),
-                ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        this,
-                        floating_action_button,
-                        "floating_action_button_transition_name"
-                ).toBundle()
-        )
+    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+        val itemId = menuItem.itemId
+        if (currentNav == itemId) return false
+        menuItem.isChecked = true
+        currentNav = itemId
+
+        when (itemId) {
+            // TODO: Implement
+            // R.id.navigation_item_contacts ->
+            R.id.navigation_item_recent -> supportFragmentManager.beginTransaction().replace(R.id.container, CallRecordsFragment()).commit()
+            R.id.navigation_item_options -> supportFragmentManager.beginTransaction().replace(R.id.container, OptionsFragment()).commit()
+        }
+        return false
     }
 
-    private fun setupTabs() {
-        tab_layout.apply {
-            setTabTextColors(
-                    ContextCompat.getColor(this@MainActivity, R.color.tab_inactive),
-                    ContextCompat.getColor(this@MainActivity, R.color.tab_active)
-            )
-            addTab(tab_layout.newTab().setText(R.string.tab_title_missed))
-            addTab(tab_layout.newTab().setText(R.string.tab_title_recents))
-            setOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-                override fun onTabReselected(tab: TabLayout.Tab?) {
-                }
+    override fun onInternetConnectivityGained() {
+        connectivityListener?.onInternetConnectivityChanged()
+    }
 
-                override fun onTabUnselected(tab: TabLayout.Tab?) {
-                }
+    override fun onInternetConnectivityLost() {
+        connectivityListener?.onInternetConnectivityChanged()
+    }
 
-                override fun onTabSelected(tab: TabLayout.Tab?) {
-                    tab?.let {
-                        (call_record_fragment as CallRecordFragment).changeType(when(it.position) {
-                            0 -> CallRecordViewModel.Type.MISSED_CALLS
-                            1 -> CallRecordViewModel.Type.ALL_CALLS
-                            else -> CallRecordViewModel.Type.ALL_CALLS
-                        })
-                    }
+    /**
+     * Listener interface to listen to changes in connectivity.
+     *
+     */
+    interface ConnectivityListener {
+        fun onInternetConnectivityChanged()
+    }
 
-                }
-            })
-        }
+    fun setConnectivityListener(connectivityListener: ConnectivityListener) {
+        this.connectivityListener = connectivityListener
     }
 }
