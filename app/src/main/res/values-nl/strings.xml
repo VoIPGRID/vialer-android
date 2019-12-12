@@ -33,7 +33,8 @@
     <string name="version_info">Versie: %1$s</string>
     <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
 
-    <string name="rating_popup_title">Vertel ons wat je tot nu toe van Vialer vindt!</string>
+    <!-- Rating popup -->
+    <string name="rating_popup_title">Vertel ons wat je tot nu toe van %1$s vindt!</string>
     <string name="rating_popup_ignore_button">Niet nu</string>
 
     <string name="rating_popup_feedback_title">Bedankt voor je beoordeling!</string>

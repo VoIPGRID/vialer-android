@@ -37,7 +37,7 @@
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
 
     <!-- Rating popup -->
-    <string name="rating_popup_title">Please rate your experience with Vialer so far!</string>
+    <string name="rating_popup_title">Please rate your experience with %1$s so far!</string>
     <string name="rating_popup_ignore_button">Not now</string>
 
     <string name="rating_popup_feedback_title">Thanks for your input!</string>

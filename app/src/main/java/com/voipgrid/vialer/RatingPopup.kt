@@ -42,7 +42,10 @@ class RatingPopupListener(val context: Context) : LifecycleObserver {
 
         val dialog = RatingDialog.Builder(context)
                 .threshold(3f)
-                .title(context.getString(R.string.rating_popup_title))
+                .title(context.getString(
+                    R.string.rating_popup_title,
+                    context.getString(R.string.app_name)
+                ))
                 .positiveButtonText(
                         context.getString(R.string.rating_popup_ignore_button).toUpperCase(locale)
                 )
