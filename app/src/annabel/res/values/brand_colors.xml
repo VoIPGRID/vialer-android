@@ -13,4 +13,6 @@
 
     <color name="dialer_warning_background">#B2B2B2</color>
     <color name="dialer_warning_text">#7765a9</color>
+
+    <color name="rating_star_background">#B6ADD1</color>
 </resources>
