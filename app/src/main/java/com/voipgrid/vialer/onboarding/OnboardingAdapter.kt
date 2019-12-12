@@ -8,7 +8,7 @@ import com.voipgrid.vialer.onboarding.core.Step
 class OnboardingAdapter(
         fragmentManager: FragmentManager,
         lifecycle: Lifecycle,
-        vararg val steps: Step
+        val steps: List<Step>
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
 
     override fun getItemCount(): Int = steps.size

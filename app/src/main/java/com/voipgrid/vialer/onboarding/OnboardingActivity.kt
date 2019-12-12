@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.activity_onboarding.*
 
 class OnboardingActivity : Onboarder() {
 
-    private val adapter = OnboardingAdapter(supportFragmentManager, lifecycle,
+    private val adapter = OnboardingAdapter(supportFragmentManager, lifecycle, listOf(
         LogoStep(),
         LoginStep(),
         AccountConfigurationStep(),
@@ -24,7 +24,7 @@ class OnboardingActivity : Onboarder() {
         MicrophonePermissionStep(),
         OptimizationWhitelistStep(),
         WelcomeStep()
-    )
+    ))
 
 
     private val currentStep : Step
