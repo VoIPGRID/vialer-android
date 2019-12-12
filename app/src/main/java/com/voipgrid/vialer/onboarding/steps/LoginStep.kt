@@ -68,6 +68,8 @@ class LoginStep : Step() {
         User.internal.hasCompletedOnBoarding = false
     }
 
+    override fun isSameAs(step: Step?) = step is LoginStep
+
     /**
      * If this activity has been started with an intent containing credentials, log in with them automatically.
      *

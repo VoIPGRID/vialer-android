@@ -35,18 +35,7 @@ abstract class Step: Fragment() {
      * to be shown.
      *
      */
-    open fun shouldThisStepBeSkipped(state: OnboardingState): Boolean {
-        return false
-    }
-
-    /**
-     * Return TRUE if this step should be skipped completely and never added
-     * to the onboarder.
-     *
-     */
-    open fun shouldThisStepBeAddedToOnboarding(): Boolean {
-        return true
-    }
+    open fun shouldSkip(state: OnboardingState) = false
 
     /**
      * Display an alert message.
@@ -70,4 +59,8 @@ abstract class Step: Fragment() {
         onboarding?.isLoading = false
         alert(title, description)
     }
+
+    open infix fun isSameAs(step: Step?) = this == step
+
+    infix fun isNotSameAs(step: Step?) = !isSameAs(step)
 }

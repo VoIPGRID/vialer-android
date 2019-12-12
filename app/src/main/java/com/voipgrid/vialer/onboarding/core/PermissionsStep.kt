@@ -59,11 +59,5 @@ abstract class PermissionsStep : Step() {
         return PermissionChecker.checkSelfPermission(VialerApplication.get(), permission) == PermissionChecker.PERMISSION_GRANTED
     }
 
-    override fun shouldThisStepBeAddedToOnboarding(): Boolean {
-        return !alreadyHasPermission()
-    }
-
-    override fun shouldThisStepBeSkipped(state: OnboardingState): Boolean {
-        return alreadyHasPermission()
-    }
+    override fun shouldSkip(state: OnboardingState) = alreadyHasPermission()
 }

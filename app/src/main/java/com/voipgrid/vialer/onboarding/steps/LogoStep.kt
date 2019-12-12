@@ -2,6 +2,7 @@ package com.voipgrid.vialer.onboarding.steps
 
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.onboarding.core.AutoContinuingStep
+import com.voipgrid.vialer.onboarding.core.OnboardingState
 
 class LogoStep : AutoContinuingStep() {
     override val delay: Int
@@ -11,12 +12,10 @@ class LogoStep : AutoContinuingStep() {
 
     override fun onResume() {
         super.onResume()
-        hasDisplayedLogoAlready = true
+        shown = true
     }
 
-    override fun shouldThisStepBeAddedToOnboarding(): Boolean {
-        return !hasDisplayedLogoAlready
-    }
+    override fun shouldSkip(state: OnboardingState) = !shown
 
     companion object {
 
@@ -25,6 +24,6 @@ class LogoStep : AutoContinuingStep() {
          * not every time onboarding is restarted.
          *
          */
-        var hasDisplayedLogoAlready = false
+        var shown = false
     }
 }
