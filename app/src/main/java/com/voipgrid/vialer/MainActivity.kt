@@ -1,20 +1,27 @@
 package com.voipgrid.vialer
 
+import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.os.ConfigurationCompat
+import com.codemybrainsout.ratingdialog.RatingDialog
 import com.google.android.material.tabs.TabLayout
 import com.voipgrid.vialer.callrecord.CallRecordFragment
 import com.voipgrid.vialer.callrecord.CallRecordViewModel
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.persistence.RatingPopup
+import com.voipgrid.vialer.persistence.Statistics
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {
@@ -40,6 +47,8 @@ class MainActivity : NavigationDrawerActivity() {
 
         setupTabs()
         floating_action_button.setOnClickListener { openDialer() }
+
+        lifecycle.addObserver(RatingPopupListener(this))
     }
 
     override fun onResume() {

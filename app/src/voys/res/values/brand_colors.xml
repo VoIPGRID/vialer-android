@@ -13,4 +13,7 @@
 
     <color name="dialer_warning_background">#C22424</color>
     <color name="dialer_warning_text">@color/color_accent</color>
+
+    <!-- Rating stars -->
+    <color name="rating_star_background">#A0A9DE</color>
 </resources>

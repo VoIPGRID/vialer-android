@@ -36,6 +36,19 @@
     <string name="version_info">Version: %s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
 
+    <!-- Rating popup -->
+    <string name="rating_popup_title">Please rate your experience with %1$s so far!</string>
+    <string name="rating_popup_ignore_button">Not now</string>
+
+    <string name="rating_popup_feedback_title">Thanks for your input!</string>
+    <string name="rating_popup_feedback_hint">What could we do to make it a 5-star app for you?</string>
+    <string name="rating_popup_feedback_submit_button">Submit</string>
+
+    <string name="rating_popup_post_feedback_title">Your feedback will be a great help in improving our product</string>
+    <string name="rating_popup_post_feedback_message">Watch for future updates to see improvements, or you can submit a public review in the Google Play Store.</string>
+    <string name="rating_popup_post_feedback_done">Done</string>
+    <string name="rating_popup_post_feedback_write_review">Write review</string>
+
     <!-- UpdateHelper -->
     <string name="title_activity_update">Updating</string>
     <string name="update_spinner_title">Initializing</string>
