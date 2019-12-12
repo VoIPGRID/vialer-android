@@ -6,11 +6,11 @@ import static com.voipgrid.vialer.sip.SipConstants.CALL_INVALID_STATE;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_PUT_ON_HOLD_ACTION;
 import static com.voipgrid.vialer.sip.SipConstants.CALL_UNHOLD_ACTION;
 
-import android.util.Log;
 import android.view.View;
 
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.contacts.Contacts;
+import com.voipgrid.vialer.sip.CallDisconnectedReason;
 import com.voipgrid.vialer.sip.SipCall;
 
 /**
@@ -82,6 +82,21 @@ public class CallPresenter {
         }
 
         updateAudioSourceButton();
+    }
+
+    void showDisconnectedReason(CallDisconnectedReason reason) {
+        String status = null;
+        // Should become a switch when more reasons are added
+        if (reason == CallDisconnectedReason.NUMBER_NOT_FOUND) {
+            status = mActivity.getString(R.string.call_disconnected_reason_not_found);
+        }
+
+        if (status != null) {
+            mActivity.mCallStatusTv.setText(status);
+            mActivity.mCallStatusTv.setVisibility(View.VISIBLE);
+        } else {
+            mActivity.mCallStatusTv.setVisibility(View.INVISIBLE);
+        }
     }
 
     /**

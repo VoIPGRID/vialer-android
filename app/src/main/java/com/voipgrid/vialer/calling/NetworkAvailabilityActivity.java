@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.sip.CallDisconnectedReason;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.NetworkUtil;
@@ -117,7 +118,7 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
     }
 
     @Override
-    public void onCallDisconnected() {
+    public void onCallDisconnected(CallDisconnectedReason reason) {
 
     }
 

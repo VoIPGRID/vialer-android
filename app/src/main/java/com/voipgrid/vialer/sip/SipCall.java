@@ -579,7 +579,11 @@ public class SipCall extends org.pjsip.pjsua2.Call {
         mCallIsConnected = false;
         mSipService.removeCallFromList(this);
         mCurrentCallState = SipConstants.CALL_DISCONNECTED_MESSAGE;
-        mSipBroadcaster.broadcastCallStatus(getIdentifier(), SipConstants.CALL_DISCONNECTED_MESSAGE);
+        mSipBroadcaster.broadcastCallStatus(
+            getIdentifier(),
+            SipConstants.CALL_DISCONNECTED_MESSAGE,
+            mLastCallInfo.getLastStatusCode()
+        );
         new CallCompletionStatsDispatcher().callDidComplete(this);
 
         // Play end of call beep only when the remote party hangs up and the call was connected.

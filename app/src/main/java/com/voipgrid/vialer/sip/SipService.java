@@ -579,7 +579,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     }
 
     @Override
-    public void onCallDisconnected() {
+    public void onCallDisconnected(CallDisconnectedReason reason) {
         Statistics.INSTANCE.setNumberOfCalls(Statistics.INSTANCE.getNumberOfCalls() + 1);
     }
 

@@ -64,12 +64,17 @@ public interface SipConstants {
     String CALL_PUT_ON_HOLD_ACTION = "PUT_ON_HOLD";
 
     /**
-     * Key used to broadcast current SIPCall status management to CalActivity to update view.
+     * Key used to broadcast current SIPCall status management to CallActivity to update view.
      */
     String CALL_STATUS_KEY = "call_status";
 
     /**
-     * Key used to broadcast current SIPCall status management to CalActivity to update view.
+     * Key used to broadcast current SIPCall status code to CallActivity to update view.
+     */
+    String CALL_STATUS_CODE = "call_status_code";
+
+    /**
+     * Key used to broadcast current SIPCall status management to CallActivity to update view.
      */
     String CALL_IDENTIFIER_KEY = "call_identifier";
 
