@@ -12,9 +12,9 @@ import org.pjsip.pjsua2.*
 
 sealed class SipCall : Call {
 
-    val thirdParty: CallerInformationHeader
-    val state = State()
     protected abstract val logger: Logger
+    private val thirdParty: CallerInformationHeader
+    val state = State()
     private val listener: CallListener
     private val endpoint: Endpoint
 
