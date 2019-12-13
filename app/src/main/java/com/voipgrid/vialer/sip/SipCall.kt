@@ -4,21 +4,19 @@ import android.util.Log
 import com.voipgrid.vialer.VialerApplication.Companion.get
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.sip.SipInvite.CallerInformationHeader
+import com.voipgrid.vialer.sip.core.CallListener
+import com.voipgrid.vialer.sip.pjsip.Pjsip
 import com.voipgrid.vialer.sip.pjsip.Pjsip.SipAccount
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import org.pjsip.pjsua2.*
 
-/**
- * Call class used to interact with a call.
- */
-class SipCall : Call {
+sealed class SipCall : Call {
 
     val thirdParty: CallerInformationHeader
     val state = State()
-    private val logger = Logger(this)
-    private val sipService: SipService
-    private val direction: Direction
-    private var invite: SipInvite? = null
+    protected abstract val logger: Logger
+    private val listener: CallListener
+    private val endpoint: Endpoint
 
     val isConnected
         get() = state.telephonyState != TelephonyState.INITIALIZING && state.telephonyState != TelephonyState.DISCONNECTED
@@ -38,38 +36,16 @@ class SipCall : Call {
     val callerId: String
         get() = thirdParty.name
 
-    val isOutgoing: Boolean
-        get() = direction == Direction.OUTGOING
-
-    val isIncoming: Boolean
-        get() = direction == Direction.INCOMING
-
-
-    /**
-     * Create an outgoing call.
-     *
-     */
-    constructor(sipService: SipService, sipAccount: SipAccount, phoneNumber: String) : super(sipAccount) {
-        this.sipService = sipService
-        direction = Direction.OUTGOING
-        this.thirdParty = CallerInformationHeader("", phoneNumber)
-        super.makeCall(SipUri.sipAddress(get(), phoneNumber), CallOpParam().apply { statusCode = pjsip_status_code.PJSIP_SC_RINGING })
+    constructor(listener: CallListener, endpoint: Endpoint, sipAccount: SipAccount, thirdParty: CallerInformationHeader, callId: Int) : super(sipAccount, callId) {
+        this.listener = listener
+        this.thirdParty = thirdParty
+        this.endpoint = endpoint
     }
 
-    /**
-     * Create an incoming call.
-     *
-     */
-    constructor(sipService: SipService, sipAccount: SipAccount, callId: Int, invite: SipInvite) : super(sipAccount, callId) {
-        this.sipService = sipService
-        this.invite = invite
-        direction = Direction.INCOMING
-        thirdParty = when {
-            invite.hasPAssertedIdentity() -> invite.pAssertedIdentity
-            invite.hasRemotePartyId() -> invite.remotePartyId
-            invite.hasFrom() -> invite.from
-            else -> CallerInformationHeader("UNABLE TO GET CIH", "WAS UNABLE TO GET CIH")
-        }
+    constructor(listener: CallListener, endpoint: Endpoint, sipAccount: SipAccount, thirdParty: CallerInformationHeader) : super(sipAccount) {
+        this.listener = listener
+        this.thirdParty = thirdParty
+        this.endpoint = endpoint
     }
 
     override fun onCallTsxState(prm: OnCallTsxStateParam) {
@@ -84,7 +60,7 @@ class SipCall : Call {
         when {
             packet.contains(CallMissedReason.CALL_ORIGINATOR_CANCEL.packetLookupString) -> {}
             packet.contains(CallMissedReason.CALL_COMPLETED_ELSEWHERE.packetLookupString) -> {}
-            else -> sipService.callWasMissed(this)
+            else -> listener.onCallMissed(this)
         }
     }
 
@@ -183,7 +159,7 @@ class SipCall : Call {
             else -> TelephonyState.INITIALIZING
         }
 Log.e("TEST123", "Changing to state ${state.telephonyState} - pjsip state= ${pjsipState}")
-        sipService.onTelephonyStateChange(this, state.telephonyState)
+        listener.onTelephonyStateChange(this, state.telephonyState)
     }
 
     /**
@@ -192,14 +168,17 @@ Log.e("TEST123", "Changing to state ${state.telephonyState} - pjsip state= ${pjs
      * @param onCallMediaStateParam parameters containing the state of the an active call' media.
      */
     override fun onCallMediaState(onCallMediaStateParam: OnCallMediaStateParam) {
-        sipService.beginTransmittingAudio()
+        val media = AudioMedia.typecastFromMedia(getUsableAudio())
+        val audDevManager = endpoint.audDevManager()
+        media.startTransmit(audDevManager.playbackDevMedia)
+        audDevManager.captureDevMedia.startTransmit(media)
     }
 
     /**
      * Finds the usable audio channel for this call.
      *
      */
-    fun getUsableAudio(): Media {
+    private fun getUsableAudio(): Media {
         for (i in 0 until info.media.size()) {
             val cmi = info.media[i.toInt()]
             val isUsable = cmi.status ==
@@ -248,10 +227,6 @@ Log.e("TEST123", "Changing to state ${state.telephonyState} - pjsip state= ${pjs
         super.reinvite(callOpParam)
     }
 
-    enum class Direction {
-        OUTGOING, INCOMING
-    }
-
     enum class MicrophoneState(val volume: Int) {
         MUTED(0), UNMUTED(2)
     }
@@ -262,5 +237,27 @@ Log.e("TEST123", "Changing to state ${state.telephonyState} - pjsip state= ${pjs
 
     enum class CallMissedReason(val packetLookupString: String) {
         CALL_ORIGINATOR_CANCEL("ORIGINATOR_CANCEL"), CALL_COMPLETED_ELSEWHERE("Call completed elsewhere");
+    }
+}
+
+class IncomingCall(listener: CallListener, endpoint: Endpoint, account: SipAccount, callId: Int, invite: SipInvite)
+    : SipCall(listener, endpoint, account, when {
+    invite.hasPAssertedIdentity() -> invite.pAssertedIdentity
+    invite.hasRemotePartyId() -> invite.remotePartyId
+    invite.hasFrom() -> invite.from
+    else -> CallerInformationHeader("UNABLE TO GET CIH", "WAS UNABLE TO GET CIH")
+}, callId) {
+
+    override val logger = Logger(this)
+
+}
+
+class OutgoingCall(listener: CallListener, endpoint: Endpoint, account: SipAccount, phoneNumber: String)
+    : SipCall(listener, endpoint, account, CallerInformationHeader("", phoneNumber)) {
+
+    override val logger = Logger(this)
+
+    init {
+        super.makeCall(SipUri.sipAddress(get(), phoneNumber), CallOpParam().apply { statusCode = pjsip_status_code.PJSIP_SC_RINGING })
     }
 }

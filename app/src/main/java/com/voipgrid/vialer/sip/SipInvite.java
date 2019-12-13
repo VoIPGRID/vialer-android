@@ -51,27 +51,27 @@ public class SipInvite {
         return new CallerInformationHeader(data.get(0), data.get(1));
     }
 
-    boolean hasFrom() {
+    public boolean hasFrom() {
         return from != null;
     }
 
-    boolean hasPAssertedIdentity() {
+    public boolean hasPAssertedIdentity() {
         return pAssertedIdentity != null;
     }
 
-    boolean hasRemotePartyId() {
+    public boolean hasRemotePartyId() {
         return remotePartyId != null;
     }
 
-    CallerInformationHeader getPAssertedIdentity() {
+    public CallerInformationHeader getPAssertedIdentity() {
         return pAssertedIdentity;
     }
 
-    CallerInformationHeader getRemotePartyId() {
+    public CallerInformationHeader getRemotePartyId() {
         return remotePartyId;
     }
 
-    CallerInformationHeader getFrom() {
+    public CallerInformationHeader getFrom() {
         return from;
     }
 
