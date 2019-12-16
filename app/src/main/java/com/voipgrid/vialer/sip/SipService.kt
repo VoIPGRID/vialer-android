@@ -49,13 +49,6 @@ import org.pjsip.pjsua2.OnIncomingCallParam
  */
 class SipService : Service(), CallListener {
 
-    /**
-     * This will track whether this instance of SipService has ever handled a call,
-     * if this is the case we can shut down the sip service immediately if we don't
-     * have a call when onStartCommand is run.
-     */
-    private var mSipServiceHasHandledACall = false
-
     private val calls = CallStack()
 
     val hasCall: Boolean
@@ -84,8 +77,8 @@ class SipService : Service(), CallListener {
     private val screenOffReceiver: ScreenOffReceiver by inject()
     private val localBroadcastManager: LocalBroadcastManager by inject()
     val pjsip: Pjsip by inject()
-    val busyTone: BusyTone by inject()
-    val outgoingCallRinger: OutgoingCallRinger by inject()
+    private val busyTone: BusyTone by inject()
+    private val outgoingCallRinger: OutgoingCallRinger by inject()
 
     override fun onCreate() {
         super.onCreate()
@@ -101,24 +94,11 @@ class SipService : Service(), CallListener {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        logger.i("mSipServiceHasHandledACall: $mSipServiceHasHandledACall")
-
-        // If the SipService has already handled a call but now has no call, this suggests
-        // that the SipService is stuck not doing anything so it should be immediately shut
-        // down.
-        if (mSipServiceHasHandledACall && calls.current == null) {
-            logger.i("onStartCommand was triggered after a call has already been handled but with no current call, stopping SipService...")
-            stopSelf()
-            return START_NOT_STICKY
-        }
-
         try {
             val action = Action.valueOf(intent.action ?: throw Exception("Unable to find action"))
 
-            startForeground(notification.notification.notificationId, notification.notification.build())
-
             if (sipActionHandler.isForegroundAction(action)) {
-                Log.e("TEST123", "Is foreground action")
+                startForeground(notification.notification.notificationId, notification.notification.build())
                 sipServiceActive = true
                 pjsip.init(this)
                 ipSwitchMonitor.init(this, pjsip.endpoint)
@@ -363,6 +343,7 @@ Log.e("TEST123", "Starting ringing...")
      */
     private fun respondToMiddleware() {
         pendingMiddlewareResponses.forEach {
+            logger.i("Responding with available for token ${it.token}")
             MiddlewareHelper.respond(it.token, it.startTime)
         }
 

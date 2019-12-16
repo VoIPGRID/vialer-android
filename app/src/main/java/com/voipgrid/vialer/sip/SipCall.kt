@@ -1,11 +1,9 @@
 package com.voipgrid.vialer.sip
 
-import android.util.Log
 import com.voipgrid.vialer.VialerApplication.Companion.get
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.sip.SipInvite.CallerInformationHeader
 import com.voipgrid.vialer.sip.core.CallListener
-import com.voipgrid.vialer.sip.pjsip.Pjsip
 import com.voipgrid.vialer.sip.pjsip.Pjsip.SipAccount
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import org.pjsip.pjsua2.*
@@ -89,9 +87,9 @@ sealed class SipCall : Call {
 
     @Throws(Exception::class)
     fun takeOffHold() {
-        val callOpParam = CallOpParam(true)
-        callOpParam.opt.flag = pjsua_call_flag.PJSUA_CALL_UNHOLD.swigValue().toLong()
-        super.reinvite(callOpParam)
+        super.reinvite(CallOpParam(true).apply {
+            opt.flag = pjsua_call_flag.PJSUA_CALL_UNHOLD.swigValue().toLong()
+        })
         state.isOnHold = false
     }
 
@@ -148,18 +146,27 @@ sealed class SipCall : Call {
      * @param onCallStateParam parameters containing the state of an active call.
      */
     override fun onCallState(onCallStateParam: OnCallStateParam) {
-        state.telephonyState = when(pjsipState) {
-            pjsip_inv_state.PJSIP_INV_STATE_NULL -> TelephonyState.INITIALIZING
-            pjsip_inv_state.PJSIP_INV_STATE_CALLING -> TelephonyState.OUTGOING_RINGING
-            pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> TelephonyState.INCOMING_RINGING
-            pjsip_inv_state.PJSIP_INV_STATE_EARLY -> TelephonyState.INCOMING_RINGING
-            pjsip_inv_state.PJSIP_INV_STATE_CONNECTING -> TelephonyState.CONNECTED
-            pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED -> TelephonyState.CONNECTED
-            pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> TelephonyState.DISCONNECTED
-            else -> TelephonyState.INITIALIZING
+        val newState = mapPjsipStateToTelephonyState(pjsipState)
+
+        if (newState != state.telephonyState) {
+            state.telephonyState = newState
+            listener.onTelephonyStateChange(this, state.telephonyState)
         }
-Log.e("TEST123", "Changing to state ${state.telephonyState} - pjsip state= ${pjsipState}")
-        listener.onTelephonyStateChange(this, state.telephonyState)
+    }
+
+    /**
+     * Convert the state from pjsip into one of our accepted telephony states.
+     *
+     */
+    private fun mapPjsipStateToTelephonyState(pjsipState: pjsip_inv_state) = when (pjsipState) {
+        pjsip_inv_state.PJSIP_INV_STATE_NULL -> TelephonyState.INITIALIZING
+        pjsip_inv_state.PJSIP_INV_STATE_CALLING -> TelephonyState.OUTGOING_RINGING
+        pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> TelephonyState.INCOMING_RINGING
+        pjsip_inv_state.PJSIP_INV_STATE_EARLY -> TelephonyState.INCOMING_RINGING
+        pjsip_inv_state.PJSIP_INV_STATE_CONNECTING -> TelephonyState.CONNECTED
+        pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED -> TelephonyState.CONNECTED
+        pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> TelephonyState.DISCONNECTED
+        else -> TelephonyState.INITIALIZING
     }
 
     /**
@@ -202,16 +209,12 @@ Log.e("TEST123", "Changing to state ${state.telephonyState} - pjsip state= ${pjs
      * @param code
      * @return
      */
-    private fun answerWithCode(code: pjsip_status_code) {
-        val callOpParam = CallOpParam()
-        callOpParam.statusCode = code
-        try {
-            this.answer(callOpParam)
-            logger.i("Answered call with code: $code")
-        } catch (e: Exception) {
-            logger.e("Failed to answer call with code $code")
-            throw RuntimeException(e)
-        }
+    private fun answerWithCode(code: pjsip_status_code) = try {
+        this.answer(CallOpParam().apply { statusCode = code })
+        logger.i("Answered call with code: $code")
+    } catch (e: Exception) {
+        logger.e("Failed to answer call with code $code")
+        throw RuntimeException(e)
     }
 
     fun busy() = answerWithCode(pjsip_status_code.PJSIP_SC_BUSY_HERE)

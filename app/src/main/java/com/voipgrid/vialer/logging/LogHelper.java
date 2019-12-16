@@ -40,14 +40,6 @@ public class LogHelper {
             message += "sip service has a call currently";
         }
 
-        if(mSipService.getNativeCallManager().nativeCallIsInProgress()) {
-            message += "there is a native call in progress";
-        }
-
-        if(mSipService.getNativeCallManager().nativeCallIsRinging()) {
-            message += "there is a native call ringing";
-        }
-
         mLogger.d(message);
     }
 

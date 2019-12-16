@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -204,7 +205,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     private void rejectDueToVialerCallAlreadyInProgress(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
         mRemoteLogger.d("Reject due to call already in progress");
 
-        replyServer(remoteMessageData, false);
+        rejectCall(remoteMessageData);
 
         sendCallFailedDueToOngoingVialerCallMetric(remoteMessage, remoteMessageData.getRequestToken());
     }
@@ -219,7 +220,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     private void rejectDueToNativeCallAlreadyInProgress(RemoteMessage remoteMessage, RemoteMessageData remoteMessageData) {
         mRemoteLogger.d("Reject due to native call already in progress");
 
-        replyServer(remoteMessageData, false);
+        rejectCall(remoteMessageData);
     }
 
     /**
@@ -239,24 +240,14 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * Notify the middleware server that we are, in fact, alive.
      *
      * @param remoteMessageData The remote message data from the remote message that we are handling.
-     * @param isAvailable TRUE if the phone is ready to accept the incoming call, FALSE if it is not available.
      */
-    private void replyServer(RemoteMessageData remoteMessageData, boolean isAvailable) {
+    private void rejectCall(RemoteMessageData remoteMessageData) {
+        if (remoteMessageData.getRequestToken().equals(sLastHandledCall)) return;
+
         mRemoteLogger.d("replyServer");
-        Middleware middlewareApi = ServiceGenerator.createRegistrationService(this);
-
-        Call<ResponseBody> call = middlewareApi.reply(remoteMessageData.getRequestToken(), isAvailable, remoteMessageData.getMessageStartTime());
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-
-            }
-        });
+        ServiceGenerator.createRegistrationService(this)
+                .reply(remoteMessageData.getRequestToken(), false, remoteMessageData.getMessageStartTime())
+                .enqueue(null);
     }
 
     /**
