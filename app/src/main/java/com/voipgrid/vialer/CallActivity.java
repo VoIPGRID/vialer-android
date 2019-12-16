@@ -32,6 +32,7 @@ import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
+import com.voipgrid.vialer.sip.CallDisconnectedReason;
 import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
@@ -166,7 +167,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
     }
 
     @Override
-    public void onCallDisconnected() {
+    public void onCallDisconnected(CallDisconnectedReason reason) {
         mOnTransfer = false;
 
         if (mCallIsTransferred) {
@@ -178,6 +179,7 @@ public class CallActivity extends AbstractCallActivity implements PopupMenu.OnMe
             mConnected = true;
             updateUi();
         } else {
+            mCallPresenter.showDisconnectedReason(reason);
             mConnected = false;
             finish();
         }

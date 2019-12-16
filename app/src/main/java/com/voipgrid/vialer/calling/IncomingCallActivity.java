@@ -15,6 +15,7 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.contacts.Contacts;
+import com.voipgrid.vialer.sip.CallDisconnectedReason;
 import com.voipgrid.vialer.sip.SipService;
 
 import javax.inject.Inject;
@@ -108,7 +109,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
     }
 
     @Override
-    public void onCallDisconnected() {
+    public void onCallDisconnected(CallDisconnectedReason reason) {
         //TODO: Seems like this is the scenario 1 of missed call.
         mSipServiceConnection.disconnect(true);
         finish();
