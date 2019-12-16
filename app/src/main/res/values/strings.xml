@@ -36,6 +36,9 @@
     <string name="version_info">Version: %s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
 
+    <!-- Disconnected reasons -->
+    <string name="call_disconnected_reason_not_found">Number was not found</string>
+
     <!-- Rating popup -->
     <string name="rating_popup_title">Please rate your experience with %1$s so far!</string>
     <string name="rating_popup_ignore_button">Not now</string>

@@ -33,6 +33,9 @@
     <string name="version_info">Versie: %1$s</string>
     <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
 
+    <!-- Disconnected reasons -->
+    <string name="call_disconnected_reason_not_found">Nummer is niet gevonden</string>
+
     <!-- Rating popup -->
     <string name="rating_popup_title">Vertel ons wat je tot nu toe van %1$s vindt!</string>
     <string name="rating_popup_ignore_button">Niet nu</string>
