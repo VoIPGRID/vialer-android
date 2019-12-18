@@ -110,7 +110,7 @@ class MainActivity : NavigationDrawerActivity() {
             )
             addTab(tab_layout.newTab().setText(R.string.tab_title_recents))
             addTab(tab_layout.newTab().setText(R.string.tab_title_missed))
-            setOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabReselected(tab: TabLayout.Tab?) {
                 }
 
