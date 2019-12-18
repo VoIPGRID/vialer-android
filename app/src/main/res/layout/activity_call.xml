@@ -267,13 +267,13 @@
 
     <com.voipgrid.vialer.calling.Dialer
         android:id="@+id/dialer"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/duration_text_view"
-        app:layout_constraintVertical_bias="1.0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/call_status"
+        android:visibility="gone"
         app:show_call_button="false"
         app:show_exit_button="true" />
 </androidx.constraintlayout.widget.ConstraintLayout>
