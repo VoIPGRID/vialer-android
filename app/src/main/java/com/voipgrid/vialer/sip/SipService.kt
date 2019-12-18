@@ -79,6 +79,8 @@ class SipService : Service(), CallListener {
     val pjsip: Pjsip by inject()
     private val busyTone: BusyTone by inject()
     private val outgoingCallRinger: OutgoingCallRinger by inject()
+    val audio = Audio(connection)
+    val actions = Actions(this, connection)
 
     override fun onCreate() {
         super.onCreate()
@@ -372,6 +374,7 @@ Log.e("TEST123", "Starting ringing...")
      * @return TRUE if we are currently transferring, otherwise false.
      */
     fun isTransferring() : Boolean = calls.size > 1
+
 
     /**
      * Class the be able to bind a activity to this service.

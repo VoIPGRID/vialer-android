@@ -26,6 +26,15 @@ abstract class AbstractCallActivity : LoginRequiredActivity(), SipServiceConnect
     protected val callStatusReceiver = CallStatusReceiver(this)
     private lateinit var proximitySensorHelper: ProximitySensorHelper
 
+    val sip
+        get() = sipServiceConnection.get()
+
+    val call
+        get() = sip.currentCall ?: throw Exception("Unable to perform this action as there is no current call.")
+
+    val sipIsAlive
+        get() = sipServiceConnection.isAvailableAndHasActiveCall
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         proximitySensorHelper = ProximitySensorHelper(this)

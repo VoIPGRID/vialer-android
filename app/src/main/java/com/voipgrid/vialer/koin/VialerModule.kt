@@ -30,7 +30,6 @@ import com.voipgrid.vialer.sip.utils.BusyTone
 import com.voipgrid.vialer.sip.utils.ScreenOffReceiver
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.NetworkUtil
-import com.voipgrid.vialer.util.ProximitySensorHelper
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 

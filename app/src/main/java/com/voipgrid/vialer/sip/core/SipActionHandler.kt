@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
@@ -15,7 +14,7 @@ import com.voipgrid.vialer.sip.core.Action.*
 import com.voipgrid.vialer.sip.incoming.MiddlewareResponse
 import java.lang.Exception
 
-class SipActionHandler(private val sipService: SipService) {
+class SipActionHandler(private val sip: SipService) {
 
     private val logger = Logger(this)
 
@@ -25,18 +24,18 @@ class SipActionHandler(private val sipService: SipService) {
      */
     fun handle(action: Action, intent: Intent): Unit = when(action) {
         HANDLE_INCOMING_CALL -> {
-            sipService.pendingMiddlewareResponses.add(MiddlewareResponse(
+            sip.pendingMiddlewareResponses.add(MiddlewareResponse(
                     intent.getStringExtra(SipService.Extra.INCOMING_TOKEN.name) ?: throw Exception("Unable to start an incoming call without a token"),
                     intent.getStringExtra(SipService.Extra.INCOMING_CALL_START_TIME.name) ?: throw Exception("Unable to start an incoming call without a call start time")
             ))
             Unit
         }
-        HANDLE_OUTGOING_CALL -> sipService.placeOutgoingCall(intent.getStringExtra(SipService.Extra.OUTGOING_PHONE_NUMBER.toString()) ?: throw IllegalArgumentException("Unable to start a call without an outgoing number"))
-        DECLINE_INCOMING_CALL -> SipService.connection.onReject()
+        HANDLE_OUTGOING_CALL -> sip.placeOutgoingCall(intent.getStringExtra(SipService.Extra.OUTGOING_PHONE_NUMBER.toString()) ?: throw IllegalArgumentException("Unable to start a call without an outgoing number"))
+        DECLINE_INCOMING_CALL -> sip.actions.reject()
         ANSWER_INCOMING_CALL -> askForPermissionsThenAnswer()
-        END_CALL -> SipService.connection.onDisconnect()
+        END_CALL -> sip.actions.disconnect()
         DISPLAY_CALL_IF_AVAILABLE -> showCallIfAvailable()
-        SILENCE -> sipService.silence()
+        SILENCE -> sip.silence()
     }.also {
         logger.i("Executing Sip Action: ${action.name}")
     }
@@ -52,10 +51,10 @@ class SipActionHandler(private val sipService: SipService) {
      *
      */
     private fun showCallIfAvailable() {
-        if (sipService.currentCall != null && sipService.currentCall?.isConnected == true) {
-            sipService.startCallActivityForCurrentCall()
+        if (sip.currentCall != null && sip.currentCall?.isConnected == true) {
+            sip.startCallActivityForCurrentCall()
         } else {
-            sipService.stopSelf()
+            sip.stopSelf()
         }
     }
 
@@ -64,14 +63,14 @@ class SipActionHandler(private val sipService: SipService) {
      *
      */
     private fun askForPermissionsThenAnswer() {
-        if (!MicrophonePermission.hasPermission(sipService))
+        if (!MicrophonePermission.hasPermission(sip))
         {
-            Toast.makeText(sipService, sipService.getString(R.string.permission_microphone_missing_message), Toast.LENGTH_LONG).show()
+            Toast.makeText(sip, sip.getString(R.string.permission_microphone_missing_message), Toast.LENGTH_LONG).show()
             logger.e("Unable to answer incoming call as we do not have microphone permission")
             return
         }
 
-        SipService.connection.onAnswer()
+        sip.actions.answer()
     }
 
     companion object {

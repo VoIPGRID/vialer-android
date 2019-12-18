@@ -67,6 +67,4 @@ class AndroidCallConnection(val voip: SipService) : Connection() {
         logger.i("Silencing call ringer")
         voip.silence()
     }
-
-    fun isBluetoothRouteAvailable(): Boolean = callAudioState != null && callAudioState.supportedRouteMask and CallAudioState.ROUTE_BLUETOOTH == CallAudioState.ROUTE_BLUETOOTH
 }

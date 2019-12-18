@@ -15,14 +15,15 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
+import androidx.lifecycle.Observer
 import cn.pedant.SweetAlert.SweetAlertDialog
 import com.voipgrid.vialer.call.CallDetail
-import com.voipgrid.vialer.call.CallViewModel
 import com.voipgrid.vialer.call.TransferCompleteDialog
 import com.voipgrid.vialer.calling.AbstractCallActivity
 import com.voipgrid.vialer.calling.Dialer
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity
 import com.voipgrid.vialer.dialer.DialerActivity
+import com.voipgrid.vialer.sip.Audio
 import com.voipgrid.vialer.sip.SipCall
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.sip.transfer.CallTransferResult
@@ -39,7 +40,14 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
     private var dialog: Dialog? = null
     private val networkUtil: NetworkUtil by inject()
     private lateinit var callPresenter: CallPresenter
-    private val model by viewModel<CallViewModel>()
+
+    /**
+     * Check whether the keypad is currently being presented to the user.
+     *
+     * @return TRUE if the keypad is on the screen.
+     */
+    private val isDialpadVisible: Boolean
+        get() = dialer.visibility == View.VISIBLE
 
     private val updateUiReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -97,22 +105,17 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
     override fun onBackPressed() {
         logger.d("onBackPressed")
-        if (!sipServiceConnection.isAvailableAndHasActiveCall) {
+        if (!sipIsAlive) {
             super.onBackPressed()
             return
         }
 
-        if (sipServiceConnection.get().isTransferring()) {
-            if (sipServiceConnection.get().currentCall == null || sipServiceConnection.get().firstCall == null) {
-                super.onBackPressed()
-            } else {
-                hangupViaBackButton()
-            }
-        } else if (button_hangup != null && button_hangup.visibility == View.VISIBLE && sipServiceConnection.get().currentCall != null) {
-            hangupViaBackButton()
-        } else if (isDialpadVisible) {
+        if (isDialpadVisible) {
             hideDialpad()
+            return
         }
+
+        hangupViaBackButton()
     }
 
     /**
@@ -135,7 +138,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
     private fun toggleSpeaker() {
         logger.d("toggleSpeaker")
-        SipService.connection.setAudioRoute(if (!isOnSpeaker) CallAudioState.ROUTE_SPEAKER else CallAudioState.ROUTE_WIRED_OR_EARPIECE)
+        sip.audio.route = if (!isOnSpeaker) Audio.Route.SPEAKER else Audio.Route.WIRED_OR_EARPIECE
     }
 
     /**
@@ -159,12 +162,12 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      *
      */
     private fun onTransferButtonClick(view: View?) {
-        if (sipServiceConnection.get().isTransferring()) {
+        if (sip.isTransferring()) {
             showCallTransferCompletedDialog(sipServiceConnection.get().mergeTransfer())
             return
         }
 
-        if (!isCallOnHold) {
+        if (!call.state.isOnHold) {
             onHoldButtonClick(button_onhold)
         }
 
@@ -178,11 +181,9 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      *
      */
     private fun onHoldButtonClick(view: View?) {
-        if (!sipServiceConnection.isAvailableAndHasActiveCall) return
-
-        when (sipServiceConnection.get().currentCall?.state?.isOnHold) {
-            true -> SipService.connection.onUnhold()
-            false -> SipService.connection.onHold()
+        when (call.state.isOnHold) {
+            true -> sip.actions.hold()
+            false -> sip.actions.unhold()
         }
     }
 
@@ -194,21 +195,19 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      *
      */
     private fun onAudioSourceButtonClick(view: View?) {
-        if (!isBluetoothRouteAvailable) {
+        if (!sip.audio.isBluetoothRouteAvailable) {
             toggleSpeaker()
             return
         }
-
-        val bluetoothDevice: BluetoothDevice? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) SipService.connection.callAudioState.activeBluetoothDevice else null
 
         val popup = PopupMenu(this, view)
         popup.menuInflater.apply {
             inflate(R.menu.menu_audio_source, popup.menu)
         }
 
-        bluetoothDevice?.let {
+        sip.audio.activeBluetoothDevice?.let {
             popup.menu.getItem(2).apply {
-                title = "$this (${bluetoothDevice.name})"
+                title = "$this (${it.name})"
             }
         }
 
@@ -236,7 +235,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
             return
         }
         try {
-            sipServiceConnection.get().currentCall!!.dialDtmf(dtmf)
+            call.dialDtmf(dtmf)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -244,9 +243,9 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.audio_source_option_phone -> SipService.connection.setAudioRoute(CallAudioState.ROUTE_WIRED_OR_EARPIECE)
-            R.id.audio_source_option_speaker -> SipService.connection.setAudioRoute(CallAudioState.ROUTE_SPEAKER)
-            R.id.audio_source_option_bluetooth -> SipService.connection.setAudioRoute(CallAudioState.ROUTE_BLUETOOTH)
+            R.id.audio_source_option_phone -> sip.audio.route = Audio.Route.WIRED_OR_EARPIECE
+            R.id.audio_source_option_speaker -> sip.audio.route = Audio.Route.SPEAKER
+            R.id.audio_source_option_bluetooth -> sip.audio.route = Audio.Route.BLUETOOTH
         }
         updateUi()
         return false
@@ -274,18 +273,10 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
         if (number == null || number.isEmpty()) return
 
-        sipServiceConnection.get().startTransfer(number)
+        sip.startTransfer(number)
     }
 
     override fun numberWasChanged(number: String) {}
-
-    /**
-     * Check whether the keypad is currently being presented to the user.
-     *
-     * @return TRUE if the keypad is on the screen.
-     */
-    private val isDialpadVisible: Boolean
-        get() = dialer.visibility == View.VISIBLE
 
     override fun sipServiceHasConnected(sipService: SipService) {
         super.sipServiceHasConnected(sipService)
@@ -299,7 +290,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      * @return TRUE if there is a second call, otherwise FALSE
      */
     fun hasSecondCall(): Boolean {
-        return sipServiceConnection.isAvailableAndHasActiveCall && sipServiceConnection.get().isTransferring()
+        return sipServiceConnection.isAvailableAndHasActiveCall && sip.isTransferring()
     }
     
     /**
@@ -317,16 +308,8 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
         }, 3000)
     }
 
-    val isMuted: Boolean
-        get() = if (sipServiceConnection.isAvailableAndHasActiveCall) {
-            sipServiceConnection.get().currentCall!!.state.isMuted
-        } else false
-
     val isOnSpeaker: Boolean
-        get() = audioRoute == CallAudioState.ROUTE_SPEAKER
-
-    val audioRoute: Int
-        get() = SipService.connection.callAudioState?.route ?: CallAudioState.ROUTE_EARPIECE
+        get() = sip.audio.route == Audio.Route.SPEAKER
 
     override fun finish() {
         if (dialog == null) super.finish()
@@ -337,18 +320,4 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
     val currentCallDetails: CallDetail?
         get() = CallDetail.fromSipCall(sipServiceConnection.get()?.currentCall)
-
-    val isBluetoothRouteAvailable: Boolean
-        get() = SipService.connection.isBluetoothRouteAvailable()
-
-    val isCurrentlyRoutingAudioViaBluetooth: Boolean
-        get() = audioRoute == CallAudioState.ROUTE_BLUETOOTH
-
-    /**
-     * Check if the primary call is on hold.
-     *
-     * @return TRUE if it is on hold, otherwise FALSE.
-     */
-    private val isCallOnHold: Boolean
-        get() = sipServiceConnection.get().currentCall?.state?.isOnHold ?: false
 }

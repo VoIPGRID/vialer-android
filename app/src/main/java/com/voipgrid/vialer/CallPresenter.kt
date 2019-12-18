@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.View
 import com.voipgrid.vialer.calling.CallActivityHelper
 import com.voipgrid.vialer.contacts.Contacts
+import com.voipgrid.vialer.sip.Audio
 import com.voipgrid.vialer.sip.SipCall
 import com.voipgrid.vialer.sip.SipCall.TelephonyState.*
 import com.voipgrid.vialer.sip.SipConstants
@@ -44,7 +45,7 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) {
             DISCONNECTED -> disableAllButtons()
         }
         mActivity.button_onhold.activate(call.state.isOnHold)
-        mActivity.button_mute.activate(mActivity.isMuted)
+        mActivity.button_mute.activate(mActivity.call.state.isMuted)
         mActivity.button_dialpad.activate(false)
         mActivity.button_transfer.activate(false)
         if (state == CONNECTED) {
@@ -107,13 +108,12 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) {
         }
         var image = R.drawable.ic_volume_on_enabled
         var text = R.string.speaker_label
-        Log.e("TEST123", "isBluetoothRouteAvailable:" + mActivity.isBluetoothRouteAvailable)
-        Log.e("TEST123", "Route:" + mActivity.audioRoute)
-        if (mActivity.isBluetoothRouteAvailable) {
+
+        if (mActivity.sip.audio.isBluetoothRouteAvailable) {
             if (mActivity.isOnSpeaker) {
                 image = R.drawable.audio_source_dropdown_speaker
                 text = R.string.speaker_label
-            } else if (mActivity.isCurrentlyRoutingAudioViaBluetooth) {
+            } else if (mActivity.sip.audio.route == Audio.Route.BLUETOOTH) {
                 image = R.drawable.audio_source_dropdown_bluetooth
                 text = R.string.audio_source_option_bluetooth
             } else {

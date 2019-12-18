@@ -46,7 +46,7 @@ public class SipServiceConnection implements ServiceConnection {
      * The activity that initiated the binding.
      *
      */
-    private Activity mActivity;
+    private Context mActivity;
 
     /**
      * An object that will receive events when the SipService binds
@@ -69,7 +69,7 @@ public class SipServiceConnection implements ServiceConnection {
      *
      * @param activity
      */
-    SipServiceConnection(Activity activity) {
+    public SipServiceConnection(Context activity) {
         mLogger = new Logger(this.getClass());
         mActivity = activity;
 
@@ -85,7 +85,7 @@ public class SipServiceConnection implements ServiceConnection {
      * @param activity
      * @param listener
      */
-    SipServiceConnection(Activity activity, SipServiceConnectionListener listener) {
+    public SipServiceConnection(Context activity, SipServiceConnectionListener listener) {
         this(activity);
         mListener = listener;
     }
