@@ -142,7 +142,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         try {
             boolean shouldStartForeground = performActionBasedOnIntent(intent);
 
-            if (shouldStartForeground) {
+            if (shouldStartForeground && activeNotification == null) {
                 startForeground(callNotification.getNotificationId(), callNotification.build());
             }
         } catch (Exception e) {
