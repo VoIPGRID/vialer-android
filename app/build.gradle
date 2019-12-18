@@ -223,6 +223,8 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
+    implementation "net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.3.0"
+
     implementation 'javax.inject:javax.inject:1@jar'
     implementation 'com.github.lzyzsd.randomcolor:library:1.0.0'
 

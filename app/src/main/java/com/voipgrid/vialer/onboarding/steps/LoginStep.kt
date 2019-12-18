@@ -24,6 +24,7 @@ import kotlinx.android.synthetic.main.onboarding_step_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import javax.inject.Inject
 
 class LoginStep : Step() {
@@ -47,6 +48,16 @@ class LoginStep : Step() {
 
         emailTextDialog.onTextChanged(enableSubmitButton)
         passwordTextDialog.onTextChanged(enableSubmitButton)
+
+        KeyboardVisibilityEvent.setEventListener(activity) { keyboardIsVisible ->
+            if (keyboardIsVisible) {
+                title_label.visibility = View.GONE
+                subtitle_label.visibility = View.GONE
+            } else {
+                title_label.visibility = View.VISIBLE
+                subtitle_label.visibility = View.VISIBLE
+            }
+        }
 
         passwordTextDialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
             actionId == EditorInfo.IME_ACTION_DONE && button_login.performClick()

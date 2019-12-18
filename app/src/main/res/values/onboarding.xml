@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!--
         Logo fragment values.
     -->
@@ -62,7 +62,7 @@
     <!-- Style for Header TextViews -->
     <style name="HeaderTitleTextViewStyle" parent="@android:style/Widget.TextView">
         <item name="android:textColor">@color/onboarding_header_textview_color</item>
-        <item name="android:textSize">46sp</item>
+        <item name="android:textSize" tools:ignore="SpUsage">46dp</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textStyle">bold</item>
     </style>
