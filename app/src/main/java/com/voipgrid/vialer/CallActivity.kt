@@ -17,6 +17,7 @@ import android.view.View
 import android.widget.PopupMenu
 import cn.pedant.SweetAlert.SweetAlertDialog
 import com.voipgrid.vialer.call.CallDetail
+import com.voipgrid.vialer.call.CallViewModel
 import com.voipgrid.vialer.call.TransferCompleteDialog
 import com.voipgrid.vialer.calling.AbstractCallActivity
 import com.voipgrid.vialer.calling.Dialer
@@ -28,6 +29,7 @@ import com.voipgrid.vialer.sip.transfer.CallTransferResult
 import com.voipgrid.vialer.util.NetworkUtil
 import kotlinx.android.synthetic.main.activity_call.*
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
  * CallActivity for incoming or outgoing call.
@@ -37,6 +39,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
     private var dialog: Dialog? = null
     private val networkUtil: NetworkUtil by inject()
     private lateinit var callPresenter: CallPresenter
+    private val model by viewModel<CallViewModel>()
 
     private val updateUiReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
