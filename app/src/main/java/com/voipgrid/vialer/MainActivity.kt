@@ -6,6 +6,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.callrecord.CallRecordsFragment
 import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.options.OptionsFragment
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.LoginRequiredActivity
@@ -21,6 +22,8 @@ class MainActivity : LoginRequiredActivity(),
     @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
 
     @Inject lateinit var userSynchronizer: UserSynchronizer
+
+    private var connectivityListener: ConnectivityListener? = null
 
     private var currentNav: Int = 0
 
@@ -100,8 +103,28 @@ class MainActivity : LoginRequiredActivity(),
             // TODO: Implement
             // R.id.navigation_item_contacts ->
             R.id.navigation_item_recent -> supportFragmentManager.beginTransaction().replace(R.id.container, CallRecordsFragment()).commit()
-            //R.id.navigation_item_options -> supportFragmentManager.beginTransaction().replace(R.id.container, OptionsFragment()).commit() //startActivity(Intent(this, NavigationDrawerActivity::class.java))
+            R.id.navigation_item_options -> supportFragmentManager.beginTransaction().replace(R.id.container, OptionsFragment()).commit()
         }
         return false
+    }
+
+    override fun onInternetConnectivityGained() {
+        connectivityListener?.onInternetConnectivityChanged()
+    }
+
+    override fun onInternetConnectivityLost() {
+        connectivityListener?.onInternetConnectivityChanged()
+    }
+
+    /**
+     * Listener interface to listen to changes in connectivity.
+     *
+     */
+    interface ConnectivityListener {
+        fun onInternetConnectivityChanged()
+    }
+
+    fun setConnectivityListener(connectivityListener: ConnectivityListener) {
+        this.connectivityListener = connectivityListener
     }
 }
