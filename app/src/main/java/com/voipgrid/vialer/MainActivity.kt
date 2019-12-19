@@ -5,6 +5,7 @@ import android.view.MenuItem
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.options.OptionsFragment
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.LoginRequiredActivity

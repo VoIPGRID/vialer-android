@@ -69,6 +69,7 @@ public interface VialerComponent {
     void inject(SettingsActivity activity);
 
     void inject(VialerBaseActivity vialerBaseActivity);
+
     void inject(PasswordResetWebActivity activity);
 
     void inject(T9HelperFragment t9HelperFragment);
