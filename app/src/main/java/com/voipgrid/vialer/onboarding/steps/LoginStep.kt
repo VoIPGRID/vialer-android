@@ -50,9 +50,9 @@ class LoginStep : Step() {
 
         KeyboardVisibilityEvent.setEventListener(activity) { keyboardIsVisible ->
             if (keyboardIsVisible) {
-                title_label.visibility = View.GONE
+                title_label?.visibility = View.GONE
             } else {
-                title_label.visibility = View.VISIBLE
+                title_label?.visibility = View.VISIBLE
             }
         }
 
