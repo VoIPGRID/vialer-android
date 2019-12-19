@@ -37,16 +37,31 @@
 
         </LinearLayout>
 
-        <androidx.coordinatorlayout.widget.CoordinatorLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/call_records_background">
 
+            <include
+                android:id="@+id/show_my_calls_only"
+                layout="@layout/view_show_missed_calls_only"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/tab_view_pager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <fragment
-                android:name="com.voipgrid.vialer.callrecord.CallRecordFragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/call_record_fragment" />
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/tab_view_pager"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/show_my_calls_only" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/floating_action_button"
@@ -58,10 +73,10 @@
                 app:backgroundTint="@color/dialer_button"
                 app:borderWidth="@dimen/fab_border_width"
                 app:elevation="@dimen/fab_elevation"
-                app:layout_anchor="@id/call_record_fragment"
-                app:layout_anchorGravity="bottom|end" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
 
