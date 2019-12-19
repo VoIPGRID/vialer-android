@@ -1,14 +1,10 @@
 package com.voipgrid.vialer;
 
-import static com.voipgrid.vialer.util.ConnectivityHelper.converseFromPreference;
-import static com.voipgrid.vialer.util.ConnectivityHelper.converseToPreference;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.InputType;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -56,6 +52,9 @@ import kotlin.Unit;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static com.voipgrid.vialer.util.ConnectivityHelper.converseFromPreference;
+import static com.voipgrid.vialer.util.ConnectivityHelper.converseToPreference;
 
 public class SettingsActivity extends LoginRequiredActivity {
 
