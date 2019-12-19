@@ -8,8 +8,8 @@
     <com.voipgrid.vialer.dialer.NumberInputView
         android:id="@+id/number_input_edit_text"
         android:layout_width="0dp"
-        android:layout_height="45dp"
-        android:background="@color/white"
+        android:layout_height="56dp"
+        android:background="@color/background_color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -29,10 +29,10 @@
 
     <com.voipgrid.vialer.dialer.CallButton
         android:id="@+id/button_call"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:background="@drawable/call_pickup_button"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_marginBottom="@dimen/onboarding_activity_vertical_margin"
+        android:background="@drawable/call_pickup_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

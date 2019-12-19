@@ -1,27 +1,24 @@
 package com.voipgrid.vialer.dialer
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
-
+import butterknife.ButterKnife
+import butterknife.OnClick
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.calling.Dialer
 import com.voipgrid.vialer.t9.T9Fragment
-
-import javax.inject.Inject
-
-import butterknife.ButterKnife
-import butterknife.OnClick
-import com.voipgrid.vialer.util.*
+import com.voipgrid.vialer.util.ConnectivityHelper
+import com.voipgrid.vialer.util.DialHelper
+import com.voipgrid.vialer.util.LoginRequiredActivity
+import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.activity_dialer.*
 import kotlinx.android.synthetic.main.view_dialer.*
 import kotlinx.coroutines.Dispatchers

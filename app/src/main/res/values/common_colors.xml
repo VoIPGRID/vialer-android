@@ -16,7 +16,7 @@
     <color name="key_pad_background_color">#ffffff</color>
     <color name="key_pad_divider_color">#E2E2E2</color>
 
-    <color name="dialpad_fab_call_color">#75c25e</color>
+    <color name="dialpad_fab_call_color">#28CA42</color>
     <color name="dialpad_fab_call_color_disabled">#888888</color>
 
     <color name="tint_color_backspace">#B9B9B9</color>
@@ -56,6 +56,7 @@
     <color name="onboarding_text_hint_color">#CCFFFFFF</color>
     <color name="onboarding_button_text_color">#555555</color>
 
-    <color name="floating_action_button_color">#2491FF</color>
+    <color name="background_color">#F5F5F5</color>
     <color name="error_background_color">#FFADAD</color>
+    <color name="floating_action_button_color">#2491FF</color>
 </resources>
