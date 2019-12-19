@@ -101,8 +101,7 @@ class MainActivity : LoginRequiredActivity(),
         currentNav = itemId
 
         when (itemId) {
-            // TODO: Implement
-            // R.id.navigation_item_contacts ->
+            // R.id.navigation_item_contacts -> // TODO: Create ContactFragment
             R.id.navigation_item_recent -> supportFragmentManager.beginTransaction().replace(R.id.container, CallRecordsFragment()).commit()
             R.id.navigation_item_options -> supportFragmentManager.beginTransaction().replace(R.id.container, OptionsFragment()).commit()
         }
