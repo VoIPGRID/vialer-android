@@ -11,6 +11,7 @@
         style="@style/DialpadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:background="@android:color/transparent"
         android:contentDescription="@null"
         android:padding="10dp"
@@ -23,11 +24,13 @@
         style="@style/DialpadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/activity_vertical_item_padding"
         android:layout_weight="0"
-        android:background="@android:color/transparent"
+        android:background="@drawable/rounded_button_encryption"
         android:contentDescription="@null"
+        android:elevation="8dp"
         android:padding="10dp"
-        android:tint="@color/dial_button_chars_color"
         android:visibility="visible"
         app:srcCompat="@drawable/ic_lock_open" />
 
@@ -35,6 +38,7 @@
         android:id="@+id/edit_text"
         style="@style/DialpadNumberInput"
         android:layout_width="0dp"
+        android:layout_gravity="center"
         android:layout_weight="1"
         android:background="@android:color/transparent"
         android:inputType="none"
@@ -47,13 +51,13 @@
         style="@style/DialpadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_weight="0"
         android:background="@android:color/transparent"
         android:contentDescription="@null"
         android:padding="10dp"
-        android:tint="@color/color_primary"
         android:visibility="gone"
-        app:srcCompat="@drawable/ic_backspace"
+        app:srcCompat="@drawable/ic_correct"
         tools:visibility="visible" />
 
 </LinearLayout>
