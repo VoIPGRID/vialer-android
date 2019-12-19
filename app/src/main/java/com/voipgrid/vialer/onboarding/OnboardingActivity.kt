@@ -75,7 +75,7 @@ class OnboardingActivity : Onboarder() {
         val currentPosition = adapter.indexOfStep(callerStep)
 
         for (i in (currentPosition + 1) until adapter.itemCount) {
-            if (adapter.getStep(i).shouldSkip(state)) {
+            if (adapter.getStep(i).shouldThisStepBeSkipped(state)) {
                 continue
             }
 

@@ -65,5 +65,5 @@ class MissingVoipAccountStep : Step() {
         }, 1000)
     }
 
-    override fun shouldSkip(state: OnboardingState) = state.hasVoipAccount
+    override fun shouldThisStepBeSkipped(state: OnboardingState) = state.hasVoipAccount
 }
