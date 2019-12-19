@@ -51,14 +51,11 @@ class LoginStep : Step() {
         password_text_dialog.setOnFocusChangeListener { _, _ -> showDefaultInputs() }
         showDefaultInputs()
 
-        password_text_dialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
         KeyboardVisibilityEvent.setEventListener(activity) { keyboardIsVisible ->
             if (keyboardIsVisible) {
                 title_label.visibility = View.GONE
-                subtitle_label.visibility = View.GONE
             } else {
                 title_label.visibility = View.VISIBLE
-                subtitle_label.visibility = View.VISIBLE
             }
         }
 
@@ -78,7 +75,6 @@ class LoginStep : Step() {
 
     override fun onResume() {
         super.onResume()
-        twoFactorHelper?.pasteCodeFromClipboard()
         User.internal.hasCompletedOnBoarding = false
     }
 

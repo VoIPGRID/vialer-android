@@ -35,7 +35,18 @@ abstract class Step: Fragment() {
      * to be shown.
      *
      */
-    open fun shouldSkip(state: OnboardingState) = false
+    open fun shouldThisStepBeSkipped(state: OnboardingState): Boolean {
+        return false
+    }
+
+    /**
+     * Return TRUE if this step should be skipped completely and never added
+     * to the onboarder.
+     *
+     */
+    open fun shouldThisStepBeAddedToOnboarding(): Boolean {
+        return true
+    }
 
     /**
      * Display an alert message.

@@ -15,7 +15,7 @@ class LogoStep : AutoContinuingStep() {
         shown = true
     }
 
-    override fun shouldSkip(state: OnboardingState) = !shown
+    override fun shouldThisStepBeSkipped(state: OnboardingState) = !shown
 
     companion object {
 
