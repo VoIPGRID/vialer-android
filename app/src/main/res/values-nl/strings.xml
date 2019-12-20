@@ -267,8 +267,8 @@
     <string name="call_connection_setting_not_supported">Jouw Android versie staat het aanpassen van
         deze instelling niet toe
     </string>
-    <string name="dialer_no_connectivity">Geen internet verbinding</string>
-    <string name="dialer_no_connectivity_subtext">Gesprekken kunnen niet worden opgezet of ontvangen zonder internet</string>
+    <string name="dialer_no_connectivity">Geen Wi-Fi of mobiele internetverbinding</string>
+    <string name="dialer_no_connectivity_subtext">Gesprekken kunnen niet worden opgezet of ontvangen zonder internet.</string>
     <string name="ignore_battery_optimization_switch">Altijd op de achtergrond laten draaien</string>
     <string name="ignore_battery_optimization_description">Deze applicatie wordt niet langer beperkt door Android batterijbesparing, waardoor de betrouwbaarheid van inkomend belverkeer toeneemt. Wij raden je sterk aan deze functie in te schakelen.</string>
     <string name="dialer_no_encryption_dialog">Versleuteld bellen is momenteel niet ingeschakeld.
