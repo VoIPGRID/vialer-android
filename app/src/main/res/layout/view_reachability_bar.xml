@@ -27,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
-        android:maxWidth="270dp"
+        android:maxWidth="220dp"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
         android:text="@string/dialer_warning_voip_disabled"
@@ -42,7 +42,7 @@
         android:text="@string/settings_menu_item_title"
         android:textAllCaps="true"
         android:textColor="@color/error_color"
-        android:textSize="13sp" />
+        android:textSize="12sp" />
 
 
 </LinearLayout>
