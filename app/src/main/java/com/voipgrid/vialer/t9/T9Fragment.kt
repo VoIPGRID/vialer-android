@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.text.toSpannable
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DiffUtil
@@ -136,7 +137,7 @@ class T9Fragment : Fragment(), CoroutineScope {
     }
 
     fun hide() {
-        view?.visibility = View.GONE
+        view?.visibility = View.INVISIBLE
     }
 
     /**
@@ -206,7 +207,7 @@ class T9Fragment : Fragment(), CoroutineScope {
                 return
             }
 
-            itemView.text_view_contact_icon.setImageBitmap(IconHelper.getCallerIconBitmap(contact.displayName.substring(0, 1), contact.phoneNumbers[0].number, 0))
+            itemView.text_view_contact_icon.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.icon_user) })
         }
 
         /**

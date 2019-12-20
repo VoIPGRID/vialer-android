@@ -12,9 +12,9 @@
     <!-- negative margins to remove the cardviews compat shadow margins -->
     <dimen name="dialpad_calling_button_bottom_margin">2dp</dimen>
 
-    <dimen name="dialpad_button_digit_text_size">18dp</dimen>
-    <dimen name="dialpad_button_chars_text_size">10sp</dimen>
-    <dimen name="dialpad_button_star_text_size">18dp</dimen>
+    <dimen name="dialpad_button_digit_text_size">16dp</dimen>
+    <dimen name="dialpad_button_chars_text_size">8sp</dimen>
+    <dimen name="dialpad_button_star_text_size">20dp</dimen>
 
     <dimen name="dialpad_button_padding">1sp</dimen>
 
@@ -39,7 +39,7 @@
 
     <dimen name="list_item_call_button_padding">6dp</dimen>
 
-    <dimen name="contact_icon_width">40dp</dimen>
+    <dimen name="contact_icon_width">32dp</dimen>
     <dimen name="contact_icon_height">@dimen/contact_icon_width</dimen>
 
     <dimen name="contact_information_text_size">11sp</dimen>

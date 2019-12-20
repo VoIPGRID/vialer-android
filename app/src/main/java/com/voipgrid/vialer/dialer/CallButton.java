@@ -3,7 +3,10 @@ package com.voipgrid.vialer.dialer;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import com.voipgrid.vialer.R;
+
 import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.core.content.ContextCompat;
 
 public class CallButton extends AppCompatImageButton {
 
@@ -20,23 +23,19 @@ public class CallButton extends AppCompatImageButton {
     }
 
     /**
-     * Fade the call button out, making it transparent
-     * and stopping user interaction.
+     * Make the call button grey and stopping user interaction.
      *
      */
-    public void fadeOut() {
-        this.setAlpha(0.3f);
-        this.getBackground().setAlpha(0);
+    public void disable() {
+        this.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.call_pickup_button_disabled));
         this.setEnabled(false);
     }
 
     /**
-     * Reverse the fadeOut() method, making it fully visible and
-     * allowing user interaction.
+     * Make the call button green and allowing user interaction.
      */
-    public void fadeIn() {
-        this.setAlpha(1f);
-        this.getBackground().setAlpha(255);
+    public void enable() {
+        this.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.call_pickup_button));
         this.setEnabled(true);
     }
 }
