@@ -37,13 +37,13 @@ class CallRecordViewModel(application: Application) : AndroidViewModel(applicati
      */
     fun updateDisplayedCallRecords(showMyCallsOnly: Boolean, type: Type) {
         filterLiveData.value = CallRecordsQuery(
-                when (type) {
-                    ALL_CALLS -> booleanArrayOf(false, true)
-                    MISSED_CALLS -> booleanArrayOf(true)
-                },
-                when (showMyCallsOnly) {
+                wasPersonal = when (showMyCallsOnly) {
                     true  -> booleanArrayOf(true)
                     false -> booleanArrayOf(false, true)
+                },
+                wasMissed = when (type) {
+                    ALL_CALLS -> booleanArrayOf(false, true)
+                    MISSED_CALLS -> booleanArrayOf(true)
                 }
         )
     }
@@ -56,5 +56,5 @@ class CallRecordViewModel(application: Application) : AndroidViewModel(applicati
         ALL_CALLS, MISSED_CALLS
     }
 
-    private class CallRecordsQuery(val wasMissed: BooleanArray, val wasPersonal: BooleanArray)
+    private class CallRecordsQuery(val wasPersonal: BooleanArray, val wasMissed: BooleanArray)
 }
