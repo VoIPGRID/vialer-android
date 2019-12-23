@@ -29,7 +29,7 @@
                 android:paddingLeft="@dimen/list_item_contact_padding_left"
                 android:paddingTop="15dp"
                 android:paddingBottom="15dp"
-                android:text="@string/call_records_show_all"
+                android:text="@string/call_records_show_my_calls_only"
                 android:textSize="@dimen/contact_name_text_size"
                 android:fontFamily="sans-serif"
                 android:textColor="@color/contact_name_text_color"
