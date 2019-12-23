@@ -115,8 +115,8 @@ class MainActivity : NavigationDrawerActivity() {
                     ContextCompat.getColor(this@MainActivity, R.color.tab_inactive),
                     ContextCompat.getColor(this@MainActivity, R.color.tab_active)
             )
-            addTab(tab_layout.newTab().setText(R.string.tab_title_recents))
-            addTab(tab_layout.newTab().setText(R.string.tab_title_missed))
+            addTab(tab_layout.newTab().setText(R.string.tab_title_all_calls))
+            addTab(tab_layout.newTab().setText(R.string.tab_title_missed_calls))
             setOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabReselected(tab: TabLayout.Tab?) {
                 }
