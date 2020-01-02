@@ -302,8 +302,8 @@
     <string name="call_codec_high_quality">Higher quality audio</string>
     <string name="call_records_show_all">Only show missed calls</string>
     <string name="call_records_show_my_calls_only">Show my calls only</string>
-    <string name="dialer_no_connectivity">No internet connection</string>
-    <string name="dialer_no_connectivity_subtext">Calls cannot be made or received without a connection</string>
+    <string name="dialer_no_connectivity">No Wi-Fi or mobile connection</string>
+    <string name="dialer_no_connectivity_subtext">Calls cannot be made or received without connection.</string>
     <string name="dialer_no_internet_connectivity">Internet connection unavailable</string>
     <string name="dialer_no_internet_connectivity_subtext">You are connected to a network but unable to access the internet and therefore a call cannot be made.</string>
     <string name="call_records_answered_elsewhere" translatable="false">%1$s (%2$s)</string>
