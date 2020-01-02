@@ -125,8 +125,8 @@ class CallRecordsFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     ContextCompat.getColor(context, R.color.tab_inactive),
                     ContextCompat.getColor(context, R.color.tab_active)
             )
-            addTab(layout.tab_layout.newTab().setText(R.string.tab_title_missed))
-            addTab(layout.tab_layout.newTab().setText(R.string.tab_title_recents))
+            addTab(layout.tab_layout.newTab().setText(R.string.tab_title_missed_calls))
+            addTab(layout.tab_layout.newTab().setText(R.string.tab_title_all_calls))
             setOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabReselected(tab: TabLayout.Tab?) {
                 }

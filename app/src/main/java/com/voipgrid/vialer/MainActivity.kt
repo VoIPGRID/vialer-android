@@ -4,11 +4,13 @@ import android.os.Bundle
 import android.view.MenuItem
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.voipgrid.vialer.api.UserSynchronizer
+import com.voipgrid.vialer.callrecord.CallRecordsFragment
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.options.OptionsFragment
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.LoginRequiredActivity
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
