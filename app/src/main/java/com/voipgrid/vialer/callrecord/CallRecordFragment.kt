@@ -9,6 +9,7 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.callrecord.database.CallRecordEntity
@@ -31,34 +33,48 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+abstract class CallRecordFragment(val type: CallRecordViewModel.Type)
+    : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private val callRecordViewModel by lazy {
-        activity?.run {
-            ViewModelProviders.of(this)[CallRecordViewModel::class.java]
-        } ?: throw Exception("No activity found")
+        ViewModelProviders.of(this)[CallRecordViewModel::class.java]
     }
 
     private val adapter = CallRecordAdapter()
-    private var type = CallRecordViewModel.Type.ALL_CALLS
 
     @Inject lateinit var newCallRecordsImporter: NewCallRecordsImporter
     @Inject lateinit var networkUtil: NetworkUtil
     @Inject lateinit var broadcastReceiverManager: BroadcastReceiverManager
 
+    private val handler = Handler()
+
+    private val multiCheckListener by lazy {
+        (activity as MainActivity).multiCheckListener
+    }
+
+    private val showMyCallsOnlySwitch by lazy {
+        (activity as MainActivity).showMyCallsOnlySwitch
+    }
+
+    private val checkListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        handler.post {
+            callRecordViewModel.updateDisplayedCallRecords(isChecked, type)
+        }
+    }
+
     /**
      * Regularly refreshes the data set to keep timestamps relevant.
      *
      */
-    private val runnable: Runnable = object : Runnable {
+    private val runnable = object : Runnable {
         override fun run() {
             adapter.notifyDataSetChanged()
-            Handler().postDelayed(this, REFRESH_TIMEOUT)
+            handler.postDelayed(this, REFRESH_TIMEOUT)
         }
     }
 
     private val networkChangeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, p1: Intent?) {
+        override fun onReceive(context: Context?, intent: Intent?) {
             onRefresh()
         }
     }
@@ -84,23 +100,25 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         setupSwipeContainer()
         setupRecyclerView()
         fetchCalls()
-        callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
-        show_my_calls_only.setOnCheckedChangeListener { _, _ ->
-            callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
-        }
+
+        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
+            networkChangeReceiver,
+            ConnectivityManager.CONNECTIVITY_ACTION
+        )
+
+        callRecordViewModel.updateDisplayedCallRecords(showMyCallsOnlySwitch.isChecked, type)
+        multiCheckListener.register(checkListener)
     }
 
     override fun onResume() {
         super.onResume()
-        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(networkChangeReceiver, ConnectivityManager.CONNECTIVITY_ACTION)
-        Handler().postDelayed(runnable, REFRESH_TIMEOUT)
-        call_records?.scrollToTop()
+        handler.postDelayed(runnable, REFRESH_TIMEOUT)
     }
 
     override fun onPause() {
         super.onPause()
-        broadcastReceiverManager.unregisterReceiver(networkChangeReceiver)
-        Handler().removeCallbacks(runnable)
+        call_records.scrollToPosition(0)
+        handler.removeCallbacks(runnable)
     }
 
     private fun setupSwipeContainer() {
@@ -117,6 +135,12 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 itemAnimator = DefaultItemAnimator()
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        multiCheckListener.unregister(checkListener)
+        broadcastReceiverManager.unregisterReceiver(networkChangeReceiver)
     }
 
     /**
@@ -175,19 +199,25 @@ class CallRecordFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         call_records_unavailable_view.visibility = View.GONE
     }
 
-    /**
-     * Change the type of call records being displayed, this is so an external source can control
-     * this fragment.
-     *
-     */
-    fun changeType(type: CallRecordViewModel.Type) {
-        this.type = type
-        callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
-        onRefresh()
-    }
 
     companion object {
         const val REFRESH_TIMEOUT: Long = 5000
+    }
+}
+
+class AllCallsFragment : CallRecordFragment(CallRecordViewModel.Type.ALL_CALLS)
+
+class MissedCallsFragment : CallRecordFragment(CallRecordViewModel.Type.MISSED_CALLS)
+
+class MultiCheckedChangeListener : CompoundButton.OnCheckedChangeListener {
+    private val listeners = mutableListOf<CompoundButton.OnCheckedChangeListener>()
+
+    fun register(listener: CompoundButton.OnCheckedChangeListener) = listeners.add(listener)
+
+    fun unregister(listener: CompoundButton.OnCheckedChangeListener) = listeners.remove(listener)
+
+    override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+        listeners.forEach { it.onCheckedChanged(buttonView, isChecked) }
     }
 }
 
