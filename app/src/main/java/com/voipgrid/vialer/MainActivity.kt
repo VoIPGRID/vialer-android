@@ -1,27 +1,21 @@
 package com.voipgrid.vialer
 
-import android.app.AlertDialog
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.widget.LinearLayout
+import android.widget.Switch
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.ConfigurationCompat
-import com.codemybrainsout.ratingdialog.RatingDialog
-import com.google.android.material.tabs.TabLayout
-import com.voipgrid.vialer.callrecord.CallRecordFragment
-import com.voipgrid.vialer.callrecord.CallRecordViewModel
+import com.voipgrid.vialer.callrecord.CallRecordFragmentAdapter
+import com.voipgrid.vialer.callrecord.MultiCheckedChangeListener
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.persistence.RatingPopup
-import com.voipgrid.vialer.persistence.Statistics
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
 import com.voipgrid.vialer.sip.SipService
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 
 class MainActivity : NavigationDrawerActivity() {
@@ -29,6 +23,13 @@ class MainActivity : NavigationDrawerActivity() {
     @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
 
     override val logger = Logger(this)
+
+    val multiCheckListener = MultiCheckedChangeListener()
+
+    val showMyCallsOnlySwitch by lazy {
+        findViewById<LinearLayout>(R.id.show_my_calls_only)
+        .findViewById<Switch>(R.id.show_my_calls_only_switch)!!
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,26 +116,14 @@ class MainActivity : NavigationDrawerActivity() {
                     ContextCompat.getColor(this@MainActivity, R.color.tab_inactive),
                     ContextCompat.getColor(this@MainActivity, R.color.tab_active)
             )
-            addTab(tab_layout.newTab().setText(R.string.tab_title_all_calls))
-            addTab(tab_layout.newTab().setText(R.string.tab_title_missed_calls))
-            setOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-                override fun onTabReselected(tab: TabLayout.Tab?) {
-                }
 
-                override fun onTabUnselected(tab: TabLayout.Tab?) {
-                }
+            val adapter = CallRecordFragmentAdapter(this@MainActivity, supportFragmentManager)
+            tab_view_pager.adapter = adapter
+            tab_view_pager.offscreenPageLimit = adapter.count
 
-                override fun onTabSelected(tab: TabLayout.Tab?) {
-                    tab?.let {
-                        (call_record_fragment as CallRecordFragment).changeType(when(it.position) {
-                            0 -> CallRecordViewModel.Type.ALL_CALLS
-                            1 -> CallRecordViewModel.Type.MISSED_CALLS
-                            else -> CallRecordViewModel.Type.ALL_CALLS
-                        })
-                    }
+            showMyCallsOnlySwitch.setOnCheckedChangeListener(multiCheckListener)
 
-                }
-            })
+            setupWithViewPager(tab_view_pager)
         }
     }
 }
