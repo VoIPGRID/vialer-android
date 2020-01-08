@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -157,14 +156,20 @@ public class SettingsActivity extends LoginRequiredActivity {
     }
 
     private void setupActionBar() {
-        /* set the Toolbar to use as ActionBar */
+        // Set the Toolbar to use as ActionBar
         setSupportActionBar(findViewById(R.id.action_bar));
 
-        /* enabled home as up for the Toolbar */
+        // Enabled home as up for the Toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        /* enabled home button for the Toolbar */
+        // Enabled home button for the Toolbar
         getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        finish();
+        return true;
     }
 
     private void initConnectionSpinner() {

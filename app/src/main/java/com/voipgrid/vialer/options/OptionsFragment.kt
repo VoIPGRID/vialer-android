@@ -132,7 +132,6 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
     }
 
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
-        println("Hallo")
         when (menuItem.itemId) {
             R.id.navigation_item_statistics -> VoIPGRIDPortalWebActivity.launchForStats(context)
             R.id.navigation_item_dial_plan -> VoIPGRIDPortalWebActivity.launchForDialPlan(context)
