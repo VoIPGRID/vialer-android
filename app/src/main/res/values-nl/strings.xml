@@ -338,4 +338,7 @@
     <string name="contacts_menu_item_title">Contacten</string>
     <string name="recent_plan_menu_item_title">Recent</string>
     <string name="options_menu_item_title">Opties</string>
+    <string name="numbers">Nummers</string>
+    <string name="network">Network</string>
+    <string name="audio">Audio</string>
 </resources>

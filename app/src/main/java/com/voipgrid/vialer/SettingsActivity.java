@@ -1,14 +1,18 @@
 package com.voipgrid.vialer;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -44,6 +48,7 @@ import com.voipgrid.vialer.util.PhoneNumberUtils;
 import javax.inject.Inject;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -65,8 +70,6 @@ public class SettingsActivity extends LoginRequiredActivity {
     @BindView(R.id.progressBar) ProgressBar mProgressBar;
 
     @BindView(R.id.account_sip_switch) CompoundButton mVoipSwitch;
-    @BindView(R.id.account_sip_id_container) View mSipIdContainer;
-    @BindView(R.id.account_sip_id_edit_text) EditText mSipIdEditText;
 
     @BindView(R.id.account_mobile_number_edit_text) EditText mMobileNumberEditText;
     @BindView(R.id.account_outgoing_number_edit_text) EditText mOutgoingNumberEditText;
@@ -92,6 +95,7 @@ public class SettingsActivity extends LoginRequiredActivity {
     private Logger mLogger;
     private ClipboardHelper mClipboardHelper;
     private BroadcastReceiverManager mBroadcastReceiverManager;
+    private final int RIGHT = 2;
 
     private boolean mEditMode = false;
     private boolean mIsSetupComplete = false;
@@ -111,7 +115,7 @@ public class SettingsActivity extends LoginRequiredActivity {
 
         mVoipgridApi = ServiceGenerator.createApiService(this);
         mLogger = new Logger(this.getClass());
-        mClipboardHelper =  ClipboardHelper.fromContext(this);
+        mClipboardHelper = ClipboardHelper.fromContext(this);
         mBroadcastReceiverManager = BroadcastReceiverManager.fromContext(this);
 
         setupActionBar();
@@ -120,6 +124,7 @@ public class SettingsActivity extends LoginRequiredActivity {
         initCodecSpinner();
         initRemoteLoggingSwitch();
         initUse3GSwitch();
+        initMobileNumberEditText();
     }
 
     @Override
@@ -228,6 +233,34 @@ public class SettingsActivity extends LoginRequiredActivity {
         usePhoneRingtoneSwitch.setOnClickListener(view -> User.userPreferences.setUsePhoneRingtone(usePhoneRingtoneSwitch.isChecked()));
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private void initMobileNumberEditText() {
+        mMobileNumberEditText.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (mMobileNumberEditText.getCompoundDrawables()[RIGHT] != null) {
+                    if (event.getX() >= (mMobileNumberEditText.getRight() - mMobileNumberEditText.getLeft() - mMobileNumberEditText.getCompoundDrawables()[RIGHT].getBounds().width())) {
+                        if (isBusyWithApiRequest()) return true;
+                        if (mEditMode) {
+                            if (isValidNumber()) {
+                                saveMobileNumber();
+                            } else {
+                                DialogHelper.displayAlert(
+                                        this,
+                                        getString(R.string.invalid_mobile_number_title),
+                                        getString(R.string.invalid_mobile_number_message)
+                                );
+                            }
+                        } else {
+                            mEditMode = true;
+                            updateUiBasedOnCurrentEditMode();
+                        }
+                    }
+                }
+            }
+            return false;
+        });
+    }
+
     /**
      * We are sometimes prompting the user to disable battery optimisation, this callback will be received when they have
      * finished the dialog.
@@ -251,7 +284,6 @@ public class SettingsActivity extends LoginRequiredActivity {
         if (!enable) {
             MiddlewareHelper.unregister(this);
             stopService(new Intent(this, SipService.class));
-            mSipIdContainer.setVisibility(View.GONE);
             User.voip.setHasEnabledSip(false);
             return;
         }
@@ -339,14 +371,10 @@ public class SettingsActivity extends LoginRequiredActivity {
     private void updateUi() {
         if (User.voip.isAccountSetupForSip()) {
             mVoipSwitch.setChecked(User.voip.getHasEnabledSip());
-            if (User.getHasVoipAccount()) {
-                mSipIdEditText.setText(User.getVoipAccount().getAccountId());
-            }
         } else {
             mVoipSwitch.setVisibility(View.GONE);
         }
 
-        mSipIdContainer.setVisibility(User.voip.getHasEnabledSip() ? View.VISIBLE : View.GONE);
         enableProgressBar(false);
 
         if (!User.isLoggedIn()) {
@@ -358,55 +386,28 @@ public class SettingsActivity extends LoginRequiredActivity {
         mOutgoingNumberEditText.setText(User.getVoipgridUser().getOutgoingCli());
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_account, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_edit).setVisible(!mEditMode);
-        menu.findItem(R.id.action_done).setVisible(mEditMode);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id != R.id.action_edit && id != R.id.action_done) {
-            return super.onOptionsItemSelected(item);
-        }
-
-        if (isBusyWithApiRequest()) return true;
-
-        if (id == R.id.action_edit) {
-            mEditMode = true;
-        } else {
-            if (isValidNumber()) {
-                saveMobileNumber();
-            } else {
-                DialogHelper.displayAlert(
-                        this,
-                        getString(R.string.invalid_mobile_number_title),
-                        getString(R.string.invalid_mobile_number_message)
-                );
-            }
-        }
-
-        updateUiBasedOnCurrentEditMode();
-
-        return true;
-    }
-
     /**
      * Updates the UI, enabling/disabling fields and changing the menu icon
      * based on the current value of mEditMode.
      */
     private void updateUiBasedOnCurrentEditMode() {
-        invalidateOptionsMenu();
-        mMobileNumberEditText.setEnabled(mEditMode);
+        int enabled = ContextCompat.getColor(getApplicationContext(), R.color.black);
+        int disabled = ContextCompat.getColor(getApplicationContext(), R.color.edit_text_disabled_color);
+        Drawable checkDrawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_done_white_18dp);
+        Drawable editDrawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_mode_edit_white_18dp);
+        checkDrawable.setTint(enabled);
+        editDrawable.setTint(enabled);
+
+        if (mEditMode) {
+            mMobileNumberEditText.setCompoundDrawablesWithIntrinsicBounds(null, null, checkDrawable, null);
+            mMobileNumberEditText.setTextColor(enabled);
+        } else {
+            mMobileNumberEditText.setCompoundDrawablesWithIntrinsicBounds(null, null, editDrawable, null);
+            mMobileNumberEditText.setTextColor(disabled);
+        }
+
+        mMobileNumberEditText.setFocusableInTouchMode(mEditMode);
+        mMobileNumberEditText.setFocusable(mEditMode);
     }
 
     /**
