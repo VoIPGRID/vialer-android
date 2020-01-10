@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:title="Audio"
+        android:icon="@drawable/ic_settings_equalizer_black_24dp">
+
+        <ListPreference
+            app:key="audioCodec"
+            app:title="Audio Quality"/>
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        app:title="Network"
+        android:icon="@drawable/ic_settings_network_cell_black_24dp">
+
+        <ListPreference
+            app:key="internalConnectionPreference"
+            app:title="Call Using"/>
+
+        <SwitchPreferenceCompat
+            app:key="PREF_HAS_3G_ENABLED"
+            app:title="@string/switch_use_3g"
+            app:summary="@string/switch_use_3g_description"
+            app:defaultValue="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="SIP"
+        android:icon="@drawable/ic_settings_dialer_sip_black_24dp">
+
+        <SwitchPreferenceCompat
+            app:key="PREF_HAS_TLS_ENABLED"
+            app:title="@string/advanced_settings_tls_switch"
+            app:summary="@string/advanced_settings_tls_description"
+            app:defaultValue="true"/>
+
+        <SwitchPreferenceCompat
+            app:key="PREF_HAS_STUN_ENABLED"
+            app:title="@string/advanced_settings_stun_switch"
+            app:summary="@string/advanced_settings_stun_description"
+            app:defaultValue="false"/>
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,0 +1,62 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        app:key="call_settings"
+        app:title="Call Settings"
+        android:icon="@drawable/ic_settings_call_black_24dp">
+
+        <SwitchPreferenceCompat
+            app:key="PREF_HAS_SIP_PERMISSION"
+            app:title="Call using VoIP"
+            app:defaultValue="false"/>
+
+        <Preference
+            android:fragment="com.voipgrid.vialer.settings.VoipSettingsFragment"
+            app:title="Voip Account"/>
+
+        <SwitchPreferenceCompat
+            app:key="use_phone_ringtone"
+            app:title="@string/use_phones_ringtone_switch_switch"
+            app:summary="@string/use_phones_ringtone_switch_description"
+            app:defaultValue="false"/>
+
+        <Preference
+            android:fragment="com.voipgrid.vialer.settings.AdvancedCallSettingsFragment"
+            app:title="Advanced Call Settings"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="android_settings"
+        app:title="Android Settings"
+        android:icon="@drawable/ic_settings_android_black_24dp">
+
+        <SwitchPreferenceCompat
+            app:key="battery_optimisation"
+            app:persistent="false"
+            app:title="@string/ignore_battery_optimization_switch"
+            app:summary="@string/ignore_battery_optimization_description"/>
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        app:key="debug_settings"
+        app:title="Debug Settings"
+        android:icon="@drawable/ic_settings_bug_report_black_24dp">
+
+        <SwitchPreferenceCompat
+            app:key="PREF_REMOTE_LOGGING"
+            app:title="@string/remote_logging_switch_title"
+            app:enableCopying="true"
+            app:defaultValue="false"/>
+
+        <Preference
+            app:title="@string/feedback_title"
+            app:summary="@string/feedback_description"/>
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

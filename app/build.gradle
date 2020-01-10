@@ -269,6 +269,7 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'androidx.preference:preference:1.1.0'
 
     implementation "com.chibatching.kotpref:kotpref:$kotPrefVersion"
     implementation "com.chibatching.kotpref:initializer:$kotPrefVersion"

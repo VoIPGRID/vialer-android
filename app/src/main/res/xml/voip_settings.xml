@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:title="VoIP Account"
+        android:icon="@drawable/ic_settings_person_black_24dp">
+
+        <EditTextPreference
+            app:selectable="false"
+            app:key="voip_account"
+            app:title="Account ID"/>
+
+        <EditTextPreference
+            app:selectable="false"
+            app:key="outgoing_number"
+            app:title="Outgoing Number"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory>
+
+        <EditTextPreference
+            app:key="mobile_number"
+            app:title="Mobile Number"
+            android:icon="@drawable/ic_settings_phone_android_black_24dp"/>
+
+
+        <Preference app:summary="The mobile number of the currently installed sim card. This is used so calls can be redirected over the mobile network if internet connectivity is limited" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

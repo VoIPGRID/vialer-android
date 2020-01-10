@@ -5,7 +5,6 @@ import com.voipgrid.vialer.ForgottenPasswordActivity;
 import com.voipgrid.vialer.Logout;
 import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.NavigationDrawerActivity;
-import com.voipgrid.vialer.SettingsActivity;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -66,8 +65,6 @@ public interface VialerComponent {
     void inject(LoginRequiredActivity loginRequiredActivity);
 
     void inject(MainActivity activity);
-
-    void inject(SettingsActivity activity);
 
     void inject(VialerBaseActivity vialerBaseActivity);
     void inject(PasswordResetWebActivity activity);

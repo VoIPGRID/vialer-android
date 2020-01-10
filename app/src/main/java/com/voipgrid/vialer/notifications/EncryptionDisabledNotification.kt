@@ -11,7 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.SettingsActivity
+import com.voipgrid.vialer.settings.SettingsActivity
 
 class EncryptionDisabledNotification : AbstractNotification() {
 
