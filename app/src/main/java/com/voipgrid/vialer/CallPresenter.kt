@@ -1,14 +1,11 @@
 package com.voipgrid.vialer
 
-import android.util.Log
 import android.view.View
 import com.voipgrid.vialer.calling.CallActivityHelper
 import com.voipgrid.vialer.contacts.Contacts
-import com.voipgrid.vialer.sip.Audio
+import com.voipgrid.vialer.sip.service.Audio
 import com.voipgrid.vialer.sip.SipCall
 import com.voipgrid.vialer.sip.SipCall.TelephonyState.*
-import com.voipgrid.vialer.sip.SipConstants
-import com.voipgrid.vialer.sip.SipConstants.*
 import kotlinx.android.synthetic.main.activity_call.*
 
 /**

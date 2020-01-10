@@ -12,6 +12,7 @@ import com.voipgrid.vialer.permissions.MicrophonePermission
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.sip.core.Action.*
 import com.voipgrid.vialer.sip.incoming.MiddlewareResponse
+import com.voipgrid.vialer.sip.service.SipServiceExtra
 import java.lang.Exception
 
 class SipActionHandler(private val sip: SipService) {
@@ -24,18 +25,18 @@ class SipActionHandler(private val sip: SipService) {
      */
     fun handle(action: Action, intent: Intent): Unit = when(action) {
         HANDLE_INCOMING_CALL -> {
-            sip.pendingMiddlewareResponses.add(MiddlewareResponse(
-                    intent.getStringExtra(SipService.Extra.INCOMING_TOKEN.name) ?: throw Exception("Unable to start an incoming call without a token"),
-                    intent.getStringExtra(SipService.Extra.INCOMING_CALL_START_TIME.name) ?: throw Exception("Unable to start an incoming call without a call start time")
+            sip.middleware.add(MiddlewareResponse(
+                    intent.getStringExtra(SipServiceExtra.INCOMING_TOKEN.name) ?: throw Exception("Unable to start an incoming call without a token"),
+                    intent.getStringExtra(SipServiceExtra.INCOMING_CALL_START_TIME.name) ?: throw Exception("Unable to start an incoming call without a call start time")
             ))
             Unit
         }
-        HANDLE_OUTGOING_CALL -> sip.placeOutgoingCall(intent.getStringExtra(SipService.Extra.OUTGOING_PHONE_NUMBER.toString()) ?: throw IllegalArgumentException("Unable to start a call without an outgoing number"))
+        HANDLE_OUTGOING_CALL -> sip.actions.placeOutgoingCall(intent.getStringExtra(SipServiceExtra.OUTGOING_PHONE_NUMBER.toString()) ?: throw IllegalArgumentException("Unable to start a call without an outgoing number"))
         DECLINE_INCOMING_CALL -> sip.actions.reject()
         ANSWER_INCOMING_CALL -> askForPermissionsThenAnswer()
         END_CALL -> sip.actions.disconnect()
         DISPLAY_CALL_IF_AVAILABLE -> showCallIfAvailable()
-        SILENCE -> sip.silence()
+        SILENCE -> sip.sounds.silence()
     }.also {
         logger.i("Executing Sip Action: ${action.name}")
     }

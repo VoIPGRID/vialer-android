@@ -28,7 +28,7 @@ class AndroidCallConnection(val voip: SipService) : Connection() {
 
     override fun onCallAudioStateChanged(state: CallAudioState) {
         logger.i("Call audio state changed $state")
-        voip.onCallAudioStateChanged(state)
+        voip.handler.onCallAudioStateChanged(state)
     }
 
     override fun onHold() {
@@ -65,6 +65,6 @@ class AndroidCallConnection(val voip: SipService) : Connection() {
 
     override fun onSilence() {
         logger.i("Silencing call ringer")
-        voip.silence()
+        voip.sounds.silence()
     }
 }

@@ -24,6 +24,7 @@ import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.sip.core.Action;
+import com.voipgrid.vialer.sip.service.SipServiceExtra;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -269,8 +270,8 @@ public class FcmMessagingService extends FirebaseMessagingService {
 
         intent.setData(sipAddressUri);
 
-        intent.putExtra(SipService.Extra.INCOMING_TOKEN.name(), remoteMessageData.getRequestToken());
-        intent.putExtra(SipService.Extra.INCOMING_CALL_START_TIME.name(), remoteMessageData.getMessageStartTime());
+        intent.putExtra(SipServiceExtra.INCOMING_TOKEN.name(), remoteMessageData.getRequestToken());
+        intent.putExtra(SipServiceExtra.INCOMING_CALL_START_TIME.name(), remoteMessageData.getMessageStartTime());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent);

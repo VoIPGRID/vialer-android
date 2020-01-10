@@ -15,7 +15,7 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
     lateinit var account: SipAccount
         private set
 
-    private lateinit var sipService: SipService
+    private lateinit var sip: SipService
 
     init {
         System.loadLibrary(LIBRARY_NAME)
@@ -26,7 +26,7 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
      *
      */
     fun init(sipService: SipService) {
-        this.sipService = sipService
+        this.sip = sipService
 
         try {
             if (endpoint != null) return
@@ -60,13 +60,13 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
         }
 
         override fun onIncomingCall(incomingCallParam: OnIncomingCallParam) {
-            sipService.onIncomingCall(incomingCallParam, this)
+            sip.handler.onIncomingCall(incomingCallParam, this)
         }
 
         override fun onRegState(regStateParam: OnRegStateParam) {
             try {
                 if (info.regIsActive) {
-                    sipService.onRegister()
+                    sip.handler.onRegister()
                 }
             } catch (exception: Exception) {
             }
@@ -80,7 +80,7 @@ class Pjsip(private val pjsipConfigurator: PjsipConfigurator, private val phoneA
 
             if (prm.state == pjsip_transport_state.PJSIP_TP_STATE_CONNECTED) {
                 logger.i("There has been a new transport created. Reinivite the calls to keep the call going.")
-                sipService.reinvite()
+                sip.actions.reinvite()
             }
         }
     }

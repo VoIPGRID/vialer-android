@@ -158,15 +158,12 @@ public class MiddlewareHelper {
                 if (!response.isSuccessful()) {
                     logger.w("Unsuccessful response to middleware: " + response.code());
                     Log.e("TEST123", "MIddleware failed... " + response.code());
-                } else {
-                    Log.e("TEST123", "Responded to middleware!");
                 }
             }
 
             @Override
             public void onFailure(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Throwable t) {
                 logger.w("Failed sending response to middleware");
-                Log.e("TEST123", "Middleware failed...");
             }
         });
 

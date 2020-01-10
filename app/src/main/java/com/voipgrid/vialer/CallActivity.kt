@@ -2,35 +2,29 @@ package com.voipgrid.vialer
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.telecom.CallAudioState
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
-import androidx.lifecycle.Observer
-import cn.pedant.SweetAlert.SweetAlertDialog
 import com.voipgrid.vialer.call.CallDetail
 import com.voipgrid.vialer.call.TransferCompleteDialog
 import com.voipgrid.vialer.calling.AbstractCallActivity
 import com.voipgrid.vialer.calling.Dialer
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity
 import com.voipgrid.vialer.dialer.DialerActivity
-import com.voipgrid.vialer.sip.Audio
+import com.voipgrid.vialer.sip.service.Audio
 import com.voipgrid.vialer.sip.SipCall
 import com.voipgrid.vialer.sip.SipService
+import com.voipgrid.vialer.sip.service.Event
 import com.voipgrid.vialer.sip.transfer.CallTransferResult
 import com.voipgrid.vialer.util.NetworkUtil
 import kotlinx.android.synthetic.main.activity_call.*
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
  * CallActivity for incoming or outgoing call.
@@ -74,7 +68,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
         if (!networkUtil.isOnline) {
             NetworkAvailabilityActivity.start()
         }
-        broadcastReceiverManager.registerReceiverViaLocalBroadcastManager(updateUiReceiver, SipService.Event.CALL_UPDATED.name)
+        broadcastReceiverManager.registerReceiverViaLocalBroadcastManager(updateUiReceiver, Event.CALL_UPDATED.name)
     }
 
     override fun onPause() {
@@ -147,7 +141,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      */
     private fun hangup() {
         if (!sipServiceConnection.isAvailable) return
-        sipServiceConnection.get().hangup()
+        sip.actions.hangup()
     }
 
     private fun onMuteButtonClick(view: View?) {
@@ -163,7 +157,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      */
     private fun onTransferButtonClick(view: View?) {
         if (sip.isTransferring()) {
-            showCallTransferCompletedDialog(sipServiceConnection.get().mergeTransfer())
+            showCallTransferCompletedDialog(sip.actions.mergeTransfer())
             return
         }
 
@@ -273,7 +267,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
         if (number == null || number.isEmpty()) return
 
-        sip.startTransfer(number)
+        sip.actions.startTransfer(number)
     }
 
     override fun numberWasChanged(number: String) {}

@@ -28,7 +28,7 @@ public class SipInvite {
      *
      * @param packet The whole INVITE that was received with the incoming call.
      */
-    SipInvite(String packet) {
+    public SipInvite(String packet) {
         this.packet = packet;
         this.pAssertedIdentity = extractFromLikeHeader(P_ASSERTED_IDENTITY_HEADER_NAME);
         this.from = extractFromLikeHeader(FROM);

@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.sip
+package com.voipgrid.vialer.sip.service
 
 import android.bluetooth.BluetoothDevice
 import android.os.Build
