@@ -22,12 +22,7 @@ class OnboardingTest : VialerTest() {
 
     @Test
     fun loginFailsWithInvalidCredentials() {
-        onView(withText("calls in the cloud")).check(matches(isDisplayed()))
-        onView(withId(R.id.emailTextDialog)).perform(typeText("Invalid email"))
-        onView(withId(R.id.passwordTextDialog)).perform(typeText("Invalid password"))
-        onView(withId(R.id.button_login)).perform(click())
-
-        Thread.sleep(2000)
+        login(username = "Invalid email", password = "Invalid password");
         onView(withText("Login failed")).check(matches(isDisplayed()))
     }
 
@@ -46,7 +41,7 @@ class OnboardingTest : VialerTest() {
     @Test
     fun itCanLoginWithCorrectCredentials() {
         login()
-        onView(withText("Vialer is configuring")).check(matches(isDisplayed()))
+        onView(withText("Enter your mobile phone number below:")).check(matches(isDisplayed()))
     }
 
     @Test
