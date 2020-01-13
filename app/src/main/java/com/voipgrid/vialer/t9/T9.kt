@@ -10,7 +10,7 @@ object T9 {
             '6' to charArrayOf('m', 'n', 'o'),
             '7' to charArrayOf('p', 'q', 'r', 's'),
             '8' to charArrayOf('t', 'u', 'v'),
-            '9' to charArrayOf('x', 'y', 'z')
+            '9' to charArrayOf('w', 'x', 'y', 'z')
     )
 
     /**

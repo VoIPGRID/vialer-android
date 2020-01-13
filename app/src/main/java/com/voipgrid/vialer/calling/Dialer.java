@@ -13,6 +13,7 @@ import com.voipgrid.vialer.dialer.CallButton;
 import com.voipgrid.vialer.dialer.KeyPadView;
 import com.voipgrid.vialer.dialer.NumberInputView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -21,6 +22,7 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
 
     private Listener listener;
 
+    @BindView(R.id.bottom) ConstraintLayout holder;
     @BindView(R.id.number_input_edit_text) NumberInputView mNumberInput;
     @BindView(R.id.key_pad_view) KeyPadView mKeypad;
     @BindView(R.id.button_call) CallButton mCallButton;
@@ -29,6 +31,7 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
     private final boolean showExitButton;
     private final boolean showCallButton;
     private final boolean showRemoveButton;
+    private final float keypadHeightPercentage;
 
     public Dialer(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -37,6 +40,7 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
         showExitButton = a.getBoolean(R.styleable.Dialer_show_exit_button, false);
         showRemoveButton = a.getBoolean(R.styleable.Dialer_show_remove_button, false);
         showCallButton = a.getBoolean(R.styleable.Dialer_show_call_button, true);
+        keypadHeightPercentage = a.getFloat(R.styleable.Dialer_keypad_height_percentage, 0.6f);
     }
 
     public Dialer(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr) {
@@ -45,6 +49,14 @@ public class Dialer extends LinearLayout implements KeyPadView.OnKeyPadClickList
 
     public Dialer(final Context context, final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
         this(context, attrs);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) mKeypad.getLayoutParams();
+        layoutParams.matchConstraintPercentHeight = keypadHeightPercentage;
+        mKeypad.setLayoutParams(layoutParams);
     }
 
     @Override

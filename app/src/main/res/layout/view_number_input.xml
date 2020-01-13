@@ -7,19 +7,6 @@
     android:orientation="horizontal">
 
     <ImageButton
-        android:id="@+id/exit_button"
-        style="@style/DialpadButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@android:color/transparent"
-        android:contentDescription="@null"
-        android:padding="10dp"
-        android:tint="@color/color_primary"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_close" />
-
-    <ImageButton
         android:id="@+id/encryption_disabled"
         style="@style/DialpadButton"
         android:layout_width="wrap_content"
@@ -57,7 +44,18 @@
         android:contentDescription="@null"
         android:padding="10dp"
         android:visibility="gone"
-        app:srcCompat="@drawable/ic_correct"
-        tools:visibility="visible" />
+        app:srcCompat="@drawable/ic_correct" />
+
+    <ImageButton
+        android:id="@+id/exit_button"
+        style="@style/DialpadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:contentDescription="@null"
+        android:padding="10dp"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_close" />
 
 </LinearLayout>

@@ -17,12 +17,15 @@ public class CallActivityHelper {
 
     public void updateLabelsBasedOnPhoneNumber(TextView title, TextView subtitle, String number, String callerId, ImageView imageView) {
         String contactName = mContacts.getContactNameByPhoneNumber(number);
-        Bitmap bitmap = mContacts.getContactImageByPhoneNumber(number);
 
-        if (bitmap != null) {
-            imageView.setImageBitmap(bitmap);
-        } else {
-            imageView.setImageResource(R.drawable.no_user);
+        if (imageView != null) {
+            Bitmap bitmap = mContacts.getContactImageByPhoneNumber(number);
+
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+            } else {
+                imageView.setImageResource(R.drawable.no_user);
+            }
         }
 
         if (contactName == null) {

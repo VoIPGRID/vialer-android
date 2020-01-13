@@ -28,9 +28,9 @@
 
     <dimen name="call_state_text_size">21sp</dimen>
     <dimen name="call_name_text_size">45sp</dimen>
-    <dimen name="call_label_text_size">18sp</dimen>
+    <dimen name="call_label_text_size">16sp</dimen>
     <dimen name="call_number_text_size">18sp</dimen>
-    <dimen name="call_duration_text_size">18sp</dimen>
+    <dimen name="call_duration_text_size">16sp</dimen>
 
     <dimen name="list_item_contact_padding_right">@dimen/activity_horizontal_margin</dimen>
     <dimen name="list_item_contact_padding_left">@dimen/activity_horizontal_margin</dimen>
@@ -83,4 +83,10 @@
     <dimen name="cardview_padding">16dp</dimen>
     <dimen name="cardview_radius">5dp</dimen>
     <dimen name="settings_text_size">16sp</dimen>
+
+    <dimen name="call_buttons_width">65dp</dimen>
+    <dimen name="call_buttons_height">@dimen/call_buttons_width</dimen>
+    <dimen name="call_buttons_icon_width">32dp</dimen>
+    <dimen name="call_buttons_icon_height">@dimen/call_buttons_icon_width</dimen>
+    <dimen name="call_buttons_icon_padding">17dp</dimen>
 </resources>
