@@ -1,35 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
-        app:title="VoIP Account"
+        app:title="@string/settings_account_category_voip"
         android:icon="@drawable/ic_settings_person_black_24dp">
 
         <EditTextPreference
             app:selectable="false"
             app:key="username"
-            app:title="Username"/>
+            app:title="@string/settings_account_username"/>
 
         <EditTextPreference
             app:selectable="false"
             app:key="name"
-            app:title="Name"/>
+            app:title="@string/settings_account_name"/>
 
         <EditTextPreference
             app:selectable="false"
             app:key="description"
-            app:title="Description"/>
+            app:title="@string/settings_account_description"/>
 
         <EditTextPreference
             app:selectable="false"
-            app:key="voip_account"
-            app:title="Account ID"/>
+            app:key="account_id"
+            app:title="@string/settings_account_account_id"/>
 
         <EditTextPreference
             app:selectable="false"
             app:key="outgoing_number"
-            app:title="Outgoing Number"/>
+            app:title="@string/settings_account_outgoing_number"/>
 
     </PreferenceCategory>
 
@@ -37,11 +38,11 @@
 
         <EditTextPreference
             app:key="mobile_number"
-            app:title="Mobile Number"
+            app:title="@string/settings_account_mobile_number"
             android:icon="@drawable/ic_settings_phone_android_black_24dp"/>
 
-
-        <Preference app:summary="The mobile number of the currently installed sim card. This is used so calls can be redirected over the mobile network if internet connectivity is limited" />
+        <Preference app:summary="@string/settings_account_mobile_number_description" />
 
     </PreferenceCategory>
+
 </PreferenceScreen>

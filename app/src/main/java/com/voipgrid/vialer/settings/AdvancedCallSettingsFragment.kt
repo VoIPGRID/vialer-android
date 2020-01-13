@@ -4,7 +4,6 @@ import android.os.Build
 import android.os.Bundle
 import androidx.preference.ListPreference
 import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.voipgrid.vialer.ActivityLifecycleTracker
 import com.voipgrid.vialer.R
@@ -17,7 +16,7 @@ import com.voipgrid.vialer.persistence.VoipSettings
 class AdvancedCallSettingsFragment : AbstractSettingsFragment() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.advanced_call_settings, rootKey)
+        setPreferencesFromResource(R.xml.settings_advanced_call, rootKey)
 
         findPreference<ListPreference>("audioCodec")?.apply {
             summaryProvider = Preference.SummaryProvider<ListPreference> { preference -> preference.entries[preference.findIndexOfValue(VoipSettings.audioCodec.toString())] }

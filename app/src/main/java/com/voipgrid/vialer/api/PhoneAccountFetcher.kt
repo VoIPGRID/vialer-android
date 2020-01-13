@@ -41,7 +41,7 @@ class PhoneAccountFetcher(private val api : VoipgridApi) {
 
     /**
      * Completed resets our cache from both in-memory and shared
-     * preferences.
+     * settings.
      *
      */
     private fun invalidateCache() {
@@ -50,7 +50,7 @@ class PhoneAccountFetcher(private val api : VoipgridApi) {
     }
 
     /**
-     * Attempt to check shared preferences for a version of our PhoneAccounts cache.
+     * Attempt to check shared settings for a version of our PhoneAccounts cache.
      *
      */
     private fun loadCacheFromSharedPreferences() : PhoneAccountsCache {

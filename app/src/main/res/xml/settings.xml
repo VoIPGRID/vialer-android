@@ -8,57 +8,55 @@
 
     <PreferenceCategory
         app:key="call_settings"
-        app:title="Call Settings"
+        app:title="@string/settings_category_call"
         android:icon="@drawable/ic_settings_call_black_24dp">
 
         <SwitchPreferenceCompat
-            app:key="PREF_HAS_SIP_PERMISSION"
-            app:title="Call using VoIP"
-            app:summary="If disabled, all calls made will be made using two-step calling."
+            app:key="PREF_HAS_SIP_ENABLED"
+            app:title="@string/settings_call_using_voip_title"
+            app:summary="@string/settings_call_using_voip_desc"
             app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
             app:key="use_phone_ringtone"
-            app:title="@string/use_phones_ringtone_switch_switch"
-            app:summary="@string/use_phones_ringtone_switch_description"
+            app:title="@string/settings_use_phones_ringtone_title"
+            app:summary="@string/settings_use_phones_ringtone_desc"
             app:defaultValue="false"/>
 
         <Preference
             android:fragment="com.voipgrid.vialer.settings.AdvancedCallSettingsFragment"
-            app:title="Advanced Call Settings"/>
+            app:title="@string/settings_link_advanced_call_settings"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
         app:key="android_settings"
-        app:title="Android Settings"
+        app:title="@string/settings_category_android"
         android:icon="@drawable/ic_settings_android_black_24dp">
 
         <SwitchPreferenceCompat
             app:key="battery_optimisation"
             app:persistent="false"
-            app:title="@string/ignore_battery_optimization_switch"
-            app:summary="@string/ignore_battery_optimization_description"/>
+            app:title="@string/settings_ignore_battery_optimization_title"
+            app:summary="@string/settings_ignore_battery_optimization_desc"/>
 
     </PreferenceCategory>
 
-
     <PreferenceCategory
         app:key="debug_settings"
-        app:title="Debug Settings"
+        app:title="@string/settings_category_debug"
         android:icon="@drawable/ic_settings_bug_report_black_24dp">
 
         <SwitchPreferenceCompat
             app:key="PREF_REMOTE_LOGGING"
-            app:title="@string/remote_logging_switch_title"
+            app:title="@string/settings_remote_logging_title"
             app:enableCopying="true"
             app:defaultValue="false"/>
 
         <Preference
-            app:title="@string/feedback_title"
-            app:summary="@string/feedback_description"/>
+            app:title="@string/settings_feedback_title"
+            app:summary="@string/settings_feedback_desc"/>
 
     </PreferenceCategory>
-
 
 </PreferenceScreen>

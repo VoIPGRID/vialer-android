@@ -27,13 +27,13 @@ class AccountSettingsFragment : AbstractSettingsFragment(), Callback<MobileNumbe
     private val voipgridApi by lazy { ServiceGenerator.createApiService(activity ?: throw Exception("No activity")) }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.voip_settings, rootKey)
+        setPreferencesFromResource(R.xml.settings_account, rootKey)
         VialerApplication.get().component().inject(this)
 
         findPreference<EditTextPreference>("name")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipgridUser?.fullName }
         findPreference<EditTextPreference>("username")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipgridUser?.email }
         findPreference<EditTextPreference>("description")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipAccount?.description }
-        findPreference<EditTextPreference>("voip_account")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipAccount?.accountId }
+        findPreference<EditTextPreference>("account_id")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipAccount?.accountId }
         findPreference<EditTextPreference>("outgoing_number")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipgridUser?.outgoingCli }
 
 

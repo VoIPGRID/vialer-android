@@ -30,10 +30,10 @@ class SettingsFragment : AbstractSettingsFragment() {
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.preferences, rootKey)
+        setPreferencesFromResource(R.xml.settings, rootKey)
         VialerApplication.get().component().inject(this)
 
-        findPreference<SwitchPreferenceCompat>("PREF_HAS_SIP_PERMISSION")?.setOnPreferenceChangeListener { _: Preference, voipEnabled: Any ->
+        findPreference<SwitchPreferenceCompat>("PREF_HAS_SIP_ENABLED")?.setOnPreferenceChangeListener { _: Preference, voipEnabled: Any ->
             if (voipEnabled == false) {
                 MiddlewareHelper.unregister(activity)
                 activity?.stopService(Intent(activity, SipService::class.java))
