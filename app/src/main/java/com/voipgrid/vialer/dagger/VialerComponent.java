@@ -24,6 +24,8 @@ import com.voipgrid.vialer.onboarding.OnboardingActivity;
 import com.voipgrid.vialer.onboarding.steps.AccountConfigurationStep;
 import com.voipgrid.vialer.onboarding.steps.LoginStep;
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep;
+import com.voipgrid.vialer.settings.AccountSettingsFragment;
+import com.voipgrid.vialer.settings.SettingsFragment;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.t9.T9Fragment;
@@ -98,4 +100,8 @@ public interface VialerComponent {
     Logout provideLogout();
 
     void inject(@NotNull final CallRecordViewModel callRecordViewModel);
+
+    void inject(@NotNull final AccountSettingsFragment accountSettingsFragment);
+
+    void inject(@NotNull final SettingsFragment settingsFragment);
 }

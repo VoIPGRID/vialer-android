@@ -1,6 +1,11 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <Preference
+        android:fragment="com.voipgrid.vialer.settings.AccountSettingsFragment"
+        android:icon="@drawable/ic_settings_person_black_24dp"
+        app:title="My Account"/>
+
     <PreferenceCategory
         app:key="call_settings"
         app:title="Call Settings"
@@ -9,11 +14,8 @@
         <SwitchPreferenceCompat
             app:key="PREF_HAS_SIP_PERMISSION"
             app:title="Call using VoIP"
+            app:summary="If disabled, all calls made will be made using two-step calling."
             app:defaultValue="false"/>
-
-        <Preference
-            android:fragment="com.voipgrid.vialer.settings.VoipSettingsFragment"
-            app:title="Voip Account"/>
 
         <SwitchPreferenceCompat
             app:key="use_phone_ringtone"

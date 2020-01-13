@@ -8,6 +8,21 @@
 
         <EditTextPreference
             app:selectable="false"
+            app:key="username"
+            app:title="Username"/>
+
+        <EditTextPreference
+            app:selectable="false"
+            app:key="name"
+            app:title="Name"/>
+
+        <EditTextPreference
+            app:selectable="false"
+            app:key="description"
+            app:title="Description"/>
+
+        <EditTextPreference
+            app:selectable="false"
             app:key="voip_account"
             app:title="Account ID"/>
 

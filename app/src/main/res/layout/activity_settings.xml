@@ -17,6 +17,15 @@
         android:theme="@style/ActionBar"
         app:popupTheme="@style/ActionBar_Popup" />
 
+    <ProgressBar
+        android:id="@+id/loading"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:progressTint="@color/progress_bar_color"
+        android:visibility="gone" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
