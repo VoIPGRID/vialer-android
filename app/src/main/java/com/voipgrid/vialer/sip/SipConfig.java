@@ -461,7 +461,7 @@ public class SipConfig implements AccountStatus {
      * @param uaConfig
      */
     private void configureStunServer(UaConfig uaConfig) {
-        if (!User.voip.getHasTlsEnabled()) {
+        if (!User.voip.getHasStunEnabled()) {
             mLogger.i("User has disabled using STUN via settings menu");
             return;
         }
