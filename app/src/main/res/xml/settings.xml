@@ -43,19 +43,27 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        app:key="debug_settings"
         app:title="@string/settings_category_debug"
         android:icon="@drawable/ic_settings_bug_report_black_24dp">
+
+        <Preference
+            app:key="feedback"
+            app:isPreferenceVisible="true"
+            app:title="@string/settings_feedback_title"
+            app:summary="@string/settings_feedback_desc"/>
+
 
         <SwitchPreferenceCompat
             app:key="PREF_REMOTE_LOGGING"
             app:title="@string/settings_remote_logging_title"
-            app:enableCopying="true"
-            app:defaultValue="false"/>
+            app:summary="@string/settings_remote_logging_desc"/>
 
         <Preference
-            app:title="@string/settings_feedback_title"
-            app:summary="@string/settings_feedback_desc"/>
+            app:key="PREF_REMOTE_LOGGING_ID"
+            app:title="@string/settings_remote_logging_id_title"
+            android:dependency="PREF_REMOTE_LOGGING"
+            app:enableCopying="true"
+            app:defaultValue="false" />
 
     </PreferenceCategory>
 

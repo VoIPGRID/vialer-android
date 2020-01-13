@@ -1,9 +1,11 @@
 package com.voipgrid.vialer.settings
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
@@ -33,6 +35,15 @@ class SettingsFragment : AbstractSettingsFragment() {
         setPreferencesFromResource(R.xml.settings, rootKey)
         VialerApplication.get().component().inject(this)
 
+        findPreference<Preference>("feedback")?.setOnPreferenceClickListener {
+            activity?.let {
+
+                FeedbackDialogFragment().show(it.supportFragmentManager, "")
+            }
+
+            false
+        }
+
         findPreference<SwitchPreferenceCompat>("PREF_HAS_SIP_ENABLED")?.setOnPreferenceChangeListener { _: Preference, voipEnabled: Any ->
             if (voipEnabled == false) {
                 MiddlewareHelper.unregister(activity)
@@ -61,8 +72,9 @@ class SettingsFragment : AbstractSettingsFragment() {
             true
         }
 
+        findPreference<Preference>("PREF_REMOTE_LOGGING_ID")?.summaryProvider = Preference.SummaryProvider<Preference> { if (User.remoteLogging.isEnabled) User.remoteLogging.id else "" }
+
         findPreference<SwitchPreferenceCompat>("PREF_REMOTE_LOGGING")?.apply {
-            summaryProvider = Preference.SummaryProvider<SwitchPreferenceCompat> { if (User.remoteLogging.isEnabled) User.remoteLogging.id else "" }
             setOnPreferenceChangeListener { _: Preference, _: Any ->
                 GlobalScope.launch(Dispatchers.Main) {
                     delay(1000)
