@@ -3,7 +3,7 @@ package com.voipgrid.vialer.persistence.core
 import com.chibatching.kotpref.KotprefModel
 
 /**
- * Abstract class that will use the default shared settings when
+ * Abstract class that will use the default shared preferences when
  * creating a new KotprefModel.
  *
  */

@@ -6,7 +6,7 @@ import java.util.*
 object RemoteLogging : DefaultKotPrefModel() {
 
     /**
-     * We want to persist the remote id even when the shared settings are cleared,
+     * We want to persist the remote id even when the shared preferences are cleared,
      * so we will store it on this object too.
      *
      */

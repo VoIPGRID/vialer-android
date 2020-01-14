@@ -248,7 +248,7 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
         const val EXTRA_RETURN_AS_RESULT = "EXTRA_RETURN_AS_RESULT"
 
         /**
-         * The key in shared settings where the last dialled number is stored.
+         * The key in shared preferences where the last dialled number is stored.
          *
          */
         const val LAST_DIALED = "last_dialed"

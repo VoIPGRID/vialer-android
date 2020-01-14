@@ -6,7 +6,7 @@ import androidx.test.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
 
 /**
- * For testing an activity, if true is passed, state (shared settings) will be wiped after each
+ * For testing an activity, if true is passed, state (shared preferences) will be wiped after each
  * test.
  *
  */

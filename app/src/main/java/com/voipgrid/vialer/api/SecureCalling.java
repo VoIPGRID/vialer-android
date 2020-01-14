@@ -173,10 +173,10 @@ public class SecureCalling {
     }
 
     /**
-     * Generates the key for the shared settings flag this should be unique per
+     * Generates the key for the shared preferences flag this should be unique per
      * VoIP account.
      *
-     * @return The key for use in shared settings
+     * @return The key for use in shared preferences
      */
     private String getSharedPreferencesKey() {
         return PREF_VOIP_ACCOUNT_HAS_SECURE_CALLING_ENABLED + mIdentifier;
