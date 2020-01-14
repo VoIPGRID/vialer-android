@@ -48,10 +48,9 @@
 
         <Preference
             app:key="feedback"
-            app:isPreferenceVisible="true"
+            app:isPreferenceVisible="false"
             app:title="@string/settings_feedback_title"
             app:summary="@string/settings_feedback_desc"/>
-
 
         <SwitchPreferenceCompat
             app:key="PREF_REMOTE_LOGGING"
