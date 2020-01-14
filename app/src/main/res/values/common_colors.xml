@@ -34,7 +34,7 @@
     <color name="google_lock_ring_handle_color">#ffa3a3a3</color>
     <color name="google_lock_ring_white_transparent">#00ffffff</color>
 
-    <color name="call_fab_hangup_color">#DB4437</color>
+    <color name="call_fab_hangup_color">@color/error_foreground_color</color>
     <color name="call_fab_pickup_color">@color/dialpad_fab_call_color</color>
     <color name="call_fab_disabled_color">#888888</color>
 

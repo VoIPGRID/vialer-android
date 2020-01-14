@@ -23,8 +23,8 @@
     <string name="call_hangup">Hang up</string>
     <string name="call_connected">Connected</string>
     <string name="call_unreachable">Unreachable</string>
-    <string name="call_incoming_accept">Accept</string>
-    <string name="call_incoming_decline">Decline</string>
+    <string name="call_incoming_accept">Answer</string>
+    <string name="call_incoming_decline">Ignore</string>
     <string name="call_back_button_confirmation">You are about to end this call, are you sure?</string>
     <string name="call_back_button_confirmation_yes">Yes, end the call</string>
     <string name="call_back_button_confirmation_no">No</string>
@@ -340,4 +340,5 @@
     <string name="numbers">Numbers</string>
     <string name="network">Network</string>
     <string name="audio">Audio</string>
+    <string name="call_lost">Call lost - %1$s</string>
 </resources>

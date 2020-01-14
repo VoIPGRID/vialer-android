@@ -107,13 +107,13 @@ public class CallPresenter {
      */
     private void updateCallLabels() {
         if (mActivity.getForceDisplayedCallDetails() != null) {
-            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.mTitle, mActivity.mSubtitle, mActivity.getForceDisplayedCallDetails().getNumber(), mActivity.getForceDisplayedCallDetails().getCallerId(), null);
+            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.mTitle, mActivity.mSubtitle, mActivity.getForceDisplayedCallDetails().getNumber(), mActivity.getForceDisplayedCallDetails().getCallerId());
             return;
         }
 
         if (mActivity.getSipServiceConnection().isAvailableAndHasActiveCall()) {
             SipCall call = mActivity.hasSecondCall() ? mActivity.getSipServiceConnection().get().getCurrentCall() : mActivity.getSipServiceConnection().get().getFirstCall();
-            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.mTitle, mActivity.mSubtitle, call.getPhoneNumber(), call.getCallerId(), null);
+            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.mTitle, mActivity.mSubtitle, call.getPhoneNumber(), call.getCallerId());
         }
     }
 

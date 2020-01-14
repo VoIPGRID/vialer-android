@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:background="@color/black">
 
     <TextView
         android:id="@+id/call_state"
@@ -14,40 +15,31 @@
         android:gravity="center"
         android:text="@string/callnotification_incoming_call"
         android:textSize="20sp"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintVertical_bias="0.4"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <TextView
         android:id="@+id/incoming_caller_title"
         style="@style/CallTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="48dp"
         android:gravity="center"
-        android:textSize="40sp"
-        app:layout_constraintTop_toBottomOf="@id/call_state" />
+        android:textSize="32sp"
+        app:layout_constraintTop_toTopOf="@id/call_state"
+        tools:text="Ghostbusters" />
 
     <TextView
         android:id="@+id/incoming_caller_subtitle"
         style="@style/CallTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:gravity="center"
-        android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@+id/incoming_caller_title" />
-
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/profile_image"
-        android:layout_width="176dp"
-        android:layout_height="176dp"
-        android:background="@drawable/contact_picture_circle"
-        android:padding="40dp"
-        android:src="@drawable/no_user"
-        app:civ_border_color="@android:color/white"
-        app:civ_border_width="2dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@+id/incoming_caller_title"
+        tools:text="+31 50 446 7828" />
 
     <TextView
         android:id="@+id/establishing_text"
@@ -71,9 +63,9 @@
         android:backgroundTint="@color/call_fab_hangup_color"
         android:contentDescription="@string/call_incoming_decline"
         android:padding="15dp"
-        app:layout_constraintBottom_toTopOf="@+id/text_view_decline"
-        app:layout_constraintEnd_toEndOf="@+id/text_view_decline"
-        app:layout_constraintStart_toStartOf="@+id/text_view_decline"
+        app:layout_constraintBottom_toTopOf="@id/text_view_decline"
+        app:layout_constraintEnd_toStartOf="@id/button_pickup"
+        app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_call_end_white" />
 
     <TextView
@@ -86,8 +78,7 @@
         android:text="@string/call_incoming_decline"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_accept"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintEnd_toStartOf="@id/button_pickup"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
@@ -98,10 +89,9 @@
         android:background="@drawable/call_pickup_button"
         android:backgroundTint="@color/call_fab_pickup_color"
         android:contentDescription="@string/call_incoming_accept"
-        android:padding="15dp"
-        app:layout_constraintBottom_toTopOf="@+id/text_view_accept"
-        app:layout_constraintEnd_toEndOf="@+id/text_view_accept"
-        app:layout_constraintStart_toStartOf="@+id/text_view_accept"
+        app:layout_constraintBottom_toTopOf="@id/text_view_accept"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_decline"
         app:srcCompat="@drawable/ic_call_white" />
 
     <TextView
@@ -117,8 +107,7 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/text_view_decline" />
+        app:layout_constraintStart_toEndOf="@+id/button_decline" />
 
     <LinearLayout
         android:id="@+id/screen_off"
