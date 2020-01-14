@@ -100,8 +100,4 @@ public interface VialerComponent {
     Logout provideLogout();
 
     void inject(@NotNull final CallRecordViewModel callRecordViewModel);
-
-    void inject(@NotNull final AccountSettingsFragment accountSettingsFragment);
-
-    void inject(@NotNull final SettingsFragment settingsFragment);
 }

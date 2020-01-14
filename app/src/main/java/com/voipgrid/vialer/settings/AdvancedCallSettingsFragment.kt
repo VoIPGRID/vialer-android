@@ -11,9 +11,12 @@ import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.SecureCalling
 import com.voipgrid.vialer.persistence.UserPreferences
 import com.voipgrid.vialer.persistence.VoipSettings
+import org.koin.android.ext.android.inject
 
 
 class AdvancedCallSettingsFragment : AbstractSettingsFragment() {
+
+    private val secureCalling: SecureCalling by inject()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_advanced_call, rootKey)
@@ -34,24 +37,19 @@ class AdvancedCallSettingsFragment : AbstractSettingsFragment() {
         }
 
         findPreference<SwitchPreferenceCompat>("PREF_HAS_TLS_ENABLED")?.setOnPreferenceChangeListener { _: Preference, enableTls: Any ->
-            val secureCalling = SecureCalling.fromContext(activity)
-
             isLoading = true
 
             if (enableTls == true) {
-                secureCalling.enable(SecureCallingUpdatedCallback())
+                secureCalling.enable(callback)
             } else {
-                secureCalling.disable(SecureCallingUpdatedCallback())
+                secureCalling.disable(callback)
             }
 
             true
         }
     }
 
-    /**
-     * This class will handle the API response when updating the secure calling setting.
-     */
-    private inner class SecureCallingUpdatedCallback internal constructor() : SecureCalling.Callback {
+    private val callback = object : SecureCalling.Callback {
         override fun onSuccess() {
             isLoading = false
             ActivityLifecycleTracker.removeEncryptionNotification()
@@ -61,5 +59,4 @@ class AdvancedCallSettingsFragment : AbstractSettingsFragment() {
             isLoading = false
         }
     }
-
 }

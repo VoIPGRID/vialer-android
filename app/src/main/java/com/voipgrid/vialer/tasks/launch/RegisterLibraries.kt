@@ -10,6 +10,10 @@ import com.segment.analytics.Analytics
 import com.segment.analytics.Analytics.setSingletonInstance
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
+import com.voipgrid.vialer.logging.appModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
 
 /**
@@ -23,6 +27,12 @@ class RegisterLibraries : OnLaunchTask {
         Contacts.initialize(application)
         initializeSegmentAnalytics(application)
         Kotpref.gson = GsonBuilder().create()
+
+        startKoin {
+            androidLogger()
+            androidContext(application)
+            modules(appModule)
+        }
     }
 
     private fun initializeSegmentAnalytics(context: Context) {

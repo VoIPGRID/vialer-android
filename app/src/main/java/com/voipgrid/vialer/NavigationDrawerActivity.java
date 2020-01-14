@@ -45,6 +45,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import kotlin.Unit;
+import kotlinx.coroutines.Dispatchers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -171,7 +172,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
         if (!isConnectedToNetwork()) return;
 
-        userSynchronizer.syncWithCallback(() -> {
+        userSynchronizer.syncWithCallback(Dispatchers.getIO(), () -> {
             runOnUiThread(this::refresh);
             return Unit.INSTANCE;
         });
