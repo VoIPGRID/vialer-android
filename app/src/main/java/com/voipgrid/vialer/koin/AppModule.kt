@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.logging
+package com.voipgrid.vialer.koin
 
 import com.voipgrid.vialer.api.SecureCalling
 import com.voipgrid.vialer.api.ServiceGenerator

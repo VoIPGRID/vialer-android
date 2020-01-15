@@ -10,7 +10,7 @@ import com.segment.analytics.Analytics
 import com.segment.analytics.Analytics.setSingletonInstance
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
-import com.voipgrid.vialer.logging.appModule
+import com.voipgrid.vialer.koin.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
