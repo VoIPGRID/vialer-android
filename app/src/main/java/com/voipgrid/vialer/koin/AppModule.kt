@@ -1,5 +1,7 @@
 package com.voipgrid.vialer.koin
 
+import android.content.Context
+import android.telephony.TelephonyManager
 import com.voipgrid.vialer.api.SecureCalling
 import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.api.UserSynchronizer
@@ -16,4 +18,7 @@ val appModule = module {
     single { UserSynchronizer(get(), androidContext(), get()) }
 
     single { BatteryOptimizationManager(androidContext()) }
+
+    single { androidContext().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager }
+
 }
