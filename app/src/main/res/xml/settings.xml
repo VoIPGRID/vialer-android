@@ -15,16 +15,19 @@
             app:key="PREF_HAS_SIP_ENABLED"
             app:title="@string/settings_call_using_voip_title"
             app:summary="@string/settings_call_using_voip_desc"
+            app:iconSpaceReserved="false"
             app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
             app:key="use_phone_ringtone"
             app:title="@string/settings_use_phones_ringtone_title"
             app:summary="@string/settings_use_phones_ringtone_desc"
+            app:iconSpaceReserved="false"
             app:defaultValue="false"/>
 
         <Preference
             android:fragment="com.voipgrid.vialer.settings.AdvancedCallSettingsFragment"
+            app:icon="@drawable/ic_settings_advanced_call_black_24dp"
             app:title="@string/settings_link_advanced_call_settings"/>
 
     </PreferenceCategory>
@@ -38,6 +41,7 @@
             app:key="battery_optimisation"
             app:persistent="false"
             app:title="@string/settings_ignore_battery_optimization_title"
+            app:iconSpaceReserved="false"
             app:summary="@string/settings_ignore_battery_optimization_desc"/>
 
     </PreferenceCategory>
@@ -50,17 +54,20 @@
             app:key="feedback"
             app:isPreferenceVisible="false"
             app:title="@string/settings_feedback_title"
+            app:iconSpaceReserved="false"
             app:summary="@string/settings_feedback_desc"/>
 
         <SwitchPreferenceCompat
             app:key="PREF_REMOTE_LOGGING"
             app:title="@string/settings_remote_logging_title"
+            app:iconSpaceReserved="false"
             app:summary="@string/settings_remote_logging_desc"/>
 
         <Preference
             app:key="PREF_REMOTE_LOGGING_ID"
             app:title="@string/settings_remote_logging_id_title"
             android:dependency="PREF_REMOTE_LOGGING"
+            app:iconSpaceReserved="false"
             app:enableCopying="true"
             app:defaultValue="false" />
 
