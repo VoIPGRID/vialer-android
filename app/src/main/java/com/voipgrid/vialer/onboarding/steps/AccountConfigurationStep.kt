@@ -9,11 +9,13 @@ import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.PhoneNumberUtils
+import com.voipgrid.vialer.util.Sim
 import kotlinx.android.synthetic.main.onboarding_step_mobile_number.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.android.ext.android.inject
 import javax.inject.Inject
 
 class AccountConfigurationStep : Step(), View.OnClickListener {
@@ -25,12 +27,8 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
 
     private val logger = Logger(this).forceRemoteLogging(true)
 
-    @Inject lateinit var userSynchronizer: UserSynchronizer
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        VialerApplication.get().component().inject(this)
-    }
+    private val userSynchronizer: UserSynchronizer by inject()
+    private val sim: Sim by inject()
 
     override fun onResume() {
         super.onResume()
@@ -41,7 +39,7 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
             return
         }
 
-        mobileNumberTextDialog.setText(User.voipgridUser?.mobileNumber)
+        mobileNumberTextDialog.setText(if (sim.mobileNumber != null) sim.mobileNumber else User.voipgridUser?.mobileNumber)
         mobileNumberTextDialog.setRightDrawableOnClickListener {
             alert(R.string.phonenumber_info_text_title, R.string.phonenumber_info_text)
         }

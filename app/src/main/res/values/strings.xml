@@ -224,7 +224,7 @@
     <string name="settings_account_account_id">Account ID</string>
     <string name="settings_account_outgoing_number">Outgoing Number</string>
     <string name="settings_account_mobile_number">Mobile Number</string>
-    <string name="settings_account_mobile_number_not_matching">The mobile number currently configured for this account does not seem to match the mobile number of the sim card. Click to set it.</string>
+    <string name="settings_account_mobile_number_not_matching">The currently configured mobile number does not seem to match the number for the current SIM. Click here to automatically update it.</string>
     <string name="settings_account_mobile_number_description">The mobile number of this device, this is used in two-step calling.</string>
     <string name="settings_advanced_call_category_audio">Audio</string>
     <string name="settings_advanced_call_category_network">Network</string>

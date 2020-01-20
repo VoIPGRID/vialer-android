@@ -6,6 +6,7 @@ import com.voipgrid.vialer.api.SecureCalling
 import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.util.BatteryOptimizationManager
+import com.voipgrid.vialer.util.Sim
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -21,4 +22,5 @@ val appModule = module {
 
     single { androidContext().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager }
 
+    single { Sim(get()) }
 }

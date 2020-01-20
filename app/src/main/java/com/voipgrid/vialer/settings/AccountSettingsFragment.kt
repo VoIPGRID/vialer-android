@@ -10,6 +10,7 @@ import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.util.PhoneNumberUtils
+import com.voipgrid.vialer.util.Sim
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -18,7 +19,7 @@ import org.koin.android.ext.android.inject
 
 class AccountSettingsFragment : AbstractSettingsFragment() {
 
-    private val telephonyManager: TelephonyManager by inject()
+    private val sim: Sim by inject()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_account, rootKey)
@@ -29,17 +30,13 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
         findPreference<EditTextPreference>("account_id")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipAccount?.accountId }
         findPreference<EditTextPreference>("outgoing_number")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipgridUser?.outgoingCli }
         findPreference<Preference>("mobile_number_not_matching")?.apply {
-            isVisible = canFindMobileNumber() && !configuredMobileNumberMatchesSimPhoneNumber()
+            isVisible = sim.mobileNumber != null && !configuredMobileNumberMatchesSimPhoneNumber()
             summaryProvider = Preference.SummaryProvider<Preference> {
-                try {
-                    telephonyManager.line1Number
-                } catch (e: SecurityException) {
-                    ""
-                }
+                if (sim.mobileNumber != null) sim.mobileNumber else ""
             }
             setOnPreferenceClickListener {
                 try {
-                    mobileNumberChanged(telephonyManager.line1Number)
+                    sim.mobileNumber?.let { mobileNumberChanged(it) }
                 } catch (e: SecurityException) { }
 
                 true
@@ -84,7 +81,7 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
 
             activity?.runOnUiThread {
                 refreshSummary<EditTextPreference>("mobile_number")
-                findPreference<Preference>("mobile_number_not_matching")?.isVisible = canFindMobileNumber() && !configuredMobileNumberMatchesSimPhoneNumber()
+                findPreference<Preference>("mobile_number_not_matching")?.isVisible = sim.mobileNumber != null && !configuredMobileNumberMatchesSimPhoneNumber()
                 isLoading = false
             }
         }
@@ -92,22 +89,6 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
         return true
     }
 
-    private fun configuredMobileNumberMatchesSimPhoneNumber() : Boolean {
-        return try {
-            telephonyManager.line1Number == User.voipgridUser?.mobileNumber
-        } catch (e: SecurityException) {
-            false
-        }
-    }
-
-    /**
-     * See if we can find the mobile number, not all manufacturers allow this.
-     *
-     */
-    private fun canFindMobileNumber() : Boolean  = try {
-        telephonyManager.line1Number != null && telephonyManager.line1Number.isNotEmpty()
-    } catch (e: SecurityException) {
-        false
-    }
-
+    private fun configuredMobileNumberMatchesSimPhoneNumber() : Boolean =
+            sim.mobileNumber == User.voipgridUser?.mobileNumber
 }
