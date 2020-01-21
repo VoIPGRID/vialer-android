@@ -23,8 +23,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.tabs.TabLayout
-import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.callrecord.database.CallRecordEntity
@@ -35,12 +33,16 @@ import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.NetworkUtil
 import kotlinx.android.synthetic.main.fragment_call_records.*
 import kotlinx.android.synthetic.main.fragment_call_records.view.*
+import kotlinx.android.synthetic.main.view_show_missed_calls_only.*
+import kotlinx.android.synthetic.main.view_show_missed_calls_only.view.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-abstract class CallRecordsFragment(val type: CallRecordViewModel.Type)
+abstract class CallRecordFragment(val type: CallRecordViewModel.Type)
     : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+
+//    val multiCheckListener = MultiCheckedChangeListener()
 
     private val callRecordViewModel by lazy {
         ViewModelProviders.of(this)[CallRecordViewModel::class.java]
@@ -58,28 +60,14 @@ abstract class CallRecordsFragment(val type: CallRecordViewModel.Type)
 
     private val handler = Handler()
 
-    private val multiCheckListener by lazy {
-        (activity as MainActivity).multiCheckListener
-    }
-
-//    private val showMyCallsOnlySwitch by lazy {
-//        (activity as MainActivity).showMyCallsOnlySwitch
-//    }
-
-    private val checkListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-        handler.post {
-            callRecordViewModel.updateDisplayedCallRecords(isChecked, type)
-        }
-    }
-
     /**
      * Regularly refreshes the data set to keep timestamps relevant.
      *
      */
-    private val runnable = object : Runnable {
+    private val runnable: Runnable = object : Runnable {
         override fun run() {
             adapter.notifyDataSetChanged()
-            handler.postDelayed(this, REFRESH_TIMEOUT)
+            Handler().postDelayed(this, REFRESH_TIMEOUT)
         }
     }
 
@@ -101,7 +89,7 @@ abstract class CallRecordsFragment(val type: CallRecordViewModel.Type)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        callRecordViewModel.calls.observe(this@CallRecordsFragment, Observer<PagedList<CallRecordEntity>> {
+        callRecordViewModel.calls.observe(this@CallRecordFragment, Observer<PagedList<CallRecordEntity>> {
             adapter.submitList(it)
         })
     }
@@ -115,15 +103,11 @@ abstract class CallRecordsFragment(val type: CallRecordViewModel.Type)
         setupSwipeContainer()
         setupRecyclerView()
         fetchCalls()
-
-        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
-                networkChangeReceiver,
-                ConnectivityManager.CONNECTIVITY_ACTION
-        )
-
         callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
         show_my_calls_only.setOnCheckedChangeListener { _, _ ->
-            callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
+            handler.post {
+                callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
+            }
         }
         encryption_disabled_view.setEncryptionView()
     }
@@ -150,27 +134,47 @@ abstract class CallRecordsFragment(val type: CallRecordViewModel.Type)
                     ContextCompat.getColor(context, R.color.tab_active)
             )
 
-            // TOOD: Remove all !!
+            // TODO: Remove all !! from code
             val adapter = CallRecordFragmentAdapter(context, activity!!.supportFragmentManager)
-            tab_view_pager.adapter = adapter
-            tab_view_pager.offscreenPageLimit = adapter.count
+            layout.tab_view_pager.adapter = adapter
+            layout.tab_view_pager.offscreenPageLimit = adapter.count
 
-            showMyCallsOnlySwitch.setOnCheckedChangeListener(multiCheckListener)
+            setupWithViewPager(layout.tab_view_pager)
 
-            setupWithViewPager(tab_view_pager)
+//            addTab(layout.tab_layout.newTab().setText(R.string.tab_title_missed_calls))
+//            addTab(layout.tab_layout.newTab().setText(R.string.tab_title_all_calls))
+//            setOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+//                override fun onTabReselected(tab: TabLayout.Tab?) {
+//                }
+//
+//                override fun onTabUnselected(tab: TabLayout.Tab?) {
+//                }
+//
+//                override fun onTabSelected(tab: TabLayout.Tab?) {
+//                    tab?.let {
+//                        changeType(when(it.position) {
+//                            0 -> CallRecordViewModel.Type.MISSED_CALLS
+//                            1 -> CallRecordViewModel.Type.ALL_CALLS
+//                            else -> CallRecordViewModel.Type.ALL_CALLS
+//                        })
+//                    }
+//                }
+//            })
 
+            //show_my_calls_only_switch.setOnCheckedChangeListener(multiCheckListener)
         }
     }
-
     override fun onResume() {
         super.onResume()
-        handler.postDelayed(runnable, REFRESH_TIMEOUT)
+        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(networkChangeReceiver, ConnectivityManager.CONNECTIVITY_ACTION)
+        Handler().postDelayed(runnable, REFRESH_TIMEOUT)
+        call_records?.scrollToTop()
     }
 
     override fun onPause() {
         super.onPause()
-        call_records.scrollToPosition(0)
-        handler.removeCallbacks(runnable)
+        broadcastReceiverManager.unregisterReceiver(networkChangeReceiver)
+        Handler().removeCallbacks(runnable)
     }
 
     private fun setupSwipeContainer() {
@@ -187,12 +191,6 @@ abstract class CallRecordsFragment(val type: CallRecordViewModel.Type)
                 itemAnimator = DefaultItemAnimator()
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        multiCheckListener.unregister(checkListener)
-        broadcastReceiverManager.unregisterReceiver(networkChangeReceiver)
     }
 
     /**
@@ -231,7 +229,6 @@ abstract class CallRecordsFragment(val type: CallRecordViewModel.Type)
         }
     }
 
-
     /**
      * Display an error, the error to display can be chained on from this method.
      *
@@ -252,27 +249,14 @@ abstract class CallRecordsFragment(val type: CallRecordViewModel.Type)
         call_records_unavailable_view.visibility = View.GONE
     }
 
-
     companion object {
         const val REFRESH_TIMEOUT: Long = 5000
     }
 }
 
-class AllCallsFragment : CallRecordsFragment(CallRecordViewModel.Type.ALL_CALLS)
+class AllCallsFragment : CallRecordFragment(CallRecordViewModel.Type.ALL_CALLS)
 
-class MissedCallsFragment : CallRecordsFragment(CallRecordViewModel.Type.MISSED_CALLS)
-
-class MultiCheckedChangeListener : CompoundButton.OnCheckedChangeListener {
-    private val listeners = mutableListOf<CompoundButton.OnCheckedChangeListener>()
-
-    fun register(listener: CompoundButton.OnCheckedChangeListener) = listeners.add(listener)
-
-    fun unregister(listener: CompoundButton.OnCheckedChangeListener) = listeners.remove(listener)
-
-    override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        listeners.forEach { it.onCheckedChanged(buttonView, isChecked) }
-    }
-}
+class MissedCallsFragment : CallRecordFragment(CallRecordViewModel.Type.MISSED_CALLS)
 
 private fun RecyclerView.scrollToTop() {
     smoothScrollToPosition(0)

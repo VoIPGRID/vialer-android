@@ -70,6 +70,15 @@
 
         </LinearLayout>
 
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/tab_view_pager"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/show_my_calls_only">
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipe_container"
             android:layout_width="match_parent"
@@ -83,6 +92,8 @@
                 android:paddingBottom="90dp" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        </androidx.viewpager.widget.ViewPager>
 
     </LinearLayout>
 
