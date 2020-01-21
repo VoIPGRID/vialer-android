@@ -28,8 +28,8 @@ public class TwoStepCallConnectionView extends RelativeLayout {
 
     private void init(Context context) {
         inflate(context, R.layout.two_step_call_connection, this);
-        mMessage = (TextView) findViewById(R.id.message);
-        mProgress = (TwoStepCallProgressView) findViewById(R.id.progress);
+        mMessage = findViewById(R.id.message);
+        mProgress = findViewById(R.id.progress);
     }
 
     public void setMessage(String text) {

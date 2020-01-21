@@ -11,17 +11,20 @@ import android.view.View;
 
 import com.voipgrid.vialer.R;
 
+import androidx.core.content.ContextCompat;
+
 /**
  * Created by eltjo on 12/10/15.
  */
 public class TwoStepCallIconView extends View {
 
-    private static final int DEFAULT_BACKGROUND_COLOR = Color.WHITE;
     private static final int DEFAULT_COLOR = Color.WHITE;
 
     public static final float BORDER_RADIUS = 30f;
+    private static final float DX = 2.0f;
+    private static final float DY = 2.0f;
     public static final float RADIUS = 27f;
-    public static final float SHADOW_WIDHT = 3.0f;
+    public static final float SHADOW_WIDTH = 3.0f;
     private static final int NOT_ENABLED_ALPHA = 127;
 
     private float mDensity;
@@ -39,10 +42,9 @@ public class TwoStepCallIconView extends View {
 
     private void init() {
         mDensity = getResources().getDisplayMetrics().density;
-        mShadowRadius = SHADOW_WIDHT * mDensity;
-        mBackgroundColor = DEFAULT_BACKGROUND_COLOR;
+        mShadowRadius = SHADOW_WIDTH * mDensity;
         mForegroundColor = DEFAULT_COLOR;
-
+        mBackgroundColor = DEFAULT_COLOR;
         Paint paintBorder = new Paint();
         paintBorder.setColor(mBackgroundColor);
         this.setLayerType(LAYER_TYPE_SOFTWARE, paintBorder);
@@ -65,8 +67,7 @@ public class TwoStepCallIconView extends View {
         Paint border = new Paint();
         border.setAntiAlias(true);
         border.setColor(mBackgroundColor);
-        border.setShadowLayer(mShadowRadius, 0.0f, 0.0f,
-                getResources().getColor(R.color.two_step_call_step_shadow));
+        border.setShadowLayer(mShadowRadius, DX, DY, ContextCompat.getColor(getContext(), R.color.two_step_call_step_shadow));
         canvas.drawCircle(borderRadius + mShadowRadius, borderRadius + mShadowRadius,
                 borderRadius, border);
 
@@ -90,8 +91,8 @@ public class TwoStepCallIconView extends View {
         }
     }
 
-    public void setColor(int color) {
-        mForegroundColor = color;
+    public void setBackgroundColor(int color) {
+        mBackgroundColor = color;
     }
 
     public void setDrawable(int resource) {

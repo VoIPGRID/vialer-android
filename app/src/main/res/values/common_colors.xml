@@ -26,10 +26,10 @@
     <color name="tab_inactive">@color/tab_tint_color</color>
 
     <color name="two_step_call_step_platform">#FFFFFF</color>
-    <color name="two_step_call_step_a">#3D4154</color>
-    <color name="two_step_call_dots">#3D4154</color>
+    <color name="two_step_call_step">#3D4154</color>
+    <color name="two_step_call_dots">#E0E0E0</color>
+    <color name="two_step_call_dot_selected">@color/dial_button_chars_color</color>
     <color name="two_step_call_step_shadow">#4D000000</color>
-    <color name="two_step_call_step_b">@color/color_primary</color>
 
     <color name="google_lock_ring_handle_color">#ffa3a3a3</color>
     <color name="google_lock_ring_white_transparent">#00ffffff</color>
@@ -64,4 +64,5 @@
     <color name="spinner_text_color">#808080</color>
     <color name="edit_text_disabled_color">#42000000</color>
     <color name="call_duration_background_color">#D45400</color>
+    <color name="neutral_color">@color/dial_button_chars_color</color>
 </resources>
