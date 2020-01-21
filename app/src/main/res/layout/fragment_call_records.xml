@@ -30,9 +30,13 @@
         android:id="@+id/error_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tab_layout" />
+
+    <com.voipgrid.vialer.reachability.ReachabilityBarView
+        android:id="@+id/encryption_disabled_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/error_view" />
 
     <LinearLayout
         android:id="@+id/call_records_container"
@@ -40,9 +44,7 @@
         android:layout_height="0dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/error_view">
+        app:layout_constraintTop_toBottomOf="@id/encryption_disabled_view">
 
         <LinearLayout
             android:layout_width="match_parent"

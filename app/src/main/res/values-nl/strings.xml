@@ -343,4 +343,5 @@
     <string name="audio">Audio</string>
     <string name="call_lost">Gesprek verloren - %1$s</string>
     <string name="two_step_call_title">Two-step call initiëren met</string>
+    <string name="not_encrypted">Gesprekken zijn niet versleuteld</string>
 </resources>

@@ -102,6 +102,7 @@ class CallRecordsFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         show_my_calls_only.setOnCheckedChangeListener { _, _ ->
             callRecordViewModel.updateDisplayedCallRecords(show_my_calls_only.isChecked, type)
         }
+        encryption_disabled_view.setEncryptionView()
     }
 
     /**

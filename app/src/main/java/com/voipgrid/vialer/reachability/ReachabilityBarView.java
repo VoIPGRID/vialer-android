@@ -2,10 +2,12 @@ package com.voipgrid.vialer.reachability;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -15,6 +17,7 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
 /**
  * Class that handles the network state view and allows the updating of the view
@@ -26,6 +29,8 @@ public class ReachabilityBarView extends RelativeLayout implements View.OnClickL
     private TextView mReachabilityBarTextView;
     private ImageView mReachabilityInfoImageView;
     private RelativeLayout mReachabilityBarView;
+    private LinearLayout mReachabilityHolder;
+    private TextView mReachabilitySettingsTextView;
 
     public ReachabilityBarView(Context context) {
         super(context);
@@ -54,8 +59,10 @@ public class ReachabilityBarView extends RelativeLayout implements View.OnClickL
     private void initLayout() {
         mReachabilityBarView = (RelativeLayout) LayoutInflater.from(mContext).inflate(R.layout.view_reachability_bar, this);
 
-        mReachabilityBarTextView = (TextView) mReachabilityBarView.findViewById(R.id.reachability_bar_text_view);
-        mReachabilityInfoImageView = (ImageView) mReachabilityBarView.findViewById(R.id.reachability_bar_drawable_info_icon);
+        mReachabilityHolder = mReachabilityBarView.findViewById(R.id.reachability_holder);
+        mReachabilityBarTextView = mReachabilityBarView.findViewById(R.id.reachability_bar_text_view);
+        mReachabilityInfoImageView = mReachabilityBarView.findViewById(R.id.reachability_bar_drawable_info_icon);
+        mReachabilitySettingsTextView = mReachabilityBarView.findViewById(R.id.reachability_bar_settings);
 
         mReachabilityInfoImageView.setOnClickListener(this);
 
@@ -66,6 +73,15 @@ public class ReachabilityBarView extends RelativeLayout implements View.OnClickL
         }
 
         ReachabilityReceiver.setInterfaceCallback(this);
+    }
+
+    public void setEncryptionView() {
+        mReachabilityHolder.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.encryption_rounded_background));
+        mReachabilityBarTextView.setText(getResources().getString(R.string.not_encrypted));
+        mReachabilityBarTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.dial_button_digit_color));
+        mReachabilityInfoImageView.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_lock_open));
+        mReachabilityInfoImageView.setColorFilter(ContextCompat.getColor(getContext(), R.color.dial_button_chars_color), PorterDuff.Mode.SRC_IN);
+        mReachabilitySettingsTextView.setTextColor(ContextCompat.getColor(getContext(), R.color.dial_button_digit_color));
     }
 
     /**

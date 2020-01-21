@@ -342,4 +342,5 @@
     <string name="audio">Audio</string>
     <string name="call_lost">Call lost - %1$s</string>
     <string name="two_step_call_title">Setting up a Two-step call with</string>
+    <string name="not_encrypted">Calls are not encrypted</string>
 </resources>

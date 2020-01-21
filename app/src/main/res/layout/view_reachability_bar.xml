@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/reachability_holder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/activity_vertical_item_padding"
@@ -16,7 +17,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|center_vertical"
-        android:layout_marginStart="@dimen/activity_vertical_item_padding"
         android:layout_marginEnd="@dimen/activity_vertical_item_padding"
         android:contentDescription="@string/help_icon"
         android:src="@drawable/ic_disconnected"
@@ -43,6 +43,5 @@
         android:textAllCaps="true"
         android:textColor="@color/error_color"
         android:textSize="12sp" />
-
 
 </LinearLayout>
