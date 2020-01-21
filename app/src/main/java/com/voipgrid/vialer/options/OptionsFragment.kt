@@ -21,6 +21,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.User.voipgridUser
 import com.voipgrid.vialer.api.ServiceGenerator
@@ -31,6 +32,7 @@ import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams
 import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.util.ConnectivityHelper
+import kotlinx.android.synthetic.main.drawer_header.*
 import kotlinx.android.synthetic.main.drawer_header.view.*
 import kotlinx.android.synthetic.main.fragment_options.*
 import retrofit2.Call
@@ -42,6 +44,7 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
 
     private lateinit var layout: View
     private var mConnectivityHelper: ConnectivityHelper? = null
+    private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     private var spinnerAdapter: CustomFontSpinnerAdapter<Destination?>? = null
 
     @Inject
@@ -101,11 +104,15 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
         val voipgridUserNotNull = voipgridUser ?: return
         val phoneNumber = voipgridUserNotNull.outgoingCli
         if (!TextUtils.isEmpty(phoneNumber)) {
-            header.text_view_name.text = phoneNumber
+            header.text_view_number.text = getFormattedPhoneNumber(phoneNumber)
         }
         val email = voipgridUserNotNull.email
         if (!TextUtils.isEmpty(email)) {
             header.text_view_email.text = email
+        }
+        val name = voipgridUserNotNull.fullName
+        if (!TextUtils.isEmpty(name)) {
+            text_view_name.text = name
         }
     }
 
@@ -278,5 +285,13 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
 
     override fun onInternetConnectivityChanged() {
         refreshCurrentAvailability()
+    }
+
+    /**
+     * Return formatted phonenumber.
+     *
+     */
+    private fun getFormattedPhoneNumber(phoneNumber: String): String {
+        return phoneNumberUtil.format(phoneNumberUtil.parse(phoneNumber, "ZZ"), PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
     }
 }
