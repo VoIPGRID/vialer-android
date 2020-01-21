@@ -22,24 +22,27 @@ abstract class VialerTest {
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.READ_PHONE_STATE, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_CONTACTS)
 
     protected fun enterMobileNumber(number: String = "+447123463890") {
-        onView(withId(R.id.mobile_number_text_dialog_prefix)).perform(replaceText(""))
-        onView(withId(R.id.mobile_number_text_dialog_prefix)).perform(typeText(number))
+        onView(withId(R.id.mobileNumberTextDialog)).perform(replaceText(""))
+        onView(withId(R.id.mobileNumberTextDialog)).perform(typeText(number))
         onView(withId(R.id.button_configure)).check(matches(ViewMatchers.isEnabled()))
         onView(withId(R.id.button_configure)).perform(click())
         Thread.sleep(2000)
     }
 
     protected fun login(username: String = BuildConfig.TEST_USERNAME, password: String = BuildConfig.TEST_PASSWORD) {
-        onView(withId(R.id.username_text_dialog)).perform(typeText(username))
-        onView(withId(R.id.password_text_dialog)).perform(typeText(password))
+        check(username.isNotEmpty()) { "Test username not set" }
+        check(password.isNotEmpty()) { "Test password not set" }
+
+        onView(withId(R.id.emailTextDialog)).perform(typeText(username))
+        onView(withId(R.id.passwordTextDialog)).perform(typeText(password))
         onView(withId(R.id.button_login)).perform(click())
         Thread.sleep(2000)
     }
 
-     fun onboard(skipIfLoggedIn: Boolean = false): Boolean {
-         Thread.sleep(2000)
+    fun onboard(skipIfLoggedIn: Boolean = false): Boolean {
+        Thread.sleep(2000)
         try {
-            onView(withId(R.id.username_text_dialog)).check(matches(isDisplayed()))
+            onView(withId(R.id.emailTextDialog)).check(matches(isDisplayed()))
         } catch (e: Exception) {
             if (skipIfLoggedIn) {
                 return false
@@ -53,7 +56,7 @@ abstract class VialerTest {
         onView(ViewMatchers.withText("Battery Optimization")).check(matches(isDisplayed()))
         onView(withId(R.id.denyButton)).perform(click())
         Thread.sleep(5000)
-        onView(ViewMatchers.withText("MY CALLS")).check(matches(isDisplayed()))
+        onView(ViewMatchers.withText("ALL CALLS")).check(matches(isDisplayed()))
         return true
     }
 }

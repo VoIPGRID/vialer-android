@@ -23,19 +23,7 @@ class RatingPopupListener(val context: Context) : LifecycleObserver {
         }
     }
 
-    private val shouldShowPopup get(): Boolean {
-        val installedDate = Date(
-            context.packageManager
-            .getPackageInfo(context.packageName, 0)
-            .firstInstallTime
-        )
-
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_YEAR, -7)
-
-        return (!RatingPopup.shown &&
-                (installedDate.before(calendar.time) || Statistics.numberOfCalls >= 3))
-    }
+    private val shouldShowPopup get() = !RatingPopup.shown && Statistics.numberOfCalls >= 3
 
     private fun showPopup() {
         val locale = ConfigurationCompat.getLocales(context.resources.configuration)[0]
@@ -72,7 +60,7 @@ class RatingPopupListener(val context: Context) : LifecycleObserver {
                             .setNegativeButton(
                                     R.string.rating_popup_post_feedback_write_review
                             ) { _, _ ->
-                                context.startActivity(Intent( Intent.ACTION_VIEW, PLAYSTORE_URL))
+                                context.startActivity(Intent(Intent.ACTION_VIEW, PLAYSTORE_URL))
                             }
                             .show()
                 }
