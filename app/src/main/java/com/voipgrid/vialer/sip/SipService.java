@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.voipgrid.vialer.BuildConfig;
 import com.voipgrid.vialer.CallActivity;
+import com.voipgrid.vialer.CallStatisticsUpdater;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.models.PhoneAccount;
@@ -38,7 +39,6 @@ import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
 import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
 import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
-import com.voipgrid.vialer.persistence.Statistics;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
@@ -93,6 +93,12 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
     private SipServiceTic tic = new SipServiceTic(this);
 
+    private CallStatisticsUpdater callStatisticsUpdater = new CallStatisticsUpdater();
+    private CallStatusReceiver statsUpdaterCallStatusReceiver = new CallStatusReceiver(
+        callStatisticsUpdater
+    );
+
+
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
     @Inject protected Handler mHandler;
@@ -117,10 +123,27 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         AudioStateChangeReceiver.fetch();
         mLogger.d("onCreate");
 
-        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(phoneStateReceiver, TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(mNetworkConnectivity, ConnectivityManager.CONNECTIVITY_ACTION);
-        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
-        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(screenOffReceiver, Integer.MAX_VALUE, Intent.ACTION_SCREEN_OFF);
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
+            phoneStateReceiver,
+            TelephonyManager.ACTION_PHONE_STATE_CHANGED
+        );
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
+            mNetworkConnectivity,
+            ConnectivityManager.CONNECTIVITY_ACTION
+        );
+        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(
+            callStatusReceiver,
+            ACTION_BROADCAST_CALL_STATUS
+        );
+        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(
+            statsUpdaterCallStatusReceiver,
+            ACTION_BROADCAST_CALL_STATUS
+        );
+        mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
+            screenOffReceiver,
+            Integer.MAX_VALUE,
+            Intent.ACTION_SCREEN_OFF
+        );
         mCheckService.start();
         changeNotification(callNotification);
         tic.begin();
@@ -300,7 +323,13 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
 
         mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
 
-        mBroadcastReceiverManager.unregisterReceiver(phoneStateReceiver, mNetworkConnectivity, callStatusReceiver, screenOffReceiver);
+        mBroadcastReceiverManager.unregisterReceiver(
+            phoneStateReceiver,
+            mNetworkConnectivity,
+            callStatusReceiver,
+            statsUpdaterCallStatusReceiver,
+            screenOffReceiver
+        );
 
         mHandler.removeCallbacks(mCheckService);
 
@@ -580,7 +609,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
 
     @Override
     public void onCallDisconnected(CallDisconnectedReason reason) {
-        Statistics.INSTANCE.setNumberOfCalls(Statistics.INSTANCE.getNumberOfCalls() + 1);
+
     }
 
     @Override
