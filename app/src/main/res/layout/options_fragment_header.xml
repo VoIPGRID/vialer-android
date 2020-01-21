@@ -30,8 +30,8 @@
             style="@style/Drawer.Header.TextView.GoodDay"
             android:layout_width="match_parent"
             android:text="@string/good_day"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:paddingEnd="@dimen/activity_horizontal_margin"
+            android:paddingStart="@dimen/activity_horizontal_margin_options_header"
+            android:paddingEnd="@dimen/activity_horizontal_margin_options_header"
             app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
@@ -39,8 +39,8 @@
             style="@style/Drawer.Header.TextView.Name"
             android:layout_width="match_parent"
             tools:text="Antoine Beauvillain"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:paddingEnd="@dimen/activity_horizontal_margin"
+            android:paddingStart="@dimen/activity_horizontal_margin_options_header"
+            android:paddingEnd="@dimen/activity_horizontal_margin_options_header"
             app:layout_constraintTop_toBottomOf="@id/text_view_good_day"/>
 
         <TextView
@@ -49,8 +49,8 @@
             android:layout_width="match_parent"
             android:text="@string/navigation_name_placeholder_text"
             tools:text="+31 4080 80032"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:paddingEnd="@dimen/activity_horizontal_margin"
+            android:paddingStart="@dimen/activity_horizontal_margin_options_header"
+            android:paddingEnd="@dimen/activity_horizontal_margin_options_header"
             app:layout_constraintBottom_toTopOf="@id/text_view_email"/>
 
         <TextView
@@ -58,8 +58,8 @@
             style="@style/Drawer.Header.TextView.Email"
             android:layout_width="match_parent"
             tools:text="antoine.beauvillain@wearespindle.com"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:paddingEnd="@dimen/activity_horizontal_margin"
+            android:paddingStart="@dimen/activity_horizontal_margin_options_header"
+            android:paddingEnd="@dimen/activity_horizontal_margin_options_header"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -68,10 +68,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="@dimen/activity_horizontal_margin"
-        android:paddingEnd="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin">
+        android:padding="@dimen/activity_horizontal_margin">
 
         <TextView
             android:id="@+id/availability_label"
@@ -81,6 +78,7 @@
             android:text="@string/account_availability_switch_title"
             android:textColor="@color/floating_action_button_color"
             android:paddingEnd="10dp"
+            android:paddingStart="10dp"
             app:layout_constraintStart_toStartOf="parent"/>
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -106,7 +104,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:layout_marginStart="-8dp"
+            android:layout_marginStart="2dp"
             app:layout_constraintTop_toBottomOf="@id/availability_label"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

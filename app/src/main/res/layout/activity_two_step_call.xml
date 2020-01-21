@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/background_gradient"
         android:orientation="vertical"
-        android:padding="@dimen/activity_horizontal_margin"
+        android:padding="@dimen/activity_vertical_margin"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView

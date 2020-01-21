@@ -32,8 +32,8 @@ import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams
 import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.util.ConnectivityHelper
-import kotlinx.android.synthetic.main.drawer_header.*
-import kotlinx.android.synthetic.main.drawer_header.view.*
+import kotlinx.android.synthetic.main.options_fragment_header.*
+import kotlinx.android.synthetic.main.options_fragment_header.view.*
 import kotlinx.android.synthetic.main.fragment_options.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -70,6 +70,7 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
         super.onViewCreated(view, savedInstanceState)
 
         navigation_view.setNavigationItemSelectedListener(this)
+        navigation_view_logout.setNavigationItemSelectedListener(this)
 
         // Set the email address and phone number of the logged in user.
         setSystemUserInfo()
@@ -77,7 +78,7 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
         // Set which version of the app the user is using.
         setVersionInfo(text_view_version)
 
-        // Setup the spinner in the drawer.
+        // Setup the spinner in the options.
         setupSpinner()
     }
 

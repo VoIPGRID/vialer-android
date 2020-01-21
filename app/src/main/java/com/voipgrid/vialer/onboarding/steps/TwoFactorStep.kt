@@ -34,6 +34,7 @@ class TwoFactorStep : Step() {
         super.onCreate(savedInstanceState)
         VialerApplication.get().component().inject(this)
 
+        if (onboarding !is OnboardingActivity) return
         val usernameCheck = (onboarding as OnboardingActivity).getUsername()
         val passwordCheck = (onboarding as OnboardingActivity).getPassword()
         if (usernameCheck == null || passwordCheck == null) {
@@ -44,7 +45,9 @@ class TwoFactorStep : Step() {
 
         username = usernameCheck
         password = passwordCheck
-        (onboarding as OnboardingActivity).setCredentialsForTfa("", "")
+        if (onboarding is OnboardingActivity) {
+            (onboarding as OnboardingActivity).setCredentialsForTfa("", "")
+        }
 
         TwoFactorFragmentHelper(context, pin_view).apply {
             if (pasteCodeFromClipboard()) {

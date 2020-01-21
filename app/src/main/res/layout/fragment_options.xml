@@ -7,15 +7,34 @@
 
     <include
         android:id="@+id/header"
-        layout="@layout/drawer_header" />
+        layout="@layout/options_fragment_header" />
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigation_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:menu="@menu/drawer"
-        app:layout_constraintTop_toBottomOf="@id/header"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:background="@color/float_transparent"
+        app:menu="@menu/options"
+        app:itemTextAppearance="@style/NavigationDrawerStyle"
+        app:itemIconTint="@color/tab_content_color"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:itemIconPadding="20dp"
+        app:elevation="0dp"/>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigation_view_logout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@color/float_transparent"
+        app:menu="@menu/option_logout"
+        app:itemTextAppearance="@style/NavigationDrawerStyle"
+        app:itemIconTint="@color/tab_content_color"
+        app:layout_constraintBottom_toTopOf="@id/text_view_version"
+        app:itemIconPadding="20dp"
         app:elevation="0dp"/>
 
     <TextView
