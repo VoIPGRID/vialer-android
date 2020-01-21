@@ -30,6 +30,9 @@ abstract class VialerTest {
     }
 
     protected fun login(username: String = BuildConfig.TEST_USERNAME, password: String = BuildConfig.TEST_PASSWORD) {
+        check(username.isNotEmpty()) { "Test username not set" }
+        check(password.isNotEmpty()) { "Test password not set" }
+
         onView(withId(R.id.username_text_dialog)).perform(typeText(username))
         onView(withId(R.id.password_text_dialog)).perform(typeText(password))
         onView(withId(R.id.button_login)).perform(click())
@@ -53,7 +56,7 @@ abstract class VialerTest {
         onView(ViewMatchers.withText("Battery Optimization")).check(matches(isDisplayed()))
         onView(withId(R.id.denyButton)).perform(click())
         Thread.sleep(5000)
-        onView(ViewMatchers.withText("MY CALLS")).check(matches(isDisplayed()))
+        onView(ViewMatchers.withText("ALL CALLS")).check(matches(isDisplayed()))
         return true
     }
 }

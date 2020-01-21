@@ -102,7 +102,6 @@
         <item name="android:textSize">@dimen/account_text_input_layout_text_size</item>
         <item name="android:textColor">@color/settings_text_color_dark</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:spinnerItemStyle">@style/spinnerItemStyle2</item>
     </style>
 
     <color name="account_edittext_hint_color">@color/onboarding_color_accent</color>
