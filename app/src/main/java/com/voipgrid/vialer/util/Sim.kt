@@ -10,7 +10,8 @@ class Sim(private val telephonyManager: TelephonyManager) {
      */
     val mobileNumber: String?
         get() = try {
-            if (telephonyManager.line1Number != null && telephonyManager.line1Number.isNotEmpty() && PhoneNumberUtils.isValidMobileNumber(telephonyManager.line1Number)) {
+            if (telephonyManager.line1Number != null && telephonyManager.line1Number.isNotEmpty()
+                    && PhoneNumberUtils.isValidMobileNumber(telephonyManager.line1Number)) {
                 telephonyManager.line1Number
             } else {
                 null
