@@ -154,7 +154,7 @@
     <string name="connection_preference_dialog_title">Tip: schakel WiFi uit voor dit gesprek</string>
     <string name="connection_preference_dialog_message">Met mobiel internet is de verbinding stabieler en daarmee de geluidskwaliteit hoger. \n\nWiFi tijdelijk uitschakelen?</string>
     <string name="connection_preference_switch_toast">Controleren of het mobiele netwerk beschikbaar is</string>
-    <string name="switch_use_3g">Gebruik 3G+ om te bellen</string>
+    <string name="settings_advanced_call_use_3g">Gebruik 3G+ om te bellen</string>
 
     <string name="url_app_info">https://vialerapp.com/nl/app-info/</string>
 
@@ -222,8 +222,8 @@
     <string name="notification_contact_sync_done_content">De contact synchronisatie is klaar! Het is nu mogelijk om te zoeken in je contacten.</string>
 
     <!-- Remote logging -->
-    <string name="remote_logging_switch_title">Remote logging</string>
-    <string name="remote_logging_input_hint">Identificatie nummer</string>
+    <string name="settings_remote_logging_title">Remote logging</string>
+    <string name="settings_remote_logging_id_title">Identificatie nummer</string>
     <string name="yes">JA</string>
     <string name="no">NEE</string>
     <string name="remote_logging_unexpected_error">Onverwachtte fout</string>
@@ -235,10 +235,10 @@
     <string name="call_incoming_accept">Beantwoorden</string>
     <string name="call_incoming_decline">Weigeren</string>
     <string name="advanced_settings_title">Geavanceerde instellingen</string>
-    <string name="advanced_settings_tls_description">Externe partijen kunnen je gesprekken afluisteren als deze functie is uitgeschakeld.</string>
-    <string name="advanced_settings_tls_switch">Gebruik versleuteld bellen</string>
-    <string name="advanced_settings_stun_switch">Gebruik STUN om te bellen</string>
-    <string name="advanced_settings_stun_description">STUN kan de connectie met het netwerk verbeteren als je NAT problemen hebt.
+    <string name="settings_advanced_call_encryption_description">Externe partijen kunnen je gesprekken afluisteren als deze functie is uitgeschakeld.</string>
+    <string name="settings_advanced_call_encryption">Gebruik versleuteld bellen</string>
+    <string name="settings_advanced_call_stun">Gebruik STUN om te bellen</string>
+    <string name="settings_advanced_call_stun_desc">STUN kan de connectie met het netwerk verbeteren als je NAT problemen hebt.
     </string>
 
     <string name="t9helper_title">Tip</string>
