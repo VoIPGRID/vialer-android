@@ -32,6 +32,7 @@ abstract class AbstractSettingsFragment : PreferenceFragmentCompat() {
      *
      */
     fun alert(title: Int, description: Int) = activity?.runOnUiThread {
+        isLoading = false
         AlertDialog.Builder(activity)
                 .setTitle(activity?.getString(title))
                 .setMessage(activity?.getString(description))
