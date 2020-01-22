@@ -38,7 +38,7 @@
         android:icon="@drawable/ic_settings_android_black_24dp">
 
         <SwitchPreferenceCompat
-            app:key="battery_optimisation"
+            app:key="battery_optimization"
             app:persistent="false"
             app:title="@string/settings_ignore_battery_optimization_title"
             app:iconSpaceReserved="false"

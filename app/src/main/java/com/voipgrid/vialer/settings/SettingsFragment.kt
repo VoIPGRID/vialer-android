@@ -51,7 +51,7 @@ class SettingsFragment : AbstractSettingsFragment() {
             }
         }
 
-        findPreference<SwitchPreferenceCompat>("battery_optimisation")?.apply {
+        findPreference<SwitchPreferenceCompat>("battery_optimization")?.apply {
             isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
             setOnPreferenceChangeListener {  _: Preference, _: Any ->
                 batteryOptimizationManager.prompt(activity ?: throw Exception("No activity"), false)
@@ -60,13 +60,13 @@ class SettingsFragment : AbstractSettingsFragment() {
         }
 
         (activity as SettingsActivity).onActivityResultCallback = {
-            findPreference<SwitchPreferenceCompat>("battery_optimisation")?.isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
+            findPreference<SwitchPreferenceCompat>("battery_optimization")?.isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        findPreference<SwitchPreferenceCompat>("battery_optimisation")?.isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
+        findPreference<SwitchPreferenceCompat>("battery_optimization")?.isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
     }
 
     /**
