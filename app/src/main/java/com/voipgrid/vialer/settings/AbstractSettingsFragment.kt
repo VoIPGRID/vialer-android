@@ -45,7 +45,7 @@ abstract class AbstractSettingsFragment : PreferenceFragmentCompat() {
      * Refresh the summary provider that is currently assigned to this preference.
      *
      */
-    fun <T: Preference> refreshSummary(preference: String) {
+    fun <T : Preference> refreshSummary(preference: String) {
         findPreference<T>(preference)?.summaryProvider = findPreference<T>(preference)?.summaryProvider
     }
 }
