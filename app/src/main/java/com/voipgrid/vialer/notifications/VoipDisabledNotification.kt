@@ -12,7 +12,7 @@ import androidx.core.app.NotificationCompat.PRIORITY_MAX
 import androidx.core.app.TaskStackBuilder
 import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.SettingsActivity
+import com.voipgrid.vialer.settings.SettingsActivity
 
 class VoipDisabledNotification : AbstractNotification() {
 

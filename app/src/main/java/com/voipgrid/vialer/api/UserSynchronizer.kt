@@ -5,10 +5,7 @@ import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.middleware.MiddlewareHelper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 /**
  * The responsibility of this is to make sure our local user information matches the information stored
@@ -48,7 +45,7 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
      * reverted to Kotlin.
      *
      */
-    fun syncWithCallback(callback: () -> Unit) = GlobalScope.launch(Dispatchers.IO) {
+    fun syncWithCallback(dispatcher: CoroutineDispatcher = Dispatchers.IO, callback: () -> Unit) = GlobalScope.launch(dispatcher) {
         sync()
         callback.invoke()
     }
