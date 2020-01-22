@@ -43,6 +43,11 @@
 
         <Preference app:summary="@string/settings_account_mobile_number_description" />
 
+        <Preference
+            app:key="mobile_number_not_matching"
+            app:title="@string/settings_account_mobile_number_not_matching"
+            android:icon="@drawable/ic_settings_mobile_number_not_matching"/>
+
     </PreferenceCategory>
 
 </PreferenceScreen>

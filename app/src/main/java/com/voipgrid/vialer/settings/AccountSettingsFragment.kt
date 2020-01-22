@@ -1,19 +1,25 @@
 package com.voipgrid.vialer.settings
 
 import android.os.Bundle
+import android.telephony.TelephonyManager
 import android.text.InputType
+import android.util.Log
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.util.PhoneNumberUtils
+import com.voipgrid.vialer.util.Sim
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 
 class AccountSettingsFragment : AbstractSettingsFragment() {
+
+    private val sim: Sim by inject()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_account, rootKey)
@@ -23,6 +29,19 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
         findPreference<EditTextPreference>("description")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipAccount?.description }
         findPreference<EditTextPreference>("account_id")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipAccount?.accountId }
         findPreference<EditTextPreference>("outgoing_number")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipgridUser?.outgoingCli }
+        findPreference<Preference>("mobile_number_not_matching")?.apply {
+            isVisible = sim.mobileNumber != null && !configuredMobileNumberMatchesSimPhoneNumber()
+            summaryProvider = Preference.SummaryProvider<Preference> {
+                if (sim.mobileNumber != null) sim.mobileNumber else ""
+            }
+            setOnPreferenceClickListener {
+                try {
+                    sim.mobileNumber?.let { mobileNumberChanged(it) }
+                } catch (e: SecurityException) { }
+
+                true
+            }
+        }
 
         findPreference<EditTextPreference>("mobile_number")?.apply {
             setOnBindEditTextListener { editText ->
@@ -62,6 +81,7 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
 
             activity?.runOnUiThread {
                 refreshSummary<EditTextPreference>("mobile_number")
+                findPreference<Preference>("mobile_number_not_matching")?.isVisible = sim.mobileNumber != null && !configuredMobileNumberMatchesSimPhoneNumber()
                 isLoading = false
             }
         }
@@ -69,4 +89,6 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
         return true
     }
 
+    private fun configuredMobileNumberMatchesSimPhoneNumber() : Boolean =
+            sim.mobileNumber == User.voipgridUser?.mobileNumber
 }
