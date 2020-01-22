@@ -18,6 +18,6 @@ object VoipSettings : DefaultKotPrefModel() {
 
     var hasTlsEnabled by booleanPref(key = "PREF_HAS_TLS_ENABLED", default = true)
     var hasStunEnabled by booleanPref(key = "PREF_HAS_STUN_ENABLED", default = false)
-    var audioCodec by enumValuePref(default = AudioCodec.OPUS)
+    var audioCodec by enumValuePref(key = "audioCodec", default = AudioCodec.OPUS)
 }
 

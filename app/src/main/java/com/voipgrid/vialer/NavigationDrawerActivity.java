@@ -30,6 +30,7 @@ import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.api.models.UserDestination;
 import com.voipgrid.vialer.middleware.MiddlewareHelper;
+import com.voipgrid.vialer.settings.SettingsActivity;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
 
@@ -44,6 +45,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import kotlin.Unit;
+import kotlinx.coroutines.Dispatchers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -170,7 +172,7 @@ public abstract class NavigationDrawerActivity extends LoginRequiredActivity
 
         if (!isConnectedToNetwork()) return;
 
-        userSynchronizer.syncWithCallback(() -> {
+        userSynchronizer.syncWithCallback(Dispatchers.getIO(), () -> {
             runOnUiThread(this::refresh);
             return Unit.INSTANCE;
         });

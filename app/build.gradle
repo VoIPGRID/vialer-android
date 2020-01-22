@@ -176,6 +176,7 @@ ext {
     kotPrefVersion = "2.8.0"
     room_version = '2.2.0-beta01'
     lifecycle_version = "1.1.1"
+    koin_version = "2.0.1"
 }
 
 dependencies {
@@ -269,6 +270,7 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'androidx.preference:preference:1.1.0'
 
     implementation "com.chibatching.kotpref:kotpref:$kotPrefVersion"
     implementation "com.chibatching.kotpref:initializer:$kotPrefVersion"
@@ -281,6 +283,8 @@ dependencies {
     implementation 'com.segment.analytics.android:analytics:4.3.1'
 
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
+
+    implementation "org.koin:koin-android:$koin_version"
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.
