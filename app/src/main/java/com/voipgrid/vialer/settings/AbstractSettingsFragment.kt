@@ -58,7 +58,10 @@ abstract class AbstractSettingsFragment : PreferenceFragmentCompat() {
      * performed first, if it fails an error dialog will be shown and the setting will
      * not be changed.
      */
-    inline fun <reified T : Any> Preference.setOnChangeListener(networkConnectivityRequired: Boolean = false, crossinline listener: (value: T) -> Boolean) {
+    inline fun <reified T : Any> Preference.setOnChangeListener(
+            networkConnectivityRequired: Boolean = false,
+            crossinline listener: (value: T) -> Boolean
+    ) {
         if (activity == null) return
 
         setOnPreferenceChangeListener { _: Preference, value: Any ->

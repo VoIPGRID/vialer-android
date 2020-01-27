@@ -22,7 +22,9 @@ class AdvancedCallSettingsFragment : AbstractSettingsFragment() {
         setPreferencesFromResource(R.xml.settings_advanced_call, rootKey)
 
         findPreference<ListPreference>("audioCodec")?.apply {
-            summaryProvider = Preference.SummaryProvider<ListPreference> { preference -> preference.entries[preference.findIndexOfValue(VoipSettings.audioCodec.toString())] }
+            summaryProvider = Preference.SummaryProvider<ListPreference> {
+                preference -> preference.entries[preference.findIndexOfValue(VoipSettings.audioCodec.toString())]
+            }
             entries = arrayOf(getString(R.string.call_codec_standard_quality), getString(R.string.call_codec_high_quality))
             entryValues = arrayOf(VoipSettings.AudioCodec.iLBC.toString(), VoipSettings.AudioCodec.OPUS.toString())
             setDefaultValue(VoipSettings.AudioCodec.OPUS.toString())
@@ -30,8 +32,16 @@ class AdvancedCallSettingsFragment : AbstractSettingsFragment() {
 
         findPreference<ListPreference>("internalConnectionPreference")?.apply {
             isVisible = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
-            summaryProvider = Preference.SummaryProvider<ListPreference> { preference -> preference.entries[preference.findIndexOfValue(User.userPreferences.connectionPreference.toString())] }
-            entries = arrayOf(getString(R.string.call_connection_only_cellular), getString(R.string.call_connection_use_wifi_cellular), getString(R.string.call_connection_optional))
+            summaryProvider = Preference.SummaryProvider<ListPreference> {
+                preference ->
+                val index = preference.findIndexOfValue(User.userPreferences.connectionPreference.toString())
+                preference.entries[index]
+            }
+            entries = arrayOf(
+                    getString(R.string.call_connection_only_cellular),
+                    getString(R.string.call_connection_use_wifi_cellular),
+                    getString(R.string.call_connection_optional)
+            )
             entryValues = arrayOf(
                     UserPreferences.ConnectionPreference.ONLY_CELLULAR.toString(),
                     UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI.toString(),
