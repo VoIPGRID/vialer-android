@@ -29,7 +29,9 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
         findPreference<EditTextPreference>("outgoing_number")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipgridUser?.outgoingCli }
         findPreference<Preference>("mobile_number_not_matching")?.apply {
             isVisible = sim.mobileNumber != null && !configuredMobileNumberMatchesSimPhoneNumber()
-            summaryProvider = Preference.SummaryProvider<Preference> { if (sim.mobileNumber != null) sim.mobileNumber else "" }
+            summaryProvider = Preference.SummaryProvider<Preference> {
+                if (sim.mobileNumber != null) sim.mobileNumber else ""
+            }
             setOnPreferenceClickListener {
                 sim.mobileNumber?.let { mobileNumberChanged(it) }
                 true
@@ -43,7 +45,9 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
                 editText.text.insert(0, User.voipgridUser?.mobileNumber)
             }
             summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipgridUser?.mobileNumber }
-            setOnChangeListener(networkConnectivityRequired = true) { newValue: String -> mobileNumberChanged(newValue) }
+            setOnChangeListener(networkConnectivityRequired = true) {
+                newValue: String -> mobileNumberChanged(newValue)
+            }
         }
     }
 

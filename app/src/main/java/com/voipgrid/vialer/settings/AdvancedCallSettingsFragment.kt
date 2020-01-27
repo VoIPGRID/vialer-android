@@ -32,11 +32,16 @@ class AdvancedCallSettingsFragment : AbstractSettingsFragment() {
             isVisible = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
             summaryProvider = Preference.SummaryProvider<ListPreference> { preference -> preference.entries[preference.findIndexOfValue(User.userPreferences.connectionPreference.toString())] }
             entries = arrayOf(getString(R.string.call_connection_only_cellular), getString(R.string.call_connection_use_wifi_cellular), getString(R.string.call_connection_optional))
-            entryValues = arrayOf(UserPreferences.ConnectionPreference.ONLY_CELLULAR.toString(), UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI.toString(), UserPreferences.ConnectionPreference.SHOW_POPUP_BEFORE_EVERY_CALL.toString())
+            entryValues = arrayOf(
+                    UserPreferences.ConnectionPreference.ONLY_CELLULAR.toString(),
+                    UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI.toString(),
+                    UserPreferences.ConnectionPreference.SHOW_POPUP_BEFORE_EVERY_CALL.toString()
+            )
             setDefaultValue(UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI.toString())
         }
 
-        findPreference<SwitchPreferenceCompat>("PREF_HAS_TLS_ENABLED")?.setOnChangeListener(networkConnectivityRequired = true) { enableTls: Boolean ->
+        findPreference<SwitchPreferenceCompat>("PREF_HAS_TLS_ENABLED")
+                ?.setOnChangeListener(networkConnectivityRequired = true) { enableTls: Boolean ->
             isLoading = true
 
             if (enableTls) {

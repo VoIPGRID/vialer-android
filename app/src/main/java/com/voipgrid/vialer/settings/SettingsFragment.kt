@@ -33,7 +33,8 @@ class SettingsFragment : AbstractSettingsFragment() {
             false
         }
 
-        findPreference<SwitchPreferenceCompat>("PREF_HAS_SIP_ENABLED")?.setOnChangeListener<Boolean>(networkConnectivityRequired = true) { enabled ->
+        findPreference<SwitchPreferenceCompat>("PREF_HAS_SIP_ENABLED")?.
+                setOnChangeListener<Boolean>(networkConnectivityRequired = true) { enabled ->
             callUsingVoipChanged(enabled)
             true
         }
