@@ -5,6 +5,7 @@ import android.view.MenuItem
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.callrecord.AllCallsFragment
+import com.voipgrid.vialer.callrecord.CallRecordFragmentHolder
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.options.OptionsFragment
 import com.voipgrid.vialer.reachability.ReachabilityReceiver
@@ -102,7 +103,7 @@ class MainActivity : LoginRequiredActivity(),
 
         when (itemId) {
             // R.id.navigation_item_contacts -> // TODO: Create ContactFragment
-            R.id.navigation_item_recent -> supportFragmentManager.beginTransaction().replace(R.id.container, AllCallsFragment()).commit()
+            R.id.navigation_item_recent -> supportFragmentManager.beginTransaction().replace(R.id.container, CallRecordFragmentHolder()).commit()
             R.id.navigation_item_options -> supportFragmentManager.beginTransaction().replace(R.id.container, OptionsFragment()).commit()
         }
         return false

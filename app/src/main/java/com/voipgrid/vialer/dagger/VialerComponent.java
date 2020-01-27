@@ -13,6 +13,7 @@ import com.voipgrid.vialer.calling.IncomingCallActivity;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.callrecord.CallRecordFragment;
+import com.voipgrid.vialer.callrecord.CallRecordFragmentHolder;
 import com.voipgrid.vialer.callrecord.CallRecordViewHolder;
 import com.voipgrid.vialer.callrecord.CallRecordViewModel;
 import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter;
@@ -94,7 +95,7 @@ public interface VialerComponent {
 
     void inject(MissingVoipAccountStep missingVoipAccountStep);
 
-    void inject(CallRecordFragment callRecordsFragment);
+    void inject(CallRecordFragment callRecordFragment);
 
     void inject(OptionsFragment optionsFragment);
 
