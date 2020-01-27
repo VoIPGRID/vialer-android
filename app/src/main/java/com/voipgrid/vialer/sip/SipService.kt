@@ -64,9 +64,9 @@ class SipService : Service() {
     private val localBroadcastManager: LocalBroadcastManager by inject()
     private val pjsip: Pjsip by inject()
 
-    val audio = Audio(connection)
-    val actions = Actions(this, connection, androidCallManager, pjsip)
-    val handler = Handler(this, notification, androidCallManager, pjsip)
+    val audio by lazy { Audio(connection) }
+    val actions by lazy { Actions(this, connection, androidCallManager, pjsip) }
+    val handler = Handler(this, notification, androidCallManager, pjsip, localBroadcastManager)
     val sounds: Sounds by inject()
     val middleware = Middleware(this)
 

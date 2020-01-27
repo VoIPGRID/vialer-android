@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.sip.service
 
+import android.util.Log
 import com.voipgrid.vialer.android.calling.AndroidCallConnection
 import com.voipgrid.vialer.android.calling.AndroidCallManager
 import com.voipgrid.vialer.android.calling.AndroidCallService

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.telecom.CallAudioState
 import android.util.Log
 import android.widget.Toast
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.android.calling.AndroidCallManager
 import com.voipgrid.vialer.logging.LogHelper
@@ -13,7 +14,7 @@ import com.voipgrid.vialer.sip.core.CallListener
 import com.voipgrid.vialer.sip.pjsip.Pjsip
 import org.pjsip.pjsua2.OnIncomingCallParam
 
-class Handler(private val sip: SipService, private val notification: SipServiceNotificationManager, private val androidCallManager: AndroidCallManager, private val pjsip: Pjsip) : CallListener  {
+class Handler(private val sip: SipService, private val notification: SipServiceNotificationManager, private val androidCallManager: AndroidCallManager, private val pjsip: Pjsip, private val localBroadcastManager: LocalBroadcastManager) : CallListener  {
 
     private val logger = Logger(this)
 
@@ -23,11 +24,11 @@ class Handler(private val sip: SipService, private val notification: SipServiceN
         SipCall.TelephonyState.OUTGOING_RINGING -> sip.sounds.outgoingCallRinger.start()
         SipCall.TelephonyState.CONNECTED -> {
             sip.sounds.outgoingCallRinger.stop()
-            sip.actions.silence()
+            sip.sounds.silence()
             notification.change(SipServiceNotificationManager.Type.ACTIVE)
             when(call) {
                 is OutgoingCall -> SipService.connection.setActive()
-                is IncomingCall -> startCallActivityForCurrentCall()
+                is IncomingCall -> sip.startCallActivityForCurrentCall()
             }
         }
         SipCall.TelephonyState.DISCONNECTED -> {
