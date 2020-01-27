@@ -70,27 +70,17 @@
 
         </LinearLayout>
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/swipe_container"
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/tab_view_pager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/show_my_calls_only">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/call_records"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingBottom="90dp" />
-
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        </androidx.viewpager.widget.ViewPager>
 
     </LinearLayout>
-
-    <com.voipgrid.vialer.callrecord.CallRecordsUnavailableView
-        android:id="@+id/call_records_unavailable_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
