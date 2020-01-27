@@ -1,9 +1,7 @@
 package com.voipgrid.vialer.settings
 
 import android.os.Bundle
-import android.telephony.TelephonyManager
 import android.text.InputType
-import android.util.Log
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import com.voipgrid.vialer.R
@@ -31,14 +29,9 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
         findPreference<EditTextPreference>("outgoing_number")?.summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipgridUser?.outgoingCli }
         findPreference<Preference>("mobile_number_not_matching")?.apply {
             isVisible = sim.mobileNumber != null && !configuredMobileNumberMatchesSimPhoneNumber()
-            summaryProvider = Preference.SummaryProvider<Preference> {
-                if (sim.mobileNumber != null) sim.mobileNumber else ""
-            }
+            summaryProvider = Preference.SummaryProvider<Preference> { if (sim.mobileNumber != null) sim.mobileNumber else "" }
             setOnPreferenceClickListener {
-                try {
-                    sim.mobileNumber?.let { mobileNumberChanged(it) }
-                } catch (e: SecurityException) { }
-
+                sim.mobileNumber?.let { mobileNumberChanged(it) }
                 true
             }
         }
@@ -50,7 +43,7 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
                 editText.text.insert(0, User.voipgridUser?.mobileNumber)
             }
             summaryProvider = Preference.SummaryProvider<EditTextPreference> { User.voipgridUser?.mobileNumber }
-            setOnPreferenceChangeListener { _: Preference, newValue: Any -> mobileNumberChanged(newValue as String) }
+            setOnChangeListener(networkConnectivityRequired = true) { newValue: String -> mobileNumberChanged(newValue) }
         }
     }
 
@@ -80,7 +73,7 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
             userSynchronizer.sync()
 
             activity?.runOnUiThread {
-                refreshSummary<EditTextPreference>("mobile_number")
+                findPreference<Preference>("mobile_number")?.refreshSummary()
                 findPreference<Preference>("mobile_number_not_matching")?.isVisible = sim.mobileNumber != null && !configuredMobileNumberMatchesSimPhoneNumber()
                 isLoading = false
             }

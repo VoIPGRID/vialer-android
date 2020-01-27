@@ -36,10 +36,10 @@ class AdvancedCallSettingsFragment : AbstractSettingsFragment() {
             setDefaultValue(UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI.toString())
         }
 
-        findPreference<SwitchPreferenceCompat>("PREF_HAS_TLS_ENABLED")?.setOnPreferenceChangeListener { _: Preference, enableTls: Any ->
+        findPreference<SwitchPreferenceCompat>("PREF_HAS_TLS_ENABLED")?.setOnChangeListener(networkConnectivityRequired = true) { enableTls: Boolean ->
             isLoading = true
 
-            if (enableTls == true) {
+            if (enableTls) {
                 secureCalling.enable(callback)
             } else {
                 secureCalling.disable(callback)

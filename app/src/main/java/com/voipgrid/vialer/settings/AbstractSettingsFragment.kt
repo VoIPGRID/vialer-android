@@ -46,7 +46,32 @@ abstract class AbstractSettingsFragment : PreferenceFragmentCompat() {
      * Refresh the summary provider that is currently assigned to this preference.
      *
      */
-    fun <T : Preference> refreshSummary(preference: String) {
-        findPreference<T>(preference)?.summaryProvider = findPreference<T>(preference)?.summaryProvider
+    fun Preference.refreshSummary() {
+        summaryProvider = summaryProvider
+    }
+
+    /**
+     * Extension function to set a change listener more cleanly, and specify if an error
+     * should be thrown if there is no connection.
+     *
+     * @param networkConnectivityRequired If set to TRUE, a network connectivity check will be
+     * performed first, if it fails an error dialog will be shown and the setting will
+     * not be changed.
+     */
+    inline fun <reified T : Any> Preference.setOnChangeListener(networkConnectivityRequired: Boolean = false, crossinline listener: (value: T) -> Boolean) {
+        if (activity == null) return
+
+        setOnPreferenceChangeListener { _: Preference, value: Any ->
+            if (!(activity as SettingsActivity).isConnectedToNetwork() && networkConnectivityRequired) {
+                alert(R.string.no_network_connection, R.string.settings_no_internet)
+                return@setOnPreferenceChangeListener false
+            }
+
+            if (value is T) {
+                listener.invoke(value)
+            } else {
+                false
+            }
+        }
     }
 }
