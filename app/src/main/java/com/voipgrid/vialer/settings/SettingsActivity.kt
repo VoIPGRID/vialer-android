@@ -3,12 +3,12 @@ package com.voipgrid.vialer.settings
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.util.LoginRequiredActivity
 
-class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+class SettingsActivity : LoginRequiredActivity(), PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     var onActivityResultCallback: (() -> Unit)? = null
 
@@ -34,10 +34,10 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
     }
 
     override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {
-        val args = pref.extras
-        val fragment = supportFragmentManager.fragmentFactory.instantiate(classLoader, pref.fragment)
-        fragment.arguments = args
-        fragment.setTargetFragment(caller, 0)
+        val fragment = supportFragmentManager.fragmentFactory.instantiate(classLoader, pref.fragment).apply {
+            arguments = pref.extras
+            setTargetFragment(caller, 0)
+        }
         supportActionBar?.title = pref.title
         supportFragmentManager.beginTransaction()
                 .replace(R.id.settings_container, fragment)
@@ -48,5 +48,6 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        onActivityResultCallback?.invoke()
     }
 }
