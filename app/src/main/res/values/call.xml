@@ -23,6 +23,8 @@
     <style name="CallNameTextViewStyle" parent="@style/CallTextViewStyle">
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textSize">@dimen/call_name_text_size</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <!-- TextView Style -->
@@ -43,6 +45,8 @@
     <!-- TextView Style -->
     <style name="CallStateTextViewStyle" parent="@style/CallTextViewStyle">
         <item name="android:textSize">@dimen/call_state_text_size</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="CallTransferStatusStyle" parent="@style/CallTextViewStyle">

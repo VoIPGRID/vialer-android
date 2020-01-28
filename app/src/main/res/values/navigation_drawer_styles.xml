@@ -7,9 +7,17 @@
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
-    <style name="Drawer.Header.TextView.Name" parent="Drawer.Header.TextView">
+    <style name="Drawer.Header.TextView.Number" parent="Drawer.Header.TextView">
         <item name="android:textSize">@dimen/navigation_drawer_header_name_text_size</item>
         <item name="android:textColor">@color/drawer_header_text_color_name</item>
+    </style>
+
+    <style name="Drawer.Header.TextView.GoodDay" parent="Drawer.Header.TextView.Number">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Drawer.Header.TextView.Name" parent="Drawer.Header.TextView.Number">
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="Drawer.Header.TextView.Email" parent="Drawer.Header.TextView">
@@ -20,6 +28,12 @@
     <style name="Drawer.Footer.TextView.Version" parent="Drawer.Header.TextView">
         <item name="android:textSize">@dimen/navigation_drawer_footer_version_text_size</item>
         <item name="android:textColor">@color/drawer_footer_text_color_version</item>
+    </style>
+
+    <style name="NavigationDrawerStyle" parent="Base.TextAppearance.AppCompat">
+        <item name="android:contentInsetStart">0dp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">@dimen/options_menu_text_size</item>
     </style>
 
 </resources>

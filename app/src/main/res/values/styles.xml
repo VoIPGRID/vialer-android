@@ -7,10 +7,21 @@
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeBackground">@color/color_primary</item>
-        <item name="colorControlActivated">@color/color_primary</item>
+        <item name="android:colorControlActivated">@color/color_primary</item>
+        <item name="android:spinnerItemStyle">@style/spinnerItemStyle</item>
     </style>
 
     <style name="AppTheme" parent="@style/BaseTheme">
+    </style>
+
+    <!-- Theme for IncomingCallActivity. -->
+    <style name="Theme.Transparent" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="colorPrimaryDark">@android:color/transparent</item>
     </style>
 
     <style name="ActionBar" parent="@style/ThemeOverlay.AppCompat.ActionBar">
@@ -88,8 +99,8 @@
     </style>
 
     <style name="AccountTextInputLayoutStyle" parent="android:style/TextAppearance">
-        <item name="android:textSize">@dimen/account_text_input_layout_text_size_</item>
-        <item name="android:textColor">@color/account_text_input_layout_text_color</item>
+        <item name="android:textSize">@dimen/account_text_input_layout_text_size</item>
+        <item name="android:textColor">@color/settings_text_color_dark</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
@@ -97,7 +108,7 @@
     <color name="account_edittext_text_color">@color/onboarding_color_accent</color>
     <color name="account_text_input_layout_text_color">@color/color_highlight</color>
 
-    <dimen name="account_text_input_layout_text_size_">16dp</dimen>
+    <dimen name="account_text_input_layout_text_size">16dp</dimen>
 
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>
@@ -112,5 +123,20 @@
         <item name="android:paddingLeft">10dp</item>
         <item name="android:paddingRight">10dp</item>
         <item name="android:paddingBottom">5dp</item>
+    </style>
+
+    <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorControlNormal">@color/settings_text_color_dark</item>
+    </style>
+
+    <style name="Switch" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">#000000</item>
+        <item name="colorSwitchThumbNormal">#f1f1f1</item>
+        <item name="android:colorForeground">#42221f1f</item>
+    </style>
+
+    <style name="spinnerItemStyle" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:textColor">@color/spinner_text_color</item>
+        <item name="android:textSize">13sp</item>
     </style>
 </resources>

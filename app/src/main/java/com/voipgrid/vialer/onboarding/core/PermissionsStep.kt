@@ -21,18 +21,18 @@ abstract class PermissionsStep : Step() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        titleTv?.text = onboarding?.getText(title)
-        justificationTv.text = onboarding?.getText(justification)
-        iconIv?.setImageResource(icon)
+        text_title?.text = onboarding?.getText(title)
+        text_justification.text = onboarding?.getText(justification)
+        imageview_icon?.setImageResource(icon)
 
         logger.i("Prompting user for the $permission permission")
 
-        denyButton.setOnClickListener {
+        button_deny.setOnClickListener {
             logger.i("User chose to skip $permission permission")
             onboarding?.progress(this)
         }
 
-        acceptButton.setOnClickListener {
+        button_accept.setOnClickListener {
             logger.i("User chose to accept $permission permission, launching Android permission prompt")
             performPermissionRequest()
         }
@@ -59,5 +59,7 @@ abstract class PermissionsStep : Step() {
         return PermissionChecker.checkSelfPermission(VialerApplication.get(), permission) == PermissionChecker.PERMISSION_GRANTED
     }
 
-    override fun shouldSkip(state: OnboardingState) = alreadyHasPermission()
+    override fun shouldThisStepBeAddedToOnboarding() = !alreadyHasPermission()
+
+    override fun shouldThisStepBeSkipped(state: OnboardingState) = alreadyHasPermission()
 }

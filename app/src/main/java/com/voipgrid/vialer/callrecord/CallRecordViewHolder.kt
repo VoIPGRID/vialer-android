@@ -14,6 +14,7 @@ import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.github.tamir7.contacts.Contact
 import com.voipgrid.vialer.R
@@ -28,6 +29,7 @@ import com.voipgrid.vialer.util.IconHelper
 import com.voipgrid.vialer.util.TimeUtils
 import kotlinx.android.synthetic.main.list_item_call_record.view.*
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
 
 
 class CallRecordViewHolder(private val view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
@@ -57,7 +59,10 @@ class CallRecordViewHolder(private val view: View) : RecyclerView.ViewHolder(vie
         this.callRecord = callRecord
         val number = callRecord.thirdPartyNumber
         val contact = contacts.getContact(number)
-        view.icon.setImageBitmap(getContactImage(number, contact))
+        if (contact == null || contact.displayName.substring(0, 1).isEmpty())
+            view.icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.icon_user))
+        else
+            view.icon.setImageBitmap(getContactImage(number, contact))
         setNumberAndCallButtonVisibility(callRecord, contact)
         view.subtitle.setCompoundDrawablesWithIntrinsicBounds(getIcon(callRecord), 0, 0, 0)
         view.subtitle.text = createContactInformationString()

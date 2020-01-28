@@ -1,30 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/reachability_holder"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/activity_vertical_item_padding"
+    android:layout_marginTop="@dimen/activity_vertical_item_padding"
+    android:layout_marginEnd="@dimen/activity_vertical_item_padding"
+    android:background="@drawable/error_rounded_background"
+    android:minHeight="50dp"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/activity_vertical_margin"
+    android:paddingEnd="@dimen/activity_vertical_margin">
 
-    <TextView
-        android:id="@+id/reachability_bar_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/dialer_warning_background"
-        android:paddingStart="5dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="40dp"
-        android:paddingBottom="8dp"
-        android:text="@string/dialer_warning_voip_disabled"
-        android:textAlignment="center"
-        android:textColor="@color/dialer_warning_text"
-        android:textSize="14sp" />
-
-    <!--make sure you are not using ImageView instead of this-->
     <ImageView
         android:id="@+id/reachability_bar_drawable_info_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|center_vertical"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="@dimen/activity_vertical_item_padding"
         android:contentDescription="@string/help_icon"
-        android:src="@drawable/ic_info_outline_white_24dp" />
-</FrameLayout>
+        android:src="@drawable/ic_disconnected"
+        android:tint="@color/error_color" />
+
+    <TextView
+        android:id="@+id/reachability_bar_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:maxWidth="220dp"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:text="@string/dialer_warning_voip_disabled"
+        android:textColor="@color/error_color"
+        android:textSize="@dimen/warning_text_size" />
+
+    <TextView
+        android:id="@+id/reachability_bar_settings"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical|end"
+        android:text="@string/settings_menu_item_title"
+        android:textAllCaps="true"
+        android:textColor="@color/error_color"
+        android:textSize="12sp" />
+
+</LinearLayout>

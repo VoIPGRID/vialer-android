@@ -1,89 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-
-    <LinearLayout android:id="@+id/top"
-                  android:layout_width="match_parent"
-                  android:layout_height="0dp"
-                  android:layout_marginTop="4dp"
-                  android:layout_marginBottom="16dp"
-                  android:orientation="vertical"
-                  app:layout_constraintBottom_toTopOf="@+id/dialer"
-                  app:layout_constraintEnd_toEndOf="parent"
-                  app:layout_constraintHeight_percent="1"
-                  app:layout_constraintHorizontal_bias="0.2"
-                  app:layout_constraintStart_toStartOf="parent"
-                  app:layout_constraintTop_toTopOf="parent">
-
-
-        <fragment android:id="@+id/t9_search"
-                  android:name="com.voipgrid.vialer.t9.T9Fragment"
-                  android:layout_width="match_parent"
-                  android:layout_height="0dp"
-                  android:layout_marginStart="8dp"
-                  android:layout_marginLeft="8dp"
-                  android:layout_marginTop="8dp"
-                  android:layout_marginEnd="8dp"
-                  android:layout_marginRight="8dp"
-                  android:layout_marginBottom="8dp"
-                  android:layout_weight="1"
-                  tools:layout="@layout/fragment_t9_search"
-        />
-
-        <LinearLayout
-            android:id="@+id/no_connectivity_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp"
-            android:visibility="gone">
-
-            <ImageView android:layout_width="wrap_content"
-                       android:layout_height="wrap_content"
-                       android:tint="@color/color_primary"
-                       app:srcCompat="@drawable/ic_signal_wifi_off"/>
-
-            <TextView
-                android:id="@+id/no_connectivity_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:paddingTop="10dp"
-                android:text="@string/dialer_no_connectivity"
-                android:textColor="@color/color_primary"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/no_connectivity_subtext"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:paddingTop="3dp"
-                android:text="@string/dialer_no_connectivity_subtext"/>
-        </LinearLayout>
-
-
-    </LinearLayout>
-
-
-    <com.voipgrid.vialer.calling.Dialer
-        android:id="@+id/dialer"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.75"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:show_remove_button="true"/>
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/button_dialpad"
@@ -98,7 +20,60 @@
         app:borderWidth="@dimen/fab_border_width"
         app:elevation="@dimen/fab_elevation"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent" />
 
+    <com.voipgrid.vialer.calling.Dialer
+        android:id="@+id/dialer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/t9_search"
+        app:show_remove_button="true" />
+
+    <fragment
+        android:id="@+id/t9_search"
+        android:name="com.voipgrid.vialer.t9.T9Fragment"
+        android:layout_width="match_parent"
+        android:layout_height="112dp"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout="@layout/fragment_t9_search" />
+
+    <LinearLayout
+        android:id="@+id/no_connectivity_container"
+        android:layout_width="match_parent"
+        android:layout_height="112dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tint="@color/error_foreground_color"
+            app:srcCompat="@drawable/ic_signal_wifi_off" />
+
+        <TextView
+            android:id="@+id/no_connectivity_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:text="@string/dialer_no_connectivity"
+            android:textColor="@color/error_foreground_color"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/no_connectivity_subtext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="3dp"
+            android:text="@string/dialer_no_connectivity_subtext" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

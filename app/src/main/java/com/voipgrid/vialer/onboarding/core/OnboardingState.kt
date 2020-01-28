@@ -6,4 +6,5 @@ package com.voipgrid.vialer.onboarding.core
  */
 class OnboardingState {
     var hasVoipAccount = true
+    var skipTwoFactor = true
 }

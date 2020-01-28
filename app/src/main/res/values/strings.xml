@@ -23,15 +23,15 @@
     <string name="call_hangup">Hang up</string>
     <string name="call_connected">Connected</string>
     <string name="call_unreachable">Unreachable</string>
-    <string name="call_incoming_accept">Accept</string>
-    <string name="call_incoming_decline">Decline</string>
+    <string name="call_incoming_accept">Answer</string>
+    <string name="call_incoming_decline">Ignore</string>
     <string name="call_back_button_confirmation">You are about to end this call, are you sure?</string>
     <string name="call_back_button_confirmation_yes">Yes, end the call</string>
     <string name="call_back_button_confirmation_no">No</string>
     <string name="dialer_connect_a_b_info">Two step modus will setup a call to your phone first and will call the other party when you answer the call.</string>
     <string name="dialer_connect_a_b_info_title">Two step modus</string>
     <string name="dialer_warning_a_b_connect">Poor connection, Two step calling enabled</string>
-    <string name="dialer_warning_no_connection">No connection, cannot call</string>
+    <string name="dialer_warning_no_connection">No connection detected</string>
     <string name="dialer_warning_voip_disabled">VoIP disabled, enable in settings</string>
     <string name="version_info">Version: %s</string>
     <string name="version_info_beta">Version: %1$s Build: %2$s</string>
@@ -74,21 +74,20 @@
     <string name="set_userdestination_api_fail">Editing of availability has failed. Please try again later.</string>
 
     <!-- Login fragment values -->
-    <string name="login_header_label_text">Business</string>
-    <string name="login_header_label_subtext">in the cloud</string>
-    <string name="email_edittext_hint">Email address</string>
+    <string name="login_header_label_text">Business calls in the cloud</string>
     <string name="password_edittext_hint">Password</string>
+    <string name="username_edittext_hint">Username</string>
     <string name="forgot_password_button_title">Forgot password</string>
-    <string name="login_button_title">login</string>
+    <string name="login_button_title">log in</string>
     <string name="login_missing_field_title">Warning</string>
     <string name="login_missing_field_message">Please fill in all fields before login!</string>
     <string name="change_password_webview_toast">To make use of the app, you need to login once and change your password</string>
 
-
     <!-- Forgot password fragment values -->
-    <string name="header_forgot_password_title">Forgot your password?</string>
-    <string name="forgot_password_button_text">Send</string>
-    <string name="forgot_password_description">Please enter your email address and we will send you instructions on setting a new password.</string>
+    <string name="email_edittext_hint">Enter your email</string>
+    <string name="header_forgot_password_title">Forgot password</string>
+    <string name="forgot_password_button_text">Send reset email</string>
+    <string name="forgot_password_description">Send password reset link to:</string>
     <string name="forgot_password_missing_field_title">Warning</string>
     <string name="forgot_password_missing_field_message">Please fill in all fields before login!</string>
     <string name="forgot_password_alert_title">Password reset</string>
@@ -102,11 +101,10 @@
     <string name="configure_button_title">Continue</string>
     <string name="configure_header_label_text">Account \nconfiguration</string>
     <string name="configure_mobile_number_text">Enter your mobile phone number below:</string>
-    <string name="outgoing_number_description">The following number will be displayed when calling someone:</string>
-    <string name="phonenumber_edittext_hint">Mobile number</string>
+    <string name="outgoing_number_description">Vialer will display the following number when calling someone:</string>
+    <string name="phonenumber_prefix_edittext_hint">Prefix</string>
+    <string name="phonenumber_edittext_hint">Phone number</string>
     <string name="outgoingnumber_edittext_hint">Outgoing number</string>
-    <string name="phonenumber_info_text_title">Mobile phone number</string>
-    <string name="phonenumber_info_text">To make two step calling possible, we need to have your mobile phone number.</string>
 
     <!-- Missing voip account fragment values -->
     <string name="set_voip_account_button_text">Set VoIP account</string>
@@ -116,7 +114,7 @@
     <string name="voip_account_missing_text">You do not currently have a VoIP account linked to your user, this is necessary to be able to make and receive calls via VoIP.\n\nIf you do not intend to use VoIP and only wish to use the management and/or two-step calling features then you may skip this step.</string>
 
     <!-- Welcome fragment values -->
-    <string name="welcome_text">Welcome</string>
+    <string name="welcome_text">Welcome to your Vialer, %1$s!</string>
     <string name="placeholder_name">Nameless user</string>
     <string name="start_calling_button">Get started</string>
     <string name="onboarding_login_failed_title">Login failed</string>
@@ -132,10 +130,9 @@
     <string name="two_factor_authentication_button">Continue</string>
     <string name="two_factor_authentication_token_invalid_title">Two-factor Authentication</string>
     <string name="two_factor_authentication_token_invalid_description">The two-factor token is invalid</string>
-    <string name="two_factor_authentication_header_label_text">Two-factor</string>
-    <string name="two_factor_authentication_header_label_subtext">Authentication</string>
-    <string name="onboarding_permission_contacts_title">Contacts Permission</string>
-    <string name="onboarding_permission_contacts_justification">This permission allows Vialer to display information (contacts book &amp; call activity) and to search through your contacts.\n\nThe data will be solely used for display and search purposes.</string>
+    <string name="two_factor_authentication_header_label_text">Two-factor authentication</string>
+    <string name="onboarding_permission_contacts_title">Import contacts</string>
+    <string name="onboarding_permission_contacts_justification">This permission allows Vialer to display information and to list your phone\'s contacts. The data is solely used to display information in the Vialer app.\n\nFor example showing your contacts &amp; call activity.</string>
     <string name="onboarding_permission_call_state_title">Call \nPermission</string>
     <string name="onboarding_permission_call_state_justification">This permission is required to allow Vialer to receive Voice over IP and cellular calls at the same time.\n\nWithout this permission, you might not be notified of incoming VoIP calls when a cellular one is ongoing.</string>
     <string name="onboarding_permission_microphone_title">Microphone Permission</string>
@@ -145,8 +142,7 @@
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_battery_optimization_whitelist_title">Battery Optimization</string>
     <string name="onboarding_battery_optimization_whitelist_justification">Battery optimization may silently shut down the app, block incoming calls and notifications, etc.\n\nThis permission will whitelist Vialer to prevent such issues. \n\nWe are aware how important battery is and use it very conservatively.</string>
-    <string name="password_reset_title">Password Reset</string>
-    <string name="password_reset_subtitle">Required</string>
+    <string name="password_reset_title">Password Reset Required</string>
     <string name="password_reset_description_top">You must create a new password before you are able to login.</string>
     <string name="password_reset_description_bottom">Your password must be at least 6 characters long and contain at least 1 non-alphabetical character.</string>
     <string name="password_reset_hint">Password</string>
@@ -340,9 +336,10 @@
     <string name="choose_codec_text">Audio Quality</string>
     <string name="call_codec_standard_quality">Standard audio</string>
     <string name="call_codec_high_quality">Higher quality audio</string>
+    <string name="call_records_show_all">Only show missed calls</string>
     <string name="call_records_show_my_calls_only">Show my calls only</string>
-    <string name="dialer_no_connectivity">No internet connection</string>
-    <string name="dialer_no_connectivity_subtext">Calls cannot be made or received without a connection</string>
+    <string name="dialer_no_connectivity">No Wi-Fi or mobile connection</string>
+    <string name="dialer_no_connectivity_subtext">Calls cannot be made or received without connection.</string>
     <string name="dialer_no_internet_connectivity">Internet connection unavailable</string>
     <string name="dialer_no_internet_connectivity_subtext">You are connected to a network but unable to access the internet and therefore a call cannot be made.</string>
     <string name="call_records_answered_elsewhere" translatable="false">%1$s (%2$s)</string>
@@ -366,4 +363,21 @@
     <string name="add_to_contacts">Add to contacts</string>
     <string name="copy_number">Copy number</string>
     <string name="number_copied">Number has been copied: %1$s</string>
+    <string name="back">Back</string>
+    <string name="username_password_wrong">This combination of username and password does not match. Please try again.\nBoth fields are case-sensitive</string>
+    <string name="allow">Allow</string>
+    <string name="enter_token">Enter your two-factor authentication token below.</string>
+    <string name="invalid_token">Invalid token</string>
+    <string name="try_again_tfa">Try again or use your backup code</string>
+    <string name="backup_code_button">Enter backup code</string>
+    <string name="contacts_menu_item_title">Contacts</string>
+    <string name="recent_plan_menu_item_title">Recent</string>
+    <string name="options_menu_item_title">Options</string>
+    <string name="numbers">Numbers</string>
+    <string name="network">Network</string>
+    <string name="audio">Audio</string>
+    <string name="call_lost">Call lost - %1$s</string>
+    <string name="two_step_call_title">Setting up a Two-step call with</string>
+    <string name="not_encrypted">Calls are not encrypted</string>
+    <string name="good_day">Good day,</string>
 </resources>

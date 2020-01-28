@@ -1,71 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".twostepcall.TwoStepCallActivity">
+    tools:context=".twostepcall.TwoStepCallActivity"
+    android:background="@color/white">
 
     <LinearLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/color_primary"
+        android:background="@drawable/background_gradient"
         android:orientation="vertical"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin">
+        android:padding="@dimen/activity_vertical_margin"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            style="@style/CallStateTextViewStyle"
+            android:text="@string/two_step_call_title"/>
 
         <TextView
             android:id="@+id/name_text_view"
             tools:text="John Doe"
-            style="@style/CallNameTextViewStyle" />
+            style="@style/CallNameTextViewStyle"
+            android:layout_marginTop="15dp"/>
 
         <TextView
             android:id="@+id/status_text_view"
-            tools:text="Out of Reach"
+            tools:text="+31 6 4092 1898"
             style="@style/CallStateTextViewStyle" />
     </LinearLayout>
 
-    <FrameLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/header">
 
-        <ScrollView
+        <com.voipgrid.vialer.twostepcall.TwoStepCallView
+            android:id="@+id/two_step_call_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:padding="42dp"/>
 
-            <com.voipgrid.vialer.twostepcall.TwoStepCallView
-                android:id="@+id/two_step_call_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin" />
+    </ScrollView>
 
-        </ScrollView>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/two_step_button_hangup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_call_end_white"
+        android:onClick="onClick"
+        app:backgroundTint="@color/call_fab_hangup_color"
+        android:layout_marginBottom="21dp"
+        app:elevation="@dimen/fab_elevation"
+        app:borderWidth="@dimen/fab_border_width"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal|bottom"
-            >
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/two_step_button_hangup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_call_end_white"
-                android:onClick="onClick"
-                app:backgroundTint="@color/call_fab_hangup_color"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                app:elevation="@dimen/fab_elevation"
-                app:borderWidth="@dimen/fab_border_width"
-                />
-        </LinearLayout>
-    </FrameLayout>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,13 +10,17 @@ import com.voipgrid.vialer.onboarding.steps.permissions.ContactsPermissionStep
 import com.voipgrid.vialer.onboarding.steps.permissions.MicrophonePermissionStep
 import com.voipgrid.vialer.onboarding.steps.permissions.OptimizationWhitelistStep
 import com.voipgrid.vialer.onboarding.steps.permissions.PhoneStatePermissionStep
+import com.voipgrid.vialer.onboarding.steps.TwoFactorStep
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
 class OnboardingActivity : Onboarder() {
+    private var username: String? = null
+    private var password: String? = null
 
     private val adapter = OnboardingAdapter(supportFragmentManager, lifecycle, listOf(
         LogoStep(),
         LoginStep(),
+        TwoFactorStep(),
         AccountConfigurationStep(),
         MissingVoipAccountStep(),
         ContactsPermissionStep(),
@@ -25,7 +29,6 @@ class OnboardingActivity : Onboarder() {
         OptimizationWhitelistStep(),
         WelcomeStep()
     ))
-
 
     private val currentStep : Step
         get() = adapter.getStep(viewPager.currentItem)
@@ -72,7 +75,7 @@ class OnboardingActivity : Onboarder() {
         val currentPosition = adapter.indexOfStep(callerStep)
 
         for (i in (currentPosition + 1) until adapter.itemCount) {
-            if (adapter.getStep(i).shouldSkip(state)) {
+            if (adapter.getStep(i).shouldThisStepBeSkipped(state)) {
                 continue
             }
 
@@ -115,5 +118,18 @@ class OnboardingActivity : Onboarder() {
         logger.i("Restarting onboarding procedure")
         finish()
         logout(true)
+    }
+
+    fun setCredentialsForTfa(username: String, password: String) {
+        this.username = username
+        this.password = password
+    }
+
+    fun getUsername(): String? {
+        return username
+    }
+
+    fun getPassword(): String? {
+        return password
     }
 }

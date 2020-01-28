@@ -21,7 +21,6 @@ import com.voipgrid.vialer.util.ConnectivityHelper
 import com.voipgrid.vialer.util.InternetConnectivity
 import javax.inject.Inject
 
-
 abstract class VialerBaseActivity : AppCompatActivity() {
 
     protected open val logger = Logger(this)

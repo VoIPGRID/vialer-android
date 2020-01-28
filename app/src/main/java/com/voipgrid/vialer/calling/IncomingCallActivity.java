@@ -1,17 +1,11 @@
 package com.voipgrid.vialer.calling;
 
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
-
 import android.app.KeyguardManager;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-
-import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.contacts.Contacts;
@@ -23,9 +17,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.hdodenhof.circleimageview.CircleImageView;
-
-import static com.voipgrid.vialer.calling.CallingConstants.CALL_IS_CONNECTED;
 
 public class IncomingCallActivity extends AbstractCallActivity {
 
@@ -35,7 +26,6 @@ public class IncomingCallActivity extends AbstractCallActivity {
 
     @BindView(R.id.incoming_caller_title) TextView mIncomingCallerTitle;
     @BindView(R.id.incoming_caller_subtitle) TextView mIncomingCallerSubtitle;
-    @BindView(R.id.profile_image) CircleImageView mContactImage;
     @BindView(R.id.button_decline) ImageButton mButtonDecline;
     @BindView(R.id.button_pickup) ImageButton mButtonPickup;
     @BindView(R.id.call_buttons) View mCallButtons;
@@ -47,7 +37,7 @@ public class IncomingCallActivity extends AbstractCallActivity {
         ButterKnife.bind(this);
         VialerApplication.get().component().inject(this);
 
-        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent(), mContactImage);
+        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent());
     }
 
     @OnClick(R.id.button_decline)

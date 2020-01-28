@@ -16,5 +16,6 @@
         <attr name="show_exit_button" format="boolean" />
         <attr name="show_remove_button" format="boolean" />
         <attr name="show_call_button" format="boolean" />
+        <attr name="keypad_height_percentage" format="float"/>
     </declare-styleable>
 </resources>

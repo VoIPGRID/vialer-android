@@ -28,7 +28,7 @@
     <string name="dialer_connect_a_b_info">Twee staps modus zal een gesprek opzetten naar je telefoon en zal na beantwooring het gesprek opzetten naar de andere partij.</string>
     <string name="dialer_connect_a_b_info_title">Twee staps modus</string>
     <string name="dialer_warning_a_b_connect">Slechte verbinding, Twee staps modus geactiveerd</string>
-    <string name="dialer_warning_no_connection">Geen verbinding, bellen niet mogelijk</string>
+    <string name="dialer_warning_no_connection">Geen verbinding gedetecteerd</string>
     <string name="dialer_warning_voip_disabled">VoIP gedeactiveerd, activeer VoIP bij instellingen</string>
     <string name="version_info">Versie: %1$s</string>
     <string name="version_info_beta">Versie: %1$s Build: %2$s</string>
@@ -71,10 +71,9 @@
     <string name="set_userdestination_api_fail">Aanpassen van bereikbaarheid mislukt. Probeer later opnieuw.</string>
 
     <!-- Login fragment values -->
-    <string name="login_header_label_text">Zakelijke</string>
-    <string name="login_header_label_subtext">telefonie in de cloud</string>
-    <string name="email_edittext_hint">E-mailadres</string>
+    <string name="login_header_label_text">Zakelijke telefonie in de cloud</string>
     <string name="password_edittext_hint">Wachtwoord</string>
+    <string name="username_edittext_hint">Gebruikersnaam</string>
     <string name="forgot_password_button_title">Wachtwoord vergeten?</string>
     <string name="login_button_title">Inloggen</string>
     <string name="login_missing_field_title">Let op</string>
@@ -82,8 +81,10 @@
     <string name="change_password_webview_toast">Om gebruik van de app te kunnen maken moet je eenmalig inloggen en je wachtwoord wijzigen</string>
 
     <!-- Forgot password fragment values -->
-    <string name="forgot_password_button_text">Verzenden</string>
-    <string name="forgot_password_description">Voer uw e-mailadres in en wij sturen je instructies om je wachtwoord te herstellen.</string>
+    <string name="email_edittext_hint">Voer uw e-mailadres in</string>
+    <string name="header_forgot_password_title">Wachtwoord vergeten</string>
+    <string name="forgot_password_button_text">Verzend herstelemail</string>
+    <string name="forgot_password_description">Verzend link om wachtwoord te herstellen naar:</string>
     <string name="forgot_password_missing_field_title">Let op</string>
     <string name="forgot_password_missing_field_message">Vul alstublieft alle velden in</string>
     <string name="forgot_password_alert_title">Wachtwoord herstellen</string>
@@ -96,10 +97,9 @@
     <!-- Configure fragment values. -->
     <string name="configure_button_title">Instellen</string>
     <string name="configure_header_label_text">Account \nconfiguratie</string>
-    <string name="phonenumber_edittext_hint">Mobiel nummer</string>
+    <string name="phonenumber_prefix_edittext_hint">Kengetal</string>
+    <string name="phonenumber_edittext_hint">Telefoonnummer</string>
     <string name="outgoingnumber_edittext_hint">Uitgaand nummer</string>
-    <string name="phonenumber_info_text_title">Mobiele telefoonnummer</string>
-    <string name="phonenumber_info_text">Om Twee stap bellen mogelijk te maken, hebben we je mobiele nummer nodig.</string>
 
     <!-- Missing voip account fragment values -->
     <string name="set_voip_account_button_text">Koppel VoIP account</string>
@@ -108,7 +108,7 @@
     <string name="voip_account_missing_text">Om gebruik te kunnen maken van bellen via VoIP, moet er een VoIP-account gekoppeld zijn aan je gebruiker.\n\nOp dit moment is er geen VoIP-account gekoppeld aan deze gebruiker.</string>
 
     <!-- Welcome fragment values -->
-    <string name="welcome_text">Welkom</string>
+    <string name="welcome_text">Welkom bij Vialer, %1$s!</string>
     <string name="placeholder_name">Naamloze gebruiker</string>
     <string name="start_calling_button">Aan de slag</string>
     <string name="onboarding_login_failed_title">Inloggen mislukt</string>
@@ -122,9 +122,7 @@
     <string name="two_factor_authentication_button">Ga verder</string>
     <string name="two_factor_authentication_token_invalid_title">Twee-Staps Verificatie</string>
     <string name="two_factor_authentication_token_invalid_description">Ingevoerde token is niet geldig</string>
-    <string name="two_factor_authentication_header_label_text">Twee-Staps</string>
-    <string name="two_factor_authentication_header_label_subtext">Verificatie</string>
-
+    <string name="two_factor_authentication_header_label_text">Twee-Staps verificatie</string>
 
     <string name="title_activity_click_to_dial">ClickToDialActivity</string>
     <string name="title_activity_warning">Waarschuwing</string>
@@ -233,7 +231,7 @@
     <string name="call_transfer_complete_success"> Succesvol doorverbonden %1$s en %2$s</string>
     <string name="call_incoming_expanded">Inkomend gesprek van:</string>
     <string name="call_incoming_accept">Beantwoorden</string>
-    <string name="call_incoming_decline">Weigeren</string>
+    <string name="call_incoming_decline">Negeren</string>
     <string name="advanced_settings_title">Geavanceerde instellingen</string>
     <string name="settings_advanced_call_encryption_description">Externe partijen kunnen je gesprekken afluisteren als deze functie is uitgeschakeld.</string>
     <string name="settings_advanced_call_encryption">Gebruik versleuteld bellen</string>
@@ -297,14 +295,15 @@
     <string name="choose_codec_text">Audio Kwaliteit</string>
     <string name="call_codec_standard_quality">Standaard audio</string>
     <string name="call_codec_high_quality">Hogere audio kwaliteit</string>
+    <string name="call_records_show_all">Toon alleen gemiste oproepen</string>
     <string name="call_records_show_my_calls_only">Toon alleen mijn gesprekken</string>
     <string name="tab_title_all_calls">alle gesprekken</string>
     <string name="tab_title_missed_calls">gemiste gesprekken</string>
     <string name="call_connection_setting_not_supported">Jouw Android versie staat het aanpassen van
         deze instelling niet toe
     </string>
-    <string name="dialer_no_connectivity">Geen internet verbinding</string>
-    <string name="dialer_no_connectivity_subtext">Gesprekken kunnen niet worden opgezet of ontvangen zonder internet</string>
+    <string name="dialer_no_connectivity">Geen Wi-Fi of mobiele internetverbinding</string>
+    <string name="dialer_no_connectivity_subtext">Gesprekken kunnen niet worden opgezet of ontvangen zonder internet.</string>
     <string name="ignore_battery_optimization_switch">Altijd op de achtergrond laten draaien</string>
     <string name="ignore_battery_optimization_description">Deze applicatie wordt niet langer beperkt door Android batterijbesparing, waardoor de betrouwbaarheid van inkomend belverkeer toeneemt. Wij raden je sterk aan deze functie in te schakelen.</string>
     <string name="dialer_no_encryption_dialog">Versleuteld bellen is momenteel niet ingeschakeld.
@@ -334,14 +333,13 @@
     <string name="dialer_no_internet_connectivity">Geen internetverbinding beschikbaar</string>
     <string name="dialer_no_internet_connectivity_subtext">Je bent met een netwerk verbonden maar er is geen internetverbinding, waardoor er geen gesprek opgezet kan worden.</string>
     <string name="use_phones_ringtone_switch_switch">Gebruik ringtone van het toestel</string>
-    <string name="header_forgot_password_title">Wachtwoord vergeten?</string>
     <string name="configure_mobile_number_text">Voer onderstaand je mobiele telefoonnummer in:</string>
-    <string name="outgoing_number_description">Het volgende nummer wordt getoond bij uitgaande gesprekken:</string>
+    <string name="outgoing_number_description">Vialer zal het volgende nummer weergeven wanneer u iemand belt:</string>
     <string name="voip_account_missing_title">VoIP account\nontbreekt</string>
     <string name="onboarding_login_failed_too_many_attempts_title">Teveel inlogpogingen</string>
     <string name="onboarding_login_failed_too_many_attempts_message">Probeer het later opnieuw.</string>
-    <string name="onboarding_permission_contacts_title">Toestemming contactenlijst</string>
-    <string name="onboarding_permission_contacts_justification">"Deze toestemming zorgt ervoor dat Vialer informatie zoals de contactenlijst en gespreksactiviteit inzichtelijk maakt.\n\nDeze data wordt enkel gebruikt voor het tonen en doorzoeken hiervan. "</string>
+    <string name="onboarding_permission_contacts_title">Importeer contacten</string>
+    <string name="onboarding_permission_contacts_justification">Deze toestemming zorgt ervoor dat Vialer informatie zoals de contactenlijst en gespreksactiviteit inzichtelijk maakt.\n\nDeze data wordt enkel gebruikt voor het tonen en doorzoeken hiervan.</string>
     <string name="onboarding_permission_call_state_title">Gesprekstoegangen</string>
     <string name="onboarding_permission_call_state_justification">Deze toestemming is nodig om Vialer toe te staan VoIP en mobiele gesprekken tegelijkertijd te ontvangen. Zonder deze toestemming zou je tijdens een mobiel gesprek geen melding kunnen ontvangen wanneer een VoIP gesprek binnenkomt.</string>
     <string name="onboarding_permission_microphone_title">Microfoon\ntoestemming</string>
@@ -351,8 +349,7 @@
     <string name="onboarding_skip">Overslaan</string>
     <string name="onboarding_battery_optimization_whitelist_title">Batterij-optimalisatie</string>
     <string name="onboarding_battery_optimization_whitelist_justification">"Batterij-optimalisatie kan ervoor zorgen dat de app langzaam wordt gestopt, gesprekken en notificaties worden geblokkeerd etc.\n\nDeze toestemming zorgt ervoor dat Vialer als veilig wordt gemarkeerd, waardoor dit gedrag zich niet voor zal doen.\n\nWe zijn ons ervan bewust hoe belangrijk je batterij is en gaan hier dan ook zuinig mee om. "</string>
-    <string name="password_reset_title">Wachtwoord reset</string>
-    <string name="password_reset_subtitle">Verplicht</string>
+    <string name="password_reset_title">Wachtwoord Reset Verplicht</string>
     <string name="password_reset_description_top">Je zult een nieuw wachtwoord moeten aanmaken voordat er opnieuw ingelogd kan worden.</string>
     <string name="password_reset_description_bottom">Je wachtwoord moet uit minimaal 6 karakters bestaan en bevat minimaal 1 niet-alfabetisch karakter.</string>
     <string name="password_reset_hint">Wachtwoord</string>
@@ -365,4 +362,21 @@
     <string name="add_to_contacts">Voeg to aan contacten</string>
     <string name="copy_number">Kopieer nummer</string>
     <string name="number_copied">Nummer gekopieerd: %1$s</string>
+    <string name="back">Terug</string>
+    <string name="username_password_wrong">Deze combinatie van gebruikersnaam en wachtwoord komt niet overeen. Probeer het opnieuw.\nBeide velden zijn hoofdlettergevoelig</string>
+    <string name="allow">Toestaan</string>
+    <string name="enter_token">Voer hier je tweestapsverificatietoken in.</string>
+    <string name="invalid_token">Ongeldig token</string>
+    <string name="try_again_tfa">Probeer opnieuw of gebruik je backupcode</string>
+    <string name="backup_code_button">Voer backupcode in</string>
+    <string name="contacts_menu_item_title">Contacten</string>
+    <string name="recent_plan_menu_item_title">Recent</string>
+    <string name="options_menu_item_title">Opties</string>
+    <string name="numbers">Nummers</string>
+    <string name="network">Network</string>
+    <string name="audio">Audio</string>
+    <string name="call_lost">Gesprek verloren - %1$s</string>
+    <string name="two_step_call_title">Two-step call initiëren met</string>
+    <string name="not_encrypted">Gesprekken zijn niet versleuteld</string>
+    <string name="good_day">Goedendag,</string>
 </resources>

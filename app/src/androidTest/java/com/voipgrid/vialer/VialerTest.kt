@@ -33,14 +33,14 @@ abstract class VialerTest {
         check(username.isNotEmpty()) { "Test username not set" }
         check(password.isNotEmpty()) { "Test password not set" }
 
-        onView(withId(R.id.emailTextDialog)).perform(typeText(username))
-        onView(withId(R.id.passwordTextDialog)).perform(typeText(password))
+        onView(withId(R.id.username_text_dialog)).perform(typeText(username))
+        onView(withId(R.id.password_text_dialog)).perform(typeText(password))
         onView(withId(R.id.button_login)).perform(click())
         Thread.sleep(2000)
     }
 
-     fun onboard(skipIfLoggedIn: Boolean = false): Boolean {
-         Thread.sleep(2000)
+    fun onboard(skipIfLoggedIn: Boolean = false): Boolean {
+        Thread.sleep(2000)
         try {
             onView(withId(R.id.emailTextDialog)).check(matches(isDisplayed()))
         } catch (e: Exception) {

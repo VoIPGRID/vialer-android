@@ -2,6 +2,7 @@ package com.voipgrid.vialer.dialer;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -93,6 +94,7 @@ public class DialpadButton extends LinearLayout {
         digit.setText(mDigit);
         digit.setLayoutParams(params);
         digit.setGravity(Gravity.CENTER);
+        digit.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
         if(mDigit.equals("*") || mDigit.equals("#")) {
             digit.setTextColor(getResources().getColor(R.color.dial_button_chars_color));
             digit.setTextSize(getResources().getDimension(R.dimen.dialpad_button_star_text_size));

@@ -1,24 +1,21 @@
 package com.voipgrid.vialer.onboarding.steps
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.onboarding.OnboardingActivity
 import com.voipgrid.vialer.onboarding.VoipgridLogin
 import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult
 import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult.*
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.ConnectivityHelper
-import com.voipgrid.vialer.util.TwoFactorFragmentHelper
 import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity
 import kotlinx.android.synthetic.main.onboarding_step_login.*
 import kotlinx.coroutines.Dispatchers
@@ -35,37 +32,36 @@ class LoginStep : Step() {
     @Inject lateinit var login: VoipgridLogin
 
     private val logger = Logger(this).forceRemoteLogging(true)
-    private var twoFactorHelper: TwoFactorFragmentHelper? = null
-    private var twoFactorDialog: AlertDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         VialerApplication.get().component().inject(this)
 
         val enableSubmitButton: (_: Editable?) -> Unit = {
-            button_login.isEnabled = emailTextDialog.length() > 0 && passwordTextDialog.length() > 0
+            button_login.isEnabled = username_text_dialog.length() > 0 && password_text_dialog.length() > 0
         }
 
-        emailTextDialog.onTextChanged(enableSubmitButton)
-        passwordTextDialog.onTextChanged(enableSubmitButton)
+        username_text_dialog.onTextChanged(enableSubmitButton)
+        password_text_dialog.onTextChanged(enableSubmitButton)
+        username_text_dialog.setOnFocusChangeListener { _, _ -> showDefaultInputs() }
+        password_text_dialog.setOnFocusChangeListener { _, _ -> showDefaultInputs() }
+        showDefaultInputs()
 
         KeyboardVisibilityEvent.setEventListener(activity) { keyboardIsVisible ->
             if (keyboardIsVisible) {
-                title_label.visibility = View.GONE
-                subtitle_label.visibility = View.GONE
+                title_label?.visibility = View.GONE
             } else {
-                title_label.visibility = View.VISIBLE
-                subtitle_label.visibility = View.VISIBLE
+                title_label?.visibility = View.VISIBLE
             }
         }
 
-        passwordTextDialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
+        password_text_dialog.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
             actionId == EditorInfo.IME_ACTION_DONE && button_login.performClick()
         }
 
         button_login.setOnClickListenerAndDisable {
-            emailTextDialog.clearFocus()
-            passwordTextDialog.clearFocus()
+            username_text_dialog.clearFocus()
+            password_text_dialog.clearFocus()
             attemptLogin()
         }
         button_forgot_password.setOnClickListener { launchForgottenPasswordActivity() }
@@ -75,7 +71,6 @@ class LoginStep : Step() {
 
     override fun onResume() {
         super.onResume()
-        twoFactorHelper?.pasteCodeFromClipboard()
         User.internal.hasCompletedOnBoarding = false
     }
 
@@ -92,8 +87,8 @@ class LoginStep : Step() {
             return
         }
 
-        emailTextDialog.setText(intent.getStringExtra(PasswordResetWebActivity.USERNAME_EXTRA))
-        passwordTextDialog.setText(intent.getStringExtra(PasswordResetWebActivity.PASSWORD_EXTRA))
+        username_text_dialog.setText(intent.getStringExtra(PasswordResetWebActivity.USERNAME_EXTRA))
+        password_text_dialog.setText(intent.getStringExtra(PasswordResetWebActivity.PASSWORD_EXTRA))
         if (button_login.isEnabled) button_login.performClick()
     }
 
@@ -104,7 +99,7 @@ class LoginStep : Step() {
     private fun attemptLogin(code: String? = null) = GlobalScope.launch(Dispatchers.Main) {
         onboarding?.isLoading = true
         logger.i("Attempting to log the user into VoIPGRID, with the following 2FA code: $code")
-        val result = login.attempt(emailTextDialog.text.toString(), passwordTextDialog.text.toString(), code)
+        val result = login.attempt(username_text_dialog.text.toString(), password_text_dialog.text.toString(), code)
         onboarding?.isLoading = false
         handleLoginResult(result)
     }
@@ -116,49 +111,25 @@ class LoginStep : Step() {
     private fun handleLoginResult(result: LoginResult) = when(result) {
         FAIL -> {
             logger.w("User failed to login to VoIPGRID")
-            login.lastError?.let { error(it.title, it.description) }
+            login.lastError?.let { showErrorInputs() }
             button_login.isEnabled = true
         }
         SUCCESS -> {
             logger.i("Login to VoIPGRID was successful, progressing the user in onboarding")
-            twoFactorDialog?.dismiss()
             onboarding?.progress(this)
         }
         TWO_FACTOR_REQUIRED -> {
             logger.i("User logged into VoIPGRID with the correct username/password but is now required to input a valid 2FA code")
             button_login.isEnabled = true
-            showTwoFactorDialog()
+            state?.skipTwoFactor = false
+            (onboarding as OnboardingActivity).setCredentialsForTfa(username_text_dialog.text.toString(), password_text_dialog.text.toString())
+            onboarding?.progress(this)
         }
         MUST_CHANGE_PASSWORD -> {
             logger.i("User must change their password before we can login")
             activity?.let {
-                PasswordResetWebActivity.launch(it, emailTextDialog.text.toString(), passwordTextDialog.text.toString())
+                PasswordResetWebActivity.launch(it, username_text_dialog.text.toString(), password_text_dialog.text.toString())
             }
-        }
-    }
-
-    /**
-     * Create and show a dialog for the user to enter a two-factor token.
-     *
-     */
-    private fun showTwoFactorDialog() {
-        activity?.let {
-            val twoFactorDialog = AlertDialog.Builder(it)
-                    .setView(R.layout.onboarding_dialog_two_factor)
-                    .show()
-
-            val codeField = (twoFactorDialog.findViewById(R.id.two_factor_code_field) as EditText)
-            twoFactorHelper = TwoFactorFragmentHelper(it, codeField).apply {
-                focusOnTokenField()
-                pasteCodeFromClipboard()
-            }
-
-            (twoFactorDialog.findViewById(R.id.button_continue) as Button).setOnClickListener {
-                onboarding?.isLoading = true
-                attemptLogin(codeField.text.toString())
-            }
-
-            this.twoFactorDialog = twoFactorDialog
         }
     }
 
@@ -168,6 +139,34 @@ class LoginStep : Step() {
      */
     private fun launchForgottenPasswordActivity() {
         logger.i("Detected forgot password click, launching activity")
-        ForgottenPasswordActivity.launchForEmail(onboarding as Context, emailTextDialog.text.toString())
+        ForgottenPasswordActivity.launchForEmail(onboarding as Context, username_text_dialog.text.toString())
+    }
+
+    /**
+     * Sets the colors of the text and border of the input fields to red, displays an exclamation
+     * mark in the text fields and displays an error text.
+     */
+    private fun showErrorInputs() {
+        username_text_dialog.setTextColor(ContextCompat.getColor(onboarding as Context, R.color.error_color))
+        username_text_dialog.backgroundTintList = ContextCompat.getColorStateList(onboarding as Context, R.color.error_color)
+        username_text_dialog.compoundDrawablesRelative[2].alpha = 255
+        password_text_dialog.setTextColor(ContextCompat.getColor(onboarding as Context, R.color.error_color))
+        password_text_dialog.backgroundTintList = ContextCompat.getColorStateList(onboarding as Context, R.color.error_color)
+        password_text_dialog.compoundDrawablesRelative[2].alpha = 255
+        text_error.visibility = View.VISIBLE
+    }
+
+    /**
+     * Sets the colors of the text and border of the input fields to default, removes the
+     * exclamation mark from the text fields and hides the error text.
+     */
+    private fun showDefaultInputs() {
+        username_text_dialog.setTextColor(ContextCompat.getColor(onboarding as Context, R.color.onboarding_text_hint_color))
+        username_text_dialog.backgroundTintList = ContextCompat.getColorStateList(onboarding as Context, R.color.onboarding_text_hint_color)
+        username_text_dialog.compoundDrawablesRelative[2].alpha = 0
+        password_text_dialog.setTextColor(ContextCompat.getColor(onboarding as Context, R.color.onboarding_text_hint_color))
+        password_text_dialog.backgroundTintList = ContextCompat.getColorStateList(onboarding as Context, R.color.onboarding_text_hint_color)
+        password_text_dialog.compoundDrawablesRelative[2].alpha = 0
+        text_error.visibility = View.GONE
     }
 }

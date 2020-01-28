@@ -3,19 +3,19 @@ package com.voipgrid.vialer.onboarding.steps
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
+import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.google.i18n.phonenumbers.Phonenumber
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.api.models.MobileNumber
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.PhoneNumberUtils
-import com.voipgrid.vialer.util.Sim
 import kotlinx.android.synthetic.main.onboarding_step_mobile_number.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.android.ext.android.inject
 import javax.inject.Inject
 
 class AccountConfigurationStep : Step(), View.OnClickListener {
@@ -26,9 +26,14 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
         get() = if (User.voipgridUser?.outgoingCli == "suppressed") onboarding?.getString(R.string.supressed_number) else User.voipgridUser?.outgoingCli
 
     private val logger = Logger(this).forceRemoteLogging(true)
+    private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
-    private val userSynchronizer: UserSynchronizer by inject()
-    private val sim: Sim by inject()
+    @Inject lateinit var userSynchronizer: UserSynchronizer
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        VialerApplication.get().component().inject(this)
+    }
 
     override fun onResume() {
         super.onResume()
@@ -39,27 +44,31 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
             return
         }
 
-        mobileNumberTextDialog.setText(if (sim.mobileNumber != null) sim.mobileNumber else User.voipgridUser?.mobileNumber)
-        mobileNumberTextDialog.setRightDrawableOnClickListener {
-            alert(R.string.phonenumber_info_text_title, R.string.phonenumber_info_text)
+        mobile_number_text_dialog_prefix.setText(getCountryCode())
+        mobile_number_text_dialog_prefix.onTextChanged {
+            button_configure.isEnabled = mobile_number_text_dialog.text?.isNotEmpty() ?: false && mobile_number_text_dialog_prefix.text?.isNotEmpty() ?: false
         }
-        mobileNumberTextDialog.onTextChanged {
-            button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false
+
+        mobile_number_text_dialog.setText(getNationalNumber())
+        mobile_number_text_dialog.onTextChanged {
+            button_configure.isEnabled = mobile_number_text_dialog.text?.isNotEmpty() ?: false && mobile_number_text_dialog_prefix.text?.isNotEmpty() ?: false
         }
-        outgoingNumberTv.text = outgoingNumber
+
+        outgoing_number_tv.text = getFormattedOutgoingNumber()
         button_configure.setOnClickListenerAndDisable(this)
-        button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false
+        button_configure.isEnabled = mobile_number_text_dialog.text?.isNotEmpty() ?: false && mobile_number_text_dialog_prefix.text?.isNotEmpty() ?: false
+        button_back.setOnClickListener { activity?.onBackPressed() }
     }
 
     override fun onClick(view: View?) {
-        val mobileNumber = mobileNumberTextDialog.text.toString()
-
+        onboarding?.isLoading = true
+        val mobileNumber = (mobile_number_text_dialog_prefix.text.toString() + mobile_number_text_dialog.text.toString()).replace(" ", "")
         if (!PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
             error(R.string.invalid_mobile_number_message, R.string.invalid_mobile_number_message)
             return
         }
 
-        mobileNumberTextDialog.clearFocus()
+        mobile_number_text_dialog.clearFocus()
 
         val formattedMobileNumber = PhoneNumberUtils.format(mobileNumber)
 
@@ -77,6 +86,7 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
     private fun configureUserAccount(mobileNumber: String) = GlobalScope.launch(Dispatchers.Main) {
         if (!PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
             error()
+            onboarding?.isLoading = false
             return@launch
         }
 
@@ -92,9 +102,11 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
                 return@launch
             }
 
+            onboarding?.isLoading = false
             onboarding?.progress(this@AccountConfigurationStep)
         } catch (e: Exception) {
             logger.e("Failed to configure account: ${e.message}")
+            onboarding?.isLoading = false
             error()
         }
     }
@@ -129,6 +141,7 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
      *
      */
     private fun informUserTheyHaveNoOutgoingNumber(mobileNumber: String) = activity?.runOnUiThread {
+        onboarding?.isLoading = false
         button_configure.isEnabled = true
         AlertDialog.Builder(onboarding)
                 .setTitle(R.string.onboarding_account_configure_no_outgoing_number_title)
@@ -138,5 +151,39 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
                 .show()
     }
 
-    private fun hasOutgoingNumber() = outgoingNumberTv.text.isNotEmpty()
+    private fun hasOutgoingNumber() = outgoing_number_tv.text.isNotEmpty()
+
+    /**
+     * Parse user's mobile number to formatted PhoneNumber object.
+     *
+     */
+    private fun getNumber(): Phonenumber.PhoneNumber {
+        return phoneNumberUtil.parse(User.voipgridUser?.mobileNumber, "ZZ")
+    }
+
+    /**
+     * Return country code from user's mobile number.
+     *
+     */
+    private fun getCountryCode(): String {
+        return "+" + getNumber().countryCode
+    }
+
+    /**
+     * Return formatted national number from user's mobile number.
+     *
+     */
+    private fun getNationalNumber(): String {
+        val internationalNumber = phoneNumberUtil.format(getNumber(), PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+        val countryCode = "+" + getNumber().countryCode
+        return internationalNumber.replace("$countryCode ", "")
+    }
+
+    /**
+     * Return formatted outgoing number.
+     *
+     */
+    private fun getFormattedOutgoingNumber(): String {
+        return phoneNumberUtil.format(phoneNumberUtil.parse(outgoingNumber, "ZZ"), PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+    }
 }

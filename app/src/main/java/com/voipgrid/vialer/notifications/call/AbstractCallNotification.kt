@@ -75,8 +75,7 @@ abstract class AbstractCallNotification : AbstractNotification() {
      *
      */
     private fun applyCallNotificationDefaults(builder : NotificationCompat.Builder) : NotificationCompat.Builder {
-        return builder.setColor(context.resources.getColor(R.color.color_primary_dark))
-                .setColorized(true)
+        return builder.setColorized(true)
                 .setSmallIcon(logo)
                 .setOngoing(true)
     }

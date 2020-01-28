@@ -16,8 +16,8 @@
     <color name="key_pad_background_color">#ffffff</color>
     <color name="key_pad_divider_color">#E2E2E2</color>
 
-    <color name="dialpad_fab_call_color">#75c25e</color>
-    <color name="dialpad_fab_call_color_disabled">#888888</color>
+    <color name="dialpad_fab_call_color">#28CA42</color>
+    <color name="dialpad_fab_call_color_disabled">#CCCCCC</color>
 
     <color name="tint_color_backspace">#B9B9B9</color>
 
@@ -26,15 +26,15 @@
     <color name="tab_inactive">@color/tab_tint_color</color>
 
     <color name="two_step_call_step_platform">#FFFFFF</color>
-    <color name="two_step_call_step_a">#3D4154</color>
-    <color name="two_step_call_dots">#3D4154</color>
+    <color name="two_step_call_step">#3D4154</color>
+    <color name="two_step_call_dots">#E0E0E0</color>
+    <color name="two_step_call_dot_selected">@color/dial_button_chars_color</color>
     <color name="two_step_call_step_shadow">#4D000000</color>
-    <color name="two_step_call_step_b">@color/color_primary</color>
 
     <color name="google_lock_ring_handle_color">#ffa3a3a3</color>
     <color name="google_lock_ring_white_transparent">#00ffffff</color>
 
-    <color name="call_fab_hangup_color">#DB4437</color>
+    <color name="call_fab_hangup_color">@color/error_foreground_color</color>
     <color name="call_fab_pickup_color">@color/dialpad_fab_call_color</color>
     <color name="call_fab_disabled_color">#888888</color>
 
@@ -50,4 +50,19 @@
 
     <color name="call_records_background">#E9E9E9</color>
     <color name="call_records_item_background">#fff</color>
+    <color name="tab_content_color">#CCCCCC</color>
+
+    <color name="error_color">#8F0A06</color>
+    <color name="onboarding_text_hint_color">#CCFFFFFF</color>
+    <color name="onboarding_button_text_color">#555555</color>
+
+    <color name="background_color">#F5F5F5</color>
+    <color name="error_foreground_color">#DA534F</color>
+    <color name="error_background_color">#FFADAD</color>
+    <color name="floating_action_button_color">#2491FF</color>
+    <color name="settings_text_color_dark">#000000</color>
+    <color name="spinner_text_color">#808080</color>
+    <color name="edit_text_disabled_color">#42000000</color>
+    <color name="call_duration_background_color">#D45400</color>
+    <color name="neutral_color">@color/dial_button_chars_color</color>
 </resources>

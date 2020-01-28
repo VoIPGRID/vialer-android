@@ -12,6 +12,9 @@ import android.os.Vibrator
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
+import com.voipgrid.vialer.R
 import com.voipgrid.vialer.R.drawable
 import com.voipgrid.vialer.R.string
 import com.voipgrid.vialer.sip.SipService
@@ -60,21 +63,19 @@ class IncomingCallNotification(private val number : String, private val callerId
                 .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(number))
                 .addAction(
                         drawable.ic_call_decline_normal,
-                        context.getString(string.call_incoming_decline),
+                        HtmlCompat.fromHtml("<font color=\"" + ContextCompat.getColor(context, R.color.color_primary) + "\">" + context.getString(string.call_incoming_decline).toUpperCase() + "</font>", HtmlCompat.FROM_HTML_MODE_LEGACY),
                         SipService.createSipServiceAction(SipService.Actions.DECLINE_INCOMING_CALL)
                 )
                 .addAction(
                         drawable.ic_call_answer_normal,
-                        context.getString(string.call_incoming_accept),
+                        HtmlCompat.fromHtml("<font color=\"" + ContextCompat.getColor(context, R.color.color_primary) + "\">" + context.getString(string.call_incoming_accept).toUpperCase() + "</font>", HtmlCompat.FROM_HTML_MODE_LEGACY),
                         SipService.createSipServiceAction(SipService.Actions.ANSWER_INCOMING_CALL)
                 )
                 .setSound(null)
     }
 
     private fun createNotificationTitle() : String {
-        val display = if (callerId.isEmpty()) number else callerId
-
-        return "${context.getString(string.call_incoming_expanded)} $display"
+        return if (callerId.isEmpty()) number else callerId
     }
 
     companion object {

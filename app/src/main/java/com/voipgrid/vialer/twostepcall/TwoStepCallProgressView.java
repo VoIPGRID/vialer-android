@@ -11,19 +11,20 @@ import android.view.View;
 
 import com.voipgrid.vialer.R;
 
+import androidx.core.content.ContextCompat;
+
 /**
  * Created by eltjo on 12/10/15.
  */
 public class TwoStepCallProgressView extends View {
 
     public static final int STATE_SUCCESS = 1;
-    public static final int STATE_FAILED = 2;
 
-
-    private static final float DOT_RADIUS = 4f;
-    private static final float DOT_ACTIVE_RADIUS = 5f;
-    private static final float DOT_STATE_RADIUS = 10f;
     private static final long ANIMATION_DELAY = 150;
+    private static final float DOT_RADIUS = 4.5f;
+    private static final float DOT_ACTIVE_RADIUS = 6f;
+    private static final float DOT_STATE_RADIUS = 10f;
+    private static final float HEIGHT = 90f;
     private static final int NOT_ENABLED_ALPHA = 127;
 
     private float mDensity;
@@ -43,43 +44,45 @@ public class TwoStepCallProgressView extends View {
     private Bitmap mBitmapSuccess, mBitmapFailed;
     private boolean mEnabled = true;
 
+    private Paint mActivePaint;
     private Paint mPaint;
     private float mPosition;
     private float mStep;
 
     public TwoStepCallProgressView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs);
+        init();
     }
 
-    private void init(Context context, AttributeSet attrs) {
+    private void init() {
         mDensity = getResources().getDisplayMetrics().density;
         mRadius = DOT_RADIUS * mDensity;
         mActiveRadius = DOT_ACTIVE_RADIUS * mDensity;
         mStateRadius = DOT_STATE_RADIUS * mDensity;
-        mHeight = 70f * mDensity;
+        mHeight = HEIGHT * mDensity;
 
         mHandler = new Handler();
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mProgressDotIndex ++;
-                if(mProgressDotIndex == 4) {
-                    mProgressDotIndex = 0;
-                }
-                invalidate();
-                if(mInProgress) {
-                    mHandler.postDelayed(mRunnable, ANIMATION_DELAY);
-                }
+        mRunnable = () -> {
+            mProgressDotIndex ++;
+            if(mProgressDotIndex == 4) {
+                mProgressDotIndex = 0;
+            }
+            invalidate();
+            if(mInProgress) {
+                mHandler.postDelayed(mRunnable, ANIMATION_DELAY);
             }
         };
 
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
-        mPaint.setColor(getResources().getColor(R.color.two_step_call_dots));
+        mPaint.setColor(ContextCompat.getColor(getContext(), R.color.two_step_call_dots));
+
+        mActivePaint = new Paint();
+        mActivePaint.setAntiAlias(true);
+        mActivePaint.setColor(ContextCompat.getColor(getContext(), R.color.two_step_call_dot_selected));
 
         mPosition = (TwoStepCallIconView.BORDER_RADIUS * mDensity) +
-                (TwoStepCallIconView.SHADOW_WIDHT * mDensity);
+                (TwoStepCallIconView.SHADOW_WIDTH * mDensity);
 
         mStep = mHeight / 4;
 
@@ -92,7 +95,7 @@ public class TwoStepCallProgressView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = (int) ((TwoStepCallIconView.BORDER_RADIUS * mDensity +
-                TwoStepCallIconView.SHADOW_WIDHT * mDensity) * 2);
+                TwoStepCallIconView.SHADOW_WIDTH * mDensity) * 2);
         setMeasuredDimension(width, (int) mHeight);
     }
 
@@ -119,7 +122,7 @@ public class TwoStepCallProgressView extends View {
                 canvas.drawCircle(mPosition,
                         (mRadius + mStep * i) - mRadius,
                         mProgressDotIndex == i ? mActiveRadius : mRadius,
-                        mPaint);
+                        mProgressDotIndex == i ? mActivePaint : mPaint);
             }
         }
     }
