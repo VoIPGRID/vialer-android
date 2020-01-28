@@ -239,6 +239,7 @@
     <string name="settings_advanced_call_stun">STUN</string>
     <string name="settings_advanced_call_stun_desc">Enabling STUN can improve connectivity when behind a Network Address Translator (NAT).
     </string>
+    <string name="settings_no_internet">It is not possible to update this setting without an internet connection.</string>
 
     <string name="url_app_info">https://vialerapp.com/app-info/</string>
 
