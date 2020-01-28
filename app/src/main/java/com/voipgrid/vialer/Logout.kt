@@ -19,7 +19,9 @@ class Logout(private val context: Context, private val sharedPreferences: Shared
      */
     fun perform(force: Boolean = false, activity: Activity?) {
         if (!connectivityHelper.hasNetworkConnection() && !force) {
-            showErrorDialog()
+            activity?.let {
+                showErrorDialog(it)
+            }
             return
         }
 
@@ -35,8 +37,8 @@ class Logout(private val context: Context, private val sharedPreferences: Shared
     }
 
 
-    private fun showErrorDialog() {
-        AlertDialog.Builder(context)
+    private fun showErrorDialog(activity: Activity) {
+        AlertDialog.Builder(activity)
                 .setTitle(R.string.cannot_logout_error_title)
                 .setMessage(R.string.cannot_logout_error_text)
                 .setCancelable(false)

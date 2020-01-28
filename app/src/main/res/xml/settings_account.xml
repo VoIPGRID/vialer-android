@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:title="@string/settings_account_category_voip"
+        android:icon="@drawable/ic_settings_person_black_24dp">
+
+        <EditTextPreference
+            app:selectable="false"
+            app:key="username"
+            app:title="@string/settings_account_username"/>
+
+        <EditTextPreference
+            app:selectable="false"
+            app:key="name"
+            app:title="@string/settings_account_name"/>
+
+        <EditTextPreference
+            app:selectable="false"
+            app:key="description"
+            app:title="@string/settings_account_description"/>
+
+        <EditTextPreference
+            app:selectable="false"
+            app:key="account_id"
+            app:title="@string/settings_account_account_id"/>
+
+        <EditTextPreference
+            app:selectable="false"
+            app:key="outgoing_number"
+            app:title="@string/settings_account_outgoing_number"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory>
+
+        <EditTextPreference
+            app:key="mobile_number"
+            app:title="@string/settings_account_mobile_number"
+            android:icon="@drawable/ic_settings_phone_android_black_24dp"/>
+
+        <Preference app:summary="@string/settings_account_mobile_number_description" />
+
+        <Preference
+            app:key="mobile_number_not_matching"
+            app:title="@string/settings_account_mobile_number_not_matching"
+            android:icon="@drawable/ic_settings_mobile_number_not_matching"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
