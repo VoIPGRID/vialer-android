@@ -224,8 +224,8 @@
     <string name="settings_account_account_id">Account ID</string>
     <string name="settings_account_outgoing_number">Outgoing Number</string>
     <string name="settings_account_mobile_number">Mobile Number</string>
-    <string name="settings_account_mobile_number_not_matching">The currently configured mobile number does not seem to match the number for the current SIM. Click here to automatically update it.</string>
-    <string name="settings_account_mobile_number_description">The mobile number of this device, this is used in two-step calling.</string>
+    <string name="settings_account_mobile_number_not_matching">The currently configured mobile number does not match the number belonging to your SIM card. Click here to automatically update it.</string>
+    <string name="settings_account_mobile_number_description">The mobile number of this device, this is used for two-step calling.</string>
     <string name="settings_advanced_call_category_audio">Audio</string>
     <string name="settings_advanced_call_category_network">Network</string>
     <string name="settings_advanced_call_category_sip">SIP</string>
@@ -239,6 +239,7 @@
     <string name="settings_advanced_call_stun">STUN</string>
     <string name="settings_advanced_call_stun_desc">Enabling STUN can improve connectivity when behind a Network Address Translator (NAT).
     </string>
+    <string name="settings_no_internet">It is not possible to update this setting without an internet connection.</string>
 
     <string name="url_app_info">https://vialerapp.com/app-info/</string>
 

@@ -33,15 +33,16 @@ class SettingsFragment : AbstractSettingsFragment() {
             false
         }
 
-        findPreference<SwitchPreferenceCompat>("PREF_HAS_SIP_ENABLED")?.setOnPreferenceChangeListener { _: Preference, voipEnabled: Any ->
-            callUsingVoipChanged(voipEnabled as Boolean)
+        findPreference<SwitchPreferenceCompat>("PREF_HAS_SIP_ENABLED")?.
+                setOnChangeListener<Boolean>(networkConnectivityRequired = true) { enabled ->
+            callUsingVoipChanged(enabled)
             true
         }
 
         findPreference<Preference>("PREF_REMOTE_LOGGING_ID")?.summaryProvider = Preference.SummaryProvider<Preference> { if (User.remoteLogging.isEnabled) User.remoteLogging.id else "" }
 
         findPreference<SwitchPreferenceCompat>("PREF_REMOTE_LOGGING")?.apply {
-            setOnPreferenceChangeListener { _: Preference, _: Any ->
+            setOnChangeListener<Boolean>(networkConnectivityRequired = true) {
                 GlobalScope.launch(Dispatchers.Main) {
                     delay(1000)
                     MiddlewareHelper.registerAtMiddleware(activity)
@@ -53,7 +54,7 @@ class SettingsFragment : AbstractSettingsFragment() {
 
         findPreference<SwitchPreferenceCompat>("battery_optimization")?.apply {
             isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
-            setOnPreferenceChangeListener {  _: Preference, _: Any ->
+            setOnChangeListener<Boolean> {
                 batteryOptimizationManager.prompt(activity ?: throw Exception("No activity"), false)
                 true
             }
@@ -97,3 +98,4 @@ class SettingsFragment : AbstractSettingsFragment() {
         }
     }
 }
+
