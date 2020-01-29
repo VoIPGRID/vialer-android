@@ -16,7 +16,7 @@
             app:title="@string/settings_call_using_voip_title"
             app:summary="@string/settings_call_using_voip_desc"
             app:iconSpaceReserved="false"
-            app:defaultValue="false"/>
+            app:defaultValue="true"/>
 
         <SwitchPreferenceCompat
             app:key="use_phone_ringtone"
