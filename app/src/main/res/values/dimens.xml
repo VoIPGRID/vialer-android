@@ -65,4 +65,6 @@
     <dimen name="lock_ring_button_size">56dp</dimen>
     <dimen name="lock_ring_button_inset">14dp</dimen>
     <dimen name="t9_helper_margin">20dp</dimen>
+
+    <dimen name="settings_icon_size">22dp</dimen>
 </resources>

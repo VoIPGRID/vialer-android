@@ -20,4 +20,6 @@
     <color name="dialer_warning_text">@color/color_accent</color>
 
     <color name="rating_star_background">#EEAE91</color>
+
+    <color name="settings_icon_color">#636363</color>
 </resources>

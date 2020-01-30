@@ -39,6 +39,13 @@ class SettingsFragment : AbstractSettingsFragment() {
             true
         }
 
+        findPreference<Preference>("battery_optimization")?.summaryProvider = Preference.SummaryProvider<Preference> {
+            getString(when (batteryOptimizationManager.isIgnoringBatteryOptimization()) {
+                true -> R.string.ignore_battery_optimization_description_on
+                false -> R.string.ignore_battery_optimization_description_off
+            })
+        }
+
         findPreference<Preference>("PREF_REMOTE_LOGGING_ID")?.summaryProvider = Preference.SummaryProvider<Preference> { if (User.remoteLogging.isEnabled) User.remoteLogging.id else "" }
 
         findPreference<SwitchPreferenceCompat>("PREF_REMOTE_LOGGING")?.apply {
@@ -51,23 +58,11 @@ class SettingsFragment : AbstractSettingsFragment() {
                 true
             }
         }
-
-        findPreference<SwitchPreferenceCompat>("battery_optimization")?.apply {
-            isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
-            setOnChangeListener<Boolean> {
-                batteryOptimizationManager.prompt(activity ?: throw Exception("No activity"), false)
-                true
-            }
-        }
-
-        (activity as SettingsActivity).onActivityResultCallback = {
-            findPreference<SwitchPreferenceCompat>("battery_optimization")?.isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
-        }
     }
 
     override fun onResume() {
         super.onResume()
-        findPreference<SwitchPreferenceCompat>("battery_optimization")?.isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
+        findPreference<Preference>("battery_optimization")?.isEnabled = !batteryOptimizationManager.isIgnoringBatteryOptimization()
     }
 
     /**
