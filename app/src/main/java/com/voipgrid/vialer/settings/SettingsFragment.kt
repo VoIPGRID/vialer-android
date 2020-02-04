@@ -39,14 +39,18 @@ class SettingsFragment : AbstractSettingsFragment() {
             true
         }
 
-        findPreference<Preference>("battery_optimization")?.summaryProvider = Preference.SummaryProvider<Preference> {
+        findPreference<Preference>("battery_optimization")?.summaryProvider =
+                Preference.SummaryProvider<Preference> {
             getString(when (batteryOptimizationManager.isIgnoringBatteryOptimization()) {
                 true -> R.string.ignore_battery_optimization_description_on
                 false -> R.string.ignore_battery_optimization_description_off
             })
         }
 
-        findPreference<Preference>("PREF_REMOTE_LOGGING_ID")?.summaryProvider = Preference.SummaryProvider<Preference> { if (User.remoteLogging.isEnabled) User.remoteLogging.id else "" }
+        findPreference<Preference>("PREF_REMOTE_LOGGING_ID")?.summaryProvider =
+                Preference.SummaryProvider<Preference> {
+                    if (User.remoteLogging.isEnabled) User.remoteLogging.id else ""
+                }
 
         findPreference<SwitchPreferenceCompat>("PREF_REMOTE_LOGGING")?.apply {
             setOnChangeListener<Boolean>(networkConnectivityRequired = true) {
@@ -62,7 +66,8 @@ class SettingsFragment : AbstractSettingsFragment() {
 
     override fun onResume() {
         super.onResume()
-        findPreference<Preference>("battery_optimization")?.isEnabled = !batteryOptimizationManager.isIgnoringBatteryOptimization()
+        findPreference<Preference>("battery_optimization")?.isEnabled =
+                !batteryOptimizationManager.isIgnoringBatteryOptimization()
     }
 
     /**

@@ -22,12 +22,14 @@ class RunInBackgroundSettingsFragment : AbstractSettingsFragment() {
         }
 
         (activity as SettingsActivity).onActivityResultCallback = {
-            findPreference<SwitchPreferenceCompat>("battery_optimization")?.isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
+            findPreference<SwitchPreferenceCompat>("battery_optimization")?.isChecked =
+                    batteryOptimizationManager.isIgnoringBatteryOptimization()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        findPreference<SwitchPreferenceCompat>("battery_optimization")?.isChecked = batteryOptimizationManager.isIgnoringBatteryOptimization()
+        findPreference<SwitchPreferenceCompat>("battery_optimization")?.isChecked =
+                batteryOptimizationManager.isIgnoringBatteryOptimization()
     }
 }
