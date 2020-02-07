@@ -5,7 +5,7 @@
 
     <PreferenceCategory
         app:title="@string/settings_account_category_voip"
-        android:icon="@drawable/ic_settings_person_black_24dp">
+        android:icon="@drawable/ic_settings_person">
 
         <EditTextPreference
             app:selectable="false"

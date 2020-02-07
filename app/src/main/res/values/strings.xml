@@ -196,19 +196,24 @@
     <string name="connection_preference_switch_toast">Trying to handover to the cellular network</string>
     <string name="advanced_settings_title">Advanced Settings</string>
 
-    <string name="settings_category_call">Call Settings</string>
+    <string name="settings_category_account">Account</string>
+    <string name="settings_account_my_account">My account</string>
+    <string name="settings_category_call">Call settings</string>
     <string name="settings_call_using_voip_title">Call using VoIP</string>
-    <string name="settings_call_using_voip_desc">When disabled all calls will utilise two-step calling which operates over your mobile phone network.</string>
+    <string name="settings_call_using_voip_desc_on">Use an internet connection to make and receive phone calls.</string>
+    <string name="settings_call_using_voip_desc_off">Calls will be made using your cellular network.</string>
     <string name="settings_use_phones_ringtone_title">Use phone ringtone</string>
-    <string name="settings_use_phones_ringtone_desc">When enabled will use the ringtone currently configured on the phone rather than the app ringtone.</string>
-    <string name="settings_link_advanced_call_settings">Advanced Call Settings</string>
-    <string name="settings_category_android">Android Settings</string>
+    <string name="settings_use_phones_ringtone_desc_on">Incoming calls will use the phone\'s current ringtone.</string>
+    <string name="settings_use_phones_ringtone_desc_off">Incoming calls will use a special ringtone specific to this application.</string>
+    <string name="settings_link_advanced_call_settings">Advanced call settings</string>
+    <string name="settings_category_android">Android settings</string>
     <string name="settings_ignore_battery_optimization_title">Always run in background</string>
     <string name="settings_ignore_battery_optimization_desc">This application will no longer be restricted by Android battery optimization, increasing the reliability of incoming calls. It is highly recommended that this is enabled.</string>
-    <string name="settings_category_debug">Debug Settings</string>
-    <string name="settings_remote_logging_title">Remote Logging</string>
-    <string name="settings_remote_logging_id_title">Remote Logging ID</string>
-    <string name="settings_remote_logging_desc">Upload anonymous application logs so they can be viewed by support staff.</string>
+    <string name="settings_category_debug">Debug settings</string>
+    <string name="settings_remote_logging_title">Remote logging</string>
+    <string name="settings_remote_logging_id_title">Remote logging ID</string>
+    <string name="settings_remote_logging_desc_on">Uploading anonymized logs for use by developers and technical support.</string>
+    <string name="settings_remote_logging_desc_off"></string>
     <string name="settings_feedback_title">Send feedback</string>
     <string name="settings_feedback_desc">Report issues or suggest new features</string>
     <string name="settings_feedback_dialog_title">Send feedback</string>
@@ -217,28 +222,28 @@
     <string name="settings_feedback_dialog_form_subject">Subject</string>
     <string name="settings_feedback_dialog_form_message">Message</string>
     <string name="settings_feedback_dialog_form_submitted">Your feedback has been submitted.\n\nThank you!</string>
-    <string name="settings_account_category_voip">VoIP Account</string>
+    <string name="settings_account_category_voip">VoIP account</string>
     <string name="settings_account_username">Username</string>
     <string name="settings_account_name">Name</string>
     <string name="settings_account_description">Description</string>
     <string name="settings_account_account_id">Account ID</string>
-    <string name="settings_account_outgoing_number">Outgoing Number</string>
-    <string name="settings_account_mobile_number">Mobile Number</string>
+    <string name="settings_account_outgoing_number">Outgoing number</string>
+    <string name="settings_account_mobile_number">Mobile number</string>
     <string name="settings_account_mobile_number_not_matching">The currently configured mobile number does not match the number belonging to your SIM card. Click here to automatically update it.</string>
     <string name="settings_account_mobile_number_description">The mobile number of this device, this is used for two-step calling.</string>
     <string name="settings_advanced_call_category_audio">Audio</string>
     <string name="settings_advanced_call_category_network">Network</string>
     <string name="settings_advanced_call_category_sip">SIP</string>
-    <string name="settings_advanced_call_audio_codec">Audio Quality</string>
-    <string name="settings_advanced_call_call_using">Call Using</string>
+    <string name="settings_advanced_call_audio_codec">Audio quality</string>
+    <string name="settings_advanced_call_call_using">Call using</string>
     <string name="settings_advanced_call_use_3g">Also use 3G+ for calls</string>
-    <string name="settings_advanced_call_use_3g_desc">Calls will be made when the device has a fast 3G connection, as well as LTE and 4G.</string>
-    <string name="settings_advanced_call_encryption">Encrypted Calling</string>
-    <string name="settings_advanced_call_encryption_description">When disabled, calls will no longer be encrypted. Third parties may be able to intercept and listen to your phone calls.
-    </string>
+    <string name="settings_advanced_call_use_3g_desc_off">Calls will be made via the internet when there is a 4G connection or better.</string>
+    <string name="settings_advanced_call_use_3g_desc_on">Calls will be made via the internet when there is a strong 3G connection or better.</string>
+    <string name="settings_advanced_call_encryption">Encrypted calling</string>
+    <string name="settings_advanced_call_encryption_description_off">Third parties may be able to intercept and listen to your phone calls.</string>
+    <string name="settings_advanced_call_encryption_description_on">Your calls are encrypted and cannot be accessed by third parties.</string>
     <string name="settings_advanced_call_stun">STUN</string>
-    <string name="settings_advanced_call_stun_desc">Enabling STUN can improve connectivity when behind a Network Address Translator (NAT).
-    </string>
+    <string name="settings_advanced_call_stun_desc">STUN can improve connectivity when behind Network Address Translation (NAT).</string>
     <string name="settings_no_internet">It is not possible to update this setting without an internet connection.</string>
 
     <string name="url_app_info">https://vialerapp.com/app-info/</string>
@@ -347,7 +352,10 @@
     <string name="dialer_no_internet_connectivity_subtext">You are connected to a network but unable to access the internet and therefore a call cannot be made.</string>
     <string name="call_records_answered_elsewhere" translatable="false">%1$s (%2$s)</string>
     <string name="ignore_battery_optimization_switch">Always run in background</string>
-    <string name="ignore_battery_optimization_description">This application will no longer be restricted by Android battery optimization, increasing the reliability of incoming calls. It is highly recommended that this is enabled.</string>
+    <string name="ignore_battery_optimization_description">Some phone manufacturers will, in an effort to save battery, completely kill background applications making it impossible to respond to phone calls.\n\nBy enabling this setting
+    this application will remain available constantly and therefore substantially increasing reliability for certain devices. For this reason, it is highly recommended that this is enabled.</string>
+    <string name="ignore_battery_optimization_description_on">Optimized for reliability</string>
+    <string name="ignore_battery_optimization_description_off">Incoming calls may not be received in certain situations</string>
     <string name="use_phones_ringtone_switch_switch">Use phone ringtone</string>
     <string name="use_phones_ringtone_switch_description">When enabled will use the ringtone currently configured on the phone rather than the app ringtone.</string>
     <string name="dialer_no_encryption_dialog">Encrypted calling is not currently enabled, third parties may be able to intercept and listen to your phone calls. Do you wish to enable it?</string>

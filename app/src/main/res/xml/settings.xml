@@ -1,33 +1,43 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Preference
-        android:fragment="com.voipgrid.vialer.settings.AccountSettingsFragment"
-        android:icon="@drawable/ic_settings_person_black_24dp"
-        app:title="My Account"/>
+    <PreferenceCategory
+        app:title="@string/settings_category_account"
+        app:icon="@drawable/ic_settings_person">
+
+        <Preference
+            android:fragment="com.voipgrid.vialer.settings.AccountSettingsFragment"
+            app:title="@string/settings_account_my_account"
+            app:iconSpaceReserved="true"/>
+
+    </PreferenceCategory>
+
 
     <PreferenceCategory
         app:key="call_settings"
+        app:icon="@drawable/ic_settings_advanced_call"
         app:title="@string/settings_category_call"
-        android:icon="@drawable/ic_settings_call_black_24dp">
+        android:icon="@drawable/ic_settings_call">
 
         <SwitchPreferenceCompat
             app:key="PREF_HAS_SIP_ENABLED"
             app:title="@string/settings_call_using_voip_title"
-            app:summary="@string/settings_call_using_voip_desc"
-            app:iconSpaceReserved="false"
+            app:summaryOn="@string/settings_call_using_voip_desc_on"
+            app:summaryOff="@string/settings_call_using_voip_desc_off"
+            app:iconSpaceReserved="true"
             app:defaultValue="true"/>
 
         <SwitchPreferenceCompat
             app:key="use_phone_ringtone"
             app:title="@string/settings_use_phones_ringtone_title"
-            app:summary="@string/settings_use_phones_ringtone_desc"
-            app:iconSpaceReserved="false"
+            app:summaryOn="@string/settings_use_phones_ringtone_desc_on"
+            app:summaryOff="@string/settings_use_phones_ringtone_desc_off"
+            app:iconSpaceReserved="true"
             app:defaultValue="false"/>
 
         <Preference
             android:fragment="com.voipgrid.vialer.settings.AdvancedCallSettingsFragment"
-            app:icon="@drawable/ic_settings_advanced_call_black_24dp"
+            app:iconSpaceReserved="true"
             app:title="@string/settings_link_advanced_call_settings"/>
 
     </PreferenceCategory>
@@ -35,39 +45,40 @@
     <PreferenceCategory
         app:key="android_settings"
         app:title="@string/settings_category_android"
-        android:icon="@drawable/ic_settings_android_black_24dp">
+        android:icon="@drawable/ic_settings_android">
 
-        <SwitchPreferenceCompat
+        <Preference
+            android:fragment="com.voipgrid.vialer.settings.RunInBackgroundSettingsFragment"
+            app:iconSpaceReserved="true"
             app:key="battery_optimization"
-            app:persistent="false"
-            app:title="@string/settings_ignore_battery_optimization_title"
-            app:iconSpaceReserved="false"
-            app:summary="@string/settings_ignore_battery_optimization_desc"/>
+            app:title="@string/settings_ignore_battery_optimization_title"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
         app:title="@string/settings_category_debug"
-        android:icon="@drawable/ic_settings_bug_report_black_24dp">
+        android:icon="@drawable/ic_settings_bug_report">
 
         <Preference
             app:key="feedback"
             app:isPreferenceVisible="false"
             app:title="@string/settings_feedback_title"
-            app:iconSpaceReserved="false"
+            app:iconSpaceReserved="true"
             app:summary="@string/settings_feedback_desc"/>
 
         <SwitchPreferenceCompat
             app:key="PREF_REMOTE_LOGGING"
             app:title="@string/settings_remote_logging_title"
-            app:iconSpaceReserved="false"
-            app:summary="@string/settings_remote_logging_desc"/>
+            app:iconSpaceReserved="true"
+            app:summaryOn="@string/settings_remote_logging_desc_on"
+            app:summaryOff="@string/settings_remote_logging_desc_off"
+            />
 
         <Preference
             app:key="PREF_REMOTE_LOGGING_ID"
             app:title="@string/settings_remote_logging_id_title"
             android:dependency="PREF_REMOTE_LOGGING"
-            app:iconSpaceReserved="false"
+            app:iconSpaceReserved="true"
             app:enableCopying="true"
             app:defaultValue="false" />
 
