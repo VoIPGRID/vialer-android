@@ -213,7 +213,6 @@
     <string name="settings_remote_logging_title">Remote logging</string>
     <string name="settings_remote_logging_id_title">Remote logging ID</string>
     <string name="settings_remote_logging_desc_on">Uploading anonymized logs for use by developers and technical support.</string>
-    <string name="settings_remote_logging_desc_off"></string>
     <string name="settings_feedback_title">Send feedback</string>
     <string name="settings_feedback_desc">Report issues or suggest new features</string>
     <string name="settings_feedback_dialog_title">Send feedback</string>

@@ -235,22 +235,18 @@
     <string name="call_incoming_accept">Beantwoorden</string>
     <string name="call_incoming_decline">Weigeren</string>
     <string name="advanced_settings_title">Geavanceerde instellingen</string>
-    <string name="settings_advanced_call_encryption_description">Externe partijen kunnen je gesprekken afluisteren als deze functie is uitgeschakeld.</string>
     <string name="settings_advanced_call_encryption">Gebruik versleuteld bellen</string>
     <string name="settings_advanced_call_stun">Gebruik STUN om te bellen</string>
     <string name="settings_advanced_call_stun_desc">STUN kan de connectie met het netwerk verbeteren als je NAT problemen hebt.
     </string>
     <string name="settings_category_call">Gespreksinstellingen</string>
     <string name="settings_call_using_voip_title">Gebruik VoIP om te bellen</string>
-    <string name="settings_call_using_voip_desc">Indien uitgeschakeld worden alle gesprekken via een tweestaps gesprek opgezet. Dit maakt gebruik van jouw eigen mobiele netwerk.</string>
     <string name="settings_use_phones_ringtone_title">Gebruik ringtoon van de telefoon</string>
-    <string name="settings_use_phones_ringtone_desc">Indien ingeschakeld wordt de huidige ringtoon van de telefoon gebruikt en niet de ringtoon van de app.</string>
     <string name="settings_link_advanced_call_settings">Geavanceerde gespreksinstellingen</string>
     <string name="settings_category_android">Android Instellingen</string>
     <string name="settings_ignore_battery_optimization_title">Altijd op de achtergrond laten draaien</string>
     <string name="settings_ignore_battery_optimization_desc">Deze app wordt niet langer beperkt door Android batterij optimalisatie, waardoor de betrouwbaarheid van inkomende gesprekken wordt verhoogd. Het wordt sterk geadviseerd dit in te schakelen.</string>
     <string name="settings_category_debug">Debug Instellingen</string>
-    <string name="settings_remote_logging_desc">Upload geanonimiseerde app logs zodat deze door een support medewerker kunnen worden geraadpleegd.</string>
     <string name="settings_feedback_title">Verstuur feedback</string>
     <string name="settings_feedback_desc">Probleem melden of een nieuwe functionaliteit voorstellen</string>
     <string name="settings_feedback_dialog_title">Verstuur feedback</string>
@@ -273,7 +269,6 @@
     <string name="settings_advanced_call_category_sip">SIP</string>
     <string name="settings_advanced_call_audio_codec">Gesprekskwaliteit</string>
     <string name="settings_advanced_call_call_using">Bellen gebruik makend van</string>
-    <string name="settings_advanced_call_use_3g_desc">Gesprekken worden opgezet indien het toestel een snelle 3G verbinding heeft, evenals LTE en 4G.</string>
 
     <string name="t9helper_title">Tip</string>
     <string name="t9helper_text">Je kunt zoeken op %1$s door de volgende nummers op het toetsenbord in te drukken.</string>
@@ -365,4 +360,18 @@
     <string name="add_to_contacts">Voeg to aan contacten</string>
     <string name="copy_number">Kopieer nummer</string>
     <string name="number_copied">Nummer gekopieerd: %1$s</string>
+    <string name="settings_advanced_call_encryption_description_off">Derde partijen kunnen mogelijk jouw gesprekken onderscheppen en meeluisteren.</string>
+    <string name="settings_advanced_call_encryption_description_on">Jouw gesprekken zijn versleuteld en daarmee niet toegankelijk voor derden.</string>
+    <string name="settings_advanced_call_use_3g_desc_off">Gesprekken worden via het internet opgezet wanneer een sterke 3G verbinding (of beter) beschikbaar is.</string>
+    <string name="settings_advanced_call_use_3g_desc_on">Gesprekken worden via het internet opgezet wanneer een sterke 4G verbinding (of beter) beschikbaar is.</string>
+    <string name="settings_call_using_voip_desc_off">Gesprekken worden opgezet door gebruik te maken van jouw mobiele netwerk</string>
+    <string name="settings_call_using_voip_desc_on">Gebruik een internetverbinding om gesprekken op te zetten en aan te nemen.</string>
+    <string name="settings_category_account">Account</string>
+    <string name="settings_remote_logging_desc_on">Upload geanonimiseerde app logs zodat deze door een support medewerker kunnen worden geraadpleegd.</string>
+    <string name="settings_use_phones_ringtone_desc_off">Inkomende oproepen gebruiken een speciaal voor deze applicatie ontwikkelde ringtoon</string>
+    <string name="settings_account_my_account">Mijn account</string>
+    <string name="ignore_battery_optimization_description_off">Inkomende oproepen kunnen in bepaalde situaties niet ontvangen worden</string>
+    <string name="ignore_battery_optimization_description_on">Geoptimaliseerd voor betrouwbaarheid</string>
+    <string name="settings_use_phones_ringtone_desc_on">Gebruik jouw ringtoon</string>
+    <string name="settings_no_internet">Het is niet mogelijk deze instelling aan te passen zonder internetverbinding.</string>
 </resources>

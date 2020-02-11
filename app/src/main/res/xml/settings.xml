@@ -71,7 +71,7 @@
             app:title="@string/settings_remote_logging_title"
             app:iconSpaceReserved="true"
             app:summaryOn="@string/settings_remote_logging_desc_on"
-            app:summaryOff="@string/settings_remote_logging_desc_off"
+            app:summaryOff=""
             />
 
         <Preference
