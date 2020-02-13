@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.text.toSpannable
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DiffUtil
@@ -26,7 +27,7 @@ import com.voipgrid.vialer.R
 import com.voipgrid.vialer.permissions.ContactsPermission
 import com.voipgrid.vialer.util.IconHelper
 import kotlinx.android.synthetic.main.fragment_t9_search.*
-import kotlinx.android.synthetic.main.list_item_contact.view.*
+import kotlinx.android.synthetic.main.list_item_t9_contact.view.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -136,7 +137,7 @@ class T9Fragment : Fragment(), CoroutineScope {
     }
 
     fun hide() {
-        view?.visibility = View.GONE
+        view?.visibility = View.INVISIBLE
     }
 
     /**
@@ -173,7 +174,7 @@ class T9Fragment : Fragment(), CoroutineScope {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactViewHolder {
             return ContactViewHolder(
-                    LayoutInflater.from(parent.context).inflate(R.layout.list_item_contact, parent, false)
+                    LayoutInflater.from(parent.context).inflate(R.layout.list_item_t9_contact, parent, false)
             )
         }
 
@@ -206,7 +207,7 @@ class T9Fragment : Fragment(), CoroutineScope {
                 return
             }
 
-            itemView.text_view_contact_icon.setImageBitmap(IconHelper.getCallerIconBitmap(contact.displayName.substring(0, 1), contact.phoneNumbers[0].number, 0))
+            itemView.text_view_contact_icon.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.ic_user) })
         }
 
         /**

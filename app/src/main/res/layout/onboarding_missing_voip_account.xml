@@ -4,87 +4,69 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient"
-    android:orientation="vertical">
+    android:background="@drawable/cloud_background"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/onboarding_activity_horizontal_margin"
+    android:paddingTop="@dimen/onboarding_header_padding"
+    android:paddingRight="@dimen/onboarding_activity_horizontal_margin">
 
     <ImageView
-        android:id="@+id/iconIv"
-        android:layout_width="wrap_content"
+        android:id="@+id/imageview_icon"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_priority_high"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.01999998"/>
+        tools:src="@drawable/ic_priority_high"/>
 
     <TextView
-        android:id="@+id/titleTv"
-        style="@style/HeaderTitleTextViewStyle"
-        android:layout_width="0dp"
+        android:id="@+id/text_title"
+        style="@style/HeaderSubTitleTextViewStyle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/voip_account_missing_title"
-        android:gravity="center"
+        android:layout_marginTop="@dimen/activity_vertical_item_padding"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iconIv"/>
+        app:layout_constraintTop_toBottomOf="@+id/imageview_icon"
+        android:text="@string/voip_account_missing_title"/>
 
     <TextView
-        android:id="@+id/justificationTv"
-        style="@style/DescriptionTitleTextViewStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:lineSpacingExtra="4sp"
-        android:paddingLeft="40sp"
-        android:paddingRight="40sp"
-        android:textAlignment="viewStart"
-        android:textSize="20sp"
-        android:text="@string/voip_account_missing_text"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleTv"
-        app:layout_constraintVertical_bias="0.100000024"/>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/text_justification"
+        style="@style/DescriptionTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingTop="15sp"
-        android:paddingBottom="15sp"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_marginTop="@dimen/onboarding_top_margin"
+        android:paddingBottom="@dimen/onboarding_activity_margin_bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_title"
+        android:text="@string/voip_account_missing_text"/>
 
-        <Button
-            android:id="@+id/continueButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:text="@string/onboarding_skip"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/setVoipAccountButton"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <Button
+        android:id="@+id/continueButton"
+        style="@style/ButtonAnchorThickTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/onboarding_activity_margin_bottom"
+        android:text="@string/onboarding_skip"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/setVoipAccountButton"
+        app:layout_constraintTop_toBottomOf="@+id/text_justification"
+        app:layout_constraintVertical_bias="1.0" />
 
-        <Button
-            android:id="@+id/setVoipAccountButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:text="@string/set_voip_account_button_text"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/continueButton"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <Button
+        android:id="@+id/setVoipAccountButton"
+        style="@style/OnboardingButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/onboarding_activity_margin_bottom"
+        android:text="@string/set_voip_account_button_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/continueButton"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_justification"
+        app:layout_constraintVertical_bias="1.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

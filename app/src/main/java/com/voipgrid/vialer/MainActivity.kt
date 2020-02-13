@@ -1,42 +1,45 @@
 package com.voipgrid.vialer
 
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.LinearLayout
-import android.widget.Switch
+import android.util.AttributeSet
+import android.util.Log
+import android.view.MenuItem
+import android.view.View
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.ContextCompat
-import com.voipgrid.vialer.callrecord.CallRecordFragmentAdapter
-import com.voipgrid.vialer.callrecord.MultiCheckedChangeListener
+import androidx.core.view.get
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.voipgrid.vialer.api.UserSynchronizer
+import com.voipgrid.vialer.callrecord.CallRecordFragment
+import com.voipgrid.vialer.callrecord.CallRecordFragmentHolder
+import com.voipgrid.vialer.callrecord.CallRecordViewModel
+import com.voipgrid.vialer.contacts.Contacts
+import com.voipgrid.vialer.contacts.ContactsFragment
 import com.voipgrid.vialer.dialer.DialerActivity
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.reachability.ReachabilityReceiver
+import com.voipgrid.vialer.options.OptionsFragment
 import com.voipgrid.vialer.sip.SipService
+import com.voipgrid.vialer.util.LoginRequiredActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : NavigationDrawerActivity() {
+class MainActivity : LoginRequiredActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
-    @Inject lateinit var reachabilityReceiver: ReachabilityReceiver
-
-    override val logger = Logger(this)
-
-    val multiCheckListener = MultiCheckedChangeListener()
-
-    val showMyCallsOnlySwitch by lazy {
-        findViewById<LinearLayout>(R.id.show_my_calls_only)
-        .findViewById<Switch>(R.id.show_my_calls_only_switch)!!
-    }
+    private val defaultFragment = Fragment.Contacts
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         VialerApplication.get().component().inject(this)
         setContentView(R.layout.activity_main)
-        setActionBar(R.id.action_bar)
-        setNavigationDrawer(R.id.drawer_layout)
+        bottom_nav.setOnNavigationItemSelectedListener(this)
+        loadFragments()
 
         if (!userIsOnboarded()) {
             logger.i("User has not properly onboarded, logging them out")
@@ -46,25 +49,43 @@ class MainActivity : NavigationDrawerActivity() {
 
         syncUser()
 
-        setupTabs()
-        floating_action_button.setOnClickListener { openDialer() }
+//        lifecycle.addObserver(RatingPopupListener(this))
 
-        lifecycle.addObserver(RatingPopupListener(this))
+        floating_action_button?.setOnClickListener { openDialer() }
+    }
+
+    /**
+     * Immediately load all our fragments into our container.
+     *
+     */
+    private fun loadFragments() {
+        val fragments = arrayOf(Fragment.Contacts, Fragment.CallRecords, Fragment.Options)
+
+        fragments.forEach {
+            supportFragmentManager.beginTransaction().apply {
+                add(R.id.container, it.fragment as androidx.fragment.app.Fragment)
+                hide(it.fragment as androidx.fragment.app.Fragment)
+            }.commitNow()
+        }
+
+        val activeFragment = activeFragment
+
+        swapFragment(when {
+            intent.hasExtra(Extra.FRAGMENT.name) -> {
+                Fragment.valueOf(intent.getStringExtra(Extra.FRAGMENT.name) ?: defaultFragment.name)
+            }
+            activeFragment != null -> activeFragment
+            else -> defaultFragment
+        })
     }
 
     override fun onResume() {
         super.onResume()
-        reachabilityReceiver.startListening()
 
         // We currently only support a single call so any time this activity is opened, we will
         // request the SipService to display the current call. If there is no current call, this will have no
         // affect.
         SipService.performActionOnSipService(this, SipService.Actions.DISPLAY_CALL_IF_AVAILABLE)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        reachabilityReceiver.stopListening()
     }
 
     /**
@@ -97,6 +118,49 @@ class MainActivity : NavigationDrawerActivity() {
     }
 
     /**
+     * Is called when a user selects a tab in the bottom navigation view. Will load the
+     * corresponding fragment into the container.
+     *
+     */
+    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+        swapFragment(when (menuItem.itemId) {
+            R.id.navigation_item_contacts -> Fragment.Contacts
+            R.id.navigation_item_recent -> Fragment.CallRecords
+            R.id.navigation_item_options -> Fragment.Options
+            else -> throw IllegalArgumentException("No fragment")
+        })
+
+        return false
+    }
+
+    private fun swapFragment(fragment: Fragment) {
+        val menuItemIndex = when(fragment) {
+            Fragment.Contacts -> 0
+            Fragment.CallRecords -> 1
+            Fragment.Options -> 2
+        }
+
+        bottom_nav.menu[menuItemIndex].isChecked = true
+        val mainActivityFragment = fragment.fragment
+
+        val transaction = supportFragmentManager.beginTransaction()
+
+        activeFragment?.let {
+            transaction.hide(it.fragment as androidx.fragment.app.Fragment)
+        }
+
+        transaction.show(mainActivityFragment as androidx.fragment.app.Fragment).commit()
+        floating_action_button.visibility = if (mainActivityFragment.shouldRenderDialerButton) View.VISIBLE else View.GONE
+        activeFragment = fragment
+
+        activeFragment?.let {
+            if (it.fragment is CallRecordFragmentHolder) {
+                (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
+            }
+        }
+    }
+
+    /**
      * Show the dialer view
      */
     private fun openDialer() {
@@ -110,20 +174,20 @@ class MainActivity : NavigationDrawerActivity() {
         )
     }
 
-    private fun setupTabs() {
-        tab_layout.apply {
-            setTabTextColors(
-                    ContextCompat.getColor(this@MainActivity, R.color.tab_inactive),
-                    ContextCompat.getColor(this@MainActivity, R.color.tab_active)
-            )
+    interface MainActivityFragment {
+        val shouldRenderDialerButton: Boolean
+            get() = true
+    }
 
-            val adapter = CallRecordFragmentAdapter(this@MainActivity, supportFragmentManager)
-            tab_view_pager.adapter = adapter
-            tab_view_pager.offscreenPageLimit = adapter.count
+    enum class Fragment(val fragment: MainActivityFragment) {
+        Contacts(ContactsFragment()), CallRecords(CallRecordFragmentHolder()), Options(OptionsFragment())
+    }
 
-            showMyCallsOnlySwitch.setOnCheckedChangeListener(multiCheckListener)
+    enum class Extra {
+        FRAGMENT
+    }
 
-            setupWithViewPager(tab_view_pager)
-        }
+    companion object {
+        private var activeFragment: Fragment? = null
     }
 }

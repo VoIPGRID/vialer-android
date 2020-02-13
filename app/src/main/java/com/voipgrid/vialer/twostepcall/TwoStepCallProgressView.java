@@ -79,7 +79,7 @@ public class TwoStepCallProgressView extends View {
         mPaint.setColor(getResources().getColor(R.color.two_step_call_dots));
 
         mPosition = (TwoStepCallIconView.BORDER_RADIUS * mDensity) +
-                (TwoStepCallIconView.SHADOW_WIDHT * mDensity);
+                (TwoStepCallIconView.SHADOW_WIDTH * mDensity);
 
         mStep = mHeight / 4;
 
@@ -92,7 +92,7 @@ public class TwoStepCallProgressView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = (int) ((TwoStepCallIconView.BORDER_RADIUS * mDensity +
-                TwoStepCallIconView.SHADOW_WIDHT * mDensity) * 2);
+                TwoStepCallIconView.SHADOW_WIDTH * mDensity) * 2);
         setMeasuredDimension(width, (int) mHeight);
     }
 

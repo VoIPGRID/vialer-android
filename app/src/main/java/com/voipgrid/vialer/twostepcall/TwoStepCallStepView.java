@@ -1,6 +1,8 @@
 package com.voipgrid.vialer.twostepcall;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -17,6 +19,8 @@ public class TwoStepCallStepView extends RelativeLayout {
 
     private TwoStepCallIconView mIcon;
 
+    private ImageView mIndicator;
+
     public TwoStepCallStepView(Context context) {
         super(context);
         init(context);
@@ -24,13 +28,25 @@ public class TwoStepCallStepView extends RelativeLayout {
 
     private void init(Context context) {
         inflate(context, R.layout.two_step_call_step, this);
-        mMessage = (TextView) findViewById(R.id.message);
-        mNumber = (TextView) findViewById(R.id.number);
-        mIcon = (TwoStepCallIconView) findViewById(R.id.icon);
+        mMessage = findViewById(R.id.message);
+        mNumber = findViewById(R.id.number);
+        mIcon = findViewById(R.id.icon);
+        mIndicator = findViewById(R.id.connection_indicator);
     }
 
-    public void setColor(int color) {
-        mIcon.setColor(color);
+    public void setMessage(String message, int color) {
+        mMessage.setText(message);
+        mMessage.setTextColor(color);
+    }
+
+    public void setBackgroundColor(int color) {
+        mIcon.setBackgroundColor(color);
+        mIcon.invalidate();
+    }
+
+    public void setIndicator(Drawable background, Drawable icon) {
+        mIndicator.setBackground(background);
+        mIndicator.setImageDrawable(icon);
     }
 
     public void setIcon(int resource) {

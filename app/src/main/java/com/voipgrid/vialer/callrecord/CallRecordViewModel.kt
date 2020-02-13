@@ -1,10 +1,8 @@
 package com.voipgrid.vialer.callrecord
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import android.util.Log
+import androidx.lifecycle.*
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import com.voipgrid.vialer.VialerApplication
@@ -15,19 +13,20 @@ import com.voipgrid.vialer.callrecord.database.CallRecordEntity
 import javax.inject.Inject
 
 
-class CallRecordViewModel(application: Application) : AndroidViewModel(application) {
-
-    @Inject lateinit var db: CallRecordDao
+class CallRecordViewModel(private val db: CallRecordDao) : ViewModel() {
 
     val calls: LiveData<PagedList<CallRecordEntity>>
+    val missedCalls: LiveData<PagedList<CallRecordEntity>>
 
     private val filterLiveData = MutableLiveData<CallRecordsQuery>()
 
     init {
-        VialerApplication.get().component().inject(this)
-
         calls = Transformations.switchMap(filterLiveData) {
-            v -> db.callRecordsByDate(v.wasPersonal, v.wasMissed).toLiveData(50)
+            v -> db.callRecordsByDate(v.wasPersonal).toLiveData(50)
+        }
+
+        missedCalls = Transformations.switchMap(filterLiveData) {
+            v -> db.missedCallRecordsByDate(v.wasPersonal).toLiveData(50)
         }
     }
 
@@ -35,15 +34,11 @@ class CallRecordViewModel(application: Application) : AndroidViewModel(applicati
      * Change the query that we are using to fetch the calls from the database.
      *
      */
-    fun updateDisplayedCallRecords(showMyCallsOnly: Boolean, type: Type) {
+    fun updateDisplayedCallRecords(showMyCallsOnly: Boolean) {
         filterLiveData.value = CallRecordsQuery(
                 wasPersonal = when (showMyCallsOnly) {
                     true  -> booleanArrayOf(true)
                     false -> booleanArrayOf(false, true)
-                },
-                wasMissed = when (type) {
-                    ALL_CALLS -> booleanArrayOf(false, true)
-                    MISSED_CALLS -> booleanArrayOf(true)
                 }
         )
     }
@@ -56,5 +51,5 @@ class CallRecordViewModel(application: Application) : AndroidViewModel(applicati
         ALL_CALLS, MISSED_CALLS
     }
 
-    private class CallRecordsQuery(val wasPersonal: BooleanArray, val wasMissed: BooleanArray)
+    private class CallRecordsQuery(val wasPersonal: BooleanArray)
 }

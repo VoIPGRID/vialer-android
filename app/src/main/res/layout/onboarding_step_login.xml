@@ -1,86 +1,109 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:background="@drawable/background_gradient">
+    android:fillViewport="true"
+    android:background="@drawable/cloud_background">
 
-    <TextView
-        android:id="@+id/title_label"
-        style="@style/HeaderTitleTextViewStyle"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/login_header_label_text" />
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/onboarding_activity_horizontal_margin"
+        android:paddingRight="@dimen/onboarding_activity_horizontal_margin"
+        android:paddingTop="@dimen/onboarding_header_padding">
 
-    <TextView
-        android:id="@+id/subtitle_label"
-        style="@style/HeaderSubTitleTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:text="@string/login_header_label_subtext" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/email_field"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/emailTextDialog"
-            style="@style/OnboardingEditTextStyle"
+        <TextView
+            android:id="@+id/header"
+            style="@style/HeaderTitleTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/email_edittext_hint"
-            android:inputType="textEmailAddress" />
+            android:text="@string/login_header_label_text"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/password_field"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        app:endIconMode="password_toggle"
-        app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/passwordTextDialog"
-            style="@style/OnboardingEditTextStyle"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/username_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/password_edittext_hint"
-            android:inputType="textPassword" />
+            android:layout_marginTop="@dimen/onboarding_top_margin"
+            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
+            app:layout_constraintTop_toBottomOf="@id/header"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/emailTextDialog"
+                style="@style/OnboardingEditTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_user"
+                android:hint="@string/username_edittext_hint"
+                android:inputType="textEmailAddress"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical">
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/password_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            app:endIconMode="password_toggle"
+            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
+            app:layout_constraintTop_toBottomOf="@id/username_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/passwordTextDialog"
+                style="@style/OnboardingEditTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_lock_on"
+                android:drawableEnd="@drawable/ic_danger"
+                android:hint="@string/password_edittext_hint"
+                android:inputType="textPassword"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/error"
+            style="@style/DescriptionTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/onboarding_activity_margin_bottom"
+            android:text="@string/username_password_wrong"
+            android:textSize="15sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/password_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <Button
             android:id="@+id/button_login"
-            android:layout_width="wrap_content"
+            style="@style/OnboardingButtonStyle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:enabled="false"
-            android:text="@string/login_button_title" />
+            android:text="@string/login_button_title"
+            app:layout_constraintBottom_toTopOf="@id/button_forgot_password"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/error"
+            app:layout_constraintVertical_bias="1.0" />
 
         <Button
             android:id="@+id/button_forgot_password"
             style="@style/ButtonAnchorStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0"
+            android:layout_marginBottom="@dimen/activity_vertical_item_padding"
             android:text="@string/forgot_password_button_title"
-            android:textAllCaps="true"/>
+            android:textAllCaps="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-</LinearLayout>
+</ScrollView>

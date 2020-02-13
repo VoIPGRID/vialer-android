@@ -1,6 +1,7 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_horizontal_margin_options_header">20dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="activity_vertical_item_padding">8dp</dimen>
 
@@ -12,7 +13,7 @@
     <!-- negative margins to remove the cardviews compat shadow margins -->
     <dimen name="dialpad_calling_button_bottom_margin">2dp</dimen>
 
-    <dimen name="dialpad_button_digit_text_size">16dp</dimen>
+    <dimen name="dialpad_button_digit_text_size">12sp</dimen>
     <dimen name="dialpad_button_chars_text_size">5sp</dimen>
     <dimen name="dialpad_button_star_text_size">9dp</dimen>
 
@@ -22,7 +23,7 @@
 
     <dimen name="dialpad_number_input_height">45dp</dimen>
     <dimen name="dialpad_number_input_elevation">1dp</dimen>
-    <dimen name="dialpad_number_input_text_size">12sp</dimen>
+    <dimen name="dialpad_number_input_text_size">10sp</dimen>
 
     <dimen name="call_button_layout_height">80dp</dimen>
 
@@ -65,6 +66,35 @@
     <dimen name="lock_ring_button_size">56dp</dimen>
     <dimen name="lock_ring_button_inset">14dp</dimen>
     <dimen name="t9_helper_margin">20dp</dimen>
+    <dimen name="t9_height">150dp</dimen>
 
     <dimen name="settings_icon_size">22dp</dimen>
+
+    <dimen name="onboarding_header_padding">50dp</dimen>
+    <dimen name="onboarding_button_text_size">14sp</dimen>
+    <dimen name="onboarding_button_padding">10dp</dimen>
+    <dimen name="onboarding_text_size_button">14sp</dimen>
+    <dimen name="onboarding_text_size_edit_text">16sp</dimen>
+    <dimen name="onboarding_text_size_text_view">18sp</dimen>
+    <dimen name="onboarding_activity_horizontal_margin">40dp</dimen>
+    <dimen name="onboarding_activity_vertical_margin">40dp</dimen>
+    <dimen name="onboarding_activity_margin_bottom">30dp</dimen>
+    <dimen name="onboarding_top_margin">32dp</dimen>
+
+    <dimen name="design_bottom_navigation_text_size" tools:override="true">10sp</dimen>
+    <dimen name="design_bottom_navigation_active_text_size" tools:override="true">10sp</dimen>
+
+    <dimen name="cardview_padding">16dp</dimen>
+    <dimen name="cardview_radius">5dp</dimen>
+    <dimen name="settings_text_size">16sp</dimen>
+
+    <dimen name="call_buttons_width">65dp</dimen>
+    <dimen name="call_buttons_height">@dimen/call_buttons_width</dimen>
+    <dimen name="call_buttons_icon_width">32dp</dimen>
+    <dimen name="call_buttons_icon_height">@dimen/call_buttons_icon_width</dimen>
+    <dimen name="call_buttons_icon_padding">17dp</dimen>
+
+    <dimen name="options_menu_text_size">16sp</dimen>
+
+    <dimen name="design_navigation_icon_size" tools:override="true">16dp</dimen>
 </resources>

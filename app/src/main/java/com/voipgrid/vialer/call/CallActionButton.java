@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import android.util.AttributeSet;
@@ -13,7 +14,7 @@ import com.voipgrid.vialer.R;
 
 public class CallActionButton extends AppCompatImageView {
 
-    public static final float ENABLED_ALPHA = 1.0f, DISABLED_ALPHA = 0.5f;
+    public static final float ENABLED_ALPHA = 1.0f, DISABLED_ALPHA = 0.4f;
 
     public CallActionButton(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -38,9 +39,9 @@ public class CallActionButton extends AppCompatImageView {
     }
 
     public void activate() {
-        this.setColorFilter(ResourcesCompat.getColor(getResources(), R.color.color_primary, null));
+        this.setColorFilter(ContextCompat.getColor(getContext(), R.color.white));
         Drawable newDrawableSpeaker = this.getBackground();
-        DrawableCompat.setTint(newDrawableSpeaker, Color.WHITE);
+        DrawableCompat.setTint(newDrawableSpeaker, ContextCompat.getColor(getContext(), R.color.color_primary));
         this.setBackground(newDrawableSpeaker);
     }
 

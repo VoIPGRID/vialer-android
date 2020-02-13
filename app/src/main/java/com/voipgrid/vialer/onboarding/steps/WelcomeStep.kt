@@ -25,7 +25,7 @@ class WelcomeStep : AutoContinuingStep() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         logger.i("Welcome ${user.fullName} to the app and completing onboarding")
-        subtitle_label.text = user.fullName
+        title_label.text = String.format(getString(R.string.welcome_text), user.fullName)
 
         activity?.let {
             HistoricCallRecordsImporter.Worker.start(it)

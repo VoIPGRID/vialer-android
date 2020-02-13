@@ -41,7 +41,6 @@ import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.onboarding.VoipgridLogin;
-import com.voipgrid.vialer.reachability.ReachabilityReceiver;
 import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipConfig;
@@ -133,10 +132,6 @@ public class VialerModule {
         return PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    @Provides ReachabilityReceiver provideReachabilityReceiver(Context context) {
-        return new ReachabilityReceiver(context);
-    }
-
     @Provides NetworkUtil provideNetworkUtil(Context context) {
         return new NetworkUtil(context);
     }
@@ -150,7 +145,9 @@ public class VialerModule {
         return new CallRecordAdapter();
     }
 
-    @Provides CachedContacts provideCachedContacts(Contacts contacts) {
+    @Provides
+    @Singleton
+    CachedContacts provideCachedContacts(Contacts contacts) {
         return new CachedContacts(contacts);
     }
 

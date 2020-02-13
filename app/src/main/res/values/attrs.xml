@@ -16,5 +16,17 @@
         <attr name="show_exit_button" format="boolean" />
         <attr name="show_remove_button" format="boolean" />
         <attr name="show_call_button" format="boolean" />
+        <attr name="keypad_height_percentage" format="float"/>
+    </declare-styleable>
+
+    <declare-styleable name="Warning">
+        <attr name="text" format="string" />
+        <attr name="warning_icon" format="integer" />
+        <attr name="show_link" format="boolean" />
+        <attr name="priority" format="enum" >
+            <enum name="high" value="0" />
+            <enum name="medium" value="1" />
+            <enum name="low" value="2" />
+        </attr>
     </declare-styleable>
 </resources>

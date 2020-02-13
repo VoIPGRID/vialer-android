@@ -74,10 +74,11 @@
     <string name="set_userdestination_api_fail">Editing of availability has failed. Please try again later.</string>
 
     <!-- Login fragment values -->
-    <string name="login_header_label_text">Business</string>
+    <string name="login_header_label_text">Business calls in the cloud</string>
     <string name="login_header_label_subtext">in the cloud</string>
-    <string name="email_edittext_hint">Email address</string>
     <string name="password_edittext_hint">Password</string>
+    <string name="email_edittext_hint">Email Address</string>
+    <string name="username_edittext_hint">Username</string>
     <string name="forgot_password_button_title">Forgot password</string>
     <string name="login_button_title">login</string>
     <string name="login_missing_field_title">Warning</string>
@@ -103,6 +104,7 @@
     <string name="configure_header_label_text">Account \nconfiguration</string>
     <string name="configure_mobile_number_text">Enter your mobile phone number below:</string>
     <string name="outgoing_number_description">The following number will be displayed when calling someone:</string>
+    <string name="phonenumber_prefix_edittext_hint">Prefix</string>
     <string name="phonenumber_edittext_hint">Mobile number</string>
     <string name="outgoingnumber_edittext_hint">Outgoing number</string>
     <string name="phonenumber_info_text_title">Mobile phone number</string>
@@ -116,7 +118,7 @@
     <string name="voip_account_missing_text">You do not currently have a VoIP account linked to your user, this is necessary to be able to make and receive calls via VoIP.\n\nIf you do not intend to use VoIP and only wish to use the management and/or two-step calling features then you may skip this step.</string>
 
     <!-- Welcome fragment values -->
-    <string name="welcome_text">Welcome</string>
+    <string name="welcome_text">Welcome to Vialer,\n\n%1$s!</string>
     <string name="placeholder_name">Nameless user</string>
     <string name="start_calling_button">Get started</string>
     <string name="onboarding_login_failed_title">Login failed</string>
@@ -132,7 +134,7 @@
     <string name="two_factor_authentication_button">Continue</string>
     <string name="two_factor_authentication_token_invalid_title">Two-factor Authentication</string>
     <string name="two_factor_authentication_token_invalid_description">The two-factor token is invalid</string>
-    <string name="two_factor_authentication_header_label_text">Two-factor</string>
+    <string name="two_factor_authentication_header_label_text">Two-factor Authentication</string>
     <string name="two_factor_authentication_header_label_subtext">Authentication</string>
     <string name="onboarding_permission_contacts_title">Contacts Permission</string>
     <string name="onboarding_permission_contacts_justification">This permission allows Vialer to display information (contacts book &amp; call activity) and to search through your contacts.\n\nThe data will be solely used for display and search purposes.</string>
@@ -373,5 +375,23 @@
     <string name="add_to_contacts">Add to contacts</string>
     <string name="copy_number">Copy number</string>
     <string name="number_copied">Number has been copied: %1$s</string>
-
+    <string name="back">Back</string>
+    <string name="username_password_wrong">This combination of username and password does not match. Please try again.\nBoth fields are case-sensitive</string>
+    <string name="allow">Allow</string>
+    <string name="enter_token">Enter your two-factor authentication token below.</string>
+    <string name="invalid_token">Invalid token</string>
+    <string name="try_again_tfa">Try again or use your backup code</string>
+    <string name="backup_code_button">Enter backup code</string>
+    <string name="contacts_menu_item_title">Contacts</string>
+    <string name="recent_plan_menu_item_title">Recent</string>
+    <string name="options_menu_item_title">Options</string>
+    <string name="numbers">Numbers</string>
+    <string name="network">Network</string>
+    <string name="audio">Audio</string>
+    <string name="call_lost">Call lost - %1$s</string>
+    <string name="two_step_call_title">Setting up a Two-step call with</string>
+    <string name="not_encrypted">Calls are not encrypted</string>
+    <string name="good_day">Good day,</string>
+    <string name="contacts_title">Contacts</string>
+    <string name="search">Search</string>
 </resources>

@@ -1,11 +1,13 @@
 package com.voipgrid.vialer.callrecord
 
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,34 +33,34 @@ import com.voipgrid.vialer.util.NetworkUtil
 import kotlinx.android.synthetic.main.fragment_call_records.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import javax.inject.Inject
 
 abstract class CallRecordFragment(val type: CallRecordViewModel.Type)
     : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
-    private val callRecordViewModel by lazy {
-        ViewModelProviders.of(this)[CallRecordViewModel::class.java]
-    }
+    private val callRecordViewModel: CallRecordViewModel by sharedViewModel()
 
     private val adapter = CallRecordAdapter()
 
     @Inject lateinit var newCallRecordsImporter: NewCallRecordsImporter
     @Inject lateinit var networkUtil: NetworkUtil
     @Inject lateinit var broadcastReceiverManager: BroadcastReceiverManager
+    @Inject lateinit var cachedContacts: CachedContacts
 
     private val handler = Handler()
 
     private val multiCheckListener by lazy {
-        (activity as MainActivity).multiCheckListener
+        CallRecordFragmentHolder.multiCheckListener
     }
 
     private val showMyCallsOnlySwitch by lazy {
-        (activity as MainActivity).showMyCallsOnlySwitch
+        CallRecordFragmentHolder.showMyCallsOnlySwitch
     }
 
     private val checkListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
         handler.post {
-            callRecordViewModel.updateDisplayedCallRecords(isChecked, type)
+            callRecordViewModel.updateDisplayedCallRecords(isChecked)
         }
     }
 
@@ -88,7 +90,11 @@ abstract class CallRecordFragment(val type: CallRecordViewModel.Type)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        callRecordViewModel.calls.observe(this@CallRecordFragment, Observer<PagedList<CallRecordEntity>> {
+
+        when(type) {
+            CallRecordViewModel.Type.ALL_CALLS -> callRecordViewModel.calls
+            CallRecordViewModel.Type.MISSED_CALLS -> callRecordViewModel.missedCalls
+        }.observe(this@CallRecordFragment, Observer<PagedList<CallRecordEntity>> {
             adapter.submitList(it)
         })
     }
@@ -106,7 +112,7 @@ abstract class CallRecordFragment(val type: CallRecordViewModel.Type)
             ConnectivityManager.CONNECTIVITY_ACTION
         )
 
-        callRecordViewModel.updateDisplayedCallRecords(showMyCallsOnlySwitch.isChecked, type)
+        callRecordViewModel.updateDisplayedCallRecords(showMyCallsOnlySwitch.isChecked)
         multiCheckListener.register(checkListener)
     }
 
@@ -155,6 +161,7 @@ abstract class CallRecordFragment(val type: CallRecordViewModel.Type)
             return
         }
 
+        cachedContacts.clear()
         hideError()
         fetchCalls()
     }

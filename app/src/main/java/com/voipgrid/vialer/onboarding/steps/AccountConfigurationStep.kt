@@ -3,6 +3,8 @@ package com.voipgrid.vialer.onboarding.steps
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
+import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.google.i18n.phonenumbers.Phonenumber
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.api.models.MobileNumber
@@ -29,6 +31,10 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
 
     private val userSynchronizer: UserSynchronizer by inject()
     private val sim: Sim by inject()
+    private val phoneNumberUtil: PhoneNumberUtil by inject()
+
+    private val mobileNumber: String
+        get() = (mobile_number_text_dialog_prefix.text.toString() + mobileNumberTextDialog.text.toString()).replace(" ", "")
 
     override fun onResume() {
         super.onResume()
@@ -39,21 +45,27 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
             return
         }
 
-        mobileNumberTextDialog.setText(if (sim.mobileNumber != null) sim.mobileNumber else User.voipgridUser?.mobileNumber)
-        mobileNumberTextDialog.setRightDrawableOnClickListener {
-            alert(R.string.phonenumber_info_text_title, R.string.phonenumber_info_text)
+        mobile_number_text_dialog_prefix.setText(getCountryCode())
+        mobile_number_text_dialog_prefix.onTextChanged {
+            button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false && mobile_number_text_dialog_prefix.text?.isNotEmpty() ?: false
         }
+
+        mobileNumberTextDialog.setText(getNationalNumber())
         mobileNumberTextDialog.onTextChanged {
-            button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false
+            button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false && mobile_number_text_dialog_prefix.text?.isNotEmpty() ?: false
         }
-        outgoingNumberTv.text = outgoingNumber
+
+        outgoingNumberTv.text = try {
+            getFormattedOutgoingNumber()
+        } catch (e: Exception) {
+            getString(R.string.supressed_number)
+        }
         button_configure.setOnClickListenerAndDisable(this)
-        button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false
+        button_configure.isEnabled = mobileNumberTextDialog.text?.isNotEmpty() ?: false && mobile_number_text_dialog_prefix.text?.isNotEmpty() ?: false
+        button_back.setOnClickListener { activity?.onBackPressed() }
     }
 
     override fun onClick(view: View?) {
-        val mobileNumber = mobileNumberTextDialog.text.toString()
-
         if (!PhoneNumberUtils.isValidMobileNumber(mobileNumber)) {
             error(R.string.invalid_mobile_number_message, R.string.invalid_mobile_number_message)
             return
@@ -139,4 +151,44 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
     }
 
     private fun hasOutgoingNumber() = outgoingNumberTv.text.isNotEmpty()
+
+    /**
+     * Parse user's mobile number to formatted PhoneNumber object.
+     *
+     */
+    private fun getNumber(): Phonenumber.PhoneNumber {
+        val number: String = if (sim.mobileNumber != null) {
+            sim.mobileNumber ?: ""
+        } else {
+            User.voipgridUser?.mobileNumber ?: ""
+        }
+
+        return phoneNumberUtil.parse(number, "ZZ")
+    }
+
+    /**
+     * Return country code from user's mobile number.
+     *
+     */
+    private fun getCountryCode(): String {
+        return "+" + getNumber().countryCode
+    }
+
+    /**
+     * Return formatted national number from user's mobile number.
+     *
+     */
+    private fun getNationalNumber(): String {
+        val internationalNumber = phoneNumberUtil.format(getNumber(), PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+        val countryCode = "+" + getNumber().countryCode
+        return internationalNumber.replace("$countryCode ", "")
+    }
+
+    /**
+     * Return formatted outgoing number.
+     *
+     */
+    private fun getFormattedOutgoingNumber(): String {
+        return phoneNumberUtil.format(phoneNumberUtil.parse(outgoingNumber, "ZZ"), PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+    }
 }

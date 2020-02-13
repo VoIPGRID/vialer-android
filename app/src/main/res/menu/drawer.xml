@@ -7,7 +7,7 @@
             android:title="@string/statistics_menu_item_title"/>
         <item
             android:id="@+id/navigation_item_dial_plan"
-            android:icon="@drawable/ic_menu_dialplan"
+            android:icon="@drawable/ic_menu_dial_plan"
             android:title="@string/dial_plan_menu_item_title"/>
 
         <item
