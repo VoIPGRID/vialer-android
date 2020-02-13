@@ -1,12 +1,13 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="@dimen/settings_icon_size"
-    android:height="@dimen/settings_icon_size"
+    android:width="22dp"
+    android:height="22dp"
     android:viewportWidth="22.0"
     android:viewportHeight="22.0">
     <path
         android:fillColor="@color/settings_icon_color"
-        android:pathData="M12,19m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0"/>
+        android:pathData="M2,22h20V2z"
+        android:fillAlpha=".3"/>
     <path
         android:fillColor="@color/settings_icon_color"
-        android:pathData="M10,3h4v12h-4z"/>
+        android:pathData="M17,7L2,22h15z"/>
 </vector>

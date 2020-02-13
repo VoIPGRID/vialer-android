@@ -22,9 +22,11 @@ abstract class AbstractSettingsFragment : PreferenceFragmentCompat() {
      *
      */
     var isLoading: Boolean
-        get() = (activity as SettingsActivity).loading.visibility == VISIBLE
+        get() = (activity as SettingsActivity)?.loading?.visibility == VISIBLE
         set(loading) {
-            (activity as SettingsActivity).loading.visibility = if (loading) VISIBLE else GONE
+            activity?.let {
+                (it as SettingsActivity).loading?.visibility = if (loading) VISIBLE else GONE
+            }
         }
 
     /**

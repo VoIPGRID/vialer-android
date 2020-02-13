@@ -5,50 +5,54 @@
 
     <PreferenceCategory
         app:title="@string/settings_advanced_call_category_audio"
-        android:icon="@drawable/ic_settings_equalizer_black_24dp">
+        android:icon="@drawable/ic_settings_equalizer">
 
         <ListPreference
             app:key="audioCodec"
             app:title="@string/settings_advanced_call_audio_codec"
-            app:iconSpaceReserved="false"/>
+            app:summary="aasdasd"
+            app:defaultValue="OPUS"
+            app:iconSpaceReserved="true"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
         app:title="@string/settings_advanced_call_category_network"
-        android:icon="@drawable/ic_settings_network_cell_black_24dp">
+        android:icon="@drawable/ic_settings_network_cell">
 
         <ListPreference
             app:key="internalConnectionPreference"
             app:title="@string/settings_advanced_call_call_using"
-            app:iconSpaceReserved="false"/>
+            app:iconSpaceReserved="true"/>
 
         <SwitchPreferenceCompat
             app:key="PREF_HAS_3G_ENABLED"
             app:title="@string/settings_advanced_call_use_3g"
-            app:summary="@string/settings_advanced_call_use_3g_desc"
+            app:summaryOff="@string/settings_advanced_call_use_3g_desc_off"
+            app:summaryOn="@string/settings_advanced_call_use_3g_desc_on"
             app:defaultValue="true"
-            app:iconSpaceReserved="false"/>
+            app:iconSpaceReserved="true"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
         app:title="@string/settings_advanced_call_category_sip"
-        android:icon="@drawable/ic_settings_dialer_sip_black_24dp">
+        android:icon="@drawable/ic_settings_dialer_sip">
 
         <SwitchPreferenceCompat
             app:key="PREF_HAS_TLS_ENABLED"
             app:title="@string/settings_advanced_call_encryption"
-            app:summary="@string/settings_advanced_call_encryption_description"
+            app:summaryOn="@string/settings_advanced_call_encryption_description_on"
+            app:summaryOff="@string/settings_advanced_call_encryption_description_off"
             app:defaultValue="true"
-            app:iconSpaceReserved="false"/>
+            app:iconSpaceReserved="true"/>
 
         <SwitchPreferenceCompat
             app:key="PREF_HAS_STUN_ENABLED"
             app:title="@string/settings_advanced_call_stun"
             app:summary="@string/settings_advanced_call_stun_desc"
             app:defaultValue="false"
-            app:iconSpaceReserved="false"/>
+            app:iconSpaceReserved="true"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

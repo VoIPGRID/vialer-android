@@ -3,10 +3,12 @@ package com.voipgrid.vialer.settings
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.util.LoginRequiredActivity
+import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : LoginRequiredActivity(), PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
@@ -25,6 +27,10 @@ class SettingsActivity : LoginRequiredActivity(), PreferenceFragmentCompat.OnPre
                 .beginTransaction()
                 .replace(R.id.settings_container, SettingsFragment())
                 .commit()
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            loading.visibility = View.GONE
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -34,6 +40,7 @@ class SettingsActivity : LoginRequiredActivity(), PreferenceFragmentCompat.OnPre
     }
 
     override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {
+        loading.visibility = View.GONE
         val fragment = supportFragmentManager.fragmentFactory.instantiate(classLoader, pref.fragment).apply {
             arguments = pref.extras
             setTargetFragment(caller, 0)
