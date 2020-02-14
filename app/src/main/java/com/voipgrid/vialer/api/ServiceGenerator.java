@@ -10,8 +10,13 @@ import com.voipgrid.vialer.api.interceptors.AddUserAgentToHeader;
 import com.voipgrid.vialer.api.interceptors.LogResponsesToConsole;
 import com.voipgrid.vialer.api.interceptors.LogUserOutOnUnauthorizedResponse;
 
+import java.util.Collections;
+
 import androidx.annotation.NonNull;
+import okhttp3.CipherSuite;
+import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
+import okhttp3.TlsVersion;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -59,12 +64,23 @@ public class ServiceGenerator {
      *
      */
     private static OkHttpClient createHttpClient(final Context context) {
-        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder()
+                .connectionSpecs(Collections.singletonList(createConnectionSpecs()));
         httpClient.addInterceptor(new AddAuthorizationCredentialsToRequest());
         httpClient.addInterceptor(new AddUserAgentToHeader(context));
         httpClient.addInterceptor(new LogUserOutOnUnauthorizedResponse(VialerApplication.get().component().provideLogout()));
         httpClient.addInterceptor(new LogResponsesToConsole());
         return httpClient.build();
+    }
+
+    private static ConnectionSpec createConnectionSpecs() {
+        return new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                .tlsVersions(TlsVersion.TLS_1_2)
+                .cipherSuites(
+                        CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                        CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                        CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256)
+                .build();
     }
 
     /**
