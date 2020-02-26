@@ -76,4 +76,6 @@ public interface VoipgridApi {
     @PUT("api/selecteduserdestination/{id}/")
     Call<Object> setSelectedUserDestination(@Path("id") String id,
                                     @Body SelectedUserDestinationParams params);
+    @PUT("api/v2/password/")
+
 }

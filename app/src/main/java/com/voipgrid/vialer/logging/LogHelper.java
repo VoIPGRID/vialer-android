@@ -58,17 +58,17 @@ public class LogHelper {
      * @param requestType
      */
     public void logMiddlewareMessageReceived(RemoteMessage remoteMessage, String requestType) {
-        if(!CALL_REQUEST_TYPE.equals(requestType)) return;
-
-        Map<String, String> message = new TreeMap<>(remoteMessage.getData());
-
-        message.put("caller_id", "<CALLER_ID>");
-        message.put("phonenumber", "<PHONE_NUMBER>");
-
-        mLogger.getVialerLogger().logToEnvironment(
-                VialerApplication.get().getString(R.string.push_log_entries_token),
-                "ANDROID : " + mGson.toJson(message)
-        );
+//        if(!CALL_REQUEST_TYPE.equals(requestType)) return;
+//
+//        Map<String, String> message = new TreeMap<>(remoteMessage.getData());
+//
+//        message.put("caller_id", "<CALLER_ID>");
+//        message.put("phonenumber", "<PHONE_NUMBER>");
+//
+//        mLogger.getVialerLogger().logToEnvironment(
+//                VialerApplication.get().getString(R.string.push_log_entries_token),
+//                "ANDROID : " + mGson.toJson(message)
+//        );
     }
 
     /**

@@ -36,9 +36,9 @@ class RegisterLibraries : OnLaunchTask {
     }
 
     private fun initializeSegmentAnalytics(context: Context) {
-        val analytics = Analytics.Builder(context, context.getString(R.string.segment_write_key)).build()
-        setSingletonInstance(analytics)
-        Analytics.with(context).track("Application started. Segment analytics implemented successfully!")
+//        val analytics = Analytics.Builder(context, context.getString(R.string.segment_write_key)).build()
+//        setSingletonInstance(analytics)
+//        Analytics.with(context).track("Application started. Segment analytics implemented successfully!")
     }
 
 }

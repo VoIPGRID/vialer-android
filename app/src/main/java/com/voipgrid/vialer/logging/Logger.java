@@ -102,15 +102,15 @@ public class Logger {
      * Function to create the remote logger instance.
      */
     private void createLogger() {
-        mLogFileCreator.createIfDoesNotExist();
-
-        if(logEntryLogger != null) return;
-
-        logEntryLogger = new VialerLogger(mContext, new LogEntriesFactory()).initialize(new String[] {
-                mContext.getString(R.string.log_entry_token),
-                mContext.getString(R.string.secondary_log_entry_token)
-        });
-    }
+//        mLogFileCreator.createIfDoesNotExist();
+//
+//        if(logEntryLogger != null) return;
+//
+//        logEntryLogger = new VialerLogger(mContext, new LogEntriesFactory()).initialize(new String[] {
+//                mContext.getString(R.string.log_entry_token),
+//                mContext.getString(R.string.secondary_log_entry_token)
+//        });
+  }
 
     /**
      * Function to log the message for the given tag.
