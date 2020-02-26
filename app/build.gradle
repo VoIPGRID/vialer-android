@@ -285,6 +285,9 @@ dependencies {
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 
     implementation "org.koin:koin-android:$koin_version"
+    implementation "org.koin:koin-android-scope:$koin_version"
+    implementation "org.koin:koin-android-viewmodel:$koin_version"
+
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

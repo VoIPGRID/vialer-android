@@ -373,4 +373,5 @@
     <string name="add_to_contacts">Add to contacts</string>
     <string name="copy_number">Copy number</string>
     <string name="number_copied">Number has been copied: %1$s</string>
+
 </resources>
