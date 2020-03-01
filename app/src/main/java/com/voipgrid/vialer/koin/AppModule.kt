@@ -32,10 +32,12 @@ val appModule = module {
 
     single { androidContext().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager }
 
-    single { ConnectivityHelper(get(),get()) }
     single { androidContext().getSystemService(Context.POWER_SERVICE) as PowerManager }
+
     single { NativeCallManager(get()) }
+
     single { ServiceGenerator.createRegistrationService(androidContext()) }
+
     single { androidContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
 
     single { Sim(get()) }
@@ -45,8 +47,6 @@ val appModule = module {
     single { ConnectivityHelper(get(), get()) }
 
     single { ContactsSearcher() }
-
-    single { androidContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
 
     viewModel { ContactsViewModel(get()) }
 

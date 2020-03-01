@@ -6,6 +6,9 @@ import com.chibatching.kotpref.gsonpref.gson
 import com.github.anrwatchdog.ANRWatchDog
 import com.github.tamir7.contacts.Contacts
 import com.google.gson.GsonBuilder
+import com.segment.analytics.Analytics
+import com.segment.analytics.Analytics.setSingletonInstance
+import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.koin.appModule
 import org.koin.android.ext.koin.androidContext
