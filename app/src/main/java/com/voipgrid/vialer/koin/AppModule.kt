@@ -12,6 +12,7 @@ import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.callrecord.CallRecordViewModel
 import com.voipgrid.vialer.call.NativeCallManager
+import com.voipgrid.vialer.middleware.Middleware
 import com.voipgrid.vialer.t9.ContactsSearcher
 import com.voipgrid.vialer.util.BatteryOptimizationManager
 import com.voipgrid.vialer.util.ConnectivityHelper
@@ -26,7 +27,7 @@ val appModule = module {
 
     single { ServiceGenerator.createApiService(androidContext()) }
 
-    single { UserSynchronizer(get(), androidContext(), get()) }
+    single { UserSynchronizer(get(), get(), get()) }
 
     single { BatteryOptimizationManager(androidContext()) }
 
@@ -53,4 +54,6 @@ val appModule = module {
     viewModel { CallRecordViewModel(get()) }
 
     single { db.callRecordDao() }
+
+    single { Middleware(androidContext()) }
 }

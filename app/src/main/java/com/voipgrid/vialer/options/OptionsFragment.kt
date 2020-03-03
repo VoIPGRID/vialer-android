@@ -32,7 +32,7 @@ import com.voipgrid.vialer.api.models.Destination
 import com.voipgrid.vialer.api.models.FixedDestination
 import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams
-import com.voipgrid.vialer.middleware.MiddlewareHelper
+import com.voipgrid.vialer.middleware.Middleware
 import com.voipgrid.vialer.settings.SettingsActivity
 import com.voipgrid.vialer.util.ConnectivityHelper
 import kotlinx.android.synthetic.main.options_fragment_header.*
@@ -52,6 +52,7 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
     private var spinnerAdapter: CustomFontSpinnerAdapter<Destination?>? = null
 
     private val userSynchronizer: UserSynchronizer by inject()
+    private val middleware: Middleware by inject()
 
     override val shouldRenderDialerButton = false
 
@@ -288,7 +289,7 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
         } else {
             val destination = parent.adapter.getItem(position) as Destination
             if (destination.description == getString(R.string.not_available)) {
-                MiddlewareHelper.unregister(context)
+                middleware.unregister()
             }
             val params = SelectedUserDestinationParams()
             params.fixedDestination = (destination as? FixedDestination)?.id
@@ -296,11 +297,7 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
             val call = context?.let { ServiceGenerator.createApiService(it).setSelectedUserDestination(User.internal.destinations[0].selectedUserDestination.id, params) }
             call?.enqueue(this)
 
-            if (!MiddlewareHelper.isRegistered()) {
-                // If the previous destination was not available, or if we're not registered
-                // for another reason, register again.
-                MiddlewareHelper.registerAtMiddleware(context)
-            }
+            middleware.register()
         }
     }
 
