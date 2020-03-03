@@ -11,7 +11,6 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.telephony.TelephonyManager
 import android.text.TextUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -24,8 +23,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.voipgrid.vialer.*
+import com.voipgrid.vialer.MainActivity
+import com.voipgrid.vialer.R
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.User.voipgridUser
+import com.voipgrid.vialer.VoIPGRIDPortalWebActivity
 import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.api.models.Destination
@@ -35,16 +37,15 @@ import com.voipgrid.vialer.api.models.SelectedUserDestinationParams
 import com.voipgrid.vialer.middleware.Middleware
 import com.voipgrid.vialer.settings.SettingsActivity
 import com.voipgrid.vialer.util.ConnectivityHelper
+import kotlinx.android.synthetic.main.fragment_options.*
 import kotlinx.android.synthetic.main.options_fragment_header.*
 import kotlinx.android.synthetic.main.options_fragment_header.view.*
-import kotlinx.android.synthetic.main.fragment_options.*
 import org.koin.android.ext.android.inject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import javax.inject.Inject
 
-class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener, MainActivity.MainActivityFragment {
+class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var layout: View
     private var mConnectivityHelper: ConnectivityHelper? = null
@@ -53,8 +54,6 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
 
     private val userSynchronizer: UserSynchronizer by inject()
     private val middleware: Middleware by inject()
-
-    override val shouldRenderDialerButton = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

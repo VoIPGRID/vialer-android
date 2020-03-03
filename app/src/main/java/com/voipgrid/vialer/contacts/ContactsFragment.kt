@@ -7,13 +7,11 @@ import android.widget.SearchView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.tamir7.contacts.Contact
 import com.github.tamir7.contacts.PhoneNumber
-import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.ContactsViewModel
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.permissions.ContactsPermission
@@ -23,11 +21,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.KoinComponent
 import kotlin.coroutines.CoroutineContext
 
-class ContactsFragment : Fragment(), KoinComponent, CoroutineScope, MainActivity.MainActivityFragment {
+class ContactsFragment : Fragment(), KoinComponent, CoroutineScope {
 
     private lateinit var job: Job
     private lateinit var searchView: SearchView

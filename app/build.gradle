@@ -15,8 +15,8 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 217
-        versionName "6.6 alpha 12"
+        versionCode 219
+        versionName "6.6 alpha 15"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -130,10 +130,10 @@ android {
 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            manifestPlaceholders = [enableCrashReporting:"true"]
+            manifestPlaceholders = [enableCrashReporting: "true"]
         }
         debug {
-            manifestPlaceholders = [enableCrashReporting:"false"]
+            manifestPlaceholders = [enableCrashReporting: "false"]
             buildConfigField("String", "TEST_USERNAME", "\"${project.properties['testUsername'] ?: ""}\"")
             buildConfigField("String", "TEST_PASSWORD", "\"${project.properties['testPassword'] ?: ""}\"")
             buildConfigField("String", "TEST_END_NUMBER", "\"${project.properties['testEndNumber'] ?: ""}\"")
@@ -177,6 +177,7 @@ ext {
     room_version = '2.2.0-beta01'
     lifecycle_version = "1.1.1"
     koin_version = "2.0.1"
+    nav_version = "2.3.0-alpha02"
 }
 
 dependencies {
@@ -196,6 +197,8 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:1.1.3"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-rc01"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-rc01"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     // Firebase setup.
     implementation "com.google.firebase:firebase-core:${firebaseCoreVersion}"
@@ -216,6 +219,11 @@ dependencies {
     implementation 'com.github.anrwatchdog:anrwatchdog:1.4.0'
 
     implementation "com.google.dagger:dagger:${daggerVersion}"
+    implementation 'androidx.navigation:navigation-fragment:2.2.1'
+    implementation 'androidx.navigation:navigation-ui:2.2.1'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.2.1'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.2.1'
     kapt "com.google.dagger:dagger-compiler:${daggerVersion}"
     implementation "com.google.dagger:dagger-android:${daggerVersion}"
     kapt "com.google.dagger:dagger-android-processor:${daggerVersion}"

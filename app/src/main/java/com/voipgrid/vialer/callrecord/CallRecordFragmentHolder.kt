@@ -1,22 +1,16 @@
 package com.voipgrid.vialer.callrecord
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Switch
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.dialer.DialerActivity
-import kotlinx.android.synthetic.main.fragment_call_record_holder.*
 import kotlinx.android.synthetic.main.fragment_call_record_holder.view.*
 
-class CallRecordFragmentHolder : Fragment(), MainActivity.MainActivityFragment {
+class CallRecordFragmentHolder : Fragment() {
 
     private lateinit var layout: View
 
