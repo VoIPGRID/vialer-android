@@ -44,7 +44,9 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
                 }
                 User.internal.callRecordMonthsImported.add(date)
                 logger.i("Completed import for $date, starting next month in ${DELAY_BETWEEN_EACH_MONTH}ms")
-                delay(DELAY_BETWEEN_EACH_MONTH)
+                if (date.monthOfYear != DateTime().monthOfYear) {
+                    delay(DELAY_BETWEEN_EACH_MONTH)
+                }
             } catch (e: Exception) {
                 logger.i("We have hit a rate limit, delaying for ${DELAY_IF_RATE_LIMIT_IS_HIT}ms")
                 delay(DELAY_IF_RATE_LIMIT_IS_HIT)
@@ -89,7 +91,7 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
         /**
          * After each month we will wait a bit to prevent issues with rate limiting.
          */
-        val DELAY_BETWEEN_EACH_MONTH : Long = Random.nextInt(10 * 60, 60 * 60).toLong() * 1000
+        val DELAY_BETWEEN_EACH_MONTH : Long = Random.nextInt(1 * 60, 5 * 60).toLong() * 1000
 
         /**
          * If we ever hit a rate limit, we will wait this long before continuing.
@@ -108,6 +110,14 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
                 .withMinuteOfHour(0)
                 .withSecondOfMinute(0)
                 .withMillisOfSecond(0)
+
+        val START_OF_THIS_MONTH
+            get() = DateTime.now()
+                    .withDayOfMonth(1)
+                    .withHourOfDay(0)
+                    .withMinuteOfHour(0)
+                    .withSecondOfMinute(0)
+                    .withMillisOfSecond(0)
 
         /**
          * We will always query all call records from this many months ago.
