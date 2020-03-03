@@ -111,14 +111,6 @@ class HistoricCallRecordsImporter(fetcher: CallRecordsFetcher, inserter: CallRec
                 .withSecondOfMinute(0)
                 .withMillisOfSecond(0)
 
-        val START_OF_THIS_MONTH
-            get() = DateTime.now()
-                    .withDayOfMonth(1)
-                    .withHourOfDay(0)
-                    .withMinuteOfHour(0)
-                    .withSecondOfMinute(0)
-                    .withMillisOfSecond(0)
-
         /**
          * We will always query all call records from this many months ago.
          *
