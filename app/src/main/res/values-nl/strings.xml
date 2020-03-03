@@ -108,7 +108,7 @@
     <string name="voip_account_missing_text">Om gebruik te kunnen maken van bellen via VoIP, moet er een VoIP-account gekoppeld zijn aan je gebruiker.\n\nOp dit moment is er geen VoIP-account gekoppeld aan deze gebruiker.</string>
 
     <!-- Welcome fragment values -->
-    <string name="welcome_text">Welkom</string>
+    <string name="welcome_text">Welkom bij Vialer,\n\n%1$s!</string>
     <string name="placeholder_name">Naamloze gebruiker</string>
     <string name="start_calling_button">Aan de slag</string>
     <string name="onboarding_login_failed_title">Inloggen mislukt</string>

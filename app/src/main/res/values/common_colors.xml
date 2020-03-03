@@ -66,7 +66,8 @@
     <color name="settings_text_color_dark">#000000</color>
     <color name="spinner_text_color">#808080</color>
     <color name="edit_text_disabled_color">#42000000</color>
-    <color name="call_duration_background_color">#D45400</color>
+
+    <color name="call_duration_background_color">@color/color_primary</color>
     <color name="neutral_color">@color/dial_button_chars_color</color>
 
     <color name="error_high_foreground_color">#DA534F</color>
