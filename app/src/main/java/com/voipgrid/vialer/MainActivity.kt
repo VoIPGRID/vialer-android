@@ -39,7 +39,6 @@ class MainActivity : LoginRequiredActivity(), BottomNavigationView.OnNavigationI
         VialerApplication.get().component().inject(this)
         setContentView(R.layout.activity_main)
         bottom_nav.setOnNavigationItemSelectedListener(this)
-        loadFragments()
 
         if (!userIsOnboarded()) {
             logger.i("User has not properly onboarded, logging them out")
@@ -61,7 +60,9 @@ class MainActivity : LoginRequiredActivity(), BottomNavigationView.OnNavigationI
     private fun loadFragments() {
         val fragments = arrayOf(Fragment.Contacts, Fragment.CallRecords, Fragment.Options)
 
-        fragments.forEach {
+        fragments.filterNot {
+            supportFragmentManager.fragments.contains(it.fragment as androidx.fragment.app.Fragment)
+        }.forEach {
             supportFragmentManager.beginTransaction().apply {
                 add(R.id.container, it.fragment as androidx.fragment.app.Fragment)
                 hide(it.fragment as androidx.fragment.app.Fragment)
@@ -86,6 +87,8 @@ class MainActivity : LoginRequiredActivity(), BottomNavigationView.OnNavigationI
         // request the SipService to display the current call. If there is no current call, this will have no
         // affect.
         SipService.performActionOnSipService(this, SipService.Actions.DISPLAY_CALL_IF_AVAILABLE)
+
+        loadFragments()
     }
 
     /**
