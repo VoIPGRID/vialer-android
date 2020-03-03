@@ -22,11 +22,11 @@ class CallRecordViewModel(private val db: CallRecordDao) : ViewModel() {
 
     init {
         calls = Transformations.switchMap(filterLiveData) {
-            v -> db.callRecordsByDate(v.wasPersonal).toLiveData(50)
+            v -> db.callRecordsByDate(v.wasPersonal).toLiveData(15)
         }
 
         missedCalls = Transformations.switchMap(filterLiveData) {
-            v -> db.missedCallRecordsByDate(v.wasPersonal).toLiveData(50)
+            v -> db.missedCallRecordsByDate(v.wasPersonal).toLiveData(15)
         }
     }
 
