@@ -18,7 +18,7 @@
                 android:id="@+id/call_records"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingBottom="90dp"
+                android:paddingBottom="200dp"
                 android:clipToPadding="false"/>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

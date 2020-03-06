@@ -41,10 +41,6 @@ class MainActivity : LoginRequiredActivity() {
         if (intent.hasExtra(Extra.NAVIGATE_TO.name)) {
             findNavController(R.id.nav_host_fragment).navigate(intent.getIntExtra(Extra.NAVIGATE_TO.name, 0))
         }
-
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            floating_action_button.visibility = if (destination.id == R.id.navigation_options) View.INVISIBLE else View.VISIBLE
-        }
     }
 
     override fun onResume() {
