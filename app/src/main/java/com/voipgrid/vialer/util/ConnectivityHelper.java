@@ -7,10 +7,6 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
 
-import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.User;
-import com.voipgrid.vialer.persistence.UserPreferences;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,20 +47,10 @@ public class ConnectivityHelper {
     public static boolean mWifiKilled = false;
 
     private static final List<Connection> sFastDataTypes = new ArrayList<>();
-    private static final List<Connection> sFast3GDataTypes = new ArrayList<>();
-
-    private static Context mContext;
 
     static {
         sFastDataTypes.add(Connection.WIFI);
         sFastDataTypes.add(Connection.LTE);
-    }
-
-    static {
-        sFast3GDataTypes.add(Connection.HSDPA);
-        sFast3GDataTypes.add(Connection.HSPAP);
-        sFast3GDataTypes.add(Connection.HSUPA);
-        sFast3GDataTypes.add(Connection.EVDO_B);
     }
 
     /**
@@ -154,47 +140,17 @@ public class ConnectivityHelper {
         return connectionString;
     }
 
-    public String getAnalyticsLabel() {
-        String analyticsLabel;
-        switch (getConnectionType()) {
-            case WIFI:
-                analyticsLabel = mContext.getString(R.string.analytics_event_label_wifi);
-                break;
-            case LTE:
-                analyticsLabel = mContext.getString(R.string.analytics_event_label_4g);
-                break;
-            case HSDPA:
-                analyticsLabel = mContext.getString(R.string.analytics_event_label_hsdpa);
-                break;
-            case HSPAP:
-                analyticsLabel = mContext.getString(R.string.analytics_event_label_hspap);
-                break;
-            case HSUPA:
-                analyticsLabel = mContext.getString(R.string.analytics_event_label_hsupa);
-                break;
-            case EVDO_B:
-                analyticsLabel = mContext.getString(R.string.analytics_event_label_evdo_b);
-                break;
-            default:
-                analyticsLabel = mContext.getString(R.string.analytics_event_label_unknown);
-                break;
-        }
-        return analyticsLabel;
-    }
-
     /**
      * Check if the device is connected via wifi or LTE connection.
      * @return
      */
     public boolean hasFastData() {
-        Connection connectionType = getConnectionType();
-        return sFastDataTypes.contains(connectionType) || (sFast3GDataTypes.contains(connectionType) && User.voip.getWantsToUse3GForCalls());
+        return sFastDataTypes.contains(getConnectionType());
     }
 
     public static ConnectivityHelper get(Context context) {
         ConnectivityManager c = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         TelephonyManager t = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        mContext = context;
         return new ConnectivityHelper(c, t);
     }
 
@@ -208,7 +164,7 @@ public class ConnectivityHelper {
      * will check whether or not we succeeded in enabling LTE. If it did not succeed then
      * we will try to get Wifi on again.
      */
-    public void waitForLTE(final Context context, int timeout, final int interval) {
+    private void waitForLTE(final Context context, int timeout, final int interval) {
         final int remainingTime = timeout - interval;
         new Handler().postDelayed(() -> {
             // Keep waiting until the remaining time is less then the interval.
@@ -221,38 +177,11 @@ public class ConnectivityHelper {
         }, interval);
     }
 
-    public void attemptUsingLTE(final Context context, int timeout) {
+    void attemptUsingLTE(final Context context, int timeout) {
         if (getConnectionType() == Connection.WIFI) {
             useWifi(context, false);
             mWifiKilled = true;
             waitForLTE(context, timeout+(timeout/10), timeout/10);
         }
-    }
-
-    /**
-     * One way conversion to charsequence from preference (long) because bidirectional maps
-     * are not nativly supported in java.
-     */
-    public static UserPreferences.ConnectionPreference converseToPreference(CharSequence connectionPreference, Context context) {
-        if (connectionPreference.equals(context.getString(R.string.call_connection_only_cellular))) {
-            return UserPreferences.ConnectionPreference.ONLY_CELLULAR;
-        } else if (connectionPreference.equals(context.getString(R.string.call_connection_use_wifi_cellular))) {
-            return UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI;
-        }
-        return UserPreferences.ConnectionPreference.SHOW_POPUP_BEFORE_EVERY_CALL;
-    }
-
-    /**
-     * One way conversion to preference (long) from charsequence because bidirectional maps
-     * are not nativly supported in java.
-     */
-    public static CharSequence converseFromPreference(
-            UserPreferences.ConnectionPreference preference, Context context) {
-        if (preference == UserPreferences.ConnectionPreference.ONLY_CELLULAR) {
-            return context.getString(R.string.call_connection_only_cellular);
-        } else if (preference == UserPreferences.ConnectionPreference.CEULLAR_AND_WIFI) {
-            return context.getString(R.string.call_connection_use_wifi_cellular);
-        }
-        return context.getString(R.string.call_connection_optional);
     }
 }

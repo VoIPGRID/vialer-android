@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.preference.ListPreference
 import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
 import androidx.preference.SwitchPreferenceCompat
 import com.voipgrid.vialer.ActivityLifecycleTracker
 import com.voipgrid.vialer.R
@@ -29,6 +30,9 @@ class AdvancedCallSettingsFragment : AbstractSettingsFragment() {
             entryValues = arrayOf(VoipSettings.AudioCodec.iLBC.toString(), VoipSettings.AudioCodec.OPUS.toString())
             setDefaultValue(VoipSettings.AudioCodec.OPUS.toString())
         }
+
+        findPreference<PreferenceCategory>("settings_advanced_call_category_network")?.isVisible =
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
 
         findPreference<ListPreference>("internalConnectionPreference")?.apply {
             isVisible = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q

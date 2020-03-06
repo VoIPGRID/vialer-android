@@ -154,7 +154,6 @@
     <string name="connection_preference_dialog_title">Tip: schakel WiFi uit voor dit gesprek</string>
     <string name="connection_preference_dialog_message">Met mobiel internet is de verbinding stabieler en daarmee de geluidskwaliteit hoger. \n\nWiFi tijdelijk uitschakelen?</string>
     <string name="connection_preference_switch_toast">Controleren of het mobiele netwerk beschikbaar is</string>
-    <string name="settings_advanced_call_use_3g">Gebruik 3G+ om te bellen</string>
 
     <string name="url_app_info">https://vialerapp.com/nl/app-info/</string>
 
@@ -362,8 +361,6 @@
     <string name="number_copied">Nummer gekopieerd: %1$s</string>
     <string name="settings_advanced_call_encryption_description_off">Derde partijen kunnen mogelijk jouw gesprekken onderscheppen en meeluisteren.</string>
     <string name="settings_advanced_call_encryption_description_on">Jouw gesprekken zijn versleuteld en daarmee niet toegankelijk voor derden.</string>
-    <string name="settings_advanced_call_use_3g_desc_off">Gesprekken worden via het internet opgezet wanneer een sterke 3G verbinding (of beter) beschikbaar is.</string>
-    <string name="settings_advanced_call_use_3g_desc_on">Gesprekken worden via het internet opgezet wanneer een sterke 4G verbinding (of beter) beschikbaar is.</string>
     <string name="settings_call_using_voip_desc_off">Gesprekken worden opgezet door gebruik te maken van jouw mobiele netwerk</string>
     <string name="settings_call_using_voip_desc_on">Gebruik een internetverbinding om gesprekken op te zetten en aan te nemen.</string>
     <string name="settings_category_account">Account</string>

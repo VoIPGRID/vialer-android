@@ -18,19 +18,12 @@
 
     <PreferenceCategory
         app:title="@string/settings_advanced_call_category_network"
+        app:key="settings_advanced_call_category_network"
         android:icon="@drawable/ic_settings_network_cell">
 
         <ListPreference
             app:key="internalConnectionPreference"
             app:title="@string/settings_advanced_call_call_using"
-            app:iconSpaceReserved="true"/>
-
-        <SwitchPreferenceCompat
-            app:key="PREF_HAS_3G_ENABLED"
-            app:title="@string/settings_advanced_call_use_3g"
-            app:summaryOff="@string/settings_advanced_call_use_3g_desc_off"
-            app:summaryOn="@string/settings_advanced_call_use_3g_desc_on"
-            app:defaultValue="true"
             app:iconSpaceReserved="true"/>
 
     </PreferenceCategory>

@@ -237,9 +237,6 @@
     <string name="settings_advanced_call_category_sip">SIP</string>
     <string name="settings_advanced_call_audio_codec">Audio quality</string>
     <string name="settings_advanced_call_call_using">Call using</string>
-    <string name="settings_advanced_call_use_3g">Also use 3G+ for calls</string>
-    <string name="settings_advanced_call_use_3g_desc_off">Calls will be made via the internet when there is a 4G connection or better.</string>
-    <string name="settings_advanced_call_use_3g_desc_on">Calls will be made via the internet when there is a strong 3G connection or better.</string>
     <string name="settings_advanced_call_encryption">Encrypted calling</string>
     <string name="settings_advanced_call_encryption_description_off">Third parties may be able to intercept and listen to your phone calls.</string>
     <string name="settings_advanced_call_encryption_description_on">Your calls are encrypted and cannot be accessed by third parties.</string>
