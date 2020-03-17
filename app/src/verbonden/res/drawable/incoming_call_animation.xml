@@ -12,7 +12,7 @@
                 android:name="path"
                 android:pathData="M 12 6 C 10.409 6 8.882 6.633 7.757 7.757 C 6.633 8.882 6 10.409 6 12 C 6 13.591 6.633 15.118 7.757 16.243 C 8.882 17.367 10.409 18 12 18 C 13.591 18 15.118 17.367 16.243 16.243 C 17.367 15.118 18 13.591 18 12 C 18 10.409 17.367 8.882 16.243 7.757 C 15.118 6.633 13.591 6 12 6 Z"
                 android:fillColor="#d8d8d8"
-                android:strokeColor="#697BE1"
+                android:strokeColor="#3676a3"
                 android:fillType="evenOdd"/>
             <group android:name="vialer_logo">
                 <path
@@ -168,14 +168,14 @@
                     android:startOffset="51"
                     android:duration="249"
                     android:valueFrom="#aaaaaa"
-                    android:valueTo="#3E50B4"
+                    android:valueTo="#043252"
                     android:valueType="colorType"
                     android:interpolator="@android:interpolator/fast_out_slow_in"/>
                 <objectAnimator
                     android:propertyName="fillColor"
                     android:startOffset="300"
                     android:duration="600"
-                    android:valueFrom="#3E50B4"
+                    android:valueFrom="#043252"
                     android:valueTo="#aaaaaa"
                     android:valueType="colorType"
                     android:interpolator="@android:interpolator/fast_out_slow_in"/>
@@ -190,14 +190,14 @@
                     android:startOffset="51"
                     android:duration="249"
                     android:valueFrom="#aaaaaa"
-                    android:valueTo="#3E50B4"
+                    android:valueTo="#043252"
                     android:valueType="colorType"
                     android:interpolator="@android:interpolator/fast_out_slow_in"/>
                 <objectAnimator
                     android:propertyName="fillColor"
                     android:startOffset="300"
                     android:duration="600"
-                    android:valueFrom="#3E50B4"
+                    android:valueFrom="#043252"
                     android:valueTo="#aaaaaa"
                     android:valueType="colorType"
                     android:interpolator="@android:interpolator/fast_out_slow_in"/>
