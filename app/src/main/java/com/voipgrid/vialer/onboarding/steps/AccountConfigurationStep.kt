@@ -170,18 +170,22 @@ class AccountConfigurationStep : Step(), View.OnClickListener {
      * Return country code from user's mobile number.
      *
      */
-    private fun getCountryCode(): String {
-        return "+" + getNumber().countryCode
+    private fun getCountryCode(): String = try {
+        "+" + getNumber().countryCode
+    } catch (e: Exception) {
+        ""
     }
 
     /**
      * Return formatted national number from user's mobile number.
      *
      */
-    private fun getNationalNumber(): String {
+    private fun getNationalNumber(): String = try {
         val internationalNumber = phoneNumberUtil.format(getNumber(), PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
         val countryCode = "+" + getNumber().countryCode
-        return internationalNumber.replace("$countryCode ", "")
+        internationalNumber.replace("$countryCode ", "")
+    } catch (e: Exception) {
+        ""
     }
 
     /**

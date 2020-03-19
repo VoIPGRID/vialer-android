@@ -16,7 +16,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 223
-        versionName "6.6 beta 01"
+        versionName "6.6"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -137,7 +137,7 @@ android {
             buildConfigField("String", "TEST_USERNAME", "\"${project.properties['testUsername'] ?: ""}\"")
             buildConfigField("String", "TEST_PASSWORD", "\"${project.properties['testPassword'] ?: ""}\"")
             buildConfigField("String", "TEST_END_NUMBER", "\"${project.properties['testEndNumber'] ?: ""}\"")
-            versionNameSuffix '-DEBUG'
+            versionNameSuffix ''
         }
     }
     dexOptions {
