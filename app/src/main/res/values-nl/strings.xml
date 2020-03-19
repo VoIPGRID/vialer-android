@@ -371,4 +371,23 @@
     <string name="ignore_battery_optimization_description_on">Geoptimaliseerd voor betrouwbaarheid</string>
     <string name="settings_use_phones_ringtone_desc_on">Gebruik jouw ringtoon</string>
     <string name="settings_no_internet">Het is niet mogelijk deze instelling aan te passen zonder internetverbinding.</string>
+    <string name="back">Terug</string>
+    <string name="username_password_wrong">Deze combinatie van gebruikersnaam en wachtwoord komt niet overeen. Probeer het opnieuw.\nBeide velden zijn hoofdlettergevoelig</string>
+    <string name="allow">Toestaan</string>
+    <string name="enter_token">Voer hier je tweestapsverificatietoken in.</string>
+    <string name="invalid_token">Ongeldig token</string>
+    <string name="try_again_tfa">Probeer opnieuw of gebruik je backupcode</string>
+    <string name="backup_code_button">Voer backupcode in</string>
+    <string name="contacts_menu_item_title">Contacten</string>
+    <string name="recent_plan_menu_item_title">Recent</string>
+    <string name="options_menu_item_title">Opties</string>
+    <string name="numbers">Nummers</string>
+    <string name="network">Network</string>
+    <string name="audio">Audio</string>
+    <string name="call_lost">Gesprek verloren - %1$s</string>
+    <string name="two_step_call_title">Two-step call initiëren met</string>
+    <string name="not_encrypted">Gesprekken zijn niet versleuteld</string>
+    <string name="good_day">Goedendag,</string>
+    <string name="contacts_title">Contacten</string>
+    <string name="search">Zoeken</string>
 </resources>
