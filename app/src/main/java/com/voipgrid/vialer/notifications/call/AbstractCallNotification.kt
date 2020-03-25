@@ -15,6 +15,7 @@ import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration
 import com.voipgrid.vialer.calling.AbstractCallActivity
 import com.voipgrid.vialer.calling.CallingConstants
 import com.voipgrid.vialer.calling.IncomingCallActivity
+import com.voipgrid.vialer.contacts.Contacts
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator
 import com.voipgrid.vialer.notifications.AbstractNotification
 import com.voipgrid.vialer.sip.SipCall
@@ -42,6 +43,7 @@ abstract class AbstractCallNotification : AbstractNotification() {
     private val logo = R.drawable.ic_logo
 
     @Inject protected lateinit var phoneNumberImageGenerator : PhoneNumberImageGenerator
+    @Inject protected lateinit var contacts: Contacts
 
     init {
         VialerApplication.get().component().inject(this)
@@ -130,7 +132,12 @@ abstract class AbstractCallNotification : AbstractNotification() {
      * Transform the call notification to an incoming call notification.
      *
      */
-    fun incoming(number: String, callerId: String) : AbstractCallNotification = IncomingCallNotification(number, callerId)
+    fun incoming(number: String, callerId: String) : AbstractCallNotification {
+        return IncomingCallNotification(number, when(callerId.isBlank()) {
+            true -> contacts.getContactNameByPhoneNumber(number) ?: ""
+            false -> callerId
+        })
+    }
 
     /**
      * Transform the call notification to an ongoing call notification.
