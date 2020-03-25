@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.callrecord
 
+import android.app.NotificationManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +10,13 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.voipgrid.vialer.R
 import kotlinx.android.synthetic.main.fragment_call_record_holder.view.*
+import org.koin.android.ext.android.inject
 
 class CallRecordFragmentHolder : Fragment() {
 
     private lateinit var layout: View
+
+    private val notificationManager: NotificationManager by inject()
 
     companion object {
         val multiCheckListener = MultiCheckedChangeListener()
@@ -28,6 +32,11 @@ class CallRecordFragmentHolder : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupTabs()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        notificationManager.cancelAll()
     }
 
     private fun setupTabs() {

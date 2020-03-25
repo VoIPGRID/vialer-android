@@ -1,5 +1,6 @@
 package com.voipgrid.vialer.koin
 
+import android.app.NotificationManager
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.PowerManager
@@ -34,6 +35,8 @@ val appModule = module {
     single { androidContext().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager }
 
     single { androidContext().getSystemService(Context.POWER_SERVICE) as PowerManager }
+
+    single { androidContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
 
     single { NativeCallManager(get()) }
 
