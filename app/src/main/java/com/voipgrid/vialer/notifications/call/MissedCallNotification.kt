@@ -42,7 +42,9 @@ class MissedCallNotification(private val number: String, private val contactName
     }
 
     override fun applyUniqueNotificationProperties(builder: NotificationCompat.Builder): NotificationCompat.Builder {
-        val intent = Intent(builder.mContext, MainActivity::class.java)
+        val intent = Intent(builder.mContext, MainActivity::class.java).apply {
+            putExtra(MainActivity.Extra.NAVIGATE_TO.name, R.id.navigation_call_records)
+        }
         val pendingIntent = PendingIntent.getActivity(builder.mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         val bundle = Bundle()
         val uri = SipUri.sipAddressUri(

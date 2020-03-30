@@ -4,7 +4,7 @@ import android.content.Context
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.middleware.MiddlewareHelper
+import com.voipgrid.vialer.middleware.Middleware
 import kotlinx.coroutines.*
 
 /**
@@ -12,7 +12,7 @@ import kotlinx.coroutines.*
  * in the api.
  *
  */
-class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context: Context, private val secureCalling: SecureCalling) {
+class UserSynchronizer(private val voipgridApi: VoipgridApi, private val secureCalling: SecureCalling, private val middleware: Middleware) {
 
     private val logger = Logger(this)
 
@@ -36,7 +36,7 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val context
 
         if (User.hasVoipAccount) {
             secureCalling.updateApiBasedOnCurrentPreferenceSetting()
-            MiddlewareHelper.registerAtMiddleware(context)
+            middleware.register()
         }
     }
 

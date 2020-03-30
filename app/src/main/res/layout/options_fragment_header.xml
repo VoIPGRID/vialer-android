@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_gradient"
+        android:orientation="vertical"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp">
+
+        <ImageView
+            android:id="@+id/profile_image"
+            android:layout_width="wrap_content"
+            android:layout_height="180dp"
+            android:alpha="0.2"
+            android:contentDescription="@null"
+            android:scaleType="fitStart"
+            android:src="@drawable/vialer_icon_half"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/text_view_good_day"
+            style="@style/Drawer.Header.TextView.GoodDay"
+            android:layout_width="match_parent"
+            android:text="@string/good_day"
+            android:paddingStart="@dimen/activity_horizontal_margin_options_header"
+            android:paddingEnd="@dimen/activity_horizontal_margin_options_header"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/text_view_name"
+            style="@style/Drawer.Header.TextView.Name"
+            android:layout_width="match_parent"
+            tools:text="Antoine Beauvillain"
+            android:paddingStart="@dimen/activity_horizontal_margin_options_header"
+            android:paddingEnd="@dimen/activity_horizontal_margin_options_header"
+            app:layout_constraintTop_toBottomOf="@id/text_view_good_day"/>
+
+        <TextView
+            android:id="@+id/text_view_number"
+            style="@style/Drawer.Header.TextView.Number"
+            android:layout_width="match_parent"
+            android:text="@string/navigation_name_placeholder_text"
+            tools:text="+31 4080 80032"
+            android:paddingStart="@dimen/activity_horizontal_margin_options_header"
+            android:paddingEnd="@dimen/activity_horizontal_margin_options_header"
+            app:layout_constraintBottom_toTopOf="@id/text_view_email"/>
+
+        <TextView
+            android:id="@+id/text_view_email"
+            style="@style/Drawer.Header.TextView.Email"
+            android:layout_width="match_parent"
+            tools:text="antoine.beauvillain@wearespindle.com"
+            android:paddingStart="@dimen/activity_horizontal_margin_options_header"
+            android:paddingEnd="@dimen/activity_horizontal_margin_options_header"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/activity_horizontal_margin">
+
+        <TextView
+            android:id="@+id/availability_label"
+            style="@style/AccountTextInputLayoutStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/account_availability_switch_title"
+            android:textColor="@color/floating_action_button_color"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/status_indicator"
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:src="@color/dialpad_fab_call_color"
+            app:layout_constraintTop_toTopOf="@id/availability_label"
+            app:layout_constraintBottom_toBottomOf="@id/availability_label"
+            app:layout_constraintStart_toEndOf="@id/availability_label"/>
+
+        <TextView
+            android:id="@+id/no_availability_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_network_connection"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/availability_label"/>
+
+        <Spinner
+            android:id="@+id/menu_availability_spinner"
+            style="@style/AccountTextInputLayoutStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="2dp"
+            app:layout_constraintTop_toBottomOf="@id/availability_label"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View style="@style/Divider" />
+
+</LinearLayout>

@@ -343,7 +343,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
                 onCallDisconnected();
                 if (mCallCompletedElsewhere) {
                     mSipService.getNotification().answeredElsewhere(mPhoneNumber);
-                } else if (!wasInCall && !mUserHangup && !mCallDeclined && isIncoming()) {
+                } else if (!wasInCall && !mUserHangup && !mCallDeclined && isIncoming() && !mCallIsTransferred) {
                     mSipService.getNotification().missed(mPhoneNumber, mCallerId);
                 }
                 delete();

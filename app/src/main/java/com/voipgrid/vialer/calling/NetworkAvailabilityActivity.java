@@ -32,7 +32,6 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
     @BindView(R.id.incoming_caller_title) TextView mIncomingCallerTitle;
     @BindView(R.id.incoming_caller_subtitle) TextView mIncomingCallerSubtitle;
     @BindView(R.id.duration_text_view) TextView mCallDurationView;
-    @BindView(R.id.profile_image) CircleImageView mContactImage;
     @BindView(R.id.button_hangup) ImageView mButtonHangup;
 
     private final static int CHECK_USER_IS_CONNECTED_TO_NETWORK = 500;
@@ -85,7 +84,6 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
         }
     }
 
-
     @Override
     public void sipServiceHasConnected(SipService sipService) {
         super.sipServiceHasConnected(sipService);
@@ -96,7 +94,7 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
         }
 
         SipCall sipCall = mSipServiceConnection.get().getCurrentCall();
-        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle,sipCall.getPhoneNumber(), sipCall.getCallerId(), mContactImage);
+        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle,sipCall.getPhoneNumber(), sipCall.getCallerId());
     }
 
     public static void start() {

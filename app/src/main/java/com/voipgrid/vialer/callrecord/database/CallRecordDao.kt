@@ -15,8 +15,11 @@ interface CallRecordDao {
     @Query("SELECT * FROM call_records WHERE was_personal = :personalCalls ORDER BY call_time DESC LIMIT 1")
     fun getMostRecentCallRecord(personalCalls: Boolean): CallRecordEntity?
 
-    @Query("SELECT * FROM call_records WHERE was_personal IN (:wasPersonal) AND was_missed IN (:wasMissed) ORDER BY call_time DESC")
-    fun callRecordsByDate(wasPersonal: BooleanArray, wasMissed : BooleanArray): DataSource.Factory<Int, CallRecordEntity>
+    @Query("SELECT * FROM call_records WHERE was_personal IN (:wasPersonal) ORDER BY call_time DESC")
+    fun callRecordsByDate(wasPersonal: BooleanArray): DataSource.Factory<Int, CallRecordEntity>
+
+    @Query("SELECT * FROM call_records WHERE was_personal IN (:wasPersonal) AND was_missed = 1 ORDER BY call_time DESC")
+    fun missedCallRecordsByDate(wasPersonal: BooleanArray): DataSource.Factory<Int, CallRecordEntity>
 
     @Query("SELECT * FROM call_records WHERE id = :id")
     fun findCallRecordById(id: Long)  : CallRecordEntity?

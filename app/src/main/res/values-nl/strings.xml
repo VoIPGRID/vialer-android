@@ -108,7 +108,7 @@
     <string name="voip_account_missing_text">Om gebruik te kunnen maken van bellen via VoIP, moet er een VoIP-account gekoppeld zijn aan je gebruiker.\n\nOp dit moment is er geen VoIP-account gekoppeld aan deze gebruiker.</string>
 
     <!-- Welcome fragment values -->
-    <string name="welcome_text">Welkom</string>
+    <string name="welcome_text">Welkom bij Vialer,\n\n%1$s!</string>
     <string name="placeholder_name">Naamloze gebruiker</string>
     <string name="start_calling_button">Aan de slag</string>
     <string name="onboarding_login_failed_title">Inloggen mislukt</string>
@@ -154,7 +154,6 @@
     <string name="connection_preference_dialog_title">Tip: schakel WiFi uit voor dit gesprek</string>
     <string name="connection_preference_dialog_message">Met mobiel internet is de verbinding stabieler en daarmee de geluidskwaliteit hoger. \n\nWiFi tijdelijk uitschakelen?</string>
     <string name="connection_preference_switch_toast">Controleren of het mobiele netwerk beschikbaar is</string>
-    <string name="settings_advanced_call_use_3g">Gebruik 3G+ om te bellen</string>
 
     <string name="url_app_info">https://vialerapp.com/nl/app-info/</string>
 
@@ -362,8 +361,6 @@
     <string name="number_copied">Nummer gekopieerd: %1$s</string>
     <string name="settings_advanced_call_encryption_description_off">Derde partijen kunnen mogelijk jouw gesprekken onderscheppen en meeluisteren.</string>
     <string name="settings_advanced_call_encryption_description_on">Jouw gesprekken zijn versleuteld en daarmee niet toegankelijk voor derden.</string>
-    <string name="settings_advanced_call_use_3g_desc_off">Gesprekken worden via het internet opgezet wanneer een sterke 3G verbinding (of beter) beschikbaar is.</string>
-    <string name="settings_advanced_call_use_3g_desc_on">Gesprekken worden via het internet opgezet wanneer een sterke 4G verbinding (of beter) beschikbaar is.</string>
     <string name="settings_call_using_voip_desc_off">Gesprekken worden opgezet door gebruik te maken van jouw mobiele netwerk</string>
     <string name="settings_call_using_voip_desc_on">Gebruik een internetverbinding om gesprekken op te zetten en aan te nemen.</string>
     <string name="settings_category_account">Account</string>
@@ -374,4 +371,23 @@
     <string name="ignore_battery_optimization_description_on">Geoptimaliseerd voor betrouwbaarheid</string>
     <string name="settings_use_phones_ringtone_desc_on">Gebruik jouw ringtoon</string>
     <string name="settings_no_internet">Het is niet mogelijk deze instelling aan te passen zonder internetverbinding.</string>
+    <string name="back">Terug</string>
+    <string name="username_password_wrong">Deze combinatie van gebruikersnaam en wachtwoord komt niet overeen. Probeer het opnieuw.\nBeide velden zijn hoofdlettergevoelig</string>
+    <string name="allow">Toestaan</string>
+    <string name="enter_token">Voer hier je tweestapsverificatietoken in.</string>
+    <string name="invalid_token">Ongeldig token</string>
+    <string name="try_again_tfa">Probeer opnieuw of gebruik je backupcode</string>
+    <string name="backup_code_button">Voer backupcode in</string>
+    <string name="contacts_menu_item_title">Contacten</string>
+    <string name="recent_plan_menu_item_title">Recent</string>
+    <string name="options_menu_item_title">Opties</string>
+    <string name="numbers">Nummers</string>
+    <string name="network">Network</string>
+    <string name="audio">Audio</string>
+    <string name="call_lost">Gesprek verloren - %1$s</string>
+    <string name="two_step_call_title">Two-step call initiëren met</string>
+    <string name="not_encrypted">Gesprekken zijn niet versleuteld</string>
+    <string name="good_day">Goedendag,</string>
+    <string name="contacts_title">Contacten</string>
+    <string name="search">Zoeken</string>
 </resources>

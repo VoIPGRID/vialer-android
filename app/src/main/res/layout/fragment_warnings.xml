@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.voipgrid.vialer.warnings.Warning
+        android:id="@+id/no_internet_connection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:text="@string/no_network_connection"
+        app:show_link="false"
+        app:warning_icon="@drawable/ic_signal_wifi_off"
+        android:visibility="gone"
+        app:priority="high"/>
+
+    <com.voipgrid.vialer.warnings.Warning
+        android:id="@+id/voip_disabled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:text="@string/dialer_warning_voip_disabled"
+        app:warning_icon="@drawable/ic_dialer_sip"
+        android:visibility="gone"
+        app:priority="low"/>
+
+    <com.voipgrid.vialer.warnings.Warning
+        android:id="@+id/not_encrypted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:text="@string/not_encrypted"
+        app:warning_icon="@drawable/ic_lock_open"
+        android:visibility="gone"
+        app:priority="low"/>
+</LinearLayout>

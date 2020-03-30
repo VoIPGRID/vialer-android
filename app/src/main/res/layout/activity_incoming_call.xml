@@ -1,137 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient">
+    tools:context="com.voipgrid.vialer.calling.IncomingCallActivity">
 
-    <TextView
-        android:id="@+id/call_state"
-        style="@style/CallTextViewStyle"
+    <LinearLayout
+        android:id="@+id/info_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:gravity="center"
-        android:text="@string/callnotification_incoming_call"
-        android:textSize="20sp"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="@drawable/background_gradient"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/incoming_caller_title"
-        style="@style/CallTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:gravity="center"
-        android:textSize="40sp"
-        app:layout_constraintTop_toBottomOf="@id/call_state" />
+        <TextView
+            android:id="@+id/call_state"
+            style="@style/CallTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="15dp"
+            android:gravity="center"
+            android:text="@string/callnotification_incoming_call"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.4" />
 
-    <TextView
-        android:id="@+id/incoming_caller_subtitle"
-        style="@style/CallTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@+id/incoming_caller_title" />
+        <TextView
+            android:id="@+id/incoming_caller_title"
+            style="@style/ShrinkingCallTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center"
+            android:textSize="32sp"
+            app:layout_constraintTop_toTopOf="@id/call_state"
+            tools:text="Ghostbusters" />
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/profile_image"
-        android:layout_width="176dp"
-        android:layout_height="176dp"
-        android:background="@drawable/contact_picture_circle"
-        android:padding="40dp"
-        android:src="@drawable/no_user"
-        app:civ_border_color="@android:color/white"
-        app:civ_border_width="2dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        <TextView
+            android:id="@+id/incoming_caller_subtitle"
+            style="@style/CallTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@+id/incoming_caller_title"
+            tools:text="+31 50 446 7828" />
+
+        <TextView
+            android:id="@+id/establishing_text"
+            style="@style/CallTextViewStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/animation"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:src="@drawable/incoming_call_animation"
+        app:layout_constraintBottom_toTopOf="@id/button_decline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/establishing_text"
-        style="@style/CallTextViewStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:gravity="center"
-        android:textSize="20sp"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_image" />
+        app:layout_constraintTop_toBottomOf="@id/info_holder" />
 
     <ImageButton
         android:id="@+id/button_decline"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:background="@drawable/call_decline_button"
         android:backgroundTint="@color/call_fab_hangup_color"
         android:contentDescription="@string/call_incoming_decline"
-        android:padding="15dp"
-        app:layout_constraintBottom_toTopOf="@+id/text_view_decline"
-        app:layout_constraintEnd_toEndOf="@+id/text_view_decline"
-        app:layout_constraintStart_toStartOf="@+id/text_view_decline"
+        android:layout_marginBottom="12sp"
+        app:layout_constraintBottom_toTopOf="@id/text_view_decline"
+        app:layout_constraintEnd_toStartOf="@id/button_pickup"
+        app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_call_end_white" />
 
     <TextView
         android:id="@+id/text_view_decline"
-        style="@style/CallTextViewStyle"
+        style="@style/CallTextViewStyleLower"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="44dp"
         android:gravity="center"
         android:text="@string/call_incoming_decline"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_accept"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintEnd_toStartOf="@id/button_pickup"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
         android:id="@+id/button_pickup"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/call_pickup_button"
         android:backgroundTint="@color/call_fab_pickup_color"
+        android:layout_marginBottom="12sp"
         android:contentDescription="@string/call_incoming_accept"
-        android:padding="15dp"
-        app:layout_constraintBottom_toTopOf="@+id/text_view_accept"
-        app:layout_constraintEnd_toEndOf="@+id/text_view_accept"
-        app:layout_constraintStart_toStartOf="@+id/text_view_accept"
+        app:layout_constraintBottom_toTopOf="@id/text_view_accept"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_decline"
         app:srcCompat="@drawable/ic_call_white" />
 
     <TextView
         android:id="@+id/text_view_accept"
-        style="@style/CallTextViewStyle"
+        style="@style/CallTextViewStyleLower"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="44dp"
         android:gravity="center"
         android:text="@string/call_incoming_accept"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/text_view_decline" />
-
-    <LinearLayout
-        android:id="@+id/screen_off"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/black"
-        android:orientation="horizontal"
-        android:visibility="gone" />
+        app:layout_constraintStart_toEndOf="@+id/button_decline" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/call_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:constraint_referenced_ids="text_view_accept,text_view_decline,button_pickup,button_decline" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

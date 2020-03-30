@@ -2,6 +2,8 @@ package com.voipgrid.vialer.twostepcall;
 
 import android.content.Context;
 import androidx.core.content.ContextCompat;
+
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
@@ -11,6 +13,13 @@ import com.voipgrid.vialer.R;
  * Class that contains a view with information about a two step call.
  */
 public class TwoStepCallView extends LinearLayout {
+    private int colorConnected;
+    private int colorFailed;
+    private Drawable backgroundConnected;
+    private Drawable backgroundFailed;
+    private Drawable iconConnected;
+    private Drawable iconFailed;
+
     private TwoStepCallConnectionView mConnectionCallA, mConnectionCallB;
     private TwoStepCallStepView mStepPlatform, mStepCallA, mStepCallB;
 
@@ -25,9 +34,15 @@ public class TwoStepCallView extends LinearLayout {
     }
 
     private void init(Context context) {
+        colorConnected = ContextCompat.getColor(getContext(), R.color.dialpad_fab_call_color);
+        colorFailed = ContextCompat.getColor(getContext(), R.color.error_foreground_color);
+        backgroundConnected = ContextCompat.getDrawable(getContext(), R.drawable.twostepcall_connected_rounded_edges);
+        backgroundFailed = ContextCompat.getDrawable(getContext(), R.drawable.twostepcall_failed_rounded_edges);
+        iconConnected = ContextCompat.getDrawable(getContext(), R.drawable.ic_twostepcall_check);
+        iconFailed = ContextCompat.getDrawable(getContext(), R.drawable.ic_twostepcall_failed);
+
         mStepPlatform = addStep(
                 context,
-                ContextCompat.getColor(context, R.color.two_step_call_step_platform),
                 R.drawable.ic_twostepcall_platform,
                 getResources().getString(R.string.two_step_call_description_platform));
 
@@ -35,25 +50,22 @@ public class TwoStepCallView extends LinearLayout {
 
         mStepCallA = addStep(
                 context,
-                ContextCompat.getColor(context, R.color.two_step_call_step_a),
-                R.drawable.ic_twostepcall_calling,
+                R.drawable.ic_call,
                 getResources().getString(R.string.two_step_call_description_step_a));
 
         mConnectionCallB = addConnection(context);
 
         mStepCallB = addStep(
                 context,
-                ContextCompat.getColor(context, R.color.two_step_call_step_b),
-                R.drawable.ic_twostepcall_calling,
+                R.drawable.ic_call,
                 getResources().getString(R.string.two_step_call_description_step_b));
 
         setOrientation(VERTICAL);
         setState(TwoStepCallUtils.STATE_INITIAL);
     }
 
-    private TwoStepCallStepView addStep(Context context, int color, int icon, String description) {
+    private TwoStepCallStepView addStep(Context context, int icon, String description) {
         TwoStepCallStepView step = new TwoStepCallStepView(context);
-        step.setColor(color);
         step.setIcon(icon);
         step.setDescription(description);
         addView(step);
@@ -154,6 +166,8 @@ public class TwoStepCallView extends LinearLayout {
         mConnectionCallA.setEnabled(true);
         mConnectionCallA.startProgress();
         mStepCallA.setEnabled(true);
+        mStepPlatform.setBackgroundColor(colorConnected);
+        mStepPlatform.setIndicator(backgroundConnected, iconConnected);
     }
 
     /**
@@ -165,6 +179,8 @@ public class TwoStepCallView extends LinearLayout {
         mConnectionCallB.setEnabled(true);
         mConnectionCallB.startProgress();
         mStepCallB.setEnabled(true);
+        mStepCallA.setBackgroundColor(colorConnected);
+        mStepCallA.setIndicator(backgroundConnected, iconConnected);
     }
 
     /**
@@ -172,8 +188,9 @@ public class TwoStepCallView extends LinearLayout {
      */
     private void failedA() {
         mConnectionCallA.stopProgress();
-        mConnectionCallA.setState(TwoStepCallProgressView.STATE_FAILED);
-        mConnectionCallA.setMessage(getResources().getString(R.string.two_step_call_message_step_a_failed));
+        mStepCallA.setMessage(getResources().getString(R.string.two_step_call_message_step_a_failed), colorFailed);
+        mStepCallA.setBackgroundColor(colorFailed);
+        mStepCallA.setIndicator(backgroundFailed, iconFailed);
     }
 
     /**
@@ -181,8 +198,9 @@ public class TwoStepCallView extends LinearLayout {
      */
     private void failedB() {
         mConnectionCallB.stopProgress();
-        mConnectionCallB.setState(TwoStepCallProgressView.STATE_FAILED);
-        mConnectionCallB.setMessage(getResources().getString(R.string.two_step_call_message_step_b_failed));
+        mStepCallB.setMessage(getResources().getString(R.string.two_step_call_message_step_b_failed), colorFailed);
+        mStepCallB.setBackgroundColor(colorFailed);
+        mStepCallB.setIndicator(backgroundFailed, iconFailed);
     }
 
     /**
@@ -190,7 +208,8 @@ public class TwoStepCallView extends LinearLayout {
      */
     private void connected() {
         mConnectionCallB.stopProgress();
-        mConnectionCallB.setState(TwoStepCallProgressView.STATE_SUCCESS);
+        mStepCallB.setBackgroundColor(colorConnected);
+        mStepCallB.setIndicator(backgroundConnected, iconConnected);
     }
 
     /**
@@ -215,11 +234,15 @@ public class TwoStepCallView extends LinearLayout {
     private void cancelled() {
         mConnectionCallA.setEnabled(true);
         mConnectionCallA.stopProgress();
-        mConnectionCallA.setState(TwoStepCallProgressView.STATE_FAILED);
+        mStepCallA.setEnabled(true);
+        mStepCallA.setBackgroundColor(colorFailed);
+        mStepCallA.setIndicator(backgroundFailed, iconFailed);
 
         mConnectionCallB.setEnabled(true);
         mConnectionCallB.stopProgress();
-        mConnectionCallB.setState(TwoStepCallProgressView.STATE_FAILED);
+        mStepCallB.setEnabled(true);
+        mStepCallB.setBackgroundColor(colorFailed);
+        mStepCallB.setIndicator(backgroundFailed, iconFailed);
     }
 
     /**

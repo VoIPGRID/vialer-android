@@ -19,9 +19,11 @@ class SettingsActivity : LoginRequiredActivity(), PreferenceFragmentCompat.OnPre
         setContentView(R.layout.activity_settings)
 
         setSupportActionBar(findViewById(R.id.action_bar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setHomeButtonEnabled(true)
-        supportActionBar?.title = getString(R.string.title_activity_account)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setHomeButtonEnabled(true)
+            title = getString(R.string.title_activity_account)
+        }
 
         supportFragmentManager
                 .beginTransaction()
@@ -36,7 +38,10 @@ class SettingsActivity : LoginRequiredActivity(), PreferenceFragmentCompat.OnPre
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val hadBackStack = supportFragmentManager.popBackStackImmediate()
         supportActionBar?.title = getString(R.string.title_activity_account)
-        return hadBackStack
+
+        if (!hadBackStack) onBackPressed()
+
+        return true
     }
 
     override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {

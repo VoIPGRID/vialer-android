@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.provider.ContactsContract
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -42,6 +43,9 @@ class CallRecordViewHolder(private val view: View) : RecyclerView.ViewHolder(vie
     init {
         VialerApplication.get().component().inject(this)
         view.call_button.setOnClickListener(this)
+        view.setOnClickListener {
+            startCall()
+        }
     }
 
     fun setActivity(activity: Activity) {
