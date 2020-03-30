@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="dialpad_button_digit_text_size">12dp</dimen>
-    <dimen name="dialpad_button_chars_text_size">5sp</dimen>
-    <dimen name="dialpad_button_star_text_size">12dp</dimen>
-</resources>

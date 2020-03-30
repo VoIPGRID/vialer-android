@@ -1,32 +1,32 @@
 package com.voipgrid.vialer.dialer
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
-
+import androidx.constraintlayout.widget.ConstraintLayout
+import butterknife.ButterKnife
+import butterknife.OnClick
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.calling.Dialer
 import com.voipgrid.vialer.t9.T9Fragment
-
-import javax.inject.Inject
-
-import butterknife.ButterKnife
-import butterknife.OnClick
-import com.voipgrid.vialer.util.*
+import com.voipgrid.vialer.util.ConnectivityHelper
+import com.voipgrid.vialer.util.DialHelper
+import com.voipgrid.vialer.util.LoginRequiredActivity
+import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.activity_dialer.*
 import kotlinx.android.synthetic.main.view_dialer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+
 
 class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.Listener {
 
@@ -177,6 +177,10 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
         dialer.visibility = View.VISIBLE
         findViewById<View>(R.id.button_dialpad).visibility = View.INVISIBLE
         findViewById<View>(R.id.button_call).visibility = View.VISIBLE
+        t9_search.view?.layoutParams = ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.MATCH_PARENT,
+                resources.getDimensionPixelSize(R.dimen.t9_height)
+                )
     }
 
     private fun refreshUi() {
@@ -222,6 +226,8 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
     override fun onExpandRequested() {
         if (dialer.visibility != View.VISIBLE) return
         dialer.visibility = View.GONE
+        t9_search.view?.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT)
+
         findViewById<View>(R.id.button_dialpad).visibility = View.VISIBLE
         findViewById<View>(R.id.button_call).visibility = View.GONE
     }

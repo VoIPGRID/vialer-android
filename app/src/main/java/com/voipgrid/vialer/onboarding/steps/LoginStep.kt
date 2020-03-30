@@ -51,11 +51,9 @@ class LoginStep : Step() {
 
         KeyboardVisibilityEvent.setEventListener(activity) { keyboardIsVisible ->
             if (keyboardIsVisible) {
-                title_label.visibility = View.GONE
-                subtitle_label.visibility = View.GONE
+                header.visibility = View.GONE
             } else {
-                title_label.visibility = View.VISIBLE
-                subtitle_label.visibility = View.VISIBLE
+                header.visibility = View.VISIBLE
             }
         }
 
@@ -102,6 +100,7 @@ class LoginStep : Step() {
      *
      */
     private fun attemptLogin(code: String? = null) = GlobalScope.launch(Dispatchers.Main) {
+        error.visibility = View.GONE
         onboarding?.isLoading = true
         logger.i("Attempting to log the user into VoIPGRID, with the following 2FA code: $code")
         val result = login.attempt(emailTextDialog.text.toString(), passwordTextDialog.text.toString(), code)
@@ -135,6 +134,10 @@ class LoginStep : Step() {
                 PasswordResetWebActivity.launch(it, emailTextDialog.text.toString(), passwordTextDialog.text.toString())
             }
         }
+    }
+
+    override fun error(title: Int, description: Int) {
+        error.visibility = View.VISIBLE
     }
 
     /**

@@ -47,4 +47,9 @@ public class CachedContacts {
 
         return contactImagesCache.get(number);
     }
+
+    public void clear() {
+        contactsCache.clear();
+        contactImagesCache.clear();
+    }
 }

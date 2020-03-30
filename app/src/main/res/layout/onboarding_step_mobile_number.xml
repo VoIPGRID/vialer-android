@@ -1,115 +1,156 @@
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:background="@drawable/background_gradient"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="@dimen/activity_horizontal_margin">
+    android:background="@drawable/cloud_background"
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/title_label"
-        style="@style/HeaderTitleTextViewStyle"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/configure_header_label_text"
-        app:layout_constraintBottom_toTopOf="@+id/configuration_container"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <LinearLayout
-        android:id="@+id/configuration_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/button_configure"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_label">
+        android:paddingStart="@dimen/onboarding_activity_horizontal_margin"
+        android:paddingTop="@dimen/onboarding_header_padding"
+        android:paddingEnd="@dimen/onboarding_activity_horizontal_margin">
 
-        <LinearLayout
-            android:id="@+id/mobile_number_container"
+        <TextView
+            android:id="@+id/title_label"
+            style="@style/HeaderTitleTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:text="@string/configure_header_label_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/subtitle_label"
-                style="@style/DescriptionTextViewStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10sp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/configure_mobile_number_text" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/mobile_number_field"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="0dp"
-                app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/mobileNumberTextDialog"
-                    style="@style/OnboardingEditTextStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:drawableEnd="@drawable/ic_info_outline_white_24dp"
-                    android:hint="@string/phonenumber_edittext_hint"
-                    android:inputType="phone" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/outgoing_number_container"
+        <TextView
+            android:id="@+id/subtitle_label"
+            style="@style/DescriptionTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:layout_marginTop="40sp">
+            android:layout_marginTop="@dimen/onboarding_top_margin"
+            android:text="@string/configure_mobile_number_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_label" />
 
-            <TextView
-                android:id="@+id/outgoing_number_description"
-                style="@style/DescriptionTextViewStyle"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/mobile_number_field_prefix"
+            android:layout_width="75dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/activity_vertical_item_padding"
+            android:padding="0dp"
+            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
+            app:layout_constraintEnd_toStartOf="@id/mobile_number_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/subtitle_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/mobile_number_text_dialog_prefix"
+                style="@style/EditTextWithBackgroundStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10sp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/outgoing_number_description" />
+                android:inputType="phone" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/outgoingNumberTv"
-                style="@style/DescriptionTextViewStyle"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/mobile_number_field"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_vertical_item_padding"
+            android:padding="0dp"
+            app:hintTextAppearance="@style/OnboardingTextInputLayoutStyle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/mobile_number_field_prefix"
+            app:layout_constraintTop_toBottomOf="@+id/subtitle_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/mobileNumberTextDialog"
+                style="@style/EditTextWithBackgroundStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="10sp"
-                android:fontFamily="sans-serif-light"
-                android:gravity="center"
-                android:text="012345678"
-                android:textAlignment="center"
-                android:textSize="30sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
+                android:inputType="phone" />
+        </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:id="@+id/prefix"
+            style="@style/HintTextStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_vertical_item_padding"
+            android:layout_marginTop="5sp"
+            android:minWidth="75dp"
+            android:text="@string/phonenumber_prefix_edittext_hint"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mobile_number_field_prefix" />
 
-    <Button
-        android:id="@+id/button_configure"
-        android:layout_width="140sp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:enabled="false"
-        android:text="@string/configure_button_title"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/configuration_container" />
+        <TextView
+            android:id="@+id/phone_number"
+            style="@style/HintTextStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="5sp"
+            android:text="@string/phonenumber_edittext_hint"
+            app:layout_constraintStart_toEndOf="@id/prefix"
+            app:layout_constraintTop_toBottomOf="@+id/mobile_number_field_prefix" />
 
+        <TextView
+            android:id="@+id/outgoing_number_description"
+            style="@style/DescriptionTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40sp"
+            android:text="@string/outgoing_number_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mobile_number_field_prefix" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/outgoingNumberTv"
+            style="@style/DescriptionTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/activity_vertical_item_padding"
+            android:fontFamily="sans-serif-light"
+            android:paddingBottom="@dimen/onboarding_activity_margin_bottom"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/outgoing_number_description"
+            tools:text="012345678" />
+
+        <Button
+            android:id="@+id/button_back"
+            style="@style/ButtonAnchorThickTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/onboarding_activity_margin_bottom"
+            android:text="@string/back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/button_configure"
+            app:layout_constraintTop_toBottomOf="@+id/outgoingNumberTv"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <Button
+            android:id="@+id/button_configure"
+            style="@style/OnboardingButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/onboarding_activity_margin_bottom"
+            android:enabled="false"
+            android:text="@string/configure_button_title"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/button_back"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/outgoingNumberTv"
+            app:layout_constraintVertical_bias="1.0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

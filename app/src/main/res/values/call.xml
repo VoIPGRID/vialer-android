@@ -19,10 +19,23 @@
         <item name="android:ellipsize">end</item>
     </style>
 
+    <style name="ShrinkingCallTextViewStyle" parent="CallTextViewStyle">
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:autoSizeTextType">uniform</item>
+        <item name="android:autoSizeMinTextSize">18sp</item>
+    </style>
+
+    <style name="CallTextViewStyleLower" parent="CallTextViewStyle">
+        <item name="android:textColor">#2B2B2B</item>
+    </style>
+
     <!-- TextView Style -->
     <style name="CallNameTextViewStyle" parent="@style/CallTextViewStyle">
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textSize">@dimen/call_name_text_size</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <!-- TextView Style -->
@@ -43,6 +56,8 @@
     <!-- TextView Style -->
     <style name="CallStateTextViewStyle" parent="@style/CallTextViewStyle">
         <item name="android:textSize">@dimen/call_state_text_size</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="CallTransferStatusStyle" parent="@style/CallTextViewStyle">

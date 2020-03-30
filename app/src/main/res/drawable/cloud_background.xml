@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:angle="90"
+                android:endColor="@color/background_gradient_end"
+                android:startColor="@color/background_gradient_start"
+                android:type="linear"
+                android:useLevel="false" />
+        </shape>
+    </item>
+
+    <item
+        android:width="220dp"
+        android:height="88dp"
+        android:drawable="@drawable/ic_background_cloud"
+        android:gravity="start"
+        android:start="-10dp"
+        android:top="10dp" />
+
+    <item
+        android:width="220dp"
+        android:height="88dp"
+        android:drawable="@drawable/ic_background_cloud"
+        android:end="-85dp"
+        android:gravity="end"
+        android:top="150dp" />
+
+    <item
+        android:width="220dp"
+        android:height="88dp"
+        android:drawable="@drawable/ic_background_cloud"
+        android:gravity="start"
+        android:start="-100dp"
+        android:top="300dp" />
+
+    <item
+        android:width="220dp"
+        android:height="88dp"
+        android:drawable="@drawable/ic_background_cloud"
+        android:end="-50dp"
+        android:gravity="end"
+        android:top="450dp" />
+
+    <item
+        android:width="220dp"
+        android:height="88dp"
+        android:drawable="@drawable/ic_background_cloud"
+        android:gravity="start"
+        android:start="-10dp"
+        android:top="600dp" />
+</layer-list>

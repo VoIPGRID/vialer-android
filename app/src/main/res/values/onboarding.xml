@@ -5,15 +5,15 @@
     -->
     <integer name="logo_dismiss_delay_ms">1000</integer>
 
-    <dimen name="onboarding_text_input_layout_text_size_">16dp</dimen>
+    <dimen name="onboarding_text_input_layout_text_size">16sp</dimen>
 
     <!-- Onboarding colors -->
     <color name="onboarding_color_accent">@color/color_accent</color>
     <color name="onboarding_color_highlight">@color/color_highlight</color>
     <color name="onboarding_button_normal_color">@color/onboarding_color_accent</color>
-    <color name="onboarding_button_text_color">@color/onboarding_color_highlight</color>
+    <color name="onboarding_button_normal_text_color">@color/onboarding_button_text_color</color>
 
-    <color name="onboarding_edittext_hint_color">@color/onboarding_color_accent</color>
+    <color name="onboarding_edittext_hint_color">@color/onboarding_text_hint_color</color>
     <color name="onboarding_edittext_text_color">@color/onboarding_color_accent</color>
     <color name="onboarding_text_input_layout_text_color">@color/color_highlight</color>
     <color name="onboarding_button_anchor_color">@color/onboarding_color_accent</color>
@@ -24,16 +24,19 @@
         <item name="colorControlNormal">@color/onboarding_color_accent</item>
         <item name="colorControlActivated">@color/onboarding_color_highlight</item>
         <item name="colorControlHighlight">@color/onboarding_color_accent</item>
-
         <item name="colorButtonNormal">@color/onboarding_button_normal_color</item>
-
         <item name="android:buttonStyle">@style/OnboardingButtonStyle</item>
         <item name="android:editTextStyle">@style/OnboardingEditTextStyle</item>
+        <item name="android:textColorHint">@color/onboarding_edittext_hint_color</item>
     </style>
 
     <!-- Button Style -->
     <style name="OnboardingButtonStyle" parent="android:style/Widget.Material.Button">
         <item name="android:textAppearance">@style/OnboardingButtonTextAppearance</item>
+        <item name="android:paddingTop">@dimen/onboarding_button_padding</item>
+        <item name="android:paddingBottom">@dimen/onboarding_button_padding</item>
+        <item name="android:background">@drawable/rounded_edges</item>
+        <item name="android:textSize">@dimen/onboarding_text_size_button</item>
     </style>
 
     <!-- Button Text Appearance -->
@@ -43,28 +46,55 @@
 
     <!-- EditText Style -->
     <style name="OnboardingEditTextStyle" parent="android:style/Widget.Material.EditText">
+        <item name="android:paddingStart">@dimen/activity_vertical_item_padding</item>
+        <item name="android:paddingEnd">@dimen/activity_vertical_item_padding</item>
         <item name="android:textColorHint">@color/onboarding_edittext_hint_color</item>
         <item name="android:textColor">@color/onboarding_edittext_text_color</item>
         <item name="android:fontFamily">sans-serif</item>
+        <item name="android:drawablePadding">10dp</item>
+        <item name="android:paddingBottom">15dp</item>
+        <item name="android:textSize">@dimen/onboarding_text_size_edit_text</item>
     </style>
-    
+
     <style name="OnboardingTextInputLayoutStyle" parent="android:style/TextAppearance">
-        <item name="android:textSize">@dimen/onboarding_text_input_layout_text_size_</item>
+        <item name="android:textSize">@dimen/onboarding_text_input_layout_text_size</item>
         <item name="android:textColor">@color/onboarding_text_input_layout_text_color</item>
         <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="EditTextWithBackgroundStyle" parent="android:style/Widget.Material.EditText">
+        <item name="android:paddingStart">@dimen/activity_vertical_item_padding</item>
+        <item name="android:paddingEnd">@dimen/activity_vertical_item_padding</item>
+        <item name="android:background">@drawable/rounded_edges</item>
+        <item name="android:textColorHint">@color/onboarding_edittext_hint_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:padding">15dp</item>
+        <item name="android:textSize">@dimen/onboarding_text_size_edit_text</item>
     </style>
 
     <!-- Style for the Forgot password button -->
     <style name="ButtonAnchorStyle" parent="@android:style/Widget.Holo.Button.Borderless">
         <item name="android:color">@color/onboarding_button_anchor_color</item>
-        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">@dimen/onboarding_text_size_button</item>
     </style>
+
+    <style name="ButtonAnchorThickTextStyle" parent="@android:style/Widget.Holo.Button.Borderless">
+        <item name="android:color">@color/onboarding_button_anchor_color</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textSize">@dimen/onboarding_text_size_button</item>
+        <item name="android:paddingTop">@dimen/onboarding_button_padding</item>
+        <item name="android:paddingBottom">@dimen/onboarding_button_padding</item>
+    </style>
+
     <!-- Style for Header TextViews -->
     <style name="HeaderTitleTextViewStyle" parent="@android:style/Widget.TextView">
         <item name="android:textColor">@color/onboarding_header_textview_color</item>
         <item name="android:textSize" tools:ignore="SpUsage">46dp</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center_horizontal</item>
     </style>
     <!-- Style for Header TextViews subtitle -->
     <style name="HeaderSubTitleTextViewStyle" parent="@style/HeaderTitleTextViewStyle">
@@ -75,6 +105,7 @@
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textStyle"/>
         <item name="android:lineSpacingExtra">4sp</item>
+        <item name="android:gravity">start</item>
     </style>
 
     <!-- Style for Forgot password description TextView -->
@@ -83,5 +114,11 @@
         <item name="android:textSize">20sp</item>
     </style>
 
-    <color name="background_onboarding">@color/color_primary</color>
+    <!-- Style for Forgot password description TextView -->
+    <style name="HintTextStyle" parent="@android:style/Widget.TextView">
+        <item name="android:textColor">@color/onboarding_header_textview_color</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
 </resources>

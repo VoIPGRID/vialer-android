@@ -4,20 +4,16 @@ import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
 import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
 
-import android.app.Activity;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.PowerManager;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.voipgrid.vialer.MainActivity;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.audio.AudioRouter;
@@ -25,7 +21,6 @@ import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.util.ProximitySensorHelper;
 
 import javax.inject.Inject;
 
@@ -41,12 +36,12 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     protected String mCurrentCallId;
     protected CallDurationTracker mCallDurationTracker;
     protected CallStatusReceiver mCallStatusReceiver;
+    protected PowerManager powerManager;
+    protected PowerManager.WakeLock wakeLock;
 
     @Nullable @BindView(R.id.duration_text_view) TextView mCallDurationView;
 
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
-
-    private ProximitySensorHelper mProximityHelper;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,7 +50,12 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         mSipServiceConnection = new SipServiceConnection(this);
         mCallDurationTracker = new CallDurationTracker(mSipServiceConnection);
         mCallStatusReceiver = new CallStatusReceiver(this);
-        mProximityHelper = new ProximitySensorHelper(this);
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+        if (powerManager.isWakeLockLevelSupported(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)) {
+            wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "vialer:in-call");
+            wakeLock.acquire();
+        }
 
         requestMicrophonePermissionIfNecessary();
         configureActivityFlags();
@@ -73,20 +73,21 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         super.onResume();
         mSipServiceConnection.connect();
         mCallDurationTracker.start(this);
-        mProximityHelper.startSensor(findViewById(R.id.screen_off));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mSipServiceConnection.disconnect();
-        mProximityHelper.stopSensor();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver);
+        if (wakeLock != null) {
+            wakeLock.release();
+        }
     }
 
     @Override

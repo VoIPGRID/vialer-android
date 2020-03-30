@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_contacts">
+
+    <fragment
+        android:id="@+id/navigation_contacts"
+        android:name="com.voipgrid.vialer.contacts.ContactsFragment"
+        android:label="@string/contacts_menu_item_title"
+        tools:layout="@layout/fragment_contacts" />
+
+    <fragment
+        android:id="@+id/navigation_call_records"
+        android:name="com.voipgrid.vialer.callrecord.CallRecordFragmentHolder"
+        android:label="@string/recent_plan_menu_item_title"
+        tools:layout="@layout/fragment_call_record_holder" />
+
+    <fragment
+        android:id="@+id/navigation_options"
+        android:name="com.voipgrid.vialer.options.OptionsFragment"
+        android:label="@string/options_menu_item_title"
+        tools:layout="@layout/fragment_options" />
+</navigation>

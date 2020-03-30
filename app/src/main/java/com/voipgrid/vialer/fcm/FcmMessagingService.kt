@@ -11,7 +11,6 @@ import com.voipgrid.vialer.api.Middleware
 import com.voipgrid.vialer.call.NativeCallManager
 import com.voipgrid.vialer.logging.LogHelper
 import com.voipgrid.vialer.logging.Logger
-import com.voipgrid.vialer.middleware.MiddlewareHelper
 import com.voipgrid.vialer.notifications.VoipDisabledNotification
 import com.voipgrid.vialer.sip.SipConstants
 import com.voipgrid.vialer.sip.SipService
@@ -34,7 +33,8 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
     private val connectivityHelper: ConnectivityHelper by inject()
     private val powerManager: PowerManager by inject()
     private val nativeCallManager: NativeCallManager by inject()
-    private val middleware: Middleware by inject()
+    private val middlewareApi: Middleware by inject()
+    private val middleware: com.voipgrid.vialer.middleware.Middleware by inject()
 
     /**
      * The number of times the middleware will attempt to send a push notification
@@ -202,7 +202,7 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
      * @param isAvailable TRUE if the phone is ready to accept the incoming call, FALSE if it is not available.
      */
     private fun replyServer(remoteMessageData: RemoteMessageData, isAvailable: Boolean) = GlobalScope.launch {
-        val response =  middleware.reply(remoteMessageData.requestToken, isAvailable, remoteMessageData.messageStartTime).execute()
+        val response =  middlewareApi.reply(remoteMessageData.requestToken, isAvailable, remoteMessageData.messageStartTime).execute()
         if (response.isSuccessful) {
             logger.i("response was successful")
         }
@@ -257,11 +257,7 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
 
     override fun onNewToken(s: String) {
         super.onNewToken(s)
-        logger.d("onTokenRefresh")
-        MiddlewareHelper.setRegistrationStatus(
-                com.voipgrid.vialer.persistence.Middleware.RegistrationStatus.UNREGISTERED)
-        MiddlewareHelper.registerAtMiddleware(this)
+        middleware.register()
     }
-
 }
 

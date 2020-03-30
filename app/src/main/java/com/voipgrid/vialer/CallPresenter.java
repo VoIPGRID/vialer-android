@@ -13,6 +13,8 @@ import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.sip.CallDisconnectedReason;
 import com.voipgrid.vialer.sip.SipCall;
 
+import androidx.core.content.ContextCompat;
+
 /**
  * Responsible for handling all the UI elements of the CallActivity, the update
  * method of this presenter can be called at any point and it will present the call to
@@ -105,13 +107,13 @@ public class CallPresenter {
      */
     private void updateCallLabels() {
         if (mActivity.getForceDisplayedCallDetails() != null) {
-            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.mTitle, mActivity.mSubtitle, mActivity.getForceDisplayedCallDetails().getNumber(), mActivity.getForceDisplayedCallDetails().getCallerId(), mActivity.mContactImage);
+            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.mTitle, mActivity.mSubtitle, mActivity.getForceDisplayedCallDetails().getNumber(), mActivity.getForceDisplayedCallDetails().getCallerId());
             return;
         }
 
         if (mActivity.getSipServiceConnection().isAvailableAndHasActiveCall()) {
             SipCall call = mActivity.hasSecondCall() ? mActivity.getSipServiceConnection().get().getCurrentCall() : mActivity.getSipServiceConnection().get().getFirstCall();
-            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.mTitle, mActivity.mSubtitle, call.getPhoneNumber(), call.getCallerId(), mActivity.mContactImage);
+            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.mTitle, mActivity.mSubtitle, call.getPhoneNumber(), call.getCallerId());
         }
     }
 
