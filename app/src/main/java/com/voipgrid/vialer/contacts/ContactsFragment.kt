@@ -28,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 class ContactsFragment : Fragment(), KoinComponent, CoroutineScope {
 
     private lateinit var job: Job
-    private lateinit var searchView: SearchView
+    private var searchView: SearchView? = null
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -70,13 +70,13 @@ class ContactsFragment : Fragment(), KoinComponent, CoroutineScope {
 
     override fun onPause() {
         super.onPause()
-        searchView.clearFocus()
+        searchView?.clearFocus()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.contacts_options_menu, menu)
         searchView = menu.findItem(R.id.search).actionView as SearchView
-        searchView.apply {
+        searchView?.apply {
             isIconifiedByDefault = true
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
