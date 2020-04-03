@@ -5,6 +5,7 @@ import com.voipgrid.vialer.api.models.ApiTokenResponse;
 import com.voipgrid.vialer.api.models.AutoLoginToken;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.MobileNumber;
+import com.voipgrid.vialer.api.models.PasswordChangeParams;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -77,5 +78,6 @@ public interface VoipgridApi {
     Call<Object> setSelectedUserDestination(@Path("id") String id,
                                     @Body SelectedUserDestinationParams params);
     @PUT("api/v2/password/")
+    Call<PasswordChangeParams> passwordChange (@Body PasswordChangeParams passwordChangeParams);
 
 }

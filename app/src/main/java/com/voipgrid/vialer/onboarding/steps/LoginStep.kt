@@ -2,16 +2,20 @@ package com.voipgrid.vialer.onboarding.steps
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import com.voipgrid.vialer.*
+import com.voipgrid.vialer.api.VoipgridApi
+import com.voipgrid.vialer.api.models.PasswordChangeParams
+import com.voipgrid.vialer.fcm.RemoteMessageData
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.VoipgridLogin
 import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult
@@ -24,7 +28,9 @@ import kotlinx.android.synthetic.main.onboarding_step_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import org.koin.android.ext.android.inject
 import javax.inject.Inject
 
 class LoginStep : Step() {
@@ -37,6 +43,7 @@ class LoginStep : Step() {
     private val logger = Logger(this).forceRemoteLogging(true)
     private var twoFactorHelper: TwoFactorFragmentHelper? = null
     private var twoFactorDialog: AlertDialog? = null
+    private var changePasswordDialog: AlertDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -120,9 +127,10 @@ class LoginStep : Step() {
             button_login.isEnabled = true
         }
         SUCCESS -> {
-            logger.i("Login to VoIPGRID was successful, progressing the user in onboarding")
-            twoFactorDialog?.dismiss()
-            onboarding?.progress(this)
+//            logger.i("Login to VoIPGRID was successful, progressing the user in onboarding")
+//            twoFactorDialog?.dismiss()
+//            onboarding?.progress(this)
+            showChangePasswordDialog()
         }
         TWO_FACTOR_REQUIRED -> {
             logger.i("User logged into VoIPGRID with the correct username/password but is now required to input a valid 2FA code")
@@ -131,11 +139,49 @@ class LoginStep : Step() {
         }
         MUST_CHANGE_PASSWORD -> {
             logger.i("User must change their password before we can login")
-            activity?.let {
-                PasswordResetWebActivity.launch(it, emailTextDialog.text.toString(), passwordTextDialog.text.toString())
-            }
+            showChangePasswordDialog()
         }
     }
+
+    /**
+     * Create and show a dialog for the user to change the password.
+     *
+     */
+    private fun showChangePasswordDialog() {
+        activity?.let {
+            val changePasswordDialog = AlertDialog.Builder(it)
+                    .setView(R.layout.activity_create_new_password)
+                    .show()
+
+            val passwordField = changePasswordDialog.findViewById(R.id.password_field_1) as EditText
+
+            (changePasswordDialog.findViewById(R.id.button_continue) as Button).setOnClickListener {
+                val passwordChangeParams = PasswordChangeParams(
+                        usersEmail = emailTextDialog.text.toString(),
+                        usersCurrentPassword = passwordTextDialog.text.toString(),
+                        usersNewPassword = passwordField.text.toString()
+                )
+                logger.e(passwordChangeParams.toString())
+                GlobalScope.launch(Dispatchers.Main) {
+                    if (!replyServer(passwordChangeParams)) {
+                        Toast.makeText(activity, activity?.getString(R.string.password_change_failure_toast), Toast.LENGTH_LONG).show();
+                    }
+                }
+
+
+            }
+
+            this.changePasswordDialog = changePasswordDialog
+        }
+    }
+
+    private suspend fun replyServer(passwordChangeParams: PasswordChangeParams) : Boolean = withContext(Dispatchers.IO) {
+        val response = voipgridApi.passwordChange(passwordChangeParams).execute()
+        return@withContext response.isSuccessful
+    }
+
+
+
 
     /**
      * Create and show a dialog for the user to enter a two-factor token.
