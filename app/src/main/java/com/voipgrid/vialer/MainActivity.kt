@@ -2,12 +2,12 @@ package com.voipgrid.vialer
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.core.app.ActivityOptionsCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.voipgrid.vialer.dialer.DialerActivity
+import com.voipgrid.vialer.permissions.ContactsPermission
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.LoginRequiredActivity
 import kotlinx.android.synthetic.main.activity_main.*
@@ -50,6 +50,8 @@ class MainActivity : LoginRequiredActivity() {
         // request the SipService to display the current call. If there is no current call, this will have no
         // affect.
         SipService.performActionOnSipService(this, SipService.Actions.DISPLAY_CALL_IF_AVAILABLE)
+
+        findViewById<BottomNavigationView>(R.id.nav_view).menu.findItem(R.id.navigation_contacts).isEnabled = ContactsPermission.hasPermission(this)
     }
 
     /**

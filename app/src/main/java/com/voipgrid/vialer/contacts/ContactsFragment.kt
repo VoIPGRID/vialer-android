@@ -8,6 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.tamir7.contacts.Contact
@@ -52,7 +53,12 @@ class ContactsFragment : Fragment(), KoinComponent, CoroutineScope {
             supportActionBar?.title = getString(R.string.contacts_title)
         }
 
-        model.getContacts().observe(this, Observer {
+        if (!ContactsPermission.hasPermission(activity)) {
+            findNavController().navigate(R.id.navigation_call_records)
+            return view
+        }
+
+        model.getContacts().observe(viewLifecycleOwner, Observer {
             adapter.submitList(it)
             adapter.notifyDataSetChanged()
         })
