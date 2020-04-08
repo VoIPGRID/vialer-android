@@ -21,22 +21,26 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val secureC
      *
      */
     suspend fun sync() {
-        syncVoipgridUser()
+        try {
+            syncVoipgridUser()
 
-        val voipgridUser = User.voipgridUser ?: return
+            val voipgridUser = User.voipgridUser ?: return
 
-        syncUserDestinations()
+            syncUserDestinations()
 
-        if (!voipgridUser.hasVoipAccount()) {
-            handleMissingVoipAccount()
-            return
-        }
+            if (!voipgridUser.hasVoipAccount()) {
+                handleMissingVoipAccount()
+                return
+            }
 
-        syncVoipAccount(voipgridUser)
+            syncVoipAccount(voipgridUser)
 
-        if (User.hasVoipAccount) {
-            secureCalling.updateApiBasedOnCurrentPreferenceSetting()
-            middleware.register()
+            if (User.hasVoipAccount) {
+                secureCalling.updateApiBasedOnCurrentPreferenceSetting()
+                middleware.register()
+            }
+        } catch (e: Exception) {
+            logger.w("Failed to sync user ${e.message}")
         }
     }
 
