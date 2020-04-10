@@ -353,6 +353,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      */
     public void startRingback() {
         mLogger.d("onCallStartRingback");
+        audioRouter.focus();
         mHandler.postDelayed(mRingbackRunnable, 2000);
     }
 
