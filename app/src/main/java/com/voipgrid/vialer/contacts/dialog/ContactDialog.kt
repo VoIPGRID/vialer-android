@@ -7,13 +7,13 @@ import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.tamir7.contacts.Contact
 import com.github.tamir7.contacts.Contacts
 import com.github.tamir7.contacts.PhoneNumber
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.callrecord.database.CallRecordDao
@@ -38,7 +38,7 @@ import org.koin.core.inject
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ContactDialog(private val contactId: Long) : DialogFragment(), KoinComponent {
+class ContactDialog(private val contactId: Long) : BottomSheetDialogFragment(), KoinComponent {
 
     private val db: CallRecordDao by inject()
 
@@ -107,12 +107,9 @@ class ContactDialog(private val contactId: Long) : DialogFragment(), KoinCompone
 
     override fun onStart() {
         super.onStart()
-        val dialog = dialog
-        if (dialog != null) {
-            val width = ViewGroup.LayoutParams.MATCH_PARENT
-            val height = ViewGroup.LayoutParams.WRAP_CONTENT
-            dialog.window!!.setLayout(width, height)
-        }
+        dialog.findViewById<View>(R.id.design_bottom_sheet)
+                ?.layoutParams
+                ?.height = ViewGroup.LayoutParams.MATCH_PARENT
     }
 
     class PhoneNumberAdapter(private val contact: Contact, private val dataset: List<PhoneNumber>) : RecyclerView.Adapter<PhoneNumberAdapter.ViewHolder>() {
