@@ -29,4 +29,7 @@ interface CallRecordDao {
 
     @Query("DELETE FROM call_records")
     suspend fun truncate()
+
+    @Query("SELECT * FROM call_records WHERE was_personal = 1 AND third_party_number IN (:numbers) ORDER BY call_time DESC LIMIT 3")
+    fun findRecentCallsFor(numbers: Array<String>): List<CallRecordEntity>
 }

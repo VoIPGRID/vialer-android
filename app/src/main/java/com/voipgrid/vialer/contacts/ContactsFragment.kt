@@ -1,10 +1,8 @@
 package com.voipgrid.vialer.contacts
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
 import android.widget.SearchView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -12,9 +10,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.tamir7.contacts.Contact
-import com.github.tamir7.contacts.PhoneNumber
 import com.voipgrid.vialer.ContactsViewModel
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.contacts.dialog.ContactDialog
 import com.voipgrid.vialer.permissions.ContactsPermission
 import com.voipgrid.vialer.util.DialHelper
 import kotlinx.android.synthetic.main.fragment_contacts.*
@@ -39,7 +37,11 @@ class ContactsFragment : Fragment(), KoinComponent, CoroutineScope {
 
     init {
         contactWasClickedCallback = {
-            callContact(it)
+            ContactDialog(it.id).show(activity?.supportFragmentManager!!, "contact")
+        }
+
+        contactNumberWasClickedCallback = { contact, number ->
+            callContact(contact, number)
         }
     }
 
@@ -122,23 +124,9 @@ class ContactsFragment : Fragment(), KoinComponent, CoroutineScope {
      * Called when a user clicks on a contact in the list.
      *
      */
-    private fun callContact(contact: Contact) {
-        if (contact.phoneNumbers.size <= 1) {
-            startCall(contact.phoneNumbers[0].number, contact.displayName)
-            return
-        }
-
-        val numbers = contact.phoneNumbers.fold(mutableListOf()) { list: MutableList<String>, phoneNumber: PhoneNumber ->
-            list.add("${phoneNumber.number} (${phoneNumber.type.toString().toLowerCase().capitalize()})")
-            list
-        }.toTypedArray()
-
-        activity?.let {
-            AlertDialog.Builder(it)
-                    .setTitle(contact.displayName)
-                    .setItems(numbers) { _: DialogInterface, _: Int -> startCall(contact.phoneNumbers[0].number, contact.displayName) }
-                    .show()
-        }
+    private fun callContact(contact: Contact, number: String) {
+        startCall(number, contact.displayName)
+        return
     }
 
     /**
@@ -153,5 +141,6 @@ class ContactsFragment : Fragment(), KoinComponent, CoroutineScope {
 
     companion object {
         var contactWasClickedCallback: ((contact: Contact) -> Unit)? = null
+        var contactNumberWasClickedCallback: ((contact: Contact, number: String) -> Unit)? = null
     }
 }

@@ -17,6 +17,8 @@
     <string name="login_error">Inloggen niet gelukt: %s</string>
     <string name="call_incoming">Inkomend gesprek</string>
     <string name="call_outgoing">Uitgaand gesprek</string>
+    <string name="call_incoming_short">Inkomend</string>
+    <string name="call_outgoing_short">Uitgaand</string>
     <string name="call_ended">Gesprek beëindigd</string>
     <string name="call_on_hold">In de wacht: %1$s</string>
     <string name="call_hangup">Ophangen</string>
@@ -324,6 +326,7 @@
     <string name="call_records_no_internet_message">Voor het inzien van gespreksopnames is een internetverbinding vereist</string>
     <string name="call_records_no_missed_message">Geen gemiste gesprekken</string>
     <string name="call_records_no_missed_title">Momenteel zijn er geen gemiste gesprekken</string>
+    <string name="contact_call_records_missed">gemiste</string>
     <string name="notification_channel_incoming_calls">Inkomende gesprekken</string>
     <string name="dialer_no_internet_connectivity">Geen internetverbinding beschikbaar</string>
     <string name="dialer_no_internet_connectivity_subtext">Je bent met een netwerk verbonden maar er is geen internetverbinding, waardoor er geen gesprek opgezet kan worden.</string>
