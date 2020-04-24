@@ -37,16 +37,17 @@ class ContactViewHolder(itemView: View, private val adapter: ContactAdapter) : R
         )
     }
 
-    /**
-     * Extract the initials (first letter from each word) from a string.
-     *
-     * @return The initials as a new string
-     */
-    private fun String.initials(limit: Int = 2) : String = this
-                .split(" ", limit = limit)
-                .filter { it.isNotEmpty() }
-                .joinToString(separator = "") {
-                    it.first().toUpperCase().toString()
-                }
-                .filter { char -> char.toLowerCase() in 'a' .. 'z' }
 }
+
+/**
+ * Extract the initials (first letter from each word) from a string.
+ *
+ * @return The initials as a new string
+ */
+fun String.initials(limit: Int = 2) : String = this
+        .split(" ", limit = limit)
+        .filter { it.isNotEmpty() }
+        .joinToString(separator = "") {
+            it.first().toUpperCase().toString()
+        }
+        .filter { char -> char.toLowerCase() in 'a' .. 'z' }

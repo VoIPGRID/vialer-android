@@ -18,6 +18,8 @@
     <string name="call_incoming">Incoming call</string>
     <string name="call_incoming_expanded">Incoming call from:</string>
     <string name="call_outgoing">Outgoing call</string>
+    <string name="call_incoming_short">Incoming</string>
+    <string name="call_outgoing_short">Outgoing</string>
     <string name="call_ended">Call ended</string>
     <string name="call_on_hold">On hold: %s</string>
     <string name="call_hangup">Hang up</string>
@@ -164,6 +166,7 @@
     <string name="call_records_no_internet_message">An internet connection is required to view call records</string>
     <string name="call_records_no_missed_message">No Missed Calls</string>
     <string name="call_records_no_missed_title">There are currently no missed calls</string>
+    <string name="contact_call_records_missed">missed</string>
 
     <string name="title_activity_click_to_dial">ClickToDialActivity</string>
     <string name="title_activity_warning">Warning</string>
