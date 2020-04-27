@@ -7,6 +7,8 @@ import androidx.preference.Preference
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.MobileNumber
+import com.voipgrid.vialer.logging.VialerBaseActivity
+import com.voipgrid.vialer.options.LogoutDialog
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import com.voipgrid.vialer.util.Sim
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +50,13 @@ class AccountSettingsFragment : AbstractSettingsFragment() {
             setOnChangeListener(networkConnectivityRequired = true) {
                 newValue: String -> mobileNumberChanged(newValue)
             }
+        }
+
+        findPreference<Preference>("logout")?.setOnPreferenceClickListener {
+            activity?.let {
+                LogoutDialog(it as VialerBaseActivity).show(it.supportFragmentManager, "")
+            }
+            true
         }
     }
 

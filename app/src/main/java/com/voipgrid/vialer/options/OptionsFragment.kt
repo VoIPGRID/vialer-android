@@ -1,8 +1,6 @@
 package com.voipgrid.vialer.options
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Typeface
@@ -34,6 +32,7 @@ import com.voipgrid.vialer.api.models.Destination
 import com.voipgrid.vialer.api.models.FixedDestination
 import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams
+import com.voipgrid.vialer.logging.VialerBaseActivity
 import com.voipgrid.vialer.middleware.Middleware
 import com.voipgrid.vialer.settings.SettingsActivity
 import com.voipgrid.vialer.util.ConnectivityHelper
@@ -154,15 +153,9 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
     }
 
     private fun promptForLogout() {
-        val builder = AlertDialog.Builder(context)
-        builder.setMessage(this.getString(R.string.logout_dialog_text))
-        builder.setPositiveButton(this.getString(R.string.logout_dialog_positive)) { _: DialogInterface?, _: Int ->
-            if (activity is MainActivity)
-                (activity as MainActivity).logout(false)
+        activity?.let {
+            LogoutDialog(it as VialerBaseActivity).show(it.supportFragmentManager, "")
         }
-        builder.setNegativeButton(this.getString(R.string.logout_dialog_negative)) { dialog: DialogInterface, _: Int -> dialog.dismiss() }
-        val dialog = builder.create()
-        dialog.show()
     }
 
     override fun onFailure(call: Call<Any>, t: Throwable) {}
