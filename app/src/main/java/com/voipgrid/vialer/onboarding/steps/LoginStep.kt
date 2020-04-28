@@ -2,7 +2,6 @@ package com.voipgrid.vialer.onboarding.steps
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.view.KeyEvent
@@ -37,6 +36,7 @@ class LoginStep : Step() {
     private val logger = Logger(this).forceRemoteLogging(true)
     private var twoFactorHelper: TwoFactorFragmentHelper? = null
     private var twoFactorDialog: AlertDialog? = null
+    private var changePasswordDialog: PasswordChangeDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -99,11 +99,11 @@ class LoginStep : Step() {
      * Attempt to log the user into VoIPGRID by launching a co-routine.
      *
      */
-    private fun attemptLogin(code: String? = null) = GlobalScope.launch(Dispatchers.Main) {
+    private fun attemptLogin(code: String? = null, password: String? = null) = GlobalScope.launch(Dispatchers.Main) {
         error.visibility = View.GONE
         onboarding?.isLoading = true
         logger.i("Attempting to log the user into VoIPGRID, with the following 2FA code: $code")
-        val result = login.attempt(emailTextDialog.text.toString(), passwordTextDialog.text.toString(), code)
+        val result = login.attempt(emailTextDialog.text.toString(), password ?: passwordTextDialog.text.toString(), code)
         onboarding?.isLoading = false
         handleLoginResult(result)
     }
@@ -130,8 +130,22 @@ class LoginStep : Step() {
         }
         MUST_CHANGE_PASSWORD -> {
             logger.i("User must change their password before we can login")
-            activity?.let {
-                PasswordResetWebActivity.launch(it, emailTextDialog.text.toString(), passwordTextDialog.text.toString())
+            showChangePasswordDialog()
+        }
+    }
+
+    /**
+     * Create and show a dialog for the user to change the password.
+     *
+     */
+    private fun showChangePasswordDialog() {
+        val activity = this.activity ?: return
+
+        this.changePasswordDialog = PasswordChangeDialog(emailTextDialog.text.toString(), passwordTextDialog.text.toString()).apply {
+            show(activity.supportFragmentManager, "PASSWORD_CHANGE")
+            onSuccess = {
+                this@LoginStep.changePasswordDialog?.dismiss()
+                attemptLogin(password = it)
             }
         }
     }

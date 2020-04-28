@@ -8,6 +8,7 @@ import android.telephony.TelephonyManager
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.voipgrid.vialer.ContactsViewModel
 import com.voipgrid.vialer.VialerApplication.Companion.db
+import com.voipgrid.vialer.api.PasswordChange
 import com.voipgrid.vialer.api.SecureCalling
 import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.api.UserSynchronizer
@@ -59,4 +60,6 @@ val appModule = module {
     single { db.callRecordDao() }
 
     single { Middleware(androidContext()) }
+
+    single { PasswordChange(get()) }
 }

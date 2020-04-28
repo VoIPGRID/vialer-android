@@ -5,6 +5,7 @@ import com.voipgrid.vialer.api.models.ApiTokenResponse;
 import com.voipgrid.vialer.api.models.AutoLoginToken;
 import com.voipgrid.vialer.api.models.CallRecord;
 import com.voipgrid.vialer.api.models.MobileNumber;
+import com.voipgrid.vialer.api.models.PasswordChangeParams;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams;
 import com.voipgrid.vialer.api.models.SystemUser;
@@ -60,20 +61,23 @@ public interface VoipgridApi {
     Call<Void> resetPassword(@Body PasswordResetParams params);
     @GET("api/cdr/record/")
     Call<VoipGridResponse<CallRecord>> getRecentCalls(@Query("limit") int limit,
-            @Query("offset") int offset,
-            @Query("call_date__gt") String from,
-            @Query("call_date__lt") String to);
+                                                      @Query("offset") int offset,
+                                                      @Query("call_date__gt") String from,
+                                                      @Query("call_date__lt") String to);
 
     @GET("api/cdr/record/personalized/")
     Call<VoipGridResponse<CallRecord>> getRecentCallsForLoggedInUser(@Query("limit") int limit,
-            @Query("offset") int offset,
-            @Query("call_date__gt") String from,
-            @Query("call_date__lt") String to);
+                                                                     @Query("offset") int offset,
+                                                                     @Query("call_date__gt") String from,
+                                                                     @Query("call_date__lt") String to);
 
     @GET("api/userdestination/")
     Call<VoipGridResponse<UserDestination>> fetchDestinations();
 
     @PUT("api/selecteduserdestination/{id}/")
     Call<Object> setSelectedUserDestination(@Path("id") String id,
-                                    @Body SelectedUserDestinationParams params);
+                                            @Body SelectedUserDestinationParams params);
+    @PUT("api/v2/password/")
+    Call<PasswordChangeParams> passwordChange (@Body PasswordChangeParams passwordChangeParams);
+
 }
