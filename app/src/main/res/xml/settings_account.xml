@@ -50,4 +50,13 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory>
+
+        <Preference
+            app:key="logout"
+            app:title="@string/logout_menu_item_title"
+            android:icon="@drawable/ic_logout_24dp"/>
+
+    </PreferenceCategory>
+
 </PreferenceScreen>
