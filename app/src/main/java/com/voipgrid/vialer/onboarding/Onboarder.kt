@@ -1,27 +1,17 @@
 package com.voipgrid.vialer.onboarding
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
-import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.logging.VialerBaseActivity
 import com.voipgrid.vialer.onboarding.core.OnboardingState
 import com.voipgrid.vialer.onboarding.core.Step
-import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity
 import kotlinx.android.synthetic.main.activity_onboarding.*
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import com.voipgrid.vialer.logging.VialerBaseActivity
-import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity.Companion.PASSWORD_EXTRA
-import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity.Companion.USERNAME_EXTRA
 
 
 typealias PermissionCallback = () -> Unit
@@ -80,15 +70,6 @@ abstract class Onboarder : VialerBaseActivity() {
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PasswordResetWebActivity.REQUEST_CODE) {
-            finish()
-            startActivity(Intent(this, OnboardingActivity::class.java).apply {
-                putExtra(USERNAME_EXTRA, data?.getStringExtra(USERNAME_EXTRA))
-                putExtra(PASSWORD_EXTRA, data?.getStringExtra(PASSWORD_EXTRA))
-            })
-            return
-        }
-
         logger.i("Received activity result, invoking callback")
         permissionCallback?.invoke()
     }
