@@ -8,7 +8,6 @@ import android.telephony.PhoneNumberUtils
 import android.util.Log
 import com.github.tamir7.contacts.Contact
 import com.github.tamir7.contacts.Contacts
-import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.voipgrid.vialer.VialerApplication.Companion.get
 import java.io.ByteArrayInputStream
 
@@ -17,9 +16,8 @@ import java.io.ByteArrayInputStream
  */
 class Contacts {
 
-    private val phoneNumberUtil: PhoneNumberUtil by lazy {
-        PhoneNumberUtil.getInstance()
-    }
+    private val q
+        get() = Contacts.getQuery()
 
     /**
      * Method used to get the contact by the phone number.
@@ -33,9 +31,16 @@ class Contacts {
         }
 
         return try {
+
+            val formattedNumber = PhoneNumberUtils.formatNumber(number, "NL")
+
             val contacts = Contacts
                     .getQuery()
-                    .whereEqualTo(Contact.Field.PhoneNumber, PhoneNumberUtils.formatNumber(number, "NL"))
+                    .or(listOf(
+                            q.whereEqualTo(Contact.Field.PhoneNumber, formattedNumber),
+                            q.whereEqualTo(Contact.Field.PhoneNumber, formattedNumber.replace("+${ASSUMED_COUNTRY_CODE} ", "")),
+                            q.whereEqualTo(Contact.Field.PhoneNumber, number)
+                    ))
                     .find()
 
             if (contacts.isNotEmpty()) contacts[0] else null
@@ -88,5 +93,9 @@ class Contacts {
     fun getContactNameByPhoneNumber(number: String?): String? {
         val contact = getContactByPhoneNumber(number) ?: return null
         return contact.displayName
+    }
+
+    companion object {
+        const val ASSUMED_COUNTRY_CODE = "31"
     }
 }
