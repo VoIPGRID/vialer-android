@@ -33,12 +33,17 @@ class Contacts {
         return try {
 
             val formattedNumber = PhoneNumberUtils.formatNumber(number, "NL")
+            val numberWithoutCountryCode = formattedNumber.replace("+${ASSUMED_COUNTRY_CODE} ", "")
+            val numberWithoutCountryCodeWithoutSpaces = formattedNumber.replace("+${ASSUMED_COUNTRY_CODE}", "").replace(" ", "")
 
             val contacts = Contacts
                     .getQuery()
                     .or(listOf(
                             q.whereEqualTo(Contact.Field.PhoneNumber, formattedNumber),
-                            q.whereEqualTo(Contact.Field.PhoneNumber, formattedNumber.replace("+${ASSUMED_COUNTRY_CODE} ", "")),
+                            q.whereEqualTo(Contact.Field.PhoneNumber, numberWithoutCountryCode),
+                            q.whereEqualTo(Contact.Field.PhoneNumber, "0$numberWithoutCountryCode"),
+                            q.whereEqualTo(Contact.Field.PhoneNumber, numberWithoutCountryCodeWithoutSpaces),
+                            q.whereEqualTo(Contact.Field.PhoneNumber, "0$numberWithoutCountryCodeWithoutSpaces"),
                             q.whereEqualTo(Contact.Field.PhoneNumber, number)
                     ))
                     .find()
