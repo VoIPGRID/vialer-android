@@ -393,4 +393,5 @@
     <string name="good_day">Goedendag,</string>
     <string name="contacts_title">Contacten</string>
     <string name="search">Zoeken</string>
+    <string name="password_change_failure_toast">Mislukt! Probeer het aub opnieuw met een ander wachtwoord</string>
 </resources>

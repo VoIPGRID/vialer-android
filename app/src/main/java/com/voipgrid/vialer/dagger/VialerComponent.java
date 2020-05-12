@@ -30,7 +30,6 @@ import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.t9.T9Fragment;
 import com.voipgrid.vialer.t9.T9HelperFragment;
 import com.voipgrid.vialer.util.LoginRequiredActivity;
-import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -68,7 +67,6 @@ public interface VialerComponent {
     void inject(MainActivity activity);
 
     void inject(VialerBaseActivity vialerBaseActivity);
-    void inject(PasswordResetWebActivity activity);
 
     void inject(T9HelperFragment t9HelperFragment);
 

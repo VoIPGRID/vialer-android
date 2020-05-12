@@ -394,6 +394,6 @@
     <string name="good_day">Good day,</string>
     <string name="contacts_title">Contacts</string>
     <string name="search">Search</string>
-    <string name="password_change_failure_toast">Failed please try again with a different password</string>
+    <string name="password_change_failure_toast">Failed! Please try again with a different password.</string>
 
 </resources>

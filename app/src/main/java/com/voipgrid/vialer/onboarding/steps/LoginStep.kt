@@ -18,7 +18,6 @@ import com.voipgrid.vialer.onboarding.VoipgridLogin.LoginResult.*
 import com.voipgrid.vialer.onboarding.core.Step
 import com.voipgrid.vialer.util.ConnectivityHelper
 import com.voipgrid.vialer.util.TwoFactorFragmentHelper
-import com.voipgrid.vialer.voipgrid.PasswordResetWebActivity
 import kotlinx.android.synthetic.main.onboarding_step_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -67,8 +66,6 @@ class LoginStep : Step() {
             attemptLogin()
         }
         button_forgot_password.setOnClickListener { launchForgottenPasswordActivity() }
-
-        automaticallyLogInIfWeHaveCredentials()
     }
 
     override fun onResume() {
@@ -78,22 +75,6 @@ class LoginStep : Step() {
     }
 
     override fun isSameAs(step: Step?) = step is LoginStep
-
-    /**
-     * If this activity has been started with an intent containing credentials, log in with them automatically.
-     *
-     */
-    private fun automaticallyLogInIfWeHaveCredentials() {
-        val intent = activity?.intent ?: return
-
-        if (!intent.hasExtra(PasswordResetWebActivity.USERNAME_EXTRA) || !intent.hasExtra(PasswordResetWebActivity.PASSWORD_EXTRA)) {
-            return
-        }
-
-        emailTextDialog.setText(intent.getStringExtra(PasswordResetWebActivity.USERNAME_EXTRA))
-        passwordTextDialog.setText(intent.getStringExtra(PasswordResetWebActivity.PASSWORD_EXTRA))
-        if (button_login.isEnabled) button_login.performClick()
-    }
 
     /**
      * Attempt to log the user into VoIPGRID by launching a co-routine.
@@ -130,6 +111,7 @@ class LoginStep : Step() {
         }
         MUST_CHANGE_PASSWORD -> {
             logger.i("User must change their password before we can login")
+            button_login.isEnabled = true
             showChangePasswordDialog()
         }
     }
