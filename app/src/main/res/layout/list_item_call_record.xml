@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/call_records_item_background"
+    android:background="@drawable/custom_ripple"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingStart="@dimen/list_item_contact_padding_left"
