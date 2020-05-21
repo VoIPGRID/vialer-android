@@ -226,7 +226,7 @@ public class SipConfig implements AccountStatus {
             throw new LibraryInitFailedException();
         }
 
-        if (BuildConfig.DEBUG || User.remoteLogging.isEnabled()) {
+        if (BuildConfig.DEBUG || User.userPreferences.getRemoteLoggingIsEnabled()) {
             setSipLogging(endpointConfig);
         }
 

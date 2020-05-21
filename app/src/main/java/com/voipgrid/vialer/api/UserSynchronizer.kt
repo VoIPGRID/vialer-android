@@ -79,6 +79,7 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val secureC
 
         User.voipgridUser = response.body()
         User.voip.isAccountSetupForSip = true
+        User.uuid = User.voipgridUser?.uuid ?: ""
     }
 
     /**

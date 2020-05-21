@@ -75,7 +75,7 @@ class Middleware(private val context: Context) {
                 Build.VERSION.CODENAME,
                 Build.VERSION.RELEASE,
                 context.packageName,
-                if (User.remoteLogging.isEnabled) User.remoteLogging.id else null
+                if (User.userPreferences.remoteLoggingIsEnabled) User.uuid else null
         ).execute()
 
         if (response.isSuccessful) {
