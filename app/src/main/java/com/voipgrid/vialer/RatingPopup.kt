@@ -9,12 +9,22 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.codemybrainsout.ratingdialog.RatingDialog
+import com.voipgrid.vialer.api.FeedbackApi
+import com.voipgrid.vialer.api.models.Feedback
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.persistence.RatingPopup
 import com.voipgrid.vialer.persistence.Statistics
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.koin.core.KoinComponent
+import org.koin.core.inject
+import java.lang.Exception
 import java.util.*
 
-class RatingPopupListener(val context: Context) : LifecycleObserver {
+class RatingPopupListener(val context: Context) : LifecycleObserver, KoinComponent {
+
+    private val feedbackApi: FeedbackApi by inject()
+    private val logger = Logger(this)
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun showIfDue() {
@@ -47,9 +57,14 @@ class RatingPopupListener(val context: Context) : LifecycleObserver {
                 )
                 .formCancelText(context.getString(R.string.cancel).toUpperCase(locale))
                 .onRatingBarFormSumbit { feedback ->
-                    val logger = Logger(MainActivity::class).forceRemoteLogging(true)
 
-                    logger.i("Feedback:\n$feedback")
+                    GlobalScope.launch {
+                        try {
+                            feedbackApi.submit(Feedback(feedback))
+                        } catch (e: Exception) {
+                            logger.e("Failed to submit feedback: $feedback")
+                        }
+                    }
 
                     AlertDialog.Builder(context)
                             .setTitle(R.string.rating_popup_post_feedback_title)

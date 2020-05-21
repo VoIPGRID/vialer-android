@@ -31,7 +31,7 @@ class MainActivity : LoginRequiredActivity() {
 
         syncUser()
 
-//        lifecycle.addObserver(RatingPopupListener(this))
+        lifecycle.addObserver(RatingPopupListener(this))
 
         floating_action_button?.setOnClickListener { openDialer() }
 
