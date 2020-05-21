@@ -226,6 +226,7 @@
     <string name="settings_feedback_dialog_form_subject">Subject</string>
     <string name="settings_feedback_dialog_form_message">Message</string>
     <string name="settings_feedback_dialog_form_submitted">Your feedback has been submitted.\n\nThank you!</string>
+    <string name="settings_feedback_dialog_form_submitted_failed">Unable to submit Feedback</string>
     <string name="settings_account_category_voip">VoIP account</string>
     <string name="settings_account_username">Username</string>
     <string name="settings_account_name">Name</string>

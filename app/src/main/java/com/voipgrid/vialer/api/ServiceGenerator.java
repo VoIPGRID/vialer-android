@@ -34,6 +34,7 @@ public class ServiceGenerator {
 
     private static VoipgridApi voipgridApi;
     private static Middleware middleware;
+    private static FeedbackApi feedbackApi;
 
     private ServiceGenerator() {
     }
@@ -56,6 +57,16 @@ public class ServiceGenerator {
                 .baseUrl(context.getString(R.string.registration_url))
                 .build()
                 .create(Middleware.class);
+    }
+
+    @NonNull
+    public static FeedbackApi createFeedbackService(@NonNull Context context) {
+        if (feedbackApi != null) return feedbackApi;
+
+        return feedbackApi = baseBuilder(context)
+                .baseUrl(context.getString(R.string.feedback_url))
+                .build()
+                .create(FeedbackApi.class);
     }
 
     /**
