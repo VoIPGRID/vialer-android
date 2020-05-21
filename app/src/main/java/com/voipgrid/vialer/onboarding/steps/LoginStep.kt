@@ -10,7 +10,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import com.voipgrid.vialer.*
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.VoipgridLogin
@@ -24,7 +23,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
-import java.time.Duration
 import javax.inject.Inject
 
 class LoginStep : Step() {
