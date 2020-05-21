@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 
-class FeedbackDialogFragment : DialogFragment(), TextWatcher, KoinComponent {
+class FeedbackDialogFragment(private val placeholderMessage: String? = null, private val messagePrefix: String = "") : DialogFragment(), TextWatcher, KoinComponent {
 
     private val logger = Logger(this)
 
@@ -33,7 +33,6 @@ class FeedbackDialogFragment : DialogFragment(), TextWatcher, KoinComponent {
             AlertDialog.Builder(it)
                     .setView(R.layout.dialog_feedback)
                     .setTitle(R.string.settings_feedback_dialog_title)
-                    .setMessage(R.string.settings_feedback_dialog_desc)
                     .setPositiveButton(R.string.settings_feedback_dialog_button_positive) { _, _ ->
                         dialog?.let { dialog ->
                             submitFeedback(dialog.feedback_message.text.toString())
@@ -49,13 +48,14 @@ class FeedbackDialogFragment : DialogFragment(), TextWatcher, KoinComponent {
         super.onResume()
         updatePositiveButtonBasedOnTextFields()
         dialog?.feedback_message?.addTextChangedListener(this)
+        dialog?.feedback_message?.hint = placeholderMessage ?: getString(R.string.settings_feedback_dialog_desc)
     }
 
     private fun submitFeedback(message: String) = GlobalScope.launch(Dispatchers.Main) {
         logger.i("Received feedback: $message")
 
         var successful = try {
-            val response = feedbackApi.submit(Feedback(message))
+            val response = feedbackApi.submit(Feedback(messagePrefix + message))
             response.isSuccessful
         } catch (e: Exception) {
             false
