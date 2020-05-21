@@ -166,7 +166,7 @@ ext {
     androidTestVersion = '1.2.0'
     firebaseCoreVersion = '17.2.0'
     firebaseMessagingVersion = '20.1.0'
-    okHttpVersion = '4.1.1'
+    okHttpVersion = '4.7.2'
     retroFitVersion = '2.6.1'
     roboElectricVersion = '4.3'
     mockitoCoreVersion = "2.23.0"
