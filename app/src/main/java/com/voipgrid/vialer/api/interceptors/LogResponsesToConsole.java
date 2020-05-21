@@ -24,7 +24,6 @@ public class LogResponsesToConsole implements Interceptor {
         Request request = chain.request();
 
         logger.i("Making request to: " + request.url());
-        logger.i("Body: " + bodyToString(request));
 
         Response response = chain.proceed(request);
         String body = response.body().string();
@@ -48,17 +47,5 @@ public class LogResponsesToConsole implements Interceptor {
 
     private boolean shouldLog(Request request) {
         return !request.url().toString().contains("cdr");
-    }
-
-    private static String bodyToString(final Request request){
-
-        try {
-            final Request copy = request.newBuilder().build();
-            final Buffer buffer = new Buffer();
-            copy.body().writeTo(buffer);
-            return buffer.readUtf8();
-        } catch (final IOException e) {
-            return "did not work";
-        }
     }
 }
