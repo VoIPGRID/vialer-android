@@ -202,8 +202,8 @@ abstract class CallRecordFragment(val type: CallRecordViewModel.Type)
      *
      */
     private fun hideError() {
-        call_records.visibility = View.VISIBLE
-        call_records_unavailable_view.visibility = View.GONE
+        call_records?.visibility = View.VISIBLE
+        call_records_unavailable_view?.visibility = View.GONE
     }
 
 

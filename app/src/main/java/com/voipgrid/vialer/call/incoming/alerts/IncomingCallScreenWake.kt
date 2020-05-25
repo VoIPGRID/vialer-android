@@ -7,14 +7,23 @@ class IncomingCallScreenWake(private val powerManager: PowerManager) : IncomingC
     private var wakeLock: PowerManager.WakeLock? = null
 
     override fun start() {
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP, "vialer:call-incoming")
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG)
         wakeLock?.acquire(30000)
     }
 
     override fun stop() {
-        wakeLock?.release()
-        wakeLock = null
+        val wakeLock = this.wakeLock ?: return
+
+        if (wakeLock.isHeld) {
+            wakeLock.release()
+        }
+
+        this.wakeLock = null
     }
 
     override fun isStarted(): Boolean = powerManager.isInteractive
+
+    companion object {
+        const val TAG = "vialer:call-incoming"
+    }
 }
