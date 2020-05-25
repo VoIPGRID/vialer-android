@@ -21,7 +21,7 @@ import com.voipgrid.vialer.util.ConnectivityHelper;
 public class DefaultDataProvider {
 
     public String getLogId() {
-        return User.remoteLogging.getId();
+        return User.getUuid();
     }
 
     public String getClientCountry() {

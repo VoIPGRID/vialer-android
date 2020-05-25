@@ -217,7 +217,7 @@
     <string name="settings_category_debug">Debug settings</string>
     <string name="settings_remote_logging_title">Remote logging</string>
     <string name="settings_remote_logging_id_title">Remote logging ID</string>
-    <string name="settings_remote_logging_desc_on">Uploading anonymized logs for use by developers and technical support.</string>
+    <string name="settings_remote_logging_desc_on">Automatically share your app activity with our developers and support team to help resolve issues and errors.</string>
     <string name="settings_feedback_title">Send feedback</string>
     <string name="settings_feedback_desc">Report issues or suggest new features</string>
     <string name="settings_feedback_dialog_title">Send feedback</string>
@@ -226,6 +226,7 @@
     <string name="settings_feedback_dialog_form_subject">Subject</string>
     <string name="settings_feedback_dialog_form_message">Message</string>
     <string name="settings_feedback_dialog_form_submitted">Your feedback has been submitted.\n\nThank you!</string>
+    <string name="settings_feedback_dialog_form_submitted_failed">Unable to submit Feedback</string>
     <string name="settings_account_category_voip">VoIP account</string>
     <string name="settings_account_username">Username</string>
     <string name="settings_account_name">Name</string>

@@ -39,6 +39,8 @@ public class SystemUser {
     @SerializedName("client")
     String clientId;
 
+    String uuid;
+
     /**
      * HashSet with list of Strings describing numbers which are not the main number
      * for multi entries in contact list. They are stored in a set because that forces
@@ -105,6 +107,10 @@ public class SystemUser {
 
     public String getMobileNumber() {
         return mobileNumber;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 
     public void setMobileNumber(String mobileNumber) {

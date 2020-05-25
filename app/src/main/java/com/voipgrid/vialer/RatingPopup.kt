@@ -1,20 +1,27 @@
 package com.voipgrid.vialer
 
-import android.app.AlertDialog
-import android.content.Context
-import android.content.Intent
 import android.net.Uri
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.codemybrainsout.ratingdialog.RatingDialog
+import com.voipgrid.vialer.api.FeedbackApi
+import com.voipgrid.vialer.api.models.Feedback
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.persistence.RatingPopup
 import com.voipgrid.vialer.persistence.Statistics
-import java.util.*
+import com.voipgrid.vialer.settings.FeedbackDialogFragment
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
-class RatingPopupListener(val context: Context) : LifecycleObserver {
+class RatingPopupListener(val context: AppCompatActivity) : LifecycleObserver, KoinComponent {
+
+    private val feedbackApi: FeedbackApi by inject()
+    private val logger = Logger(this)
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun showIfDue() {
@@ -46,28 +53,36 @@ class RatingPopupListener(val context: Context) : LifecycleObserver {
                         context.getString(R.string.rating_popup_feedback_submit_button).toUpperCase(locale)
                 )
                 .formCancelText(context.getString(R.string.cancel).toUpperCase(locale))
-                .onRatingBarFormSumbit { feedback ->
-                    val logger = Logger(MainActivity::class).forceRemoteLogging(true)
-
-                    logger.i("Feedback:\n$feedback")
-
-                    AlertDialog.Builder(context)
-                            .setTitle(R.string.rating_popup_post_feedback_title)
-                            .setMessage(R.string.rating_popup_post_feedback_message)
-                            .setPositiveButton(R.string.rating_popup_post_feedback_done) {
-                                dialog, _ -> dialog.dismiss()
-                            }
-                            .setNegativeButton(
-                                    R.string.rating_popup_post_feedback_write_review
-                            ) { _, _ ->
-                                context.startActivity(Intent(Intent.ACTION_VIEW, PLAYSTORE_URL))
-                            }
-                            .show()
+                .onRatingBarFormSumbit { feedback -> submitFeedback(feedback) }
+                .onThresholdFailed { ratingDialog, rating, _ ->
+                    logger.i("User failed the rating threshold with a $rating star rating")
+                    ratingDialog.dismiss()
+                    FeedbackDialogFragment(
+                            context.getString(R.string.rating_popup_feedback_hint),
+                            messagePrefix = "User has left the following feedback after rating the app $rating stars: "
+                    ).show(context.supportFragmentManager, "")
                 }
                 .build()
 
         RatingPopup.shown = true
         dialog.show()
+    }
+
+    /**
+     * Submit feedback and properly catch errors where they occur.
+     *
+     */
+    private fun submitFeedback(message: String) = GlobalScope.launch {
+        try {
+            val response = feedbackApi.submit(Feedback(message))
+
+            if (!response.isSuccessful) {
+                logger.e("Unable to submit feedback with code ${response.code()}: $message")
+            }
+
+        } catch (e: Exception) {
+            logger.e("Failed to submit feedback: $message")
+        }
     }
 
 

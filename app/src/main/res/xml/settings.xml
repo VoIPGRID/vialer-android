@@ -61,7 +61,6 @@
 
         <Preference
             app:key="feedback"
-            app:isPreferenceVisible="false"
             app:title="@string/settings_feedback_title"
             app:iconSpaceReserved="true"
             app:summary="@string/settings_feedback_desc"/>
@@ -70,17 +69,8 @@
             app:key="PREF_REMOTE_LOGGING"
             app:title="@string/settings_remote_logging_title"
             app:iconSpaceReserved="true"
-            app:summaryOn="@string/settings_remote_logging_desc_on"
-            app:summaryOff=""
+            app:summary="@string/settings_remote_logging_desc_on"
             />
-
-        <Preference
-            app:key="PREF_REMOTE_LOGGING_ID"
-            app:title="@string/settings_remote_logging_id_title"
-            android:dependency="PREF_REMOTE_LOGGING"
-            app:iconSpaceReserved="true"
-            app:enableCopying="true"
-            app:defaultValue="false" />
 
     </PreferenceCategory>
 

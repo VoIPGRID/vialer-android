@@ -4,16 +4,6 @@
     android:layout_height="wrap_content">
 
     <EditText
-        android:id="@+id/feedback_subject"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/settings_feedback_dialog_form_subject"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="20dp"/>
-
-    <EditText
         android:id="@+id/feedback_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

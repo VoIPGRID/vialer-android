@@ -56,11 +56,11 @@ public class Logger {
         mLogFormatter = new LogFormatter();
         mLogComposer = new LogComposer(
                 new DeviceInformation(mContext),
-                User.remoteLogging.getId(),
+                User.getUuid(),
                 VialerApplication.getAppVersion()
         );
         mCallerLocator = new CallerLocator();
-        mRemoteLoggingEnabled = User.remoteLogging.isEnabled();
+        mRemoteLoggingEnabled = User.userPreferences.getRemoteLoggingIsEnabled();
         tag = thisClass.getSimpleName();
     }
 
