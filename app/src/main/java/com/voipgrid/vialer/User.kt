@@ -9,7 +9,6 @@ import com.voipgrid.vialer.persistence.core.DefaultKotPrefModel
 object User : DefaultKotPrefModel() {
 
     @JvmField val voip = VoipSettings
-    @JvmField val remoteLogging = RemoteLogging
     @JvmField val internal = Internal
     @JvmField val middleware = Middleware
     @JvmField val userPreferences = UserPreferences
@@ -22,4 +21,5 @@ object User : DefaultKotPrefModel() {
 
     @JvmStatic var loginToken by stringPref()
     @JvmStatic var username by stringPref()
+    @JvmStatic var uuid by stringPref()
 }

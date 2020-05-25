@@ -47,5 +47,7 @@ object UserPreferences : DefaultKotPrefModel() {
      *
      */
     var usePhoneRingtone by booleanPref(key = "use_phone_ringtone", default = false)
+
+    var remoteLoggingIsEnabled by booleanPref(key = "PREF_REMOTE_LOGGING", default = false)
 }
 

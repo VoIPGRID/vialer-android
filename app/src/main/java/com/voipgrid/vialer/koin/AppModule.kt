@@ -29,6 +29,8 @@ val appModule = module {
 
     single { ServiceGenerator.createApiService(androidContext()) }
 
+    single { ServiceGenerator.createFeedbackService(androidContext()) }
+
     single { UserSynchronizer(get(), get(), get()) }
 
     single { BatteryOptimizationManager(androidContext()) }

@@ -48,10 +48,6 @@ class SettingsFragment : AbstractSettingsFragment() {
             })
         }
 
-        findPreference<Preference>("PREF_REMOTE_LOGGING_ID")?.summaryProvider =
-                Preference.SummaryProvider<Preference> {
-                    if (User.remoteLogging.isEnabled) User.remoteLogging.id else ""
-                }
 
         findPreference<SwitchPreferenceCompat>("PREF_REMOTE_LOGGING")?.apply {
             setOnChangeListener<Boolean>(networkConnectivityRequired = true) {
