@@ -84,9 +84,20 @@ class LoginStep : Step() {
         error.visibility = View.GONE
         onboarding?.isLoading = true
         logger.i("Attempting to log the user into VoIPGRID, with the following 2FA code: $code")
-        val result = login.attempt(emailTextDialog.text.toString(), password ?: passwordTextDialog.text.toString(), code)
-        onboarding?.isLoading = false
-        handleLoginResult(result)
+        try {
+            val result = login.attempt(emailTextDialog.text.toString(), password ?: passwordTextDialog.text.toString(), code)
+            handleLoginResult(result)
+        } catch (e: Exception) {
+            button_login.isEnabled = true
+            AlertDialog.Builder(activity)
+                    .setTitle(R.string.onboarding_no_internet_message)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.ok) { dialog, _ -> dialog.dismiss() }
+                    .create()
+                    .show()
+        } finally {
+            onboarding?.isLoading = false
+        }
     }
 
     /**

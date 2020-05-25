@@ -19,7 +19,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingBottom="200dp"
-                android:clipToPadding="false"/>
+                android:clipToPadding="false"
+                android:background="@color/call_records_item_background"/>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
