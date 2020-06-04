@@ -84,11 +84,4 @@ class RatingPopupListener(val context: AppCompatActivity) : LifecycleObserver, K
             logger.e("Failed to submit feedback: $message")
         }
     }
-
-
-    companion object {
-        private val PLAYSTORE_URL = Uri.parse(
-                "https://play.google.com/store/apps/details?id=com.voipgrid.vialer"
-        )
-    }
 }
