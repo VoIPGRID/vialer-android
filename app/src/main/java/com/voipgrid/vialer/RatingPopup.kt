@@ -36,7 +36,7 @@ class RatingPopupListener(val context: AppCompatActivity) : LifecycleObserver, K
         val locale = ConfigurationCompat.getLocales(context.resources.configuration)[0]
 
         val dialog = RatingDialog.Builder(context)
-                .threshold(2.1f)
+                .threshold(3f)
                 .title(context.getString(
                     R.string.rating_popup_title,
                     context.getString(R.string.app_name)
