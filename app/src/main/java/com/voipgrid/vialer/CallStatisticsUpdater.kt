@@ -11,7 +11,7 @@ class CallStatisticsUpdater : CallStatusReceiver.Listener {
 
     override fun onCallConnected() {
         callStatisticsTimer = Timer()
-        callStatisticsTimer?.schedule(20000) {
+        callStatisticsTimer?.schedule((MINIMUM_REQUIRED_CALL_LENGTH_SECONDS * 1000).toLong()) {
             Statistics.numberOfCalls++
             callStatisticsTimer?.cancel()
         }
@@ -32,5 +32,9 @@ class CallStatisticsUpdater : CallStatusReceiver.Listener {
     override fun onCallUnhold() {}
 
     override fun onCallRingingOut() {}
+
+    companion object {
+        const val MINIMUM_REQUIRED_CALL_LENGTH_SECONDS = 10
+    }
 
 }
