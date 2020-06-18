@@ -18,7 +18,6 @@ import com.voipgrid.vialer.Logout
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.ConnectivityHelper
-import com.voipgrid.vialer.util.InternetConnectivity
 import javax.inject.Inject
 
 
@@ -33,7 +32,6 @@ abstract class VialerBaseActivity : AppCompatActivity() {
 
     private val networkChangeReceiver = NetworkChangeReceiver()
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
-    protected val internetConnectivity = InternetConnectivity()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

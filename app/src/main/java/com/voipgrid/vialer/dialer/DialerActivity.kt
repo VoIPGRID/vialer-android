@@ -126,11 +126,6 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
      * @param contactName contact name to display
      */
     private fun onCallNumber(number: String, contactName: String?) = GlobalScope.launch(Dispatchers.Main) {
-        if (isConnectedToNetwork() && !internetConnectivity.canGuaranteeAnInternetConnection()) {
-            handleNoInternetAccess()
-            return@launch
-        }
-
         if (shouldReturnNumberAsResult()) {
             setResult(RESULT_DIALED_NUMBER, Intent().apply { putExtra("DIALED_NUMBER", number) })
             finish()
@@ -146,19 +141,6 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
                 User.internal.lastDialledNumber = phoneNumberToCall
             }
         }
-    }
-
-    private fun handleNoInternetAccess() {
-        button_call.isClickable = true
-
-        AlertDialog.Builder(this).setTitle(R.string.dialer_no_internet_connectivity)
-                .setMessage(R.string.dialer_no_internet_connectivity_subtext)
-                .setCancelable(false)
-                .setPositiveButton(this.getString(R.string.ok)) { dialog, _ ->
-                    dialog.dismiss()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) startActivityForResult(Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY), 1)
-                }
-                .show()
     }
 
     @OnClick(R.id.button_call)
