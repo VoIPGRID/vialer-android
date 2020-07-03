@@ -367,7 +367,7 @@
     <string name="settings_call_using_voip_desc_off">Gesprekken worden opgezet door gebruik te maken van jouw mobiele netwerk</string>
     <string name="settings_call_using_voip_desc_on">Gebruik een internetverbinding om gesprekken op te zetten en aan te nemen.</string>
     <string name="settings_category_account">Account</string>
-    <string name="settings_remote_logging_desc_on">Upload geanonimiseerde app logs zodat deze door een support medewerker kunnen worden geraadpleegd.</string>
+    <string name="settings_remote_logging_desc_on">Automatisch delen van jouw app activiteit met onze ontwikkelaars en support om ze te helpen problemen en foutmeldingen op te losse.</string>
     <string name="settings_use_phones_ringtone_desc_off">Inkomende oproepen gebruiken een speciaal voor deze applicatie ontwikkelde ringtoon</string>
     <string name="settings_account_my_account">Mijn account</string>
     <string name="ignore_battery_optimization_description_off">Inkomende oproepen kunnen in bepaalde situaties niet ontvangen worden</string>
@@ -394,4 +394,7 @@
     <string name="contacts_title">Contacten</string>
     <string name="search">Zoeken</string>
     <string name="password_change_failure_toast">Mislukt! Probeer het aub opnieuw met een ander wachtwoord</string>
+    <string name="settings_feedback_dialog_form_submitted_failed">Niet mogelijk feedback in te dienen</string>
+    <string name="username_edittext_hint">Gebruikersnaam</string>
+    <string name="phonenumber_prefix_edittext_hint">Voorvoegsel</string>
 </resources>

@@ -15,8 +15,8 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 231
-        versionName "6.7.1"
+        versionCode 235
+        versionName "6.8.0"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -243,7 +243,7 @@ dependencies {
     kapt "com.jakewharton:butterknife-compiler:${butterKnifeVersion}"
 
     // App rating popup
-    implementation 'com.codemybrainsout.rating:ratingdialog:1.0.8'
+    implementation "com.stepstone.apprating:app-rating:2.3.1"
 
     // Scytale -  Manage key generation
     implementation 'com.yakivmospan:scytale:1.0.1'

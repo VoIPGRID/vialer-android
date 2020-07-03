@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.GsonBuilder;
+import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.api.Middleware;
 import com.voipgrid.vialer.api.SecureCalling;
@@ -368,7 +369,9 @@ public class VialerStatistics {
     }
 
     private void send() {
-        mMiddleware.metrics(payload).enqueue(new VialerStatisticsRequestCallback(mLogger));
+        if (User.getHasVoipAccount()) {
+            mMiddleware.metrics(payload).enqueue(new VialerStatisticsRequestCallback(mLogger));
+        }
         log();
         resetPayload();
     }
