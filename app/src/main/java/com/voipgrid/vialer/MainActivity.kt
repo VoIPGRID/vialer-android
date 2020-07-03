@@ -3,6 +3,7 @@ package com.voipgrid.vialer
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.core.app.ActivityOptionsCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
@@ -148,6 +149,11 @@ class MainActivity : LoginRequiredActivity(), RatingDialogListener {
     }
 
     override fun onPositiveButtonClicked(rate: Int, comment: String) {
+        if (rate <= 0 && comment.isBlank()) {
+            Toast.makeText(this, R.string.settings_feedback_dialog_form_rating_required, Toast.LENGTH_LONG).show()
+            return
+        }
+
         RatingPopup.shown = true
         if (comment.isNotBlank()) {
             submitFeedback("Feedback submitted with a $rate star-rating: $comment")
