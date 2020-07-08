@@ -61,10 +61,6 @@ android {
             storePassword keystoreProperties['annabelStorePassword']
         }
     }
-    dexOptions {
-        // Prevent OutOfMemory with MultiDex during the build phase
-        javaMaxHeapSize "4g"
-    }
     flavorDimensions "default"
     productFlavors {
         vialer {
@@ -128,7 +124,7 @@ android {
             productFlavors.verbonden.signingConfig signingConfigs.verbonden
             productFlavors.annabel.signingConfig signingConfigs.annabel
 
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             manifestPlaceholders = [enableCrashReporting: "true"]
         }
@@ -141,7 +137,7 @@ android {
         }
     }
     dexOptions {
-        javaMaxHeapSize "4g"
+        javaMaxHeapSize "8g"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
