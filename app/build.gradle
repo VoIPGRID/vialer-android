@@ -124,7 +124,7 @@ android {
             productFlavors.verbonden.signingConfig signingConfigs.verbonden
             productFlavors.annabel.signingConfig signingConfigs.annabel
 
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             manifestPlaceholders = [enableCrashReporting: "true"]
         }
