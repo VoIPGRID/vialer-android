@@ -395,6 +395,7 @@
     <string name="search">Zoeken</string>
     <string name="password_change_failure_toast">Mislukt! Probeer het aub opnieuw met een ander wachtwoord</string>
     <string name="settings_feedback_dialog_form_submitted_failed">Niet mogelijk feedback in te dienen</string>
+    <string name="settings_feedback_dialog_form_rating_required">Selecteer een aantal sterren om feedback te geven</string>
     <string name="username_edittext_hint">Gebruikersnaam</string>
     <string name="phonenumber_prefix_edittext_hint">Voorvoegsel</string>
 </resources>

@@ -15,8 +15,8 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 235
-        versionName "6.8.0"
+        versionCode 236
+        versionName "6.8.1"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -60,10 +60,6 @@ android {
             storeFile file(keystoreProperties['annabelStoreFile'])
             storePassword keystoreProperties['annabelStorePassword']
         }
-    }
-    dexOptions {
-        // Prevent OutOfMemory with MultiDex during the build phase
-        javaMaxHeapSize "4g"
     }
     flavorDimensions "default"
     productFlavors {
@@ -141,7 +137,7 @@ android {
         }
     }
     dexOptions {
-        javaMaxHeapSize "4g"
+        javaMaxHeapSize "8g"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

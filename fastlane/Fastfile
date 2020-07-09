@@ -1,5 +1,6 @@
 ensure_bundle_exec
 update_fastlane
+ensure_git_status_clean
 default_platform(:android)
 
 platform :android do
@@ -29,15 +30,15 @@ platform :android do
       task: 'assemble',
       flavor: flavor,
       build_type: 'Release',
-      print_command: false,
-      print_command_output: false
+      print_command: true,
+      print_command_output: true
     )
     apk_path = rename_apk(lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH], flavor)
     notify(flavor, apk_path)
   end
 
   desc 'Generate a signed APK for each flavor'
-  private_lane :apks do |options|
+  lane :apks do |options|
     flavors.each do |flavor|
          options[:flavor] = flavor
          apk(options)
