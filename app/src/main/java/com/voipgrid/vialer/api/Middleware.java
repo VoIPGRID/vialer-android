@@ -21,7 +21,7 @@ public interface Middleware {
     @FormUrlEncoded
     @POST("api/call-response/")
     Call<ResponseBody> reply(@Field("unique_key") String token, @Field("available") boolean isAvailable,
-               @Field("message_start_time") String messageStartTime);
+               @Field("message_start_time") String messageStartTime, @Field("sip_user_id") String sipId);
 
     @FormUrlEncoded
     @HTTP(method = "DELETE", path = "api/android-device/", hasBody = true)
