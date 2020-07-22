@@ -202,7 +202,12 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
      * @param isAvailable TRUE if the phone is ready to accept the incoming call, FALSE if it is not available.
      */
     private fun replyServer(remoteMessageData: RemoteMessageData, isAvailable: Boolean) = GlobalScope.launch {
-        val response =  middlewareApi.reply(remoteMessageData.requestToken, isAvailable, remoteMessageData.messageStartTime).execute()
+        val response =  middlewareApi.reply(
+                remoteMessageData.requestToken,
+                isAvailable,
+                remoteMessageData.messageStartTime,
+                User.voipAccount?.accountId
+        ).execute()
         if (response.isSuccessful) {
             logger.i("response was successful")
         }

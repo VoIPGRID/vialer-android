@@ -395,7 +395,18 @@ public class SipConfig implements AccountStatus {
 
         Middleware middlewareApi = ServiceGenerator.createRegistrationService(mSipService);
 
-        retrofit2.Call<ResponseBody> call = middlewareApi.reply(token, true, messageStartTime);
+        String sipUserId = "";
+
+        if (User.getVoipAccount() != null && User.getVoipAccount().getAccountId() != null) {
+            sipUserId = User.getVoipAccount().getAccountId();
+        }
+
+        retrofit2.Call<ResponseBody> call = middlewareApi.reply(
+                token,
+                true,
+                messageStartTime,
+                sipUserId
+        );
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
