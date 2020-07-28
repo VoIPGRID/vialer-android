@@ -65,6 +65,4 @@ val appModule = module {
     single { Middleware(androidContext()) }
 
     single { PasswordChange(get()) }
-
-    single { FirebaseEventSubmitter() }
 }

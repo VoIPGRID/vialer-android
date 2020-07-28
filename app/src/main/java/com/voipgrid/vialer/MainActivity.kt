@@ -35,7 +35,6 @@ class MainActivity : LoginRequiredActivity(), RatingDialogListener {
 
     private var ratingDialog: AppRatingDialog? = null
     private val feedbackApi: FeedbackApi by inject()
-    private val firebaseEventSubmitter: FirebaseEventSubmitter by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -166,7 +165,7 @@ class MainActivity : LoginRequiredActivity(), RatingDialogListener {
             submitFeedback("Feedback submitted with a $rate star-rating: $comment")
         }
 
-        firebaseEventSubmitter.userDidRateApp(rate)
+        FirebaseEventSubmitter.userDidRateApp(rate)
 
         if (rate >= 3) {
             startActivity(Intent(Intent.ACTION_VIEW).apply {

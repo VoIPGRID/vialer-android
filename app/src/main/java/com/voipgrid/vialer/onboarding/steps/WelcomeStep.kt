@@ -8,6 +8,7 @@ import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.SecureCalling
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter
+import com.voipgrid.vialer.firebase.FirebaseEventSubmitter
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.onboarding.core.AutoContinuingStep
 import kotlinx.android.synthetic.main.onboarding_step_welcome.*
@@ -32,5 +33,6 @@ class WelcomeStep : AutoContinuingStep() {
             SecureCalling.fromContext(it).updateApiBasedOnCurrentPreferenceSetting()
         }
         User.internal.hasCompletedOnBoarding = true
+        FirebaseEventSubmitter.userLoggedIn()
     }
 }
