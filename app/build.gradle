@@ -15,8 +15,8 @@ android {
         applicationId "com.voipgrid.app"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 237
-        versionName "6.8.2"
+        versionCode 238
+        versionName "6.8.3"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -123,6 +123,7 @@ android {
             productFlavors.voys.signingConfig signingConfigs.voys
             productFlavors.verbonden.signingConfig signingConfigs.verbonden
             productFlavors.annabel.signingConfig signingConfigs.annabel
+            productFlavors.staging.signingConfig signingConfigs.vialer
 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -199,6 +200,7 @@ dependencies {
     // Firebase setup.
     implementation "com.google.firebase:firebase-core:${firebaseCoreVersion}"
     implementation "com.google.firebase:firebase-messaging:${firebaseMessagingVersion}"
+    implementation 'com.google.firebase:firebase-analytics-ktx:17.4.4'
 
     // Firebase Performance Measurement.
     implementation 'com.google.firebase:firebase-perf:19.0.0'

@@ -14,6 +14,7 @@ import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.api.UserSynchronizer
 import com.voipgrid.vialer.callrecord.CallRecordViewModel
 import com.voipgrid.vialer.call.NativeCallManager
+import com.voipgrid.vialer.firebase.FirebaseEventSubmitter
 import com.voipgrid.vialer.middleware.Middleware
 import com.voipgrid.vialer.t9.ContactsSearcher
 import com.voipgrid.vialer.util.BatteryOptimizationManager
@@ -64,4 +65,6 @@ val appModule = module {
     single { Middleware(androidContext()) }
 
     single { PasswordChange(get()) }
+
+    single { FirebaseEventSubmitter() }
 }
