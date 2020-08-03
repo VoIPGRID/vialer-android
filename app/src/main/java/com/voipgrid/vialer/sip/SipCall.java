@@ -11,6 +11,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
+import com.voipgrid.vialer.firebase.FirebaseEventSubmitter;
 import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.media.monitoring.CallMediaMonitor;
@@ -575,7 +576,7 @@ public class SipCall extends org.pjsip.pjsua2.Call {
 
     private void onCallDisconnected() {
         mLogger.d("onCallDisconnected");
-
+        FirebaseEventSubmitter.INSTANCE.userCompletedCall(this);
         mCallIsConnected = false;
         mSipService.removeCallFromList(this);
         mCurrentCallState = SipConstants.CALL_DISCONNECTED_MESSAGE;

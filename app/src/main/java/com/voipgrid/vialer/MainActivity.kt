@@ -3,16 +3,22 @@ package com.voipgrid.vialer
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityOptionsCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import com.stepstone.apprating.AppRatingDialog
 import com.stepstone.apprating.listener.RatingDialogListener
 import com.voipgrid.vialer.api.FeedbackApi
 import com.voipgrid.vialer.api.models.Feedback
 import com.voipgrid.vialer.dialer.DialerActivity
+import com.voipgrid.vialer.firebase.FirebaseEventSubmitter
 import com.voipgrid.vialer.permissions.ContactsPermission
 import com.voipgrid.vialer.persistence.RatingPopup
 import com.voipgrid.vialer.persistence.Statistics
@@ -157,9 +163,9 @@ class MainActivity : LoginRequiredActivity(), RatingDialogListener {
         RatingPopup.shown = true
         if (comment.isNotBlank()) {
             submitFeedback("Feedback submitted with a $rate star-rating: $comment")
-        } else {
-            submitFeedback("The app was given a $rate star-rating but the user left no comment.")
         }
+
+        FirebaseEventSubmitter.userDidRateApp(rate)
 
         if (rate >= 3) {
             startActivity(Intent(Intent.ACTION_VIEW).apply {
