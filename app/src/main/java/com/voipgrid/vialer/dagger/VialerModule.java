@@ -23,13 +23,11 @@ import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
 import com.voipgrid.vialer.audio.AudioFocus;
-import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallScreenWake;
 import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
-import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.callrecord.CachedContacts;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
 import com.voipgrid.vialer.callrecord.database.CallRecordDao;
@@ -42,10 +40,6 @@ import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.middleware.Middleware;
 import com.voipgrid.vialer.onboarding.VoipgridLogin;
-import com.voipgrid.vialer.sip.IpSwitchMonitor;
-import com.voipgrid.vialer.sip.NetworkConnectivity;
-import com.voipgrid.vialer.sip.SipConfig;
-import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ColorHelper;
@@ -116,19 +110,6 @@ public class VialerModule {
         return new Contacts();
     }
 
-    @Provides CallActivityHelper provideCallActivityHelper(Contacts contacts) {
-        return new CallActivityHelper(contacts);
-    }
-
-    @Provides IpSwitchMonitor provideIpSwitchMonitor() {
-        return new IpSwitchMonitor();
-    }
-
-    @Provides
-    SipConfig provideSipConfig(IpSwitchMonitor ipSwitchMonitor, BroadcastReceiverManager broadcastReceiverManager) {
-        return new SipConfig(ipSwitchMonitor, broadcastReceiverManager);
-    }
-
     @Provides SharedPreferences provideSharedPreferences(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);
     }
@@ -170,14 +151,6 @@ public class VialerModule {
         return new NativeCallManager(telephonyManager);
     }
 
-    @Provides ToneGenerator provideToneGenerator() {
-        return new ToneGenerator(android.media.AudioManager.STREAM_VOICE_CALL, SipConstants.RINGING_VOLUME);
-    }
-
-    @Provides NetworkConnectivity provideNetworkConnectivity() {
-        return new NetworkConnectivity();
-    }
-
     @Provides @Singleton
     PhoneAccountFetcher providePhoneAccountFetcher(VoipgridApi api) {
         return new PhoneAccountFetcher(api);
@@ -202,11 +175,6 @@ public class VialerModule {
     @Provides
     IncomingCallVibration provideIncomingCallVibrator(android.media.AudioManager audioManager, Vibrator vibrator) {
         return new IncomingCallVibration(audioManager, vibrator);
-    }
-
-    @Provides
-    AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager, AudioFocus audioFocus) {
-        return new AudioRouter(context, androidAudioManager, broadcastReceiverManager, audioFocus);
     }
 
     @Singleton

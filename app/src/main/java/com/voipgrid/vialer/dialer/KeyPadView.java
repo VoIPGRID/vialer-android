@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.sip.SipService;
 
 
 /**
@@ -88,9 +87,10 @@ public class KeyPadView extends LinearLayout
      * @return True if a tone should be produced, false otherwise.
      */
     private boolean shouldUseTone() {
-        return SipService.sipServiceActive || Settings.System.getInt(
-                getContext().getContentResolver(),
-                Settings.System.DTMF_TONE_WHEN_DIALING, 1) == 1;
+        return true;
+//        return SipService.sipServiceActive || Settings.System.getInt(
+//                getContext().getContentResolver(),
+//                Settings.System.DTMF_TONE_WHEN_DIALING, 1) == 1;
     }
 
     public void setOnKeyPadClickListener(OnKeyPadClickListener listener) {

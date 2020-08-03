@@ -172,7 +172,7 @@ ext {
     kotPrefVersion = "2.8.0"
     room_version = '2.2.0-beta01'
     lifecycle_version = "1.1.1"
-    koin_version = "2.0.1"
+    koin_version = "2.1.4"
     nav_version = "2.3.0-alpha02"
 }
 
@@ -182,7 +182,7 @@ dependencies {
 
     // Modules.
     implementation files('libs/logentries-android.jar')
-    implementation(name: 'pjsip', ext: 'aar')
+    implementation(name: 'AndroidPhoneLib', ext: 'aar')
 
     implementation "androidx.appcompat:appcompat:${supportLibVersion}"
     implementation 'com.google.android.material:material:1.1.0-alpha10'

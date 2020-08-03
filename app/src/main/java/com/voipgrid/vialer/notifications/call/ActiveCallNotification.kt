@@ -1,15 +1,13 @@
 package com.voipgrid.vialer.notifications.call
 
 import android.app.PendingIntent
+import android.content.Intent
 import androidx.core.app.NotificationCompat
-import com.voipgrid.vialer.CallActivity
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.calling.AbstractCallActivity
-import com.voipgrid.vialer.calling.CallingConstants
-import com.voipgrid.vialer.sip.SipCall
+import com.voipgrid.vialer.voip.Call
 
 
-class ActiveCallNotification(private val call : SipCall) : AbstractCallNotification() {
+class ActiveCallNotification(private val call : Call) : AbstractCallNotification() {
 
     /**
      * Build the active call notification, this includes the call duration so
@@ -21,20 +19,21 @@ class ActiveCallNotification(private val call : SipCall) : AbstractCallNotificat
                 .setContentTitle(createNotificationTitle())
                 .setContentText(context.getString(R.string.callnotification_active_call))
                 .setContentIntent(createCallActivityPendingIntent())
-                .setSubText(call.prettyCallDuration)
+//                .setSubText(call.duration)
                 .setShowWhen(false)
-                .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(call.phoneNumber))
+//                .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(call.phoneNumber))
     }
 
     private fun createCallActivityPendingIntent(): PendingIntent? {
-        return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
-                context,
-                CallActivity::class.java,
-                call.phoneNumberUri,
-                CallingConstants.TYPE_OUTGOING_CALL,
-                call.callerId,
-                call.phoneNumber
-        ))
+        return createPendingIntent(Intent())
+//        return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
+//                context,
+//                CallActivity::class.java,
+//                call.phoneNumberUri,
+//                CallingConstants.TYPE_OUTGOING_CALL,
+//                call.callerId,
+//                call.phoneNumber
+//        ))
     }
 
     /**
@@ -43,10 +42,11 @@ class ActiveCallNotification(private val call : SipCall) : AbstractCallNotificat
      *
      */
     private fun createNotificationTitle() : String {
-        if (call.callerId == null || call.callerId.isEmpty()) {
-            return if (call.phoneNumber == null) " " else call.phoneNumber
-        }
-
-        return "${call.callerId} (${call.phoneNumber})"
+        return "CreatenOtifiactiontitle"
+//        if (call.callerId == null || call.callerId.isEmpty()) {
+//            return if (call.phoneNumber == null) " " else call.phoneNumber
+//        }
+//
+//        return "${call.callerId} (${call.phoneNumber})"
     }
 }

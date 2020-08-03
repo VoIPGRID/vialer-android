@@ -1,14 +1,12 @@
 package com.voipgrid.vialer.notifications.call
 
 import android.app.PendingIntent
+import android.content.Intent
 import androidx.core.app.NotificationCompat
-import com.voipgrid.vialer.CallActivity
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.calling.AbstractCallActivity
-import com.voipgrid.vialer.calling.CallingConstants
-import com.voipgrid.vialer.sip.SipCall
+import com.voipgrid.vialer.voip.Call
 
-class OutgoingCallDiallingNotification(private val call : SipCall) : AbstractCallNotification() {
+class OutgoingCallDiallingNotification(private val call : Call) : AbstractCallNotification() {
 
     /**
      * Build an outgoing call notification for during dialling.
@@ -20,27 +18,28 @@ class OutgoingCallDiallingNotification(private val call : SipCall) : AbstractCal
                 .setContentTitle(createNotificationTitle())
                 .setContentText(context.getString(R.string.callnotification_active_call))
                 .setContentIntent(createCallActivityPendingIntent())
-                .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(call.phoneNumber))
+//                .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(call.phoneNumber))
     }
 
     private fun createNotificationTitle() : String {
         val dialing = context.getString(R.string.callnotification_dialing)
-
-        if (!call.callerId.isNullOrEmpty()) {
-            return "$dialing ${call.callerId} (${call.phoneNumber})"
-        }
-
-        return "$dialing ${call.phoneNumber}"
+return dialing
+//        if (!call.callerId.isNullOrEmpty()) {
+//            return "$dialing ${call.callerId} (${call.phoneNumber})"
+//        }
+//
+//        return "$dialing ${call.phoneNumber}"
     }
 
     private fun createCallActivityPendingIntent(): PendingIntent? {
-        return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
-                context,
-                CallActivity::class.java,
-                call.phoneNumberUri,
-                CallingConstants.TYPE_OUTGOING_CALL,
-                call.callerId,
-                call.phoneNumber
-        ))
+        return createPendingIntent(Intent())
+//        return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
+//                context,
+//                CallActivity::class.java,
+//                call.phoneNumberUri,
+//                CallingConstants.TYPE_OUTGOING_CALL,
+//                call.callerId,
+//                call.phoneNumber
+//        ))
     }
 }

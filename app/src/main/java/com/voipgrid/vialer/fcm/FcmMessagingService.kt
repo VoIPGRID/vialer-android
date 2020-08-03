@@ -12,10 +12,6 @@ import com.voipgrid.vialer.call.NativeCallManager
 import com.voipgrid.vialer.logging.LogHelper
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.notifications.VoipDisabledNotification
-import com.voipgrid.vialer.sip.SipConstants
-import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.sip.SipUri
-import com.voipgrid.vialer.statistics.VialerStatistics
 import com.voipgrid.vialer.util.ConnectivityHelper
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.coroutines.GlobalScope
@@ -52,7 +48,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
         super.onMessageReceived(remoteMessage)
         val remoteMessageData = RemoteMessageData(remoteMessage.data)
         LogHelper.using(logger).logMiddlewareMessageReceived(remoteMessage, remoteMessageData.requestType)
-        VialerStatistics.pushNotificationWasReceived(remoteMessage)
 
         when {
             !remoteMessageData.hasRequestType() -> logger.e("No requestType")
@@ -73,8 +68,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
      * @param remoteMessageData
      */
     private fun handleCall(remoteMessage: RemoteMessage, remoteMessageData: RemoteMessageData) {
-        logCurrentState(remoteMessageData)
-
         when {
             !isConnectionSufficient() -> handleInsufficientConnection(remoteMessage, remoteMessageData)
             isAVialerCallAlreadyInProgress() -> rejectDueToVialerCallAlreadyInProgress(remoteMessage, remoteMessageData)
@@ -96,7 +89,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
      * @param remoteMessageData
      */
     private fun handleMessage(remoteMessage: RemoteMessage, remoteMessageData: RemoteMessageData) {
-
         if (!remoteMessageData.isRegisteredOnOtherDeviceMessage) {
             return
         }
@@ -117,9 +109,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
      * @param remoteMessageData The remote message data that we are handling.
      */
     private fun handleInsufficientConnection(remoteMessage: RemoteMessage, remoteMessageData: RemoteMessageData) {
-        if (hasExceededMaximumAttempts(remoteMessageData)) {
-            VialerStatistics.incomingCallFailedDueToInsufficientNetwork(remoteMessage)
-        }
         logger.e(when(isDeviceInIdleMode()){
             true -> "Device in idle mode and connection insufficient. For now do nothing wait for next middleware push."
             false -> "Connection is insufficient. For now do nothing and wait for next middleware push"
@@ -139,16 +128,8 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
      *
      * @return TRUE if there is an active call, otherwise FALSE
      */
-    private fun isAVialerCallAlreadyInProgress() = SipService.sipServiceActive;
+    private fun isAVialerCallAlreadyInProgress() = false
 
-    /**
-     * Check if we have reached or exceeded the maximum number of attempts that we
-     * accept from the middleware.
-     *
-     * @param remoteMessageData The remote message data that we are handling.
-     * @return TRUE if we have reached or exceeded maximum attempts, otherwise FALSE.
-     */
-    private fun hasExceededMaximumAttempts(remoteMessageData: RemoteMessageData) = remoteMessageData.getAttemptNumber() >= MAX_MIDDLEWARE_PUSH_ATTEMPTS
 
     /**
      * Performs various tasks that are necessary when rejecting a call based on the fact that there is
@@ -176,8 +157,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
         logger.d("Reject due to native call already in progress")
 
         replyServer(remoteMessageData, false)
-
-        VialerStatistics.incomingCallFailedDueToOngoingGsmCall(remoteMessage)
     }
 
     /**
@@ -191,8 +170,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
             logger.i("Push notification ($lastHandledCall) is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully")
             return
         }
-
-        VialerStatistics.incomingCallFailedDueToOngoingVialerCall(remoteMessage)
     }
 
     /**
@@ -220,20 +197,7 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
      * @param remoteMessageData
      */
     private fun startSipService(remoteMessageData: RemoteMessageData) {
-        val intent = Intent(this, SipService::class.java).apply {
-            action = SipService.Actions.HANDLE_INCOMING_CALL
-            data = SipUri.sipAddressUri(this@FcmMessagingService,PhoneNumberUtils.format(remoteMessageData.phoneNumber))
-            putExtra(SipConstants.EXTRA_RESPONSE_URL, remoteMessageData.responseUrl);
-            putExtra(SipConstants.EXTRA_REQUEST_TOKEN, remoteMessageData.requestToken)
-            putExtra(SipConstants.EXTRA_PHONE_NUMBER, remoteMessageData.phoneNumber)
-            putExtra(SipConstants.EXTRA_CONTACT_NAME, remoteMessageData.callerId)
-            putExtra(RemoteMessageData.MESSAGE_START_TIME, remoteMessageData.messageStartTime)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
+
     }
 
     /**
@@ -245,20 +209,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
      */
     private fun isDeviceInIdleMode() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && powerManager.isDeviceIdleMode
 
-    /**
-     * Log some information about our current state to help determine what state the phone is in when
-     * a push notification is incoming.
-     *
-     * @param remoteMessageData
-     */
-    private fun logCurrentState(remoteMessageData: RemoteMessageData) {
-        listOf(
-                "SipService Active: " + SipService.sipServiceActive,    "CurrentConnection: " + connectivityHelper.getConnectionTypeString(),
-                "Payload: " + remoteMessageData.getRawData().toString()
-        ).forEach{
-            logger.d(it)
-        }
-    }
 
     override fun onNewToken(s: String) {
         super.onNewToken(s)

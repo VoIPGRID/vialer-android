@@ -14,7 +14,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.R.drawable
 import com.voipgrid.vialer.R.string
-import com.voipgrid.vialer.sip.SipService
 
 
 class IncomingCallNotification(private val number : String, private val callerId : String) : AbstractCallNotification() {
@@ -58,16 +57,16 @@ class IncomingCallNotification(private val number : String, private val callerId
                 .setCategory(NotificationCompat.CATEGORY_CALL)
                 .setFullScreenIntent(createIncomingCallActivityPendingIntent(number, callerId), true)
                 .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(number))
-                .addAction(
-                        drawable.ic_call_decline_normal,
-                        context.getString(string.call_incoming_decline),
-                        SipService.createSipServiceAction(SipService.Actions.DECLINE_INCOMING_CALL)
-                )
-                .addAction(
-                        drawable.ic_call_answer_normal,
-                        context.getString(string.call_incoming_accept),
-                        SipService.createSipServiceAction(SipService.Actions.ANSWER_INCOMING_CALL)
-                )
+//                .addAction(
+//                        drawable.ic_call_decline_normal,
+//                        context.getString(string.call_incoming_decline),
+//                        SipService.createSipServiceAction(SipService.Actions.DECLINE_INCOMING_CALL)
+//                )
+//                .addAction(
+//                        drawable.ic_call_answer_normal,
+//                        context.getString(string.call_incoming_accept),
+//                        SipService.createSipServiceAction(SipService.Actions.ANSWER_INCOMING_CALL)
+//                )
                 .setSound(null)
     }
 

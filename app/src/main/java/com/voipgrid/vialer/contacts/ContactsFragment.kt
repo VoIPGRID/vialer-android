@@ -14,7 +14,6 @@ import com.voipgrid.vialer.ContactsViewModel
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.contacts.dialog.ContactDialog
 import com.voipgrid.vialer.permissions.ContactsPermission
-import com.voipgrid.vialer.util.DialHelper
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.fragment_contacts.*
 import kotlinx.coroutines.CoroutineScope
@@ -135,9 +134,8 @@ class ContactsFragment : Fragment(), KoinComponent, CoroutineScope {
      *
      */
     private fun startCall(number: String, contact: String) {
-        activity?.let {
-            DialHelper.fromActivity(it).callNumber(PhoneNumberUtils.format(number), contact)
-        }
+
+        throw NotImplementedError("not implemented")
     }
 
     companion object {

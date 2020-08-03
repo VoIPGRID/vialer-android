@@ -24,7 +24,6 @@ import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.callrecord.database.CallRecordEntity
 import com.voipgrid.vialer.contacts.Contacts
 import com.voipgrid.vialer.dialer.DialerActivity
-import com.voipgrid.vialer.util.DialHelper
 import com.voipgrid.vialer.util.IconHelper
 import com.voipgrid.vialer.util.TimeUtils
 import kotlinx.android.synthetic.main.list_item_call_record.view.*
@@ -154,14 +153,15 @@ class CallRecordViewHolder(private val view: View) : RecyclerView.ViewHolder(vie
     }
 
     private fun startCall() {
-        if (!callAlreadySetup) {
-            callAlreadySetup = true
-            DialHelper.fromActivity(activity).callNumber(callRecord.thirdPartyNumber, "")
-            PreferenceManager.getDefaultSharedPreferences(activity).edit().putString(
-                    DialerActivity.LAST_DIALED, callRecord.thirdPartyNumber).apply()
-        }
+        throw NotImplementedError("not implemented")
+//        if (!callAlreadySetup) {
+//            callAlreadySetup = true
+//            DialHelper.fromActivity(activity).callNumber(callRecord.thirdPartyNumber, "")
+//            PreferenceManager.getDefaultSharedPreferences(activity).edit().putString(
+//                    DialerActivity.LAST_DIALED, callRecord.thirdPartyNumber).apply()
+//        }
 
-        callAlreadySetup = false
+        //callAlreadySetup = false
     }
 
     private fun addToContacts() {

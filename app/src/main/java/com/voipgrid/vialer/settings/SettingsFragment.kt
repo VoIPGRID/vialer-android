@@ -10,7 +10,6 @@ import com.voipgrid.vialer.middleware.Middleware
 import com.voipgrid.vialer.notifications.VoipDisabledNotification
 import com.voipgrid.vialer.onboarding.SingleOnboardingStepActivity.Companion.launch
 import com.voipgrid.vialer.onboarding.steps.MissingVoipAccountStep
-import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.BatteryOptimizationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -74,7 +73,7 @@ class SettingsFragment : AbstractSettingsFragment() {
     private fun callUsingVoipChanged(voipEnabled: Boolean) {
         if (!voipEnabled) {
             middleware.unregister()
-            activity?.stopService(Intent(activity, SipService::class.java))
+//            activity?.stopService(Intent(activity, SipService::class.java))
             return
         }
 

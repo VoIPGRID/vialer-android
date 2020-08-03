@@ -18,7 +18,6 @@ import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.calling.Dialer
 import com.voipgrid.vialer.t9.T9Fragment
 import com.voipgrid.vialer.util.ConnectivityHelper
-import com.voipgrid.vialer.util.DialHelper
 import com.voipgrid.vialer.util.LoginRequiredActivity
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.activity_dialer.*
@@ -29,8 +28,6 @@ import kotlinx.coroutines.launch
 
 
 class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.Listener {
-
-    private val dialHelper by lazy { DialHelper.fromActivity(this) }
 
     private lateinit var t9Fragment: T9Fragment
 
@@ -115,7 +112,8 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
                 startActivity(intent)
                 finish()
             }
-            this.resources.getInteger(R.integer.microphone_permission_request_code) -> dialHelper.callAttemptedNumber()
+            this.resources.getInteger(R.integer.microphone_permission_request_code) -> throw NotImplementedError("not implemented")
+
         }
     }
 
@@ -137,8 +135,8 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
         when(number.isEmpty()) {
             true -> Toast.makeText(this@DialerActivity, getString(R.string.dialer_invalid_number), Toast.LENGTH_LONG).show()
             false -> {
-                dialHelper.callNumber(phoneNumberToCall, contactName)
                 User.internal.lastDialledNumber = phoneNumberToCall
+                throw NotImplementedError("not implemented")
             }
         }
     }

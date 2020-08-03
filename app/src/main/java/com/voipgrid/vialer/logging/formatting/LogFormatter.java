@@ -1,12 +1,10 @@
 package com.voipgrid.vialer.logging.formatting;
 
 import com.voipgrid.vialer.logging.formatting.formatters.PayloadAnonymizer;
-import com.voipgrid.vialer.logging.formatting.formatters.SipLogAnonymizer;
 
 public class LogFormatter {
 
     private static final Formatter[] formatters = new Formatter[] {
-            new SipLogAnonymizer(),
             new PayloadAnonymizer(),
     };
 
