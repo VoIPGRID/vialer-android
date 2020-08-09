@@ -8,9 +8,13 @@ import com.github.tamir7.contacts.Contacts
 import com.google.gson.GsonBuilder
 import com.segment.analytics.Analytics
 import com.segment.analytics.Analytics.setSingletonInstance
+import com.voipgrid.voip.di.voipModules
 import com.voipgrid.vialer.R
+import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.koin.appModule
+import com.voipgrid.voip.Config
+import com.voipgrid.voip.SoftPhone
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -31,8 +35,18 @@ class RegisterLibraries : OnLaunchTask {
         startKoin {
             androidLogger()
             androidContext(application)
-            modules(appModule)
+            modules(listOf(appModule) + voipModules)
         }
+
+        User.voipAccount?.let {
+            SoftPhone.config = Config(
+                    it.accountId,
+                    it.password,
+                    "sipproxy.voipgrid.nl",
+                    "5060"
+            )
+        }
+
     }
 
     private fun initializeSegmentAnalytics(context: Context) {

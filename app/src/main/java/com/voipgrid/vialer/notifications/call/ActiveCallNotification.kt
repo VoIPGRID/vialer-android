@@ -4,10 +4,10 @@ import android.app.PendingIntent
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.voip.Call
+import com.voipgrid.voip.Call
 
 
-class ActiveCallNotification(private val call : Call) : AbstractCallNotification() {
+class ActiveCallNotification(private val call : com.voipgrid.voip.Call) : AbstractCallNotification() {
 
     /**
      * Build the active call notification, this includes the call duration so

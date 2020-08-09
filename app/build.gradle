@@ -13,7 +13,7 @@ android {
     compileSdkVersion 29
     defaultConfig {
         applicationId "com.voipgrid.app"
-        minSdkVersion 23
+        minSdkVersion 26
         targetSdkVersion 29
         versionCode 237
         versionName "6.8.2"
@@ -182,8 +182,6 @@ dependencies {
 
     // Modules.
     implementation files('libs/logentries-android.jar')
-    implementation(name: 'AndroidPhoneLib', ext: 'aar')
-
     implementation "androidx.appcompat:appcompat:${supportLibVersion}"
     implementation 'com.google.android.material:material:1.1.0-alpha10'
     implementation "androidx.annotation:annotation:1.1.0"
@@ -220,6 +218,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.2.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.2.1'
+    implementation project(path: ':app:voip')
     kapt "com.google.dagger:dagger-compiler:${daggerVersion}"
     implementation "com.google.dagger:dagger-android:${daggerVersion}"
     kapt "com.google.dagger:dagger-android-processor:${daggerVersion}"

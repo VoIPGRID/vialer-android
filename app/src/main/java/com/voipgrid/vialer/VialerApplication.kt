@@ -10,7 +10,6 @@ import com.voipgrid.vialer.database.AppDatabase
 import com.voipgrid.vialer.tasks.launch.ConvertApiToken
 import com.voipgrid.vialer.tasks.launch.RegisterLibraries
 import com.voipgrid.vialer.tasks.launch.RegisterPeriodicTasks
-import nl.spindle.phonelib.PhoneLib
 
 class VialerApplication : Application() {
 

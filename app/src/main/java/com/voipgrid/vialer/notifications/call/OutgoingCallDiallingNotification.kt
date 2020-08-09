@@ -4,9 +4,9 @@ import android.app.PendingIntent
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.R
-import com.voipgrid.vialer.voip.Call
+import com.voipgrid.voip.Call
 
-class OutgoingCallDiallingNotification(private val call : Call) : AbstractCallNotification() {
+class OutgoingCallDiallingNotification(private val call : com.voipgrid.voip.Call) : AbstractCallNotification() {
 
     /**
      * Build an outgoing call notification for during dialling.

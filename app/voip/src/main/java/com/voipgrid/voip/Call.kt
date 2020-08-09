@@ -1,9 +1,9 @@
-package com.voipgrid.vialer.voip
+package com.voipgrid.voip
 
 import nl.spindle.phonelib.model.Session
 import java.util.*
 
-class Call(private val session: Session, val direction: Direction) {
+class Call(val session: Session, val direction: Direction) {
 
     val uuid = UUID.randomUUID()
 

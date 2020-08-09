@@ -34,12 +34,12 @@ class Middleware(private val context: Context) {
             val token = task.result?.token ?: return@addOnCompleteListener
 
             GlobalScope.launch {
-                try {
+//                try {
                     performRegistrationApiRequest(token)
-                    logger.i("Registered at the middleware with the token: $token")
-                } catch (e: Exception) {
-                    logger.w("Failed to register ${e.message}")
-                }
+//                    logger.i("Registered at the middleware with the token: $token")
+//                } catch (e: Exception) {
+//                    logger.w("Failed to register ${e.message}")
+//                }
             }
         }
     }
@@ -56,32 +56,34 @@ class Middleware(private val context: Context) {
         }
 
         GlobalScope.launch {
-            try {
+//            try {
                 performUnregisterApiRequest()
                 logger.i("Unregistered from the middleware successfully")
-            } catch (e: Exception) {
-                logger.w("Failed to unregister ${e.message}")
-            }
+//            } catch (e: Exception) {
+//                logger.w("Failed to unregister ${e.message}")
+//            }
         }
     }
 
     private fun isValidUserToRegisterWithMiddleware(): Boolean = User.isLoggedIn && User.voip.canUseSip
 
-    private suspend fun performRegistrationApiRequest(token: String) = withContext(Dispatchers.IO) {
-        val response = api.register(
-                User.voipgridUser?.fullName,
-                token,
-                User.voipAccount?.accountId,
-                Build.VERSION.CODENAME,
-                Build.VERSION.RELEASE,
-                context.packageName,
-                if (User.userPreferences.remoteLoggingIsEnabled) User.uuid else null
-        ).execute()
+    private suspend fun performRegistrationApiRequest(token: String) {
+        withContext(Dispatchers.IO) {
+            val response = api.register(
+                    User.voipgridUser?.fullName,
+                    token,
+                    User.voipAccount?.accountId,
+                    Build.VERSION.CODENAME,
+                    Build.VERSION.RELEASE,
+                    context.packageName,
+                    if (User.userPreferences.remoteLoggingIsEnabled) User.uuid else null
+            ).execute()
 
-        if (response.isSuccessful) {
-            User.middleware.currentToken = token
-        } else {
-            throw Exception("Failed to unregister from the middleware, ${response.code()}")
+            if (response.isSuccessful) {
+                User.middleware.currentToken = token
+            } else {
+                throw Exception("Failed to unregister from the middleware, ${response.code()}")
+            }
         }
     }
 

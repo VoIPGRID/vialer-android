@@ -19,8 +19,6 @@ import com.voipgrid.vialer.t9.ContactsSearcher
 import com.voipgrid.vialer.util.BatteryOptimizationManager
 import com.voipgrid.vialer.util.ConnectivityHelper
 import com.voipgrid.vialer.util.Sim
-import com.voipgrid.vialer.voip.SoftPhone
-import nl.spindle.phonelib.PhoneLib
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -66,8 +64,4 @@ val appModule = module {
     single { Middleware(androidContext()) }
 
     single { PasswordChange(get()) }
-//
-//    single { SoftPhone(get()) }
-//
-//    single { PhoneLib.getInstance(androidContext()) }
 }

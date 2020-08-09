@@ -18,14 +18,11 @@ import com.voipgrid.vialer.permissions.ContactsPermission
 import com.voipgrid.vialer.persistence.RatingPopup
 import com.voipgrid.vialer.persistence.Statistics
 import com.voipgrid.vialer.util.LoginRequiredActivity
-import com.voipgrid.vialer.voip.SoftPhone
+import com.voipgrid.voip.VoIP
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import nl.spindle.phonelib.PhoneLib
-import nl.spindle.phonelib.model.RegistrationState
-import nl.spindle.phonelib.repository.registration.RegistrationCallback
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 
@@ -34,6 +31,7 @@ class MainActivity : LoginRequiredActivity(), RatingDialogListener {
 
     private var ratingDialog: AppRatingDialog? = null
     private val feedbackApi: FeedbackApi by inject()
+    private val voip: VoIP by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,18 +56,7 @@ class MainActivity : LoginRequiredActivity(), RatingDialogListener {
             findNavController(R.id.nav_host_fragment).navigate(intent.getIntExtra(Extra.NAVIGATE_TO.name, 0))
         }
 
-        PhoneLib.getInstance(this).initialise(this)
-
-        val phonelib = PhoneLib.getInstance(this)
-
-        User.voipAccount?.let {
-            phonelib.register(it.id, it.password, "sipproxy.voipgrid.nl", "5060", object : RegistrationCallback() {
-                override fun stateChanged(registrationState: RegistrationState) {
-                    super.stateChanged(registrationState)
-                    Log.e("TEST123", "State changed! ${registrationState.name}")
-                }
-            })
-        }
+        voip.placeCall("243")
     }
 
     override fun onResume() {
