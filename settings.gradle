@@ -1,2 +1,4 @@
+include ':app:common'
+include ':app:contacts'
 include ':app:voip'
 include ':app'

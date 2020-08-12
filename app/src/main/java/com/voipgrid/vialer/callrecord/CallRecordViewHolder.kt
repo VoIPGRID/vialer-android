@@ -7,10 +7,8 @@ import android.content.Context.CLIPBOARD_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.provider.ContactsContract
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -22,8 +20,7 @@ import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.PhoneAccountFetcher
 import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.callrecord.database.CallRecordEntity
-import com.voipgrid.vialer.contacts.Contacts
-import com.voipgrid.vialer.dialer.DialerActivity
+import com.voipgrid.contacts.Contacts
 import com.voipgrid.vialer.util.IconHelper
 import com.voipgrid.vialer.util.TimeUtils
 import kotlinx.android.synthetic.main.list_item_call_record.view.*
@@ -138,7 +135,7 @@ class CallRecordViewHolder(private val view: View) : RecyclerView.ViewHolder(vie
     override fun onClick(view: View) {
         val popup = PopupMenu(activity, view.call_button)
         popup.menuInflater.inflate(R.menu.menu_recent_call, popup.menu)
-        if (Contacts().getContactByPhoneNumber(callRecord.thirdPartyNumber) != null) {
+        if (com.voipgrid.contacts.Contacts(VialerApplication.get()).getContactByPhoneNumber(callRecord.thirdPartyNumber) != null) {
             popup.menu.removeItem(R.id.add_to_contacts)
         }
         popup.setOnMenuItemClickListener { item ->

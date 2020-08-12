@@ -1,11 +1,10 @@
 package com.voipgrid.vialer.callrecord;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.github.tamir7.contacts.Contact;
+import com.voipgrid.contacts.Contacts;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.contacts.Contacts;
 import com.voipgrid.vialer.permissions.ContactsPermission;
 
 import java.util.HashMap;

@@ -1,7 +1,7 @@
 package com.voipgrid.vialer.call;
 
-import static com.voipgrid.vialer.call.CallActionButton.DISABLED_ALPHA;
-import static com.voipgrid.vialer.call.CallActionButton.ENABLED_ALPHA;
+import static com.voipgrid.vialer.call.ui.buttons.CallActionButton.DISABLED_ALPHA;
+import static com.voipgrid.vialer.call.ui.buttons.CallActionButton.ENABLED_ALPHA;
 
 import android.content.Context;
 import android.util.AttributeSet;

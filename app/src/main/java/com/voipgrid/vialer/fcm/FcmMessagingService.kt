@@ -14,6 +14,7 @@ import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.notifications.VoipDisabledNotification
 import com.voipgrid.vialer.util.ConnectivityHelper
 import com.voipgrid.vialer.util.PhoneNumberUtils
+import com.voipgrid.voip.VoIP
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -31,6 +32,7 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
     private val nativeCallManager: NativeCallManager by inject()
     private val middlewareApi: Middleware by inject()
     private val middleware: com.voipgrid.vialer.middleware.Middleware by inject()
+    private val voip: VoIP by inject()
 
     /**
      * The number of times the middleware will attempt to send a push notification
@@ -77,7 +79,9 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
 
                 logger.d("Payload processed, calling startService method")
 
-                startSipService(remoteMessageData)
+                voip.addNewIncomingCall {
+                    replyServer(remoteMessageData, true)
+                }
             }
         }
     }
@@ -188,16 +192,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
         if (response.isSuccessful) {
             logger.i("response was successful")
         }
-    }
-
-    /**
-     * Start the SIP service with the relevant data from the push message in the
-     * intent.
-     *
-     * @param remoteMessageData
-     */
-    private fun startSipService(remoteMessageData: RemoteMessageData) {
-
     }
 
     /**

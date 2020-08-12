@@ -3,7 +3,6 @@ package com.voipgrid.vialer.dagger;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -12,6 +11,8 @@ import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.voipgrid.contacts.Contacts;
+import com.voipgrid.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.Logout;
 import com.voipgrid.vialer.User;
 import com.voipgrid.vialer.VialerApplication;
@@ -33,9 +34,6 @@ import com.voipgrid.vialer.callrecord.database.CallRecordsInserter;
 import com.voipgrid.vialer.callrecord.importing.CallRecordsFetcher;
 import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter;
 import com.voipgrid.vialer.callrecord.importing.NewCallRecordsImporter;
-import com.voipgrid.vialer.contacts.Contacts;
-import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
-import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.middleware.Middleware;
 import com.voipgrid.vialer.onboarding.VoipgridLogin;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
@@ -104,8 +102,8 @@ public class VialerModule {
         return (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
     }
 
-    @Provides Contacts provideContacts() {
-        return new Contacts();
+    @Provides Contacts provideContacts(Context context) {
+        return new Contacts(context);
     }
 
     @Provides SharedPreferences provideSharedPreferences(Context context) {
@@ -155,8 +153,8 @@ public class VialerModule {
     }
 
     @Provides
-    PhoneNumberImageGenerator provideNumberImageFinder(Contacts contacts) {
-        return new PhoneNumberImageGenerator(contacts);
+    PhoneNumberImageGenerator provideNumberImageFinder(Contacts contacts, Context context) {
+        return new PhoneNumberImageGenerator(contacts, context);
     }
 
     @Provides

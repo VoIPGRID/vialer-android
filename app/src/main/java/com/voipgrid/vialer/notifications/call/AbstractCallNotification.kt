@@ -11,10 +11,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
-import com.voipgrid.vialer.contacts.Contacts
-import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator
+import com.voipgrid.contacts.Contacts
+import com.voipgrid.contacts.PhoneNumberImageGenerator
 import com.voipgrid.vialer.notifications.AbstractNotification
-import com.voipgrid.voip.Call
 import javax.inject.Inject
 
 
@@ -36,8 +35,8 @@ abstract class AbstractCallNotification : AbstractNotification() {
      */
     private val logo = R.drawable.ic_logo
 
-    @Inject protected lateinit var phoneNumberImageGenerator : PhoneNumberImageGenerator
-    @Inject protected lateinit var contacts: Contacts
+    @Inject protected lateinit var phoneNumberImageGenerator : com.voipgrid.contacts.PhoneNumberImageGenerator
+    @Inject protected lateinit var contacts: com.voipgrid.contacts.Contacts
 
     init {
         VialerApplication.get().component().inject(this)

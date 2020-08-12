@@ -1,20 +1,19 @@
-package com.voipgrid.vialer.contacts
+package com.voipgrid.contacts
 import android.content.ContentUris
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.ContactsContract
 import android.telephony.PhoneNumberUtils
-import android.util.Log
 import com.github.tamir7.contacts.Contact
 import com.github.tamir7.contacts.Contacts
-import com.voipgrid.vialer.VialerApplication.Companion.get
 import java.io.ByteArrayInputStream
 
 /**
  * Class that allows you to get information about contacts..
  */
-class Contacts {
+class Contacts(private val context: Context) {
 
     private val q
         get() = Contacts.getQuery()
@@ -33,8 +32,8 @@ class Contacts {
         return try {
 
             val formattedNumber = PhoneNumberUtils.formatNumber(number, "NL")
-            val numberWithoutCountryCode = formattedNumber.replace("+${ASSUMED_COUNTRY_CODE} ", "")
-            val numberWithoutCountryCodeWithoutSpaces = formattedNumber.replace("+${ASSUMED_COUNTRY_CODE}", "").replace(" ", "")
+            val numberWithoutCountryCode = formattedNumber.replace("+$ASSUMED_COUNTRY_CODE ", "")
+            val numberWithoutCountryCodeWithoutSpaces = formattedNumber.replace("+$ASSUMED_COUNTRY_CODE", "").replace(" ", "")
 
             val contacts = Contacts
                     .getQuery()
@@ -74,7 +73,7 @@ class Contacts {
     private fun openPhoto(contactId: Long): Bitmap? {
         val contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId)
         val photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY)
-        val cursor = get().contentResolver.query(photoUri, arrayOf(ContactsContract.Contacts.Photo.PHOTO), null, null, null)
+        val cursor = context.contentResolver.query(photoUri, arrayOf(ContactsContract.Contacts.Photo.PHOTO), null, null, null)
                 ?: return null
         try {
             if (cursor.moveToFirst()) {

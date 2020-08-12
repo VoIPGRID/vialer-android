@@ -56,7 +56,6 @@ class MainActivity : LoginRequiredActivity(), RatingDialogListener {
             findNavController(R.id.nav_host_fragment).navigate(intent.getIntExtra(Extra.NAVIGATE_TO.name, 0))
         }
 
-        voip.placeCall("243")
     }
 
     override fun onResume() {
@@ -102,14 +101,16 @@ class MainActivity : LoginRequiredActivity(), RatingDialogListener {
      * Show the dialer view
      */
     private fun openDialer() {
-        startActivity(
-                Intent(this, DialerActivity::class.java),
-                ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        this,
-                        floating_action_button,
-                        "floating_action_button_transition_name"
-                ).toBundle()
-        )
+
+        voip.placeCall("244")
+//        startActivity(
+//                Intent(this, DialerActivity::class.java),
+//                ActivityOptionsCompat.makeSceneTransitionAnimation(
+//                        this,
+//                        floating_action_button,
+//                        "floating_action_button_transition_name"
+//                ).toBundle()
+//        )
     }
 
     private fun askForRating() {

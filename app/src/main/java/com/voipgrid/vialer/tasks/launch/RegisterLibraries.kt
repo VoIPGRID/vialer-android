@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.tasks.launch
 
 import android.content.Context
+import android.util.Log
 import com.chibatching.kotpref.Kotpref
 import com.chibatching.kotpref.gsonpref.gson
 import com.github.anrwatchdog.ANRWatchDog
@@ -8,6 +9,7 @@ import com.github.tamir7.contacts.Contacts
 import com.google.gson.GsonBuilder
 import com.segment.analytics.Analytics
 import com.segment.analytics.Analytics.setSingletonInstance
+import com.voipgrid.contacts.di.contactsModule
 import com.voipgrid.voip.di.voipModules
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
@@ -35,10 +37,11 @@ class RegisterLibraries : OnLaunchTask {
         startKoin {
             androidLogger()
             androidContext(application)
-            modules(listOf(appModule) + voipModules)
+            modules(listOf(appModule) + voipModules + contactsModule)
         }
 
         User.voipAccount?.let {
+            Log.e("TEST123", "Settiong config")
             SoftPhone.config = Config(
                     it.accountId,
                     it.password,

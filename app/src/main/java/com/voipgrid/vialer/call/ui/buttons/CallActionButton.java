@@ -1,4 +1,4 @@
-package com.voipgrid.vialer.call;
+package com.voipgrid.vialer.call.ui.buttons;
 
 import android.content.Context;
 import android.graphics.Color;

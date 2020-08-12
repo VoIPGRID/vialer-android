@@ -14,7 +14,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/incoming_caller_title"
+            android:id="@+id/third_party_title"
             style="@style/ShrinkingCallTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
             tools:text="Ghostbusters" />
 
         <TextView
-            android:id="@+id/incoming_caller_subtitle"
+            android:id="@+id/third_party_subtitle"
             style="@style/CallTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/holder_dialpad">
 
-        <com.voipgrid.vialer.call.CallActionButton
+        <com.voipgrid.vialer.call.ui.buttons.CallActionButton
             android:id="@+id/button_mute"
             android:layout_width="@dimen/call_buttons_width"
             android:layout_height="@dimen/call_buttons_height"
@@ -112,7 +112,7 @@
         app:layout_constraintTop_toBottomOf="@+id/info_holder"
         app:layout_constraintVertical_chainStyle="packed">
 
-        <com.voipgrid.vialer.call.CallActionButton
+        <com.voipgrid.vialer.call.ui.buttons.CallActionButton
             android:id="@+id/button_dialpad"
             android:layout_width="@dimen/call_buttons_width"
             android:layout_height="@dimen/call_buttons_height"
@@ -144,7 +144,7 @@
         app:layout_constraintStart_toEndOf="@+id/holder_dialpad"
         app:layout_constraintTop_toTopOf="@+id/holder_dialpad">
 
-        <com.voipgrid.vialer.call.CallActionButton
+        <com.voipgrid.vialer.call.ui.buttons.AudioRouteButton
             android:id="@+id/button_speaker"
             android:layout_width="@dimen/call_buttons_width"
             android:layout_height="@dimen/call_buttons_height"
@@ -178,7 +178,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/holder_onhold">
 
-        <com.voipgrid.vialer.call.CallActionButton
+        <com.voipgrid.vialer.call.ui.buttons.CallActionButton
             android:id="@+id/button_transfer"
             android:layout_width="@dimen/call_buttons_width"
             android:layout_height="@dimen/call_buttons_height"
@@ -212,7 +212,7 @@
         app:layout_constraintStart_toEndOf="@+id/holder_transfer"
         app:layout_constraintTop_toBottomOf="@+id/holder_dialpad">
 
-        <com.voipgrid.vialer.call.CallActionButton
+        <com.voipgrid.vialer.call.ui.buttons.CallActionButton
             android:id="@+id/button_onhold"
             android:layout_width="@dimen/call_buttons_width"
             android:layout_height="@dimen/call_buttons_height"

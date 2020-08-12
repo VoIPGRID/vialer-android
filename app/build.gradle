@@ -13,7 +13,7 @@ android {
     compileSdkVersion 29
     defaultConfig {
         applicationId "com.voipgrid.app"
-        minSdkVersion 26
+        minSdkVersion 28
         targetSdkVersion 29
         versionCode 237
         versionName "6.8.2"
@@ -219,6 +219,8 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.2.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.2.1'
     implementation project(path: ':app:voip')
+    implementation project(path: ':app:contacts')
+    implementation project(path: ':app:common')
     kapt "com.google.dagger:dagger-compiler:${daggerVersion}"
     implementation "com.google.dagger:dagger-android:${daggerVersion}"
     kapt "com.google.dagger:dagger-android-processor:${daggerVersion}"

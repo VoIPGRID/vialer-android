@@ -12,6 +12,10 @@
                 <action android:name="android.telecom.ConnectionService" />
             </intent-filter>
         </service>
+        <receiver android:name=".android.NotificationActionReceiver"
+            android:exported="true">
+        </receiver>
+
     </application>
 
 </manifest>

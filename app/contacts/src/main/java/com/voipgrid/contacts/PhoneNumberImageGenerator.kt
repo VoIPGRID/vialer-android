@@ -1,11 +1,11 @@
-package com.voipgrid.vialer.contacts
+package com.voipgrid.contacts
 
+import android.content.Context
 import android.graphics.*
 import com.github.tamir7.contacts.Contact
-import com.voipgrid.vialer.util.IconHelper
 
 
-class PhoneNumberImageGenerator(private val contacts : Contacts) {
+class PhoneNumberImageGenerator(private val contacts : Contacts, private val context: Context) {
 
     /**
      * Perform a look-up in the contacts to find a contact image, if one is not found then generate
@@ -16,12 +16,12 @@ class PhoneNumberImageGenerator(private val contacts : Contacts) {
         val contact : Contact? = contacts.getContactByPhoneNumber(number)
 
         if (contact == null) {
-            return IconHelper.getCallerIconBitmap("", number, 0)
+            return IconHelper.getCallerIconBitmap(context, "", number, 0)
         }
 
         val contactImage = contacts.getContactImageByPhoneNumber(number)
 
-        return contactImage ?: IconHelper.getCallerIconBitmap(contact.displayName.substring(0, 1), number, 0)
+        return contactImage ?: IconHelper.getCallerIconBitmap(context, contact.displayName.substring(0, 1), number, 0)
     }
 
     /**

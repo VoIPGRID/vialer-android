@@ -9,6 +9,7 @@ import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import com.voipgrid.voip.android.VoIPService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -40,13 +41,15 @@ class VoIP(private val context: Context, private val telecomManager: TelecomMana
         )
     }
 
-    fun addNewIncomingCall() {
+    fun addNewIncomingCall(onRegister: (() -> Unit)?) {
+        telecomManager.registerPhoneAccount(phoneAccount)
 
         GlobalScope.launch(Main) {
+            softPhone.register()
 
-            val call = softPhone.awaitIncomingCall()
+            onRegister?.invoke()
 
-            telecomManager.registerPhoneAccount(phoneAccount)
+            softPhone.awaitIncomingCall()
 
             telecomManager.addNewIncomingCall(handle, Bundle())
         }
