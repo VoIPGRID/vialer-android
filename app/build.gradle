@@ -180,6 +180,8 @@ dependencies {
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
+    implementation 'org.openvoipalliance:AndroidPhoneLib:0.0.3'
+
     // Modules.
     implementation files('libs/logentries-android.jar')
     implementation "androidx.appcompat:appcompat:${supportLibVersion}"
