@@ -6,10 +6,11 @@ import com.voipgrid.vialer.CallActivity
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.calling.AbstractCallActivity
 import com.voipgrid.vialer.calling.CallingConstants
-import com.voipgrid.vialer.sip.SipCall
+import com.voipgrid.vialer.phonelib.prettyCallDuration
+import org.openvoipalliance.phonelib.model.Session
 
 
-class ActiveCallNotification(private val call : SipCall) : AbstractCallNotification() {
+class ActiveCallNotification(private val call : Session) : AbstractCallNotification() {
 
     /**
      * Build the active call notification, this includes the call duration so
@@ -29,11 +30,7 @@ class ActiveCallNotification(private val call : SipCall) : AbstractCallNotificat
     private fun createCallActivityPendingIntent(): PendingIntent? {
         return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
                 context,
-                CallActivity::class.java,
-                call.phoneNumberUri,
-                CallingConstants.TYPE_OUTGOING_CALL,
-                call.callerId,
-                call.phoneNumber
+                CallActivity::class.java
         ))
     }
 
@@ -43,10 +40,10 @@ class ActiveCallNotification(private val call : SipCall) : AbstractCallNotificat
      *
      */
     private fun createNotificationTitle() : String {
-        if (call.callerId == null || call.callerId.isEmpty()) {
+        if (call.displayName == null || call.displayName.isEmpty()) {
             return if (call.phoneNumber == null) " " else call.phoneNumber
         }
 
-        return "${call.callerId} (${call.phoneNumber})"
+        return "${call.displayName} (${call.phoneNumber})"
     }
 }

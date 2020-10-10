@@ -14,6 +14,7 @@ import com.voipgrid.vialer.koin.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import org.openvoipalliance.phonelib.PhoneLib
 
 
 /**
@@ -25,7 +26,7 @@ class RegisterLibraries : OnLaunchTask {
     override fun execute(application: VialerApplication) {
         ANRWatchDog().start()
         Contacts.initialize(application)
-       initializeSegmentAnalytics(application)
+        initializeSegmentAnalytics(application)
         Kotpref.gson = GsonBuilder().create()
 
         startKoin {

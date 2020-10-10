@@ -183,7 +183,6 @@ dependencies {
 
     // Modules.
     implementation files('libs/logentries-android.jar')
-    implementation(name: 'pjsip', ext: 'aar')
 
     implementation "androidx.appcompat:appcompat:${supportLibVersion}"
     implementation 'com.google.android.material:material:1.1.0-alpha10'
@@ -264,7 +263,7 @@ dependencies {
     androidTestImplementation 'tools.fastlane:screengrab:1.1.0'
 
     // Crashlytics
-    releaseImplementation "com.crashlytics.sdk.android:crashlytics:2.10.1"
+    releaseImplementation "com.crashlytics.sdk.android:crashlytics:17.2.2"
     implementation "androidx.core:core-ktx:1.0.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "androidx.work:work-runtime-ktx:$workVersion"
@@ -298,6 +297,8 @@ dependencies {
 
     implementation 'com.google.android.play:core:1.8.0'
     implementation 'com.google.android.play:core-ktx:1.8.0'
+
+    implementation 'org.openvoipalliance:AndroidPhoneLib:0.0.3'
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

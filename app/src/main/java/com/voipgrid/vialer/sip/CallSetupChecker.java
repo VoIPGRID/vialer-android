@@ -137,8 +137,9 @@ public class CallSetupChecker {
      * Check if the SipService is currently busy with the call we are checking for.
      */
     private boolean isSipServiceHandlingOurCall() {
-        return mSipService != null && mSipService.getCurrentCall() != null && mRequestToken.equals(
-                mSipService.getCurrentCall().getMiddlewareKey());
+        return mSipService != null && mSipService.getCurrentCall() != null;
+
+        //&& mRequestToken.equals(mSipService.getCurrentCall().getMiddlewareKey());
     }
 
     /**

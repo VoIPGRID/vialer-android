@@ -1,7 +1,9 @@
 package com.voipgrid.vialer.call;
 
 import com.voipgrid.vialer.contacts.Contacts;
-import com.voipgrid.vialer.sip.SipCall;
+import com.voipgrid.vialer.phonelib.SessionExtensionsKt;
+
+import org.openvoipalliance.phonelib.model.Session;
 
 public class CallDetail {
 
@@ -14,8 +16,8 @@ public class CallDetail {
         this.contactsCallerId = contactsCallerId;
     }
 
-    public static CallDetail fromSipCall(SipCall sipCall) {
-        return new CallDetail(sipCall.getIdentifier(), sipCall.getPhoneNumber(), sipCall.getCallerId(), new Contacts().getContactNameByPhoneNumber(sipCall.getPhoneNumber()));
+    public static CallDetail fromSipCall(Session sipCall) {
+        return new CallDetail(SessionExtensionsKt.getCallId(sipCall), sipCall.getPhoneNumber(), sipCall.getDisplayName(), new Contacts().getContactNameByPhoneNumber(sipCall.getPhoneNumber()));
     }
 
     public String getIdentifier() {

@@ -21,7 +21,6 @@ import android.util.Log;
 
 import com.voipgrid.vialer.bluetooth.BluetoothMediaSessionService;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 

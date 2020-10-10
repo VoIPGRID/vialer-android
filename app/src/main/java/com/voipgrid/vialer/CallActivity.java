@@ -33,7 +33,6 @@ import com.voipgrid.vialer.calling.Dialer;
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity;
 import com.voipgrid.vialer.dialer.DialerActivity;
 import com.voipgrid.vialer.sip.CallDisconnectedReason;
-import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.sip.SipUri;
 import com.voipgrid.vialer.statistics.VialerStatistics;

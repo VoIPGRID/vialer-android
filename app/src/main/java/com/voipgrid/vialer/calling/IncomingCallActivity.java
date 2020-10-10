@@ -128,29 +128,4 @@ public class IncomingCallActivity extends AbstractCallActivity {
     public void onCallDisconnected(CallDisconnectedReason reason) {
         finish();
     }
-
-    @Override
-    public void onCallHold() {
-
-    }
-
-    @Override
-    public void onCallUnhold() {
-
-    }
-
-    @Override
-    public void onCallRingingOut() {
-
-    }
-
-    @Override
-    public void onCallRingingIn() {
-
-    }
-
-    @Override
-    public void onServiceStopped() {
-
-    }
 }

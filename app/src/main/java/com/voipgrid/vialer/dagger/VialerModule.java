@@ -42,7 +42,6 @@ import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator;
 import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.middleware.Middleware;
 import com.voipgrid.vialer.onboarding.VoipgridLogin;
-import com.voipgrid.vialer.sip.IpSwitchMonitor;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
 import com.voipgrid.vialer.sip.SipConfig;
 import com.voipgrid.vialer.sip.SipConstants;
@@ -120,13 +119,9 @@ public class VialerModule {
         return new CallActivityHelper(contacts);
     }
 
-    @Provides IpSwitchMonitor provideIpSwitchMonitor() {
-        return new IpSwitchMonitor();
-    }
-
     @Provides
-    SipConfig provideSipConfig(IpSwitchMonitor ipSwitchMonitor, BroadcastReceiverManager broadcastReceiverManager) {
-        return new SipConfig(ipSwitchMonitor, broadcastReceiverManager);
+    SipConfig provideSipConfig() {
+        return new SipConfig();
     }
 
     @Provides SharedPreferences provideSharedPreferences(Context context) {

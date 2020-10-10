@@ -33,7 +33,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, CallStatusReceiver.Listener {
 
     protected SipServiceConnection mSipServiceConnection;
-    protected String mCurrentCallId;
     protected CallDurationTracker mCallDurationTracker;
     protected CallStatusReceiver mCallStatusReceiver;
     protected PowerManager powerManager;
@@ -94,7 +93,6 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
     @CallSuper
     public void sipServiceHasConnected(SipService sipService) {
         if (sipService.getFirstCall() != null) {
-            mCurrentCallId = sipService.getFirstCall().getIdentifier();
         } else {
             finish();
         }
@@ -136,7 +134,7 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
 
     @Optional
     public void onCallDurationUpdate(long seconds) {
-        if (!mSipServiceConnection.isAvailableAndHasActiveCall() || !mSipServiceConnection.get().getCurrentCall().isConnected() || mCallDurationView == null) {
+        if (!mSipServiceConnection.isAvailableAndHasActiveCall() || mCallDurationView == null) {
             return;
         }
 
@@ -159,16 +157,9 @@ public abstract class AbstractCallActivity extends LoginRequiredActivity impleme
         return getSipServiceConnection().get().getAudioRouter();
     }
 
-    public String getCurrentCallId() {
-        return mCurrentCallId;
-    }
-
-    public static Intent createIntentForCallActivity(Context caller, Class<?> activity, Uri sipAddressUri, String type, String callerId, String number) {
+    public static Intent createIntentForCallActivity(Context caller, Class<?> activity) {
         Intent intent = new Intent(caller, activity);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setDataAndType(sipAddressUri, type);
-        intent.putExtra(CallingConstants.CONTACT_NAME, callerId);
-        intent.putExtra(CallingConstants.PHONE_NUMBER, number);
         return intent;
     }
 }

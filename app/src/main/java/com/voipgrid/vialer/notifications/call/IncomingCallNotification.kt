@@ -53,10 +53,10 @@ class IncomingCallNotification(private val number : String, private val callerId
         return builder.setSmallIcon(drawable.ic_logo)
                 .setContentTitle(createNotificationTitle())
                 .setContentText(number)
-                .setContentIntent(createIncomingCallActivityPendingIntent(number, callerId))
+                .setContentIntent(createIncomingCallActivityPendingIntent())
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_CALL)
-                .setFullScreenIntent(createIncomingCallActivityPendingIntent(number, callerId), true)
+                .setFullScreenIntent(createIncomingCallActivityPendingIntent(), true)
                 .setLargeIcon(phoneNumberImageGenerator.findWithRoundedCorners(number))
                 .addAction(
                         drawable.ic_call_decline_normal,

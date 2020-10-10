@@ -11,16 +11,12 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication
-import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration
 import com.voipgrid.vialer.calling.AbstractCallActivity
-import com.voipgrid.vialer.calling.CallingConstants
 import com.voipgrid.vialer.calling.IncomingCallActivity
 import com.voipgrid.vialer.contacts.Contacts
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator
 import com.voipgrid.vialer.notifications.AbstractNotification
-import com.voipgrid.vialer.sip.SipCall
-import com.voipgrid.vialer.sip.SipUri
-import com.voipgrid.vialer.util.PhoneNumberUtils
+import org.openvoipalliance.phonelib.model.Session
 import javax.inject.Inject
 
 
@@ -104,14 +100,10 @@ abstract class AbstractCallNotification : AbstractNotification() {
      * Create a pending intent to open the incoming call activity screen.
      *
      */
-    protected fun createIncomingCallActivityPendingIntent(number: String, callerId: String): PendingIntent {
+    protected fun createIncomingCallActivityPendingIntent(): PendingIntent {
         return createPendingIntent(AbstractCallActivity.createIntentForCallActivity(
                 context,
-                IncomingCallActivity::class.java,
-                SipUri.sipAddressUri(context, PhoneNumberUtils.format(number)),
-                CallingConstants.TYPE_INCOMING_CALL,
-                callerId,
-                number
+                IncomingCallActivity::class.java
         ))
     }
 
@@ -143,13 +135,13 @@ abstract class AbstractCallNotification : AbstractNotification() {
      * Transform the call notification to an ongoing call notification.
      *
      */
-    fun outgoing(call : SipCall) : AbstractCallNotification = OutgoingCallDiallingNotification(call)
+    fun outgoing(call : Session) : AbstractCallNotification = OutgoingCallDiallingNotification(call)
 
     /**
      * Transform the call notification to an active call notification.
      *
      */
-    fun active(call : SipCall) : AbstractCallNotification = ActiveCallNotification(call)
+    fun active(call : Session) : AbstractCallNotification = ActiveCallNotification(call)
 
     fun missed(number: String, contactName: String?) {
         MissedCallNotification(number, contactName).display()

@@ -1,30 +1,6 @@
 package com.voipgrid.vialer.statistics;
 
 
-import android.content.Context;
-
-import com.google.firebase.messaging.RemoteMessage;
-import com.google.gson.GsonBuilder;
-import com.voipgrid.vialer.User;
-import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.Middleware;
-import com.voipgrid.vialer.api.SecureCalling;
-import com.voipgrid.vialer.api.ServiceGenerator;
-import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.media.monitoring.PacketStats;
-import com.voipgrid.vialer.sip.SipCall;
-import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
-import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 import static com.voipgrid.vialer.fcm.RemoteMessageData.ATTEMPT;
 import static com.voipgrid.vialer.fcm.RemoteMessageData.MESSAGE_START_TIME;
 import static com.voipgrid.vialer.fcm.RemoteMessageData.REQUEST_TOKEN;
@@ -38,8 +14,6 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_DURATION;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CALL_SETUP_SUCCESSFUL;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CLIENT_COUNTRY;
-import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CODEC;
-import static com.voipgrid.vialer.statistics.StatsConstants.KEY_CONNECTION_TYPE;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_DEVICE_MANUFACTURER;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_DEVICE_MODEL;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_FAILED_REASON;
@@ -52,10 +26,8 @@ import static com.voipgrid.vialer.statistics.StatsConstants.KEY_NETWORK;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_NETWORK_OPERATOR;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_OS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_OS_VERSION;
-import static com.voipgrid.vialer.statistics.StatsConstants.KEY_RX_PACKETS;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_SIP_USER_ID;
 import static com.voipgrid.vialer.statistics.StatsConstants.KEY_TIME_TO_INITIAL_RESPONSE;
-import static com.voipgrid.vialer.statistics.StatsConstants.KEY_TX_PACKETS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_ACCOUNT_CONNECTION_TYPE_TCP;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_ACCOUNT_CONNECTION_TYPE_TLS;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_BLUETOOTH_AUDIO_ENABLED_TRUE;
@@ -76,6 +48,31 @@ import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_HANGUP_REASON_USER;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_NETWORK_WIFI;
 import static com.voipgrid.vialer.statistics.StatsConstants.VALUE_OS;
+
+import android.content.Context;
+
+import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.GsonBuilder;
+import com.voipgrid.vialer.User;
+import com.voipgrid.vialer.VialerApplication;
+import com.voipgrid.vialer.api.Middleware;
+import com.voipgrid.vialer.api.SecureCalling;
+import com.voipgrid.vialer.api.ServiceGenerator;
+import com.voipgrid.vialer.logging.Logger;
+import com.voipgrid.vialer.phonelib.SessionExtensionsKt;
+import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
+import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
+
+import org.openvoipalliance.phonelib.model.Session;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class VialerStatistics {
 
@@ -108,7 +105,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void callWasSuccessfullySetup(SipCall sipCall) {
+    public static void callWasSuccessfullySetup(Session sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -128,7 +125,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void callFailedDueToNoAudio(SipCall sipCall, boolean hasReceivedAudio, boolean hasSentAudio) {
+    public static void callFailedDueToNoAudio(Session sipCall, boolean hasReceivedAudio, boolean hasSentAudio) {
         String failedReason;
 
         if (!hasReceivedAudio && !hasSentAudio) {
@@ -169,7 +166,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void incomingCallFailedDueToOngoingGsmCall(SipCall sipCall) {
+    public static void incomingCallFailedDueToOngoingGsmCall(Session sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -202,7 +199,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void incomingCallFailedDueToOngoingVialerCall(SipCall sipCall) {
+    public static void incomingCallFailedDueToOngoingVialerCall(Session sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -213,7 +210,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void userDeclinedIncomingCall(SipCall sipCall) {
+    public static void userDeclinedIncomingCall(Session sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -225,7 +222,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void incomingCallWasCompletedElsewhere(SipCall sipCall) {
+    public static void incomingCallWasCompletedElsewhere(Session sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -236,7 +233,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void incomingCallWasCancelledByOriginator(SipCall sipCall) {
+    public static void incomingCallWasCancelledByOriginator(Session sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -247,25 +244,25 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void userDidHangUpCall(SipCall sipCall) {
+    public static void userDidHangUpCall(Session sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
                 .withCallInformation(sipCall)
                 .withBluetoothInformation()
                 .addValue(KEY_HANGUP_REASON, VALUE_HANGUP_REASON_USER)
-                .addValue(KEY_CALL_DURATION, String.valueOf(sipCall.getCallDurationInMilliseconds()))
+                .addValue(KEY_CALL_DURATION, String.valueOf(SessionExtensionsKt.getCallDurationInMilliseconds(sipCall)))
                 .send();
     }
 
-    public static void remoteDidHangUpCall(SipCall sipCall) {
+    public static void remoteDidHangUpCall(Session sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
                 .withCallInformation(sipCall)
                 .withBluetoothInformation()
                 .addValue(KEY_HANGUP_REASON, VALUE_HANGUP_REASON_REMOTE)
-                .addValue(KEY_CALL_DURATION, String.valueOf(sipCall.getCallDurationInMilliseconds()))
+                .addValue(KEY_CALL_DURATION, String.valueOf(SessionExtensionsKt.getCallDurationInMilliseconds(sipCall)))
                 .send();
     }
 
@@ -305,31 +302,31 @@ public class VialerStatistics {
         return this;
     }
 
-    private VialerStatistics withCallInformation(SipCall call) {
-        if (call.getMiddlewareKey() != null && !call.getMiddlewareKey().isEmpty()) {
-            addValue(KEY_MIDDLEWARE_KEY, call.getMiddlewareKey());
-        }
+    private VialerStatistics withCallInformation(Session call) {
+//        if (call.getMiddlewareKey() != null && !call.getMiddlewareKey().isEmpty()) {
+//            addValue(KEY_MIDDLEWARE_KEY, call.getMiddlewareKey());
+//        }
 
-        addValue(KEY_CALL_ID, call.getAsteriskCallId());
-        addValue(KEY_CALL_DIRECTION, call.getCallDirection());
-        addValue(KEY_CONNECTION_TYPE, call.getTransport() != null ? call.getTransport().toUpperCase() : "");
+        addValue(KEY_CALL_ID, SessionExtensionsKt.getCallId(call));
+//        addValue(KEY_CALL_DIRECTION, call.getCallDirection());
+//        addValue(KEY_CONNECTION_TYPE, call.getTransport() != null ? call.getTransport().toUpperCase() : "");
         addValue(KEY_ACCOUNT_CONNECTION_TYPE, SecureCalling.fromContext(VialerApplication.get()).isEnabled() ? VALUE_ACCOUNT_CONNECTION_TYPE_TLS : VALUE_ACCOUNT_CONNECTION_TYPE_TCP);
-        addValue(KEY_CODEC, call.getCodec());
+//        addValue(KEY_CODEC, call.getCodec());
 
-        if (call.getMessageStartTime() != null) {
-            addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(call.getMessageStartTime())));
-        }
+//        if (call.getMessageStartTime() != null) {
+//            addValue(KEY_TIME_TO_INITIAL_RESPONSE, String.valueOf(calculateTimeToInitialResponse(call.getMessageStartTime())));
+//        }
+//
+//        PacketStats packetStats = call.getLastMediaPacketStats();
 
-        PacketStats packetStats = call.getLastMediaPacketStats();
-
-        if (packetStats != null) {
-            addValue(KEY_RX_PACKETS, String.valueOf(packetStats.getReceived()));
-            addValue(KEY_TX_PACKETS, String.valueOf(packetStats.getSent()));
-        }
-
-        if (call.hasCalculatedMos()) {
-            addValue(KEY_MOS, String.valueOf(call.getMos()));
-        }
+//        if (packetStats != null) {
+//            addValue(KEY_RX_PACKETS, String.valueOf(packetStats.getReceived()));
+//            addValue(KEY_TX_PACKETS, String.valueOf(packetStats.getSent()));
+//        }
+//
+//        if (call.hasCalculatedMos()) {
+            addValue(KEY_MOS, String.valueOf(call.getQuality().getAverage()));
+//        }
 
         return this;
     }

@@ -65,14 +65,10 @@ public class CallDurationTracker implements Runnable {
         }
 
         if (sipService.getCurrentCall() == null) {
-            return sipService.getFirstCall().getCallDuration();
+            return sipService.getFirstCall().getDuration();
         }
 
-        if (sipService.getFirstCall().getIdentifier().equals(sipService.getCurrentCall().getIdentifier())) {
-            return sipService.getFirstCall().getCallDuration();
-        }
-
-        return sipService.getCurrentCall().getCallDuration();
+        return sipService.getCurrentCall().getDuration();
     }
 
     /**

@@ -2,12 +2,15 @@ package com.voipgrid.vialer.sip;
 
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
 import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
+import static com.voipgrid.vialer.sip.SipConstants.EXTRA_PHONE_NUMBER;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -39,8 +42,13 @@ import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
 import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
 import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
+import com.voipgrid.vialer.phonelib.SessionExtensionsKt;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
+
+import org.openvoipalliance.phonelib.PhoneLib;
+import org.openvoipalliance.phonelib.model.Reason;
+import org.openvoipalliance.phonelib.model.Session;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -52,6 +60,8 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
+import androidx.core.app.ActivityCompat;
+import com.voipgrid.vialer.phonelib.SessionExtensionsKt.*;
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -60,6 +70,9 @@ import androidx.annotation.StringDef;
  */
 public class SipService extends Service implements CallStatusReceiver.Listener,
         SipServiceTic.TicListener {
+
+    private PhoneLib phoneLib;
+
     /**
      * This will track whether this instance of SipService has ever handled a call,
      * if this is the case we can shut down the sip service immediately if we don't
@@ -75,14 +88,13 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     public boolean incomingAlertsMuted = false;
 
     private Intent mIncomingCallDetails = null;
-    private SipCall mCurrentCall;
-    private SipCall mInitialCall;
-    private List<SipCall> mCallList = new ArrayList<>();
+    private Session mCurrentCall;
+    private Session mInitialCall;
+    private List<Session> mCallList = new ArrayList<>();
 
     @Nullable private Intent intent;
 
     private Logger mLogger;
-    private SipBroadcaster mSipBroadcaster;
     private final BroadcastReceiver phoneStateReceiver = new PhoneStateReceiver();
     private Runnable mRingbackRunnable = new OutgoingCallRinger();
     private final IBinder mBinder = new SipServiceBinder();
@@ -95,7 +107,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
 
     private CallStatisticsUpdater callStatisticsUpdater = new CallStatisticsUpdater();
     private CallStatusReceiver statsUpdaterCallStatusReceiver = new CallStatusReceiver(
-        callStatisticsUpdater
+            callStatisticsUpdater
     );
 
 
@@ -105,7 +117,9 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     @Inject protected ToneGenerator mToneGenerator;
     @Inject protected NetworkConnectivity mNetworkConnectivity;
     @Inject protected NativeCallManager mNativeCallManager;
-    @Inject @Nullable protected PhoneAccount mPhoneAccount;
+    @Inject
+    @Nullable
+    protected PhoneAccount mPhoneAccount;
     @Inject AudioRouter audioRouter;
     @Inject IncomingCallAlerts incomingCallAlerts;
 
@@ -118,31 +132,31 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     public void onCreate() {
         super.onCreate();
         mLogger = new Logger(SipService.class);
-        mSipBroadcaster = new SipBroadcaster(this);
         VialerApplication.get().component().inject(this);
+        phoneLib = PhoneLib.getInstance(this);
         AudioStateChangeReceiver.fetch();
         mLogger.d("onCreate");
 
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
-            phoneStateReceiver,
-            TelephonyManager.ACTION_PHONE_STATE_CHANGED
+                phoneStateReceiver,
+                TelephonyManager.ACTION_PHONE_STATE_CHANGED
         );
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
-            mNetworkConnectivity,
-            ConnectivityManager.CONNECTIVITY_ACTION
+                mNetworkConnectivity,
+                ConnectivityManager.CONNECTIVITY_ACTION
         );
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(
-            callStatusReceiver,
-            ACTION_BROADCAST_CALL_STATUS
+                callStatusReceiver,
+                ACTION_BROADCAST_CALL_STATUS
         );
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(
-            statsUpdaterCallStatusReceiver,
-            ACTION_BROADCAST_CALL_STATUS
+                statsUpdaterCallStatusReceiver,
+                ACTION_BROADCAST_CALL_STATUS
         );
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
-            screenOffReceiver,
-            Integer.MAX_VALUE,
-            Intent.ACTION_SCREEN_OFF
+                screenOffReceiver,
+                Integer.MAX_VALUE,
+                Intent.ACTION_SCREEN_OFF
         );
         mCheckService.start();
         changeNotification(callNotification);
@@ -157,7 +171,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         // that the SipService is stuck not doing anything so it should be immediately shut
         // down.
         if (mSipServiceHasHandledACall && mCurrentCall == null) {
-            mLogger.i("onStartCommand was triggered after a call has already been handled but with no current call, stopping SipService...");
+            mLogger.i(
+                    "onStartCommand was triggered after a call has already been handled but with no current call, stopping SipService...");
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -169,7 +184,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
                 startForeground(callNotification.getNotificationId(), callNotification.build());
             }
         } catch (Exception e) {
-            mLogger.e("Failed to perform action based on intent, stopping service: " + e.getMessage());
+            mLogger.e("Failed to perform action based on intent, stopping service: "
+                    + e.getMessage());
             stopSelf();
         }
 
@@ -182,7 +198,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      *
      * @param intent
      */
-    public boolean performActionBasedOnIntent(Intent intent) throws Exception {
+    public boolean performActionBasedOnIntent(Intent intent) throws SecurityException {
         if (intent == null) return false;
 
         this.intent = intent;
@@ -193,45 +209,39 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         if (Actions.HANDLE_INCOMING_CALL.equals(action)) {
             initialiseIncomingCall();
             return true;
-        }
-        else if (Actions.HANDLE_OUTGOING_CALL.equals(action)) {
+        } else if (Actions.HANDLE_OUTGOING_CALL.equals(action)) {
             initialiseOutgoingCall(intent);
             return true;
-        }
-        else if (Actions.DECLINE_INCOMING_CALL.equals(action)){
+        } else if (Actions.DECLINE_INCOMING_CALL.equals(action)) {
             incomingCallAlerts.stop();
-            mCurrentCall.decline();
-        }
-        else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
+            phoneLib.declineIncoming(mCurrentCall, Reason.DECLINED);
+        } else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
             if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
-                Toast.makeText(this, getString(R.string.permission_microphone_missing_message), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.permission_microphone_missing_message),
+                        Toast.LENGTH_LONG).show();
                 mLogger.e("Unable to answer incoming call as we do not have microphone permission");
                 return false;
             }
 
             incomingCallAlerts.stop();
-            mCurrentCall.answer();
-        }
-        else if (Actions.END_CALL.equals(action)) {
-            mCurrentCall.hangup(true);
-        }
-        else if (Actions.ANSWER_OR_HANGUP.equals(action)) {
-            if (mCurrentCall.isCallRinging()) {
-                mCurrentCall.answer();
-            } else if (mCurrentCall.isConnected()) {
-                mCurrentCall.hangup(true);
+            phoneLib.acceptIncoming(mCurrentCall);
+        } else if (Actions.END_CALL.equals(action)) {
+            phoneLib.end(mCurrentCall);
+        } else if (Actions.ANSWER_OR_HANGUP.equals(action)) {
+            if (SessionExtensionsKt.isRinging(mCurrentCall)) {
+                phoneLib.acceptIncoming(mCurrentCall);
+            } else if (SessionExtensionsKt.isConnected(mCurrentCall)) {
+                phoneLib.end(mCurrentCall);
             }
-        }
-        else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
+        } else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
             if (getCurrentCall() != null) {
-                if (getCurrentCall().isConnected()) {
+                if (SessionExtensionsKt.isConnected(mCurrentCall)) {
                     startCallActivityForCurrentCall();
                 }
             } else {
                 stopSelf();
             }
-        }
-        else {
+        } else {
             mLogger.e("SipService received an invalid action: " + action);
         }
 
@@ -255,19 +265,15 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      */
     private void initialiseOutgoingCall(Intent intent) {
         if (getCurrentCall() != null) {
-            getLogger().i("Attempting to initialise a second outgoing call but this is not currently supported");
+            getLogger().i(
+                    "Attempting to initialise a second outgoing call but this is not currently supported");
             startCallActivityForCurrentCall();
             return;
         }
 
         mLogger.d("outgoingCall");
         loadSip();
-        makeCall(
-                intent.getData(),
-                this.intent.getStringExtra(SipConstants.EXTRA_CONTACT_NAME),
-                this.intent.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER),
-                true
-        );
+        makeCall(intent.getStringExtra(EXTRA_PHONE_NUMBER), true);
         performPostCallCreationActions();
     }
 
@@ -276,7 +282,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      *
      */
     private void performPostCallCreationActions() {
-        if (audioRouter.isBluetoothRouteAvailable() && !audioRouter.isCurrentlyRoutingAudioViaBluetooth()) {
+        if (audioRouter.isBluetoothRouteAvailable()
+                && !audioRouter.isCurrentlyRoutingAudioViaBluetooth()) {
             audioRouter.routeAudioViaBluetooth();
         }
     }
@@ -315,20 +322,12 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         incomingCallAlerts.stop();
         tic.stop();
 
-        // If no phoneaccount was found in the onCreate there won't be a sipconfig either.
-        // Check to avoid nullpointers.
-        if (mSipConfig != null) {
-            mSipConfig.cleanUp();
-        }
-
-        mSipBroadcaster.broadcastServiceInfo(SipConstants.SERVICE_STOPPED);
-
         mBroadcastReceiverManager.unregisterReceiver(
-            phoneStateReceiver,
-            mNetworkConnectivity,
-            callStatusReceiver,
-            statsUpdaterCallStatusReceiver,
-            screenOffReceiver
+                phoneStateReceiver,
+                mNetworkConnectivity,
+                callStatusReceiver,
+                statsUpdaterCallStatusReceiver,
+                screenOffReceiver
         );
 
         mHandler.removeCallbacks(mCheckService);
@@ -342,7 +341,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      */
     public void playBusyTone() {
         try {
-            mToneGenerator.startTone(ToneGenerator.Constants.TONE_CDMA_NETWORK_BUSY, BUSY_TONE_DURATION);
+            mToneGenerator.startTone(ToneGenerator.Constants.TONE_CDMA_NETWORK_BUSY,
+                    BUSY_TONE_DURATION);
             Thread.sleep(BUSY_TONE_DURATION);
         } catch (InterruptedException ignored) {
         }
@@ -365,51 +365,39 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         mHandler.removeCallbacks(mRingbackRunnable);
     }
 
-    /**
-     * Function to make a outgoing call without starting a activity.
-     * @param number
-     * @param contactName
-     * @param phoneNumber
-     */
-    public void makeCall(Uri number, String contactName, String phoneNumber) {
-        makeCall(number, contactName, phoneNumber, false);
+    public void makeCall(String phoneNumber) {
+        makeCall(phoneNumber, false);
     }
 
     /**
      * Function to make a call with or without starting a activity.
-     * @param number
-     * @param contactName
      * @param phoneNumber
      * @param startActivity
      */
-    public void makeCall(Uri number, String contactName, String phoneNumber, boolean startActivity) {
-        SipCall call = new SipCall(this, getSipConfig().getSipAccount());
-        call.setPhoneNumberUri(number);
-        call.setCallerId(contactName);
-        call.setPhoneNumber(phoneNumber);
+    public void makeCall(String phoneNumber, boolean startActivity) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            PhoneLib.getInstance(this).callTo(phoneNumber);
 
-        boolean success = call.startOutgoingCall(number);
-
-        if (success && startActivity) {
-            startOutgoingCallActivity(call, call.getPhoneNumberUri());
+            if (startActivity) {
+                startOutgoingCallActivity(phoneNumber);
+            }
         }
+
     }
 
     /**
      * Start the activity for a (initial) outgoing call.
-     * @param sipCall
      * @param number
      */
-    public void startOutgoingCallActivity(SipCall sipCall, Uri number) {
+    public void startOutgoingCallActivity(String number) {
         startCallActivity(
                 number,
                 CallingConstants.TYPE_OUTGOING_CALL,
-                sipCall.getCallerId(),
-                sipCall.getPhoneNumber(),
                 CallActivity.class
         );
 
-        changeNotification(callNotification.outgoing(sipCall));
+        changeNotification(callNotification.outgoing(mCurrentCall));
     }
 
     /**
@@ -475,16 +463,9 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         }
     }
 
-    public void startCallActivity(Uri sipAddressUri, @CallingConstants.CallTypes String type, String callerId, String number, Class activity) {
+    public void startCallActivity(String number, @CallingConstants.CallTypes String type, Class activity) {
         mLogger.d("callVisibleForUser");
-        startActivity(AbstractCallActivity.createIntentForCallActivity(
-                this,
-                activity,
-                sipAddressUri,
-                type,
-                callerId,
-                number
-        ));
+        startActivity(AbstractCallActivity.createIntentForCallActivity(this, activity));
         sipServiceActive = true;
     }
 
@@ -493,7 +474,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      * first call made set mInitialCall as well.
      * @param call
      */
-    public void setCurrentCall(SipCall call) {
+    public void setCurrentCall(Session call) {
         mSipServiceHasHandledACall = true;
         if (call != null && mInitialCall == null) {
             setInitialCall(call);
@@ -504,7 +485,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         }
     }
 
-    public SipCall getCurrentCall() {
+    public Session getCurrentCall() {
         return mCurrentCall;
     }
 
@@ -513,10 +494,10 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      * the service.
      * @param call
      */
-    public void removeCallFromList(SipCall call) {
+    public void removeCallFromList(Session call) {
         mCallList.remove(call);
 
-        if (mCallList.isEmpty() || call.getCallIsTransferred()) {
+        if (mCallList.isEmpty()) {
             setCurrentCall(null);
             stopSelf();
         } else {
@@ -530,7 +511,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
             return;
         }
 
-        startOutgoingCallActivity(getCurrentCall(), getCurrentCall().getPhoneNumberUri());
+        startOutgoingCallActivity(getCurrentCall().getPhoneNumber());
     }
 
     /**
@@ -541,15 +522,15 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         return mIncomingCallDetails;
     }
 
-    private void setInitialCall(SipCall initialCall) {
+    private void setInitialCall(Session initialCall) {
         mInitialCall = initialCall;
     }
 
-    public SipCall getInitialCall() {
+    public Session getInitialCall() {
         return mInitialCall;
     }
 
-    public SipCall getFirstCall() {
+    public Session getFirstCall() {
 
         if (mCallList.size() > 0) {
             return mCallList.get(0);
@@ -570,10 +551,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         return mSipConfig;
     }
 
-    public SipBroadcaster getSipBroadcaster() {
-        return mSipBroadcaster;
-    }
-
     public AbstractCallNotification getNotification() {
         return callNotification;
     }
@@ -587,7 +564,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     public void onCallConnected() {
         if (getCurrentCall() == null) return;
 
-        if (getCurrentCall().isOutgoing()) {
+        if (SessionExtensionsKt.isOutgoing(getCurrentCall())) {
             mLogger.i("Call has connected, it is an outbound call so just changing audio focus");
             audioRouter.focus();
             return;
@@ -596,10 +573,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         mLogger.i("Call has connected, it is an inbound call so stop all incoming call notifications and change the audio focus");
 
         startCallActivity(
-                SipUri.sipAddressUri(this, PhoneNumberUtils.format(getCurrentCall().getPhoneNumber())),
-                CallingConstants.TYPE_INCOMING_CALL,
-                getCurrentCall().getCallerId(),
                 getCurrentCall().getPhoneNumber(),
+                CallingConstants.TYPE_INCOMING_CALL,
                 CallActivity.class
         );
 
@@ -613,30 +588,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
 
     }
 
-    @Override
-    public void onCallHold() {
-
-    }
-
-    @Override
-    public void onCallUnhold() {
-
-    }
-
-    @Override
-    public void onCallRingingOut() {
-
-    }
-
-    @Override
-    public void onCallRingingIn() {
-
-    }
-
-    @Override
-    public void onServiceStopped() {
-
-    }
 
     public AudioRouter getAudioRouter() {
         return audioRouter;
@@ -650,11 +601,11 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     public void onTic() {
         if (getCurrentCall() == null) return;
 
-        SipCall call = getCurrentCall();
+        Session call = getCurrentCall();
 
         refreshCallAlerts(call);
 
-        if (call.isConnected()) {
+        if (SessionExtensionsKt.isConnected(call)) {
             audioRouter.focus();
         }
     }
@@ -664,15 +615,15 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      *
      * @param call
      */
-    private void refreshCallAlerts(SipCall call) {
+    private void refreshCallAlerts(Session call) {
         if (incomingAlertsMuted) {
             incomingCallAlerts.stop();
             return;
         }
 
-        if (SipConstants.CALL_INCOMING_RINGING.equals(call.getCurrentCallState())) {
+        if (SessionExtensionsKt.isRinging(call)) {
             if (call.getPhoneNumber() != null && !call.getPhoneNumber().isEmpty()) {
-                changeNotification(callNotification.incoming(call.getPhoneNumber(), call.getCallerId()));
+                changeNotification(callNotification.incoming(call.getPhoneNumber(), call.getDisplayName()));
                 incomingCallAlerts.start();
             }
         } else {
@@ -709,17 +660,21 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
                     return;
                 }
 
-                mLogger.i("Current call state: " + mCurrentCall.getCurrentCallState());
+                mLogger.i("Current call state: " + mCurrentCall.getState());
 
-                if (mCurrentCall.isCallRinging() || mCurrentCall.getCurrentCallState().equals(SipConstants.CALL_INVALID_STATE)) {
+                if (SessionExtensionsKt.isRinging(mCurrentCall)) {
                     mLogger.i("Our call is still ringing. So decline it.");
-                    mCurrentCall.decline();
+                    try {
+                        phoneLib.declineIncoming(mCurrentCall, Reason.BUSY);
+                    } catch (SecurityException e) {
+                        mLogger.e("Unable to decline incoming call due to permissions");
+                    }
                     return;
                 }
 
-                if (mCurrentCall.isConnected() && !mCurrentCall.isOnHold()) {
+                if (SessionExtensionsKt.isConnected(mCurrentCall) && !SessionExtensionsKt.isOnHold(mCurrentCall)) {
                     mLogger.i("Call was not on hold already. So put call on hold.");
-                    mCurrentCall.toggleHold();
+                    phoneLib.setHold(mCurrentCall, true);
                 }
             } catch(Exception e) {
                 e.printStackTrace();

@@ -12,9 +12,11 @@ import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.sip.CallDisconnectedReason;
-import com.voipgrid.vialer.sip.SipCall;
 import com.voipgrid.vialer.sip.SipService;
 import com.voipgrid.vialer.util.NetworkUtil;
+
+import org.openvoipalliance.phonelib.PhoneLib;
+import org.openvoipalliance.phonelib.model.Session;
 
 import javax.inject.Inject;
 
@@ -76,7 +78,7 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
         }
 
         try {
-            mSipServiceConnection.get().getCurrentCall().hangup(true);
+            PhoneLib.getInstance(this).end(mSipServiceConnection.get().getCurrentCall());
             mLogger.i("The user hang up from Network Availability Activity");
         } catch (Exception e) {
             mLogger.i("Failed to decline call "+e.getClass().getSimpleName()+e.getMessage());
@@ -93,8 +95,8 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
             return;
         }
 
-        SipCall sipCall = mSipServiceConnection.get().getCurrentCall();
-        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle,sipCall.getPhoneNumber(), sipCall.getCallerId());
+        Session sipCall = mSipServiceConnection.get().getCurrentCall();
+        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle,sipCall.getPhoneNumber(), sipCall.getDisplayName());
     }
 
     public static void start() {
@@ -117,31 +119,6 @@ public class NetworkAvailabilityActivity extends AbstractCallActivity {
 
     @Override
     public void onCallDisconnected(CallDisconnectedReason reason) {
-
-    }
-
-    @Override
-    public void onCallHold() {
-
-    }
-
-    @Override
-    public void onCallUnhold() {
-
-    }
-
-    @Override
-    public void onCallRingingOut() {
-
-    }
-
-    @Override
-    public void onCallRingingIn() {
-
-    }
-
-    @Override
-    public void onServiceStopped() {
 
     }
 }

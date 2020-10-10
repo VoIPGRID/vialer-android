@@ -23,6 +23,7 @@ import com.voipgrid.vialer.util.Sim
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
+import org.openvoipalliance.phonelib.PhoneLib
 
 val appModule = module {
 
@@ -65,4 +66,6 @@ val appModule = module {
     single { Middleware(androidContext()) }
 
     single { PasswordChange(get()) }
+
+    single { PhoneLib.getInstance(androidContext()).initialise() }
 }

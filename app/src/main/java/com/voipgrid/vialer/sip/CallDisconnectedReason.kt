@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.sip
 
-import org.pjsip.pjsua2.pjsip_status_code
+import org.openvoipalliance.phonelib.model.Reason
+
 
 enum class CallDisconnectedReason {
     NONE,
@@ -8,11 +9,9 @@ enum class CallDisconnectedReason {
 
     companion object {
         @JvmStatic
-        fun fromStatusCode(code: pjsip_status_code?): CallDisconnectedReason {
-            return when(code) {
-                pjsip_status_code.PJSIP_SC_NOT_FOUND -> NUMBER_NOT_FOUND
+        fun fromReason(reason: Reason) =when(reason) {
+                Reason.ADDRESS_INCOMPLETE -> NUMBER_NOT_FOUND
                 else -> NONE
-            }
         }
     }
 }

@@ -23,16 +23,6 @@ class CallStatisticsUpdater : CallStatusReceiver.Listener {
 
     override fun onCallStatusChanged(status: String?, callId: String?) {}
 
-    override fun onCallRingingIn() {}
-
-    override fun onServiceStopped() {}
-
-    override fun onCallHold() {}
-
-    override fun onCallUnhold() {}
-
-    override fun onCallRingingOut() {}
-
     companion object {
         const val MINIMUM_REQUIRED_CALL_LENGTH_SECONDS = 10
     }
