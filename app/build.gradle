@@ -173,7 +173,7 @@ ext {
     kotPrefVersion = "2.8.0"
     room_version = '2.2.0-beta01'
     lifecycle_version = "1.1.1"
-    koin_version = "2.0.1"
+    koin_version = "2.1.4"
     nav_version = "2.3.0-alpha02"
 }
 
@@ -298,7 +298,8 @@ dependencies {
     implementation 'com.google.android.play:core:1.8.0'
     implementation 'com.google.android.play:core-ktx:1.8.0'
 
-    implementation 'org.openvoipalliance:AndroidPhoneLib:0.0.3'
+    implementation 'org.openvoipalliance:AndroidPhoneLib:0.4.1'
+    implementation ("org.linphone:linphone-sdk-android:4.4+")
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

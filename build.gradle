@@ -24,5 +24,8 @@ allprojects {
         google()
         jcenter()
         maven { url "https://jitpack.io" }
+        maven {
+            url "https://linphone.org/maven_repository/"
+        }
     }
 }

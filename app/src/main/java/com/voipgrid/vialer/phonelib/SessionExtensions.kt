@@ -1,6 +1,7 @@
 package com.voipgrid.vialer.phonelib
 
 import android.text.format.DateUtils
+import com.voipgrid.vialer.sip.SipConstants.*
 import org.openvoipalliance.phonelib.model.CallState.*
 import org.openvoipalliance.phonelib.model.Session
 
@@ -35,3 +36,11 @@ val Session.callId
     get() = "spindle-12345-test"
 
 fun Session.getCallDurationInMilliseconds() = duration * 1000
+
+val Session.legacyState
+    get() = when(state) {
+        Idle, IncomingReceived, OutgoingInit, OutgoingProgress, OutgoingRinging, OutgoingEarlyMedia , Unknown-> CALL_INVALID_STATE
+        Connected, StreamsRunning, Pausing, Paused, Resuming, Referred, PausedByRemote, CallUpdatedByRemote, CallIncomingEarlyMedia,
+        CallUpdating, CallEarlyUpdatedByRemote, CallEarlyUpdating -> CALL_CONNECTED_MESSAGE
+        Error, CallReleased, CallEnd -> CALL_DISCONNECTED_MESSAGE
+    }

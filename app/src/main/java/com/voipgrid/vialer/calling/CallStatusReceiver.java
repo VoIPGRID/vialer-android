@@ -13,6 +13,7 @@ import com.voipgrid.vialer.sip.CallDisconnectedReason;
 import com.voipgrid.vialer.sip.SipConstants;
 
 import org.openvoipalliance.phonelib.model.Reason;
+import org.openvoipalliance.phonelib.model.Session;
 
 public class CallStatusReceiver extends BroadcastReceiver {
 

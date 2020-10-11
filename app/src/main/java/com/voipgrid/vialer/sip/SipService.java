@@ -2,7 +2,15 @@ package com.voipgrid.vialer.sip;
 
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
 import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_CONNECTED_MESSAGE;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_IDENTIFIER_KEY;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_STATUS_CODE;
+import static com.voipgrid.vialer.sip.SipConstants.CALL_STATUS_KEY;
 import static com.voipgrid.vialer.sip.SipConstants.EXTRA_PHONE_NUMBER;
+
+import static org.koin.java.KoinJavaComponent.get;
+import static org.koin.java.KoinJavaComponent.inject;
 
 import android.Manifest;
 import android.app.PendingIntent;
@@ -19,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.voipgrid.vialer.BuildConfig;
@@ -35,6 +44,7 @@ import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.dialer.ToneGenerator;
+import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.ActiveCallNotification;
@@ -43,12 +53,16 @@ import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
 import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.phonelib.SessionExtensionsKt;
+import com.voipgrid.vialer.phonelib.SoftPhone;
+import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.PhoneNumberUtils;
 
+import org.jetbrains.annotations.NotNull;
 import org.openvoipalliance.phonelib.PhoneLib;
 import org.openvoipalliance.phonelib.model.Reason;
 import org.openvoipalliance.phonelib.model.Session;
+import org.openvoipalliance.phonelib.repository.initialise.SessionCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -61,6 +75,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 import androidx.core.app.ActivityCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import kotlin.Lazy;
+
 import com.voipgrid.vialer.phonelib.SessionExtensionsKt.*;
 
 /**
@@ -68,10 +85,9 @@ import com.voipgrid.vialer.phonelib.SessionExtensionsKt.*;
  * provides a persistent interface to SIP services throughout the app.
  *
  */
-public class SipService extends Service implements CallStatusReceiver.Listener,
-        SipServiceTic.TicListener {
+public class SipService extends Service implements SipServiceTic.TicListener {
 
-    private PhoneLib phoneLib;
+    private SoftPhone softphone = get(SoftPhone.class);
 
     /**
      * This will track whether this instance of SipService has ever handled a call,
@@ -88,9 +104,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     public boolean incomingAlertsMuted = false;
 
     private Intent mIncomingCallDetails = null;
-    private Session mCurrentCall;
-    private Session mInitialCall;
-    private List<Session> mCallList = new ArrayList<>();
 
     @Nullable private Intent intent;
 
@@ -101,15 +114,14 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
     private CheckServiceIsRunning mCheckService = new CheckServiceIsRunning();
     private AbstractCallNotification callNotification = new DefaultCallNotification();
     private AbstractCallNotification activeNotification;
-    private CallStatusReceiver callStatusReceiver = new CallStatusReceiver(this);
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
     private SipServiceTic tic = new SipServiceTic(this);
+    private final LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
     private CallStatisticsUpdater callStatisticsUpdater = new CallStatisticsUpdater();
     private CallStatusReceiver statsUpdaterCallStatusReceiver = new CallStatusReceiver(
             callStatisticsUpdater
     );
-
 
     @Inject protected SipConfig mSipConfig;
     @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
@@ -133,7 +145,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         super.onCreate();
         mLogger = new Logger(SipService.class);
         VialerApplication.get().component().inject(this);
-        phoneLib = PhoneLib.getInstance(this);
         AudioStateChangeReceiver.fetch();
         mLogger.d("onCreate");
 
@@ -144,10 +155,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         mBroadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(
                 mNetworkConnectivity,
                 ConnectivityManager.CONNECTIVITY_ACTION
-        );
-        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(
-                callStatusReceiver,
-                ACTION_BROADCAST_CALL_STATUS
         );
         mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(
                 statsUpdaterCallStatusReceiver,
@@ -170,7 +177,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         // If the SipService has already handled a call but now has no call, this suggests
         // that the SipService is stuck not doing anything so it should be immediately shut
         // down.
-        if (mSipServiceHasHandledACall && mCurrentCall == null) {
+        if (mSipServiceHasHandledACall && !softphone.getHasCall()) {
             mLogger.i(
                     "onStartCommand was triggered after a call has already been handled but with no current call, stopping SipService...");
             stopSelf();
@@ -214,7 +221,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
             return true;
         } else if (Actions.DECLINE_INCOMING_CALL.equals(action)) {
             incomingCallAlerts.stop();
-            phoneLib.declineIncoming(mCurrentCall, Reason.DECLINED);
+            softphone.getPhone().declineIncoming(softphone.getCall(), Reason.DECLINED);
         } else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
             if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
                 Toast.makeText(this, getString(R.string.permission_microphone_missing_message),
@@ -224,18 +231,18 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
             }
 
             incomingCallAlerts.stop();
-            phoneLib.acceptIncoming(mCurrentCall);
+            softphone.getPhone().acceptIncoming(softphone.getCall());
         } else if (Actions.END_CALL.equals(action)) {
-            phoneLib.end(mCurrentCall);
+            softphone.getPhone().end(softphone.getCall());
         } else if (Actions.ANSWER_OR_HANGUP.equals(action)) {
-            if (SessionExtensionsKt.isRinging(mCurrentCall)) {
-                phoneLib.acceptIncoming(mCurrentCall);
-            } else if (SessionExtensionsKt.isConnected(mCurrentCall)) {
-                phoneLib.end(mCurrentCall);
+            if (SessionExtensionsKt.isRinging(softphone.getCall())) {
+                softphone.getPhone().acceptIncoming(softphone.getCall());
+            } else if (SessionExtensionsKt.isConnected(softphone.getCall())) {
+                softphone.getPhone().end(softphone.getCall());
             }
         } else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
             if (getCurrentCall() != null) {
-                if (SessionExtensionsKt.isConnected(mCurrentCall)) {
+                if (SessionExtensionsKt.isConnected(softphone.getCall())) {
                     startCallActivityForCurrentCall();
                 }
             } else {
@@ -307,8 +314,9 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
                     mPhoneAccount,
                     intent != null && Actions.HANDLE_INCOMING_CALL.equals(intent.getAction())
             );
-            mSipConfig.initLibrary();
+            mSipConfig.initLibrary(callback);
         } catch (Exception e) {
+            Log.e("TEST123", "", e);
             mLogger.e("Failed to load pjsip, stopping the service");
             stopSelf();
         }
@@ -325,7 +333,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         mBroadcastReceiverManager.unregisterReceiver(
                 phoneStateReceiver,
                 mNetworkConnectivity,
-                callStatusReceiver,
                 statsUpdaterCallStatusReceiver,
                 screenOffReceiver
         );
@@ -333,6 +340,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         mHandler.removeCallbacks(mCheckService);
 
         sipServiceActive = false;
+        softphone.cleanUp();
         super.onDestroy();
     }
 
@@ -376,7 +384,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
      */
     public void makeCall(String phoneNumber, boolean startActivity) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
+                == PackageManager.PERMISSION_GRANTED) {
             PhoneLib.getInstance(this).callTo(phoneNumber);
 
             if (startActivity) {
@@ -397,7 +405,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
                 CallActivity.class
         );
 
-        changeNotification(callNotification.outgoing(mCurrentCall));
+        changeNotification(callNotification.outgoing(softphone.getCall()));
     }
 
     /**
@@ -469,40 +477,8 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         sipServiceActive = true;
     }
 
-    /**
-     * Set the current call and add it to the list of calls if it does not exists. If this is the
-     * first call made set mInitialCall as well.
-     * @param call
-     */
-    public void setCurrentCall(Session call) {
-        mSipServiceHasHandledACall = true;
-        if (call != null && mInitialCall == null) {
-            setInitialCall(call);
-        }
-        mCurrentCall = call;
-        if (!mCallList.contains(call) && call != null) {
-            mCallList.add(call);
-        }
-    }
-
     public Session getCurrentCall() {
-        return mCurrentCall;
-    }
-
-    /**
-     * Removes the call from the list and deletes it. If there are no calls left stop
-     * the service.
-     * @param call
-     */
-    public void removeCallFromList(Session call) {
-        mCallList.remove(call);
-
-        if (mCallList.isEmpty()) {
-            setCurrentCall(null);
-            stopSelf();
-        } else {
-            setCurrentCall(mCallList.get(0));
-        }
+        return softphone.getCall();
     }
 
     private void startCallActivityForCurrentCall() {
@@ -522,22 +498,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         return mIncomingCallDetails;
     }
 
-    private void setInitialCall(Session initialCall) {
-        mInitialCall = initialCall;
-    }
-
-    public Session getInitialCall() {
-        return mInitialCall;
-    }
-
-    public Session getFirstCall() {
-
-        if (mCallList.size() > 0) {
-            return mCallList.get(0);
-        } else {
-            return null;
-        }
-    }
 
     public Logger getLogger() {
         return mLogger;
@@ -555,12 +515,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         return callNotification;
     }
 
-    @Override
-    public void onCallStatusChanged(String status, String callId) {
-
-    }
-
-    @Override
     public void onCallConnected() {
         if (getCurrentCall() == null) return;
 
@@ -581,11 +535,6 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
         incomingCallAlerts.stop();
         changeNotification(callNotification.active(getCurrentCall()));
         audioRouter.focus();
-    }
-
-    @Override
-    public void onCallDisconnected(CallDisconnectedReason reason) {
-
     }
 
 
@@ -654,27 +603,27 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
                 // When the native call has been picked up and there is a current call in the ringing state
                 // Then decline the current call.
                 mLogger.i("Native call is picked up.");
-                mLogger.i("Is there an active call: " + (mCurrentCall != null));
+                mLogger.i("Is there an active call: " + (softphone.getCall() != null));
 
-                if (mCurrentCall == null) {
+                if (softphone.getCall() == null) {
                     return;
                 }
 
-                mLogger.i("Current call state: " + mCurrentCall.getState());
+                mLogger.i("Current call state: " + softphone.getCall().getState());
 
-                if (SessionExtensionsKt.isRinging(mCurrentCall)) {
+                if (SessionExtensionsKt.isRinging(softphone.getCall())) {
                     mLogger.i("Our call is still ringing. So decline it.");
                     try {
-                        phoneLib.declineIncoming(mCurrentCall, Reason.BUSY);
+                        softphone.getPhone().declineIncoming(softphone.getCall(), Reason.BUSY);
                     } catch (SecurityException e) {
                         mLogger.e("Unable to decline incoming call due to permissions");
                     }
                     return;
                 }
 
-                if (SessionExtensionsKt.isConnected(mCurrentCall) && !SessionExtensionsKt.isOnHold(mCurrentCall)) {
+                if (SessionExtensionsKt.isConnected(softphone.getCall()) && !SessionExtensionsKt.isOnHold(softphone.getCall())) {
                     mLogger.i("Call was not on hold already. So put call on hold.");
-                    phoneLib.setHold(mCurrentCall, true);
+                    softphone.getPhone().setHold(softphone.getCall(), true);
                 }
             } catch(Exception e) {
                 e.printStackTrace();
@@ -795,7 +744,7 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
 
         private void stopServiceIfNoActiveCalls() {
             mLogger.d("checkServiceBeingUsed");
-            if (mCurrentCall == null) {
+            if (softphone.getCall() == null) {
                 mLogger.i("No active calls stop the service");
                 stopSelf();
                 if (mIncomingCallDetails != null) {
@@ -873,4 +822,90 @@ public class SipService extends Service implements CallStatusReceiver.Listener,
          */
         String DISPLAY_CALL_IF_AVAILABLE = PREFIX + "DISPLAY_CALL_IF_AVAILABLE";
     }
+
+    private SessionCallback callback = new SessionCallback() {
+
+        private static final String DEFAULT_EVENT = "call-update";
+
+
+
+        private boolean canHandleIncomingCall() {
+            boolean result = getCurrentCall() == null && !getNativeCallManager().isBusyWithNativeCall();
+
+            if (!result) LogHelper.using(mLogger).logBusyReason(SipService.this);
+
+            return result;
+        }
+
+
+        @Override
+        public void incomingCall(@NotNull final Session incomingSession) {
+            fireEvent(DEFAULT_EVENT, incomingSession);
+
+Log.e("TEST123", "incoming call...");
+            if (!canHandleIncomingCall()) {
+                try {
+                    softphone.getPhone().declineIncoming(incomingSession, Reason.BUSY);
+                } catch (SecurityException e) {
+
+                }
+                return;
+            }
+
+            if (getCurrentCall() != null) {
+                VialerStatistics.incomingCallFailedDueToOngoingVialerCall(incomingSession);
+            }
+
+            if (getNativeCallManager().isBusyWithNativeCall()) {
+                VialerStatistics.incomingCallFailedDueToOngoingGsmCall(incomingSession);
+            }
+
+            softphone.setCall(incomingSession);
+            informUserAboutIncomingCall(incomingSession.getPhoneNumber(), incomingSession.getDisplayName());
+        }
+
+        @Override
+        public void outgoingInit(@NotNull final Session session) {
+            fireEvent(DEFAULT_EVENT, session);
+            softphone.setCall(session);
+        }
+
+        @Override
+        public void sessionConnected(@NotNull final Session session) {
+            fireEvent(CALL_CONNECTED_MESSAGE, session);
+            onCallConnected();
+        }
+
+        @Override
+        public void sessionEnded(@NotNull final Session session) {
+            fireEvent(CALL_DISCONNECTED_MESSAGE, session);
+            softphone.setCall(null);
+        }
+
+        @Override
+        public void sessionReleased(@NotNull final Session session) {
+            fireEvent(CALL_DISCONNECTED_MESSAGE, session);
+            softphone.setCall(null);
+        }
+
+        @Override
+        public void error(@NotNull final Session session) {
+            fireEvent(CALL_DISCONNECTED_MESSAGE, session);
+            softphone.setCall(null);
+        }
+
+        @Override
+        public void sessionUpdated(@NotNull final Session session) {
+            fireEvent(DEFAULT_EVENT, session);
+        }
+
+        private void fireEvent(String event, Session call) {
+            Intent intent = new Intent(SipConstants.ACTION_BROADCAST_CALL_STATUS);
+            intent.putExtra(CALL_STATUS_KEY, event);
+            intent.putExtra(CALL_IDENTIFIER_KEY, SessionExtensionsKt.getCallId(call));
+            intent.putExtra(CALL_STATUS_CODE, call.getReason().toString());
+
+            localBroadcastManager.sendBroadcast(intent);
+        }
+    };
 }

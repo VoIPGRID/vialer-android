@@ -2,6 +2,7 @@ package com.voipgrid.vialer.sip;
 
 
 import android.content.Intent;
+import android.util.Log;
 
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.User;
@@ -12,12 +13,12 @@ import com.voipgrid.vialer.api.ServiceGenerator;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.fcm.RemoteMessageData;
 import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.phonelib.SessionCallback;
 import com.voipgrid.vialer.util.UserAgent;
 
 import org.jetbrains.annotations.NotNull;
 import org.openvoipalliance.phonelib.PhoneLib;
 import org.openvoipalliance.phonelib.model.RegistrationState;
+import org.openvoipalliance.phonelib.repository.initialise.SessionCallback;
 import org.openvoipalliance.phonelib.repository.registration.RegistrationCallback;
 
 import androidx.annotation.NonNull;
@@ -35,6 +36,8 @@ public class SipConfig {
     private boolean shouldResponseToMiddlewareOnRegistration = false;
     private boolean mHasRespondedToMiddleware = false;
 
+    private boolean isInitialised = false;
+
     /**
      * Initialise the sip service with the relevant details.
      *
@@ -51,17 +54,19 @@ public class SipConfig {
         return this;
     }
 
-    void initLibrary() {
+    void initLibrary(SessionCallback callback) {
+        if (isInitialised) return;
+
+        isInitialised = true;
+        PhoneLib.getInstance(mSipService).initialise();
         PhoneLib.getInstance(mSipService).setUserAgent(new UserAgent(mSipService).generate());
-        PhoneLib.getInstance(mSipService).setSessionCallback(new SessionCallback(
-                LocalBroadcastManager.getInstance(mSipService))
-        );
+        PhoneLib.getInstance(mSipService).setSessionCallback(callback);
 
         PhoneLib.getInstance(mSipService).register(
                 mPhoneAccount.getAccountId(),
                 mPhoneAccount.getPassword(),
                 getSipHost(),
-                null,
+                String.valueOf(5061),
                 User.voip.getHasStunEnabled() ? mSipService.getResources().getStringArray(R.array.stun_hosts)[0] : null,
                 shouldUseTls(),
                 new RegistrationCallback() {
@@ -70,7 +75,9 @@ public class SipConfig {
                         super.stateChanged(registrationState);
 
                         if (registrationState == RegistrationState.REGISTERED) {
+                            Log.e("TEST123", "Registered!" + shouldResponseToMiddlewareOnRegistration + mHasRespondedToMiddleware);
                             if (shouldResponseToMiddlewareOnRegistration && !mHasRespondedToMiddleware) {
+
                                 respondToMiddleware();
                             }
                         }
@@ -106,7 +113,7 @@ public class SipConfig {
         if (User.getVoipAccount() != null && User.getVoipAccount().getAccountId() != null) {
             sipUserId = User.getVoipAccount().getAccountId();
         }
-
+Log.e("TEST123", "Responding available to middleware");
         retrofit2.Call<ResponseBody> call = middlewareApi.reply(
                 token,
                 true,
@@ -120,6 +127,8 @@ public class SipConfig {
                     mLogger.w(
                             "Unsuccessful response to middleware: " + Integer.toString(response.code()));
                     mSipService.stopSelf();
+                } else {
+                    Log.e("TEST123", "Middleware success!");
                 }
             }
 

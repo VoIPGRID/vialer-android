@@ -60,12 +60,12 @@ public class CallDurationTracker implements Runnable {
     private long findCallDuration() {
         SipService sipService = mSipServiceConnection.get();
 
-        if (sipService.getFirstCall() == null) {
+        if (sipService.getCurrentCall() == null) {
             return 0L;
         }
 
         if (sipService.getCurrentCall() == null) {
-            return sipService.getFirstCall().getDuration();
+            return sipService.getCurrentCall().getDuration();
         }
 
         return sipService.getCurrentCall().getDuration();
@@ -80,7 +80,7 @@ public class CallDurationTracker implements Runnable {
     private boolean hasActiveCalls(SipServiceConnection sipServiceConnection) {
         return sipServiceConnection.isAvailable() && (
                 sipServiceConnection.get().getCurrentCall() != null
-                        || sipServiceConnection.get().getFirstCall() != null);
+                        || sipServiceConnection.get().getCurrentCall() != null);
 
     }
 

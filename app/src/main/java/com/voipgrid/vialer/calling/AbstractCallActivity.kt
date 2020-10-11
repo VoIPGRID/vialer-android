@@ -1,165 +1,139 @@
-package com.voipgrid.vialer.calling;
+package com.voipgrid.vialer.calling
 
-import static com.voipgrid.vialer.calling.CallingConstants.CONTACT_NAME;
-import static com.voipgrid.vialer.calling.CallingConstants.PHONE_NUMBER;
-import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
+import android.content.Context
+import android.content.Intent
+import android.media.AudioManager
+import android.os.Bundle
+import android.os.PowerManager
+import android.text.format.DateUtils
+import android.view.WindowManager
+import android.widget.TextView
+import androidx.annotation.CallSuper
+import butterknife.BindView
+import butterknife.Optional
+import com.voipgrid.vialer.R
+import com.voipgrid.vialer.VialerApplication.Companion.get
+import com.voipgrid.vialer.audio.AudioRouter
+import com.voipgrid.vialer.calling.SipServiceConnection.SipServiceConnectionListener
+import com.voipgrid.vialer.permissions.MicrophonePermission
+import com.voipgrid.vialer.phonelib.SoftPhone
+import com.voipgrid.vialer.sip.SipConstants
+import com.voipgrid.vialer.sip.SipService
+import com.voipgrid.vialer.util.BroadcastReceiverManager
+import com.voipgrid.vialer.util.LoginRequiredActivity
+import org.koin.core.KoinComponent
+import org.koin.core.inject
+import org.openvoipalliance.phonelib.PhoneLib
+import javax.inject.Inject
 
-import android.content.Context;
-import android.content.Intent;
-import android.media.AudioManager;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.PowerManager;
-import android.text.format.DateUtils;
-import android.view.WindowManager;
-import android.widget.TextView;
+abstract class AbstractCallActivity : LoginRequiredActivity(), SipServiceConnectionListener, CallDurationTracker.Listener, CallStatusReceiver.Listener, KoinComponent {
 
-import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.audio.AudioRouter;
-import com.voipgrid.vialer.permissions.MicrophonePermission;
-import com.voipgrid.vialer.sip.SipService;
-import com.voipgrid.vialer.util.BroadcastReceiverManager;
-import com.voipgrid.vialer.util.LoginRequiredActivity;
+    val softPhone: SoftPhone by inject()
 
-import javax.inject.Inject;
+    var sipServiceConnection: SipServiceConnection? = null
+    private var mCallDurationTracker: CallDurationTracker? = null
+    private var mCallStatusReceiver: CallStatusReceiver? = null
+    private var powerManager: PowerManager? = null
+    private var wakeLock: PowerManager.WakeLock? = null
 
-import androidx.annotation.CallSuper;
-import androidx.annotation.Nullable;
-import butterknife.BindView;
-import butterknife.Optional;
+    @JvmField @BindView(R.id.duration_text_view) var mCallDurationView: TextView? = null
 
-public abstract class AbstractCallActivity extends LoginRequiredActivity implements
-        SipServiceConnection.SipServiceConnectionListener, CallDurationTracker.Listener, CallStatusReceiver.Listener {
+    @JvmField @Inject var mBroadcastReceiverManager: BroadcastReceiverManager? = null
 
-    protected SipServiceConnection mSipServiceConnection;
-    protected CallDurationTracker mCallDurationTracker;
-    protected CallStatusReceiver mCallStatusReceiver;
-    protected PowerManager powerManager;
-    protected PowerManager.WakeLock wakeLock;
+    protected val phoneNumberFromIntent: String
+        get() = softPhone.call?.phoneNumber ?: ""
+    protected val callerIdFromIntent: String?
+        get() = softPhone.call?.displayName ?: ""
 
-    @Nullable @BindView(R.id.duration_text_view) TextView mCallDurationView;
-
-    @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        VialerApplication.get().component().inject(this);
-        mSipServiceConnection = new SipServiceConnection(this);
-        mCallDurationTracker = new CallDurationTracker(mSipServiceConnection);
-        mCallStatusReceiver = new CallStatusReceiver(this);
-        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-
-        if (powerManager.isWakeLockLevelSupported(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "vialer:in-call");
-            wakeLock.acquire();
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        get().component().inject(this)
+        sipServiceConnection = SipServiceConnection(this)
+        mCallDurationTracker = CallDurationTracker(sipServiceConnection)
+        mCallStatusReceiver = CallStatusReceiver(this)
+        powerManager = getSystemService(POWER_SERVICE) as PowerManager
+        if (powerManager!!.isWakeLockLevelSupported(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)) {
+            wakeLock = powerManager!!.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP, "vialer:in-call")
+            wakeLock?.acquire(10*60*1000L)
         }
-
-        requestMicrophonePermissionIfNecessary();
-        configureActivityFlags();
-        setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+        requestMicrophonePermissionIfNecessary()
+        configureActivityFlags()
+        volumeControlStream = AudioManager.STREAM_VOICE_CALL
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mBroadcastReceiverManager.registerReceiverViaLocalBroadcastManager(mCallStatusReceiver, ACTION_BROADCAST_CALL_STATUS);
+    override fun onStart() {
+        super.onStart()
+        mBroadcastReceiverManager!!.registerReceiverViaLocalBroadcastManager(mCallStatusReceiver, SipConstants.ACTION_BROADCAST_CALL_STATUS)
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mSipServiceConnection.connect();
-        mCallDurationTracker.start(this);
+    override fun onResume() {
+        super.onResume()
+        sipServiceConnection!!.connect()
+        mCallDurationTracker!!.start(this)
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mSipServiceConnection.disconnect();
+    override fun onPause() {
+        super.onPause()
+        sipServiceConnection!!.disconnect()
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mBroadcastReceiverManager.unregisterReceiver(mCallStatusReceiver);
+    override fun onDestroy() {
+        super.onDestroy()
+        mBroadcastReceiverManager!!.unregisterReceiver(mCallStatusReceiver)
         if (wakeLock != null) {
-            wakeLock.release();
+            wakeLock!!.release()
         }
     }
 
-    @Override
     @CallSuper
-    public void sipServiceHasConnected(SipService sipService) {
-        if (sipService.getFirstCall() != null) {
-        } else {
-            finish();
+    override fun sipServiceHasConnected(sipService: SipService) {
+        if (sipService.currentCall == null) {
+            finish()
         }
     }
 
-    @Override
     @CallSuper
-    public void sipServiceBindingFailed() {}
+    override fun sipServiceBindingFailed() {
+    }
 
-    @Override
     @CallSuper
-    public void sipServiceHasBeenDisconnected() {}
+    override fun sipServiceHasBeenDisconnected() {
+    }
 
-    private void requestMicrophonePermissionIfNecessary() {
+    private fun requestMicrophonePermissionIfNecessary() {
         if (!MicrophonePermission.hasPermission(this)) {
-            MicrophonePermission.askForPermission(this);
+            MicrophonePermission.askForPermission(this)
         }
     }
 
-    private void configureActivityFlags() {
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED|WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+    private fun configureActivityFlags() {
+        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
     }
 
-    protected void onPickupButtonClicked() {
-
-    }
-
-    protected void onDeclineButtonClicked() {
-
-    }
-
-    protected String getPhoneNumberFromIntent() {
-        return getIntent().getStringExtra(PHONE_NUMBER);
-    }
-
-    protected String getCallerIdFromIntent() {
-        return getIntent().getStringExtra(CONTACT_NAME);
-    }
+    protected open fun onPickupButtonClicked() {}
+    protected open fun onDeclineButtonClicked() {}
 
     @Optional
-    public void onCallDurationUpdate(long seconds) {
-        if (!mSipServiceConnection.isAvailableAndHasActiveCall() || mCallDurationView == null) {
-            return;
+    override fun onCallDurationUpdate(seconds: Long) {
+        if (!sipServiceConnection!!.isAvailableAndHasActiveCall || mCallDurationView == null) {
+            return
         }
-
-        mCallDurationView.setText(DateUtils.formatElapsedTime(seconds));
+        mCallDurationView!!.text = DateUtils.formatElapsedTime(seconds)
     }
 
-    private String getCallerInfo() {
-        if (getCallerIdFromIntent() != null && !getCallerIdFromIntent().isEmpty()) {
-            return getCallerIdFromIntent();
+    private val callerInfo: String?
+        private get() = if (callerIdFromIntent != null && !callerIdFromIntent!!.isEmpty()) {
+            callerIdFromIntent
+        } else phoneNumberFromIntent
+    val audioRouter: AudioRouter
+        get() = sipServiceConnection!!.get().audioRouter
+
+    companion object {
+        @JvmStatic
+        fun createIntentForCallActivity(caller: Context?, activity: Class<*>?): Intent {
+            val intent = Intent(caller, activity)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            return intent
         }
-        return getPhoneNumberFromIntent();
-    }
-
-
-    public SipServiceConnection getSipServiceConnection() {
-        return mSipServiceConnection;
-    }
-
-    public AudioRouter getAudioRouter() {
-        return getSipServiceConnection().get().getAudioRouter();
-    }
-
-    public static Intent createIntentForCallActivity(Context caller, Class<?> activity) {
-        Intent intent = new Intent(caller, activity);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        return intent;
     }
 }

@@ -16,6 +16,7 @@ import com.voipgrid.vialer.callrecord.CallRecordViewModel
 import com.voipgrid.vialer.call.NativeCallManager
 import com.voipgrid.vialer.firebase.FirebaseEventSubmitter
 import com.voipgrid.vialer.middleware.Middleware
+import com.voipgrid.vialer.phonelib.SoftPhone
 import com.voipgrid.vialer.t9.ContactsSearcher
 import com.voipgrid.vialer.util.BatteryOptimizationManager
 import com.voipgrid.vialer.util.ConnectivityHelper
@@ -67,5 +68,7 @@ val appModule = module {
 
     single { PasswordChange(get()) }
 
-    single { PhoneLib.getInstance(androidContext()).initialise() }
+    single { PhoneLib.getInstance(androidContext()) }
+
+    single { SoftPhone(get()) }
 }

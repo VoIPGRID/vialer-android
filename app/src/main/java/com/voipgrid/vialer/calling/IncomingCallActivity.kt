@@ -1,131 +1,114 @@
-package com.voipgrid.vialer.calling;
+package com.voipgrid.vialer.calling
 
-import android.app.KeyguardManager;
-import android.graphics.drawable.Animatable2;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.app.KeyguardManager
+import android.graphics.drawable.Animatable2
+import android.graphics.drawable.AnimatedVectorDrawable
+import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.os.Handler
+import android.view.View
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
+import butterknife.BindView
+import butterknife.ButterKnife
+import butterknife.OnClick
+import com.voipgrid.vialer.R
+import com.voipgrid.vialer.VialerApplication.Companion.get
+import com.voipgrid.vialer.contacts.Contacts
+import com.voipgrid.vialer.sip.CallDisconnectedReason
+import com.voipgrid.vialer.sip.SipService
+import javax.inject.Inject
 
-import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.contacts.Contacts;
-import com.voipgrid.vialer.sip.CallDisconnectedReason;
-import com.voipgrid.vialer.sip.SipService;
+class IncomingCallActivity : AbstractCallActivity() {
+    @JvmField @Inject var mKeyguardManager: KeyguardManager? = null
 
-import javax.inject.Inject;
+    @JvmField @Inject var mContacts: Contacts? = null
 
-import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
-import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+    @JvmField @Inject var mCallActivityHelper: CallActivityHelper? = null
 
-public class IncomingCallActivity extends AbstractCallActivity {
+    @JvmField @BindView(R.id.incoming_caller_title) var mIncomingCallerTitle: TextView? = null
 
-    @Inject KeyguardManager mKeyguardManager;
-    @Inject Contacts mContacts;
-    @Inject CallActivityHelper mCallActivityHelper;
+    @JvmField @BindView(R.id.incoming_caller_subtitle) var mIncomingCallerSubtitle: TextView? = null
 
-    @BindView(R.id.incoming_caller_title) TextView mIncomingCallerTitle;
-    @BindView(R.id.incoming_caller_subtitle) TextView mIncomingCallerSubtitle;
-    @BindView(R.id.button_decline) ImageButton mButtonDecline;
-    @BindView(R.id.button_pickup) ImageButton mButtonPickup;
-    @BindView(R.id.call_buttons) View mCallButtons;
-    @BindView(R.id.animation) ImageView animation;
+    @JvmField @BindView(R.id.button_decline) var mButtonDecline: ImageButton? = null
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_incoming_call);
-        ButterKnife.bind(this);
-        VialerApplication.get().component().inject(this);
+    @JvmField @BindView(R.id.button_pickup) var mButtonPickup: ImageButton? = null
 
-        mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, getPhoneNumberFromIntent(), getCallerIdFromIntent());
-        beginAnimation();
+    @JvmField @BindView(R.id.call_buttons) var mCallButtons: View? = null
+
+    @JvmField @BindView(R.id.animation) var animation: ImageView? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_incoming_call)
+        ButterKnife.bind(this)
+        get().component().inject(this)
+        mCallActivityHelper!!.updateLabelsBasedOnPhoneNumber(mIncomingCallerTitle, mIncomingCallerSubtitle, phoneNumberFromIntent, callerIdFromIntent)
+        beginAnimation()
     }
 
     /**
      * Begin the incoming call animation and loop it.
      *
      */
-    private void beginAnimation() {
-        Drawable d = animation.getDrawable();
-        ((AnimatedVectorDrawable) d).start();
-        ((AnimatedVectorDrawable) d).registerAnimationCallback(
-                new Animatable2.AnimationCallback() {
-                    @Override
-                    public void onAnimationEnd(final Drawable drawable) {
-                        super.onAnimationEnd(drawable);
-                        new Handler().postDelayed(((AnimatedVectorDrawable) d)::start, 1000);
+    private fun beginAnimation() {
+        val d = animation!!.drawable
+        (d as AnimatedVectorDrawable).start()
+        d.registerAnimationCallback(
+                object : Animatable2.AnimationCallback() {
+                    override fun onAnimationEnd(drawable: Drawable) {
+                        super.onAnimationEnd(drawable)
+                        Handler().postDelayed({ d.start() }, 1000)
                     }
-                });
+                })
     }
 
     @OnClick(R.id.button_decline)
-    public void onDeclineButtonClicked() {
-        getLogger().d("decline");
-
-        disableAllButtons();
-
-        if (!mSipServiceConnection.isAvailable()) {
-            return;
+    public override fun onDeclineButtonClicked() {
+        logger.d("decline")
+        disableAllButtons()
+        if (!sipServiceConnection!!.isAvailable) {
+            return
         }
-
-        if (mSipServiceConnection.get().getCurrentCall() == null) {
-            return;
+        if (sipServiceConnection!!.get().currentCall == null) {
+            return
         }
-
-        SipService.performActionOnSipService(this, SipService.Actions.DECLINE_INCOMING_CALL);
-
-        finish();
+        SipService.performActionOnSipService(this, SipService.Actions.DECLINE_INCOMING_CALL)
+        finish()
     }
 
     @OnClick(R.id.button_pickup)
-    public void onPickupButtonClicked() {
-        if (!mSipServiceConnection.isAvailable() || mSipServiceConnection.get().getCurrentCall() == null) {
-            finish();
-            return;
+    public override fun onPickupButtonClicked() {
+        if (!sipServiceConnection!!.isAvailable || sipServiceConnection!!.get().currentCall == null) {
+            finish()
+            return
         }
-
-        disableAllButtons();
-
-        SipService.performActionOnSipService(this, SipService.Actions.ANSWER_INCOMING_CALL);
+        disableAllButtons()
+        SipService.performActionOnSipService(this, SipService.Actions.ANSWER_INCOMING_CALL)
     }
 
-    private void disableAllButtons() {
-        mButtonPickup.setEnabled(false);
-        mButtonDecline.setEnabled(false);
+    private fun disableAllButtons() {
+        mButtonPickup!!.isEnabled = false
+        mButtonDecline!!.isEnabled = false
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mSipServiceConnection.disconnect(true);
+    override fun onDestroy() {
+        super.onDestroy()
+        sipServiceConnection!!.disconnect(true)
     }
 
-    @Override
-    public void sipServiceHasConnected(SipService sipService) {
-        super.sipServiceHasConnected(sipService);
-        if (sipService.getFirstCall() == null) finish();
+    override fun sipServiceHasConnected(sipService: SipService) {
+        super.sipServiceHasConnected(sipService)
+        if (sipService.currentCall == null) finish()
     }
 
-    @Override
-    public void onCallStatusChanged(String status, String callId) {
-
+    override fun onCallStatusChanged(status: String, callId: String) {}
+    override fun onCallConnected() {
+        sipServiceConnection!!.disconnect(true)
     }
 
-    @Override
-    public void onCallConnected() {
-        mSipServiceConnection.disconnect(true);
-    }
-
-    @Override
-    public void onCallDisconnected(CallDisconnectedReason reason) {
-        finish();
+    override fun onCallDisconnected(reason: CallDisconnectedReason) {
+        finish()
     }
 }
