@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.voipgrid.vialer.R;
+import com.voipgrid.vialer.phonelib.Initialiser;
 
 /**
  * Class for creating the correct sip addresses.
@@ -20,7 +21,7 @@ public class SipUri {
     public static String sipAddress(Context context, String sipAccount) {
         return prependSIPUri(
                 context,
-                sipAccount + "@" + SipConfig.getSipHost()
+                sipAccount + "@" + Initialiser.getSipHost()
         );
     }
 

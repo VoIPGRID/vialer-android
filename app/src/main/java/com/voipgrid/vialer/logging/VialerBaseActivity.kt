@@ -18,14 +18,17 @@ import com.voipgrid.vialer.Logout
 import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.ConnectivityHelper
+import dagger.android.AndroidInjection.inject
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import javax.inject.Inject
 
 
-abstract class VialerBaseActivity : AppCompatActivity() {
+abstract class VialerBaseActivity : AppCompatActivity(), KoinComponent {
 
     protected open val logger = Logger(this)
 
-    @Inject protected lateinit var broadcastReceiverManager: BroadcastReceiverManager
+    val broadcastReceiverManager: BroadcastReceiverManager by inject()
     @Inject protected lateinit var connectivityHelper: ConnectivityHelper
     @Inject protected lateinit var connectivityManager: ConnectivityManager
     @Inject protected lateinit var logout: Logout

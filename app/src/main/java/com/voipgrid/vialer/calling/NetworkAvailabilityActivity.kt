@@ -3,19 +3,13 @@ package com.voipgrid.vialer.calling
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.widget.ImageView
-import android.widget.TextView
-import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.VialerApplication.Companion.get
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.sip.CallDisconnectedReason
-import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.NetworkUtil
-import kotlinx.android.synthetic.main.activity_call.*
-import org.openvoipalliance.phonelib.PhoneLib
 import javax.inject.Inject
 
 class NetworkAvailabilityActivity : AbstractCallActivity() {
@@ -50,27 +44,9 @@ class NetworkAvailabilityActivity : AbstractCallActivity() {
     override fun onPickupButtonClicked() {}
     @OnClick(R.id.button_hangup)
     public override fun onDeclineButtonClicked() {
-        if (!sipServiceConnection!!.isAvailableAndHasActiveCall) {
-            finish()
-            return
+        softPhone.call?.let {
+            softPhone.phone?.end(it)
         }
-        try {
-            PhoneLib.getInstance(this).end(sipServiceConnection!!.get().currentCall)
-            mLogger.i("The user hang up from Network Availability Activity")
-        } catch (e: Exception) {
-            mLogger.i("Failed to decline call " + e.javaClass.simpleName + e.message)
-            finish()
-        }
-    }
-
-    override fun sipServiceHasConnected(sipService: SipService) {
-        super.sipServiceHasConnected(sipService)
-        if (!sipServiceConnection!!.isAvailableAndHasActiveCall) {
-            finish()
-            return
-        }
-        val sipCall = sipServiceConnection!!.get().currentCall
-        mCallActivityHelper!!.updateLabelsBasedOnPhoneNumber(incoming_caller_title, incoming_caller_subtitle, sipCall.phoneNumber, sipCall.displayName)
     }
 
     override fun onCallStatusChanged(status: String, callId: String) {}

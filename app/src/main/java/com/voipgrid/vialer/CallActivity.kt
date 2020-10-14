@@ -14,94 +14,55 @@ import android.widget.PopupMenu
 import butterknife.ButterKnife
 import butterknife.OnClick
 import cn.pedant.SweetAlert.SweetAlertDialog
-import com.voipgrid.vialer.VialerApplication.Companion.get
-import com.voipgrid.vialer.call.CallDetail
-import com.voipgrid.vialer.call.DisplayCallDetail
 import com.voipgrid.vialer.call.TransferCompleteDialog
 import com.voipgrid.vialer.calling.AbstractCallActivity
-import com.voipgrid.vialer.calling.CallingConstants
 import com.voipgrid.vialer.calling.Dialer
 import com.voipgrid.vialer.calling.NetworkAvailabilityActivity
 import com.voipgrid.vialer.dialer.DialerActivity
-import com.voipgrid.vialer.phonelib.callId
-import com.voipgrid.vialer.phonelib.isConnected
 import com.voipgrid.vialer.phonelib.isOnHold
 import com.voipgrid.vialer.sip.CallDisconnectedReason
-import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.sip.SipUri
-import com.voipgrid.vialer.statistics.VialerStatistics
 import com.voipgrid.vialer.util.NetworkUtil
-import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.activity_call.*
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import org.openvoipalliance.phonelib.PhoneLib
-import javax.inject.Inject
+import java.util.*
+import kotlin.concurrent.fixedRateTimer
 
 /**
  * CallActivity for incoming or outgoing call.
  */
 class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, Dialer.Listener, KoinComponent {
 
-    private val phoneLib: PhoneLib by inject()
-
-    @JvmField @Inject var mNetworkUtil: NetworkUtil? = null
-
-
-    private var mCallPresenter: CallPresenter? = null
+    val mNetworkUtil: NetworkUtil by inject()
+    private val callPresenter by lazy { CallPresenter(this) }
     private var mTransferCompleteDialog: SweetAlertDialog? = null
     private val updateUiReceiver = UpdateUiReceiver()
-    private var mConnected = false
-    var isOnTransfer = false
-        private set
-    private var mType: String? = null
-    private var mCallIsTransferred = false
-    var initialCallDetail: CallDetail? = null
-        private set
-    var transferCallDetail: CallDetail? = null
-        private set
-
-    /**
-     * The call details stored in this property will always be displayed
-     * on the screen, this is only used before the appropriate call has been
-     * setup correctly, when set to null the information will be pulled from
-     * the SipCall object directly.
-     *
-     */
-    var forceDisplayedCallDetails: DisplayCallDetail? = null
-        private set
+    private var uiTimer: Timer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_call)
+        updateUi()
         ButterKnife.bind(this)
-        get().component().inject(this)
-        mCallPresenter = CallPresenter(this)
-        updateUi()
-        mType = intent.type
-        mConnected = intent.getBooleanExtra(CallingConstants.CALL_IS_CONNECTED, false)
-        if (CallingConstants.TYPE_INCOMING_CALL != mType && CallingConstants.TYPE_OUTGOING_CALL != mType) {
-            return
-        }
-        forceDisplayedCallDetails = DisplayCallDetail(intent.getStringExtra(CallingConstants.PHONE_NUMBER), intent.getStringExtra(CallingConstants.CONTACT_NAME))
-        updateUi()
     }
 
     override fun onResume() {
         super.onResume()
         updateUi()
-        if (!mNetworkUtil!!.isOnline) {
+        if (!mNetworkUtil.isOnline) {
             NetworkAvailabilityActivity.start()
         }
-        broadcastReceiverManager!!.registerReceiverViaGlobalBroadcastManager(updateUiReceiver, BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED, Intent.ACTION_HEADSET_PLUG)
+        broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(updateUiReceiver, BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED, Intent.ACTION_HEADSET_PLUG)
+//        uiTimer = fixedRateTimer("ui", false, 0, 1000) {
+//            runOnUiThread { updateUi() }
+//        }
     }
 
     override fun onPause() {
         super.onPause()
-        if (mTransferCompleteDialog != null) {
-            mTransferCompleteDialog!!.dismiss()
-        }
-        broadcastReceiverManager!!.unregisterReceiver(updateUiReceiver)
+        mTransferCompleteDialog?.dismiss()
+        broadcastReceiverManager.unregisterReceiver(updateUiReceiver)
+//        uiTimer?.cancel()
     }
 
     override fun onCallStatusChanged(status: String, callId: String) {
@@ -109,36 +70,11 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
     }
 
     override fun onCallConnected() {
-        mConnected = true
-        forceDisplayedCallDetails = null
-        if (softPhone.hasCall) {
-            initialCallDetail = CallDetail.fromSipCall(softPhone.call)
-        }
-
-        if (softPhone.isOnTransfer) {
-            softPhone.transferSession?.to?.let {
-                transferCallDetail = CallDetail.fromSipCall(it)
-            }
-        }
-
-        if (sipServiceConnection!!.isAvailableAndHasActiveCall) {
-            VialerStatistics.callWasSuccessfullySetup(sipServiceConnection!!.get().currentCall)
-        }
         updateUi()
     }
 
     override fun onCallDisconnected(reason: CallDisconnectedReason) {
-        isOnTransfer = false
-        if (mCallIsTransferred) {
-            showCallTransferCompletedDialog()
-        }
-        if (sipServiceConnection!!.isAvailableAndHasActiveCall) {
-            forceDisplayedCallDetails = null
-            mConnected = true
-            updateUi()
-        } else {
-            mCallPresenter!!.showDisconnectedReason(reason)
-            mConnected = false
+        if (!softPhone.hasCall) {
             finish()
         }
     }
@@ -148,25 +84,22 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      *
      */
     private fun updateUi() {
-        if (mCallPresenter == null) {
+        if (!softPhone.hasCall && mTransferCompleteDialog == null) {
+            finish()
             return
         }
-        mCallPresenter!!.update()
+        callPresenter.update()
     }
 
     override fun onBackPressed() {
         logger.d("onBackPressed")
-        if (!sipServiceConnection!!.isAvailableAndHasActiveCall) {
+
+        if (!softPhone.hasCall) {
             super.onBackPressed()
             return
         }
-        if (isOnTransfer) {
-            if (softPhone.hasCall) {
-                super.onBackPressed()
-            } else {
-                hangupViaBackButton()
-            }
-        } else if (button_hangup != null && button_hangup!!.visibility == View.VISIBLE && sipServiceConnection!!.get().currentCall != null) {
+
+        if (softPhone.isOnTransfer || button_hangup.visibility == View.VISIBLE) {
             hangupViaBackButton()
         } else if (isDialpadVisible) {
             hideDialpad()
@@ -203,64 +136,29 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
         updateUi()
     }
 
-    // Toggle the hold the call when the user presses the button.
-    private fun toggleOnHold() {
-        logger.d("toggleOnHold")
-        if (!sipServiceConnection!!.isAvailableAndHasActiveCall) {
-            return
-        }
-        try {
-            softPhone.call?.let {
-                phoneLib.setHold(it, it.isOnHold())
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
     /**
      * Hang-up the call, this will only hang-up the current call, not any call on-hold in the background.
      *
      */
     fun hangup() {
-        if (!sipServiceConnection!!.isAvailable) {
-            return
-        }
-        if (isOnTransfer) {
-            callTransferHangupSecondCall()
-            updateUi()
-            return
-        }
-        try {
-            phoneLib.end(sipServiceConnection!!.get().currentCall)
-            updateUi()
-        } catch (ignored: Exception) {
-        } finally {
-            finish()
-        }
+        softPhone.call?.let { softPhone.phone?.end(it) }
+        updateUi()
     }
 
     @OnClick(R.id.button_mute)
     fun onMuteButtonClick(view: View?) {
-        if (isOnTransfer && sipServiceConnection!!.get().currentCall.isConnected() || mConnected) {
-            if (sipServiceConnection!!.isAvailableAndHasActiveCall) {
-                phoneLib.setMicrophone(!phoneLib.isMicrophoneMuted())
-            }
-        }
+        softPhone.phone?.setMicrophone(softPhone.phone?.isMicrophoneMuted() ?: false)
+        updateUi()
     }
 
     @OnClick(R.id.button_transfer)
     fun onTransferButtonClick(view: View?) {
-        if (!mConnected) {
+        if (softPhone.isOnTransfer) {
+            softPhone.finishAttendedTransfer()
+            showCallTransferCompletedDialog()
             return
         }
-        if (isOnTransfer) {
-            callTransferConnectTheCalls()
-            return
-        }
-        if (!isCallOnHold) {
-            onHoldButtonClick(null)
-        }
+
         val intent = Intent(this, DialerActivity::class.java)
         intent.putExtra(DialerActivity.EXTRA_RETURN_AS_RESULT, true)
         startActivityForResult(intent, DialerActivity.RESULT_DIALED_NUMBER)
@@ -268,11 +166,8 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
     @OnClick(R.id.button_onhold)
     fun onHoldButtonClick(view: View?) {
-        if (isOnTransfer && sipServiceConnection!!.get().currentCall.isConnected() || mConnected) {
-            if (sipServiceConnection!!.isAvailableAndHasActiveCall) {
-                toggleOnHold()
-            }
-        }
+        softPhone.call?.let { softPhone.phone?.setHold(it, !it.isOnHold()) }
+        updateUi()
     }
 
     @OnClick(R.id.button_speaker)
@@ -291,12 +186,14 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
         }
         popup.setOnMenuItemClickListener(this)
         popup.show()
+        updateUi()
     }
 
     @OnClick(R.id.button_hangup)
     public override fun onDeclineButtonClicked() {
         logger.i("Hangup the call")
         hangup()
+        updateUi()
     }
 
     @OnClick(R.id.button_dialpad)
@@ -307,22 +204,9 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
     }
 
     override fun digitWasPressed(dtmf: String) {
-        if (!sipServiceConnection!!.isAvailableAndHasActiveCall) {
-            return
+        softPhone.call?.let {
+            softPhone.phone?.sendDtmf(it, dtmf)
         }
-        try {
-            //sipServiceConnection!!.get().currentCall.dialDtmf(dtmf) @TODO
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun callTransferMakeSecondCall(numberToCall: String?) {
-        val sipAddressUri = SipUri.sipAddressUri(
-                applicationContext,
-                PhoneNumberUtils.format(numberToCall)
-        )
-        sipServiceConnection!!.get().makeCall(numberToCall)
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
@@ -351,51 +235,22 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (data == null) {
-            isOnTransfer = false
             return
         }
         val number = data.getStringExtra("DIALED_NUMBER")
         if (number == null || number.isEmpty()) {
             return
         }
-        beginCallTransferTo(number)
+
+        try {
+            softPhone.beginAttendedTransfer(number)
+        } catch (e: SecurityException) {
+            logger.e("Unable to begin call transfer, permission issue.")
+        }
     }
 
-    private fun beginCallTransferTo(number: String) {
-        isOnTransfer = true
-        callTransferMakeSecondCall(number)
-        forceDisplayedCallDetails = DisplayCallDetail(number, null)
-        updateUi()
-    }
 
     override fun numberWasChanged(number: String) {}
-
-    private fun callTransferHangupSecondCall() {
-        forceDisplayedCallDetails = null
-        try {
-            softPhone.transferSession?.let {
-                phoneLib.end(it.to)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * This method will connect the two calls that we have setup and send the appropriate analytics events.
-     *
-     */
-    private fun callTransferConnectTheCalls() {
-        try {
-            softPhone.transferSession?.let {
-                phoneLib.finishAttendedTransfer(it)
-            }
-
-            mCallIsTransferred = true
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
 
     /**
      * Check whether the keypad is currently being presented to the user.
@@ -405,22 +260,6 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
     private val isDialpadVisible: Boolean
         private get() = dialer.visibility == View.VISIBLE
 
-    /**
-     * Returns TRUE if the call that started this activity is an incoming
-     * call.
-     *
-     * @return TRUE if incoming
-     */
-    private val isIncomingCall: Boolean
-        private get() = CallingConstants.TYPE_INCOMING_CALL == mType
-
-    override fun sipServiceHasConnected(sipService: SipService) {
-        super.sipServiceHasConnected(sipService)
-        if (isIncomingCall) {
-            onCallConnected()
-        }
-        updateUi()
-    }
 
     /**
      * Determine if there are currently two calls, this would suggest a transfer
@@ -435,15 +274,15 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      *
      */
     private fun showCallTransferCompletedDialog() {
-        if (isFinishing || initialCallDetail == null) {
+        if (isFinishing) {
             return
         }
-        if (transferCallDetail != null && mTransferCompleteDialog == null) {
-            mTransferCompleteDialog = TransferCompleteDialog.createAndShow(this, initialCallDetail!!.phoneNumber, transferCallDetail!!.phoneNumber)
+
+        softPhone.transferSession?.let {
+            mTransferCompleteDialog = TransferCompleteDialog.createAndShow(this, it.from.phoneNumber, it.to.phoneNumber)
+            finishAfterTransferDialogIsComplete()
         }
     }
-
-    val isMuted = phoneLib.isMicrophoneMuted()
 
     val isOnSpeaker: Boolean
         get() = audioRouter.isCurrentlyRoutingAudioViaSpeaker
@@ -458,31 +297,18 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
     private fun finishAfterTransferDialogIsComplete() {
         Handler().postDelayed({
-            if (mTransferCompleteDialog != null) {
-                mTransferCompleteDialog!!.cancel()
-                mTransferCompleteDialog = null
-            }
-            finish()
+            mTransferCompleteDialog?.cancel()
+            mTransferCompleteDialog = null
+            super.finish()
         }, 3000)
     }
-
-    /**
-     * Check if the primary call is on hold.
-     *
-     * @return TRUE if it is on hold, otherwise FALSE.
-     */
-    val isCallOnHold: Boolean
-        get() = if (sipServiceConnection!!.isAvailableAndHasActiveCall) {
-            sipServiceConnection!!.get().currentCall.isOnHold()
-        } else false
-
     /**
      * Updates the UI whenever any events are received.
      *
      */
     private inner class UpdateUiReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            runOnUiThread { updateUi() }
+//            runOnUiThread { updateUi() }
         }
     }
 }

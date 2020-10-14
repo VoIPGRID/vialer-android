@@ -17,7 +17,7 @@ public class CallDetail {
     }
 
     public static CallDetail fromSipCall(Session sipCall) {
-        return new CallDetail(SessionExtensionsKt.getCallId(sipCall), sipCall.getPhoneNumber(), sipCall.getDisplayName(), new Contacts().getContactNameByPhoneNumber(sipCall.getPhoneNumber()));
+        return new CallDetail(sipCall.getCallId(), sipCall.getPhoneNumber(), sipCall.getDisplayName(), new Contacts().getContactNameByPhoneNumber(sipCall.getPhoneNumber()));
     }
 
     public String getIdentifier() {

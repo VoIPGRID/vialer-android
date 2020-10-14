@@ -2,15 +2,9 @@ package com.voipgrid.vialer.sip;
 
 import static com.voipgrid.vialer.sip.SipConstants.ACTION_BROADCAST_CALL_STATUS;
 import static com.voipgrid.vialer.sip.SipConstants.BUSY_TONE_DURATION;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_CONNECTED_MESSAGE;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_DISCONNECTED_MESSAGE;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_IDENTIFIER_KEY;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_STATUS_CODE;
-import static com.voipgrid.vialer.sip.SipConstants.CALL_STATUS_KEY;
 import static com.voipgrid.vialer.sip.SipConstants.EXTRA_PHONE_NUMBER;
 
 import static org.koin.java.KoinJavaComponent.get;
-import static org.koin.java.KoinJavaComponent.inject;
 
 import android.Manifest;
 import android.app.PendingIntent;
@@ -35,7 +29,6 @@ import com.voipgrid.vialer.CallActivity;
 import com.voipgrid.vialer.CallStatisticsUpdater;
 import com.voipgrid.vialer.R;
 import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.bluetooth.AudioStateChangeReceiver;
 import com.voipgrid.vialer.call.NativeCallManager;
@@ -44,7 +37,6 @@ import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.dialer.ToneGenerator;
-import com.voipgrid.vialer.logging.LogHelper;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.ActiveCallNotification;
@@ -52,22 +44,17 @@ import com.voipgrid.vialer.notifications.call.DefaultCallNotification;
 import com.voipgrid.vialer.notifications.call.IncomingCallNotification;
 import com.voipgrid.vialer.notifications.call.MissedCallNotification;
 import com.voipgrid.vialer.permissions.MicrophonePermission;
+import com.voipgrid.vialer.phonelib.Initialiser;
 import com.voipgrid.vialer.phonelib.SessionExtensionsKt;
 import com.voipgrid.vialer.phonelib.SoftPhone;
 import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
-import com.voipgrid.vialer.util.PhoneNumberUtils;
 
-import org.jetbrains.annotations.NotNull;
-import org.openvoipalliance.phonelib.PhoneLib;
 import org.openvoipalliance.phonelib.model.Reason;
 import org.openvoipalliance.phonelib.model.Session;
-import org.openvoipalliance.phonelib.repository.initialise.SessionCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -75,10 +62,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 import androidx.core.app.ActivityCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import kotlin.Lazy;
-
-import com.voipgrid.vialer.phonelib.SessionExtensionsKt.*;
+import kotlin.Unit;
 
 /**
  * SipService ensures proper lifecycle management for the PJSUA2 library and
@@ -88,6 +72,10 @@ import com.voipgrid.vialer.phonelib.SessionExtensionsKt.*;
 public class SipService extends Service implements SipServiceTic.TicListener {
 
     private SoftPhone softphone = get(SoftPhone.class);
+    private AudioRouter audioRouter = get(AudioRouter.class);
+    private IncomingCallAlerts incomingCallAlerts = get(IncomingCallAlerts.class);
+    private BroadcastReceiverManager mBroadcastReceiverManager = get(BroadcastReceiverManager.class);
+    private Initialiser phoneInitialiser = get (Initialiser.class);
 
     /**
      * This will track whether this instance of SipService has ever handled a call,
@@ -116,24 +104,16 @@ public class SipService extends Service implements SipServiceTic.TicListener {
     private AbstractCallNotification activeNotification;
     private ScreenOffReceiver screenOffReceiver = new ScreenOffReceiver();
     private SipServiceTic tic = new SipServiceTic(this);
-    private final LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
     private CallStatisticsUpdater callStatisticsUpdater = new CallStatisticsUpdater();
     private CallStatusReceiver statsUpdaterCallStatusReceiver = new CallStatusReceiver(
             callStatisticsUpdater
     );
 
-    @Inject protected SipConfig mSipConfig;
-    @Inject protected BroadcastReceiverManager mBroadcastReceiverManager;
     @Inject protected Handler mHandler;
     @Inject protected ToneGenerator mToneGenerator;
     @Inject protected NetworkConnectivity mNetworkConnectivity;
     @Inject protected NativeCallManager mNativeCallManager;
-    @Inject
-    @Nullable
-    protected PhoneAccount mPhoneAccount;
-    @Inject AudioRouter audioRouter;
-    @Inject IncomingCallAlerts incomingCallAlerts;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -180,7 +160,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         if (mSipServiceHasHandledACall && !softphone.getHasCall()) {
             mLogger.i(
                     "onStartCommand was triggered after a call has already been handled but with no current call, stopping SipService...");
-            stopSelf();
+            stop();
             return START_NOT_STICKY;
         }
 
@@ -193,7 +173,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         } catch (Exception e) {
             mLogger.e("Failed to perform action based on intent, stopping service: "
                     + e.getMessage());
-            stopSelf();
+            stop();
         }
 
         return START_NOT_STICKY;
@@ -246,7 +226,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
                     startCallActivityForCurrentCall();
                 }
             } else {
-                stopSelf();
+                stop();
             }
         } else {
             mLogger.e("SipService received an invalid action: " + action);
@@ -262,7 +242,14 @@ public class SipService extends Service implements SipServiceTic.TicListener {
     private void initialiseIncomingCall() {
         mLogger.d("incomingCall");
         mIncomingCallDetails = intent;
-        loadSip();
+        phoneInitialiser.initLibrary(softphone.getSessionCallback(this), () -> {
+                    phoneInitialiser.respondToMiddleware(this);
+                    return Unit.INSTANCE;
+                },
+                () -> {
+                    stop();
+                    return Unit.INSTANCE;
+                });
         performPostCallCreationActions();
     }
 
@@ -278,10 +265,16 @@ public class SipService extends Service implements SipServiceTic.TicListener {
             return;
         }
 
-        mLogger.d("outgoingCall");
-        loadSip();
-        makeCall(intent.getStringExtra(EXTRA_PHONE_NUMBER), true);
-        performPostCallCreationActions();
+        phoneInitialiser.initLibrary(softphone.getSessionCallback(this), () -> {
+                    makeCall(intent.getStringExtra(EXTRA_PHONE_NUMBER), true);
+                    performPostCallCreationActions();
+                    return Unit.INSTANCE;
+                },
+                () -> {
+                    stop();
+                    return Unit.INSTANCE;
+                });
+
     }
 
     /**
@@ -292,33 +285,6 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         if (audioRouter.isBluetoothRouteAvailable()
                 && !audioRouter.isCurrentlyRoutingAudioViaBluetooth()) {
             audioRouter.routeAudioViaBluetooth();
-        }
-    }
-
-    /**
-     * Begin the process of actually starting the SIP library so we can
-     * start/receive calls.
-     *
-     */
-    private void loadSip() {
-        if (mPhoneAccount == null) {
-            mLogger.w("No sip account when trying to create service");
-            stopSelf();
-            return;
-        }
-
-        try {
-            mLogger.i("Attempting to load sip lib");
-            mSipConfig = mSipConfig.init(
-                    this,
-                    mPhoneAccount,
-                    intent != null && Actions.HANDLE_INCOMING_CALL.equals(intent.getAction())
-            );
-            mSipConfig.initLibrary(callback);
-        } catch (Exception e) {
-            Log.e("TEST123", "", e);
-            mLogger.e("Failed to load pjsip, stopping the service");
-            stopSelf();
         }
     }
 
@@ -340,8 +306,22 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         mHandler.removeCallbacks(mCheckService);
 
         sipServiceActive = false;
-        softphone.cleanUp();
         super.onDestroy();
+    }
+
+    private Handler handler;
+
+    public void stop() {
+        softphone.cleanUp();
+        phoneInitialiser.destroy();
+
+        if (handler == null) {
+            handler = new Handler();
+            handler.postDelayed(() -> {
+                stopSelf();
+                handler = null;
+            }, 3000);
+        }
     }
 
     /**
@@ -373,10 +353,6 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         mHandler.removeCallbacks(mRingbackRunnable);
     }
 
-    public void makeCall(String phoneNumber) {
-        makeCall(phoneNumber, false);
-    }
-
     /**
      * Function to make a call with or without starting a activity.
      * @param phoneNumber
@@ -385,13 +361,12 @@ public class SipService extends Service implements SipServiceTic.TicListener {
     public void makeCall(String phoneNumber, boolean startActivity) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 == PackageManager.PERMISSION_GRANTED) {
-            PhoneLib.getInstance(this).callTo(phoneNumber);
+            softphone.getPhone().callTo(phoneNumber);
 
             if (startActivity) {
                 startOutgoingCallActivity(phoneNumber);
             }
         }
-
     }
 
     /**
@@ -507,10 +482,6 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         return mNativeCallManager;
     }
 
-    public SipConfig getSipConfig() {
-        return mSipConfig;
-    }
-
     public AbstractCallNotification getNotification() {
         return callNotification;
     }
@@ -535,6 +506,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         incomingCallAlerts.stop();
         changeNotification(callNotification.active(getCurrentCall()));
         audioRouter.focus();
+        VialerStatistics.callWasSuccessfullySetup(getCurrentCall());
     }
 
 
@@ -715,7 +687,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
         mLogger.i("Stopping SipService as task has been removed");
-        stopSelf();
+        stop();
     }
 
     /**
@@ -746,7 +718,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
             mLogger.d("checkServiceBeingUsed");
             if (softphone.getCall() == null) {
                 mLogger.i("No active calls stop the service");
-                stopSelf();
+                stop();
                 if (mIncomingCallDetails != null) {
                     String number = mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_PHONE_NUMBER);
                     String contactName = mIncomingCallDetails.getStringExtra(SipConstants.EXTRA_CONTACT_NAME);
@@ -822,90 +794,4 @@ public class SipService extends Service implements SipServiceTic.TicListener {
          */
         String DISPLAY_CALL_IF_AVAILABLE = PREFIX + "DISPLAY_CALL_IF_AVAILABLE";
     }
-
-    private SessionCallback callback = new SessionCallback() {
-
-        private static final String DEFAULT_EVENT = "call-update";
-
-
-
-        private boolean canHandleIncomingCall() {
-            boolean result = getCurrentCall() == null && !getNativeCallManager().isBusyWithNativeCall();
-
-            if (!result) LogHelper.using(mLogger).logBusyReason(SipService.this);
-
-            return result;
-        }
-
-
-        @Override
-        public void incomingCall(@NotNull final Session incomingSession) {
-            fireEvent(DEFAULT_EVENT, incomingSession);
-
-Log.e("TEST123", "incoming call...");
-            if (!canHandleIncomingCall()) {
-                try {
-                    softphone.getPhone().declineIncoming(incomingSession, Reason.BUSY);
-                } catch (SecurityException e) {
-
-                }
-                return;
-            }
-
-            if (getCurrentCall() != null) {
-                VialerStatistics.incomingCallFailedDueToOngoingVialerCall(incomingSession);
-            }
-
-            if (getNativeCallManager().isBusyWithNativeCall()) {
-                VialerStatistics.incomingCallFailedDueToOngoingGsmCall(incomingSession);
-            }
-
-            softphone.setCall(incomingSession);
-            informUserAboutIncomingCall(incomingSession.getPhoneNumber(), incomingSession.getDisplayName());
-        }
-
-        @Override
-        public void outgoingInit(@NotNull final Session session) {
-            fireEvent(DEFAULT_EVENT, session);
-            softphone.setCall(session);
-        }
-
-        @Override
-        public void sessionConnected(@NotNull final Session session) {
-            fireEvent(CALL_CONNECTED_MESSAGE, session);
-            onCallConnected();
-        }
-
-        @Override
-        public void sessionEnded(@NotNull final Session session) {
-            fireEvent(CALL_DISCONNECTED_MESSAGE, session);
-            softphone.setCall(null);
-        }
-
-        @Override
-        public void sessionReleased(@NotNull final Session session) {
-            fireEvent(CALL_DISCONNECTED_MESSAGE, session);
-            softphone.setCall(null);
-        }
-
-        @Override
-        public void error(@NotNull final Session session) {
-            fireEvent(CALL_DISCONNECTED_MESSAGE, session);
-            softphone.setCall(null);
-        }
-
-        @Override
-        public void sessionUpdated(@NotNull final Session session) {
-            fireEvent(DEFAULT_EVENT, session);
-        }
-
-        private void fireEvent(String event, Session call) {
-            Intent intent = new Intent(SipConstants.ACTION_BROADCAST_CALL_STATUS);
-            intent.putExtra(CALL_STATUS_KEY, event);
-            intent.putExtra(CALL_IDENTIFIER_KEY, SessionExtensionsKt.getCallId(call));
-            intent.putExtra(CALL_STATUS_CODE, call.getReason().toString());
-
-            localBroadcastManager.sendBroadcast(intent);
-        }
-    };
 }

@@ -21,6 +21,7 @@ import com.voipgrid.vialer.sip.SipService
 import javax.inject.Inject
 
 class IncomingCallActivity : AbstractCallActivity() {
+
     @JvmField @Inject var mKeyguardManager: KeyguardManager? = null
 
     @JvmField @Inject var mContacts: Contacts? = null
@@ -68,10 +69,7 @@ class IncomingCallActivity : AbstractCallActivity() {
     public override fun onDeclineButtonClicked() {
         logger.d("decline")
         disableAllButtons()
-        if (!sipServiceConnection!!.isAvailable) {
-            return
-        }
-        if (sipServiceConnection!!.get().currentCall == null) {
+        if (!softPhone.hasCall) {
             return
         }
         SipService.performActionOnSipService(this, SipService.Actions.DECLINE_INCOMING_CALL)
@@ -80,7 +78,7 @@ class IncomingCallActivity : AbstractCallActivity() {
 
     @OnClick(R.id.button_pickup)
     public override fun onPickupButtonClicked() {
-        if (!sipServiceConnection!!.isAvailable || sipServiceConnection!!.get().currentCall == null) {
+        if (!softPhone.hasCall) {
             finish()
             return
         }
@@ -93,19 +91,10 @@ class IncomingCallActivity : AbstractCallActivity() {
         mButtonDecline!!.isEnabled = false
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        sipServiceConnection!!.disconnect(true)
-    }
-
-    override fun sipServiceHasConnected(sipService: SipService) {
-        super.sipServiceHasConnected(sipService)
-        if (sipService.currentCall == null) finish()
-    }
-
     override fun onCallStatusChanged(status: String, callId: String) {}
+
     override fun onCallConnected() {
-        sipServiceConnection!!.disconnect(true)
+        finish()
     }
 
     override fun onCallDisconnected(reason: CallDisconnectedReason) {

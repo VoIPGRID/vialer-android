@@ -3,11 +3,8 @@ package com.voipgrid.vialer.dagger;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
-import android.os.PowerManager;
-import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 
@@ -22,13 +19,7 @@ import com.voipgrid.vialer.api.UserSynchronizer;
 import com.voipgrid.vialer.api.VoipgridApi;
 import com.voipgrid.vialer.api.models.PhoneAccount;
 import com.voipgrid.vialer.api.models.SystemUser;
-import com.voipgrid.vialer.audio.AudioFocus;
-import com.voipgrid.vialer.audio.AudioRouter;
 import com.voipgrid.vialer.call.NativeCallManager;
-import com.voipgrid.vialer.call.incoming.alerts.IncomingCallAlerts;
-import com.voipgrid.vialer.call.incoming.alerts.IncomingCallRinger;
-import com.voipgrid.vialer.call.incoming.alerts.IncomingCallScreenWake;
-import com.voipgrid.vialer.call.incoming.alerts.IncomingCallVibration;
 import com.voipgrid.vialer.calling.CallActivityHelper;
 import com.voipgrid.vialer.callrecord.CachedContacts;
 import com.voipgrid.vialer.callrecord.CallRecordAdapter;
@@ -43,10 +34,9 @@ import com.voipgrid.vialer.dialer.ToneGenerator;
 import com.voipgrid.vialer.middleware.Middleware;
 import com.voipgrid.vialer.onboarding.VoipgridLogin;
 import com.voipgrid.vialer.sip.NetworkConnectivity;
-import com.voipgrid.vialer.sip.SipConfig;
+import com.voipgrid.vialer.phonelib.Initialiser;
 import com.voipgrid.vialer.sip.SipConstants;
 import com.voipgrid.vialer.util.BatteryOptimizationManager;
-import com.voipgrid.vialer.util.BroadcastReceiverManager;
 import com.voipgrid.vialer.util.ColorHelper;
 import com.voipgrid.vialer.util.ConnectivityHelper;
 import com.voipgrid.vialer.util.HtmlHelper;
@@ -100,12 +90,6 @@ public class VialerModule {
     @Provides LocalBroadcastManager provideLocalBroadcastManager(Context context) {
         return LocalBroadcastManager.getInstance(context);
     }
-
-    @Provides
-    BroadcastReceiverManager provideBroadcastReceiverManager(LocalBroadcastManager localBroadcastManager, Context context) {
-        return new BroadcastReceiverManager(localBroadcastManager, context);
-    }
-
     @Provides
     KeyguardManager provideKeyguardManager(Context context) {
         return (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
@@ -117,11 +101,6 @@ public class VialerModule {
 
     @Provides CallActivityHelper provideCallActivityHelper(Contacts contacts) {
         return new CallActivityHelper(contacts);
-    }
-
-    @Provides
-    SipConfig provideSipConfig() {
-        return new SipConfig();
     }
 
     @Provides SharedPreferences provideSharedPreferences(Context context) {
@@ -181,57 +160,6 @@ public class VialerModule {
     @Provides
     PhoneNumberImageGenerator provideNumberImageFinder(Contacts contacts) {
         return new PhoneNumberImageGenerator(contacts);
-    }
-
-    @Provides
-    android.media.AudioManager provideAudioManager(Context context) {
-        return (android.media.AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-    }
-
-    @Provides
-    Vibrator provideVibrator(Context context) {
-        return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-    }
-
-    @Singleton
-    @Provides
-    IncomingCallVibration provideIncomingCallVibrator(android.media.AudioManager audioManager, Vibrator vibrator) {
-        return new IncomingCallVibration(audioManager, vibrator);
-    }
-
-    @Provides
-    AudioRouter provideAudioRouter(Context context, android.media.AudioManager androidAudioManager, BroadcastReceiverManager broadcastReceiverManager, AudioFocus audioFocus) {
-        return new AudioRouter(context, androidAudioManager, broadcastReceiverManager, audioFocus);
-    }
-
-    @Singleton
-    @Provides
-    IncomingCallAlerts incomingCallAlerts(IncomingCallVibration vibration, IncomingCallRinger ringer, IncomingCallScreenWake incomingCallScreenWake) {
-        return new IncomingCallAlerts(vibration, ringer, incomingCallScreenWake);
-    }
-
-    @Singleton
-    @Provides
-    IncomingCallScreenWake provideIncomingCallScreenWake(PowerManager pm) {
-        return new IncomingCallScreenWake(pm);
-    }
-
-    @Singleton
-    @Provides
-    PowerManager providePowerManager(Context context) {
-        return (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-    }
-
-    @Singleton
-    @Provides
-    IncomingCallRinger provideRinger(Context context, AudioFocus audioFocus) {
-        return new IncomingCallRinger(context, audioFocus);
-    }
-
-    @Singleton
-    @Provides
-    AudioFocus provideAudioFocus(AudioManager audioManager) {
-        return new AudioFocus(audioManager);
     }
 
     @Provides

@@ -307,7 +307,7 @@ public class VialerStatistics {
 //            addValue(KEY_MIDDLEWARE_KEY, call.getMiddlewareKey());
 //        }
 
-        addValue(KEY_CALL_ID, SessionExtensionsKt.getCallId(call));
+        addValue(KEY_CALL_ID, call.getCallId());
 //        addValue(KEY_CALL_DIRECTION, call.getCallDirection());
 //        addValue(KEY_CONNECTION_TYPE, call.getTransport() != null ? call.getTransport().toUpperCase() : "");
         addValue(KEY_ACCOUNT_CONNECTION_TYPE, SecureCalling.fromContext(VialerApplication.get()).isEnabled() ? VALUE_ACCOUNT_CONNECTION_TYPE_TLS : VALUE_ACCOUNT_CONNECTION_TYPE_TCP);

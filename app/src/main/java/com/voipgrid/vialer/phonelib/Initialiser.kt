@@ -1,163 +1,143 @@
-package com.voipgrid.vialer.sip;
+package com.voipgrid.vialer.phonelib
 
+import android.content.Context
+import android.util.ArraySet
+import android.util.Log
+import com.voipgrid.vialer.R
+import com.voipgrid.vialer.User
+import com.voipgrid.vialer.VialerApplication.Companion.get
+import com.voipgrid.vialer.api.SecureCalling
+import com.voipgrid.vialer.api.ServiceGenerator
+import com.voipgrid.vialer.api.models.PhoneAccount
+import com.voipgrid.vialer.fcm.RemoteMessageData
+import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.persistence.VoipSettings
+import com.voipgrid.vialer.sip.CallSetupChecker
+import com.voipgrid.vialer.sip.SipConstants
+import com.voipgrid.vialer.sip.SipService
+import com.voipgrid.vialer.util.UserAgent
+import okhttp3.ResponseBody
+import org.openvoipalliance.phonelib.PhoneLib
+import org.openvoipalliance.phonelib.model.Codec
+import org.openvoipalliance.phonelib.model.RegistrationState
+import org.openvoipalliance.phonelib.repository.initialise.SessionCallback
+import org.openvoipalliance.phonelib.repository.registration.RegistrationCallback
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-import android.content.Intent;
-import android.util.Log;
+class Initialiser(private val context: Context, private val softPhone: SoftPhone) {
 
-import com.voipgrid.vialer.R;
-import com.voipgrid.vialer.User;
-import com.voipgrid.vialer.VialerApplication;
-import com.voipgrid.vialer.api.Middleware;
-import com.voipgrid.vialer.api.SecureCalling;
-import com.voipgrid.vialer.api.ServiceGenerator;
-import com.voipgrid.vialer.api.models.PhoneAccount;
-import com.voipgrid.vialer.fcm.RemoteMessageData;
-import com.voipgrid.vialer.logging.Logger;
-import com.voipgrid.vialer.util.UserAgent;
+    private val mLogger = Logger(this)
+    private val logListener = PhoneLibLogger()
+    
+    private val port
+        get() = if (shouldUseTls()) "5061" else "5060"
+    
+    private val stun
+        get() = if (User.voip.hasStunEnabled) context.resources.getStringArray(R.array.stun_hosts)[0] else null
 
-import org.jetbrains.annotations.NotNull;
-import org.openvoipalliance.phonelib.PhoneLib;
-import org.openvoipalliance.phonelib.model.RegistrationState;
-import org.openvoipalliance.phonelib.repository.initialise.SessionCallback;
-import org.openvoipalliance.phonelib.repository.registration.RegistrationCallback;
+    private var onRegister: (() -> Unit)? = null
+    private var onFailure: (() -> Unit)? = null
 
-import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import okhttp3.ResponseBody;
-import retrofit2.Callback;
-import retrofit2.Response;
+    fun initLibrary(callback: SessionCallback?, onRegister: (() -> Unit), onFailure: (() -> Unit)) {
+        this.onRegister = onRegister
+        this.onFailure = onFailure
 
-public class SipConfig {
+        val account = User.voipAccount ?: return
 
-    private PhoneAccount mPhoneAccount;
-    private Logger mLogger = new Logger(this);
-    private SipService mSipService;
+        softPhone.phone = PhoneLib.getInstance(context)
+        softPhone.phone?.setAudioCodecs(setOf(if (User.voip.audioCodec != VoipSettings.AudioCodec.OPUS) Codec.ILBC else Codec.OPUS))
 
-    private boolean shouldResponseToMiddlewareOnRegistration = false;
-    private boolean mHasRespondedToMiddleware = false;
+        softPhone.phone?.apply {
+            initialise()
+            setUserAgent(UserAgent(context).generate())
+            setSessionCallback(callback)
+            setLogListener(logListener)
+            register(account.accountId, account.password, sipHost, port, stun, shouldUseTls(), object : RegistrationCallback() {
+                override fun stateChanged(registrationState: RegistrationState) {
+                    if (registrationState == RegistrationState.REGISTERED) {
+                        this@Initialiser.onRegister?.invoke()
+                        this@Initialiser.onRegister = null
+                        this@Initialiser.onFailure = null
+                    }
 
-    private boolean isInitialised = false;
-
-    /**
-     * Initialise the sip service with the relevant details.
-     *
-     * @param sipService
-     * @param phoneAccount
-     * @param shouldResponseToMiddlewareOnRegistration Set to TRUE if when the account has been registered, that a reply should be sent to the middleware.
-     * @return
-     */
-    public SipConfig init(SipService sipService, PhoneAccount phoneAccount, boolean shouldResponseToMiddlewareOnRegistration) {
-        mSipService = sipService;
-        mPhoneAccount = phoneAccount;
-        this.shouldResponseToMiddlewareOnRegistration = shouldResponseToMiddlewareOnRegistration;
-
-        return this;
+                    if (registrationState == RegistrationState.FAILED) {
+                        this@Initialiser.onFailure?.invoke()
+                        this@Initialiser.onRegister = null
+                        this@Initialiser.onFailure = null
+                    }
+                }
+            })
+        }
     }
 
-    void initLibrary(SessionCallback callback) {
-        if (isInitialised) return;
-
-        isInitialised = true;
-        PhoneLib.getInstance(mSipService).initialise();
-        PhoneLib.getInstance(mSipService).setUserAgent(new UserAgent(mSipService).generate());
-        PhoneLib.getInstance(mSipService).setSessionCallback(callback);
-
-        PhoneLib.getInstance(mSipService).register(
-                mPhoneAccount.getAccountId(),
-                mPhoneAccount.getPassword(),
-                getSipHost(),
-                String.valueOf(5061),
-                User.voip.getHasStunEnabled() ? mSipService.getResources().getStringArray(R.array.stun_hosts)[0] : null,
-                shouldUseTls(),
-                new RegistrationCallback() {
-                    @Override
-                    public void stateChanged(@NotNull final RegistrationState registrationState) {
-                        super.stateChanged(registrationState);
-
-                        if (registrationState == RegistrationState.REGISTERED) {
-                            Log.e("TEST123", "Registered!" + shouldResponseToMiddlewareOnRegistration + mHasRespondedToMiddleware);
-                            if (shouldResponseToMiddlewareOnRegistration && !mHasRespondedToMiddleware) {
-
-                                respondToMiddleware();
-                            }
-                        }
-                    }
-                });
+    fun destroy() {
+        softPhone.phone?.destroy()
+        softPhone.phone = null
     }
 
     /**
      * Response to the middleware on a incoming call to notify asterisk we are ready to accept
      * calls.
      */
-    private void respondToMiddleware() {
-        Intent incomingCallDetails = mSipService.getIncomingCallDetails();
+    fun respondToMiddleware(sipService: SipService) {
+        val incomingCallDetails = sipService.incomingCallDetails
 
         if (incomingCallDetails == null) {
-            mLogger.w("Trying to respond to middleware with no details");
-            return;
+            mLogger.w("Trying to respond to middleware with no details")
+            return
         }
 
-        String url = incomingCallDetails.getStringExtra(SipConstants.EXTRA_RESPONSE_URL);
-        String messageStartTime = incomingCallDetails.getStringExtra(RemoteMessageData.MESSAGE_START_TIME);
-        String token = incomingCallDetails.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN);
-        String attempt = incomingCallDetails.getStringExtra(RemoteMessageData.ATTEMPT);
+        val url = incomingCallDetails.getStringExtra(SipConstants.EXTRA_RESPONSE_URL)
+        val messageStartTime = incomingCallDetails.getStringExtra(RemoteMessageData.MESSAGE_START_TIME)
+        val token = incomingCallDetails.getStringExtra(SipConstants.EXTRA_REQUEST_TOKEN)
+        val attempt = incomingCallDetails.getStringExtra(RemoteMessageData.ATTEMPT)
 
-        // Set responded as soon as possible to avoid duplicate requests due to multiple
-        // onAccountRegistered calls in a row.
-        mHasRespondedToMiddleware = true;
+        val middlewareApi = ServiceGenerator.createRegistrationService(sipService)
 
-        Middleware middlewareApi = ServiceGenerator.createRegistrationService(mSipService);
-
-        String sipUserId = "";
-
-        if (User.getVoipAccount() != null && User.getVoipAccount().getAccountId() != null) {
-            sipUserId = User.getVoipAccount().getAccountId();
-        }
-Log.e("TEST123", "Responding available to middleware");
-        retrofit2.Call<ResponseBody> call = middlewareApi.reply(
+        val call = middlewareApi.reply(
                 token,
                 true,
                 messageStartTime,
-                sipUserId
-        );
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                if (!response.isSuccessful()) {
+                User.voipAccount?.accountId ?: ""
+        )
+
+        call.enqueue(object : Callback<ResponseBody?> {
+            override fun onResponse(call: Call<ResponseBody?>, response: Response<ResponseBody?>) {
+                if (!response.isSuccessful) {
                     mLogger.w(
-                            "Unsuccessful response to middleware: " + Integer.toString(response.code()));
-                    mSipService.stopSelf();
-                } else {
-                    Log.e("TEST123", "Middleware success!");
+                            "Unsuccessful response to middleware: " + Integer.toString(response.code()))
+                    sipService.stop()
                 }
             }
 
-            @Override
-            public void onFailure(@NonNull retrofit2.Call<ResponseBody> call, @NonNull Throwable t) {
-                mLogger.w("Failed sending response to middleware");
-                mSipService.stopSelf();
+            override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
+                mLogger.w("Failed sending response to middleware")
+                sipService.stop()
             }
-        });
+        })
 
-        CallSetupChecker.withPushMessageInformation(token, messageStartTime, attempt).start(mSipService);
+        CallSetupChecker.withPushMessageInformation(token, messageStartTime, attempt).start(sipService)
     }
 
-    /**
-     * Find the current SIP domain that should be used for all calls.
-     *
-     * @return The domain as a string
-     */
-    @NonNull
-    public static String getSipHost() {
-        return VialerApplication.get().getString(shouldUseTls() ? R.string.sip_host_secure : R.string.sip_host);
-    }
+    companion object {
+        /**
+         * Find the current SIP domain that should be used for all calls.
+         *
+         * @return The domain as a string
+         */
+        @JvmStatic
+        val sipHost: String
+            get() = get().getString(if (shouldUseTls()) R.string.sip_host_secure else R.string.sip_host)
 
-    /**
-     * Determine if TLS should be used for all calls.
-     *
-     * @return TRUE if TLS should be used
-     */
-    public static boolean shouldUseTls() {
-        return SecureCalling.fromContext(VialerApplication.get()).isEnabled();
+        /**
+         * Determine if TLS should be used for all calls.
+         *
+         * @return TRUE if TLS should be used
+         */
+        fun shouldUseTls(): Boolean {
+            return SecureCalling.fromContext(get()).isEnabled
+        }
     }
 }

@@ -33,6 +33,7 @@ import com.voipgrid.vialer.util.NetworkUtil
 import kotlinx.android.synthetic.main.fragment_call_records.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import javax.inject.Inject
 
@@ -45,7 +46,7 @@ abstract class CallRecordFragment(val type: CallRecordViewModel.Type)
 
     @Inject lateinit var newCallRecordsImporter: NewCallRecordsImporter
     @Inject lateinit var networkUtil: NetworkUtil
-    @Inject lateinit var broadcastReceiverManager: BroadcastReceiverManager
+    private val broadcastReceiverManager: BroadcastReceiverManager by inject()
     @Inject lateinit var cachedContacts: CachedContacts
 
     private val handler = Handler()

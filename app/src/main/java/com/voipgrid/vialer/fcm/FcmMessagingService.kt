@@ -80,11 +80,12 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
             isAVialerCallAlreadyInProgress() -> rejectDueToVialerCallAlreadyInProgress(remoteMessage, remoteMessageData)
             nativeCallManager.isBusyWithNativeCall ->  rejectDueToNativeCallAlreadyInProgress(remoteMessage, remoteMessageData)
             else -> {
-                lastHandledCall = remoteMessageData.requestToken
-
                 logger.d("Payload processed, calling startService method")
 
-                startSipService(remoteMessageData)
+                if (lastHandledCall != remoteMessageData.requestToken) {
+                    lastHandledCall = remoteMessageData.requestToken
+                    startSipService(remoteMessageData)
+                }
             }
         }
     }

@@ -1,13 +1,19 @@
 package com.voipgrid.vialer
 
+import android.util.Log
 import android.view.View
 import com.voipgrid.vialer.calling.CallActivityHelper
 import com.voipgrid.vialer.contacts.Contacts
+import com.voipgrid.vialer.phonelib.SoftPhone
 import com.voipgrid.vialer.phonelib.isOnHold
 import com.voipgrid.vialer.phonelib.legacyState
+import com.voipgrid.vialer.phonelib.prettyCallDuration
 import com.voipgrid.vialer.sip.CallDisconnectedReason
 import com.voipgrid.vialer.sip.SipConstants
+import dagger.android.AndroidInjection.inject
 import kotlinx.android.synthetic.main.activity_call.*
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
 /**
  * Responsible for handling all the UI elements of the CallActivity, the update
@@ -15,7 +21,9 @@ import kotlinx.android.synthetic.main.activity_call.*
  * the user (labels, buttons etc.) correctly.
  *
  */
-class CallPresenter internal constructor(private val mActivity: CallActivity) {
+class CallPresenter internal constructor(private val mActivity: CallActivity) : KoinComponent {
+    private val softPhone: SoftPhone by inject()
+
     private val mCallActivityHelper: CallActivityHelper = CallActivityHelper(Contacts())
 
     /**
@@ -27,36 +35,42 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) {
             return
         }
         updateCallLabels()
-        if (!mActivity.sipServiceConnection!!.isAvailable) {
-            enableOrDisableCallActionButtons(false, false, true, true, false)
+        if (!softPhone.hasCall) {
+            enableOrDisableCallActionButtons(false, false, false, false, false)
             hideCallDuration()
             return
-        } else if (!mActivity.sipServiceConnection!!.isAvailableAndHasActiveCall) {
-            disableAllButtons()
-            mActivity.button_hangup.disable()
-            return
         }
-        val call = mActivity.sipServiceConnection!!.get().currentCall
+        val call = softPhone.call ?: return
+
         val state: String = call.legacyState
         updateTransferButton(state)
         when (state) {
-            SipConstants.CALL_INVALID_STATE -> enableOrDisableButtons(false, false, true, true, false, true)
-            SipConstants.CALL_CONNECTED_MESSAGE, SipConstants.CALL_UNHOLD_ACTION, SipConstants.CALL_PUT_ON_HOLD_ACTION -> enableOrDisableButtons(true, true, true, true, true, true)
+            SipConstants.CALL_INVALID_STATE -> enableOrDisableButtons(mute = false, hold = false, dialpad = true, speaker = true, transfer = false, hangUp = true)
+            SipConstants.CALL_CONNECTED_MESSAGE, SipConstants.CALL_UNHOLD_ACTION, SipConstants.CALL_PUT_ON_HOLD_ACTION -> enableOrDisableButtons(mute = true, hold = true, dialpad = true, speaker = true, transfer = true, hangUp = true)
             SipConstants.CALL_DISCONNECTED_MESSAGE -> disableAllButtons()
         }
         mActivity.button_onhold.activate(call.isOnHold())
-        mActivity.button_mute.activate(mActivity.isMuted)
+        mActivity.button_mute.activate(softPhone.phone?.isMicrophoneMuted() ?: false)
         mActivity.button_dialpad.activate(false)
         mActivity.button_transfer.activate(false)
-        if (state == SipConstants.CALL_CONNECTED_MESSAGE || state == SipConstants.CALL_UNHOLD_ACTION) {
+
+        if (call.isOnHold()) {
             showCallDuration()
-        } else {
+            mActivity.duration_text_view.text = mActivity.getString(R.string.callnotification_on_hold)
+        }
+        else if (state == SipConstants.CALL_CONNECTED_MESSAGE || state == SipConstants.CALL_UNHOLD_ACTION) {
+            mActivity.duration_text_view.text = call.prettyCallDuration
+            showCallDuration()
+        }
+        else {
             hideCallDuration()
         }
+
         updateAudioSourceButton()
+        showDisconnectedReason(CallDisconnectedReason.fromReason(call.reason))
     }
 
-    fun showDisconnectedReason(reason: CallDisconnectedReason) {
+    private fun showDisconnectedReason(reason: CallDisconnectedReason) {
         var status: String? = null
         // Should become a switch when more reasons are added
         if (reason === CallDisconnectedReason.NUMBER_NOT_FOUND) {
@@ -75,14 +89,8 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) {
      *
      */
     private fun updateCallLabels() {
-        if (mActivity.forceDisplayedCallDetails != null) {
-            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.incoming_caller_title, mActivity.incoming_caller_subtitle, mActivity.forceDisplayedCallDetails!!.number, mActivity.forceDisplayedCallDetails!!.callerId)
-            return
-        }
-        if (mActivity.sipServiceConnection!!.isAvailableAndHasActiveCall) {
-            val call = if (mActivity.hasSecondCall()) mActivity.softPhone.transferSession?.to else mActivity.softPhone.call
-
-            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.incoming_caller_title, mActivity.incoming_caller_subtitle, call!!.phoneNumber, call!!.displayName)
+        softPhone.call?.let {
+            mCallActivityHelper.updateLabelsBasedOnPhoneNumber(mActivity.incoming_caller_title, mActivity.incoming_caller_subtitle, it.phoneNumber, it.displayName)
         }
     }
 
@@ -93,8 +101,8 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) {
      * @param state The current call state of the primary call
      */
     private fun updateTransferButton(state: String) {
-        if (mActivity.isOnTransfer) {
-            mActivity.call_status.text = mActivity.getString(R.string.call_on_hold, mActivity.initialCallDetail!!.displayLabel)
+        if (softPhone.isOnTransfer) {
+            mActivity.call_status.text = mActivity.getString(R.string.call_on_hold, softPhone.transferSession?.from?.phoneNumber ?: "")
             mActivity.call_status.visibility = View.VISIBLE
             mActivity.button_transfer.setImageResource(R.drawable.ic_call_merge)
             mActivity.transfer_label.setText(R.string.transfer_connect)
@@ -193,7 +201,7 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) {
      * Show the call duration timer.
      */
     private fun showCallDuration() {
-        mActivity.mCallDurationView!!.visibility = View.VISIBLE
+        mActivity.duration_text_view.visibility = View.VISIBLE
     }
 
     /**
@@ -201,7 +209,7 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) {
      *
      */
     private fun hideCallDuration() {
-        mActivity.mCallDurationView!!.visibility = View.INVISIBLE
+        mActivity.duration_text_view.visibility = View.INVISIBLE
     }
 
 }

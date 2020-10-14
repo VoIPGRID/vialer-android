@@ -3,6 +3,7 @@ package com.voipgrid.vialer.phonelib
 import android.text.format.DateUtils
 import com.voipgrid.vialer.sip.SipConstants.*
 import org.openvoipalliance.phonelib.model.CallState.*
+import org.openvoipalliance.phonelib.model.Direction
 import org.openvoipalliance.phonelib.model.Session
 
 fun Session.isRinging() = when (state) {
@@ -27,13 +28,10 @@ val Session.prettyCallDuration
     get() = DateUtils.formatElapsedTime(duration.toLong())
 
 val Session.isIncoming
-    get() = true
+    get() = direction == Direction.INCOMING
 
 val Session.isOutgoing
-    get() = false
-
-val Session.callId
-    get() = "spindle-12345-test"
+    get() = direction == Direction.OUTGOING
 
 fun Session.getCallDurationInMilliseconds() = duration * 1000
 
