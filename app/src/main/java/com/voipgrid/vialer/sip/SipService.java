@@ -337,23 +337,6 @@ public class SipService extends Service implements SipServiceTic.TicListener {
     }
 
     /**
-     * Start the ring back for a outgoing call.
-     */
-    public void startRingback() {
-        mLogger.d("onCallStartRingback");
-        audioRouter.focus();
-        mHandler.postDelayed(mRingbackRunnable, 2000);
-    }
-
-    /**
-     * Stop the ring back for a outgoing call.
-     */
-    public void stopRingback() {
-        mLogger.d("onCallStopRingback");
-        mHandler.removeCallbacks(mRingbackRunnable);
-    }
-
-    /**
      * Function to make a call with or without starting a activity.
      * @param phoneNumber
      * @param startActivity

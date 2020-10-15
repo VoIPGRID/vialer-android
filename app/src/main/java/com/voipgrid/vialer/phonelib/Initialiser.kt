@@ -73,6 +73,8 @@ class Initialiser(private val context: Context, private val softPhone: SoftPhone
     }
 
     fun destroy() {
+        onRegister = null
+        onFailure = null
         softPhone.phone?.destroy()
         softPhone.phone = null
     }

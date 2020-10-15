@@ -4,16 +4,15 @@ import android.util.Log
 import android.view.View
 import com.voipgrid.vialer.calling.CallActivityHelper
 import com.voipgrid.vialer.contacts.Contacts
-import com.voipgrid.vialer.phonelib.SoftPhone
-import com.voipgrid.vialer.phonelib.isOnHold
-import com.voipgrid.vialer.phonelib.legacyState
-import com.voipgrid.vialer.phonelib.prettyCallDuration
+import com.voipgrid.vialer.phonelib.*
 import com.voipgrid.vialer.sip.CallDisconnectedReason
 import com.voipgrid.vialer.sip.SipConstants
 import dagger.android.AndroidInjection.inject
 import kotlinx.android.synthetic.main.activity_call.*
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import org.openvoipalliance.phonelib.model.CallState
+import org.openvoipalliance.phonelib.model.CallState.*
 
 /**
  * Responsible for handling all the UI elements of the CallActivity, the update
@@ -57,6 +56,10 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) : 
         if (call.isOnHold()) {
             showCallDuration()
             mActivity.duration_text_view.text = mActivity.getString(R.string.callnotification_on_hold)
+        }
+        else if (call.state == OutgoingRinging) {
+            showCallDuration()
+            mActivity.duration_text_view.text = mActivity.getString(R.string.analytics_event_label_ringing) + "..."
         }
         else if (state == SipConstants.CALL_CONNECTED_MESSAGE || state == SipConstants.CALL_UNHOLD_ACTION) {
             mActivity.duration_text_view.text = call.prettyCallDuration

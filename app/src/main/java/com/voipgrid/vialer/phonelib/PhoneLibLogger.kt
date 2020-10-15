@@ -13,7 +13,7 @@ class PhoneLibLogger : LogListener {
          when (lev) {
              DEBUG -> Log.i("LINPHONE", message)
              TRACE -> Log.i("LINPHONE", message)
-             MESSAGE -> Log.i("LINPHONE", message)
+             MESSAGE -> logger.i(message)
              WARNING -> logger.w(message)
              ERROR -> logger.e(message)
              FATAL -> logger.e(message)

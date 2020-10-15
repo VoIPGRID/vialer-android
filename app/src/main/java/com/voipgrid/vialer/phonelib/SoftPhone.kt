@@ -120,12 +120,6 @@ Log.e("TEST123", "INCOMING!!!")
 
         override fun sessionUpdated(session: Session) {
             fireEvent(DEFAULT_EVENT, session)
-
-            if (session.state == CallState.OutgoingRinging) {
-                sipService.startRingback()
-            } else {
-                sipService.stopRingback()
-            }
         }
 
         private fun fireEvent(event: String, call: Session) {
