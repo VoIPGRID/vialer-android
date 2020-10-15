@@ -53,16 +53,16 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
             NetworkAvailabilityActivity.start()
         }
         broadcastReceiverManager.registerReceiverViaGlobalBroadcastManager(updateUiReceiver, BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED, BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED, Intent.ACTION_HEADSET_PLUG)
-//        uiTimer = fixedRateTimer("ui", false, 0, 1000) {
-//            runOnUiThread { updateUi() }
-//        }
+        uiTimer = fixedRateTimer("ui", false, 0, 1000) {
+            runOnUiThread { updateUi() }
+        }
     }
 
     override fun onPause() {
         super.onPause()
         mTransferCompleteDialog?.dismiss()
         broadcastReceiverManager.unregisterReceiver(updateUiReceiver)
-//        uiTimer?.cancel()
+        uiTimer?.cancel()
     }
 
     override fun onCallStatusChanged(status: String, callId: String) {
@@ -308,7 +308,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      */
     private inner class UpdateUiReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-//            runOnUiThread { updateUi() }
+            runOnUiThread { updateUi() }
         }
     }
 }
