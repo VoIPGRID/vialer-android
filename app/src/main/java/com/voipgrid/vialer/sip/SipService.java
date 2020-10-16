@@ -97,7 +97,6 @@ public class SipService extends Service implements SipServiceTic.TicListener {
 
     private Logger mLogger;
     private final BroadcastReceiver phoneStateReceiver = new PhoneStateReceiver();
-    private Runnable mRingbackRunnable = new OutgoingCallRinger();
     private final IBinder mBinder = new SipServiceBinder();
     private CheckServiceIsRunning mCheckService = new CheckServiceIsRunning();
     private AbstractCallNotification callNotification = new DefaultCallNotification();
@@ -583,15 +582,6 @@ public class SipService extends Service implements SipServiceTic.TicListener {
             } catch(Exception e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private class OutgoingCallRinger implements Runnable {
-        @Override
-        public void run() {
-            // Play a ring back tone to update a user that setup is ongoing.
-            mToneGenerator.startTone(ToneGenerator.Constants.TONE_SUP_DIAL, 1000);
-            mHandler.postDelayed(mRingbackRunnable, 4000);
         }
     }
 

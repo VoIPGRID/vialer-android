@@ -22,6 +22,7 @@ import com.voipgrid.vialer.util.DialHelper
 import com.voipgrid.vialer.util.LoginRequiredActivity
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.activity_dialer.*
+import kotlinx.android.synthetic.main.include_progress_overlay.*
 import kotlinx.android.synthetic.main.view_dialer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -137,6 +138,7 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
         when(number.isEmpty()) {
             true -> Toast.makeText(this@DialerActivity, getString(R.string.dialer_invalid_number), Toast.LENGTH_LONG).show()
             false -> {
+                progress_overlay.visibility = View.VISIBLE
                 dialHelper.callNumber(phoneNumberToCall, contactName)
                 User.internal.lastDialledNumber = phoneNumberToCall
             }
@@ -148,6 +150,7 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
         when {
             dialer.number.isNotBlank() -> {
                 button_call.isClickable = false
+                button_call.disable()
                 onCallNumber(PhoneNumberUtils.format(dialer.number), null)
             }
             dialer.number.isBlank() -> dialer.number = User.internal.lastDialledNumber

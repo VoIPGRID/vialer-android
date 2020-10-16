@@ -5,7 +5,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.voipgrid.vialer.call.NativeCallManager
-import com.voipgrid.vialer.logging.LogHelper
 import com.voipgrid.vialer.sip.SipConstants
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.statistics.VialerStatistics
@@ -116,6 +115,7 @@ Log.e("TEST123", "INCOMING!!!")
             }
 
             transferSession = null
+            LogHelper.logCall(session)
         }
 
         override fun sessionUpdated(session: Session) {
@@ -125,7 +125,7 @@ Log.e("TEST123", "INCOMING!!!")
         private fun fireEvent(event: String, call: Session) {
             val intent = Intent(SipConstants.ACTION_BROADCAST_CALL_STATUS)
             intent.putExtra(SipConstants.CALL_STATUS_KEY, event)
-            intent.putExtra(SipConstants.CALL_IDENTIFIER_KEY, call.callId)
+            intent.putExtra(SipConstants.CALL_IDENTIFIER_KEY, call.callId ?: "")
             intent.putExtra(SipConstants.CALL_STATUS_CODE, call.reason.toString())
             localBroadcastManager.sendBroadcast(intent)
         }
