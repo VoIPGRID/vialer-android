@@ -12,6 +12,7 @@ import com.voipgrid.vialer.call.NativeCallManager
 import com.voipgrid.vialer.logging.LogHelper
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.notifications.VoipDisabledNotification
+import com.voipgrid.vialer.phonelib.Initialiser
 import com.voipgrid.vialer.sip.SipConstants
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.sip.SipUri
@@ -35,6 +36,7 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
     private val nativeCallManager: NativeCallManager by inject()
     private val middlewareApi: Middleware by inject()
     private val middleware: com.voipgrid.vialer.middleware.Middleware by inject()
+    private val initialiser: Initialiser by inject()
 
     /**
      * The number of times the middleware will attempt to send a push notification

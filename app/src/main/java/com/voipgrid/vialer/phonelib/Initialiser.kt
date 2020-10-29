@@ -40,36 +40,42 @@ class Initialiser(private val context: Context, private val softPhone: SoftPhone
     private var onRegister: (() -> Unit)? = null
     private var onFailure: (() -> Unit)? = null
 
-    fun initLibrary(callback: SessionCallback?, onRegister: (() -> Unit), onFailure: (() -> Unit)) {
-        this.onRegister = onRegister
-        this.onFailure = onFailure
-
-        val account = User.voipAccount ?: return
-
+    fun initLibrary(callback: SessionCallback?) {
         softPhone.phone = PhoneLib.getInstance(context)
         softPhone.phone?.setAudioCodecs(setOf(if (User.voip.audioCodec != VoipSettings.AudioCodec.OPUS) Codec.ILBC else Codec.OPUS))
 
         softPhone.phone?.apply {
             initialise()
             setUserAgent(UserAgent(context).generate())
-            setSessionCallback(callback)
             setLogListener(logListener)
-            register(account.accountId, account.password, sipHost, port, stun, shouldUseTls(), object : RegistrationCallback() {
-                override fun stateChanged(registrationState: RegistrationState) {
-                    if (registrationState == RegistrationState.REGISTERED) {
-                        this@Initialiser.onRegister?.invoke()
-                        this@Initialiser.onRegister = null
-                        this@Initialiser.onFailure = null
-                    }
-
-                    if (registrationState == RegistrationState.FAILED) {
-                        this@Initialiser.onFailure?.invoke()
-                        this@Initialiser.onRegister = null
-                        this@Initialiser.onFailure = null
-                    }
-                }
-            })
         }
+
+        callback?.let { softPhone.phone?.setSessionCallback(it) }
+    }
+
+    fun register(callback: SessionCallback?, onRegister: (() -> Unit), onFailure: (() -> Unit)) {
+        this.onRegister = onRegister
+        this.onFailure = onFailure
+
+        val account = User.voipAccount ?: return
+
+        softPhone.phone?.setSessionCallback(callback)
+
+        softPhone.phone?.register(account.accountId, account.password, sipHost, port, stun, shouldUseTls(), object : RegistrationCallback() {
+            override fun stateChanged(registrationState: RegistrationState) {
+                if (registrationState == RegistrationState.REGISTERED) {
+                    this@Initialiser.onRegister?.invoke()
+                    this@Initialiser.onRegister = null
+                    this@Initialiser.onFailure = null
+                }
+
+                if (registrationState == RegistrationState.FAILED) {
+                    this@Initialiser.onFailure?.invoke()
+                    this@Initialiser.onRegister = null
+                    this@Initialiser.onFailure = null
+                }
+            }
+        })
     }
 
     fun destroy() {

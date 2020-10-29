@@ -59,7 +59,7 @@ class SoftPhone(val nativeCallManager: NativeCallManager, val localBroadcastMana
 
         override fun incomingCall(incomingSession: Session) {
             fireEvent(DEFAULT_EVENT, incomingSession)
-Log.e("TEST123", "INCOMING!!!")
+
             if (!canHandleIncomingCall) {
                 try {
                     phone?.declineIncoming(incomingSession, Reason.BUSY)

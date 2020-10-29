@@ -241,7 +241,13 @@ public class SipService extends Service implements SipServiceTic.TicListener {
     private void initialiseIncomingCall() {
         mLogger.d("incomingCall");
         mIncomingCallDetails = intent;
-        phoneInitialiser.initLibrary(softphone.getSessionCallback(this), () -> {
+        mLogger.i("Beginning library INIT for INCOMING call");
+        phoneInitialiser.initLibrary(softphone.getSessionCallback(this));
+        mLogger.i("Completed library INIT for INCOMING call");
+        mLogger.i("Beginning REGISTER for INCOMING call");
+
+        phoneInitialiser.register(softphone.getSessionCallback(this), () -> {
+                    mLogger.i("Finished REGISTER for INCOMING call");
                     phoneInitialiser.respondToMiddleware(this);
                     return Unit.INSTANCE;
                 },
@@ -263,8 +269,13 @@ public class SipService extends Service implements SipServiceTic.TicListener {
             startCallActivityForCurrentCall();
             return;
         }
+        mLogger.i("Beginning library INIT for OUTGOING call");
+        phoneInitialiser.initLibrary(softphone.getSessionCallback(this));
+        mLogger.i("Completed library INIT for OUTGOING call");
 
-        phoneInitialiser.initLibrary(softphone.getSessionCallback(this), () -> {
+        mLogger.i("Beginning REGISTER for OUTGOING call");
+        phoneInitialiser.register(softphone.getSessionCallback(this), () -> {
+                    mLogger.i("Finished REGISTER for OUTGOING call");
                     makeCall(intent.getStringExtra(EXTRA_PHONE_NUMBER), true);
                     performPostCallCreationActions();
                     return Unit.INSTANCE;
