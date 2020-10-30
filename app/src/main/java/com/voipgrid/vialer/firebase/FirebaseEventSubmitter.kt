@@ -39,4 +39,16 @@ object FirebaseEventSubmitter {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN) {
         }
     }
+
+    fun libraryInit(ms: Long) {
+        firebaseAnalytics.logEvent("library_init") {
+            param("library_init_time", ms)
+        }
+    }
+
+    fun libraryRegister(ms: Long) {
+        firebaseAnalytics.logEvent("library_register") {
+            param("library_register_time", ms)
+        }
+    }
 }

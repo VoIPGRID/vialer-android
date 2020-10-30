@@ -37,6 +37,7 @@ import com.voipgrid.vialer.calling.AbstractCallActivity;
 import com.voipgrid.vialer.calling.CallStatusReceiver;
 import com.voipgrid.vialer.calling.CallingConstants;
 import com.voipgrid.vialer.dialer.ToneGenerator;
+import com.voipgrid.vialer.firebase.FirebaseEventSubmitter;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.notifications.call.AbstractCallNotification;
 import com.voipgrid.vialer.notifications.call.ActiveCallNotification;
@@ -241,13 +242,17 @@ public class SipService extends Service implements SipServiceTic.TicListener {
     private void initialiseIncomingCall() {
         mLogger.d("incomingCall");
         mIncomingCallDetails = intent;
+        long begin = System.nanoTime();
         mLogger.i("Beginning library INIT for INCOMING call");
         phoneInitialiser.initLibrary(softphone.getSessionCallback(this));
+        FirebaseEventSubmitter.INSTANCE.libraryInit(System.nanoTime() - begin);
         mLogger.i("Completed library INIT for INCOMING call");
         mLogger.i("Beginning REGISTER for INCOMING call");
 
+        final long finalBegin = System.nanoTime();
         phoneInitialiser.register(softphone.getSessionCallback(this), () -> {
                     mLogger.i("Finished REGISTER for INCOMING call");
+                    FirebaseEventSubmitter.INSTANCE.libraryRegister(System.nanoTime() - finalBegin);
                     phoneInitialiser.respondToMiddleware(this);
                     return Unit.INSTANCE;
                 },
@@ -269,13 +274,18 @@ public class SipService extends Service implements SipServiceTic.TicListener {
             startCallActivityForCurrentCall();
             return;
         }
+
+        long begin = System.nanoTime();
         mLogger.i("Beginning library INIT for OUTGOING call");
         phoneInitialiser.initLibrary(softphone.getSessionCallback(this));
         mLogger.i("Completed library INIT for OUTGOING call");
+        FirebaseEventSubmitter.INSTANCE.libraryInit(System.nanoTime() - begin);
 
         mLogger.i("Beginning REGISTER for OUTGOING call");
+        final long finalBegin = System.nanoTime();
         phoneInitialiser.register(softphone.getSessionCallback(this), () -> {
                     mLogger.i("Finished REGISTER for OUTGOING call");
+                    FirebaseEventSubmitter.INSTANCE.libraryRegister(System.nanoTime() - finalBegin);
                     makeCall(intent.getStringExtra(EXTRA_PHONE_NUMBER), true);
                     performPostCallCreationActions();
                     return Unit.INSTANCE;
