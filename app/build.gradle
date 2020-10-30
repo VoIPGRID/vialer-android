@@ -125,7 +125,8 @@ android {
             productFlavors.annabel.signingConfig signingConfigs.annabel
             productFlavors.staging.signingConfig signingConfigs.vialer
 
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             manifestPlaceholders = [enableCrashReporting: "true"]
         }
