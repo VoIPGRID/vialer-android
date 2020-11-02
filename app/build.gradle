@@ -297,8 +297,7 @@ dependencies {
     implementation 'com.google.android.play:core:1.8.0'
     implementation 'com.google.android.play:core-ktx:1.8.1'
 
-    implementation 'org.openvoipalliance:AndroidPhoneLib:0.4.75'
-    implementation ("org.linphone:linphone-sdk-android:4.4+")
+    implementation 'org.openvoipalliance:AndroidPhoneLib:0.4.77'
     implementation 'com.pnikosis:materialish-progress:1.7'
 }
 
