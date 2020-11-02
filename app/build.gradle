@@ -16,7 +16,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 240
-        versionName "6.9 new-voip-library-3"
+        versionName "6.9 beta 01"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {
