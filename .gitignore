@@ -11,6 +11,7 @@ dialer2/build
 config.xml
 google-services.json
 keystore.properties
+/buildSrc
 
 
 # Local user specific env vars for fastlane
