@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.Intent
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.middleware.Middleware
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class OnBootReceiver : BroadcastReceiver(), KoinComponent {
 

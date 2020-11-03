@@ -33,8 +33,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.joda.time.Period
 import org.joda.time.format.PeriodFormatterBuilder
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -107,7 +107,7 @@ class ContactDialog(private val contactId: Long) : BottomSheetDialogFragment(), 
 
     override fun onStart() {
         super.onStart()
-        dialog.findViewById<View>(R.id.design_bottom_sheet)
+        dialog?.findViewById<View>(R.id.design_bottom_sheet)
                 ?.layoutParams
                 ?.height = ViewGroup.LayoutParams.MATCH_PARENT
     }

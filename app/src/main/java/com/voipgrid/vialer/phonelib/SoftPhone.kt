@@ -122,11 +122,11 @@ class SoftPhone(val nativeCallManager: NativeCallManager, val localBroadcastMana
             fireEvent(DEFAULT_EVENT, session)
         }
 
-        private fun fireEvent(event: String, call: Session) {
+        fun fireEvent(event: String, call: Session?) {
             val intent = Intent(SipConstants.ACTION_BROADCAST_CALL_STATUS)
             intent.putExtra(SipConstants.CALL_STATUS_KEY, event)
-            intent.putExtra(SipConstants.CALL_IDENTIFIER_KEY, call.callId ?: "")
-            intent.putExtra(SipConstants.CALL_STATUS_CODE, call.reason.toString())
+            intent.putExtra(SipConstants.CALL_IDENTIFIER_KEY, call?.callId ?: "")
+            intent.putExtra(SipConstants.CALL_STATUS_CODE, call?.reason.toString() ?: "")
             localBroadcastManager.sendBroadcast(intent)
         }
     }

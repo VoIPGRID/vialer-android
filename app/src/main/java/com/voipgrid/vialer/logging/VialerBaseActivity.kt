@@ -19,8 +19,8 @@ import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.util.BroadcastReceiverManager
 import com.voipgrid.vialer.util.ConnectivityHelper
 import dagger.android.AndroidInjection.inject
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import javax.inject.Inject
 
 

@@ -267,6 +267,7 @@ public class AudioRouter {
      *
      */
     public void focus() {
+        Log.e("TEST123", "e", new Exception());
         audioFocus.forCall();
     }
 

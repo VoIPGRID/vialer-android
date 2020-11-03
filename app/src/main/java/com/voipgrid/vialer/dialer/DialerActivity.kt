@@ -15,7 +15,10 @@ import butterknife.OnClick
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.VialerApplication
+import com.voipgrid.vialer.calling.CallStatusReceiver
 import com.voipgrid.vialer.calling.Dialer
+import com.voipgrid.vialer.sip.CallDisconnectedReason
+import com.voipgrid.vialer.sip.SipConstants
 import com.voipgrid.vialer.t9.T9Fragment
 import com.voipgrid.vialer.util.ConnectivityHelper
 import com.voipgrid.vialer.util.DialHelper
@@ -29,7 +32,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.Listener {
+class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.Listener, CallStatusReceiver.Listener {
 
     private val dialHelper by lazy { DialHelper.fromActivity(this) }
 
@@ -37,6 +40,8 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
 
     private val isContactsExpanded: Boolean
         get() = dialer.visibility != View.VISIBLE
+
+    private val callStatusReceiver = CallStatusReceiver(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +53,13 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
         t9Fragment.listener = this
         preventKeyboardFromBeingDisplayed()
         handleIntents()
+        broadcastReceiverManager.registerReceiverViaLocalBroadcastManager(callStatusReceiver, SipConstants.ACTION_BROADCAST_CALL_STATUS)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        broadcastReceiverManager.unregisterReceiver(callStatusReceiver)
     }
 
     /**
@@ -243,5 +255,16 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
          *
          */
         const val LAST_DIALED = "last_dialed"
+    }
+
+    override fun onCallStatusChanged(status: String?, callId: String?) {
+    }
+
+    override fun onCallConnected() {
+    }
+
+    override fun onCallDisconnected() {
+        Toast.makeText(this, R.string.two_step_call_state_setup_failed, Toast.LENGTH_LONG).show()
+        finish()
     }
 }

@@ -21,7 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.core.KoinComponent
+import org.koin.core.component.KoinComponent
 import kotlin.coroutines.CoroutineContext
 
 class ContactsFragment : Fragment(), KoinComponent, CoroutineScope {

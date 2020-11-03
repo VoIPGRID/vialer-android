@@ -15,6 +15,8 @@ import com.voipgrid.vialer.sip.SipConstants;
 import org.openvoipalliance.phonelib.model.Reason;
 import org.openvoipalliance.phonelib.model.Session;
 
+import androidx.annotation.Nullable;
+
 public class CallStatusReceiver extends BroadcastReceiver {
 
     private final Listener mListener;
@@ -36,9 +38,7 @@ public class CallStatusReceiver extends BroadcastReceiver {
         switch (status) {
             case CALL_CONNECTED_MESSAGE: mListener.onCallConnected(); break;
             case CALL_DISCONNECTED_MESSAGE:
-                mListener.onCallDisconnected(
-                    CallDisconnectedReason.Companion.fromReason(Reason.valueOf(intent.getStringExtra(CALL_STATUS_CODE)))
-                );
+                mListener.onCallDisconnected();
                 break;
         }
 
@@ -50,6 +50,6 @@ public class CallStatusReceiver extends BroadcastReceiver {
 
         void onCallConnected();
 
-        void onCallDisconnected(CallDisconnectedReason reason);
+        void onCallDisconnected();
     }
 }

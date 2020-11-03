@@ -97,7 +97,7 @@ class IncomingCallActivity : AbstractCallActivity() {
         finish()
     }
 
-    override fun onCallDisconnected(reason: CallDisconnectedReason) {
+    override fun onCallDisconnected() {
         finish()
     }
 }

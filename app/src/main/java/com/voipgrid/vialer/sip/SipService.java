@@ -326,6 +326,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         mHandler.removeCallbacks(mCheckService);
 
         sipServiceActive = false;
+        softphone.getSessionCallback(this).fireEvent(SipConstants.CALL_DISCONNECTED_MESSAGE, null);
         super.onDestroy();
     }
 
@@ -529,7 +530,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
 
         refreshCallAlerts(call);
 
-        if (SessionExtensionsKt.isConnected(call)) {
+        if (SessionExtensionsKt.isConnected(call) && !SessionExtensionsKt.isRinging(call)) {
             audioRouter.focus();
         }
     }

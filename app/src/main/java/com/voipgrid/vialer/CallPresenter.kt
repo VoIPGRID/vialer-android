@@ -9,8 +9,8 @@ import com.voipgrid.vialer.sip.CallDisconnectedReason
 import com.voipgrid.vialer.sip.SipConstants
 import dagger.android.AndroidInjection.inject
 import kotlinx.android.synthetic.main.activity_call.*
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.openvoipalliance.phonelib.model.CallState
 import org.openvoipalliance.phonelib.model.CallState.*
 
@@ -70,15 +70,15 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) : 
         }
 
         updateAudioSourceButton()
-        showDisconnectedReason(CallDisconnectedReason.fromReason(call.reason))
+        showDisconnectedReason()
     }
 
-    private fun showDisconnectedReason(reason: CallDisconnectedReason) {
+    private fun showDisconnectedReason() {
         var status: String? = null
         // Should become a switch when more reasons are added
-        if (reason === CallDisconnectedReason.NUMBER_NOT_FOUND) {
-            status = mActivity.getString(R.string.call_disconnected_reason_not_found)
-        }
+//        if (reason === CallDisconnectedReason.NUMBER_NOT_FOUND) {
+//            status = mActivity.getString(R.string.call_disconnected_reason_not_found)
+//        }
         if (status != null) {
             mActivity.call_status.text = status
             mActivity.call_status.visibility = View.VISIBLE

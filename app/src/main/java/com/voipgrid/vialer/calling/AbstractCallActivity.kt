@@ -12,8 +12,8 @@ import com.voipgrid.vialer.permissions.MicrophonePermission
 import com.voipgrid.vialer.phonelib.SoftPhone
 import com.voipgrid.vialer.sip.SipConstants
 import com.voipgrid.vialer.util.LoginRequiredActivity
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 abstract class AbstractCallActivity : LoginRequiredActivity(), CallStatusReceiver.Listener, KoinComponent {
 

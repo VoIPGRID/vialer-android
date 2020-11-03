@@ -22,7 +22,7 @@ import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import org.koin.core.KoinComponent
+import org.koin.core.component.KoinComponent
 
 /**
  * Listen to messages from FCM. The backend server sends us FCM notifications when we have

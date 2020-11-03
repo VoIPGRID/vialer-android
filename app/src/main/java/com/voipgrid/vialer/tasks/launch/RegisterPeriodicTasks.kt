@@ -6,8 +6,8 @@ import com.voipgrid.vialer.VialerApplication
 import com.voipgrid.vialer.api.SecureCalling
 import com.voipgrid.vialer.callrecord.importing.HistoricCallRecordsImporter
 import com.voipgrid.vialer.middleware.Middleware
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.util.concurrent.TimeUnit
 
 /**

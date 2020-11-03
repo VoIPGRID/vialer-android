@@ -14,8 +14,8 @@ import com.voipgrid.vialer.User
 import com.voipgrid.vialer.util.ConnectivityHelper
 import kotlinx.android.synthetic.main.fragment_warnings.*
 import kotlinx.android.synthetic.main.view_number_input.*
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class WarningFragment : Fragment(), KoinComponent {
 

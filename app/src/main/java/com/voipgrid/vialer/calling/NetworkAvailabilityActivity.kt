@@ -51,7 +51,7 @@ class NetworkAvailabilityActivity : AbstractCallActivity() {
 
     override fun onCallStatusChanged(status: String, callId: String) {}
     override fun onCallConnected() {}
-    override fun onCallDisconnected(reason: CallDisconnectedReason) {}
+    override fun onCallDisconnected() {}
 
     companion object {
         private const val CHECK_USER_IS_CONNECTED_TO_NETWORK = 500

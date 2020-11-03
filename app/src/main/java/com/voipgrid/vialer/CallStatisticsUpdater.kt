@@ -17,7 +17,7 @@ class CallStatisticsUpdater : CallStatusReceiver.Listener {
         }
     }
 
-    override fun onCallDisconnected(reason: CallDisconnectedReason?) {
+    override fun onCallDisconnected() {
         callStatisticsTimer?.cancel()
     }
 
