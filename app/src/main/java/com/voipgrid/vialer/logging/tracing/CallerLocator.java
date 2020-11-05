@@ -16,6 +16,7 @@ public class CallerLocator {
 
     static {
         translations.put("SipLogWriter", new Caller("Pjsip", null, 0));
+        translations.put("PhoneLibLogger", new Caller("Linphone", null, 0));
     }
 
     /**

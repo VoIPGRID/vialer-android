@@ -45,9 +45,9 @@ class Initialiser(private val context: Context, private val softPhone: SoftPhone
         softPhone.phone?.setAudioCodecs(setOf(if (User.voip.audioCodec != VoipSettings.AudioCodec.OPUS) Codec.ILBC else Codec.OPUS))
 
         softPhone.phone?.apply {
-            initialise()
-            setUserAgent(UserAgent(context).generate())
             setLogListener(logListener)
+            setUserAgent(UserAgent(context).generate())
+            initialise()
         }
 
         callback?.let { softPhone.phone?.setSessionCallback(it) }

@@ -15,8 +15,8 @@ class PhoneLibLogger : LogListener {
     override fun onLogMessageWritten(lev: LogLevel, message: String) {
         GlobalScope.launch(Dispatchers.IO) {
             when (lev) {
-                DEBUG -> Log.i("LINPHONE", message)
-                TRACE -> Log.i("LINPHONE", message)
+                DEBUG -> logger.d(message)
+                TRACE -> logger.d(message)
                 MESSAGE -> logger.i(message)
                 WARNING -> logger.w(message)
                 ERROR -> logger.e(message)
