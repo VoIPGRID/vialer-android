@@ -533,6 +533,10 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         if (SessionExtensionsKt.isConnected(call) && !SessionExtensionsKt.isRinging(call)) {
             audioRouter.focus();
         }
+
+        if (activeNotification.getClass().equals(ActiveCallNotification.class)) {
+            changeNotification(callNotification.active(call));
+        }
     }
 
     /**
