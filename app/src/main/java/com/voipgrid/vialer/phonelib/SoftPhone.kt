@@ -8,47 +8,47 @@ import com.voipgrid.vialer.call.NativeCallManager
 import com.voipgrid.vialer.sip.SipConstants
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.statistics.VialerStatistics
-import org.linphone.core.Call
+import org.linphone.core.Call as LinphoneCall
 import org.openvoipalliance.phonelib.PhoneLib
 import org.openvoipalliance.phonelib.model.AttendedTransferSession
 import org.openvoipalliance.phonelib.model.CallState
 import org.openvoipalliance.phonelib.model.Reason
-import org.openvoipalliance.phonelib.model.Session
+import org.openvoipalliance.phonelib.model.Call
 import java.lang.Exception
 import org.openvoipalliance.phonelib.repository.initialise.SessionCallback as SessionCallbackLib
 
 class SoftPhone(val nativeCallManager: NativeCallManager, val localBroadcastManager: LocalBroadcastManager) {
 
-    var callInternal: Session? = null
+    var callInternal: Call? = null
     var phone: PhoneLib? = null
 
-    var call: Session?
-        get() = transferSession?.to ?: callInternal
+    var call: Call?
+        get() = transferCall?.to ?: callInternal
         set(call) { callInternal = call }
 
-    var transferSession: AttendedTransferSession? = null
+    var transferCall: AttendedTransferSession? = null
 
     val hasCall: Boolean
-        get() = call != null || transferSession != null
+        get() = call != null || transferCall != null
 
     val isOnTransfer: Boolean
-        get() = transferSession != null
+        get() = transferCall != null
 
     fun cleanUp() {
         call = null
-        transferSession = null
+        transferCall = null
     }
 
     fun beginAttendedTransfer(number: String) {
         try {
-            call?.let { transferSession = phone?.beginAttendedTransfer(it, number) }
+            call?.let { transferCall = phone?.beginAttendedTransfer(it, number) }
         } catch (e: SecurityException) {
 
         }
     }
 
     fun finishAttendedTransfer() {
-        transferSession?.let { phone?.finishAttendedTransfer(it) }
+        transferCall?.let { phone?.finishAttendedTransfer(it) }
     }
 
     private val canHandleIncomingCall = call == null && !nativeCallManager.isBusyWithNativeCall
@@ -57,72 +57,72 @@ class SoftPhone(val nativeCallManager: NativeCallManager, val localBroadcastMana
 
     inner class SessionCallback(private val sipService: SipService): SessionCallbackLib() {
 
-        override fun incomingCall(incomingSession: Session) {
-            fireEvent(DEFAULT_EVENT, incomingSession)
+        override fun incomingCall(incomingCall: Call) {
+            fireEvent(DEFAULT_EVENT, incomingCall)
 
             if (!canHandleIncomingCall) {
                 try {
-                    phone?.declineIncoming(incomingSession, Reason.BUSY)
+                    phone?.declineIncoming(incomingCall, Reason.BUSY)
                 } catch (e: SecurityException) {
                 }
                 return
             }
 
             if (call != null) {
-                VialerStatistics.incomingCallFailedDueToOngoingVialerCall(incomingSession)
+                VialerStatistics.incomingCallFailedDueToOngoingVialerCall(incomingCall)
             }
 
             if (nativeCallManager.isBusyWithNativeCall) {
-                VialerStatistics.incomingCallFailedDueToOngoingGsmCall(incomingSession)
+                VialerStatistics.incomingCallFailedDueToOngoingGsmCall(incomingCall)
             }
 
-            call = incomingSession
-            sipService.informUserAboutIncomingCall(incomingSession.phoneNumber, incomingSession.displayName)
+            call = incomingCall
+            sipService.informUserAboutIncomingCall(incomingCall.phoneNumber, incomingCall.displayName)
         }
 
-        override fun outgoingInit(session: Session) {
-            fireEvent(DEFAULT_EVENT, session)
+        override fun outgoingInit(call: Call) {
+            fireEvent(DEFAULT_EVENT, call)
             if (!hasCall) {
-                call = session
+                this@SoftPhone.call = call
             }
         }
 
-        override fun sessionConnected(session: Session) {
+        override fun sessionConnected(call: Call) {
             sipService.onCallConnected()
-            fireEvent(SipConstants.CALL_CONNECTED_MESSAGE, session)
+            fireEvent(SipConstants.CALL_CONNECTED_MESSAGE, call)
         }
 
-        override fun sessionEnded(session: Session) {
-            handleEndedCall(session)
+        override fun sessionEnded(call: Call) {
+            handleEndedCall(call)
         }
 
-        override fun sessionReleased(session: Session) {
-            handleEndedCall(session)
+        override fun sessionReleased(call: Call) {
+            handleEndedCall(call)
         }
 
-        override fun error(session: Session) {
-            handleEndedCall(session)
+        override fun error(call: Call) {
+            handleEndedCall(call)
         }
 
-        private fun handleEndedCall(session: Session) {
+        private fun handleEndedCall(call: Call) {
             if (!isOnTransfer) {
-                fireEvent(SipConstants.CALL_DISCONNECTED_MESSAGE, session)
-                if (session.reason == Reason.BUSY) {
+                fireEvent(SipConstants.CALL_DISCONNECTED_MESSAGE, call)
+                if (call.reason == Reason.BUSY) {
                     sipService.playBusyTone()
                 }
                 sipService.stop()
-                call = null
+                this@SoftPhone.call = null
             }
 
-            transferSession = null
-            LogHelper.logCall(session)
+            transferCall = null
+            LogHelper.logCall(call)
         }
 
-        override fun sessionUpdated(session: Session) {
+        override fun sessionUpdated(session: Call) {
             fireEvent(DEFAULT_EVENT, session)
         }
 
-        fun fireEvent(event: String, call: Session?) {
+        fun fireEvent(event: String, call: Call?) {
             val intent = Intent(SipConstants.ACTION_BROADCAST_CALL_STATUS)
             intent.putExtra(SipConstants.CALL_STATUS_KEY, event)
             intent.putExtra(SipConstants.CALL_IDENTIFIER_KEY, call?.callId ?: "")

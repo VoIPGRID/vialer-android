@@ -279,7 +279,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
             return
         }
 
-        softPhone.transferSession?.let {
+        softPhone.transferCall?.let {
             mTransferCompleteDialog = TransferCompleteDialog.createAndShow(this, it.from.phoneNumber, it.to.phoneNumber)
             finishAfterTransferDialogIsComplete()
         }

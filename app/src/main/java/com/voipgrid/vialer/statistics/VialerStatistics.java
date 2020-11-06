@@ -63,14 +63,13 @@ import com.voipgrid.vialer.phonelib.SessionExtensionsKt;
 import com.voipgrid.vialer.statistics.providers.BluetoothDataProvider;
 import com.voipgrid.vialer.statistics.providers.DefaultDataProvider;
 
-import org.openvoipalliance.phonelib.model.Session;
+import org.openvoipalliance.phonelib.model.Call;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
@@ -105,7 +104,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void callWasSuccessfullySetup(Session sipCall) {
+    public static void callWasSuccessfullySetup(Call sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -125,7 +124,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void callFailedDueToNoAudio(Session sipCall, boolean hasReceivedAudio, boolean hasSentAudio) {
+    public static void callFailedDueToNoAudio(Call sipCall, boolean hasReceivedAudio, boolean hasSentAudio) {
         String failedReason;
 
         if (!hasReceivedAudio && !hasSentAudio) {
@@ -166,7 +165,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void incomingCallFailedDueToOngoingGsmCall(Session sipCall) {
+    public static void incomingCallFailedDueToOngoingGsmCall(Call sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -199,7 +198,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void incomingCallFailedDueToOngoingVialerCall(Session sipCall) {
+    public static void incomingCallFailedDueToOngoingVialerCall(Call sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -210,7 +209,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void userDeclinedIncomingCall(Session sipCall) {
+    public static void userDeclinedIncomingCall(Call sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -222,7 +221,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void incomingCallWasCompletedElsewhere(Session sipCall) {
+    public static void incomingCallWasCompletedElsewhere(Call sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -233,7 +232,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void incomingCallWasCancelledByOriginator(Session sipCall) {
+    public static void incomingCallWasCancelledByOriginator(Call sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -244,7 +243,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void userDidHangUpCall(Session sipCall) {
+    public static void userDidHangUpCall(Call sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -255,7 +254,7 @@ public class VialerStatistics {
                 .send();
     }
 
-    public static void remoteDidHangUpCall(Session sipCall) {
+    public static void remoteDidHangUpCall(Call sipCall) {
         VialerStatistics
                 .get()
                 .withDefaults()
@@ -302,7 +301,7 @@ public class VialerStatistics {
         return this;
     }
 
-    private VialerStatistics withCallInformation(Session call) {
+    private VialerStatistics withCallInformation(Call call) {
 //        if (call.getMiddlewareKey() != null && !call.getMiddlewareKey().isEmpty()) {
 //            addValue(KEY_MIDDLEWARE_KEY, call.getMiddlewareKey());
 //        }
@@ -412,14 +411,14 @@ public class VialerStatistics {
         }
 
         @Override
-        public void onResponse(Call<Void> call, Response<Void> response) {
+        public void onResponse(retrofit2.Call<Void> call, Response<Void> response) {
             if (!response.isSuccessful()) {
                 mLogger.e("Failed to upload vialer statistics, with status code: " + response.code());
             }
         }
 
         @Override
-        public void onFailure(Call<Void> call, Throwable t) {
+        public void onFailure(retrofit2.Call<Void> call, Throwable t) {
             mLogger.e("Failed to upload vialer statistics with exception: " + t.getMessage());
         }
     }

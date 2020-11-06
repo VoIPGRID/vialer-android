@@ -18,6 +18,8 @@ import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.util.UserAgent
 import okhttp3.ResponseBody
 import org.openvoipalliance.phonelib.PhoneLib
+import org.openvoipalliance.phonelib.config.Auth
+import org.openvoipalliance.phonelib.config.Config
 import org.openvoipalliance.phonelib.model.Codec
 import org.openvoipalliance.phonelib.model.RegistrationState
 import org.openvoipalliance.phonelib.repository.initialise.SessionCallback
@@ -32,7 +34,7 @@ class Initialiser(private val context: Context, private val softPhone: SoftPhone
     private val logListener = PhoneLibLogger()
     
     private val port
-        get() = if (shouldUseTls()) "5061" else "5060"
+        get() = if (shouldUseTls()) 5061 else 5060
     
     private val stun
         get() = if (User.voip.hasStunEnabled) context.resources.getStringArray(R.array.stun_hosts)[0] else null
@@ -40,16 +42,21 @@ class Initialiser(private val context: Context, private val softPhone: SoftPhone
     private var onRegister: (() -> Unit)? = null
     private var onFailure: (() -> Unit)? = null
 
+
+    private val config by lazy {
+        Config(
+                auth = Auth(User.voipAccount?.accountId ?: "", User.voipAccount?.password ?: "", sipHost, port),
+                encryption = shouldUseTls(),
+                stun = stun,
+                userAgent = UserAgent(context).generate(),
+                logListener = logListener,
+                codecs = arrayOf(if (User.voip.audioCodec != VoipSettings.AudioCodec.OPUS) Codec.ILBC else Codec.OPUS)
+        )
+    }
+
     fun initLibrary(callback: SessionCallback?) {
         softPhone.phone = PhoneLib.getInstance(context)
-        softPhone.phone?.setAudioCodecs(setOf(if (User.voip.audioCodec != VoipSettings.AudioCodec.OPUS) Codec.ILBC else Codec.OPUS))
-
-        softPhone.phone?.apply {
-            setLogListener(logListener)
-            setUserAgent(UserAgent(context).generate())
-            initialise()
-        }
-
+        softPhone.phone?.initialise(config)
         callback?.let { softPhone.phone?.setSessionCallback(it) }
     }
 
@@ -57,25 +64,20 @@ class Initialiser(private val context: Context, private val softPhone: SoftPhone
         this.onRegister = onRegister
         this.onFailure = onFailure
 
-        val account = User.voipAccount ?: return
-
         softPhone.phone?.setSessionCallback(callback)
-
-        softPhone.phone?.register(account.accountId, account.password, sipHost, port, stun, shouldUseTls(), object : RegistrationCallback() {
-            override fun stateChanged(registrationState: RegistrationState) {
-                if (registrationState == RegistrationState.REGISTERED) {
-                    this@Initialiser.onRegister?.invoke()
-                    this@Initialiser.onRegister = null
-                    this@Initialiser.onFailure = null
-                }
-
-                if (registrationState == RegistrationState.FAILED) {
-                    this@Initialiser.onFailure?.invoke()
-                    this@Initialiser.onRegister = null
-                    this@Initialiser.onFailure = null
-                }
+        softPhone.phone?.register { registrationState ->
+            if (registrationState == RegistrationState.REGISTERED) {
+                this@Initialiser.onRegister?.invoke()
+                this@Initialiser.onRegister = null
+                this@Initialiser.onFailure = null
             }
-        })
+
+            if (registrationState == RegistrationState.FAILED) {
+                this@Initialiser.onFailure?.invoke()
+                this@Initialiser.onRegister = null
+                this@Initialiser.onFailure = null
+            }
+        }
     }
 
     fun destroy() {

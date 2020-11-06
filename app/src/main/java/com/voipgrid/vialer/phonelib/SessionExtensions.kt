@@ -4,14 +4,14 @@ import android.text.format.DateUtils
 import com.voipgrid.vialer.sip.SipConstants.*
 import org.openvoipalliance.phonelib.model.CallState.*
 import org.openvoipalliance.phonelib.model.Direction
-import org.openvoipalliance.phonelib.model.Session
+import org.openvoipalliance.phonelib.model.Call
 
-fun Session.isRinging() = when (state) {
+fun Call.isRinging() = when (state) {
     IncomingReceived -> true
     else -> false
 }
 
-fun Session.isConnected() = when (state) {
+fun Call.isConnected() = when (state) {
     IncomingReceived, OutgoingInit, OutgoingProgress, OutgoingRinging,
     OutgoingEarlyMedia, Connected, StreamsRunning, Pausing, Paused,
     Resuming, Referred, PausedByRemote, CallUpdatedByRemote,
@@ -19,23 +19,23 @@ fun Session.isConnected() = when (state) {
     else -> false
 }
 
-fun Session.isOnHold() = when (state) {
+fun Call.isOnHold() = when (state) {
     Paused -> true
     else -> false
 }
 
-val Session.prettyCallDuration
+val Call.prettyCallDuration
     get() = DateUtils.formatElapsedTime(duration.toLong())
 
-val Session.isIncoming
+val Call.isIncoming
     get() = direction == Direction.INCOMING
 
-val Session.isOutgoing
+val Call.isOutgoing
     get() = direction == Direction.OUTGOING
 
-fun Session.getCallDurationInMilliseconds() = duration * 1000
+fun Call.getCallDurationInMilliseconds() = duration * 1000
 
-val Session.legacyState
+val Call.legacyState
     get() = when(state) {
         Idle, IncomingReceived, OutgoingInit, OutgoingProgress, OutgoingRinging, OutgoingEarlyMedia , Unknown-> CALL_INVALID_STATE
         Connected, StreamsRunning, Pausing, Paused, Resuming, Referred, PausedByRemote, CallUpdatedByRemote, CallIncomingEarlyMedia,

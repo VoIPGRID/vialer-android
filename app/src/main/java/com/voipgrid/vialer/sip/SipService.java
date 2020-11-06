@@ -52,7 +52,7 @@ import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 
 import org.openvoipalliance.phonelib.model.Reason;
-import org.openvoipalliance.phonelib.model.Session;
+import org.openvoipalliance.phonelib.model.Call;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -456,7 +456,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         sipServiceActive = true;
     }
 
-    public Session getCurrentCall() {
+    public Call getCurrentCall() {
         return softphone.getCall();
     }
 
@@ -526,7 +526,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
     public void onTic() {
         if (getCurrentCall() == null) return;
 
-        Session call = getCurrentCall();
+        Call call = getCurrentCall();
 
         refreshCallAlerts(call);
 
@@ -544,7 +544,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
      *
      * @param call
      */
-    private void refreshCallAlerts(Session call) {
+    private void refreshCallAlerts(Call call) {
         if (incomingAlertsMuted) {
             incomingCallAlerts.stop();
             return;

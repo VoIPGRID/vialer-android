@@ -105,7 +105,7 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) : 
      */
     private fun updateTransferButton(state: String) {
         if (softPhone.isOnTransfer) {
-            mActivity.call_status.text = mActivity.getString(R.string.call_on_hold, softPhone.transferSession?.from?.phoneNumber ?: "")
+            mActivity.call_status.text = mActivity.getString(R.string.call_on_hold, softPhone.transferCall?.from?.phoneNumber ?: "")
             mActivity.call_status.visibility = View.VISIBLE
             mActivity.button_transfer.setImageResource(R.drawable.ic_call_merge)
             mActivity.transfer_label.setText(R.string.transfer_connect)

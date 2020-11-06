@@ -7,10 +7,10 @@ import com.voipgrid.vialer.R
 import com.voipgrid.vialer.calling.AbstractCallActivity
 import com.voipgrid.vialer.calling.CallingConstants
 import com.voipgrid.vialer.phonelib.prettyCallDuration
-import org.openvoipalliance.phonelib.model.Session
+import org.openvoipalliance.phonelib.model.Call
 
 
-class ActiveCallNotification(private val call : Session) : AbstractCallNotification() {
+class ActiveCallNotification(private val call : Call) : AbstractCallNotification() {
 
     /**
      * Build the active call notification, this includes the call duration so

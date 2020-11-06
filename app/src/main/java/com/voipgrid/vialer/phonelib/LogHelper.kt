@@ -3,14 +3,14 @@ package com.voipgrid.vialer.phonelib
 import com.google.gson.GsonBuilder
 import com.voipgrid.vialer.logging.Logger
 import org.linphone.core.StreamType
-import org.openvoipalliance.phonelib.model.Session
+import org.openvoipalliance.phonelib.model.Call
 
 object LogHelper {
 
     private val logger = Logger(this)
     private val gson = GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create()
 
-    fun logCall(call: Session) {
+    fun logCall(call: Call) {
         val linphoneCall = call.linphoneCall
         val data = mapOf(
                 "to-address" to mapOf(

@@ -5,9 +5,9 @@ import androidx.core.app.NotificationCompat
 import com.voipgrid.vialer.CallActivity
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.calling.AbstractCallActivity
-import org.openvoipalliance.phonelib.model.Session
+import org.openvoipalliance.phonelib.model.Call
 
-class OutgoingCallDiallingNotification(private val call : Session) : AbstractCallNotification() {
+class OutgoingCallDiallingNotification(private val call : Call) : AbstractCallNotification() {
 
     /**
      * Build an outgoing call notification for during dialling.

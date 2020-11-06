@@ -13,7 +13,7 @@ import com.voipgrid.vialer.sip.CallDisconnectedReason;
 import com.voipgrid.vialer.sip.SipConstants;
 
 import org.openvoipalliance.phonelib.model.Reason;
-import org.openvoipalliance.phonelib.model.Session;
+import org.openvoipalliance.phonelib.model.Call;
 
 import androidx.annotation.Nullable;
 

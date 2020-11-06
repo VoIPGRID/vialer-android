@@ -16,7 +16,7 @@ import com.voipgrid.vialer.calling.IncomingCallActivity
 import com.voipgrid.vialer.contacts.Contacts
 import com.voipgrid.vialer.contacts.PhoneNumberImageGenerator
 import com.voipgrid.vialer.notifications.AbstractNotification
-import org.openvoipalliance.phonelib.model.Session
+import org.openvoipalliance.phonelib.model.Call
 import javax.inject.Inject
 
 
@@ -135,13 +135,13 @@ abstract class AbstractCallNotification : AbstractNotification() {
      * Transform the call notification to an ongoing call notification.
      *
      */
-    fun outgoing(call : Session) : AbstractCallNotification = OutgoingCallDiallingNotification(call)
+    fun outgoing(call : Call) : AbstractCallNotification = OutgoingCallDiallingNotification(call)
 
     /**
      * Transform the call notification to an active call notification.
      *
      */
-    fun active(call : Session) : AbstractCallNotification = ActiveCallNotification(call)
+    fun active(call : Call) : AbstractCallNotification = ActiveCallNotification(call)
 
     fun missed(number: String, contactName: String?) {
         MissedCallNotification(number, contactName).display()
