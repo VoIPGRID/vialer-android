@@ -49,7 +49,7 @@ class CallPresenter internal constructor(private val mActivity: CallActivity) : 
             SipConstants.CALL_DISCONNECTED_MESSAGE -> disableAllButtons()
         }
         mActivity.button_onhold.activate(call.isOnHold())
-        mActivity.button_mute.activate(softPhone.phone?.isMicrophoneMuted() ?: false)
+        mActivity.button_mute.activate(softPhone.phone?.microphoneMuted ?: false)
         mActivity.button_dialpad.activate(false)
         mActivity.button_transfer.activate(false)
 

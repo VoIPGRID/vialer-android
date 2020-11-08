@@ -201,7 +201,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
             return true;
         } else if (Actions.DECLINE_INCOMING_CALL.equals(action)) {
             incomingCallAlerts.stop();
-            softphone.getPhone().declineIncoming(softphone.getCall(), Reason.DECLINED);
+            softphone.getPhone().actions(softphone.getCall()).decline(Reason.DECLINED);
         } else if (Actions.ANSWER_INCOMING_CALL.equals(action)) {
             if (!MicrophonePermission.hasPermission(VialerApplication.get())) {
                 Toast.makeText(this, getString(R.string.permission_microphone_missing_message),
@@ -211,14 +211,14 @@ public class SipService extends Service implements SipServiceTic.TicListener {
             }
 
             incomingCallAlerts.stop();
-            softphone.getPhone().acceptIncoming(softphone.getCall());
+            softphone.getPhone().actions(softphone.getCall()).accept();
         } else if (Actions.END_CALL.equals(action)) {
-            softphone.getPhone().end(softphone.getCall());
+            softphone.getPhone().actions(softphone.getCall()).end();
         } else if (Actions.ANSWER_OR_HANGUP.equals(action)) {
             if (SessionExtensionsKt.isRinging(softphone.getCall())) {
-                softphone.getPhone().acceptIncoming(softphone.getCall());
+                softphone.getPhone().actions(softphone.getCall()).accept();
             } else if (SessionExtensionsKt.isConnected(softphone.getCall())) {
-                softphone.getPhone().end(softphone.getCall());
+                softphone.getPhone().actions(softphone.getCall()).end();
             }
         } else if (Actions.DISPLAY_CALL_IF_AVAILABLE.equals(action)) {
             if (getCurrentCall() != null) {
@@ -250,7 +250,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         mLogger.i("Beginning REGISTER for INCOMING call");
 
         final long finalBegin = System.nanoTime();
-        phoneInitialiser.register(softphone.getSessionCallback(this), () -> {
+        phoneInitialiser.register(() -> {
                     mLogger.i("Finished REGISTER for INCOMING call");
                     FirebaseEventSubmitter.INSTANCE.libraryRegister(System.nanoTime() - finalBegin);
                     phoneInitialiser.respondToMiddleware(this);
@@ -283,7 +283,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
 
         mLogger.i("Beginning REGISTER for OUTGOING call");
         final long finalBegin = System.nanoTime();
-        phoneInitialiser.register(softphone.getSessionCallback(this), () -> {
+        phoneInitialiser.register(() -> {
                     mLogger.i("Finished REGISTER for OUTGOING call");
                     FirebaseEventSubmitter.INSTANCE.libraryRegister(System.nanoTime() - finalBegin);
                     makeCall(intent.getStringExtra(EXTRA_PHONE_NUMBER), true);
@@ -594,7 +594,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
                 if (SessionExtensionsKt.isRinging(softphone.getCall())) {
                     mLogger.i("Our call is still ringing. So decline it.");
                     try {
-                        softphone.getPhone().declineIncoming(softphone.getCall(), Reason.BUSY);
+                        softphone.getPhone().actions(softphone.getCall()).decline(Reason.BUSY);
                     } catch (SecurityException e) {
                         mLogger.e("Unable to decline incoming call due to permissions");
                     }
@@ -603,7 +603,7 @@ public class SipService extends Service implements SipServiceTic.TicListener {
 
                 if (SessionExtensionsKt.isConnected(softphone.getCall()) && !SessionExtensionsKt.isOnHold(softphone.getCall())) {
                     mLogger.i("Call was not on hold already. So put call on hold.");
-                    softphone.getPhone().setHold(softphone.getCall(), true);
+                    softphone.getPhone().actions(softphone.getCall()).hold(true);
                 }
             } catch(Exception e) {
                 e.printStackTrace();

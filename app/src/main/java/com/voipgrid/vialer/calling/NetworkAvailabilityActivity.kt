@@ -45,7 +45,7 @@ class NetworkAvailabilityActivity : AbstractCallActivity() {
     @OnClick(R.id.button_hangup)
     public override fun onDeclineButtonClicked() {
         softPhone.call?.let {
-            softPhone.phone?.end(it)
+            softPhone.phone?.actions(it)?.end()
         }
     }
 

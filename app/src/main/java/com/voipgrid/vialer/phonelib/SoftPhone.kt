@@ -14,8 +14,8 @@ import org.openvoipalliance.phonelib.model.AttendedTransferSession
 import org.openvoipalliance.phonelib.model.CallState
 import org.openvoipalliance.phonelib.model.Reason
 import org.openvoipalliance.phonelib.model.Call
+import org.openvoipalliance.phonelib.repository.initialise.CallListener
 import java.lang.Exception
-import org.openvoipalliance.phonelib.repository.initialise.SessionCallback as SessionCallbackLib
 
 class SoftPhone(val nativeCallManager: NativeCallManager, val localBroadcastManager: LocalBroadcastManager) {
 
@@ -41,62 +41,58 @@ class SoftPhone(val nativeCallManager: NativeCallManager, val localBroadcastMana
 
     fun beginAttendedTransfer(number: String) {
         try {
-            call?.let { transferCall = phone?.beginAttendedTransfer(it, number) }
+            call?.let { transferCall = phone?.actions(it)?.beginAttendedTransfer(number) }
         } catch (e: SecurityException) {
 
         }
     }
 
     fun finishAttendedTransfer() {
-        transferCall?.let { phone?.finishAttendedTransfer(it) }
+        transferCall?.let { phone?.actions(it.from)?.finishAttendedTransfer(it) }
     }
 
     private val canHandleIncomingCall = call == null && !nativeCallManager.isBusyWithNativeCall
 
     fun getSessionCallback(sipService: SipService) = SessionCallback(sipService)
 
-    inner class SessionCallback(private val sipService: SipService): SessionCallbackLib() {
+    inner class SessionCallback(private val sipService: SipService): CallListener {
 
-        override fun incomingCall(incomingCall: Call) {
-            fireEvent(DEFAULT_EVENT, incomingCall)
+        override fun incomingCallReceived(call: Call) {
+            fireEvent(DEFAULT_EVENT, call)
 
             if (!canHandleIncomingCall) {
                 try {
-                    phone?.declineIncoming(incomingCall, Reason.BUSY)
+                    phone?.actions(call)?.decline(Reason.BUSY)
                 } catch (e: SecurityException) {
                 }
                 return
             }
 
             if (call != null) {
-                VialerStatistics.incomingCallFailedDueToOngoingVialerCall(incomingCall)
+                VialerStatistics.incomingCallFailedDueToOngoingVialerCall(call)
             }
 
             if (nativeCallManager.isBusyWithNativeCall) {
-                VialerStatistics.incomingCallFailedDueToOngoingGsmCall(incomingCall)
+                VialerStatistics.incomingCallFailedDueToOngoingGsmCall(call)
             }
 
-            call = incomingCall
-            sipService.informUserAboutIncomingCall(incomingCall.phoneNumber, incomingCall.displayName)
+            this@SoftPhone.call = call
+            sipService.informUserAboutIncomingCall(call.phoneNumber, call.displayName)
         }
 
-        override fun outgoingInit(call: Call) {
+        override fun outgoingCallCreated(call: Call) {
             fireEvent(DEFAULT_EVENT, call)
             if (!hasCall) {
                 this@SoftPhone.call = call
             }
         }
 
-        override fun sessionConnected(call: Call) {
+        override fun callConnected(call: Call) {
             sipService.onCallConnected()
             fireEvent(SipConstants.CALL_CONNECTED_MESSAGE, call)
         }
 
-        override fun sessionEnded(call: Call) {
-            handleEndedCall(call)
-        }
-
-        override fun sessionReleased(call: Call) {
+        override fun callEnded(call: Call) {
             handleEndedCall(call)
         }
 
@@ -118,7 +114,7 @@ class SoftPhone(val nativeCallManager: NativeCallManager, val localBroadcastMana
             LogHelper.logCall(call)
         }
 
-        override fun sessionUpdated(session: Call) {
+        override fun callUpdated(session: Call) {
             fireEvent(DEFAULT_EVENT, session)
         }
 

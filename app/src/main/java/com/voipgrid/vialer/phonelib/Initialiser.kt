@@ -22,7 +22,7 @@ import org.openvoipalliance.phonelib.config.Auth
 import org.openvoipalliance.phonelib.config.Config
 import org.openvoipalliance.phonelib.model.Codec
 import org.openvoipalliance.phonelib.model.RegistrationState
-import org.openvoipalliance.phonelib.repository.initialise.SessionCallback
+import org.openvoipalliance.phonelib.repository.initialise.CallListener
 import org.openvoipalliance.phonelib.repository.registration.RegistrationCallback
 import retrofit2.Call
 import retrofit2.Callback
@@ -50,21 +50,20 @@ class Initialiser(private val context: Context, private val softPhone: SoftPhone
                 stun = stun,
                 userAgent = UserAgent(context).generate(),
                 logListener = logListener,
-                codecs = arrayOf(if (User.voip.audioCodec != VoipSettings.AudioCodec.OPUS) Codec.ILBC else Codec.OPUS)
+                codecs = arrayOf(if (User.voip.audioCodec != VoipSettings.AudioCodec.OPUS) Codec.ILBC else Codec.OPUS),
+                callListener = object : CallListener{}
         )
     }
 
-    fun initLibrary(callback: SessionCallback?) {
+    fun initLibrary(callback: CallListener) {
         softPhone.phone = PhoneLib.getInstance(context)
-        softPhone.phone?.initialise(config)
-        callback?.let { softPhone.phone?.setSessionCallback(it) }
+        softPhone.phone?.initialise(config.copy(callListener = callback))
     }
 
-    fun register(callback: SessionCallback?, onRegister: (() -> Unit), onFailure: (() -> Unit)) {
+    fun register(onRegister: (() -> Unit), onFailure: (() -> Unit)) {
         this.onRegister = onRegister
         this.onFailure = onFailure
 
-        softPhone.phone?.setSessionCallback(callback)
         softPhone.phone?.register { registrationState ->
             if (registrationState == RegistrationState.REGISTERED) {
                 this@Initialiser.onRegister?.invoke()

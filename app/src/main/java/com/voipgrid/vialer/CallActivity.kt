@@ -142,13 +142,13 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
      *
      */
     fun hangup() {
-        softPhone.call?.let { softPhone.phone?.end(it) }
+        softPhone.call?.let { softPhone.phone?.actions(it)?.end() }
         updateUi()
     }
 
     @OnClick(R.id.button_mute)
     fun onMuteButtonClick(view: View?) {
-        softPhone.phone?.setMicrophone(softPhone.phone?.isMicrophoneMuted() ?: false)
+        softPhone.phone?.microphoneMuted = !(softPhone.phone?.microphoneMuted ?: false)
         updateUi()
     }
 
@@ -167,7 +167,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
     @OnClick(R.id.button_onhold)
     fun onHoldButtonClick(view: View?) {
-        softPhone.call?.let { softPhone.phone?.setHold(it, !it.isOnHold()) }
+        softPhone.call?.let { softPhone.phone?.actions(it)?.hold(!it.isOnHold()) }
         updateUi()
     }
 
@@ -206,7 +206,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
 
     override fun digitWasPressed(dtmf: String) {
         softPhone.call?.let {
-            softPhone.phone?.sendDtmf(it, dtmf)
+            softPhone.phone?.actions(it)?.sendDtmf(dtmf)
         }
     }
 
