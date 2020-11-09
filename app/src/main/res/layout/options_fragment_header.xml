@@ -110,6 +110,26 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <LinearLayout
+        android:id="@+id/elsewhere_help"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_gravity="center_horizontal"
+        android:padding="@dimen/activity_horizontal_margin">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_baseline_info_24"
+            android:layout_marginEnd="10dp"
+            app:tint="@color/availability_elsewhere_text" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/availability_elsewhere_text"
+            android:text="@string/availability_elsewhere_help"/>
+    </LinearLayout>
 
 
     <LinearLayout
@@ -120,12 +140,12 @@
         android:padding="@dimen/activity_horizontal_margin">
 
         <TextView
-            android:id="@+id/availability_label3"
+            android:id="@+id/destination_label"
             style="@style/AccountTextInputLayoutStyle"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/add_destination_title"
-            android:textColor="@color/floating_action_button_color"
+            android:textColor="@color/text_color"
             android:paddingEnd="10dp"
             android:paddingStart="10dp"
             app:layout_constraintStart_toStartOf="parent"/>
@@ -136,7 +156,7 @@
             android:layout_height="wrap_content"
             android:text="@string/no_network_connection"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/availability_label3"/>
+            app:layout_constraintTop_toBottomOf="@id/destination_label"/>
 
         <Spinner
             android:id="@+id/menu_availability_spinner"
@@ -144,7 +164,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="2dp"
-            app:layout_constraintTop_toBottomOf="@id/availability_label3"/>
+            app:layout_constraintTop_toBottomOf="@id/destination_label"/>
 
     </LinearLayout>
 

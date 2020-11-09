@@ -1,5 +1,9 @@
 package com.voipgrid.vialer.util;
 
+import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO;
+import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA;
+import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -22,7 +26,8 @@ public class ConnectivityHelper {
         HSDPA("HSDPA", 3),     // ~ 2-14 Mbps
         HSPAP("HSPAP", 4),     // ~ 10-20 Mbps
         HSUPA("HSUPA", 5),     // ~ 1-23 Mbps
-        EVDO_B("EVDO_B", 6);   // ~ 5 Mbps
+        EVDO_B("EVDO_B", 6),
+        FIVE_G("FIVE_G", 7);
 
         String stringValue;
         int intValue;
@@ -51,6 +56,7 @@ public class ConnectivityHelper {
     static {
         sFastDataTypes.add(Connection.WIFI);
         sFastDataTypes.add(Connection.LTE);
+        sFastDataTypes.add(Connection.FIVE_G);
     }
 
     /**
@@ -87,11 +93,15 @@ public class ConnectivityHelper {
         // Get network type from ConnectivityManager.
         int networkTypeConnection = info.getSubtype();
         // Get network type from TelephonyManager.
-        int networkTypeTelephony = mTelephonyManager.getNetworkType();
+        int networkTypeTelephony = mTelephonyManager.getDataNetworkType();
 
         if (info.getType() == ConnectivityManager.TYPE_WIFI) {
             return Connection.WIFI;
-        } else if (networkTypeConnection == TelephonyManager.NETWORK_TYPE_LTE || networkTypeTelephony == TelephonyManager.NETWORK_TYPE_LTE) {
+        }
+        else if (networkTypeConnection == TelephonyManager.NETWORK_TYPE_NR) {
+            return Connection.FIVE_G;
+        }
+        else if (networkTypeConnection == TelephonyManager.NETWORK_TYPE_LTE || networkTypeTelephony == TelephonyManager.NETWORK_TYPE_LTE) {
             return Connection.LTE;
         } else if (networkTypeConnection == TelephonyManager.NETWORK_TYPE_HSDPA || networkTypeTelephony == TelephonyManager.NETWORK_TYPE_HSDPA) {
             return Connection.HSDPA;
@@ -116,6 +126,9 @@ public class ConnectivityHelper {
         switch (getConnectionType()) {
             case WIFI:
                 connectionString = Connection.WIFI.toString();
+                break;
+            case FIVE_G:
+                connectionString = Connection.FIVE_G.toString();
                 break;
             case LTE:
                 connectionString = Connection.LTE.toString();

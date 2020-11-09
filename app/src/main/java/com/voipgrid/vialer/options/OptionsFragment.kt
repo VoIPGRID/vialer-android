@@ -151,7 +151,7 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
     private fun setVersionInfo(textView: TextView?) {
         if (textView != null) {
             try {
-                val packageInfo = activity?.packageManager?.getPackageInfo(activity?.packageName, 0)
+                val packageInfo = activity?.packageManager?.getPackageInfo(activity?.packageName ?: "", 0)
                 val version = packageInfo?.versionName
                 if (version != null && version.contains("beta")) {
                     textView.text = getString(R.string.version_info_beta, version, packageInfo.versionCode.toString())
@@ -234,18 +234,24 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
                 dnd_label.text = resources.getText(R.string.availability_on)
                 dnd_label.setTextColor(resources.getColor(R.color.availability_available_text))
                 dnd_label.background.setTint(resources.getColor(R.color.availability_available))
+                elsewhere_help.visibility = View.GONE
+                dnd.setThumbColorLeft(resources.getColor(R.color.availability_available_text))
             }
             ELSEWHERE -> {
                 dnd.checked = IconSwitch.Checked.LEFT
                 dnd_label.text = resources.getText(R.string.availability_elsewhere)
                 dnd_label.setTextColor(resources.getColor(R.color.availability_elsewhere_text))
                 dnd_label.background.setTint(resources.getColor(R.color.availability_elsewhere))
+                elsewhere_help.visibility = View.VISIBLE
+                dnd.setThumbColorLeft(resources.getColor(R.color.availability_elsewhere_text))
             }
             DND -> {
                 dnd.checked = IconSwitch.Checked.RIGHT
                 dnd_label.text = resources.getText(R.string.availability_off)
                 dnd_label.setTextColor(resources.getColor(R.color.availability_unavailable_text))
                 dnd_label.background.setTint(resources.getColor(R.color.availability_unavailable))
+                elsewhere_help.visibility = View.GONE
+                dnd.setThumbColorLeft(resources.getColor(R.color.availability_available_text))
             }
         }
     }

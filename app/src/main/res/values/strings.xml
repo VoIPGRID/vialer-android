@@ -404,4 +404,5 @@
     <string name="availability_on">Available</string>
     <string name="availability_off" translatable="false">Do not disturb</string>
     <string name="availability_elsewhere">Available elsewhere</string>
+    <string name="availability_elsewhere_help">Calls made to your user are currently being directed to a different device.</string>
 </resources>
