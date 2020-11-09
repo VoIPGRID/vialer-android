@@ -398,4 +398,5 @@
     <string name="settings_feedback_dialog_form_rating_required">Selecteer een aantal sterren om feedback te geven</string>
     <string name="username_edittext_hint">Gebruikersnaam</string>
     <string name="phonenumber_prefix_edittext_hint">Voorvoegsel</string>
+    <string name="availability_on">Beschikbaar</string>
 </resources>

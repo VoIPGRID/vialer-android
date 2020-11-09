@@ -2,6 +2,7 @@ package com.voipgrid.vialer
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.core.app.ActivityOptionsCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController

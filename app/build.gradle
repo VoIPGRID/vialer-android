@@ -264,6 +264,7 @@ dependencies {
 
     implementation 'org.openvoipalliance:AndroidPhoneLib:0.5.3'
     implementation 'com.pnikosis:materialish-progress:1.7'
+    implementation 'com.polyak:icon-switch:1.0.0'
 }
 
 // Needs to be applied at the bottom of the gradle file otherwise it will create a conflict.

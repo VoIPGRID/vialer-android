@@ -401,4 +401,7 @@
     <string name="password_change_failure_toast">Failed! Please try again with a different password.</string>
     <string name="settings_feedback_dialog_form_rating_required">You must select a rating to submit feedback</string>
 
+    <string name="availability_on">Available</string>
+    <string name="availability_off" translatable="false">Do not disturb</string>
+    <string name="availability_elsewhere">Available elsewhere</string>
 </resources>

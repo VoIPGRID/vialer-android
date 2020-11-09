@@ -1,10 +1,12 @@
 package com.voipgrid.vialer.api
 
 import android.content.Context
+import android.util.Log
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.models.SystemUser
 import com.voipgrid.vialer.logging.Logger
 import com.voipgrid.vialer.middleware.Middleware
+import com.voipgrid.vialer.persistence.VoipSettings
 import kotlinx.coroutines.*
 
 /**
@@ -37,7 +39,7 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val secureC
 
             if (User.hasVoipAccount) {
                 secureCalling.updateApiBasedOnCurrentPreferenceSetting()
-                middleware.register()
+                middleware.refresh()
             }
         } catch (e: Exception) {
             logger.w("Failed to sync user ${e.message}")
@@ -112,8 +114,25 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val secureC
             return@withContext
         }
 
-        val destinations = response.body()?.objects ?: return@withContext
+        val body = response.body() ?: return@withContext
+
+        val destinations = body.objects ?: return@withContext
+
+        val userDestination = destinations.first() ?: return@withContext
 
         User.internal.destinations = destinations
+
+        val currentDestinationId = userDestination.selectUserDestination.fixedDestinationId
+                ?: userDestination.selectUserDestination.phoneAccountId
+
+        if (currentDestinationId == null) {
+            User.voip.availability = VoipSettings.Availability.DND
+        }
+        else if (currentDestinationId == User.voipgridUser?.voipAccountId) {
+            User.voip.availability = VoipSettings.Availability.AVAILABLE
+        }
+        else {
+            User.voip.availability = VoipSettings.Availability.ELSEWHERE
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.google.firebase.iid.FirebaseInstanceId
 import com.voipgrid.vialer.User
 import com.voipgrid.vialer.api.ServiceGenerator
 import com.voipgrid.vialer.logging.Logger
+import com.voipgrid.vialer.persistence.VoipSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -65,7 +66,18 @@ class Middleware(private val context: Context) {
         }
     }
 
-    private fun isValidUserToRegisterWithMiddleware(): Boolean = User.isLoggedIn && User.voip.canUseSip
+    /**
+     * Refresh middleware status, either registering or unregistering based on the
+     * current user.
+     *
+     */
+    fun refresh() = if (isValidUserToRegisterWithMiddleware()) {
+        register()
+    } else {
+        unregister()
+    }
+
+    private fun isValidUserToRegisterWithMiddleware(): Boolean = User.isLoggedIn && User.voip.canUseSip && User.voip.availability != VoipSettings.Availability.DND
 
     private suspend fun performRegistrationApiRequest(token: String) = withContext(Dispatchers.IO) {
         val response = api.register(

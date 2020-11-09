@@ -9,6 +9,7 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.telephony.TelephonyManager
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -21,6 +22,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.polyak.iconswitch.IconSwitch
 import com.voipgrid.vialer.MainActivity
 import com.voipgrid.vialer.R
 import com.voipgrid.vialer.User
@@ -34,6 +36,8 @@ import com.voipgrid.vialer.api.models.PhoneAccount
 import com.voipgrid.vialer.api.models.SelectedUserDestinationParams
 import com.voipgrid.vialer.logging.VialerBaseActivity
 import com.voipgrid.vialer.middleware.Middleware
+import com.voipgrid.vialer.persistence.VoipSettings
+import com.voipgrid.vialer.persistence.VoipSettings.Availability.*
 import com.voipgrid.vialer.settings.SettingsActivity
 import com.voipgrid.vialer.util.ConnectivityHelper
 import kotlinx.android.synthetic.main.fragment_options.*
@@ -53,6 +57,10 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
 
     private val userSynchronizer: UserSynchronizer by inject()
     private val middleware: Middleware by inject()
+
+    private val api by lazy {
+        ServiceGenerator.createApiService(requireContext())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,6 +90,22 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
 
         // Setup the spinner in the options.
         setupSpinner()
+
+        dnd.setCheckedChangeListener {
+            val params = if (it == IconSwitch.Checked.LEFT) {
+                val params = SelectedUserDestinationParams()
+                params.phoneAccount = User.voipgridUser?.voipAccountId
+                params.fixedDestination = null
+                params
+            } else {
+                val params = SelectedUserDestinationParams()
+                params.fixedDestination = null
+                params.phoneAccount = null
+                params
+            }
+
+            api.setSelectedUserDestination(User.internal.destinations[0].selectedUserDestination.id, params).enqueue(this)
+        }
     }
 
     override fun onResume() {
@@ -204,22 +228,26 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
         header.menu_availability_spinner.tag = activeIndex
         header.menu_availability_spinner.setSelection(activeIndex)
 
-        colorAvailabilityIndicator(if (isUnavailable()) R.color.availability_unavailable else R.color.availability_available)
-    }
-
-    /**
-     * Check if the current availability is unavailable.
-     *
-     */
-    private fun isUnavailable(): Boolean =
-            header.menu_availability_spinner.selectedItem.toString() == getString(R.string.not_available)
-
-    /**
-     * Change the color of the availability indicator.
-     *
-     */
-    private fun colorAvailabilityIndicator(color: Int) {
-        header.status_indicator.setImageDrawable(ColorDrawable(resources.getColor(color)))
+        when (User.voip.availability) {
+            AVAILABLE -> {
+                dnd.checked = IconSwitch.Checked.LEFT
+                dnd_label.text = resources.getText(R.string.availability_on)
+                dnd_label.setTextColor(resources.getColor(R.color.availability_available_text))
+                dnd_label.background.setTint(resources.getColor(R.color.availability_available))
+            }
+            ELSEWHERE -> {
+                dnd.checked = IconSwitch.Checked.LEFT
+                dnd_label.text = resources.getText(R.string.availability_elsewhere)
+                dnd_label.setTextColor(resources.getColor(R.color.availability_elsewhere_text))
+                dnd_label.background.setTint(resources.getColor(R.color.availability_elsewhere))
+            }
+            DND -> {
+                dnd.checked = IconSwitch.Checked.RIGHT
+                dnd_label.text = resources.getText(R.string.availability_off)
+                dnd_label.setTextColor(resources.getColor(R.color.availability_unavailable_text))
+                dnd_label.background.setTint(resources.getColor(R.color.availability_unavailable))
+            }
+        }
     }
 
     override fun onResponse(call: Call<Any>, response: Response<Any>) {

@@ -19,8 +19,12 @@
     <color name="dialpad_fab_call_color">#28CA42</color>
     <color name="dialpad_fab_call_color_disabled">#CCCCCC</color>
 
-    <color name="availability_available">#28CA42</color>
-    <color name="availability_unavailable">#FF0000</color>
+    <color name="availability_available_text">#1b5e20</color>
+    <color name="availability_unavailable_text">#c62828</color>
+    <color name="availability_available">#e8f5e9</color>
+    <color name="availability_unavailable">#ffcdd2</color>
+    <color name="availability_elsewhere">#b3e5fc</color>
+    <color name="availability_elsewhere_text">#0277bd</color>
 
     <color name="tint_color_backspace">#B9B9B9</color>
 

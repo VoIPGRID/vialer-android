@@ -13,9 +13,14 @@ object VoipSettings : DefaultKotPrefModel() {
     var isAccountSetupForSip by booleanPref(key = "PREF_HAS_SIP_PERMISSION", default = false)
     var hasEnabledSip by booleanPref(key = "PREF_HAS_SIP_ENABLED", default = true)
     val canUseSip get() = isAccountSetupForSip && hasEnabledSip && User.hasVoipAccount
+    var availability by enumValuePref(key = "current_availability", default = Availability.AVAILABLE)
 
     var hasTlsEnabled by booleanPref(key = "PREF_HAS_TLS_ENABLED", default = true)
     var hasStunEnabled by booleanPref(key = "PREF_HAS_STUN_ENABLED", default = false)
     var audioCodec by enumValuePref(key = "audioCodec", default = AudioCodec.OPUS)
+
+    enum class Availability {
+        AVAILABLE, ELSEWHERE, DND
+    }
 }
 
