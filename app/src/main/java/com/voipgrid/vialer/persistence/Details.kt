@@ -21,4 +21,8 @@ object Internal : DefaultKotPrefModel() {
         get() = destinations.flatMap { it.phoneAccounts }.map { it.id }
 
     var hasCompletedOnBoarding by booleanPref(default = true)
+
+    val internalNumber: String
+        get() = destinations.first().internalNumber
+
 }

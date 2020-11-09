@@ -126,7 +126,7 @@ class UserSynchronizer(private val voipgridApi: VoipgridApi, private val secureC
                 ?: userDestination.selectUserDestination.phoneAccountId
 
         if (currentDestinationId == null) {
-            User.voip.availability = VoipSettings.Availability.DND
+            User.voip.availability = VoipSettings.Availability.NOT_AVAILABLE
         }
         else if (currentDestinationId == User.voipgridUser?.voipAccountId) {
             User.voip.availability = VoipSettings.Availability.AVAILABLE

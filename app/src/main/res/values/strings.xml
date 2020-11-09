@@ -404,5 +404,9 @@
     <string name="availability_on">Available</string>
     <string name="availability_off" translatable="false">Do not disturb</string>
     <string name="availability_elsewhere">Available elsewhere</string>
-    <string name="availability_elsewhere_help">Calls made to your user are currently being directed to a different device.</string>
+    <string name="availability_elsewhere_help">Calls made to your user (%1$s) are currently being directed to a different device.\n\nSet your destination below to %2$s to resume calls to this device.</string>
+    <string name="availability_not_available_help">Calls made to your user (%1$s) will not be received, you will continue to receive calls made to this VoIP account.\n\nSet your destination below to %2$s to resume calls to this device.</string>
+    <string name="availability_dnd_help">You will not receive any calls.</string>
+    <string name="availability_not_available">Not available</string>
+    <string name="active_destination">Active destination</string>
 </resources>

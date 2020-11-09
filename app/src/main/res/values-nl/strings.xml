@@ -399,4 +399,6 @@
     <string name="username_edittext_hint">Gebruikersnaam</string>
     <string name="phonenumber_prefix_edittext_hint">Voorvoegsel</string>
     <string name="availability_on">Beschikbaar</string>
+    <string name="availability_elsewhere">Elders bereikbaar</string>
+    <string name="availability_elsewhere_help">Oproepen naar jouw gebruiker worden momenteel op een ander toestel afgeleverd.</string>
 </resources>

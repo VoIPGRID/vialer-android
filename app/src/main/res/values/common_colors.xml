@@ -21,10 +21,14 @@
 
     <color name="availability_available_text">#1b5e20</color>
     <color name="availability_unavailable_text">#c62828</color>
-    <color name="availability_available">#e8f5e9</color>
     <color name="availability_unavailable">#ffcdd2</color>
+    <color name="availability_available">#e8f5e9</color>
     <color name="availability_elsewhere">#b3e5fc</color>
     <color name="availability_elsewhere_text">#0277bd</color>
+    <color name="availability_dnd_text">#c62828</color>
+    <color name="availability_dnd">#ffcdd2</color>
+    <color name="availability_not_available">#ffe0b2</color>
+    <color name="availability_not_available_text">#ef6c00</color>
 
     <color name="tint_color_backspace">#B9B9B9</color>
 

@@ -92,19 +92,8 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
         setupSpinner()
 
         dnd.setCheckedChangeListener {
-            val params = if (it == IconSwitch.Checked.LEFT) {
-                val params = SelectedUserDestinationParams()
-                params.phoneAccount = User.voipgridUser?.voipAccountId
-                params.fixedDestination = null
-                params
-            } else {
-                val params = SelectedUserDestinationParams()
-                params.fixedDestination = null
-                params.phoneAccount = null
-                params
-            }
-
-            api.setSelectedUserDestination(User.internal.destinations[0].selectedUserDestination.id, params).enqueue(this)
+            User.voip.dnd = it == IconSwitch.Checked.RIGHT
+            refreshCurrentAvailability()
         }
     }
 
@@ -228,30 +217,58 @@ class OptionsFragment : Fragment(), Callback<Any>, OnItemSelectedListener, Navig
         header.menu_availability_spinner.tag = activeIndex
         header.menu_availability_spinner.setSelection(activeIndex)
 
+        if (!User.hasVoipAccount) {
+            availability_status.visibility = View.GONE
+            availability_help.visibility = View.GONE
+            return
+        }
+
+        val voipgridUser = User.voipgridUser ?: return
+        val voipAccount = User.voipAccount ?: return
+
+        val userString = "${voipgridUser.email}/${User.internal.internalNumber}"
+        val resetString = "${voipAccount.number} / ${voipAccount.description}"
+
+        if (User.voip.dnd) {
+            dnd.checked = IconSwitch.Checked.RIGHT
+            availability_help.visibility = View.VISIBLE
+            availability_help_text.text = resources.getText(R.string.availability_dnd_help)
+            availability_help_text.setTextColor(resources.getColor(R.color.availability_unavailable_text))
+            availability_help_icon.setColorFilter(resources.getColor(R.color.availability_unavailable_text))
+            dnd_label.text = resources.getText(R.string.availability_off)
+            dnd_label.setTextColor(resources.getColor(R.color.availability_unavailable_text))
+            dnd_label.background.setTint(resources.getColor(R.color.availability_unavailable))
+            return
+        }
+
         when (User.voip.availability) {
             AVAILABLE -> {
-                dnd.checked = IconSwitch.Checked.LEFT
+                availability_help.visibility = View.GONE
                 dnd_label.text = resources.getText(R.string.availability_on)
                 dnd_label.setTextColor(resources.getColor(R.color.availability_available_text))
                 dnd_label.background.setTint(resources.getColor(R.color.availability_available))
-                elsewhere_help.visibility = View.GONE
+                availability_help.visibility = View.GONE
                 dnd.setThumbColorLeft(resources.getColor(R.color.availability_available_text))
             }
             ELSEWHERE -> {
-                dnd.checked = IconSwitch.Checked.LEFT
                 dnd_label.text = resources.getText(R.string.availability_elsewhere)
                 dnd_label.setTextColor(resources.getColor(R.color.availability_elsewhere_text))
                 dnd_label.background.setTint(resources.getColor(R.color.availability_elsewhere))
-                elsewhere_help.visibility = View.VISIBLE
+                availability_help.visibility = View.VISIBLE
+                availability_help_text.text = resources.getString(R.string.availability_elsewhere_help, userString, resetString)
+                availability_help_text.setTextColor(resources.getColor(R.color.availability_elsewhere_text))
+                availability_help_icon.setColorFilter(resources.getColor(R.color.availability_elsewhere_text))
                 dnd.setThumbColorLeft(resources.getColor(R.color.availability_elsewhere_text))
             }
-            DND -> {
-                dnd.checked = IconSwitch.Checked.RIGHT
-                dnd_label.text = resources.getText(R.string.availability_off)
-                dnd_label.setTextColor(resources.getColor(R.color.availability_unavailable_text))
-                dnd_label.background.setTint(resources.getColor(R.color.availability_unavailable))
-                elsewhere_help.visibility = View.GONE
-                dnd.setThumbColorLeft(resources.getColor(R.color.availability_available_text))
+            NOT_AVAILABLE -> {
+                dnd_label.text = resources.getText(R.string.availability_not_available)
+                dnd_label.setTextColor(resources.getColor(R.color.availability_not_available_text))
+                dnd_label.background.setTint(resources.getColor(R.color.availability_not_available))
+                availability_help.visibility = View.VISIBLE
+                availability_help_text.text = resources.getString(R.string.availability_not_available_help, userString, resetString)
+                availability_help_text.setTextColor(resources.getColor(R.color.availability_not_available_text))
+                availability_help_icon.setColorFilter(resources.getColor(R.color.availability_not_available_text))
+                dnd.setThumbColorLeft(resources.getColor(R.color.availability_not_available_text))
             }
         }
     }
