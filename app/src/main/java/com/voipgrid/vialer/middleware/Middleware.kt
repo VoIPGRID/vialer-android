@@ -77,7 +77,7 @@ class Middleware(private val context: Context) {
         unregister()
     }
 
-    private fun isValidUserToRegisterWithMiddleware(): Boolean = User.isLoggedIn && User.voip.canUseSip && !User.voip.dnd
+    private fun isValidUserToRegisterWithMiddleware(): Boolean = User.isLoggedIn && User.voip.canUseSip
 
     private suspend fun performRegistrationApiRequest(token: String) = withContext(Dispatchers.IO) {
         val response = api.register(

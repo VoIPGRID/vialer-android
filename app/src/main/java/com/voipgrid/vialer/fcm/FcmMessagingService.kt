@@ -16,7 +16,6 @@ import com.voipgrid.vialer.phonelib.Initialiser
 import com.voipgrid.vialer.sip.SipConstants
 import com.voipgrid.vialer.sip.SipService
 import com.voipgrid.vialer.sip.SipUri
-import com.voipgrid.vialer.statistics.VialerStatistics
 import com.voipgrid.vialer.util.ConnectivityHelper
 import com.voipgrid.vialer.util.PhoneNumberUtils
 import kotlinx.coroutines.GlobalScope
@@ -36,7 +35,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
     private val nativeCallManager: NativeCallManager by inject()
     private val middlewareApi: Middleware by inject()
     private val middleware: com.voipgrid.vialer.middleware.Middleware by inject()
-    private val initialiser: Initialiser by inject()
 
     /**
      * The number of times the middleware will attempt to send a push notification
@@ -54,7 +52,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
         super.onMessageReceived(remoteMessage)
         val remoteMessageData = RemoteMessageData(remoteMessage.data)
         LogHelper.using(logger).logMiddlewareMessageReceived(remoteMessage, remoteMessageData.requestType)
-        VialerStatistics.pushNotificationWasReceived(remoteMessage)
 
         when {
             !remoteMessageData.hasRequestType() -> logger.e("No requestType")
@@ -78,12 +75,11 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
         logCurrentState(remoteMessageData)
 
         when {
+            User.voip.dnd -> rejectDueToDnd(remoteMessage, remoteMessageData)
             !isConnectionSufficient() -> handleInsufficientConnection(remoteMessage, remoteMessageData)
             isAVialerCallAlreadyInProgress() -> rejectDueToVialerCallAlreadyInProgress(remoteMessage, remoteMessageData)
             nativeCallManager.isBusyWithNativeCall ->  rejectDueToNativeCallAlreadyInProgress(remoteMessage, remoteMessageData)
             else -> {
-
-
                 if (lastHandledCall != remoteMessageData.requestToken) {
                     logger.d("Payload processed, calling startService method")
                     lastHandledCall = remoteMessageData.requestToken
@@ -121,9 +117,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
      * @param remoteMessageData The remote message data that we are handling.
      */
     private fun handleInsufficientConnection(remoteMessage: RemoteMessage, remoteMessageData: RemoteMessageData) {
-        if (hasExceededMaximumAttempts(remoteMessageData)) {
-            VialerStatistics.incomingCallFailedDueToInsufficientNetwork(remoteMessage)
-        }
         logger.e(when(isDeviceInIdleMode()){
             true -> "Device in idle mode and connection insufficient. For now do nothing wait for next middleware push."
             false -> "Connection is insufficient. For now do nothing and wait for next middleware push"
@@ -176,12 +169,23 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
      * @param remoteMessage The remote message that we are handling.
      * @param remoteMessageData The remote message data that we are handling.
      */
+    private fun rejectDueToDnd(remoteMessage: RemoteMessage, remoteMessageData: RemoteMessageData) {
+        logger.d("Reject due to user has enabled DND")
+
+        replyServer(remoteMessageData, false)
+    }
+
+    /**
+     * Performs various tasks that are necessary when rejecting a call based on the fact that there is
+     * already a Vialer call in progress.
+     *
+     * @param remoteMessage The remote message that we are handling.
+     * @param remoteMessageData The remote message data that we are handling.
+     */
     private fun rejectDueToNativeCallAlreadyInProgress(remoteMessage: RemoteMessage, remoteMessageData: RemoteMessageData) {
         logger.d("Reject due to native call already in progress")
 
         replyServer(remoteMessageData, false)
-
-        VialerStatistics.incomingCallFailedDueToOngoingGsmCall(remoteMessage)
     }
 
     /**
@@ -195,8 +199,6 @@ class FcmMessagingService : FirebaseMessagingService(), KoinComponent {
             logger.i("Push notification ($lastHandledCall) is being rejected because there is a Vialer call already in progress but not sending metric because it was already handled successfully")
             return
         }
-
-        VialerStatistics.incomingCallFailedDueToOngoingVialerCall(remoteMessage)
     }
 
     /**

@@ -48,7 +48,6 @@ import com.voipgrid.vialer.permissions.MicrophonePermission;
 import com.voipgrid.vialer.phonelib.Initialiser;
 import com.voipgrid.vialer.phonelib.SessionExtensionsKt;
 import com.voipgrid.vialer.phonelib.SoftPhone;
-import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 
 import org.openvoipalliance.phonelib.model.Reason;
@@ -510,7 +509,6 @@ public class SipService extends Service implements SipServiceTic.TicListener {
         incomingCallAlerts.stop();
         changeNotification(callNotification.active(getCurrentCall()));
         audioRouter.focus();
-        VialerStatistics.callWasSuccessfullySetup(getCurrentCall());
     }
 
 

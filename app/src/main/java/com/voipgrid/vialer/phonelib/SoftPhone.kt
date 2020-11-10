@@ -7,7 +7,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.voipgrid.vialer.call.NativeCallManager
 import com.voipgrid.vialer.sip.SipConstants
 import com.voipgrid.vialer.sip.SipService
-import com.voipgrid.vialer.statistics.VialerStatistics
 import org.linphone.core.Call as LinphoneCall
 import org.openvoipalliance.phonelib.PhoneLib
 import org.openvoipalliance.phonelib.model.AttendedTransferSession
@@ -66,14 +65,6 @@ class SoftPhone(val nativeCallManager: NativeCallManager, val localBroadcastMana
                 } catch (e: SecurityException) {
                 }
                 return
-            }
-
-            if (call != null) {
-                VialerStatistics.incomingCallFailedDueToOngoingVialerCall(call)
-            }
-
-            if (nativeCallManager.isBusyWithNativeCall) {
-                VialerStatistics.incomingCallFailedDueToOngoingGsmCall(call)
             }
 
             this@SoftPhone.call = call

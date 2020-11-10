@@ -7,7 +7,6 @@ import android.content.Intent;
 import com.voipgrid.vialer.VialerApplication;
 import com.voipgrid.vialer.logging.Logger;
 import com.voipgrid.vialer.logging.sip.SipLogHandler;
-import com.voipgrid.vialer.statistics.VialerStatistics;
 import com.voipgrid.vialer.util.BroadcastReceiverManager;
 
 /**
@@ -51,12 +50,6 @@ public class CallSetupChecker {
         public void onReceive(Context context, Intent intent) {
             continueChecking = false;
             mBroadcastReceiverManager.unregisterReceiver(this);
-            VialerStatistics.incomingCallFailedDueToSipError(
-                    mRequestToken,
-                    mMessageStartTime,
-                    mAttempt,
-                    intent.getIntExtra(SipLogHandler.EXTRA_SIP_ERROR_CODE, 0)
-            );
         }
     };
 
@@ -116,7 +109,6 @@ public class CallSetupChecker {
         }
 
         if (hasMaximumAllowedTimeExpired()) {
-            VialerStatistics.noCallReceivedFromAsteriskAfterOkToMiddleware(mRequestToken, mMessageStartTime, mAttempt);
             mLogger.e("Unable to confirm call from fcm message (" + mRequestToken + ") was setup correctly");
             continueChecking = false;
         }
