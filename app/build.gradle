@@ -16,7 +16,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 250
-        versionName "6.9 beta 06"
+        versionName "6.9"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {
