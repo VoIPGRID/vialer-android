@@ -31,6 +31,7 @@ public class CallStatusReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String status = intent.getStringExtra(SipConstants.CALL_STATUS_KEY) + "";
         String callId = intent.getStringExtra(SipConstants.CALL_IDENTIFIER_KEY);
+        String callStatus = intent.getStringExtra(SipConstants.CALL_STATUS_CODE);
 
 
         mLogger.i("Dispatching call status " + status + " for call id " + callId + " to " + mListener.getClass().getSimpleName());
@@ -38,7 +39,7 @@ public class CallStatusReceiver extends BroadcastReceiver {
         switch (status) {
             case CALL_CONNECTED_MESSAGE: mListener.onCallConnected(); break;
             case CALL_DISCONNECTED_MESSAGE:
-                mListener.onCallDisconnected();
+                mListener.onCallDisconnected(callStatus);
                 break;
         }
 
@@ -50,6 +51,6 @@ public class CallStatusReceiver extends BroadcastReceiver {
 
         void onCallConnected();
 
-        void onCallDisconnected();
+        void onCallDisconnected(@Nullable String reason);
     }
 }

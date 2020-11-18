@@ -15,8 +15,8 @@ android {
         applicationId "com.voipgrid.vialer"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 249
-        versionName "6.9 beta 05"
+        versionCode 250
+        versionName "6.9 beta 06"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         ndk {

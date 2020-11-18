@@ -26,6 +26,7 @@ import com.voipgrid.vialer.util.NetworkUtil
 import kotlinx.android.synthetic.main.activity_call.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.openvoipalliance.phonelib.model.Reason
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
@@ -74,7 +75,7 @@ class CallActivity : AbstractCallActivity(), PopupMenu.OnMenuItemClickListener, 
         updateUi()
     }
 
-    override fun onCallDisconnected() {
+    override fun onCallDisconnected(reason: String?) {
         if (!softPhone.hasCall) {
             finish()
         }

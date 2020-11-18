@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.WindowManager
@@ -30,6 +31,8 @@ import kotlinx.android.synthetic.main.view_dialer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.openvoipalliance.phonelib.model.Reason
+import org.openvoipalliance.phonelib.model.Reason.*
 
 
 class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.Listener, CallStatusReceiver.Listener {
@@ -263,8 +266,12 @@ class DialerActivity : LoginRequiredActivity(), Dialer.Listener, T9Fragment.List
     override fun onCallConnected() {
     }
 
-    override fun onCallDisconnected() {
-        Toast.makeText(this, R.string.two_step_call_state_setup_failed, Toast.LENGTH_LONG).show()
-        finish()
+    override fun onCallDisconnected(reason: String?) {
+        reason?.let {
+            val disconnectReason = Reason.valueOf(it)
+            if (disconnectReason == DECLINED) {
+                Toast.makeText(this, R.string.two_step_call_state_failed_b, Toast.LENGTH_LONG).show()
+            }
+        }
     }
 }

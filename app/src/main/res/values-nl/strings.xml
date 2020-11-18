@@ -400,5 +400,9 @@
     <string name="phonenumber_prefix_edittext_hint">Voorvoegsel</string>
     <string name="availability_on">Beschikbaar</string>
     <string name="availability_elsewhere">Elders bereikbaar</string>
-    <string name="availability_elsewhere_help">Oproepen naar jouw gebruiker worden momenteel op een ander toestel afgeleverd.</string>
+    <string name="availability_elsewhere_help">Oproepen naar jouw gebruiker (%1$s) worden momenteel op een ander toestel afgeleverd.\n\n Pas onderstaand jouw bereikbaarheid aan naar %2$s om oproepen naar dit toestel te hervatten.</string>
+    <string name="availability_not_available_help">Oproepen naar jouw gebruiker (%1$s) zullen niet worden ontvangen, je zult de oproepen op dit VoIP account blijven ontvangen.\n\n Pas onderstaand jouw bereikbaarheid aan naar %2$s om oproepen naar dit toestel te hervatten.</string>
+    <string name="availability_dnd_help">Je zult geen enkele oproep ontvangen.</string>
+    <string name="availability_not_available">Niet bereikbaar</string>
+    <string name="active_destination">Actieve bestemming</string>
 </resources>
